@@ -1,0 +1,955 @@
+{
+ "meta": {
+  "name": "汉末非郡治战略据点表",
+  "scenario": "公元 194 年（兴平元年）群雄割据",
+  "version": 1,
+  "generatedBy": "tools/build-strategic-nodes.mjs",
+  "generatedFrom": "人工编纂；文献依据见各条 historicalNote，郡国隶属对照 lib/game/data/junguozhi-raw.json",
+  "coordinateSystem": "WGS84 decimal degrees",
+  "coordinatePrecision": "按战略尺度（约 10 km/格）取值，保留两位小数（约 1 km）。道路类（kind=pass）的坐标是该道穿山段的代表点，不是城池点。",
+  "bounds": {
+   "west": 94,
+   "east": 127,
+   "south": 16,
+   "north": 43
+  },
+  "kinds": {
+   "gate": "关隘，有关城或塞垣，可屯兵可争夺",
+   "pass": "谷道栈道，线状要素，坐标为代表点",
+   "ford": "河津渡口",
+   "port": "江海港口与水军基地",
+   "depot": "仓城，粮秣转运储备点",
+   "battlefield": "战场地标，194 年剧本内不可占领（capturable=false）"
+  },
+  "certainty": {
+   "attested": "今地明确，遗址或故城位置有共识",
+   "approx": "大致地段明确，具体点位不能精确到百米级",
+   "disputed": "位置或建置年代本身存在学界分歧，分歧内容写在 historicalNote 中"
+  },
+  "fieldNotes": {
+   "nearestCommandery": "优先取汉末行政隶属（依《后汉书·郡国志》属县），其次才是几何最近；两者不一致的条目由构建脚本列出以便复核。",
+   "capturable": "194 年剧本中是否可作为可争夺据点。战场类一律为 false；潼关因建置年代存疑、剑门关因关城尚未修筑，亦为 false。",
+   "overlapsWithCommanderies": "番禺与南海郡治、合浦与合浦郡治为同一地点，此处只补记其港口属性，建模时应与 commanderies.json 对应条目合并，不要当作两个据点。江津与南郡治江陵相距十余里，属港城分工。"
+  },
+  "counts": {
+   "total": 61,
+   "byKind": {
+    "gate": 22,
+    "pass": 7,
+    "ford": 9,
+    "port": 12,
+    "depot": 4,
+    "battlefield": 7
+   },
+   "byCertainty": {
+    "attested": 20,
+    "approx": 28,
+    "disputed": 13
+   }
+  },
+  "license": "据点名称与史事依据公有领域古籍（《后汉书》《三国志》《水经注》《汉书》）；坐标由现代地名反查得出，可自由使用。"
+ },
+ "nodes": [
+  {
+   "id": "hulao-guan",
+   "name": "虎牢关",
+   "aliases": [
+    "成皋关",
+    "旋门关",
+    "汜水关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 113.12,
+   "latitude": 34.86,
+   "modernReference": "河南荥阳市西北汜水镇",
+   "certainty": "attested",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "洛阳东面第一门户，扼汜水河谷，东出即中原大平原。东汉时属河南尹成皋县，当时称成皋关或旋门关（洛阳八关之一），「虎牢关」之名多见于后世；《三国演义》把汜水关与虎牢关写成两处，实为一地。190 年关东联军讨董卓，主战场即在此。"
+  },
+  {
+   "id": "han-hangu-guan",
+   "name": "汉函谷关",
+   "aliases": [
+    "函谷关",
+    "新安关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 112.15,
+   "latitude": 34.72,
+   "modernReference": "河南洛阳市新安县东（汉函谷关遗址）",
+   "certainty": "attested",
+   "nearestCommandery": "弘农郡",
+   "historicalNote": "汉武帝元鼎三年（前 114）楼船将军杨仆把关城自秦函谷东徙至新安，故址即此，属弘农郡新安县，是洛阳西面门户、八关之一。注意与秦函谷关（今河南灵宝东北，即弘农郡治所在，《郡国志》弘农县下记「故秦函谷关」）相距约 150 里，不是同一处。"
+  },
+  {
+   "id": "tong-guan",
+   "name": "潼关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": false,
+   "longitude": 110.28,
+   "latitude": 34.56,
+   "modernReference": "陕西渭南市潼关县北秦东镇一带（汉唐潼关故址）",
+   "certainty": "disputed",
+   "nearestCommandery": "弘农郡",
+   "historicalNote": "位置分歧不大（弘农郡华阴县境，黄河由北南折东转的拐角），有争议的是建置年代：潼关见于史册最早为建安十六年（211）曹操与马超「战于潼关」，一般认为是东汉末（建安初，196 年后）废汉函谷关、改设潼关以控关中，《水经注》云「河在关内南流潼激关山，因谓之潼关」。194 年潼关是否已设无明证，本剧本按尚未设关处理（capturable=false），此地当时只是风陵渡—潼水口的河防要冲。"
+  },
+  {
+   "id": "wu-guan",
+   "name": "武关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 110.61,
+   "latitude": 33.69,
+   "modernReference": "陕西商洛市丹凤县东武关镇",
+   "certainty": "attested",
+   "nearestCommandery": "京兆尹",
+   "historicalNote": "关中东南门户，丹水河谷上的隘口，出关经商洛、南阳可下荆襄。《郡国志》京兆尹领「商」「上雒」二县（并注「故属弘农」），武关即在商县境。前 207 年刘邦由武关入关中；汉末是关中集团与荆州刘表之间唯一的直通孔道。"
+  },
+  {
+   "id": "dasan-guan",
+   "name": "大散关",
+   "aliases": [
+    "散关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 107.04,
+   "latitude": 34.26,
+   "modernReference": "陕西宝鸡市渭滨区西南大散岭（清姜河谷）",
+   "certainty": "approx",
+   "nearestCommandery": "右扶风",
+   "historicalNote": "关中西南门户，陈仓道（故道）北口。《郡国志》右扶风领陈仓县，散关在陈仓西南大散岭上。前 206 年韩信「暗度陈仓」即由此道入关中。关城具体位置随历代道路改线略有移动，故记 approx。"
+  },
+  {
+   "id": "xiao-guan",
+   "name": "萧关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 106.35,
+   "latitude": 35.9,
+   "modernReference": "宁夏固原市原州区东南（三关口—瓦亭一带）",
+   "certainty": "disputed",
+   "nearestCommandery": "安定郡",
+   "historicalNote": "关中北面门户，控泾水上游河谷，防的是北地、上郡方向的匈奴与羌胡。汉萧关的确址历来有争议：主流定在今固原东南的三关口，另有瓦亭说与甘肃环县说。《郡国志》安定郡乌枝县下有「有瓦亭，出薄落谷」，是瓦亭说的依据。194 年凉州为韩遂、马腾所据，萧关是其东出的门户。"
+  },
+  {
+   "id": "yangping-guan",
+   "name": "阳平关",
+   "aliases": [
+    "阳安关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 106.55,
+   "latitude": 33.16,
+   "modernReference": "陕西汉中市勉县西（老城镇一带，汉水与白马河交汇处）",
+   "certainty": "disputed",
+   "nearestCommandery": "汉中郡",
+   "historicalNote": "汉中盆地西门户，扼金牛道入汉中之口。具体关址学界有勉县西白马河口说与走马岭说，未定论；今陕西宁强县「阳平关镇」是后世移名，不是汉阳平关。194 年张鲁据汉中，此为其西面屏障；建安二十年（215）曹操攻张鲁，苦战于此。"
+  },
+  {
+   "id": "jianmen-guan",
+   "name": "剑门关",
+   "aliases": [
+    "剑阁",
+    "大剑关"
+   ],
+   "kind": "gate",
+   "capturable": false,
+   "longitude": 105.57,
+   "latitude": 32.23,
+   "modernReference": "四川广元市剑阁县剑门关镇（大剑山石隘）",
+   "certainty": "attested",
+   "nearestCommandery": "广汉郡",
+   "historicalNote": "大剑山中断处的石壁天险，金牛道必经，是蜀地北面最险的一道门。地点明确，但 194 年尚无关城：据《水经注》，是蜀汉诸葛亮「凿石架空为飞梁阁道」并置关尉之后才成为正式关隘，263 年姜维拒钟会于剑阁即此。故 194 年剧本按天险（不可占领）处理。当时属广汉郡梓潼县地，刘备置梓潼郡在建安二十二年（217）之后。"
+  },
+  {
+   "id": "baishui-guan",
+   "name": "白水关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 105.35,
+   "latitude": 32.61,
+   "modernReference": "四川广元市青川县沙州镇（白龙江畔，原址已没入白龙湖／宝珠寺水库）",
+   "certainty": "approx",
+   "nearestCommandery": "广汉郡",
+   "historicalNote": "白龙江（汉白水）上的关口，益州北面第一道门，《郡国志》广汉郡有「白水」县。211 年刘备入蜀，先屯白水关，次年杀白水军督杨怀、高沛并其兵，才南下取成都。原关址已被水库淹没，坐标取旧址所在的白龙江河段（经高程数据核校落在谷地而非两侧山脊），记 approx。"
+  },
+  {
+   "id": "jiameng-guan",
+   "name": "葭萌关",
+   "aliases": [
+    "汉寿",
+    "剑门关外城"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 105.81,
+   "latitude": 32.32,
+   "modernReference": "四川广元市昭化区昭化古城",
+   "certainty": "attested",
+   "nearestCommandery": "广汉郡",
+   "historicalNote": "嘉陵江与白龙江交汇处，金牛道上的水陆转运点，《郡国志》广汉郡有「葭萌」县。211 年刘璋迎刘备入蜀御张鲁，刘备北屯葭萌，「厚树恩德以收众心」，一年后反攻成都。今昭化古城即汉葭萌县城故址。"
+  },
+  {
+   "id": "hu-guan",
+   "name": "壶关",
+   "aliases": [
+    "壶口关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 113.25,
+   "latitude": 36,
+   "modernReference": "山西长治市壶关县东南（羊肠坂一带）",
+   "certainty": "disputed",
+   "nearestCommandery": "上党郡",
+   "historicalNote": "上党盆地东南出太行、下河内的隘口。《郡国志》上党郡有壶关县（「有黎亭，故黎国」），但关址本身分歧较大：一说在今壶关县东南的晋豫古道口（羊肠坂），一说在今长治市北。206 年曹操征高干，围壶关三月乃拔；《苦寒行》「北上太行山……羊肠坂诘屈」即写此行。"
+  },
+  {
+   "id": "jingxing-guan",
+   "name": "井陉关",
+   "aliases": [
+    "井陉口",
+    "土门关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 114.2,
+   "latitude": 38.04,
+   "modernReference": "河北石家庄市井陉县至鹿泉区土门一线",
+   "certainty": "approx",
+   "nearestCommandery": "常山国",
+   "historicalNote": "太行八陉之第五陉，并州太原盆地东出冀州的主通道，《郡国志》常山国领井陉县。前 204 年韩信「背水一战」破赵于井陉口。陉道长约百里，关口历代在故关、井陉口（土门）之间移动，坐标取陉道中段，记 approx。194 年是袁绍冀州与并州之间的咽喉。"
+  },
+  {
+   "id": "feihu-kou",
+   "name": "飞狐口",
+   "aliases": [
+    "飞狐陉",
+    "飞狐峪"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 114.6,
+   "latitude": 39.66,
+   "modernReference": "河北张家口市蔚县南至保定涞源县北的飞狐峪",
+   "certainty": "approx",
+   "nearestCommandery": "代郡",
+   "historicalNote": "太行北端的南北孔道，代郡（今蔚县代王城为汉代县）经此南下中山、常山。峡谷长四十里，「一夫当关」之地。汉末为幽、并二州与冀州之间的侧翼通道，也是防乌桓、鲜卑南下的要口。坐标取峡谷中段。"
+  },
+  {
+   "id": "juyong-guan",
+   "name": "居庸关",
+   "aliases": [
+    "军都关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 116.08,
+   "latitude": 40.29,
+   "modernReference": "北京市昌平区居庸关",
+   "certainty": "attested",
+   "nearestCommandery": "上谷郡",
+   "historicalNote": "军都陉隘口，蓟城（幽州治）正北的屏障，《郡国志》上谷郡领居庸县。汉时称居庸关或军都关，御的是上谷塞外的乌桓、鲜卑。194 年幽州为公孙瓒与刘虞残部相争之地，此关控制蓟城与上谷之间的联络。"
+  },
+  {
+   "id": "yanmen-guan",
+   "name": "雁门关",
+   "aliases": [
+    "勾注塞",
+    "西陉关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 112.85,
+   "latitude": 39.24,
+   "modernReference": "山西忻州市代县西北雁门山（勾注山脊隘口）",
+   "certainty": "approx",
+   "nearestCommandery": "雁门郡",
+   "historicalNote": "勾注山（雁门山）隘口，太原盆地北出云中、平城的门户。汉称勾注塞、西陉，今存关城为明代所筑，位置较汉塞略有移动，故记 approx。坐标经高程数据核校，取勾注山脊隘口（约海拔 1400 米），而非山北的朔州盆地。汉末雁门以北已多为鲜卑所据，此关实际是并州北界。"
+  },
+  {
+   "id": "yique-guan",
+   "name": "伊阙关",
+   "aliases": [
+    "龙门"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 112.47,
+   "latitude": 34.56,
+   "modernReference": "河南洛阳市龙门（伊河两山对峙处）",
+   "certainty": "attested",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "洛阳正南门户，伊河穿两山而出，形如门阙。中平元年（184）因黄巾之乱置八关都尉，八关为函谷、广成、伊阙、大谷、轘辕、旋门、孟津、小平津（《后汉书·灵帝纪》），此其一。守住伊阙即封住南阳方向北上洛阳的路。"
+  },
+  {
+   "id": "huanyuan-guan",
+   "name": "轘辕关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 112.9,
+   "latitude": 34.5,
+   "modernReference": "河南洛阳市偃师区南府店镇与登封市交界的轘辕山",
+   "certainty": "approx",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "洛阳东南门户，洛阳八关之一，道路十二曲而险，是自颍川、汝南方向直趋洛阳的近路。190 年前后关东诸军进逼洛阳，轘辕与大谷、伊阙同为董卓布防重点。"
+  },
+  {
+   "id": "tianjing-guan",
+   "name": "天井关",
+   "aliases": [
+    "太行关",
+    "雄定关"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 112.9,
+   "latitude": 35.41,
+   "modernReference": "山西晋城市泽州县南天井关村",
+   "certainty": "attested",
+   "nearestCommandery": "上党郡",
+   "historicalNote": "太行陉（太行八陉之第二陉）南口，上党盆地南下河内、洛阳的必经之路。《郡国志》上党郡领高都县，关在其境。此关与壶关、滏口陉一起构成上党的三面出口，决定并州势力能否插手中原。"
+  },
+  {
+   "id": "fukou-xing",
+   "name": "滏口陉",
+   "aliases": [
+    "滏口"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 114.21,
+   "latitude": 36.42,
+   "modernReference": "河北邯郸市峰峰矿区滏山（鼓山）滏水出口",
+   "certainty": "attested",
+   "nearestCommandery": "魏郡",
+   "historicalNote": "太行八陉之第四陉，邺城正西的门户，出陉西行经涉县可达上党。《郡国志》魏郡下记邺县「有滏水」，武安县「有铁」，即此一带。194 年袁绍据邺，滏口是其通往并州的通道，也是并州方面威胁邺城的方向。"
+  },
+  {
+   "id": "lulong-sai",
+   "name": "卢龙塞",
+   "aliases": [
+    "喜峰口"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 118.3,
+   "latitude": 40.32,
+   "modernReference": "河北唐山市迁西县喜峰口（今没入潘家口水库）",
+   "certainty": "approx",
+   "nearestCommandery": "右北平郡",
+   "historicalNote": "右北平与辽西之间长城线上的塞口，出塞即乌桓、鲜卑牧地。207 年曹操北征乌桓，因傍海道不通，改「出卢龙塞，堑山堙谷五百余里」，直趋柳城，战于白狼山。194 年这一线是公孙瓒与乌桓、辽东公孙度之间的接触面。原址已被水库淹没。"
+  },
+  {
+   "id": "jiang-guan",
+   "name": "江关",
+   "aliases": [
+    "扞关",
+    "捍关",
+    "瞿塘关",
+    "白帝城"
+   ],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 109.57,
+   "latitude": 31.05,
+   "modernReference": "重庆市奉节县白帝城（瞿塘峡西口）",
+   "certainty": "attested",
+   "nearestCommandery": "巴郡",
+   "historicalNote": "三峡西口，益州东面的总门户，出峡即荆州。《郡国志》巴郡鱼复县下明记「捍水有扦关」，南郡巫县下记「西有白帝城」——白帝城为公孙述所筑。此地控制长江上下行的全部船运，刘备章武二年（222）夷陵败后即退守于此并改鱼复为永安。注：另有一处「扞关」说在今湖北长阳清江畔，与本条不是一地。"
+  },
+  {
+   "id": "yang-guan",
+   "name": "阳关",
+   "aliases": [],
+   "kind": "gate",
+   "capturable": true,
+   "longitude": 94.1,
+   "latitude": 39.95,
+   "modernReference": "甘肃酒泉市敦煌市西南南湖乡（古董滩）",
+   "certainty": "approx",
+   "nearestCommandery": "敦煌郡",
+   "historicalNote": "通西域南道的关口，与玉门关同属敦煌郡龙勒县——《郡国志》敦煌郡龙勒县下记「有玉门关」。玉门关（小方盘城，约东经 93.9 度）在本图西界（94°E）以西，故本表只收阳关。194 年凉州大乱，敦煌一线由本地大姓自守，与中原基本隔绝。遗址仅存墩墩山烽燧，关城已埋沙下，记 approx。"
+  },
+  {
+   "id": "ziwu-dao",
+   "name": "子午道",
+   "aliases": [
+    "子午谷",
+    "子午关"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 108.84,
+   "latitude": 33.98,
+   "modernReference": "陕西西安市长安区子午镇南秦岭谷口（北口），南口在安康石泉",
+   "certainty": "approx",
+   "nearestCommandery": "京兆尹",
+   "historicalNote": "长安直穿秦岭到汉中的谷道，王莽元始五年（5 年）开通。全程险窄、粮运极难，非主干线。228 年魏延献「子午谷奇谋」欲由此袭长安，诸葛亮不用。坐标取北口子午关，代表整条道路，不是城池。"
+  },
+  {
+   "id": "baoxie-dao",
+   "name": "褒斜道",
+   "aliases": [
+    "斜谷道"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 107.1,
+   "latitude": 33.8,
+   "modernReference": "陕西秦岭中段（北口斜谷在宝鸡眉县，南口褒谷在汉中北），坐标取留坝—太白间中段",
+   "certainty": "approx",
+   "nearestCommandery": "汉中郡",
+   "historicalNote": "关中与汉中之间栈道最长、运量最大的主干道，《郡国志》右扶风武功县下记「有斜谷」。234 年诸葛亮最后一次北伐即由斜谷出，屯五丈原。道路是线状要素，坐标取穿山段中点。"
+  },
+  {
+   "id": "chencang-dao",
+   "name": "陈仓道",
+   "aliases": [
+    "故道",
+    "嘉陵道"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 106.6,
+   "latitude": 33.9,
+   "modernReference": "陕西宝鸡市凤县凤州（汉武都郡故道县故址）一带",
+   "certainty": "approx",
+   "nearestCommandery": "武都郡",
+   "historicalNote": "由陈仓经大散关、故道县、河池至沔阳，《郡国志》武都郡领「故道」县。四条蜀道中坡度最缓、可通车，但路程最长。前 206 年韩信「暗度陈仓」走的就是这条。坐标取故道县所在的谷道中段。"
+  },
+  {
+   "id": "tangluo-dao",
+   "name": "傥骆道",
+   "aliases": [
+    "骆谷道"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 107.9,
+   "latitude": 33.6,
+   "modernReference": "陕西秦岭（北口骆谷在西安周至西南，南口傥谷在汉中洋县），坐标取佛坪一带中段",
+   "certainty": "approx",
+   "nearestCommandery": "汉中郡",
+   "historicalNote": "关中入汉中四道中路程最短而最险的一条，翻越海拔近 2000 米的秦岭主脊，沿途无居民。三国时已通行，魏晋以后使用渐多；244 年曹爽伐蜀即由骆谷进兵而大败。"
+  },
+  {
+   "id": "micang-dao",
+   "name": "米仓道",
+   "aliases": [],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 106.85,
+   "latitude": 32.7,
+   "modernReference": "陕西汉中南郑至四川巴中南江之间的米仓山山道",
+   "certainty": "approx",
+   "nearestCommandery": "汉中郡",
+   "historicalNote": "汉中越米仓山直下巴地的通道，避开金牛道正面。194 年张鲁据汉中、刘璋据巴蜀，两家在巴西一带反复争夺，米仓道即其主要接触方向；215 年张鲁败于阳平后也是由米仓道南奔巴中。"
+  },
+  {
+   "id": "qishan-dao",
+   "name": "祁山道",
+   "aliases": [
+    "陇右道"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 105.13,
+   "latitude": 34.35,
+   "modernReference": "甘肃陇南市礼县东祁山（祁山堡）一带",
+   "certainty": "approx",
+   "nearestCommandery": "汉阳郡",
+   "historicalNote": "由汉中沿西汉水西北上陇右的通道，《郡国志》汉阳郡西县下记「有嶓冢山，西汉水」。道路较宽、可通大军与辎重，是诸葛亮北伐「出祁山」所指的方向。194 年陇右为凉州诸将势力范围，与汉中张鲁之间由此道相连。"
+  },
+  {
+   "id": "yinping-dao",
+   "name": "阴平道",
+   "aliases": [
+    "摩天岭道",
+    "邓艾道"
+   ],
+   "kind": "pass",
+   "capturable": false,
+   "longitude": 104.75,
+   "latitude": 32.63,
+   "modernReference": "甘肃陇南市文县与四川广元市青川县之间的摩天岭",
+   "certainty": "approx",
+   "nearestCommandery": "广汉属国",
+   "historicalNote": "《郡国志》广汉属国领阴平道、甸氐道、刚氐道三道，「道」是设于少数族地区的县级政区。自阴平（今文县）翻摩天岭至江油、涪城，七百里无人烟，本非通路。263 年邓艾「凿山通道、造作桥阁……以毡自裹推转而下」由此奇袭灭蜀。194 年这一带为氐羌所居，非常规通行路线。"
+  },
+  {
+   "id": "meng-jin",
+   "name": "孟津",
+   "aliases": [
+    "河阳津",
+    "富平津",
+    "盟津"
+   ],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 112.72,
+   "latitude": 34.84,
+   "modernReference": "河南洛阳市孟津区会盟镇一带",
+   "certainty": "approx",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "洛阳正北的黄河渡口，武王伐纣「八百诸侯会于盟津」即此，洛阳八关之一。控制孟津就控制了河内与洛阳之间的往来。189 年董卓入洛前，河内太守王匡屯兵河阳津与之对峙。汉末黄河河道在今河道以北，渡口具体点位随河势移动，记 approx。"
+  },
+  {
+   "id": "xiaoping-jin",
+   "name": "小平津",
+   "aliases": [],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 112.52,
+   "latitude": 34.88,
+   "modernReference": "河南洛阳市孟津区西北黄河渡（今小浪底一带）",
+   "certainty": "approx",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "孟津以西的第二处渡口，洛阳八关之一，与孟津同为洛阳北面的双重河防。中平六年（189）张让、段珪劫少帝与陈留王夜奔小平津，董卓在此迎驾入洛，是汉末政局转折的现场。"
+  },
+  {
+   "id": "baima-jin",
+   "name": "白马津",
+   "aliases": [],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 114.6,
+   "latitude": 35.57,
+   "modernReference": "河南安阳市滑县东（汉白马县故城一带）",
+   "certainty": "approx",
+   "nearestCommandery": "东郡",
+   "historicalNote": "黄河南岸渡口，与北岸的黎阳津正相对，是河北南下兖州的正面通道。《郡国志》东郡领白马县。200 年官渡之战序幕：袁绍遣颜良攻白马，曹操声东击西自延津回军，关羽于此斩颜良。注意东汉黄河（王景治河后的东汉故道）经此东北流向千乘入海，与今河道不同。"
+  },
+  {
+   "id": "yan-jin",
+   "name": "延津",
+   "aliases": [
+    "灵昌津"
+   ],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 114.2,
+   "latitude": 35.3,
+   "modernReference": "河南新乡市延津县北的古黄河渡口",
+   "certainty": "disputed",
+   "nearestCommandery": "陈留郡",
+   "historicalNote": "白马津以西的一段河津，得名于河道在此延伸数十里皆可渡。200 年曹操于延津南设饵诱袁军，斩文丑。汉末此段河道后世屡次改徙，渡口确址已不可指实，学界分歧从延津县北到汲县南不等，一说即今延津县北的古灵昌津，故记 disputed。汉时其地在陈留郡酸枣县以北、东郡燕县以西之间。"
+  },
+  {
+   "id": "guandu",
+   "name": "官渡",
+   "aliases": [],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 114.06,
+   "latitude": 34.75,
+   "modernReference": "河南郑州市中牟县东北官渡镇",
+   "certainty": "approx",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "不是黄河渡口，而是鸿沟（汴渠）水系上的渡口与堰埭，《郡国志》河南尹中牟县下记「有圃田泽」「有曲遇聚」，即此一带。位置正当许都北面的屏障线，200 年曹袁决战于此。194 年此处尚是普通水陆节点，其战略地位来自曹操 196 年迎献帝都许之后。"
+  },
+  {
+   "id": "puban-jin",
+   "name": "蒲坂津",
+   "aliases": [
+    "蒲津关",
+    "临晋关"
+   ],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 110.3,
+   "latitude": 34.84,
+   "modernReference": "山西运城市永济市西蒲州古城西的黄河渡（对岸为陕西大荔朝邑）",
+   "certainty": "attested",
+   "nearestCommandery": "河东郡",
+   "historicalNote": "河东进入关中的正面渡口，《郡国志》河东郡领蒲坂县。东岸蒲坂、西岸临晋，是黄河中游最重要的浮桥渡。211 年曹操与马超相持于潼关，遣徐晃、朱灵夜渡蒲坂津据西岸，才得以绕过关塞。194 年河东为白波、匈奴与关中诸将交争之地。"
+  },
+  {
+   "id": "liyang-jin",
+   "name": "黎阳津",
+   "aliases": [],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 114.53,
+   "latitude": 35.62,
+   "modernReference": "河南鹤壁市浚县东（汉黎阳县故城南的黄河渡）",
+   "certainty": "approx",
+   "nearestCommandery": "魏郡",
+   "historicalNote": "黄河北岸渡口，与南岸白马津隔河相望，两者相距不足二十里，是河北势力南下的桥头堡。《郡国志》魏郡领黎阳县。袁绍南攻曹操以黎阳为前进基地，官渡战后袁谭、袁尚兄弟亦屡屯于此。"
+  },
+  {
+   "id": "ji-jin",
+   "name": "棘津",
+   "aliases": [
+    "南津",
+    "石济津"
+   ],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 114.35,
+   "latitude": 35.25,
+   "modernReference": "河南新乡市延津县东北至卫辉市南一带的古黄河渡口",
+   "certainty": "disputed",
+   "nearestCommandery": "河内郡",
+   "historicalNote": "古黄河渡口，先秦典籍中太公望「卖食棘津」即此。位置有两组说法互不相容：其一为古河津说，在今延津东北或汲县（卫辉）南，《水经注》系于汲郡南，本条依此归入河内郡汲县；其二据《郡国志》清河国广川县下「有棘津城」，则在今河北景县、枣强一带，与黄河渡口无涉。本表取河津说并给出坐标，但标 disputed，两说并存。"
+  },
+  {
+   "id": "hengjiang-jin",
+   "name": "横江津",
+   "aliases": [
+    "横江浦"
+   ],
+   "kind": "ford",
+   "capturable": true,
+   "longitude": 118.42,
+   "latitude": 31.66,
+   "modernReference": "安徽马鞍山市和县东南（对岸即采石／牛渚）",
+   "certainty": "approx",
+   "nearestCommandery": "九江郡",
+   "historicalNote": "长江下游最窄处的北岸渡口，与南岸牛渚配成一对。《郡国志》九江郡历阳县下注「刺史治」，横江在历阳境内。兴平二年（195）孙策自历阳渡江，破樊能、于麋于横江，破张英于当利口，遂据牛渚——江东基业的起点，正是本剧本开局后一年的事。"
+  },
+  {
+   "id": "xiakou",
+   "name": "夏口",
+   "aliases": [
+    "沔口",
+    "汉口"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 114.28,
+   "latitude": 30.56,
+   "modernReference": "湖北武汉市汉阳龟山一带（汉水入长江处）",
+   "certainty": "attested",
+   "nearestCommandery": "江夏郡",
+   "historicalNote": "汉水入江之口，长江中游第一水军要冲，控制汉水—长江的换乘。《郡国志》江夏郡领沙羡县，夏口在其境。注意 194 年江夏郡治在西陵（今武汉新洲—黄冈一带），夏口尚无城，夏口城为孙权黄武二年（223）所筑；208 年刘备退保夏口、刘琦驻此，用的也还是天然水口而非城池。"
+  },
+  {
+   "id": "jiang-jin",
+   "name": "江津",
+   "aliases": [
+    "津乡",
+    "江津戍"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 112.25,
+   "latitude": 30.31,
+   "modernReference": "湖北荆州市沙市区（江陵城南的长江港）",
+   "certainty": "attested",
+   "nearestCommandery": "南郡",
+   "historicalNote": "江陵城的长江外港，《郡国志》南郡江陵县下明记「有津乡」。江陵是荆州的粮械总库，其对外全靠江津装卸，两者相距仅十余里——因此本条与 commanderies.json 的南郡（治江陵）在地理上紧邻，属港城分工而非重复。注意勿与今重庆江津区混淆，后者汉时属巴郡江州地。"
+  },
+  {
+   "id": "han-jin",
+   "name": "汉津",
+   "aliases": [],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 112.59,
+   "latitude": 30.71,
+   "modernReference": "湖北荆门市沙洋县（汉水中游渡口，古称汉津）",
+   "certainty": "approx",
+   "nearestCommandery": "南郡",
+   "historicalNote": "汉水中游的渡口兼转运点，是江陵—襄阳陆路与汉水水运的交汇。208 年刘备当阳长坂溃败后「斜趋汉津，適与羽船会」，即由陆路东奔至此登舟。具体津口在沙洋一带哪一处，史料不能细指，记 approx。"
+  },
+  {
+   "id": "niuzhu",
+   "name": "牛渚",
+   "aliases": [
+    "采石矶",
+    "牛渚矶"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 118.48,
+   "latitude": 31.68,
+   "modernReference": "安徽马鞍山市采石矶",
+   "certainty": "attested",
+   "nearestCommandery": "丹阳郡",
+   "historicalNote": "《郡国志》丹阳郡秣陵县下明记「南有牛渚」。江面在此最窄，矶石突入江中可泊可守，是历代由江北渡江进入江东的首选登陆点。195 年孙策渡江先取牛渚营，得其邸阁粮谷战具，江东由此开局。"
+  },
+  {
+   "id": "ruxu-kou",
+   "name": "濡须口",
+   "aliases": [
+    "濡须坞",
+    "东关"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 117.95,
+   "latitude": 31.52,
+   "modernReference": "安徽马鞍山市含山县西南至芜湖市无为市北（濡须水入江处，今东关一带）",
+   "certainty": "approx",
+   "nearestCommandery": "庐江郡",
+   "historicalNote": "巢湖经濡须水入长江的水口，两山夹峙，是江北进入巢湖—合肥方向的门户。《郡国志》庐江郡领居巢侯国，濡须在其境。建安十七年（212）孙权才在此筑濡须坞，此后曹孙两家在这一点上反复攻守数十年；194 年尚是一处天然水口。"
+  },
+  {
+   "id": "hukou",
+   "name": "湖口",
+   "aliases": [
+    "彭蠡口"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 116.22,
+   "latitude": 29.74,
+   "modernReference": "江西九江市湖口县（鄱阳湖入长江处）",
+   "certainty": "attested",
+   "nearestCommandery": "豫章郡",
+   "historicalNote": "彭蠡泽（今鄱阳湖）入江之口，《郡国志》豫章郡彭泽县下记「彭蠡泽在西」。控制此口即控制豫章全境的水路出入，是长江中下游之间的分界节点。194 年豫章太守周术病死，刘繇、笮融、华歆先后争夺此地。"
+  },
+  {
+   "id": "chaisang",
+   "name": "柴桑",
+   "aliases": [],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 115.88,
+   "latitude": 29.63,
+   "modernReference": "江西九江市柴桑区（今九江市西南）",
+   "certainty": "attested",
+   "nearestCommandery": "豫章郡",
+   "historicalNote": "《郡国志》豫章郡领柴桑县。长江南岸良港，上控荆州来路、下扼彭蠡湖口，是江东西面的水军前进基地。208 年孙权屯柴桑迎鲁肃、见诸葛亮并定破曹之计；周瑜自此出兵赤壁。194 年尚属刘繇势力与豫章诸势力交界处。"
+  },
+  {
+   "id": "baqiu",
+   "name": "巴丘",
+   "aliases": [
+    "巴陵"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 113.13,
+   "latitude": 29.36,
+   "modernReference": "湖南岳阳市（洞庭湖入长江处）",
+   "certainty": "disputed",
+   "nearestCommandery": "长沙郡",
+   "historicalNote": "洞庭湖水系汇入长江之口，控制湘、资、沅、澧四水与长江的往来，是荆南与江夏之间的枢纽。《郡国志》长沙郡领罗、下隽等县，其地在此一带。汉末「巴丘」所指有争议：一说即今岳阳的洞庭湖口巴丘山（周瑜 210 年卒于巴丘多从此说），一说为长沙郡巴丘县（今湖南平江），两地相距百余里，故标 disputed。"
+  },
+  {
+   "id": "panyu",
+   "name": "番禺",
+   "aliases": [
+    "广州"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 113.26,
+   "latitude": 23.13,
+   "modernReference": "广东广州市（老城区）",
+   "certainty": "attested",
+   "nearestCommandery": "南海郡",
+   "historicalNote": "岭南第一大港与南海贸易总汇，珠江三角洲的出海口。**注意：番禺同时是南海郡治**，因此本条与 commanderies.json 中的「南海郡」是同一地点，这里只补记其海港属性，游戏建模时应合并而不是当作两个据点。194 年交州为士燮兄弟所据（交州治龙编，士壹领合浦），番禺是其对外通商与转运的核心。"
+  },
+  {
+   "id": "hepu",
+   "name": "合浦",
+   "aliases": [
+    "合浦港"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 109.19,
+   "latitude": 21.62,
+   "modernReference": "广西北海市合浦县廉州镇一带（南流江出海口）",
+   "certainty": "attested",
+   "nearestCommandery": "合浦郡",
+   "historicalNote": "《汉书·地理志》粤地条记「自日南障塞、徐闻、合浦船行……」，合浦是汉代海上丝路的起航港之一，以采珠与南海转运著称。**注意：合浦同时是合浦郡治**，与 commanderies.json 的「合浦郡」为同一地点，本条只补记港口属性。194 年士燮之弟士壹领合浦太守。"
+  },
+  {
+   "id": "xuwen",
+   "name": "徐闻",
+   "aliases": [],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 110.18,
+   "latitude": 20.33,
+   "modernReference": "广东湛江市徐闻县（雷州半岛南端）",
+   "certainty": "attested",
+   "nearestCommandery": "合浦郡",
+   "historicalNote": "《郡国志》合浦郡领徐闻县，《汉书·地理志》以徐闻、合浦、日南障塞并列为南海航路的起点。雷州半岛南端，隔海峡与朱崖（海南）相望，是汉朝管理海南与南海贸易的口岸。地处交州最南，汉末远离中原战事，是纯粹的经济节点。"
+  },
+  {
+   "id": "houguan",
+   "name": "侯官",
+   "aliases": [
+    "东冶",
+    "冶县"
+   ],
+   "kind": "port",
+   "capturable": true,
+   "longitude": 119.3,
+   "latitude": 26.08,
+   "modernReference": "福建福州市（闽江下游）",
+   "certainty": "disputed",
+   "nearestCommandery": "会稽郡",
+   "historicalNote": "闽中沿海唯一的港口据点，汉代自会稽循海南下交趾的中继站。位置有真分歧：《郡国志》会稽郡「章安，故冶，闽越地，光武更名」，据此汉「冶（东冶）」当在今浙江临海章安；而通行看法以东冶／侯官为今福州，建安元年（196）孙策置会稽南部都尉即治侯官。两说至今未决，故标 disputed，坐标取福州说。"
+  },
+  {
+   "id": "aocang",
+   "name": "敖仓",
+   "aliases": [
+    "敖庾"
+   ],
+   "kind": "depot",
+   "capturable": true,
+   "longitude": 113.39,
+   "latitude": 34.94,
+   "modernReference": "河南郑州市荥阳市北广武山（敖山）黄河南岸",
+   "certainty": "approx",
+   "nearestCommandery": "河南尹",
+   "historicalNote": "秦汉最大的国家粮仓，建在敖山上，正当黄河与鸿沟（汴渠）交汇处——关东漕粮由此中转入关中或供洛阳。《郡国志》河南尹荥阳县下记「有敖亭」「有广武城」，即此。楚汉相争时「据敖仓之粟」是决定性资源，汉末洛阳残破后其转运功能仍在。遗址在广武山一带，具体仓址未精确定点，记 approx；坐标经高程核校取山脊（约海拔 210 米）而非南麓平地。"
+  },
+  {
+   "id": "liyang-cang",
+   "name": "黎阳仓",
+   "aliases": [],
+   "kind": "depot",
+   "capturable": true,
+   "longitude": 114.57,
+   "latitude": 35.68,
+   "modernReference": "河南鹤壁市浚县大伾山北麓（隋黎阳仓遗址）",
+   "certainty": "disputed",
+   "nearestCommandery": "魏郡",
+   "historicalNote": "需要说清年代：作为专名并有考古遗址的「黎阳仓」是隋代所建的国家大仓（浚县大伾山北麓已发掘）。汉末黎阳确为河北南面的屯粮与转运重镇——袁绍南下以黎阳为基地、屯粮聚兵于此，官渡战后袁谭袁尚也据黎阳——但当时没有同名仓城的记载。本表按「汉末屯粮据点」收录并沿用后世通名，位置取隋仓遗址所在的黎阳城地望，certainty 记 disputed。"
+  },
+  {
+   "id": "meiwu",
+   "name": "郿坞",
+   "aliases": [
+    "万岁坞"
+   ],
+   "kind": "depot",
+   "capturable": true,
+   "longitude": 107.83,
+   "latitude": 34.32,
+   "modernReference": "陕西宝鸡市眉县东北（渭水北岸）",
+   "certainty": "approx",
+   "nearestCommandery": "右扶风",
+   "historicalNote": "董卓于初平三年（192）在郿县所筑的坞堡，墙高厚各七丈，「积谷为三十年储」，是他为自己准备的退路与金库。《郡国志》右扶风领郿县（「有邰亭」）。192 年董卓被诛后郿坞被攻破焚掠，194 年此地当为残垒，但仍是关中西部渭北的一处要点，游戏中可作可争夺的物资节点并附「已残破」状态。遗址未精确定点，记 approx。"
+  },
+  {
+   "id": "wuchao",
+   "name": "乌巢",
+   "aliases": [
+    "乌巢泽"
+   ],
+   "kind": "depot",
+   "capturable": true,
+   "longitude": 114.35,
+   "latitude": 35.05,
+   "modernReference": "河南新乡市延津县东南（一说开封封丘县西）",
+   "certainty": "disputed",
+   "nearestCommandery": "陈留郡",
+   "historicalNote": "官渡之战中袁绍军的屯粮所，建安五年（200）曹操亲率轻兵夜袭焚粮，一举决定胜负。位置分歧较大：主流定在今延津县东南，另有封丘西说；古乌巢泽为黄河泛区中的湖沼，早已淤平无迹。194 年此处只是陈留郡北境的一片沼泽村落，本条主要作为后续事件的地理锚点。"
+  },
+  {
+   "id": "jieqiao",
+   "name": "界桥",
+   "aliases": [],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 115.32,
+   "latitude": 37,
+   "modernReference": "河北邢台市威县东（清河故渎上的桥渡）",
+   "certainty": "disputed",
+   "nearestCommandery": "清河国",
+   "historicalNote": "初平三年（192，一说 191 年冬）公孙瓒南下与袁绍决战之地，《后汉书》记「战于界桥南二十里」，麹义以八百先登破白马义从，是河北归属的转折点。桥址早已无存，今只能定到威县东一带的清河国境内，故标 disputed。本条是本表中唯一发生于剧本开局之前的战场。"
+  },
+  {
+   "id": "changban",
+   "name": "长坂",
+   "aliases": [
+    "长坂坡"
+   ],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 111.78,
+   "latitude": 30.82,
+   "modernReference": "湖北宜昌市当阳市区西",
+   "certainty": "approx",
+   "nearestCommandery": "南郡",
+   "historicalNote": "建安十三年（208）曹操轻骑一日一夜行三百余里，在当阳长坂追及南撤的刘备，刘备弃妻子走，张飞据水断桥、赵云救阿斗皆在此。地在江陵—襄阳大道上，今当阳市区西的长坂坡为传统认定地点，具体交战范围不能细指。"
+  },
+  {
+   "id": "chibi",
+   "name": "赤壁",
+   "aliases": [],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 113.6,
+   "latitude": 29.72,
+   "modernReference": "湖北咸宁市赤壁市（原蒲圻县）西北的长江南岸",
+   "certainty": "disputed",
+   "nearestCommandery": "江夏郡",
+   "historicalNote": "建安十三年（208）孙刘联军破曹处。地点长期聚讼，主要有蒲圻说（今赤壁市，出土大量东汉兵器，为今日主流并已据以更名）、黄州说（今黄冈，即苏轼所游「东坡赤壁」，文学赤壁而非战场）、嘉鱼说、江夏说。本表取蒲圻说，标 disputed 以存异。汉末其地当江夏郡沙羡县与长沙郡下隽县之交，吴黄武二年（223）分下隽置蒲圻县，故郡属亦不能确指。"
+  },
+  {
+   "id": "wulin",
+   "name": "乌林",
+   "aliases": [],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 113.57,
+   "latitude": 29.79,
+   "modernReference": "湖北荆州市洪湖市乌林镇（长江北岸）",
+   "certainty": "approx",
+   "nearestCommandery": "南郡",
+   "historicalNote": "赤壁之战中曹军的江北大营与船阵所在，与南岸赤壁隔江相望，相距不足二十里——所谓「火烧赤壁」，烧的实际是乌林一侧的连船与营寨。位置随蒲圻赤壁说而定，若采黄州说则乌林另有他指，故记 approx。"
+  },
+  {
+   "id": "yiling",
+   "name": "夷陵",
+   "aliases": [
+    "猇亭"
+   ],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 111.42,
+   "latitude": 30.53,
+   "modernReference": "湖北宜昌市猇亭区一带",
+   "certainty": "approx",
+   "nearestCommandery": "南郡",
+   "historicalNote": "章武二年（222）刘备东征，陆逊在此火烧连营七百里，蜀汉由此丧失东出能力。《郡国志》南郡夷陵县下记「有荆门、虎牙山」，即长江出峡处两岸夹峙的山，是三峡东口的锁钥。交战沿长江数十里展开，坐标取猇亭主战场。"
+  },
+  {
+   "id": "wuzhangyuan",
+   "name": "五丈原",
+   "aliases": [],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 107.63,
+   "latitude": 34.25,
+   "modernReference": "陕西宝鸡市岐山县南五丈原镇（渭水南岸台塬）",
+   "certainty": "attested",
+   "nearestCommandery": "右扶风",
+   "historicalNote": "建兴十二年（234）诸葛亮出斜谷、据武功水西岸的五丈原与司马懿相持百余日，卒于军中。台原三面临空、正当褒斜道北口外，是蜀军出秦岭后唯一能屯大军并就近屯田的高地。坐标经高程数据核校，落在渭河南岸约 600 米的台塬面上，而非北侧约 500 米的渭河川道；与东北方向的郿县（郿坞）相距约二十公里。"
+  },
+  {
+   "id": "jieting",
+   "name": "街亭",
+   "aliases": [
+    "街泉亭"
+   ],
+   "kind": "battlefield",
+   "capturable": false,
+   "longitude": 105.86,
+   "latitude": 34.98,
+   "modernReference": "甘肃天水市秦安县陇城镇（汉汉阳郡略阳县地）",
+   "certainty": "disputed",
+   "nearestCommandery": "汉阳郡",
+   "historicalNote": "建兴六年（228）马谡舍水上山、为张郃所破，诸葛亮第一次北伐因此全线撤退。《郡国志》汉阳郡略阳县下明记「有街泉亭」，是本条最硬的文献依据；今地主流定于秦安县陇城镇，另有庄浪县东南说，故标 disputed。此地当陇山西口，控制关中援军进入陇右的通道。"
+  }
+ ]
+}

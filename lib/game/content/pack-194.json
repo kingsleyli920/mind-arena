@@ -1,0 +1,169 @@
+{
+  "version": "0.1.0-draft",
+  "scenario": "兴平元年·群雄割据",
+  "_note": "首版草案。动作与数值来自 docs/GAMEPLAY-*.md 两轮调研；待 GAMEPLAY-DESIGN-V2-DELTA 收敛后修订。规则写在此处而非代码里，是为了让引擎与模型提示词共用同一份定义。",
+
+  "constants": {
+    "时钟": { "旬每季": 3, "季每年": 4, "一局年数": 15, "决策季": "每年第一季" },
+    "行动点": { "基础": 5, "每控郡加": 0, "上限": 8, "说明": "与领土脱钩且不可囤积，防止大势力动作数爆炸" },
+    "产出": { "粮每户每旬": 0.09, "金每户每旬": 0.04, "民心影响": "产出 × (0.6 + 民心/125)" },
+    "消耗": { "行伍粮耗每人每旬": 1.0, "围城粮耗每人每旬": 0.7, "戍兵粮耗每人每旬": 0.5, "补给线加成": "1 + 0.10 × 路径旬数" },
+    "征募": { "上限": "min(口 × 2%, 郡粮每旬 ÷ 0.5)" },
+    "战斗": { "攻击力": "兵力 × 兵种攻 × (0.7 + 士气/250 + 统率/300)", "防御力": "戍兵 × (0.82 + 统率/280) × (1 + 城防/120)", "破城": "城防每旬 -= max(0, A/D - 1) × 20，降至 0 则城破", "围城窗口": 6 },
+    "城防": { "初值": "30 + 郡等 × 5", "上限": 100 }
+  },
+
+  "actions": [
+    {
+      "id": "campaign",
+      "name": "出征",
+      "category": "military",
+      "summary": "编成一支军团向目标郡进军。只下达意图，行军路径与遭遇由引擎按地形图确定性求解，不需要也不能逐步指挥。",
+      "params": [
+        { "name": "from", "type": "commandery", "scope": "own", "description": "出兵起点，须为己方控制" },
+        { "name": "muster", "type": "commandery", "scope": "own", "optional": true, "description": "额外抽调戍兵的郡，最多 3 个，须与起点连地。没有这个参数就凑不出能破城的兵力" },
+        { "name": "target", "type": "commandery", "scope": "any", "description": "进攻目标" },
+        { "name": "commander", "type": "officer", "scope": "own", "description": "主将，其统率与特技影响全程" },
+        { "name": "strength", "type": "tier", "description": "投入兵力占可调集戍兵的比例", "tiers": [
+          { "id": "probe", "label": "试探 三成", "value": 0.3 },
+          { "id": "half", "label": "半数", "value": 0.5 },
+          { "id": "full", "label": "倾力 八成", "value": 0.8 }
+        ]},
+        { "name": "posture", "type": "tier", "description": "姿态，影响攻防与损耗", "tiers": [
+          { "id": "assault", "label": "强攻", "value": 1.15, "note": "攻高守低，损耗大" },
+          { "id": "steady", "label": "稳进", "value": 1.0 },
+          { "id": "siege", "label": "围困", "value": 0.85, "note": "不强攻，耗其粮草" }
+        ]}
+      ],
+      "cost": { "ap": 2, "formula": "粮：行军路径旬数 × 兵力 × 1.0" },
+      "preconditions": ["起点与目标之间存在通路", "主将未被派往他处", "粮草足以支撑往返"],
+      "effects": ["军团按路径行军", "抵达后按战斗公式逐旬结算", "城防降至 0 则易主"],
+      "standing": true
+    },
+    {
+      "id": "reinforce",
+      "name": "增援",
+      "category": "military",
+      "summary": "向已在外的军团补充兵员。用于长期围城，但每次只补一批且要走路，不如出征时一次调足。",
+      "params": [
+        { "name": "army", "type": "commandery", "scope": "own", "description": "目标军团当前所在位置" },
+        { "name": "from", "type": "commandery", "scope": "own", "description": "抽调来源" }
+      ],
+      "cost": { "ap": 1 },
+      "preconditions": ["来源郡与军团之间通路未被切断"],
+      "effects": ["兵员按行程抵达后并入军团"]
+    },
+    {
+      "id": "develop",
+      "name": "劝农",
+      "category": "civil",
+      "summary": "投入府库提升郡的产出上限。见效慢，适合开局与后方，前线郡投进去会被抢走。",
+      "params": [
+        { "name": "at", "type": "commandery", "scope": "own", "description": "施政的郡" },
+        { "name": "focus", "type": "tier", "description": "方向", "tiers": [
+          { "id": "farm", "label": "屯田", "value": 1, "note": "提粮" },
+          { "id": "trade", "label": "通商", "value": 2, "note": "提金" },
+          { "id": "wall", "label": "缮城", "value": 3, "note": "提城防" }
+        ]}
+      ],
+      "cost": { "ap": 1, "gold": 40 },
+      "preconditions": ["该郡民心不低于 30"],
+      "effects": ["对应产出或城防在若干旬后提升"],
+      "delay": 3
+    },
+    {
+      "id": "appoint",
+      "name": "任命",
+      "category": "personnel",
+      "summary": "任武将为郡太守。太守的政治影响该郡产出与民心，统率影响守备。空缺的郡产出打折。",
+      "params": [
+        { "name": "officer", "type": "officer", "scope": "own", "description": "受任武将" },
+        { "name": "at", "type": "commandery", "scope": "own", "description": "任所" }
+      ],
+      "cost": { "ap": 1 },
+      "preconditions": ["该武将未担任他职", "武将忠诚不低于 40"],
+      "effects": ["该郡产出与守备按武将属性修正"]
+    },
+    {
+      "id": "recruit",
+      "name": "招揽",
+      "category": "personnel",
+      "summary": "招揽在野武将。194 年有大量名士尚未出仕，招揽成功与否取决于使者的魅力、对方的义理与你的威望。",
+      "params": [
+        { "name": "target", "type": "officer", "scope": "unassigned", "description": "在野武将" },
+        { "name": "envoy", "type": "officer", "scope": "own", "description": "出使者，魅力为主要判据" }
+      ],
+      "cost": { "ap": 1, "gold": 60 },
+      "preconditions": ["目标为在野", "使者未被派往他处"],
+      "effects": ["按成功率判定，成功则该武将加入"],
+      "delay": 3
+    },
+    {
+      "id": "diplomacy",
+      "name": "遣使",
+      "category": "diplomacy",
+      "summary": "向他方提出可被机器校验的具体承诺。承诺格式化，背弃有代价——这是外交能成为博弈而非空谈的前提。",
+      "params": [
+        { "name": "to", "type": "faction", "scope": "any", "description": "对象势力" },
+        { "name": "envoy", "type": "officer", "scope": "own", "description": "使者" },
+        { "name": "proposal", "type": "tier", "description": "提议类型", "tiers": [
+          { "id": "truce", "label": "停战", "value": 1, "note": "约定旬数内互不进攻" },
+          { "id": "alliance", "label": "同盟", "value": 2, "note": "共同对敌，可借道" },
+          { "id": "joint", "label": "联合出兵", "value": 3, "note": "指定共同目标" }
+        ]},
+        { "name": "term", "type": "tier", "description": "期限", "tiers": [
+          { "id": "short", "label": "一年", "value": 4 },
+          { "id": "mid", "label": "三年", "value": 12 },
+          { "id": "long", "label": "五年", "value": 20 }
+        ]}
+      ],
+      "cost": { "ap": 1, "gold": 30 },
+      "preconditions": ["双方非交战中，或交战满 4 旬后方可议和"],
+      "effects": ["对方可接受或拒绝", "达成后写入契约表，背弃则威望大损"]
+    },
+    {
+      "id": "scout",
+      "name": "细作",
+      "category": "intel",
+      "summary": "刺探指定郡的实况。不派细作只能看到分档估值，派了才有 ±15% 的点估计——攻防比算不准就不敢出兵。",
+      "params": [
+        { "name": "at", "type": "commandery", "scope": "any", "description": "刺探目标" }
+      ],
+      "cost": { "ap": 1, "gold": 25 },
+      "preconditions": [],
+      "effects": ["下一次观测中该郡的兵力、粮草、城防给出点估计而非档位"],
+      "delay": 1
+    }
+  ],
+
+  "terrain": [
+    { "id": "plain", "name": "平原", "marchCost": 1.0, "defenseBonus": 0.0, "yieldFactor": 1.0, "description": "华北、江汉、成都平原，行军与产出的基准" },
+    { "id": "hill", "name": "丘陵", "marchCost": 1.35, "defenseBonus": 0.12, "yieldFactor": 0.8, "description": "行军渐慢，守方略占便宜" },
+    { "id": "mountain", "name": "山地", "marchCost": 2.1, "defenseBonus": 0.3, "yieldFactor": 0.45, "description": "秦岭、太行、巴山，大军难行" },
+    { "id": "gate", "name": "关隘", "marchCost": 2.6, "defenseBonus": 0.55, "yieldFactor": 0.2, "description": "虎牢、函谷、剑门之类，以寡当众" },
+    { "id": "river", "name": "大河", "marchCost": 1.8, "defenseBonus": 0.35, "yieldFactor": 1.1, "description": "黄河长江，无渡口不可过" },
+    { "id": "marsh", "name": "沼泽", "marchCost": 1.9, "defenseBonus": 0.1, "yieldFactor": 0.5, "description": "云梦、彭蠡一带，行军损耗大" }
+  ],
+
+  "units": [
+    { "id": "infantry", "name": "步卒", "strongAgainst": ["cavalry"], "attack": 1.0, "defense": 1.1, "upkeep": 1.0, "marchSpeed": 1.0, "recruitCost": { "gold": 8, "grain": 12 }, "description": "主力，攻守均衡，山地不吃亏" },
+    { "id": "cavalry", "name": "骑兵", "strongAgainst": ["archer"], "attack": 1.35, "defense": 0.85, "upkeep": 1.6, "marchSpeed": 1.7, "recruitCost": { "gold": 22, "grain": 18 }, "description": "机动与突击，平原强、山地关隘减半" },
+    { "id": "archer", "name": "弓弩", "strongAgainst": ["infantry"], "attack": 1.15, "defense": 0.8, "upkeep": 1.1, "marchSpeed": 0.9, "recruitCost": { "gold": 14, "grain": 10 }, "description": "远程消耗，守城加成显著" },
+    { "id": "navy", "name": "水军", "strongAgainst": [], "attack": 1.0, "defense": 1.0, "upkeep": 1.2, "marchSpeed": 2.2, "recruitCost": { "gold": 18, "grain": 14 }, "description": "沿江河快速机动，无水路则不可用" }
+  ],
+
+  "skills": [
+    { "id": "shensuan", "name": "神算", "trigger": "battle", "effect": [{ "stat": "stratagemRate", "op": "add", "value": 0.2 }], "summary": "计略成功率显著提升" },
+    { "id": "jianbing", "name": "坚兵", "trigger": "siege", "effect": [{ "stat": "defense", "op": "mul", "value": 1.25 }], "summary": "守城时防御提升" },
+    { "id": "jixing", "name": "疾行", "trigger": "march", "effect": [{ "stat": "marchSpeed", "op": "mul", "value": 1.3 }], "summary": "行军速度提升，可抢先抵达" },
+    { "id": "tuntian", "name": "屯田", "trigger": "civil", "effect": [{ "stat": "grainYield", "op": "mul", "value": 1.2 }], "summary": "所辖郡粮食产出提升" },
+    { "id": "mingshi", "name": "名士", "trigger": "passive", "effect": [{ "stat": "recruitRate", "op": "add", "value": 0.15 }], "summary": "招揽他人成功率提升" }
+  ],
+
+  "victory": [
+    { "id": "hegemon", "name": "霸业", "test": "pi >= startPi * 2.5 && pi >= 0.25", "description": "国势较开局增长 2.5 倍且占天下四分之一。判据用相对开局的增量，测的是把手上的牌打成了什么，而不是抽到了什么牌" },
+    { "id": "ascendant", "name": "崛起", "test": "pi >= startPi * 1.8", "description": "国势较开局增长 1.8 倍" },
+    { "id": "survival", "name": "存续", "test": "pi >= startPi * 1.3", "description": "国势较开局增长 1.3 倍" },
+    { "id": "eliminated", "name": "覆灭", "test": "commanderies == 0", "description": "尽失疆土。综合分 ×0.5——只惩罚出局，不奖励苟活" }
+  ]
+}

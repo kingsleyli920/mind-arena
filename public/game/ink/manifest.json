@@ -1,0 +1,377 @@
+{
+ "note": "皴法墨迹图章，自公有领域中国山水画提取。灰度值即墨密度，用作 alpha 通道。",
+ "stamps": [
+  {
+   "file": "fupi-0.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 125,
+    "y": 509,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-1.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 1085,
+    "y": 125,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-2.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 1661,
+    "y": 701,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-3.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 1277,
+    "y": 1085,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-4.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 509,
+    "y": 125,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-5.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 125,
+    "y": 125,
+    "size": 256
+   }
+  },
+  {
+   "file": "fupi-6.png",
+   "cun": "fupi",
+   "cunName": "斧劈皴",
+   "source": "李唐《万壑松风图》",
+   "license": "CC0",
+   "from": {
+    "x": 1469,
+    "y": 317,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-0.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 22326,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-1.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 21942,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-2.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 20214,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-3.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 19638,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-4.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 15030,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-5.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 20598,
+    "y": 246,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-6.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 12150,
+    "y": 438,
+    "size": 256
+   }
+  },
+  {
+   "file": "pima-7.png",
+   "cun": "pima",
+   "cunName": "披麻皴",
+   "source": "黄公望《富春山居图》",
+   "license": "Public domain",
+   "from": {
+    "x": 21366,
+    "y": 54,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-0.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 745,
+    "y": 3625,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-1.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 169,
+    "y": 3625,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-2.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 1129,
+    "y": 3433,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-3.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 169,
+    "y": 1321,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-4.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 745,
+    "y": 4009,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-5.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 745,
+    "y": 3241,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-6.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 1513,
+    "y": 3433,
+    "size": 256
+   }
+  },
+  {
+   "file": "yudian-7.png",
+   "cun": "yudian",
+   "cunName": "雨点皴",
+   "source": "范宽《谿山行旅图》",
+   "license": "Public domain",
+   "from": {
+    "x": 2281,
+    "y": 3433,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-0.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 501,
+    "y": 1461,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-1.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 885,
+    "y": 885,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-2.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 117,
+    "y": 1077,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-3.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 1269,
+    "y": 1077,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-4.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 117,
+    "y": 693,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-5.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 1269,
+    "y": 693,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-6.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 885,
+    "y": 1269,
+    "size": 256
+   }
+  },
+  {
+   "file": "juanyun-7.png",
+   "cun": "juanyun",
+   "cunName": "卷云皴",
+   "source": "郭熙《早春图》",
+   "license": "Public domain",
+   "from": {
+    "x": 501,
+    "y": 1077,
+    "size": 256
+   }
+  }
+ ]
+}
