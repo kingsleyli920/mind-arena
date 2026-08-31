@@ -192,7 +192,7 @@ export function toRulesDigest(pack: ContentPack): string {
       a.cost.grain ? `${a.cost.grain} 粮` : null,
       a.cost.formula ?? null,
     ].filter(Boolean).join(" + ") || "无";
-    lines.push(`\n### ${a.id}　${a.name}（${cost}${a.delay ? `，${a.delay} 旬后生效` : ""}${a.standing ? "，持续命令" : ""}）`);
+    lines.push(`\n### ${a.id} ${a.name}（${cost}${a.delay ? `，${a.delay} 旬后生效` : ""}${a.standing ? "，持续命令" : ""}）`);
     lines.push(a.summary);
     for (const prm of a.params) {
       const opts = prm.tiers ? `：${prm.tiers.map((t) => `${t.id}(${t.label})`).join(" / ")}` : "";

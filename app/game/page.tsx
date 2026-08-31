@@ -1,12 +1,17 @@
-import type { Metadata } from "next";
-import { StrategyGame } from "./StrategyGame";
+import { InkMapViewer } from "./InkMapViewer";
 import "./game.css";
 
-export const metadata: Metadata = {
-  title: "群雄沙盘 · Mind Arena",
-  description: "在一张原创沙盘地图上与本地策略 AI 或 OpenRouter 模型争夺天下。",
-};
+export const metadata = { title: "汉末沙盘 · 群雄沙盘" };
 
-export default function GamePage() {
-  return <StrategyGame />;
+export default function MapPage() {
+  return (
+    <main className="map-page">
+      <header className="map-head">
+        <span className="map-era">兴平元年 · 一九四</span>
+        <h1>汉末沙盘</h1>
+        <p>《后汉书·郡国志》一百零五郡国 · 十三州 · 黄河东汉故道</p>
+      </header>
+      <InkMapViewer />
+    </main>
+  );
 }
