@@ -1,0 +1,2807 @@
+{
+ "meta": {
+  "note": "郡国通行图。Delaunay 取候选边，沿边采样地形网格定档，与水系求交判跨河，关津按垂距挂载。",
+  "generatedFrom": "tools/build-adjacency.mjs",
+  "commanderies": 105,
+  "edges": 223,
+  "maxEdgeKm": 420,
+  "costUnit": "1 = 100km 平原",
+  "terrainCost": {
+   "plain": 1,
+   "hill": 1.35,
+   "mountain": 2.1,
+   "gate": 2.6,
+   "river": 1.8
+  }
+ },
+ "edges": [
+  {
+   "from": "上党郡",
+   "to": "太原郡",
+   "km": 184,
+   "terrain": "hill",
+   "cost": 2.49,
+   "maxElev": 1575,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "上党郡",
+   "to": "西河郡",
+   "km": 232,
+   "terrain": "hill",
+   "cost": 3.13,
+   "maxElev": 1880,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "上谷郡",
+   "to": "渔阳郡",
+   "km": 117,
+   "terrain": "gate",
+   "cost": 3.05,
+   "maxElev": 672,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "juyong-guan",
+     "name": "居庸关",
+     "kind": "gate",
+     "offset": 9.5
+    }
+   ]
+  },
+  {
+   "from": "上郡",
+   "to": "云中郡",
+   "km": 269,
+   "terrain": "hill",
+   "cost": 3.63,
+   "maxElev": 1327,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "上郡",
+   "to": "五原郡",
+   "km": 265,
+   "terrain": "hill",
+   "cost": 3.58,
+   "maxElev": 1483,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "上郡",
+   "to": "朔方郡",
+   "km": 356,
+   "terrain": "hill",
+   "cost": 4.8,
+   "maxElev": 1433,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东平国",
+   "to": "任城国",
+   "km": 60,
+   "terrain": "plain",
+   "cost": 0.6,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东平国",
+   "to": "山阳郡",
+   "km": 82,
+   "terrain": "plain",
+   "cost": 0.82,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东平国",
+   "to": "泰山郡",
+   "km": 76,
+   "terrain": "plain",
+   "cost": 0.76,
+   "maxElev": 171,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东平国",
+   "to": "济北国",
+   "km": 63,
+   "terrain": "plain",
+   "cost": 0.63,
+   "maxElev": 180,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东海郡",
+   "to": "下邳国",
+   "km": 68,
+   "terrain": "plain",
+   "cost": 0.68,
+   "maxElev": 38,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东海郡",
+   "to": "东莱郡",
+   "km": 388,
+   "terrain": "plain",
+   "cost": 3.88,
+   "maxElev": 220,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东海郡",
+   "to": "彭城国",
+   "km": 120,
+   "terrain": "plain",
+   "cost": 1.2,
+   "maxElev": 40,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东海郡",
+   "to": "琅邪国",
+   "km": 50,
+   "terrain": "plain",
+   "cost": 0.5,
+   "maxElev": 66,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东郡",
+   "to": "东平国",
+   "km": 142,
+   "terrain": "plain",
+   "cost": 1.42,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东郡",
+   "to": "山阳郡",
+   "km": 109,
+   "terrain": "plain",
+   "cost": 1.09,
+   "maxElev": 57,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "东郡",
+   "to": "济阴郡",
+   "km": 88,
+   "terrain": "plain",
+   "cost": 0.88,
+   "maxElev": 59,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "中山国",
+   "to": "代郡",
+   "km": 237,
+   "terrain": "gate",
+   "cost": 6.17,
+   "maxElev": 1433,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "feihu-kou",
+     "name": "飞狐口",
+     "kind": "gate",
+     "offset": 31.8
+    }
+   ]
+  },
+  {
+   "from": "中山国",
+   "to": "安平国",
+   "km": 121,
+   "terrain": "plain",
+   "cost": 1.21,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "中山国",
+   "to": "河闲国",
+   "km": 124,
+   "terrain": "plain",
+   "cost": 1.24,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "中山国",
+   "to": "涿郡",
+   "km": 144,
+   "terrain": "plain",
+   "cost": 1.44,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "中山国",
+   "to": "雁门郡",
+   "km": 219,
+   "terrain": "mountain",
+   "cost": 4.6,
+   "maxElev": 1915,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "丹阳郡",
+   "to": "会稽郡",
+   "km": 205,
+   "terrain": "plain",
+   "cost": 2.05,
+   "maxElev": 574,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "丹阳郡",
+   "to": "吴郡",
+   "km": 182,
+   "terrain": "plain",
+   "cost": 1.82,
+   "maxElev": 226,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "丹阳郡",
+   "to": "豫章郡",
+   "km": 377,
+   "terrain": "plain",
+   "cost": 3.77,
+   "maxElev": 360,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "乐安国",
+   "to": "齐国",
+   "km": 61,
+   "terrain": "plain",
+   "cost": 0.61,
+   "maxElev": 47,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "九江郡",
+   "to": "丹阳郡",
+   "km": 216,
+   "terrain": "river",
+   "cost": 3.89,
+   "maxElev": 86,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "hengjiang-jin",
+     "name": "横江津",
+     "kind": "ford",
+     "offset": 17.9
+    },
+    {
+     "id": "niuzhu",
+     "name": "牛渚",
+     "kind": "port",
+     "offset": 23.9
+    },
+    {
+     "id": "ruxu-kou",
+     "name": "濡须口",
+     "kind": "port",
+     "offset": 28.5
+    }
+   ]
+  },
+  {
+   "from": "九江郡",
+   "to": "庐江郡",
+   "km": 149,
+   "terrain": "plain",
+   "cost": 1.49,
+   "maxElev": 165,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "云中郡",
+   "to": "代郡",
+   "km": 248,
+   "terrain": "hill",
+   "cost": 3.35,
+   "maxElev": 1645,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "云中郡",
+   "to": "定襄郡",
+   "km": 128,
+   "terrain": "hill",
+   "cost": 1.72,
+   "maxElev": 1598,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "云中郡",
+   "to": "雁门郡",
+   "km": 203,
+   "terrain": "mountain",
+   "cost": 4.26,
+   "maxElev": 1646,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "五原郡",
+   "to": "代郡",
+   "km": 393,
+   "terrain": "hill",
+   "cost": 5.31,
+   "maxElev": 1518,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "交趾郡",
+   "to": "九真郡",
+   "km": 155,
+   "terrain": "plain",
+   "cost": 1.55,
+   "maxElev": 59,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "京兆尹",
+   "to": "南阳郡",
+   "km": 387,
+   "terrain": "gate",
+   "cost": 10.05,
+   "maxElev": 1338,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "wu-guan",
+     "name": "武关",
+     "kind": "gate",
+     "offset": 1.7
+    }
+   ]
+  },
+  {
+   "from": "京兆尹",
+   "to": "右扶风",
+   "km": 36,
+   "terrain": "gate",
+   "cost": 0.95,
+   "maxElev": 487,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "ziwu-dao",
+     "name": "子午道",
+     "kind": "pass",
+     "offset": 41
+    }
+   ]
+  },
+  {
+   "from": "京兆尹",
+   "to": "左冯翊",
+   "km": 30,
+   "terrain": "hill",
+   "cost": 0.4,
+   "maxElev": 389,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "京兆尹",
+   "to": "汉中郡",
+   "km": 228,
+   "terrain": "gate",
+   "cost": 5.92,
+   "maxElev": 2015,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "tangluo-dao",
+     "name": "傥骆道",
+     "kind": "pass",
+     "offset": 7.2
+    },
+    {
+     "id": "ziwu-dao",
+     "name": "子午道",
+     "kind": "pass",
+     "offset": 31.5
+    }
+   ]
+  },
+  {
+   "from": "代郡",
+   "to": "上谷郡",
+   "km": 181,
+   "terrain": "hill",
+   "cost": 2.45,
+   "maxElev": 1585,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "任城国",
+   "to": "山阳郡",
+   "km": 54,
+   "terrain": "plain",
+   "cost": 0.54,
+   "maxElev": 42,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "任城国",
+   "to": "彭城国",
+   "km": 139,
+   "terrain": "plain",
+   "cost": 1.39,
+   "maxElev": 42,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "会稽郡",
+   "to": "吴郡",
+   "km": 144,
+   "terrain": "plain",
+   "cost": 1.44,
+   "maxElev": 12,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "勃海郡",
+   "to": "乐安国",
+   "km": 145,
+   "terrain": "plain",
+   "cost": 1.45,
+   "maxElev": 15,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "勃海郡",
+   "to": "右北平郡",
+   "km": 242,
+   "terrain": "plain",
+   "cost": 2.42,
+   "maxElev": 44,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "勃海郡",
+   "to": "平原郡",
+   "km": 100,
+   "terrain": "plain",
+   "cost": 1,
+   "maxElev": 23,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "勃海郡",
+   "to": "广阳郡",
+   "km": 206,
+   "terrain": "plain",
+   "cost": 2.06,
+   "maxElev": 47,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "勃海郡",
+   "to": "涿郡",
+   "km": 176,
+   "terrain": "plain",
+   "cost": 1.76,
+   "maxElev": 36,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "北地郡",
+   "to": "上郡",
+   "km": 345,
+   "terrain": "hill",
+   "cost": 4.66,
+   "maxElev": 1517,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "北地郡",
+   "to": "武威郡",
+   "km": 345,
+   "terrain": "mountain",
+   "cost": 7.25,
+   "maxElev": 1618,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "北海国",
+   "to": "齐国",
+   "km": 47,
+   "terrain": "plain",
+   "cost": 0.47,
+   "maxElev": 134,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "南海郡",
+   "to": "苍梧郡",
+   "km": 196,
+   "terrain": "plain",
+   "cost": 1.96,
+   "maxElev": 402,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "南郡",
+   "to": "武陵郡",
+   "km": 153,
+   "terrain": "plain",
+   "cost": 1.53,
+   "maxElev": 74,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "南郡",
+   "to": "江夏郡",
+   "km": 259,
+   "terrain": "river",
+   "cost": 4.66,
+   "maxElev": 35,
+   "crossings": [
+    "汉水"
+   ],
+   "nodes": [
+    {
+     "id": "xiakou",
+     "name": "夏口",
+     "kind": "port",
+     "offset": 20.6
+    },
+    {
+     "id": "han-jin",
+     "name": "汉津",
+     "kind": "port",
+     "offset": 30.6
+    }
+   ]
+  },
+  {
+   "from": "南郡",
+   "to": "长沙郡",
+   "km": 245,
+   "terrain": "river",
+   "cost": 4.42,
+   "maxElev": 54,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "jiang-jin",
+     "name": "江津",
+     "kind": "port",
+     "offset": 4.2
+    }
+   ]
+  },
+  {
+   "from": "南阳郡",
+   "to": "南郡",
+   "km": 294,
+   "terrain": "river",
+   "cost": 5.29,
+   "maxElev": 130,
+   "crossings": [
+    "汉水"
+   ],
+   "nodes": [
+    {
+     "id": "han-jin",
+     "name": "汉津",
+     "kind": "port",
+     "offset": 34
+    }
+   ]
+  },
+  {
+   "from": "南阳郡",
+   "to": "江夏郡",
+   "km": 323,
+   "terrain": "plain",
+   "cost": 3.23,
+   "maxElev": 366,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "右北平郡",
+   "to": "辽西郡",
+   "km": 340,
+   "terrain": "gate",
+   "cost": 8.85,
+   "maxElev": 555,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "lulong-sai",
+     "name": "卢龙塞",
+     "kind": "gate",
+     "offset": 37.6
+    }
+   ]
+  },
+  {
+   "from": "右扶风",
+   "to": "安定郡",
+   "km": 197,
+   "terrain": "hill",
+   "cost": 2.66,
+   "maxElev": 1323,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "右扶风",
+   "to": "汉中郡",
+   "km": 196,
+   "terrain": "gate",
+   "cost": 5.1,
+   "maxElev": 2197,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "tangluo-dao",
+     "name": "傥骆道",
+     "kind": "pass",
+     "offset": 16.2
+    }
+   ]
+  },
+  {
+   "from": "合浦郡",
+   "to": "交趾郡",
+   "km": 308,
+   "terrain": "plain",
+   "cost": 3.08,
+   "maxElev": 313,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "太原郡",
+   "to": "西河郡",
+   "km": 136,
+   "terrain": "mountain",
+   "cost": 2.86,
+   "maxElev": 1843,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "太原郡",
+   "to": "雁门郡",
+   "km": 159,
+   "terrain": "hill",
+   "cost": 2.15,
+   "maxElev": 1457,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "安定郡",
+   "to": "上郡",
+   "km": 371,
+   "terrain": "mountain",
+   "cost": 7.79,
+   "maxElev": 1657,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "安定郡",
+   "to": "北地郡",
+   "km": 254,
+   "terrain": "mountain",
+   "cost": 5.33,
+   "maxElev": 1890,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "安平国",
+   "to": "平原郡",
+   "km": 92,
+   "terrain": "plain",
+   "cost": 0.92,
+   "maxElev": 28,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "安平国",
+   "to": "河闲国",
+   "km": 89,
+   "terrain": "plain",
+   "cost": 0.89,
+   "maxElev": 25,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "安平国",
+   "to": "清河国",
+   "km": 74,
+   "terrain": "plain",
+   "cost": 0.74,
+   "maxElev": 36,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "定襄郡",
+   "to": "代郡",
+   "km": 130,
+   "terrain": "hill",
+   "cost": 1.76,
+   "maxElev": 1716,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "定襄郡",
+   "to": "雁门郡",
+   "km": 101,
+   "terrain": "gate",
+   "cost": 2.62,
+   "maxElev": 1637,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yanmen-guan",
+     "name": "雁门关",
+     "kind": "gate",
+     "offset": 3.6
+    }
+   ]
+  },
+  {
+   "from": "山阳郡",
+   "to": "济阴郡",
+   "km": 53,
+   "terrain": "plain",
+   "cost": 0.53,
+   "maxElev": 51,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "左冯翊",
+   "to": "上郡",
+   "km": 409,
+   "terrain": "hill",
+   "cost": 5.53,
+   "maxElev": 1288,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "左冯翊",
+   "to": "右扶风",
+   "km": 64,
+   "terrain": "hill",
+   "cost": 0.86,
+   "maxElev": 487,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "左冯翊",
+   "to": "安定郡",
+   "km": 222,
+   "terrain": "hill",
+   "cost": 3,
+   "maxElev": 1286,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "巴郡",
+   "to": "广汉郡",
+   "km": 271,
+   "terrain": "hill",
+   "cost": 3.66,
+   "maxElev": 573,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "巴郡",
+   "to": "牂牁郡",
+   "km": 322,
+   "terrain": "hill",
+   "cost": 4.35,
+   "maxElev": 1368,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "巴郡",
+   "to": "犍为郡",
+   "km": 269,
+   "terrain": "hill",
+   "cost": 3.63,
+   "maxElev": 507,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "巴郡",
+   "to": "蜀郡",
+   "km": 270,
+   "terrain": "hill",
+   "cost": 3.64,
+   "maxElev": 595,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "常山国",
+   "to": "中山国",
+   "km": 93,
+   "terrain": "hill",
+   "cost": 1.26,
+   "maxElev": 64,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "常山国",
+   "to": "太原郡",
+   "km": 199,
+   "terrain": "gate",
+   "cost": 5.16,
+   "maxElev": 1275,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jingxing-guan",
+     "name": "井陉关",
+     "kind": "gate",
+     "offset": 30.2
+    }
+   ]
+  },
+  {
+   "from": "常山国",
+   "to": "赵国",
+   "km": 128,
+   "terrain": "plain",
+   "cost": 1.28,
+   "maxElev": 81,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "常山国",
+   "to": "雁门郡",
+   "km": 223,
+   "terrain": "gate",
+   "cost": 5.8,
+   "maxElev": 1662,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jingxing-guan",
+     "name": "井陉关",
+     "kind": "gate",
+     "offset": 0.1
+    }
+   ]
+  },
+  {
+   "from": "广汉属国",
+   "to": "武都郡",
+   "km": 122,
+   "terrain": "mountain",
+   "cost": 2.56,
+   "maxElev": 2347,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广汉属国",
+   "to": "汉阳郡",
+   "km": 210,
+   "terrain": "gate",
+   "cost": 5.46,
+   "maxElev": 2357,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "qishan-dao",
+     "name": "祁山道",
+     "kind": "pass",
+     "offset": 5.9
+    }
+   ]
+  },
+  {
+   "from": "广汉属国",
+   "to": "蜀郡属国",
+   "km": 366,
+   "terrain": "mountain",
+   "cost": 7.68,
+   "maxElev": 3680,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广汉属国",
+   "to": "陇西郡",
+   "km": 281,
+   "terrain": "mountain",
+   "cost": 5.91,
+   "maxElev": 3130,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广汉郡",
+   "to": "广汉属国",
+   "km": 219,
+   "terrain": "gate",
+   "cost": 5.7,
+   "maxElev": 2705,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yinping-dao",
+     "name": "阴平道",
+     "kind": "pass",
+     "offset": 12.7
+    }
+   ]
+  },
+  {
+   "from": "广汉郡",
+   "to": "蜀郡",
+   "km": 41,
+   "terrain": "hill",
+   "cost": 0.55,
+   "maxElev": 510,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广汉郡",
+   "to": "蜀郡属国",
+   "km": 167,
+   "terrain": "hill",
+   "cost": 2.25,
+   "maxElev": 800,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广阳郡",
+   "to": "上谷郡",
+   "km": 91,
+   "terrain": "gate",
+   "cost": 2.37,
+   "maxElev": 969,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "juyong-guan",
+     "name": "居庸关",
+     "kind": "gate",
+     "offset": 19.1
+    }
+   ]
+  },
+  {
+   "from": "广阳郡",
+   "to": "右北平郡",
+   "km": 173,
+   "terrain": "plain",
+   "cost": 1.73,
+   "maxElev": 47,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广阳郡",
+   "to": "渔阳郡",
+   "km": 70,
+   "terrain": "plain",
+   "cost": 0.7,
+   "maxElev": 78,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广陵郡",
+   "to": "丹阳郡",
+   "km": 173,
+   "terrain": "plain",
+   "cost": 1.73,
+   "maxElev": 44,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广陵郡",
+   "to": "九江郡",
+   "km": 187,
+   "terrain": "plain",
+   "cost": 1.87,
+   "maxElev": 86,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "广陵郡",
+   "to": "吴郡",
+   "km": 165,
+   "terrain": "plain",
+   "cost": 1.65,
+   "maxElev": 17,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "庐江郡",
+   "to": "豫章郡",
+   "km": 309,
+   "terrain": "river",
+   "cost": 5.56,
+   "maxElev": 165,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "hukou",
+     "name": "湖口",
+     "kind": "port",
+     "offset": 13
+    },
+    {
+     "id": "chaisang",
+     "name": "柴桑",
+     "kind": "port",
+     "offset": 38.5
+    }
+   ]
+  },
+  {
+   "from": "弘农郡",
+   "to": "京兆尹",
+   "km": 196,
+   "terrain": "gate",
+   "cost": 5.08,
+   "maxElev": 1613,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "tong-guan",
+     "name": "潼关",
+     "kind": "gate",
+     "offset": 9.6
+    },
+    {
+     "id": "puban-jin",
+     "name": "蒲坂津",
+     "kind": "ford",
+     "offset": 40.2
+    }
+   ]
+  },
+  {
+   "from": "弘农郡",
+   "to": "南阳郡",
+   "km": 233,
+   "terrain": "hill",
+   "cost": 3.15,
+   "maxElev": 1402,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "弘农郡",
+   "to": "左冯翊",
+   "km": 172,
+   "terrain": "gate",
+   "cost": 4.48,
+   "maxElev": 552,
+   "crossings": [
+    "渭水"
+   ],
+   "nodes": [
+    {
+     "id": "tong-guan",
+     "name": "潼关",
+     "kind": "gate",
+     "offset": 3.7
+    },
+    {
+     "id": "puban-jin",
+     "name": "蒲坂津",
+     "kind": "ford",
+     "offset": 34.7
+    }
+   ]
+  },
+  {
+   "from": "张掖属国",
+   "to": "张掖居延属国",
+   "km": 349,
+   "terrain": "hill",
+   "cost": 4.72,
+   "maxElev": 2136,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "张掖郡",
+   "to": "张掖居延属国",
+   "km": 339,
+   "terrain": "hill",
+   "cost": 4.58,
+   "maxElev": 1726,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "张掖郡",
+   "to": "张掖属国",
+   "km": 64,
+   "terrain": "mountain",
+   "cost": 1.34,
+   "maxElev": 1867,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "张掖郡",
+   "to": "酒泉郡",
+   "km": 208,
+   "terrain": "mountain",
+   "cost": 4.37,
+   "maxElev": 2413,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "彭城国",
+   "to": "下邳国",
+   "km": 77,
+   "terrain": "plain",
+   "cost": 0.77,
+   "maxElev": 40,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "日南郡",
+   "to": "九真郡",
+   "km": 361,
+   "terrain": "plain",
+   "cost": 3.61,
+   "maxElev": 43,
+   "crossings": [],
+   "nodes": [],
+   "via": "兜底连通"
+  },
+  {
+   "from": "桂阳郡",
+   "to": "南海郡",
+   "km": 293,
+   "terrain": "plain",
+   "cost": 2.93,
+   "maxElev": 966,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "桂阳郡",
+   "to": "苍梧郡",
+   "km": 304,
+   "terrain": "hill",
+   "cost": 4.1,
+   "maxElev": 1067,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "桂阳郡",
+   "to": "长沙郡",
+   "km": 272,
+   "terrain": "plain",
+   "cost": 2.72,
+   "maxElev": 238,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "任城国",
+   "km": 112,
+   "terrain": "plain",
+   "cost": 1.12,
+   "maxElev": 50,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "山阳郡",
+   "km": 102,
+   "terrain": "plain",
+   "cost": 1.02,
+   "maxElev": 50,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "彭城国",
+   "km": 82,
+   "terrain": "plain",
+   "cost": 0.82,
+   "maxElev": 47,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "沛国",
+   "km": 66,
+   "terrain": "plain",
+   "cost": 0.66,
+   "maxElev": 46,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "济阴郡",
+   "km": 104,
+   "terrain": "plain",
+   "cost": 1.04,
+   "maxElev": 52,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "梁国",
+   "to": "陈国",
+   "km": 162,
+   "terrain": "plain",
+   "cost": 1.62,
+   "maxElev": 48,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "武威郡",
+   "to": "张掖属国",
+   "km": 178,
+   "terrain": "mountain",
+   "cost": 3.73,
+   "maxElev": 2378,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "武陵郡",
+   "to": "长沙郡",
+   "km": 151,
+   "terrain": "plain",
+   "cost": 1.51,
+   "maxElev": 66,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "汉中郡",
+   "to": "巴郡",
+   "km": 391,
+   "terrain": "gate",
+   "cost": 10.16,
+   "maxElev": 1664,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "micang-dao",
+     "name": "米仓道",
+     "kind": "pass",
+     "offset": 12.4
+    }
+   ]
+  },
+  {
+   "from": "汉中郡",
+   "to": "广汉属国",
+   "km": 228,
+   "terrain": "gate",
+   "cost": 5.93,
+   "maxElev": 2013,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yangping-guan",
+     "name": "阳平关",
+     "kind": "gate",
+     "offset": 12.9
+    },
+    {
+     "id": "baishui-guan",
+     "name": "白水关",
+     "kind": "gate",
+     "offset": 40.5
+    }
+   ]
+  },
+  {
+   "from": "汉中郡",
+   "to": "广汉郡",
+   "km": 352,
+   "terrain": "gate",
+   "cost": 9.15,
+   "maxElev": 1815,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jiameng-guan",
+     "name": "葭萌关",
+     "kind": "gate",
+     "offset": 14.5
+    },
+    {
+     "id": "micang-dao",
+     "name": "米仓道",
+     "kind": "pass",
+     "offset": 19.6
+    },
+    {
+     "id": "jianmen-guan",
+     "name": "剑门关",
+     "kind": "gate",
+     "offset": 22.1
+    }
+   ]
+  },
+  {
+   "from": "汉中郡",
+   "to": "武都郡",
+   "km": 164,
+   "terrain": "gate",
+   "cost": 4.25,
+   "maxElev": 1509,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yangping-guan",
+     "name": "阳平关",
+     "kind": "gate",
+     "offset": 12.5
+    }
+   ]
+  },
+  {
+   "from": "汉阳郡",
+   "to": "北地郡",
+   "km": 347,
+   "terrain": "mountain",
+   "cost": 7.29,
+   "maxElev": 2165,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jieting",
+     "name": "街亭",
+     "kind": "battlefield",
+     "offset": 42.8
+    }
+   ]
+  },
+  {
+   "from": "汉阳郡",
+   "to": "安定郡",
+   "km": 207,
+   "terrain": "mountain",
+   "cost": 4.36,
+   "maxElev": 2417,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jieting",
+     "name": "街亭",
+     "kind": "battlefield",
+     "offset": 2.9
+    }
+   ]
+  },
+  {
+   "from": "汉阳郡",
+   "to": "武都郡",
+   "km": 112,
+   "terrain": "gate",
+   "cost": 2.91,
+   "maxElev": 1949,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "qishan-dao",
+     "name": "祁山道",
+     "kind": "pass",
+     "offset": 27.3
+    }
+   ]
+  },
+  {
+   "from": "汝南郡",
+   "to": "南阳郡",
+   "km": 202,
+   "terrain": "plain",
+   "cost": 2.02,
+   "maxElev": 211,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "汝南郡",
+   "to": "沛国",
+   "km": 236,
+   "terrain": "plain",
+   "cost": 2.36,
+   "maxElev": 46,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "汝南郡",
+   "to": "陈国",
+   "km": 85,
+   "terrain": "plain",
+   "cost": 0.85,
+   "maxElev": 48,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "江夏郡",
+   "to": "庐江郡",
+   "km": 227,
+   "terrain": "hill",
+   "cost": 3.07,
+   "maxElev": 1054,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "江夏郡",
+   "to": "豫章郡",
+   "km": 261,
+   "terrain": "river",
+   "cost": 4.69,
+   "maxElev": 336,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "chaisang",
+     "name": "柴桑",
+     "kind": "port",
+     "offset": 43.7
+    }
+   ]
+  },
+  {
+   "from": "江夏郡",
+   "to": "长沙郡",
+   "km": 341,
+   "terrain": "river",
+   "cost": 6.14,
+   "maxElev": 268,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "xiakou",
+     "name": "夏口",
+     "kind": "port",
+     "offset": 25.8
+    },
+    {
+     "id": "chibi",
+     "name": "赤壁",
+     "kind": "battlefield",
+     "offset": 32.7
+    },
+    {
+     "id": "wulin",
+     "name": "乌林",
+     "kind": "battlefield",
+     "offset": 39.3
+    }
+   ]
+  },
+  {
+   "from": "沛国",
+   "to": "下邳国",
+   "km": 113,
+   "terrain": "plain",
+   "cost": 1.13,
+   "maxElev": 86,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "沛国",
+   "to": "彭城国",
+   "km": 50,
+   "terrain": "plain",
+   "cost": 0.5,
+   "maxElev": 48,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "沛国",
+   "to": "陈国",
+   "km": 187,
+   "terrain": "plain",
+   "cost": 1.87,
+   "maxElev": 48,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河东郡",
+   "to": "上党郡",
+   "km": 193,
+   "terrain": "hill",
+   "cost": 2.61,
+   "maxElev": 1447,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河东郡",
+   "to": "左冯翊",
+   "km": 217,
+   "terrain": "river",
+   "cost": 3.91,
+   "maxElev": 442,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [
+    {
+     "id": "puban-jin",
+     "name": "蒲坂津",
+     "kind": "ford",
+     "offset": 4.9
+    }
+   ]
+  },
+  {
+   "from": "河东郡",
+   "to": "弘农郡",
+   "km": 77,
+   "terrain": "hill",
+   "cost": 1.05,
+   "maxElev": 744,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河东郡",
+   "to": "西河郡",
+   "km": 262,
+   "terrain": "hill",
+   "cost": 3.54,
+   "maxElev": 1690,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河内郡",
+   "to": "上党郡",
+   "km": 124,
+   "terrain": "gate",
+   "cost": 3.21,
+   "maxElev": 1100,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "tianjing-guan",
+     "name": "天井关",
+     "kind": "gate",
+     "offset": 30.3
+    }
+   ]
+  },
+  {
+   "from": "河内郡",
+   "to": "东郡",
+   "km": 172,
+   "terrain": "river",
+   "cost": 3.09,
+   "maxElev": 87,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [
+    {
+     "id": "baima-jin",
+     "name": "白马津",
+     "kind": "ford",
+     "offset": 2.1
+    },
+    {
+     "id": "liyang-jin",
+     "name": "黎阳津",
+     "kind": "ford",
+     "offset": 9.9
+    },
+    {
+     "id": "yan-jin",
+     "name": "延津",
+     "kind": "ford",
+     "offset": 10.1
+    },
+    {
+     "id": "liyang-cang",
+     "name": "黎阳仓",
+     "kind": "depot",
+     "offset": 14.5
+    },
+    {
+     "id": "ji-jin",
+     "name": "棘津",
+     "kind": "ford",
+     "offset": 20.9
+    }
+   ]
+  },
+  {
+   "from": "河内郡",
+   "to": "陈留郡",
+   "km": 121,
+   "terrain": "plain",
+   "cost": 1.21,
+   "maxElev": 93,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "guandu",
+     "name": "官渡",
+     "kind": "ford",
+     "offset": 10.5
+    },
+    {
+     "id": "wuchao",
+     "name": "乌巢",
+     "kind": "depot",
+     "offset": 31
+    }
+   ]
+  },
+  {
+   "from": "河内郡",
+   "to": "颍川郡",
+   "km": 105,
+   "terrain": "gate",
+   "cost": 2.74,
+   "maxElev": 338,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "aocang",
+     "name": "敖仓",
+     "kind": "depot",
+     "offset": 2.1
+    },
+    {
+     "id": "hulao-guan",
+     "name": "虎牢关",
+     "kind": "gate",
+     "offset": 28.8
+    }
+   ]
+  },
+  {
+   "from": "河内郡",
+   "to": "魏郡",
+   "km": 181,
+   "terrain": "hill",
+   "cost": 2.44,
+   "maxElev": 619,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yan-jin",
+     "name": "延津",
+     "kind": "ford",
+     "offset": 44.3
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "上党郡",
+   "km": 157,
+   "terrain": "gate",
+   "cost": 4.07,
+   "maxElev": 1006,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "meng-jin",
+     "name": "孟津",
+     "kind": "ford",
+     "offset": 5.7
+    },
+    {
+     "id": "tianjing-guan",
+     "name": "天井关",
+     "kind": "gate",
+     "offset": 13.6
+    },
+    {
+     "id": "xiaoping-jin",
+     "name": "小平津",
+     "kind": "ford",
+     "offset": 14.1
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "南阳郡",
+   "km": 192,
+   "terrain": "gate",
+   "cost": 4.98,
+   "maxElev": 536,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yique-guan",
+     "name": "伊阙关",
+     "kind": "gate",
+     "offset": 15.5
+    },
+    {
+     "id": "huanyuan-guan",
+     "name": "轘辕关",
+     "kind": "gate",
+     "offset": 26.5
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "弘农郡",
+   "km": 173,
+   "terrain": "gate",
+   "cost": 4.5,
+   "maxElev": 1047,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "han-hangu-guan",
+     "name": "汉函谷关",
+     "kind": "gate",
+     "offset": 6.1
+    },
+    {
+     "id": "yique-guan",
+     "name": "伊阙关",
+     "kind": "gate",
+     "offset": 15.4
+    },
+    {
+     "id": "xiaoping-jin",
+     "name": "小平津",
+     "kind": "ford",
+     "offset": 19
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "河东郡",
+   "km": 146,
+   "terrain": "gate",
+   "cost": 3.78,
+   "maxElev": 1056,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [
+    {
+     "id": "xiaoping-jin",
+     "name": "小平津",
+     "kind": "ford",
+     "offset": 12.9
+    },
+    {
+     "id": "han-hangu-guan",
+     "name": "汉函谷关",
+     "kind": "gate",
+     "offset": 15.5
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "河内郡",
+   "km": 85,
+   "terrain": "gate",
+   "cost": 2.2,
+   "maxElev": 168,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "meng-jin",
+     "name": "孟津",
+     "kind": "ford",
+     "offset": 7.7
+    },
+    {
+     "id": "hulao-guan",
+     "name": "虎牢关",
+     "kind": "gate",
+     "offset": 9.6
+    },
+    {
+     "id": "aocang",
+     "name": "敖仓",
+     "kind": "depot",
+     "offset": 14.9
+    }
+   ]
+  },
+  {
+   "from": "河南尹",
+   "to": "颍川郡",
+   "km": 102,
+   "terrain": "gate",
+   "cost": 2.66,
+   "maxElev": 598,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "huanyuan-guan",
+     "name": "轘辕关",
+     "kind": "gate",
+     "offset": 3.6
+    }
+   ]
+  },
+  {
+   "from": "河闲国",
+   "to": "勃海郡",
+   "km": 51,
+   "terrain": "plain",
+   "cost": 0.51,
+   "maxElev": 14,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河闲国",
+   "to": "平原郡",
+   "km": 111,
+   "terrain": "plain",
+   "cost": 1.11,
+   "maxElev": 26,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "河闲国",
+   "to": "涿郡",
+   "km": 150,
+   "terrain": "plain",
+   "cost": 1.5,
+   "maxElev": 36,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "泰山郡",
+   "to": "北海国",
+   "km": 158,
+   "terrain": "plain",
+   "cost": 1.58,
+   "maxElev": 627,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "泰山郡",
+   "to": "济北国",
+   "km": 52,
+   "terrain": "plain",
+   "cost": 0.52,
+   "maxElev": 542,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "泰山郡",
+   "to": "济南国",
+   "km": 59,
+   "terrain": "plain",
+   "cost": 0.59,
+   "maxElev": 520,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "泰山郡",
+   "to": "琅邪国",
+   "km": 168,
+   "terrain": "plain",
+   "cost": 1.68,
+   "maxElev": 424,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "泰山郡",
+   "to": "齐国",
+   "km": 128,
+   "terrain": "plain",
+   "cost": 1.28,
+   "maxElev": 518,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "济北国",
+   "to": "平原郡",
+   "km": 85,
+   "terrain": "plain",
+   "cost": 0.85,
+   "maxElev": 100,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "济北国",
+   "to": "济南国",
+   "km": 65,
+   "terrain": "plain",
+   "cost": 0.65,
+   "maxElev": 286,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "济南国",
+   "to": "乐安国",
+   "km": 68,
+   "terrain": "plain",
+   "cost": 0.68,
+   "maxElev": 55,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "济南国",
+   "to": "齐国",
+   "km": 94,
+   "terrain": "plain",
+   "cost": 0.94,
+   "maxElev": 211,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "涿郡",
+   "to": "上谷郡",
+   "km": 104,
+   "terrain": "hill",
+   "cost": 1.4,
+   "maxElev": 1081,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "涿郡",
+   "to": "代郡",
+   "km": 236,
+   "terrain": "gate",
+   "cost": 6.13,
+   "maxElev": 1708,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "feihu-kou",
+     "name": "飞狐口",
+     "kind": "gate",
+     "offset": 37
+    }
+   ]
+  },
+  {
+   "from": "涿郡",
+   "to": "广阳郡",
+   "km": 58,
+   "terrain": "plain",
+   "cost": 0.58,
+   "maxElev": 47,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "清河国",
+   "to": "东郡",
+   "km": 149,
+   "terrain": "plain",
+   "cost": 1.49,
+   "maxElev": 52,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "清河国",
+   "to": "平原郡",
+   "km": 72,
+   "terrain": "plain",
+   "cost": 0.72,
+   "maxElev": 36,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "清河国",
+   "to": "赵国",
+   "km": 126,
+   "terrain": "plain",
+   "cost": 1.26,
+   "maxElev": 69,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jieqiao",
+     "name": "界桥",
+     "kind": "battlefield",
+     "offset": 21.3
+    }
+   ]
+  },
+  {
+   "from": "渔阳郡",
+   "to": "右北平郡",
+   "km": 141,
+   "terrain": "plain",
+   "cost": 1.41,
+   "maxElev": 324,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "牂牁郡",
+   "to": "犍为属国",
+   "km": 292,
+   "terrain": "mountain",
+   "cost": 6.13,
+   "maxElev": 2330,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "犍为郡",
+   "to": "蜀郡属国",
+   "km": 88,
+   "terrain": "hill",
+   "cost": 1.18,
+   "maxElev": 800,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "玄菟郡",
+   "to": "乐浪郡",
+   "km": 380,
+   "terrain": "plain",
+   "cost": 3.8,
+   "maxElev": 553,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "玄菟郡",
+   "to": "辽东属国",
+   "km": 232,
+   "terrain": "plain",
+   "cost": 2.32,
+   "maxElev": 327,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "琅邪国",
+   "to": "东莱郡",
+   "km": 346,
+   "terrain": "plain",
+   "cost": 3.46,
+   "maxElev": 171,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "琅邪国",
+   "to": "北海国",
+   "km": 180,
+   "terrain": "plain",
+   "cost": 1.8,
+   "maxElev": 373,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "琅邪国",
+   "to": "彭城国",
+   "km": 143,
+   "terrain": "plain",
+   "cost": 1.43,
+   "maxElev": 69,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "益州郡",
+   "to": "永昌郡",
+   "km": 336,
+   "terrain": "mountain",
+   "cost": 7.05,
+   "maxElev": 2181,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "益州郡",
+   "to": "犍为属国",
+   "km": 315,
+   "terrain": "mountain",
+   "cost": 6.61,
+   "maxElev": 3132,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "苍梧郡",
+   "to": "合浦郡",
+   "km": 285,
+   "terrain": "plain",
+   "cost": 2.85,
+   "maxElev": 328,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "苍梧郡",
+   "to": "郁林郡",
+   "km": 121,
+   "terrain": "plain",
+   "cost": 1.21,
+   "maxElev": 97,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "蜀郡",
+   "to": "犍为郡",
+   "km": 55,
+   "terrain": "hill",
+   "cost": 0.75,
+   "maxElev": 504,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "蜀郡",
+   "to": "蜀郡属国",
+   "km": 129,
+   "terrain": "hill",
+   "cost": 1.74,
+   "maxElev": 800,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "西河郡",
+   "to": "雁门郡",
+   "km": 247,
+   "terrain": "mountain",
+   "cost": 5.2,
+   "maxElev": 2072,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "赵国",
+   "to": "上党郡",
+   "km": 165,
+   "terrain": "gate",
+   "cost": 4.29,
+   "maxElev": 1153,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "fukou-xing",
+     "name": "滏口陉",
+     "kind": "gate",
+     "offset": 10.9
+    },
+    {
+     "id": "hu-guan",
+     "name": "壶关",
+     "kind": "gate",
+     "offset": 24.3
+    }
+   ]
+  },
+  {
+   "from": "赵国",
+   "to": "太原郡",
+   "km": 232,
+   "terrain": "hill",
+   "cost": 3.13,
+   "maxElev": 1685,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "越巂郡",
+   "to": "蜀郡属国",
+   "km": 242,
+   "terrain": "mountain",
+   "cost": 5.08,
+   "maxElev": 2890,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "辽东郡",
+   "to": "乐浪郡",
+   "km": 347,
+   "terrain": "plain",
+   "cost": 3.47,
+   "maxElev": 545,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "辽东郡",
+   "to": "玄菟郡",
+   "km": 78,
+   "terrain": "plain",
+   "cost": 0.78,
+   "maxElev": 76,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "辽东郡",
+   "to": "辽东属国",
+   "km": 196,
+   "terrain": "plain",
+   "cost": 1.96,
+   "maxElev": 225,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "辽西郡",
+   "to": "辽东属国",
+   "km": 14,
+   "terrain": "plain",
+   "cost": 0.14,
+   "maxElev": 199,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "辽西郡",
+   "to": "辽东郡",
+   "km": 209,
+   "terrain": "plain",
+   "cost": 2.09,
+   "maxElev": 225,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "郁林郡",
+   "to": "合浦郡",
+   "km": 209,
+   "terrain": "plain",
+   "cost": 2.09,
+   "maxElev": 187,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "酒泉郡",
+   "to": "张掖居延属国",
+   "km": 348,
+   "terrain": "hill",
+   "cost": 4.7,
+   "maxElev": 1445,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "酒泉郡",
+   "to": "敦煌郡",
+   "km": 376,
+   "terrain": "mountain",
+   "cost": 7.89,
+   "maxElev": 2756,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "金城郡",
+   "to": "张掖属国",
+   "km": 377,
+   "terrain": "mountain",
+   "cost": 7.91,
+   "maxElev": 4292,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "金城郡",
+   "to": "武威郡",
+   "km": 223,
+   "terrain": "mountain",
+   "cost": 4.69,
+   "maxElev": 3026,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "钜鹿郡",
+   "to": "中山国",
+   "km": 107,
+   "terrain": "plain",
+   "cost": 1.07,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "钜鹿郡",
+   "to": "安平国",
+   "km": 71,
+   "terrain": "plain",
+   "cost": 0.71,
+   "maxElev": 31,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "钜鹿郡",
+   "to": "常山国",
+   "km": 39,
+   "terrain": "plain",
+   "cost": 0.39,
+   "maxElev": 61,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "钜鹿郡",
+   "to": "清河国",
+   "km": 113,
+   "terrain": "plain",
+   "cost": 1.13,
+   "maxElev": 36,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "jieqiao",
+     "name": "界桥",
+     "kind": "battlefield",
+     "offset": 18
+    }
+   ]
+  },
+  {
+   "from": "钜鹿郡",
+   "to": "赵国",
+   "km": 110,
+   "terrain": "plain",
+   "cost": 1.1,
+   "maxElev": 69,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "长沙郡",
+   "to": "豫章郡",
+   "km": 286,
+   "terrain": "plain",
+   "cost": 2.86,
+   "maxElev": 876,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陇西郡",
+   "to": "北地郡",
+   "km": 351,
+   "terrain": "mountain",
+   "cost": 7.36,
+   "maxElev": 2799,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陇西郡",
+   "to": "汉阳郡",
+   "km": 159,
+   "terrain": "mountain",
+   "cost": 3.35,
+   "maxElev": 2313,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陇西郡",
+   "to": "金城郡",
+   "km": 86,
+   "terrain": "mountain",
+   "cost": 1.81,
+   "maxElev": 2245,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陈国",
+   "to": "济阴郡",
+   "km": 163,
+   "terrain": "plain",
+   "cost": 1.63,
+   "maxElev": 64,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陈国",
+   "to": "陈留郡",
+   "km": 109,
+   "terrain": "plain",
+   "cost": 1.09,
+   "maxElev": 66,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "陈留郡",
+   "to": "东郡",
+   "km": 124,
+   "terrain": "plain",
+   "cost": 1.24,
+   "maxElev": 71,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "baima-jin",
+     "name": "白马津",
+     "kind": "ford",
+     "offset": 32.8
+    },
+    {
+     "id": "wuchao",
+     "name": "乌巢",
+     "kind": "depot",
+     "offset": 33.7
+    },
+    {
+     "id": "liyang-cang",
+     "name": "黎阳仓",
+     "kind": "depot",
+     "offset": 40.1
+    },
+    {
+     "id": "liyang-jin",
+     "name": "黎阳津",
+     "kind": "ford",
+     "offset": 41.2
+    },
+    {
+     "id": "ji-jin",
+     "name": "棘津",
+     "kind": "ford",
+     "offset": 42
+    }
+   ]
+  },
+  {
+   "from": "陈留郡",
+   "to": "济阴郡",
+   "km": 108,
+   "terrain": "plain",
+   "cost": 1.08,
+   "maxElev": 70,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "雁门郡",
+   "to": "代郡",
+   "km": 160,
+   "terrain": "hill",
+   "cost": 2.16,
+   "maxElev": 1716,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "零陵郡",
+   "to": "桂阳郡",
+   "km": 154,
+   "terrain": "plain",
+   "cost": 1.54,
+   "maxElev": 704,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "零陵郡",
+   "to": "武陵郡",
+   "km": 290,
+   "terrain": "plain",
+   "cost": 2.9,
+   "maxElev": 552,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "零陵郡",
+   "to": "苍梧郡",
+   "km": 327,
+   "terrain": "plain",
+   "cost": 3.27,
+   "maxElev": 750,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "零陵郡",
+   "to": "郁林郡",
+   "km": 367,
+   "terrain": "plain",
+   "cost": 3.67,
+   "maxElev": 793,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "零陵郡",
+   "to": "长沙郡",
+   "km": 238,
+   "terrain": "plain",
+   "cost": 2.38,
+   "maxElev": 377,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "颍川郡",
+   "to": "南阳郡",
+   "km": 157,
+   "terrain": "plain",
+   "cost": 1.57,
+   "maxElev": 231,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "颍川郡",
+   "to": "汝南郡",
+   "km": 169,
+   "terrain": "plain",
+   "cost": 1.69,
+   "maxElev": 123,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "颍川郡",
+   "to": "陈国",
+   "km": 144,
+   "terrain": "plain",
+   "cost": 1.44,
+   "maxElev": 123,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "颍川郡",
+   "to": "陈留郡",
+   "km": 119,
+   "terrain": "plain",
+   "cost": 1.19,
+   "maxElev": 123,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "guandu",
+     "name": "官渡",
+     "kind": "ford",
+     "offset": 30.6
+    }
+   ]
+  },
+  {
+   "from": "魏郡",
+   "to": "上党郡",
+   "km": 170,
+   "terrain": "gate",
+   "cost": 4.43,
+   "maxElev": 1366,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "fukou-xing",
+     "name": "滏口陉",
+     "kind": "gate",
+     "offset": 14.4
+    },
+    {
+     "id": "hu-guan",
+     "name": "壶关",
+     "kind": "gate",
+     "offset": 18.3
+    }
+   ]
+  },
+  {
+   "from": "魏郡",
+   "to": "东郡",
+   "km": 80,
+   "terrain": "plain",
+   "cost": 0.8,
+   "maxElev": 64,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "baima-jin",
+     "name": "白马津",
+     "kind": "ford",
+     "offset": 43.9
+    }
+   ]
+  },
+  {
+   "from": "魏郡",
+   "to": "清河国",
+   "km": 126,
+   "terrain": "plain",
+   "cost": 1.26,
+   "maxElev": 64,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "魏郡",
+   "to": "赵国",
+   "km": 32,
+   "terrain": "hill",
+   "cost": 0.43,
+   "maxElev": 69,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "东平国",
+   "km": 63,
+   "terrain": "plain",
+   "cost": 0.63,
+   "maxElev": 67,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "任城国",
+   "km": 44,
+   "terrain": "plain",
+   "cost": 0.44,
+   "maxElev": 67,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "彭城国",
+   "km": 149,
+   "terrain": "plain",
+   "cost": 1.49,
+   "maxElev": 128,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "泰山郡",
+   "km": 69,
+   "terrain": "plain",
+   "cost": 0.69,
+   "maxElev": 162,
+   "crossings": [],
+   "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "琅邪国",
+   "km": 144,
+   "terrain": "plain",
+   "cost": 1.44,
+   "maxElev": 280,
+   "crossings": [],
+   "nodes": []
+  }
+ ]
+}
