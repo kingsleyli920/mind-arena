@@ -10,6 +10,9 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    // 引擎与其测试用 node --experimental-strip-types 直接运行 .ts，
+    // 导入必须带 .ts 扩展名；此选项让 tsc 接受该写法（noEmit 下无副作用）
+    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,

@@ -3,7 +3,7 @@
   "note": "郡国通行图。Delaunay 取候选边，沿边采样地形网格定档，与水系求交判跨河，关津按垂距挂载。",
   "generatedFrom": "tools/build-adjacency.mjs",
   "commanderies": 105,
-  "edges": 223,
+  "edges": 227,
   "maxEdgeKm": 420,
   "costUnit": "1 = 100km 平原",
   "terrainCost": {
@@ -161,6 +161,17 @@
    "maxElev": 66,
    "crossings": [],
    "nodes": []
+  },
+  {
+   "from": "东莱郡",
+   "to": "北海国",
+   "km": 190,
+   "terrain": "plain",
+   "cost": 1.9,
+   "maxElev": 109,
+   "crossings": [],
+   "nodes": [],
+   "via": "同州连通（青州）"
   },
   {
    "from": "东郡",
@@ -946,6 +957,19 @@
    ]
   },
   {
+   "from": "平原郡",
+   "to": "济南国",
+   "km": 102,
+   "terrain": "river",
+   "cost": 1.84,
+   "maxElev": 49,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [],
+   "via": "同州连通（青州）"
+  },
+  {
    "from": "广汉属国",
    "to": "武都郡",
    "km": 122,
@@ -1065,6 +1089,19 @@
    "maxElev": 78,
    "crossings": [],
    "nodes": []
+  },
+  {
+   "from": "广陵郡",
+   "to": "下邳国",
+   "km": 237,
+   "terrain": "river",
+   "cost": 4.26,
+   "maxElev": 26,
+   "crossings": [
+    "淮水"
+   ],
+   "nodes": [],
+   "via": "同州连通（徐州）"
   },
   {
    "from": "广陵郡",
@@ -1238,7 +1275,7 @@
    "maxElev": 43,
    "crossings": [],
    "nodes": [],
-   "via": "兜底连通"
+   "via": "同州连通（交州）"
   },
   {
    "from": "桂阳郡",
@@ -2782,6 +2819,17 @@
    "maxElev": 128,
    "crossings": [],
    "nodes": []
+  },
+  {
+   "from": "鲁国",
+   "to": "梁国",
+   "km": 144,
+   "terrain": "plain",
+   "cost": 1.44,
+   "maxElev": 67,
+   "crossings": [],
+   "nodes": [],
+   "via": "同州连通（豫州）"
   },
   {
    "from": "鲁国",

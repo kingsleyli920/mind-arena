@@ -267,6 +267,54 @@ for (const [i, j] of raw) {
   console.log(`按关津补边 ${addedByNode} 条`);
 }
 
+// ── 补边一点五：同州连通 ────────────────────────────────────────────
+// 州是有驿道相连的行政区。若某郡与本州其余郡国全不相连，说明剪枝过头了
+// （实测广陵郡属徐州却只连南边的丹阳九江吴郡，与下邳东海之间因淮水被剪，
+// 刘备的地盘被切成两半）。为这类郡补一条通向本州最近郡的边，
+// 跨河者按「有津渡」处理——同州之内必有官渡。
+{
+  const have = new Set(edges.map((e) => [e.from, e.to].sort().join("|")));
+  const byZhou = new Map();
+  for (const c of commanderies) {
+    if (!byZhou.has(c.zhou)) byZhou.set(c.zhou, []);
+    byZhou.get(c.zhou).push(c);
+  }
+  let addedByZhou = 0;
+  for (const [zhou, members] of byZhou) {
+    if (members.length < 2) continue;
+    const ids = new Set(members.map((c) => c.id));
+    for (const c of members) {
+      const linked = edges.some((e) =>
+        (e.from === c.id && ids.has(e.to)) || (e.to === c.id && ids.has(e.from)));
+      if (linked) continue;
+      const near = members
+        .filter((o) => o.id !== c.id)
+        .map((o) => ({ o, d: dist(c, o) }))
+        .sort((a, b) => a.d - b.d)[0];
+      if (!near || near.d > MAX_KM) continue;
+      const key = [c.id, near.o.id].sort().join("|");
+      if (have.has(key)) continue;
+      const s = sampleEdge(c, near.o);
+      const rivers = crossings(c, near.o);
+      const mtn = s.samples ? s.tally.mountain / s.samples : 0;
+      const hill = s.samples ? s.tally.hill / s.samples : 0;
+      const terrain = rivers.length ? "river" : mtn > 0.35 ? "mountain"
+        : hill + mtn > 0.45 ? "hill" : "plain";
+      const COST = { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 };
+      edges.push({
+        from: c.id, to: near.o.id, km: Math.round(near.d), terrain,
+        cost: +(near.d / 100 * COST[terrain]).toFixed(2),
+        maxElev: Math.round(s.maxElev),
+        crossings: rivers.map((r) => r.river),
+        nodes: nodesOnEdge(c, near.o),
+        via: `同州连通（${zhou}）`,
+      });
+      have.add(key); addedByZhou += 1;
+    }
+  }
+  if (addedByZhou) console.log(`同州连通补边 ${addedByZhou} 条`);
+}
+
 // ── 补边二：孤立分量兜底 ────────────────────────────────────────────
 // 河西走廊、南中这类地方史实上确实偏远，但完全不连通意味着永远打不到
 // 也守不住，玩法上等于不存在。给每个孤立分量补一条通向主体的最短边。
