@@ -30,6 +30,9 @@ export interface ActionParam {
 export interface ActionCost {
   /** 全局行动点。与领土脱钩、不可囤积，防止大势力动作数爆炸 */
   ap?: number;
+  /** ap 为 0 时必须给出每季次数上限——免费不等于无限，
+   *  否则模型可以一季刺探全图，观测预算与博弈深度双双失守 */
+  freeUses?: number;
   gold?: number;
   grain?: number;
   /** 表达式，变量由引擎在校验时注入 */
@@ -159,6 +162,9 @@ export function validateContent(pack: ContentPack): Issue[] {
     if (!a.cost || (a.cost.ap === undefined && a.cost.gold === undefined
                  && a.cost.grain === undefined && !a.cost.formula)) {
       issues.push({ path: `${p}.cost`, message: "动作必须有代价，否则会被无限刷" });
+    }
+    if (a.cost?.ap === 0 && a.cost.freeUses === undefined) {
+      issues.push({ path: `${p}.cost`, message: "免费动作必须声明 freeUses 每季上限" });
     }
     if (!a.effects?.length) issues.push({ path: `${p}.effects`, message: "缺少效果说明" });
   }
