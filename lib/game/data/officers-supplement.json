@@ -1,0 +1,4939 @@
+{
+  "meta": {
+    "count": 230,
+    "scenarioYear": 194,
+    "era": "兴平元年",
+    "supplementTo": "lib/game/data/officers.json（578 人）",
+    "note": "officers.json 的系统性补录。原名录抽取时只走《三国志》《后汉书》的列传，《后汉书·皇后纪》《列女传》《三国志》后妃传与妃嫔传整片漏掉，故女性几近于无；医方术士、建安七子之半、邺下文人、经师、三国后期人物与数个边缘势力的僚属亦有成片缺口。本文件按同一体例补 230 人：女性 42、《三国演义》独有者 8（fictional=true、certainty=romance，出处只记演义回目）。字段定义、affiliation194 口径（兴平元年岁末此人在为谁做事，非其一生主君；避难未仕、辞辟不就、本年未生或已卒者一律 null）、commandery 回溯《续汉书·郡国志》建置、prominence 与 certainty 分级，皆与 officers.json 完全一致。id 与原 578 人无一冲突。本文件不含任何战斗数值。",
+    "sources": [
+      "《三国志》陈寿撰、裴松之注（公有领域）",
+      "《后汉书》范晔撰、李贤注；志三十卷司马彪《续汉书》（公有领域）",
+      "《华阳国志》常璩（公有领域）",
+      "《晋书》房玄龄等（公有领域）",
+      "《三国演义》罗贯中（公有领域，仅用于标注虚构人物）",
+      "《世说新语》刘义庆（公有领域，仅用于旁证，不作单独出处）",
+      "《释名》刘熙、《九章算术注》刘徽、《针灸甲乙经》皇甫谧等汉魏著述自序（公有领域）"
+    ],
+    "disclaimer": "人名、字、籍贯、生卒、官职、事迹均取自上列公有领域史籍；不含任何商业游戏的数值表、能力表或美术资源。",
+    "coverage": {
+      "女性": "补 42 人。《后汉书·皇后纪》《列女传》、《三国志》魏书后妃传、吴书妃嫔传、蜀书二主妃子传、《晋书》后妃传与列女传为主干；正史无本传者（樊氏、蔡夫人、张鲁母、刘夫人等）在 historicalNote 中注明散见何篇。史不载名者一律于 note 写明「名不详」，不采后世小说、戏曲所加之名（甄宓、孙尚香、关银屏皆如此处理）。",
+      "医方术士": "华佗弟子吴普、樊阿、李当之；占梦周宣、赵直，相术朱建平；乐律杜夔，工巧马钧、韩暨，算学刘徽，针灸皇甫谧。华佗、张机、管辂、左慈、于吉原名录已有。",
+      "建安七子": "补徐干、阮瑀、应玚、刘桢四人，七子至此齐备（孔融、陈琳、王粲原名录已有）；另补邺下文人杨修、吴质、邯郸淳、丁仪、丁廙、路粹、缪袭与祢衡、边让，经师应劭、服虔、高诱、谢该。",
+      "三国后期": "魏晋补文鸯兄弟、郝昭、孙礼、卢毓、钟毓、卫臻、高堂隆、桓范及曹爽党、司马氏功臣与竹林名士；吴补三嗣主、孙峻孙綝、滕胤吕据、朱异施绩、陆凯陆胤、韦昭华核、王蕃周处等；蜀补诸葛瞻父子、黄崇、阎宇、杨戏、柳隐、蒋斌、张遵、赵统赵广、关统关彝等。",
+      "势力查漏": "刘表荆州群僚补裴潜、刘廙兄弟、司马芝、娄圭、韩暨、习祯、庞山民、黄射、苏飞、陈就等；刘璋益州补刘焉三子与广汉、犍为、巴郡士族十余人及大儒董扶；士燮交州补交州刺史张津、区景、吴巨、士祗与避地岭南的袁忠、桓晔、刘熙；公孙度辽东补阳仪、柳毅、国渊及公孙渊时之贾范、伦直、卑衍、杨祚。另及长安朝廷、曹操、袁绍、公孙瓒、陶谦旧部、袁术、孙氏、黑山、张杨、凉州、南中诸势力。"
+    },
+    "selfCheckIds": {
+      "female": [
+        "bulianshi",
+        "cailushi_liubiao",
+        "caojie_xian",
+        "dingfuren",
+        "dongbai",
+        "dongtaihou",
+        "dufuren",
+        "fanshi_guiyang",
+        "guanyinping",
+        "guohuanghou_mingyuan",
+        "guonvwang",
+        "huanfuren",
+        "huangfuguiqi",
+        "lichunxiang",
+        "liufuren_yuanshao",
+        "liushi_caoang",
+        "maohuanghou",
+        "mifuren",
+        "panfuren_wu",
+        "quanfuren_sunliang",
+        "sunluban",
+        "sunluyu",
+        "tangji",
+        "wangfuren_hedadai",
+        "wangrong_meiren",
+        "wangyuanji",
+        "wuhuanghou_mu",
+        "xiahouhui",
+        "xiahoushi_zhangfei",
+        "xiefuren_wu",
+        "xinxianying",
+        "xufuren_wu",
+        "xuncai",
+        "yanghuiyu",
+        "yinfuren",
+        "yuanfuren_wu",
+        "zhangchunhua",
+        "zhanghou_hou",
+        "zhanghou_jingai",
+        "zhanglumu",
+        "zhaoe",
+        "zhenshi"
+      ],
+      "fictional": [
+        "ahuinan",
+        "dailaidongzhu",
+        "dongtuna",
+        "gongzhi",
+        "guanyinping",
+        "lichunxiang",
+        "mangyachang",
+        "mengyou"
+      ]
+    }
+  },
+  "officers": [
+    {
+      "id": "zhenshi",
+      "name": "甄氏",
+      "courtesyName": null,
+      "birthYear": 182,
+      "deathYear": 221,
+      "origin": "冀州中山国无极县",
+      "commandery": "中山国",
+      "affiliation194": null,
+      "roles": [
+        "后妃",
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传文昭甄皇后",
+        "裴注引魏略、魏书"
+      ],
+      "historicalNote": "上蔡令甄逸之女，本年十三在中山家中；建安中为袁熙妻，邺破归曹丕，生明帝叡与东乡公主，后失意赐死。史不载其名，「宓」「洛」之名出后世附会《洛神赋》。无极县《续汉书·郡国志》作毋极。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "guonvwang",
+      "name": "郭女王",
+      "courtesyName": "女王",
+      "birthYear": 184,
+      "deathYear": 235,
+      "origin": "冀州钜鹿郡广宗县",
+      "commandery": "钜鹿郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传文德郭皇后"
+      ],
+      "historicalNote": "南郡太守郭永次女，父奇之曰「此乃吾女中王也」，遂以女王为字；本年十一，早孤流离铜鞮侯家。有智数，佐曹丕定太子位，明帝立而尊为太后。本传称安平广宗，广宗汉属钜鹿郡。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "dingfuren",
+      "name": "丁夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国",
+      "commandery": null,
+      "affiliation194": "caocao",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传裴注引魏略"
+      ],
+      "historicalNote": "曹操元配，本年在军中；养刘夫人子曹昂，昂死宛城，丁氏哭曰「将我儿杀之，都不复念」，操怒遣归家，往迎之不还，遂绝而以卞氏为夫人。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "huanfuren",
+      "name": "环夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国",
+      "commandery": null,
+      "affiliation194": "caocao",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传",
+        "武文世王公传"
+      ],
+      "historicalNote": "曹操妾，本年当已在操左右；生曹冲、曹据、曹宇。冲称象、仁爱识察，年十三而夭，操哭之甚哀。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dufuren",
+      "name": "杜夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传裴注引魏略",
+        "蜀记见关羽传裴注"
+      ],
+      "historicalNote": "本秦宜禄之妻。建安三年曹操吕布围下邳，关羽屡启操求以妻之，操疑其有色，城陷自纳焉。生曹林、曹衮及金乡公主，并养前夫之子秦朗。姓氏见裴注，名籍贯生卒皆不详；本年当随夫在吕布军中。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yinfuren",
+      "name": "尹夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传",
+        "魏书·何晏传裴注引魏略"
+      ],
+      "historicalNote": "本大将军何进子妇，曹操纳之，生曹矩；何晏为其前夫之子，随母入宫为操收养。本年在何氏家。姓氏名籍贯史载止此。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liushi_caoang",
+      "name": "刘夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "caocao",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传",
+        "武文世王公传"
+      ],
+      "historicalNote": "曹操妾，曹昂、曹铄之母，早卒，昂由丁夫人抚养。本年若在当随操军。史仅称「刘夫人」，名籍贯皆不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangchunhua",
+      "name": "张春华",
+      "courtesyName": "春华",
+      "birthYear": 189,
+      "deathYear": 247,
+      "origin": "司隶河内郡平皋县",
+      "commandery": "河内郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "晋书·后妃传宣穆张皇后"
+      ],
+      "historicalNote": "张汪之女，司马懿妻，师昭干及南阳公主之母；本年六岁。懿初辞曹操之辟称风痹，曝书遇雨自起收之，为一婢所见，春华手杀婢以灭口。晋追尊宣穆皇后。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "yanghuiyu",
+      "name": "羊徽瑜",
+      "courtesyName": "徽瑜",
+      "birthYear": 214,
+      "deathYear": 278,
+      "origin": "兖州泰山郡南城县",
+      "commandery": "泰山郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "晋书·后妃传景献羊皇后",
+        "羊祜传"
+      ],
+      "historicalNote": "蔡邕外孙女、羊祜之姊，司马师继室；本年未生。师无子，以昭子攸为嗣；晋立尊为弘训太后。南城汉属东海，后属泰山。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "xiahouhui",
+      "name": "夏侯徽",
+      "courtesyName": "媛容",
+      "birthYear": 211,
+      "deathYear": 234,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "晋书·后妃传景怀夏侯皇后"
+      ],
+      "historicalNote": "夏侯尚与德阳乡主之女，司马师元配，生五女；有识度，知师非魏之纯臣，师深忌之，青龙二年鸩杀，年二十四。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "wangyuanji",
+      "name": "王元姬",
+      "courtesyName": "元姬",
+      "birthYear": 217,
+      "deathYear": 268,
+      "origin": "徐州东海郡郯县",
+      "commandery": "东海郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "晋书·后妃传文明王皇后"
+      ],
+      "historicalNote": "王肃之女、王朗孙女，司马昭妻，晋武帝炎与齐王攸之母；本年未生。八岁诵《诗》《论》，尝谓昭曰「钟会见利忘义，不可大任」，后果反。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "xinxianying",
+      "name": "辛宪英",
+      "courtesyName": "宪英",
+      "birthYear": 191,
+      "deathYear": 269,
+      "origin": "豫州颍川郡阳翟县",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "名士",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·辛毗传裴注引世语",
+        "晋书·列女传"
+      ],
+      "historicalNote": "辛毗之女、羊耽之妻，本年四岁；闻曹丕为太子喜而叹「代君不可以不戚，主国不可以不惧」，料曹爽必败、钟会必乱、知司马师举必克，三国女子中识见第一。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "maohuanghou",
+      "name": "毛皇后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 237,
+      "origin": "司隶河内郡",
+      "commandery": "河内郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传明悼毛皇后"
+      ],
+      "historicalNote": "典虞车工毛嘉之女，明帝为平原王时得幸，即位立为后；后宠衰，因窥知帝与郭夫人游后园而不召己，帝怒赐死。本年未生。本传称河内人，县不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guohuanghou_mingyuan",
+      "name": "郭皇后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 264,
+      "origin": "凉州西平郡",
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·后妃传明元郭皇后"
+      ],
+      "historicalNote": "西平郭氏之女，其家坐叛没入宫，明帝立为后；齐王芳、高贵乡公、常道乡公三废立皆假其令，司马氏藉以行事。本年未生。西平郡建安中分金城置，汉无此郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "caojie_xian",
+      "name": "曹节",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 260,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "后汉书·皇后纪献穆曹皇后",
+        "三国志·魏书·武帝纪"
+      ],
+      "historicalNote": "曹操中女，与姊宪、妹华同入汉宫，建安十九年立为献帝皇后；魏受禅索玺绶，节怒投之于轩下曰「天不祚尔」，左右莫能仰视。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "tangji",
+      "name": "唐姬",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州会稽郡",
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "后汉书·皇后纪",
+        "董卓传"
+      ],
+      "historicalNote": "会稽太守唐瑁之女，弘农王刘辩妃；辩被鸩，起舞而歌与之诀。归乡里，本年前后为李傕所掠欲妻之，誓死不从，后诏迎置园中。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "dongtaihou",
+      "name": "董太后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 189,
+      "origin": "冀州河闲国",
+      "commandery": "河闲国",
+      "affiliation194": null,
+      "roles": [
+        "后妃",
+        "外戚"
+      ],
+      "sources": [
+        "后汉书·皇后纪孝仁董皇后"
+      ],
+      "historicalNote": "解渎亭侯刘苌妻、汉灵帝之母，尊为孝仁皇后居永乐宫，好聚金钱、使帝卖官；与何太后争权，为何进所奏迁归本国，忧怖暴崩。已卒五年。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangrong_meiren",
+      "name": "王荣",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 181,
+      "origin": "冀州赵国",
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "后汉书·皇后纪灵思何皇后",
+        "献帝纪"
+      ],
+      "historicalNote": "五官中郎将王苞孙女，汉灵帝美人，生皇子协即献帝；为何皇后鸩杀。献帝即位追尊灵怀皇后。本年已卒十三年。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "mifuren",
+      "name": "糜夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "徐州东海郡朐县",
+      "commandery": "东海郡",
+      "affiliation194": "liubei",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·蜀书·糜竺传",
+        "二主妃子传"
+      ],
+      "historicalNote": "糜竺之妹，本年尚在东海糜氏家中；建安元年吕布袭下邳、备军溃，竺进妹于备为夫人，并奴客二千金银货币以助军资。演义所载长坂投井乃虚构，正史不载其卒。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "wuhuanghou_mu",
+      "name": "吴皇后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 245,
+      "origin": "兖州陈留郡",
+      "commandery": "陈留郡",
+      "affiliation194": "liuzhang",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·蜀书·二主妃子传穆皇后",
+        "杨戏传",
+        "华阳国志"
+      ],
+      "historicalNote": "吴懿之妹，随兄依刘焉入蜀，本年在蜀；相者言当大贵，焉以配子刘瑁，瑁卒寡居。刘备定益州，群下劝纳之，遂立为夫人，章武元年为皇后。名不详。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "xiahoushi_zhangfei",
+      "name": "夏侯氏",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·诸夏侯曹传裴注引魏略"
+      ],
+      "historicalNote": "夏侯霸从妹、夏侯渊侄女；本年约七八岁在谯。建安五年年十三四，出行采樵为张飞所得，遂以为妻，生二女并为后主皇后。渊死，其为敛葬。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "zhanghou_jingai",
+      "name": "敬哀皇后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 237,
+      "origin": "幽州涿郡",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·蜀书·二主妃子传"
+      ],
+      "historicalNote": "张飞长女、夏侯氏所生，本年未生；建兴元年纳为后主皇后，十五年薨，葬南陵。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhanghou_hou",
+      "name": "张皇后",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "幽州涿郡",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·蜀书·二主妃子传"
+      ],
+      "historicalNote": "张飞次女、敬哀皇后之妹，本年未生；姊卒后入宫为贵人，建兴十五年立为皇后，蜀亡随后主迁洛阳。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xufuren_wu",
+      "name": "徐夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": "yuanshu",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "徐琨之女、孙坚外孙女，本年当在吴；先适同郡陆尚，尚卒，孙权为讨虏将军纳之，使母养孙登。以妒废处吴，权称帝而不得立后。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xiefuren_wu",
+      "name": "谢夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州会稽郡山阴县",
+      "commandery": "会稽郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "谢煚之女，孙权初纳幸之；权欲以徐氏代之而使谢下之，不肯，由是失志早卒。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "bulianshi",
+      "name": "步练师",
+      "courtesyName": "练师",
+      "birthYear": null,
+      "deathYear": 238,
+      "origin": "徐州临淮郡淮阴县",
+      "commandery": "下邳国",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "步骘族人，随母避难庐江，孙权纳之最有宠；生鲁班、鲁育二女。性不妒忌多所推进，宫内皆称皇后而群臣不许，卒后追赠皇后玺绶。临淮汉属下邳国。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangfuren_hedadai",
+      "name": "王夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "徐州琅邪国",
+      "commandery": "琅邪国",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传大懿王皇后"
+      ],
+      "historicalNote": "选入孙权宫，黄武中有宠，生孙和；步夫人卒后当立而为全公主所谮，忧死。孙皓即位追尊大懿皇后。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "panfuren_wu",
+      "name": "潘夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 252,
+      "origin": "扬州会稽郡句章县",
+      "commandery": "会稽郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "父坐法死，与姊俱输织室，孙权见而异之，生孙亮；赤乌十四年立为皇后，性险妒，为侍疾诸吏所缢杀。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yuanfuren_wu",
+      "name": "袁夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州汝南郡汝阳县",
+      "commandery": "汝南郡",
+      "affiliation194": "yuanshu",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "袁术之女，本年在寿春父侧；术败归吴，孙权纳之，有节行而无子。权欲立为后，辞以无子不受。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "sunluban",
+      "name": "孙鲁班",
+      "courtesyName": "大虎",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传",
+        "孙和传",
+        "诸葛恪传"
+      ],
+      "historicalNote": "孙权与步夫人长女，先适周循，后适全琮，号全公主；谮王夫人致其忧死，间构二宫、废太子和，助孙峻诛诸葛恪，吴中衅乱多由之。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "sunluyu",
+      "name": "孙鲁育",
+      "courtesyName": "小虎",
+      "birthYear": null,
+      "deathYear": 255,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传",
+        "孙峻传"
+      ],
+      "historicalNote": "孙权与步夫人次女，先适朱据，后适刘纂，号朱公主；不与姊同谋废太子，姊衔之，孙峻诛诸葛恪时诬其与谋而杀之。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "quanfuren_sunliang",
+      "name": "全夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡钱唐县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传"
+      ],
+      "historicalNote": "全尚之女、全公主之侄孙女，孙亮皇后；孙綝废亮，随之国。名史不显，后世传作惠解，非本传所载。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xuncai",
+      "name": "荀采",
+      "courtesyName": "女荀",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州颍川郡颍阴县",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "后汉书·列女传"
+      ],
+      "historicalNote": "荀爽之女，聪敏有才艺；适阴瑜，瑜卒，父逼再嫁郭奕，采伪许而阖户自缢死。本年前后事。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huangfuguiqi",
+      "name": "皇甫规妻",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 192,
+      "origin": "凉州安定郡朝那县",
+      "commandery": "安定郡",
+      "affiliation194": null,
+      "roles": [
+        "名士",
+        "文学"
+      ],
+      "sources": [
+        "后汉书·列女传"
+      ],
+      "historicalNote": "皇甫规继室，善属文能草书；规卒，董卓聘之不从，大骂卓而被榜杀于车下，观者莫不流涕。史不载其姓名，后世或称马氏，无据。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaoe",
+      "name": "赵娥",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "凉州酒泉郡禄福县",
+      "commandery": "酒泉郡",
+      "affiliation194": null,
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "后汉书·列女传庞淯母",
+        "三国志·魏书·庞淯传裴注引皇甫谧列女传"
+      ],
+      "historicalNote": "庞子夏妻、庞淯之母，字娥亲；父为同县李寿所杀，三兄病死，娥手刃寿于都亭，诣县自首，禄福长解印绶欲与俱亡。本年前后事，凉州为之立碑。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dongbai",
+      "name": "董白",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 192,
+      "origin": "凉州陇西郡临洮县",
+      "commandery": "陇西郡",
+      "affiliation194": null,
+      "roles": [
+        "豪族"
+      ],
+      "sources": [
+        "后汉书·董卓传",
+        "三国志·魏书·董卓传"
+      ],
+      "historicalNote": "董卓孙女，卓爱之，年未及笄封渭阳君，为筑坛于郿城下、使卓子孙迎授印绶；初平三年卓诛，白与卓母、卓弟旻并被杀，尽灭其族。已卒二年。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "fanshi_guiyang",
+      "name": "樊氏",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州桂阳郡",
+      "commandery": "桂阳郡",
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·蜀书·赵云传裴注引云别传"
+      ],
+      "historicalNote": "桂阳太守赵范之寡嫂，有国色；建安十四年刘备定荆南，范欲以配赵云，云辞曰「相与同姓，卿兄犹我兄」，固辞不许，范果逃走而云无纤介之嫌。姓氏见裴注，名生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhanglumu",
+      "name": "张鲁母",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国丰县",
+      "commandery": "沛国",
+      "affiliation194": "zhanglu",
+      "roles": [
+        "方术"
+      ],
+      "sources": [
+        "三国志·魏书·张鲁传",
+        "后汉书·刘焉传",
+        "华阳国志"
+      ],
+      "historicalNote": "张陵之子张衡之妻、张鲁之母；始以鬼道有少容，往来刘焉家，焉以是任鲁为督义司马遣取汉中。建安初刘璋杀之及鲁弟，鲁遂据汉中不复奉璋。姓名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liufuren_yuanshao",
+      "name": "刘夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshao",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·袁绍传裴注引典略",
+        "后汉书·袁绍传"
+      ],
+      "historicalNote": "袁绍后妻，爱袁尚而数称其才，绍由是欲以为后；绍卒，未葬即尽杀绍宠妾五人，又髡发墨面以毁其形。本年在绍所。名籍贯不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "cailushi_liubiao",
+      "name": "蔡夫人",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南郡襄阳县",
+      "commandery": "南郡",
+      "affiliation194": "liubiao",
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国志·魏书·刘表传裴注引典略、世语",
+        "后汉书·刘表传"
+      ],
+      "historicalNote": "蔡瑁之姊、刘表后妻，本年在襄阳；爱少子刘琮，数毁刘琦于表，表遂以琮为嗣，荆州之降由此始。名不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guanyinping",
+      "name": "关银屏",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国演义第七十三回",
+        "荆州、云南地方志与民间关索传说"
+      ],
+      "historicalNote": "民间所传关羽之女。正史仅载孙权为子求婚于关羽女，羽骂辱其使，不载名字；演义承之亦无名，「银屏」之名出后世戏曲、《花关索传》与云南地方传说。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "lichunxiang",
+      "name": "李春香",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 212,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "后妃"
+      ],
+      "sources": [
+        "三国演义第五十七回"
+      ],
+      "historicalNote": "演义中黄奎之妾，与黄奎妻弟苗泽私通，泽以其言告曹操，遂发马腾之谋。正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "wupu",
+      "name": "吴普",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国广戚县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "医术"
+      ],
+      "sources": [
+        "三国志·魏书·方技传华佗传附",
+        "后汉书·方术列传"
+      ],
+      "historicalNote": "华佗弟子，依佗术疗病多所全济；行五禽之戏，年九十余耳目聪明齿牙完坚。撰《吴普本草》，后世医书多引。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "fanae",
+      "name": "樊阿",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "徐州彭城国",
+      "commandery": "彭城国",
+      "affiliation194": null,
+      "roles": [
+        "医术"
+      ],
+      "sources": [
+        "三国志·魏书·方技传华佗传附",
+        "裴注"
+      ],
+      "historicalNote": "华佗弟子，善针，能背入一二寸、巨阙胸藏针五六寸而病辄应除；从佗求可服食益于人者，佗授以漆叶青黏散，阿服之寿百余岁。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lidangzhi",
+      "name": "李当之",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "医术"
+      ],
+      "sources": [
+        "三国志·魏书·方技传华佗传附",
+        "后世本草书所引李当之药录"
+      ],
+      "historicalNote": "华佗弟子，撰《李当之药录》《本草经》，陶弘景《本草经集注》屡引之。正史仅附见姓名，字籍贯生卒皆不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huangfumi",
+      "name": "皇甫谧",
+      "courtesyName": "士安",
+      "birthYear": 215,
+      "deathYear": 282,
+      "origin": "凉州安定郡朝那县",
+      "commandery": "安定郡",
+      "affiliation194": null,
+      "roles": [
+        "医术",
+        "学者",
+        "文学"
+      ],
+      "sources": [
+        "晋书·皇甫谧传"
+      ],
+      "historicalNote": "皇甫嵩曾孙，年二十始笃学，带经而农，号玄晏先生；晋屡征不起。撰《针灸甲乙经》为针灸之祖，又撰《高士传》《列女传》《帝王世纪》，裴松之注《三国志》多引之。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "zhouxuan",
+      "name": "周宣",
+      "courtesyName": "孔和",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "青州乐安国",
+      "commandery": "乐安国",
+      "affiliation194": null,
+      "roles": [
+        "方术"
+      ],
+      "sources": [
+        "三国志·魏书·方技传"
+      ],
+      "historicalNote": "善占梦，为郡吏；魏文帝问三梦皆奇中，明帝梦青气自地属天亦如其言。其术曰「梦者意耳，苟以形言，便占吉凶」。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhujianping",
+      "name": "朱建平",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "方术"
+      ],
+      "sources": [
+        "三国志·魏书·方技传"
+      ],
+      "historicalNote": "善相术，于闾巷之间效验非一；曹丕为五官将时会客三十余人，相丕寿八十当有小厄，丕年四十而崩，乃悟昼夜为八十。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaozhi",
+      "name": "赵直",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "方术"
+      ],
+      "sources": [
+        "三国志·蜀书·蒋琬传",
+        "魏延传",
+        "杨戏传裴注"
+      ],
+      "historicalNote": "蜀汉占梦者；解蒋琬梦见血牛头为「见血者事分明」，解魏延梦头生角为「麒麟有角而不用」，退而告人曰「角之为字，刀下用也」。籍贯字生卒皆不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "majun",
+      "name": "马钧",
+      "courtesyName": "德衡",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶右扶风",
+      "commandery": "右扶风",
+      "affiliation194": null,
+      "roles": [
+        "工巧"
+      ],
+      "sources": [
+        "三国志·魏书·方技传杜夔传裴注引傅子"
+      ],
+      "historicalNote": "天下之名巧；复造指南车，作翻车灌园，改连弩五十倍，制水转百戏，欲改发石车而不见用。傅玄叹「马先生之巧，虽古公输般、墨翟不能过也」。本传称扶风人，汉为右扶风。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dukui",
+      "name": "杜夔",
+      "courtesyName": "公良",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶河南尹",
+      "commandery": "河南尹",
+      "affiliation194": null,
+      "roles": [
+        "工巧",
+        "学者"
+      ],
+      "sources": [
+        "三国志·魏书·方技传"
+      ],
+      "historicalNote": "汉灵帝时雅乐郎，本年避乱荆州依刘表；后归曹操为军谋祭酒参太乐事，绍复先代古乐，铸铜钟、定律吕，汉世雅乐由是得存。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "hanji",
+      "name": "韩暨",
+      "courtesyName": "公至",
+      "birthYear": null,
+      "deathYear": 238,
+      "origin": "荆州南阳郡堵阳县",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "工巧",
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·韩暨传"
+      ],
+      "historicalNote": "本年避乱鲁阳山中，纠合宗族拒山贼；刘表礼辟而遁逃孱陵，表怨之，惧而应命为宜城长。后归曹操为监冶谒者，因长流为水排鼓铸，计其利益三倍于前，官至司徒。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuhui_suan",
+      "name": "刘徽",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "工巧"
+      ],
+      "sources": [
+        "晋书·律历志",
+        "隋书·律历志",
+        "九章算术注自序"
+      ],
+      "historicalNote": "魏景元四年注《九章算术》，创割圆术求圆周率、立阳马堑堵之证与重差术（后单行为《海岛算经》），中国古代数学理论之极。正史无传，事迹据其书自序与历志所记年月。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xugan",
+      "name": "徐干",
+      "courtesyName": "伟长",
+      "birthYear": 171,
+      "deathYear": 217,
+      "origin": "青州北海国剧县",
+      "commandery": "北海国",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "学者"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附",
+        "裴注引先贤行状"
+      ],
+      "historicalNote": "建安七子之一，本年二十四在北海；恬淡寡欲有箕山之志，为曹操司空军谋祭酒掾属。撰《中论》二十余篇，曹丕称其「成一家之言，辞义典雅，足传于后」。建安二十二年大疫卒。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "ruanyu",
+      "name": "阮瑀",
+      "courtesyName": "元瑜",
+      "birthYear": null,
+      "deathYear": 212,
+      "origin": "兖州陈留郡尉氏县",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附",
+        "裴注引典略、文士传"
+      ],
+      "historicalNote": "建安七子之一，蔡邕弟子善鼓琴；曹操累辟不应，逃入山中，操使人焚山乃出，为司空军谋祭酒管记室。军国书檄多其与陈琳所作，马上具草，操不能增损。阮籍之父。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "yingchang",
+      "name": "应玚",
+      "courtesyName": "德琏",
+      "birthYear": null,
+      "deathYear": 217,
+      "origin": "豫州汝南郡南顿县",
+      "commandery": "汝南郡",
+      "affiliation194": null,
+      "roles": [
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附",
+        "后汉书·应劭传"
+      ],
+      "historicalNote": "建安七子之一，应劭从子；后为曹丕五官将文学。曹丕称「德琏常斐然有述作之意，其才学足以著书」。建安二十二年大疫卒。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 3
+    },
+    {
+      "id": "liuzhen",
+      "name": "刘桢",
+      "courtesyName": "公干",
+      "birthYear": null,
+      "deathYear": 217,
+      "origin": "兖州东平国宁阳县",
+      "commandery": "东平国",
+      "affiliation194": null,
+      "roles": [
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附",
+        "裴注引典略、文士传"
+      ],
+      "historicalNote": "建安七子之一，五言诗之善者妙绝时人；为曹丕文学，坐平视甄夫人不敬，输作部磨石，太祖问石何如，答以「石出自荆山悬岩之巅，外有五色之章，内含卞氏之珍」。建安二十二年大疫卒。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "yangxiu",
+      "name": "杨修",
+      "courtesyName": "德祖",
+      "birthYear": 175,
+      "deathYear": 219,
+      "origin": "司隶弘农郡华阴县",
+      "commandery": "弘农郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·陈思王植传",
+        "裴注引典略、世语",
+        "后汉书·杨震传附"
+      ],
+      "historicalNote": "杨彪之子，本年二十在长安；后为曹操主簿，总知外内事皆称意，为曹植羽翼数豫谋议，操虑终始之变而杀之，鸡肋之说其一。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "wuzhi",
+      "name": "吴质",
+      "courtesyName": "季重",
+      "birthYear": 177,
+      "deathYear": 230,
+      "origin": "兖州济阴郡",
+      "commandery": "济阴郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附",
+        "裴注引魏略"
+      ],
+      "historicalNote": "本年十八；以文才为曹丕所善，密载入府议夺嫡之计，教丕临别涕泣以胜曹植之辞采。后为振威将军假节都督河北诸军事，恃宠傲慢，谥曰丑侯。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "handanchun",
+      "name": "邯郸淳",
+      "courtesyName": "子叔",
+      "birthYear": 132,
+      "deathYear": null,
+      "origin": "豫州颍川郡",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "学者"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附裴注引魏略",
+        "后汉书·蔡邕传"
+      ],
+      "historicalNote": "一名竺字子礼，博学有才章，善《苍》《雅》虫篆许氏字指；曾书曹娥碑，蔡邕题「黄绢幼妇」八字。本年避地荆州，后归曹操，撰《笑林》《艺经》。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dingyi_zhengli",
+      "name": "丁仪",
+      "courtesyName": "正礼",
+      "birthYear": null,
+      "deathYear": 220,
+      "origin": "豫州沛国",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·陈思王植传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "丁冲之子，曹操欲以女妻之，曹丕以其目疾止之，遂深怨丕而党曹植；文帝即位，与弟廙并诛，男口皆杀。本年幼。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dingyi_jingli",
+      "name": "丁廙",
+      "courtesyName": "敬礼",
+      "birthYear": null,
+      "deathYear": 220,
+      "origin": "豫州沛国",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·陈思王植传",
+        "裴注引魏略、典略"
+      ],
+      "historicalNote": "丁仪之弟，为黄门侍郎；数称曹植之才于曹操前，欲以为嗣。与兄同诛。本年幼或未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lucui",
+      "name": "路粹",
+      "courtesyName": "文蔚",
+      "birthYear": null,
+      "deathYear": 214,
+      "origin": "兖州陈留郡",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·王粲传附裴注引典略",
+        "后汉书·孔融传"
+      ],
+      "historicalNote": "少学于蔡邕；为曹操军谋祭酒管记室，承操意枉状奏孔融「大逆不道」，融由是诛，天下惜之。后坐擅取禀军事被杀。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "miaoxi",
+      "name": "缪袭",
+      "courtesyName": "熙伯",
+      "birthYear": 186,
+      "deathYear": 245,
+      "origin": "徐州东海郡",
+      "commandery": "东海郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "学者"
+      ],
+      "sources": [
+        "三国志·魏书·刘劭传附",
+        "裴注",
+        "宋书·乐志"
+      ],
+      "historicalNote": "本年九岁；有才学，历事魏四世，官至尚书、光禄勋。作魏鼓吹曲十二篇代汉铙歌，述曹氏创业本末，为乐府之一变。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "miheng",
+      "name": "祢衡",
+      "courtesyName": "正平",
+      "birthYear": 173,
+      "deathYear": 198,
+      "origin": "青州平原郡般县",
+      "commandery": "平原郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "名士"
+      ],
+      "sources": [
+        "后汉书·祢衡传",
+        "三国志·魏书·荀彧传裴注引平原祢衡传"
+      ],
+      "historicalNote": "本年二十二；少有辩才而尚气刚傲，唯善孔融、杨修，称「大儿孔文举，小儿杨德祖」。曹操召为鼓吏而裸身击《渔阳》三挝，操送与刘表，表转送黄祖，卒以侮慢见杀，作《鹦鹉赋》。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "bianrang",
+      "name": "边让",
+      "courtesyName": "文礼",
+      "birthYear": null,
+      "deathYear": 193,
+      "origin": "兖州陈留郡浚仪县",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "名士"
+      ],
+      "sources": [
+        "后汉书·文苑列传",
+        "三国志·魏书·武帝纪裴注引曹瞒传、九州春秋"
+      ],
+      "historicalNote": "才辩过人，蔡邕荐之何进，作《章华赋》；出为九江太守，去官还乡里。数轻侮曹操，操杀之并其妻子，兖州士大夫由是怨畔，陈宫张邈迎吕布之变实由此。已卒一年。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "yingshao",
+      "name": "应劭",
+      "courtesyName": "仲远",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州汝南郡南顿县",
+      "commandery": "汝南郡",
+      "affiliation194": "yuanshao",
+      "roles": [
+        "学者",
+        "内政"
+      ],
+      "sources": [
+        "后汉书·应劭传",
+        "三国志·魏书·武帝纪"
+      ],
+      "historicalNote": "本年为泰山太守，坐迎曹嵩不谨致嵩被杀，惧而弃郡奔袁绍。博学多识，撰《汉官仪》《风俗通义》《律略》，删定律令为《汉仪》，汉末典章赖以不坠。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "fuqian_jing",
+      "name": "服虔",
+      "courtesyName": "子慎",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶河南尹荥阳县",
+      "commandery": "河南尹",
+      "affiliation194": null,
+      "roles": [
+        "学者"
+      ],
+      "sources": [
+        "后汉书·儒林列传"
+      ],
+      "historicalNote": "初名重，又名祇；举孝廉，中平末拜九江太守。作《春秋左氏传解谊》，为汉魏《左氏》学之宗，晋人杜预《集解》即与之争胜。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "gaoyou",
+      "name": "高诱",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "幽州涿郡",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "学者"
+      ],
+      "sources": [
+        "高诱吕氏春秋序、淮南子序",
+        "后汉书·卢植传"
+      ],
+      "historicalNote": "少受学于卢植，建安中为司空掾、河东濮阳令；注《淮南子》《吕氏春秋》《战国策》，今皆存，为汉人注书之仅存者。正史无传，事迹据其自序。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xiegai",
+      "name": "谢该",
+      "courtesyName": "文仪",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南阳郡章陵县",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "学者"
+      ],
+      "sources": [
+        "后汉书·儒林列传"
+      ],
+      "historicalNote": "善明《春秋左氏》，为世名儒；建安中避乱在荆土，欲南归，孔融上书留之，诏拜议郎。章陵县汉属南阳郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuyi_gonggan",
+      "name": "刘廙",
+      "courtesyName": "恭嗣",
+      "birthYear": 180,
+      "deathYear": 221,
+      "origin": "荆州南阳郡安众县",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "谋略",
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·刘廙传",
+        "裴注引廙别传"
+      ],
+      "historicalNote": "本年十五在荆州；司马徽称之。避难荆州而不为刘表所用，后归曹操为丞相掾属，弟伟坐魏讽反当诛，操特赦之。著先刑后礼之论数十篇。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "liuwangzhi",
+      "name": "刘望之",
+      "courtesyName": "子雅",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南阳郡安众县",
+      "commandery": "南阳郡",
+      "affiliation194": "liubiao",
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "三国志·魏书·刘廙传裴注引廙别传"
+      ],
+      "historicalNote": "刘廙之兄，为刘表所辟为从事；正言不合，二友以非罪见诛，望之又以正谏不合投檄而去，未几为表所杀。廙由是去荆州。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "peiqian",
+      "name": "裴潜",
+      "courtesyName": "文行",
+      "birthYear": null,
+      "deathYear": 244,
+      "origin": "司隶河东郡闻喜县",
+      "commandery": "河东郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·裴潜传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "本年前后避乱荆州，刘表待以宾礼而不为所用；私谓王粲、司马芝曰「刘牧非霸王之才，而欲西伯自处，其败无日矣」，乃南适长沙。后归曹操，历代郡太守服乌丸三单于、荆州刺史、尚书令，官至光禄大夫。裴松之之高祖。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "simazhi",
+      "name": "司马芝",
+      "courtesyName": "子华",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶河内郡温县",
+      "commandery": "河内郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·司马芝传"
+      ],
+      "historicalNote": "本年避乱荆州道遇贼，独坐守老母，贼义而释之；居南方十余年躬耕守节。后为菅长、河南尹，不畏强御，魏世为公廉之首。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lougui",
+      "name": "娄圭",
+      "courtesyName": "子伯",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南阳郡",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "谋略",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪裴注引吴书",
+        "崔琰传裴注引魏略"
+      ],
+      "historicalNote": "本年在荆北聚众依刘表；后归曹操为大将，多设计谋，操称「子伯之计，孤不及也」。潼关沙筑冰城之策出其手，后以言忤操被诛。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "litong",
+      "name": "李通",
+      "courtesyName": "文达",
+      "birthYear": 168,
+      "deathYear": 209,
+      "origin": "荆州江夏郡平春县",
+      "commandery": "江夏郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·李通传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "字文达，一名万亿；本年以侠闻于江汝之间，与陈恭共起兵于朗陵，不属刘表亦不属袁术。后归曹操，拒袁绍之招，讨瞿恭、江夏之贼，为汝南太守。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "xizhen",
+      "name": "习祯",
+      "courtesyName": "文祥",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南郡襄阳县",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注引襄阳记"
+      ],
+      "historicalNote": "有风流善谈论，名亚庞统而在马良之右；后随刘备入蜀，历洛、郫令、广汉太守。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "pangshanmin",
+      "name": "庞山民",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南郡襄阳县",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "三国志·蜀书·诸葛亮传裴注引襄阳记",
+        "庞统传"
+      ],
+      "historicalNote": "庞德公之子、庞统从兄；娶诸葛亮姊，仕魏至黄门吏部郎。名或以山民为名，字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangcun",
+      "name": "张存",
+      "courtesyName": "处仁",
+      "birthYear": null,
+      "deathYear": 212,
+      "origin": "荆州南阳郡",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注",
+        "刘巴传裴注引零陵先贤传"
+      ],
+      "historicalNote": "以荆州从事随刘备入蜀，领广汉太守；庞统死，存曰「统虽尽忠可惜，然违大雅之义」，备怒免其官，后病卒。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huangshe",
+      "name": "黄射",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州江夏郡",
+      "commandery": "江夏郡",
+      "affiliation194": "liubiao",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "后汉书·祢衡传",
+        "三国志·吴书·孙权传"
+      ],
+      "historicalNote": "黄祖长子，为章陵太守；大会宾客于鹦鹉洲，请祢衡作《鹦鹉赋》，笔不停缀。建安八年攻柴桑为孙权所破。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "sufei",
+      "name": "苏飞",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "liubiao",
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·吴书·甘宁传"
+      ],
+      "historicalNote": "黄祖都督，数荐甘宁于祖而祖不用，乃使宁为邾长以纵之去；江夏破，飞被执，宁以先陈之恩为之请命于孙权，得免。籍贯字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "chenjiu",
+      "name": "陈就",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 208,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "liubiao",
+      "roles": [
+        "水军"
+      ],
+      "sources": [
+        "三国志·吴书·吴主传",
+        "董袭传",
+        "吕蒙传"
+      ],
+      "historicalNote": "黄祖部将，为都督将艨艟守沔口；建安十三年孙权破江夏，吕蒙亲枭其首，祖城遂拔。籍贯字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "gongzhi",
+      "name": "巩志",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国演义第五十三回"
+      ],
+      "historicalNote": "演义中武陵从事，劝太守金旋降刘备不听，射杀金旋而以城降，遂领武陵太守。正史不载，金旋事见《三国志·蜀书·先主传》及《三辅决录注》。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "dongfu",
+      "name": "董扶",
+      "courtesyName": "茂安",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州广汉郡绵竹县",
+      "commandery": "广汉郡",
+      "affiliation194": null,
+      "roles": [
+        "方术",
+        "学者"
+      ],
+      "sources": [
+        "后汉书·方术列传",
+        "三国志·蜀书·刘二牧传",
+        "华阳国志"
+      ],
+      "historicalNote": "少师事杨厚，究极图谶；私谓刘焉曰「京师将乱，益州分野有天子气」，焉遂求益州。求为蜀郡属国都尉与焉俱西，本年前后卒于家，年八十二。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "liufan",
+      "name": "刘范",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 194,
+      "origin": "荆州江夏郡竟陵县",
+      "commandery": "江夏郡",
+      "affiliation194": "lijue",
+      "roles": [
+        "宗室"
+      ],
+      "sources": [
+        "三国志·蜀书·刘二牧传",
+        "后汉书·刘焉传",
+        "裴注引英雄记"
+      ],
+      "historicalNote": "刘焉长子，为左中郎将留长安；本年与马腾谋袭李傕，事泄奔槐里，兵败与弟诞俱被杀，焉闻之发疽而卒。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liudan",
+      "name": "刘诞",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 194,
+      "origin": "荆州江夏郡竟陵县",
+      "commandery": "江夏郡",
+      "affiliation194": "lijue",
+      "roles": [
+        "宗室"
+      ],
+      "sources": [
+        "三国志·蜀书·刘二牧传",
+        "后汉书·刘焉传"
+      ],
+      "historicalNote": "刘焉次子，为治书御史在长安；本年与兄范同谋诛李傕，事败俱死。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liumao_yz",
+      "name": "刘瑁",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州江夏郡竟陵县",
+      "commandery": "江夏郡",
+      "affiliation194": "liuzhang",
+      "roles": [
+        "宗室"
+      ],
+      "sources": [
+        "三国志·蜀书·刘二牧传",
+        "二主妃子传",
+        "华阳国志"
+      ],
+      "historicalNote": "刘焉第三子，随焉入蜀为别部司马；娶吴懿之妹即后之穆皇后。本年焉卒，赵韪等以刘璋温仁而立之，瑁不得立，后狂疾而死。字史无明文，或传作叔玉，无确据。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangmou",
+      "name": "王谋",
+      "courtesyName": "元泰",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州蜀郡属国汉嘉县",
+      "commandery": "蜀郡属国",
+      "affiliation194": "liuzhang",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "华阳国志"
+      ],
+      "historicalNote": "本年为州书佐；刘璋时历巴郡太守，刘备定蜀为治中从事，后为太常，与许靖等劝进。本传称汉嘉人；汉嘉县《续汉书·郡国志》属蜀郡属国，建安中乃分置汉嘉郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lifu",
+      "name": "李福",
+      "courtesyName": "孙德",
+      "birthYear": null,
+      "deathYear": 238,
+      "origin": "益州广汉郡涪县",
+      "commandery": "广汉郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "诸葛亮传裴注引益部耆旧杂记"
+      ],
+      "historicalNote": "刘备定蜀为书佐、西充国长；诸葛亮病笃，后主遣福省侍，问以国家大计及身后谁可任者，亮以蒋琬、费祎对。官至尚书仆射。本年幼。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yaozhou",
+      "name": "姚伷",
+      "courtesyName": "子绪",
+      "birthYear": null,
+      "deathYear": 242,
+      "origin": "益州巴郡阆中县",
+      "commandery": "巴郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注"
+      ],
+      "historicalNote": "刘备定益州为功曹书佐；建兴中为广汉太守、丞相参军，上言宜文武并进，诸葛亮称其「忠虑之至」。阆中汉属巴郡，建安六年后属巴西。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "hezhi",
+      "name": "何祗",
+      "courtesyName": "君肃",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州蜀郡",
+      "commandery": "蜀郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨洪传附",
+        "裴注引益部耆旧传杂记"
+      ],
+      "historicalNote": "初为督军从事，以宽济安民有能名；诸葛亮欲责其不治，祗一夜省诸曹文书，亮问无不对，遂迁郫令、广汉太守。梦井中生桑，赵直占为四十八而卒，果验。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "limiao",
+      "name": "李邈",
+      "courtesyName": "汉南",
+      "birthYear": null,
+      "deathYear": 234,
+      "origin": "益州广汉郡郪县",
+      "commandery": "广汉郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注引华阳国志"
+      ],
+      "historicalNote": "李朝、李邵之兄，广汉五李之一；刘备领益州牧，邈面责其夺同宗之土，备欲诛之，诸葛亮为请得免。亮卒，上疏以亮比吕禄，后主怒而诛之。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liren_yz",
+      "name": "李仁",
+      "courtesyName": "德贤",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州犍为郡武阳县",
+      "commandery": "犍为郡",
+      "affiliation194": null,
+      "roles": [
+        "学者"
+      ],
+      "sources": [
+        "三国志·蜀书·李譔传",
+        "华阳国志"
+      ],
+      "historicalNote": "李譔之父，与同县尹默俱游荆州从司马徽、宋忠学古文经；后归益州传其学。本年当在荆州或乡里。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "chenshu",
+      "name": "陈术",
+      "courtesyName": "申伯",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州汉中郡",
+      "commandery": "汉中郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "文学"
+      ],
+      "sources": [
+        "三国志·蜀书·李譔传附"
+      ],
+      "historicalNote": "博学多闻，著《释问》七篇、《益部耆旧传》及志，历新城、广汉、汶山太守。所撰《益部耆旧传》裴松之注《三国志》屡引之。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangshi_yz",
+      "name": "王士",
+      "courtesyName": "义强",
+      "birthYear": null,
+      "deathYear": 223,
+      "origin": "益州广汉郡郪县",
+      "commandery": "广汉郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "华阳国志"
+      ],
+      "historicalNote": "王甫从兄，历符节长、牙门将、宕渠太守；徙益州太守，赴郡道为蛮夷所害。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wuliang",
+      "name": "五梁",
+      "courtesyName": "德山",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州犍为郡南安县",
+      "commandery": "犍为郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注"
+      ],
+      "historicalNote": "以儒学节操称，历谏议大夫、五官中郎将。姓五名梁，非五人之谓。本年未仕。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "changbo",
+      "name": "常播",
+      "courtesyName": "文平",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州蜀郡江原县",
+      "commandery": "蜀郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "华阳国志"
+      ],
+      "historicalNote": "江原县吏；县长朱游被诬当死，播诣狱受考掠，讼争二百余日、受数千杖而辞终不挠，卒申其冤。本年未仕。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yanzhi",
+      "name": "阎芝",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注",
+        "马忠传"
+      ],
+      "historicalNote": "巴西太守；刘备猇亭败绩，芝发诸县兵五千人以补其阙，遣马忠送之，备与语而奇之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "gonglu",
+      "name": "龚禄",
+      "courtesyName": "德绪",
+      "birthYear": null,
+      "deathYear": 225,
+      "origin": "益州巴郡安汉县",
+      "commandery": "巴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "华阳国志"
+      ],
+      "historicalNote": "龚谌之子；刘备定益州为郡督邮，历越巂太守、安汉将军。诸葛亮南征，禄先入越巂为蛮夷所害。本年幼。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "gongchen",
+      "name": "龚谌",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州巴郡安汉县",
+      "commandery": "巴郡",
+      "affiliation194": "liuzhang",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注",
+        "华阳国志"
+      ],
+      "historicalNote": "本年为刘璋从事；刘备围成都，谌与许靖等出降，后为犍为太守。安汉县《续汉书·郡国志》属巴郡，建安六年后属巴西。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "fukuang",
+      "name": "辅匡",
+      "courtesyName": "元弼",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南郡襄阳县",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注"
+      ],
+      "historicalNote": "以荆楚宿旧随刘备入蜀；猇亭之役为别督，后为镇南将军、右将军，封中乡侯。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuyong_nanhe",
+      "name": "刘邕",
+      "courtesyName": "南和",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南阳郡义阳",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注",
+        "裴注引蜀记"
+      ],
+      "historicalNote": "随刘备入蜀，历江阳、江夏太守，官至监军、后将军。义阳建安中分南阳置，汉属南阳郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xiangcun",
+      "name": "向存",
+      "courtesyName": "伯玙",
+      "birthYear": null,
+      "deathYear": 223,
+      "origin": "荆州南郡宜城县",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传季汉辅臣赞注"
+      ],
+      "historicalNote": "与兄向朗俱事刘备；为将军，将兵取汉嘉，为蛮夷所害。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhuoying",
+      "name": "卓膺",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "liuzhang",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·先主传",
+        "法正传"
+      ],
+      "historicalNote": "刘璋将，刘备入蜀时璋使与备共击张鲁；备还攻璋，膺随备进兵。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangjin_jiaozhou",
+      "name": "张津",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "方术"
+      ],
+      "sources": [
+        "三国志·吴书·士燮传裴注引吴书",
+        "刘表传裴注引英雄记",
+        "三国志·吴书·士燮传"
+      ],
+      "historicalNote": "汉廷所置交州刺史，继朱符之后；废汉家法律、去冠帻、鼓琴烧香读邪俗道书，为其将区景所杀，刘表遣赖恭代之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "qujing",
+      "name": "区景",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·吴书·士燮传裴注引吴书"
+      ],
+      "historicalNote": "交州刺史张津部将，杀津；刘表遣赖恭为刺史，苍梧太守吴巨复与恭相失。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wuju_jiao",
+      "name": "吴巨",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 210,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·吴书·士燮传",
+        "蜀书·先主传裴注引江表传",
+        "吴书·步骘传"
+      ],
+      "historicalNote": "刘表所遣苍梧太守，与赖恭相失举兵逐之；刘备南奔时欲往投之，鲁肃止之。建安十五年步骘至交州，斩巨。籍贯字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "shizhi",
+      "name": "士祗",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "交州苍梧郡广信县",
+      "commandery": "苍梧郡",
+      "affiliation194": "shixie",
+      "roles": [
+        "宗室"
+      ],
+      "sources": [
+        "三国志·吴书·士燮传"
+      ],
+      "historicalNote": "士燮之子；燮遣子廞入质于吴，此外诸子祗、干、颂等，燮卒后士徽拒吴，孙权诛徽兄弟六人，祗与焉。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yuanzhong_jiao",
+      "name": "袁忠",
+      "courtesyName": "正甫",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州汝南郡汝阳县",
+      "commandery": "汝南郡",
+      "affiliation194": null,
+      "roles": [
+        "名士",
+        "内政"
+      ],
+      "sources": [
+        "后汉书·袁安传附",
+        "三国志·魏书·武帝纪裴注引魏书"
+      ],
+      "historicalNote": "袁闳之弟，以清亮称；本年前后为沛相，坐与曹操相恶去官，浮海南渡交趾，客死。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huanye",
+      "name": "桓晔",
+      "courtesyName": "文林",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国龙亢县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "后汉书·桓荣传附桓晔"
+      ],
+      "historicalNote": "桓典之从子，一名严；避董卓之乱客会稽，转交趾，越人化其节。后为士燮所留，孙策使人杀之。本年在交趾。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuxi_jiao",
+      "name": "刘熙",
+      "courtesyName": "成国",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "青州北海国",
+      "commandery": "北海国",
+      "affiliation194": null,
+      "roles": [
+        "学者"
+      ],
+      "sources": [
+        "三国志·吴书·薛综传",
+        "程秉传",
+        "韦曜传"
+      ],
+      "historicalNote": "汉末避地交州，讲学不辍，程秉、薛综、许慈皆师之，为岭南文教之祖。撰《释名》八卷，今存，训诂之要籍。正史无传，事迹散见诸弟子传。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yangyi_liaodong",
+      "name": "阳仪",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "gongsundu",
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·公孙度传",
+        "裴注引魏书"
+      ],
+      "historicalNote": "公孙度部将，本年在辽东为长史；度自立为辽东侯，仪与柳毅同为腹心，海东之地由二人分统。或作杨仪。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuyi_liaodong",
+      "name": "柳毅",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "gongsundu",
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·魏书·公孙度传",
+        "武帝纪",
+        "魏书·管宁传"
+      ],
+      "historicalNote": "公孙度部将；度越海取东莱诸县置营州刺史，毅为其将驻东莱。建安中曹操遣张辽等击破之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guoyuan",
+      "name": "国渊",
+      "courtesyName": "子尼",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "青州乐安国盖县",
+      "commandery": "乐安国",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "学者"
+      ],
+      "sources": [
+        "三国志·魏书·国渊传"
+      ],
+      "historicalNote": "郑玄弟子，本年避乱辽东，与邴原管宁俱在；后归曹操为司空掾属，屯田五年仓廪丰实。案讼有匿名书诽谤者，以《二京赋》求师而得其人。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "jiafan_liaodong",
+      "name": "贾范",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 237,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·公孙度传附公孙渊"
+      ],
+      "historicalNote": "公孙渊将军；渊自立为燕王，范与伦直数谏不可绝魏，渊皆杀之。籍贯字生卒不详，本年当未生或幼。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lunzhi_liaodong",
+      "name": "伦直",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 237,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·公孙度传附公孙渊",
+        "裴注引魏书"
+      ],
+      "historicalNote": "公孙渊参军；与贾范切谏渊勿叛魏，被杀。司马懿平辽东，封二人之墓、显其遗嗣。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "beiyan",
+      "name": "卑衍",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 238,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·明帝纪",
+        "公孙度传附公孙渊",
+        "晋书·宣帝纪"
+      ],
+      "historicalNote": "公孙渊大将军；与杨祚将步骑数万屯辽隧围堑二十余里以拒司马懿，懿声东击西趋襄平，衍败走，遂斩之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yangzuo",
+      "name": "杨祚",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·公孙度传附公孙渊",
+        "晋书·宣帝纪"
+      ],
+      "historicalNote": "公孙渊将，与卑衍共屯辽隧拒司马懿；襄平围急，渊遣王建、柳甫请降不许。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wenyang",
+      "name": "文鸯",
+      "courtesyName": "次骞",
+      "birthYear": 238,
+      "deathYear": 291,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "骑将"
+      ],
+      "sources": [
+        "三国志·魏书·毌丘俭传裴注引魏氏春秋、世语",
+        "晋书·武帝纪",
+        "资治通鉴"
+      ],
+      "historicalNote": "本名俶，小字阿鸯，文钦之子；年十八随父举兵淮南，夜袭司马师垒，师惊而目出，单骑摧数千骑数十返，魏军莫敢逼。降魏拒诸葛诞，泰始中督凉州破秃发树机能，后为诸葛诞外孙司马繇所诬，夷三族。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "wenhu",
+      "name": "文虎",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·毌丘俭传附文钦",
+        "诸葛诞传"
+      ],
+      "historicalNote": "文钦次子、文鸯之弟；父为诸葛诞所杀，与鸯逾城降魏，司马昭赦而用之，使巡城招降，寿春遂溃。后与鸯同被诛。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wenji",
+      "name": "文稷",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·毌丘俭传附文钦",
+        "裴注引魏书"
+      ],
+      "historicalNote": "曹操时旧将，文钦之父；钦以将门子少有勇力见任。字生卒不详，本年当在曹操军中。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "haozhao",
+      "name": "郝昭",
+      "courtesyName": "伯道",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "并州太原郡",
+      "commandery": "太原郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·明帝纪裴注引魏略",
+        "蜀书·诸葛亮传"
+      ],
+      "historicalNote": "少入军为部曲督，镇河西十余年民夷畏服；太和二年以千余人守陈仓，拒诸葛亮数万众二十余日，云梯冲车地道皆破之，亮粮尽而退。本年幼或未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "wangshuang_wei",
+      "name": "王双",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 228,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "骑将"
+      ],
+      "sources": [
+        "三国志·蜀书·诸葛亮传",
+        "魏书·明帝纪"
+      ],
+      "historicalNote": "魏将；诸葛亮出散关围陈仓，粮尽而还，双率骑追之，为亮所斩。籍贯字生卒不详。演义作与郝昭同守陈仓之勇将，正史止此一事。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "qinlang",
+      "name": "秦朗",
+      "courtesyName": "元明",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·明帝纪裴注引魏略",
+        "武文世王公传"
+      ],
+      "historicalNote": "秦宜禄与杜夫人之子，小字阿苏；父随吕布，下邳破后母为曹操所纳，操收养之，宠若己子。明帝时为骁骑将军，率中军讨鲜卑步度根、轲比能。曹爽用事而免。本年当未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "suze",
+      "name": "苏则",
+      "courtesyName": "文师",
+      "birthYear": null,
+      "deathYear": 223,
+      "origin": "司隶右扶风武功县",
+      "commandery": "右扶风",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·苏则传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "以举孝廉入仕，历酒泉、安定、武都太守；西平麹演反，则讨平河西诸叛，威著西土。为侍中，闻魏受禅而汉帝见害发丧悲哭，几获罪。本年年少。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "zhongyu",
+      "name": "钟毓",
+      "courtesyName": "稚叔",
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "豫州颍川郡长社县",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·钟繇传附钟毓",
+        "裴注引世语"
+      ],
+      "historicalNote": "钟繇之子、钟会之兄；年十四为散骑侍郎，机捷谈笑有父风。谏明帝勿伐蜀、料钟会必乱而豫言之，官至青州刺史、都督徐荆州诸军事。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "luyu",
+      "name": "卢毓",
+      "courtesyName": "子家",
+      "birthYear": 183,
+      "deathYear": 257,
+      "origin": "幽州涿郡涿县",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·卢毓传"
+      ],
+      "historicalNote": "卢植之少子，本年十二；十岁而孤，二兄死于乱，遭大饥养寡嫂孤兄子以学行显。历吏部尚书典选举十余年，倡「选举莫取有名，名如画地作饼」，官至司空。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "wangguan",
+      "name": "王观",
+      "courtesyName": "伟台",
+      "birthYear": null,
+      "deathYear": 260,
+      "origin": "兖州东郡廪丘县",
+      "commandery": "东郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·王观传"
+      ],
+      "historicalNote": "少孤贫励志，为曹操丞相文学掾；历郡守、少府，清身履正。高平陵之变假行中领军据曹爽营，官至司空。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "sunli",
+      "name": "孙礼",
+      "courtesyName": "德达",
+      "birthYear": null,
+      "deathYear": 250,
+      "origin": "幽州涿郡容城县",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·孙礼传"
+      ],
+      "historicalNote": "刚断伉厉；曹爽用事，为冀州牧争清河平原界不阿，坐免。后为并州刺史，与司马懿言天下事，泣数行下。官至司空。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "weizhen",
+      "name": "卫臻",
+      "courtesyName": "公振",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "兖州陈留郡襄邑县",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·卫臻传"
+      ],
+      "historicalNote": "卫兹之子；父从曹操起兵战死荥阳，操每祭之流涕。历侍中、吏部尚书、司空、司徒，屡言辽东、淮南之事而中。本年年少。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "gaotanglong",
+      "name": "高堂隆",
+      "courtesyName": "升平",
+      "birthYear": null,
+      "deathYear": 237,
+      "origin": "兖州泰山郡平阳县",
+      "commandery": "泰山郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·高堂隆传"
+      ],
+      "historicalNote": "高堂生之后，明典礼；明帝大治宫室，隆切谏数十上，言「天下，陛下之天下」，临终犹上疏戒宗室微弱。本年年少。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "huanfan",
+      "name": "桓范",
+      "courtesyName": "元则",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "豫州沛国",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "谋略",
+        "内政",
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·曹爽传裴注引魏略、世语",
+        "晋书·宣帝纪"
+      ],
+      "historicalNote": "号智囊；高平陵之变出奔曹爽，劝挟天子诣许昌发四方兵，爽不能用，范哭曰「曹子丹佳人，生汝兄弟犊耳」。爽降，范与俱诛。撰《世要论》。本年年少。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "lisheng",
+      "name": "李胜",
+      "courtesyName": "公昭",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "荆州南阳郡",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·曹爽传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "曹爽腹心，与何晏邓飏等号台中三狗之党；出为荆州刺史，辞司马懿，懿伪疾持杯粥皆流出、误荆州为并州，胜以为信然而告爽，爽遂不备。爽败同诛。本年幼。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dengyang",
+      "name": "邓飏",
+      "courtesyName": "玄茂",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "荆州南阳郡",
+      "commandery": "南阳郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·曹爽传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "邓禹之后；明帝时以浮华被免，曹爽用为尚书，变易旧制受货卖官，京师为之语「台中有三狗，二狗崖柴不可当，一狗凭默作疽囊」。爽败同诛。本年幼或未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "dingmi",
+      "name": "丁谧",
+      "courtesyName": "彦靖",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "豫州沛国",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·曹爽传裴注引魏略"
+      ],
+      "historicalNote": "丁斐之子；曹爽以为尚书，多所构画，画策使爽白天子出郭太后于永宁宫，以夺司马懿之权。爽败同诛。本年幼或未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "biguai",
+      "name": "毕轨",
+      "courtesyName": "昭先",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "兖州东平国",
+      "commandery": "东平国",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·曹爽传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "毕子礼之子；曹爽用为司隶校尉，尝出并州击鲜卑轲比能而败。爽败同诛。本年幼或未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "linghuyu",
+      "name": "令狐愚",
+      "courtesyName": "公治",
+      "birthYear": null,
+      "deathYear": 249,
+      "origin": "并州太原郡",
+      "commandery": "太原郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·王凌传",
+        "裴注引魏略"
+      ],
+      "historicalNote": "本名浚，王凌之甥；为兖州刺史屯平阿，与凌谋立楚王曹彪都许昌，事未发而病死。凌事败，与凌俱被剖棺暴尸于市。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huzun",
+      "name": "胡遵",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 256,
+      "origin": "凉州安定郡",
+      "commandery": "安定郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·明帝纪",
+        "三少帝纪",
+        "晋书·宣帝纪"
+      ],
+      "historicalNote": "安定胡氏，随司马懿平辽东；正元二年为征东将军，东兴之役与诸葛诞攻堤，为丁奉所破。官至卫将军。字生卒不详，本年当未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "hufen",
+      "name": "胡奋",
+      "courtesyName": "玄威",
+      "birthYear": null,
+      "deathYear": 288,
+      "origin": "凉州安定郡临泾县",
+      "commandery": "安定郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "晋书·胡奋传"
+      ],
+      "historicalNote": "胡遵之子；少好武事，随司马懿平辽东，泰始中都督江北、荆州诸军事，女为晋武帝贵人。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "tangzi",
+      "name": "唐咨",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 255,
+      "origin": "徐州东海郡利城县",
+      "commandery": "东海郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·魏书·三少帝纪",
+        "文帝纪",
+        "吴书·孙权传"
+      ],
+      "historicalNote": "黄初中利城郡兵反，共立咨为主；魏军讨之，咨走入海奔吴，为左将军。后随诸葛诞守寿春，城破降魏，为安远将军。利城县汉属东海郡，黄初中分置利城郡，寻废。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "hezeng",
+      "name": "何曾",
+      "courtesyName": "颖考",
+      "birthYear": 199,
+      "deathYear": 278,
+      "origin": "豫州陈国阳夏县",
+      "commandery": "陈国",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "晋书·何曾传"
+      ],
+      "historicalNote": "何夔之子；魏时为司隶校尉，纠劾无所避。劝司马昭早图代魏，晋立为太尉、太傅，日食万钱犹曰无下箸处。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xunyi",
+      "name": "荀顗",
+      "courtesyName": "景倩",
+      "birthYear": null,
+      "deathYear": 274,
+      "origin": "豫州颍川郡颍阴县",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "学者"
+      ],
+      "sources": [
+        "晋书·荀顗传"
+      ],
+      "historicalNote": "荀彧之子；明《三礼》，与羊祜共定晋礼。司马氏代魏，与何曾等赞其事，晋为太尉、司徒。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xunxu",
+      "name": "荀勖",
+      "courtesyName": "公曾",
+      "birthYear": null,
+      "deathYear": 289,
+      "origin": "豫州颍川郡颍阴县",
+      "commandery": "颍川郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "学者",
+        "工巧"
+      ],
+      "sources": [
+        "晋书·荀勖传"
+      ],
+      "historicalNote": "荀爽曾孙；钟会谋反前独言其必反。晋为中书监，掌乐律以古尺正律吕，又领秘书监整理汲冢竹书、编定《中经新簿》。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "peixiu",
+      "name": "裴秀",
+      "courtesyName": "季彦",
+      "birthYear": 224,
+      "deathYear": 271,
+      "origin": "司隶河东郡闻喜县",
+      "commandery": "河东郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "学者"
+      ],
+      "sources": [
+        "晋书·裴秀传"
+      ],
+      "historicalNote": "裴潜之子；晋司空，作《禹贡地域图》十八篇，立分率、准望、道里、高下、方邪、迂直「制图六体」，为中国古代制图学之祖。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "wangchen_jin",
+      "name": "王沈",
+      "courtesyName": "处道",
+      "birthYear": null,
+      "deathYear": 266,
+      "origin": "并州太原郡晋阳县",
+      "commandery": "太原郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "文学"
+      ],
+      "sources": [
+        "晋书·王沈传",
+        "三国志·魏书·三少帝纪"
+      ],
+      "historicalNote": "王柔之孙、王机之子；与荀顗、阮籍共撰《魏书》，裴松之注多引之。高贵乡公将讨司马昭，沈驰告昭，以功封侯，时人贱其卖主。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhengchong",
+      "name": "郑冲",
+      "courtesyName": "文和",
+      "birthYear": null,
+      "deathYear": 274,
+      "origin": "司隶河南尹荥阳县",
+      "commandery": "河南尹",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "内政"
+      ],
+      "sources": [
+        "晋书·郑冲传"
+      ],
+      "historicalNote": "起自寒微，卓尔立操，耽玩经史；魏末与何晏等共撰《论语集解》，为晋太傅。晋受禅之诏册其所草。本传称荥阳开封人，荥阳汉属河南尹。本年年少或未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "chenqian",
+      "name": "陈骞",
+      "courtesyName": "休渊",
+      "birthYear": 201,
+      "deathYear": 281,
+      "origin": "徐州广陵郡东阳县",
+      "commandery": "广陵郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "晋书·陈骞传"
+      ],
+      "historicalNote": "陈矫之子；沉厚有智谋，随司马昭平诸葛诞，都督淮南、荆州诸军事，晋为大司马。本年未生。东阳汉属广陵郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "shantao",
+      "name": "山涛",
+      "courtesyName": "巨源",
+      "birthYear": 205,
+      "deathYear": 283,
+      "origin": "司隶河内郡怀县",
+      "commandery": "河内郡",
+      "affiliation194": null,
+      "roles": [
+        "名士",
+        "内政"
+      ],
+      "sources": [
+        "晋书·山涛传"
+      ],
+      "historicalNote": "竹林七贤之一，与嵇康吕安善；嵇康遗以《与山巨源绝交书》。晋为吏部尚书典选十余年，所奏甄拔人物皆行，号《山公启事》。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "ruanji",
+      "name": "阮籍",
+      "courtesyName": "嗣宗",
+      "birthYear": 210,
+      "deathYear": 263,
+      "origin": "兖州陈留郡尉氏县",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "名士"
+      ],
+      "sources": [
+        "晋书·阮籍传",
+        "三国志·魏书·王粲传附"
+      ],
+      "historicalNote": "阮瑀之子，竹林七贤之首；本有济世志，值魏晋之际天下多故，遂酣饮为常，发言玄远口不臧否人物，作《咏怀诗》八十二首、《大人先生传》。为郑冲等草劝进笺。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "jikang",
+      "name": "嵇康",
+      "courtesyName": "叔夜",
+      "birthYear": 223,
+      "deathYear": 262,
+      "origin": "豫州沛国铚县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "名士",
+        "工巧"
+      ],
+      "sources": [
+        "晋书·嵇康传",
+        "三国志·魏书·王粲传裴注引魏氏春秋"
+      ],
+      "historicalNote": "竹林七贤，娶曹操曾孙女为长乐亭主之婿；善鼓琴锻铁，作《声无哀乐论》《养生论》《琴赋》。为钟会所构，司马昭杀之，临刑索琴弹《广陵散》曰「《广陵散》于今绝矣」。本年未生。谯国魏分沛国置，汉为沛国。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "wangbi_fusi",
+      "name": "王弼",
+      "courtesyName": "辅嗣",
+      "birthYear": 226,
+      "deathYear": 249,
+      "origin": "兖州山阳郡高平县",
+      "commandery": "山阳郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "文学"
+      ],
+      "sources": [
+        "三国志·魏书·钟会传附裴注引何劭王弼传"
+      ],
+      "historicalNote": "王粲族孙；年十余好《老氏》，注《老子》《周易》扫象数而言义理，与何晏同开正始玄风。裴徽问圣人体无，弼对「圣人体无，无又不可以训」。年二十四以疠疾卒。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "sunliang",
+      "name": "孙亮",
+      "courtesyName": "子明",
+      "birthYear": 243,
+      "deathYear": 260,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "君主"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传"
+      ],
+      "historicalNote": "孙权少子、潘夫人所生，二宫构争后立为太子，十岁即位；聪察善察狱，以蜜中鼠矢辨黄门之诈。为孙綝所废为会稽王，途中自杀。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "sunxiu",
+      "name": "孙休",
+      "courtesyName": "子烈",
+      "birthYear": 235,
+      "deathYear": 264,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "君主"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传"
+      ],
+      "historicalNote": "孙权第六子；孙綝废亮而迎立之，与张布丁奉谋诛綝。好学立五经博士，置学官，在位六年。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "sunhao",
+      "name": "孙皓",
+      "courtesyName": "元宗",
+      "birthYear": 242,
+      "deathYear": 284,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "君主"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传",
+        "裴注引江表传",
+        "晋书·武帝纪"
+      ],
+      "historicalNote": "孙和之子；初立粗有令誉，既而粗暴骄盈、多忌讳好酒色，剥面凿眼以刑杀为乐，吴由是亡。降晋，武帝谓「设此座以待卿久矣」，皓对「臣于南方亦设此座以待陛下」。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "sunjun",
+      "name": "孙峻",
+      "courtesyName": "子远",
+      "birthYear": 219,
+      "deathYear": 256,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·吴书·孙峻传"
+      ],
+      "historicalNote": "孙静曾孙；骁果胆决，受孙权遗诏辅政。诱杀诸葛恪自为丞相大将军，滛乱宫人、杀鲁育公主与孙仪等，吴人侧目。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "sunchen",
+      "name": "孙綝",
+      "courtesyName": "子通",
+      "birthYear": 231,
+      "deathYear": 258,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·吴书·孙綝传"
+      ],
+      "historicalNote": "孙峻从弟，峻死代之；杀滕胤、吕据、王惇，废孙亮立孙休，专恣益甚。休与张布丁奉谋于腊会执而斩之，诏改姓故人以别之。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "tengyin",
+      "name": "滕胤",
+      "courtesyName": "承嗣",
+      "birthYear": null,
+      "deathYear": 256,
+      "origin": "青州北海国剧县",
+      "commandery": "北海国",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·滕胤传"
+      ],
+      "historicalNote": "滕胄之子，尚公主；夜省文书、昼接宾客，未尝有倦。孙峻死，与吕据谋讨孙綝，事败被夷三族。本年未生。本传称北海剧人。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lvju",
+      "name": "吕据",
+      "courtesyName": "世议",
+      "birthYear": null,
+      "deathYear": 256,
+      "origin": "扬州吴郡吴县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·吴书·吕范传附吕据"
+      ],
+      "historicalNote": "吕范次子；以父任为郎，历骠骑将军。与滕胤谋诛孙綝不果，众散而自杀。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liuzan",
+      "name": "留赞",
+      "courtesyName": "正明",
+      "birthYear": 183,
+      "deathYear": 255,
+      "origin": "扬州会稽郡长山县",
+      "commandery": "会稽郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·吴书·孙峻传裴注引吴书"
+      ],
+      "historicalNote": "本年十二；少为郡吏，手斩妖贼吴桓，创重脚屈不伸，乃引刀自割其筋而愈。每临阵先散发大呼歌讴以震敌。东兴之役先陷阵，后随孙峻出淮南病笃遇魏军而死。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhuyi_wu",
+      "name": "朱异",
+      "courtesyName": "季文",
+      "birthYear": null,
+      "deathYear": 257,
+      "origin": "扬州吴郡吴县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·吴书·朱桓传附朱异"
+      ],
+      "historicalNote": "朱桓之子；破魏于樊城、夺魏浮桥，屡有战功。诸葛诞据寿春，异三攻魏围不解，孙綝怒而杀之。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "shiji_zhuji",
+      "name": "施绩",
+      "courtesyName": "公绪",
+      "birthYear": null,
+      "deathYear": 270,
+      "origin": "扬州丹阳郡故鄣县",
+      "commandery": "丹阳郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·吴书·朱然传附施绩"
+      ],
+      "historicalNote": "本名朱绩，朱然之子；然本姓施，绩后复本姓。为左大司马、右军师，镇乐乡拒晋。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "puyangxing",
+      "name": "濮阳兴",
+      "courtesyName": "子元",
+      "birthYear": null,
+      "deathYear": 264,
+      "origin": "兖州陈留郡",
+      "commandery": "陈留郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传附濮阳兴传"
+      ],
+      "historicalNote": "濮阳逸之子；孙休时为丞相，作浦里塘功费不成，众怨之。与张布迎立孙皓，寻为皓所诛，夷三族。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangti",
+      "name": "张悌",
+      "courtesyName": "巨先",
+      "birthYear": null,
+      "deathYear": 280,
+      "origin": "荆州南郡襄阳县",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传裴注引襄阳记、干宝晋纪"
+      ],
+      "historicalNote": "少有名理；闻钟会邓艾伐蜀，独料蜀必亡而魏之亡亦不远。吴末为丞相，晋军临江，率众渡江而战，众溃不肯去曰「今日是我死日也」，遂死之。本年未生。襄阳汉属南郡。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "lukai",
+      "name": "陆凯",
+      "courtesyName": "敬风",
+      "birthYear": 198,
+      "deathYear": 269,
+      "origin": "扬州吴郡吴县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "军事"
+      ],
+      "sources": [
+        "三国志·吴书·陆凯传"
+      ],
+      "historicalNote": "陆逊族子；孙皓时为左丞相，上疏切谏二十事，历数皓之失而言辞恳直，皓虽恨之以其宗族强盛且方赖以御晋，故不加诛。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "luyin",
+      "name": "陆胤",
+      "courtesyName": "敬宗",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡吴县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·陆凯传附陆胤",
+        "裴注引吴录"
+      ],
+      "historicalNote": "陆凯之弟；为交州刺史，招纳降附三万余家，苍梧、南海之乱以宁。转西陵督，所在有治名。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huahe",
+      "name": "华核",
+      "courtesyName": "永先",
+      "birthYear": 219,
+      "deathYear": 278,
+      "origin": "扬州吴郡丹徒县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "文学",
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·华核传"
+      ],
+      "historicalNote": "始为上虞尉，以文学入为秘府郎，与韦曜等撰《吴书》；孙皓时上疏切谏节用息役凡百余奏。本传称吴郡武进人，武进吴分丹徒置，汉属吴郡丹徒。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "weizhao",
+      "name": "韦昭",
+      "courtesyName": "弘嗣",
+      "birthYear": 204,
+      "deathYear": 273,
+      "origin": "扬州吴郡曲阿县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "文学"
+      ],
+      "sources": [
+        "三国志·吴书·韦曜传"
+      ],
+      "historicalNote": "本名昭，晋人避司马昭讳改曜；领左国史撰《吴书》，注《国语》，今存。孙皓强人饮酒，昭不能饮，密以茶代酒。后以不肯为皓父作纪、又不阿旨而被诛。本传称吴郡云阳人，云阳即汉之曲阿，孙权改名。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "heshao_wu",
+      "name": "贺邵",
+      "courtesyName": "兴伯",
+      "birthYear": 227,
+      "deathYear": 275,
+      "origin": "扬州会稽郡山阴县",
+      "commandery": "会稽郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·贺齐传附贺邵"
+      ],
+      "historicalNote": "贺齐之孙；孙皓时为中书令、太子太傅，上疏极谏皓之奢暴。中恶风口不能言，皓疑其托疾，收付酒藏拷掠千所，遂断锯杀之。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangfan",
+      "name": "王蕃",
+      "courtesyName": "永元",
+      "birthYear": 228,
+      "deathYear": 266,
+      "origin": "扬州庐江郡",
+      "commandery": "庐江郡",
+      "affiliation194": null,
+      "roles": [
+        "学者",
+        "工巧"
+      ],
+      "sources": [
+        "三国志·吴书·王蕃传",
+        "晋书·天文志"
+      ],
+      "historicalNote": "博览多闻兼通术艺；依刘洪《乾象历》推浑天之数，作浑仪，论周天径率，天文之学吴中第一。孙皓大会酒酣，蕃醉伏不起，皓疑其诈而斩之。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "zhonglimu",
+      "name": "钟离牧",
+      "courtesyName": "子干",
+      "birthYear": null,
+      "deathYear": 272,
+      "origin": "扬州会稽郡山阴县",
+      "commandery": "会稽郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·钟离牧传",
+        "裴注引会稽典录"
+      ],
+      "historicalNote": "汉鲁相钟离意七世孙；少躬耕，以所种稻与占者，郡县欲治其人，牧为请免。历武陵、濡须、西陵督，平五溪夷与建安贼，官至前将军。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhouchu",
+      "name": "周处",
+      "courtesyName": "子隐",
+      "birthYear": 236,
+      "deathYear": 297,
+      "origin": "扬州吴郡阳羡县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "晋书·周处传",
+        "世说新语所载"
+      ],
+      "historicalNote": "周鲂之子；少凶强侠气，为乡里所患，与南山虎、长桥蛟并称三害，处杀虎斩蛟而后自励，遂改节。吴末为东观令，入晋为御史中丞，讨齐万年力战而死。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "wanyu",
+      "name": "万彧",
+      "courtesyName": "文彬",
+      "birthYear": null,
+      "deathYear": 272,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传",
+        "孙和传"
+      ],
+      "historicalNote": "本乌程令，与孙皓善，说濮阳兴张布迎立之，遂为右丞相；后以谏忤皓，被酖不死，忧而自杀。籍贯生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "cenhun",
+      "name": "岑昏",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 280,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·三嗣主传",
+        "晋书·王濬传"
+      ],
+      "historicalNote": "孙皓宠幸之宦人，为九卿，好兴功役以扰民；晋师临江，众人请杀之，皓即遣斩之以谢众。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "quanshang",
+      "name": "全尚",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 258,
+      "origin": "扬州吴郡钱唐县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·孙亮传",
+        "妃嫔传",
+        "孙綝传"
+      ],
+      "historicalNote": "全琮族子；女为孙亮皇后，以是为太常卫将军。孙亮谋诛孙綝，谋泄，綝遣兵执尚，徙零陵而杀之。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "tengmu",
+      "name": "滕牧",
+      "courtesyName": "叔先",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "青州北海国剧县",
+      "commandery": "北海国",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传",
+        "三嗣主传"
+      ],
+      "historicalNote": "滕胤族人，女为孙皓皇后；官至卫将军、录尚书事。后主宠妃用事，牧被谴徙苍梧，忧死。本传称北海剧人。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhugezhan",
+      "name": "诸葛瞻",
+      "courtesyName": "思远",
+      "birthYear": 227,
+      "deathYear": 263,
+      "origin": "徐州琅邪国阳都县",
+      "commandery": "琅邪国",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·诸葛亮传附诸葛瞻"
+      ],
+      "historicalNote": "诸葛亮之子，尚公主；工书画强识念，蜀人追思亮，每有善政虽非瞻所建亦归之，是以美声溢誉。邓艾入蜀，率军拒于绵竹，不用黄崇速据险之谋，战败而死。本年未生。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "zhugeshang",
+      "name": "诸葛尚",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "徐州琅邪国阳都县",
+      "commandery": "琅邪国",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·诸葛亮传附",
+        "裴注引华阳国志"
+      ],
+      "historicalNote": "诸葛瞻长子，年十九；绵竹之战叹曰「父子荷国重恩，不早斩黄皓，以致倾败，用生何为」，驰赴魏阵而死。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huangchong",
+      "name": "黄崇",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "益州巴郡阆中县",
+      "commandery": "巴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·黄权传附黄崇",
+        "华阳国志"
+      ],
+      "historicalNote": "黄权留蜀之子，为尚书郎；随诸葛瞻拒邓艾，屡劝速行据险无令敌得入平地，瞻犹豫不纳，崇至于流涕。临阵激励将士死战而没。本年未生。字不详。本传称巴西阆中人；巴西建安六年分巴郡置，汉属巴郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yanyu_shu",
+      "name": "阎宇",
+      "courtesyName": "文平",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "荆州南郡",
+      "commandery": "南郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·马忠传裴注引华阳国志",
+        "姜维传裴注引华阳国志"
+      ],
+      "historicalNote": "宿有功干，历庲降都督、右大将军；与黄皓相表里，皓欲以代姜维。蜀亡前率军东下援永安，遂不及归。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yangxi",
+      "name": "杨戏",
+      "courtesyName": "文然",
+      "birthYear": null,
+      "deathYear": 261,
+      "origin": "益州犍为郡武阳县",
+      "commandery": "犍为郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "文学"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传"
+      ],
+      "historicalNote": "少与程祁、杨汰、张表齐名；性简略疏诞，蒋琬费祎皆器之。撰《季汉辅臣赞》，赞蜀汉群臣数十人，为陈寿立蜀书传次之所本。本年未生。一名义。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "liuyin",
+      "name": "柳隐",
+      "courtesyName": "休然",
+      "birthYear": 190,
+      "deathYear": 269,
+      "origin": "益州蜀郡成都县",
+      "commandery": "蜀郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注引华阳国志"
+      ],
+      "historicalNote": "本年五岁；与杜祯、柳伸并知名。数从姜维出征，临事设计当敌陷阵。为黄金围督，钟会攻之不能克，后主敕降乃止。晋为西河太守。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "jiangbin",
+      "name": "蒋斌",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 264,
+      "origin": "荆州零陵郡湘乡县",
+      "commandery": "零陵郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·蒋琬传附蒋斌",
+        "裴注引华阳国志"
+      ],
+      "historicalNote": "蒋琬长子，为绥武将军、汉城护军；钟会至汉城，与斌书叙好，斌答书称美。蜀亡后至成都，与钟会之乱俱死。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangzun",
+      "name": "张遵",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "幽州涿郡",
+      "commandery": "涿郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·张飞传附",
+        "诸葛亮传附"
+      ],
+      "historicalNote": "张苞之子、张飞之孙，为尚书；随诸葛瞻拒邓艾于绵竹，临阵而死。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaotong",
+      "name": "赵统",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "冀州常山国真定县",
+      "commandery": "常山国",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·赵云传",
+        "裴注引云别传"
+      ],
+      "historicalNote": "赵云长子，袭爵永昌亭侯，官至虎贲中郎督、行领军。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaoguang",
+      "name": "赵广",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "冀州常山国真定县",
+      "commandery": "常山国",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·赵云传裴注引云别传"
+      ],
+      "historicalNote": "赵云次子，为牙门将；随姜维沓中，临阵战死。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guantong",
+      "name": "关统",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶河东郡解县",
+      "commandery": "河东郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·关羽传"
+      ],
+      "historicalNote": "关兴之子，尚公主，官至虎贲中郎将；卒无子，以庶兄彝续封。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guanyi",
+      "name": "关彝",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "司隶河东郡解县",
+      "commandery": "河东郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·关羽传",
+        "裴注引蜀记"
+      ],
+      "historicalNote": "关兴庶子、关统之弟，统卒无子，以彝续封汉寿亭侯。庞德之子庞会随钟会入蜀，尽灭关氏家。本年未生。字不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liqiu",
+      "name": "李球",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 263,
+      "origin": "益州益州郡俞元县",
+      "commandery": "益州郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·李恢传附",
+        "裴注引华阳国志"
+      ],
+      "historicalNote": "李恢之侄，为羽林右部督；随诸葛瞻拒邓艾，临陈授命而死。本年未生。字不详。建宁郡建兴三年改益州郡置，汉为益州郡。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "jufu",
+      "name": "句扶",
+      "courtesyName": "孝兴",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州巴郡汉昌县",
+      "commandery": "巴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注引华阳国志"
+      ],
+      "historicalNote": "忠勇宽厚，数有战功，功名爵位亚于王平；时人语曰「前有王句，后有张廖」。官至左将军。本年未生。汉昌县汉属巴郡，建安六年后属巴西。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangbiao",
+      "name": "张表",
+      "courtesyName": "伯达",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "益州蜀郡",
+      "commandery": "蜀郡",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·杨戏传裴注引益部耆旧传",
+        "马忠传"
+      ],
+      "historicalNote": "张肃之子；有威仪风观，与杨戏齐名，时人以为不及。继马忠为庲降都督，官至尚书。本年未生。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "mamiao",
+      "name": "马邈",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·邓艾传",
+        "蜀书·后主传裴注引蜀记"
+      ],
+      "historicalNote": "蜀汉江由戍守将；邓艾行无人之地七百余里、凿山通道以出，邈望风而降，蜀之北门遂启。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wanghan",
+      "name": "王含",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·姜维传",
+        "魏书·钟会传"
+      ],
+      "historicalNote": "蜀汉蒋舒之侪，守乐城；钟会伐蜀，遣别将攻乐城不能克。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "maridi",
+      "name": "马日磾",
+      "courtesyName": "翁叔",
+      "birthYear": null,
+      "deathYear": 194,
+      "origin": "司隶右扶风茂陵县",
+      "commandery": "右扶风",
+      "affiliation194": "lijue",
+      "roles": [
+        "名士",
+        "外交",
+        "学者"
+      ],
+      "sources": [
+        "后汉书·袁术传",
+        "三国志·魏书·董卓传裴注引献帝春秋",
+        "吴书·刘繇传"
+      ],
+      "historicalNote": "马融族孙，太傅、录尚书事；初平末持节安集关东，至寿春为袁术所留，夺其节、迫以军师之号，本年发病忧愤呕血而死。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "zhaowen",
+      "name": "赵温",
+      "courtesyName": "子柔",
+      "birthYear": 137,
+      "deathYear": 208,
+      "origin": "益州蜀郡成都县",
+      "commandery": "蜀郡",
+      "affiliation194": "lijue",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "后汉书·献帝纪",
+        "三国志·魏书·武帝纪裴注引献帝起居注",
+        "华阳国志"
+      ],
+      "historicalNote": "赵谦之弟；本年为司空，李傕郭汜相攻时随驾东归，为傕所劫又释之。后为司徒录尚书事十余年，坐辟曹丕被免。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "chongshao",
+      "name": "种劭",
+      "courtesyName": "申甫",
+      "birthYear": null,
+      "deathYear": 195,
+      "origin": "司隶河南尹雒阳县",
+      "commandery": "河南尹",
+      "affiliation194": "lijue",
+      "roles": [
+        "名士"
+      ],
+      "sources": [
+        "后汉书·种暠传附",
+        "三国志·魏书·董卓传裴注引献帝纪"
+      ],
+      "historicalNote": "种拂之子；董卓入雒时独当卓军叱之，卓将士皆披靡。本年为益州刺史未行，留侍帝侧；次年李傕郭汜乱，与父拂俱死于兵。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huangfuli",
+      "name": "皇甫郦",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "凉州安定郡朝那县",
+      "commandery": "安定郡",
+      "affiliation194": "lijue",
+      "roles": [
+        "外交"
+      ],
+      "sources": [
+        "后汉书·董卓传",
+        "三国志·魏书·董卓传裴注引献帝起居注"
+      ],
+      "historicalNote": "皇甫嵩从子，为骑都尉；李傕郭汜相攻，帝使郦和解之，郦责傕曰「昔有扈氏无道」云云，傕不听而怒欲杀之，郦得逃去。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "limeng_dz",
+      "name": "李蒙",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 195,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "lijue",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "后汉书·董卓传",
+        "三国志·魏书·董卓传",
+        "武帝纪"
+      ],
+      "historicalNote": "董卓部将，与王方、郭汜等围长安；初平三年随李傕破吕布入城。兴平二年为李傕所杀。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangfang_dz",
+      "name": "王方",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 192,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "后汉书·董卓传",
+        "三国志·魏书·董卓传裴注引英雄记"
+      ],
+      "historicalNote": "董卓部将；初平三年与李蒙共攻长安，为吕布军所杀。已卒二年。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yuanhuan",
+      "name": "袁涣",
+      "courtesyName": "曜卿",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州陈国扶乐县",
+      "commandery": "陈国",
+      "affiliation194": "yuanshu",
+      "roles": [
+        "内政",
+        "名士"
+      ],
+      "sources": [
+        "三国志·魏书·袁涣传",
+        "裴注引袁氏世纪"
+      ],
+      "historicalNote": "袁滂之子；刘备为豫州举为茂才，本年避地江淮为袁术所命。后为吕布所拘，布使作书骂刘备，涣正色不从，布惭而止。归曹操为郎中令，谏勿轻用兵、宜以德胜。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "hekui",
+      "name": "何夔",
+      "courtesyName": "叔龙",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "豫州陈国阳夏县",
+      "commandery": "陈国",
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·何夔传"
+      ],
+      "historicalNote": "长八尺三寸，容貌矜严；本年避乱淮南，袁术屡辟不就，惧而逃匿。后归曹操为长广太守、丞相东曹掾，常怀毒药以备见辱。何曾之父。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xingyong",
+      "name": "邢颙",
+      "courtesyName": "子昂",
+      "birthYear": null,
+      "deathYear": 223,
+      "origin": "冀州河闲国鄚县",
+      "commandery": "河闲国",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "名士"
+      ],
+      "sources": [
+        "三国志·魏书·邢颙传"
+      ],
+      "historicalNote": "举孝廉不就，本年避乱辽东，与田畴俱在无终；公孙度欲礼之而去，度曰「此不可屈也」。后归曹操为曹植家丞，防闲以礼，操称其「德行堂堂邢子昂」。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhangfan_wei",
+      "name": "张范",
+      "courtesyName": "公仪",
+      "birthYear": null,
+      "deathYear": 212,
+      "origin": "司隶河内郡脩武县",
+      "commandery": "河内郡",
+      "affiliation194": null,
+      "roles": [
+        "名士",
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·张范传"
+      ],
+      "historicalNote": "张歆之孙、司徒张延之子，袁隗欲以女妻之而辞；本年避地扬州，后与弟承依曹操为议郎参丞相军事。轻财重义，收恤穷乏无所余。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "caode",
+      "name": "曹德",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 193,
+      "origin": "豫州沛国谯县",
+      "commandery": "沛国",
+      "affiliation194": null,
+      "roles": [
+        "宗室"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪裴注引世语、韦曜吴书",
+        "后汉书·应劭传"
+      ],
+      "historicalNote": "曹操之弟；初平四年随父曹嵩避难琅邪，为陶谦部将张闿所杀于泰山华、费间，操由是大举伐徐州。已卒一年。字生卒不详，一作曹疾。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "tianchou",
+      "name": "田畴",
+      "courtesyName": "子泰",
+      "birthYear": 169,
+      "deathYear": 214,
+      "origin": "幽州右北平郡无终县",
+      "commandery": "右北平郡",
+      "affiliation194": null,
+      "roles": [
+        "谋略",
+        "名士"
+      ],
+      "sources": [
+        "三国志·魏书·田畴传",
+        "裴注引先贤行状"
+      ],
+      "historicalNote": "本年二十六；为刘虞使奉章诣长安，还而虞已死，哭祭其墓。率宗族入徐无山营深险平敞地而居，约束二十余条，归者五千余家。后为曹操导军出卢龙塞破乌桓，坚辞封侯者四。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 2
+    },
+    {
+      "id": "hanheng",
+      "name": "韩珩",
+      "courtesyName": "子佩",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "幽州代郡",
+      "commandery": "代郡",
+      "affiliation194": "yuanshao",
+      "roles": [
+        "内政",
+        "名士"
+      ],
+      "sources": [
+        "三国志·魏书·袁绍传裴注引先贤行状",
+        "武帝纪"
+      ],
+      "historicalNote": "本年为袁绍别驾；袁尚败，鲜于辅等议附曹操，珩独曰「吾受袁公父子厚恩，今其破亡，智不能救、勇不能死，于义阙矣，若乃北面于曹氏，所弗能为也」，坐者叹息，操亦高之。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "guoyuan_yuan",
+      "name": "郭援",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 202,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·钟繇传",
+        "裴注引典略",
+        "武帝纪"
+      ],
+      "historicalNote": "袁尚所遣河东太守，高幹之甥；与南匈奴单于共寇平阳，钟繇率关中诸将拒之，庞德斩援首。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "yangang_gsz",
+      "name": "严纲",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 192,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "骑将"
+      ],
+      "sources": [
+        "三国志·魏书·公孙瓒传",
+        "后汉书·公孙瓒传",
+        "裴注引英雄记"
+      ],
+      "historicalNote": "公孙瓒所置冀州刺史；初平三年界桥之战为先登，麹义伏盾而起大破之，斩纲首，瓒军遂溃。已卒二年。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangmen",
+      "name": "王门",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "gongsunzan",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·田畴传裴注",
+        "后汉书·刘虞传",
+        "三国志·魏书·公孙瓒传裴注引英雄记"
+      ],
+      "historicalNote": "本刘虞旧将，虞死降公孙瓒，本年为瓒将万余人来攻鲜于辅等；后事见于渔阳一带。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaoyu",
+      "name": "赵昱",
+      "courtesyName": "元达",
+      "birthYear": null,
+      "deathYear": 194,
+      "origin": "徐州琅邪国",
+      "commandery": "琅邪国",
+      "affiliation194": null,
+      "roles": [
+        "内政",
+        "名士"
+      ],
+      "sources": [
+        "后汉书·陶谦传",
+        "三国志·魏书·陶谦传裴注引谢承后汉书",
+        "吴书·刘繇传"
+      ],
+      "historicalNote": "陶谦别驾，劝谦奉使贡献于长安，谦由是得徐州牧；出为广陵太守，本年为笮融所杀，融尽掠郡资而去。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xudan",
+      "name": "许耽",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州丹阳郡",
+      "commandery": "丹阳郡",
+      "affiliation194": "liubei",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·吕布传裴注引英雄记"
+      ],
+      "historicalNote": "陶谦旧将，丹阳兵之帅，本年随刘备守下邳为中郎将；建安元年夜遣司马章诳告吕布，开城迎布，备遂失徐州。本传止称丹阳人，县与字生卒皆不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "caohong_taoqian",
+      "name": "曹宏",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": null,
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·陶谦传",
+        "后汉书·陶谦传"
+      ],
+      "historicalNote": "陶谦所亲信之谗慝小人；谦背道任之，刑政失和，良善多被其害，徐州渐乱。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lejiu",
+      "name": "乐就",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 199,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshu",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪",
+        "袁术传",
+        "吕布传"
+      ],
+      "historicalNote": "袁术大将；建安二年术遣与桥蕤、李丰、梁纲等屯蕲阳，为曹操所破，并斩之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lianggang",
+      "name": "梁纲",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 197,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshu",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪",
+        "袁术传"
+      ],
+      "historicalNote": "袁术大将，与桥蕤、乐就、李丰同屯蕲阳，为曹操所斩。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "lifeng_ys",
+      "name": "李丰",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 197,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshu",
+      "roles": [
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪",
+        "袁术传",
+        "吴书·孙策传"
+      ],
+      "historicalNote": "袁术大将，屯蕲阳，为曹操所斩。与魏中书令李丰同名异人。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "huiqu",
+      "name": "惠衢",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshu",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·袁术传",
+        "吴书·孙策传裴注引江表传"
+      ],
+      "historicalNote": "袁术所置扬州刺史，与吴景共屯历阳攻樊能、张英；后术僭号，衢等分守诸郡。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "shuzhongying",
+      "name": "舒仲应",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "yuanshu",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·袁术传裴注引汉末英雄记"
+      ],
+      "historicalNote": "袁术部下；术军中大饥，仲应擅以术军粮十万斛赈饥民，术怒欲斩之，仲应曰「知当必死，故为之耳」，术下马牵其手曰「仲应，独尔为快耶」，遂赦之。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "sunjing",
+      "name": "孙静",
+      "courtesyName": "幼台",
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": null,
+      "roles": [
+        "军事",
+        "宗室"
+      ],
+      "sources": [
+        "三国志·吴书·孙静传"
+      ],
+      "historicalNote": "孙坚季弟；本年纠合乡曲及宗室五六百人保守乡里，众咸附焉。后随孙策定会稽，献分兵袭查渎之计破王朗；策表为奋武校尉，静恋坟墓宗族求留，遂终于家。",
+      "fictional": false,
+      "certainty": "attested",
+      "prominence": 3
+    },
+    {
+      "id": "xukun",
+      "name": "徐琨",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "扬州吴郡富春县",
+      "commandery": "吴郡",
+      "affiliation194": "yuanshu",
+      "roles": [
+        "军事",
+        "水军"
+      ],
+      "sources": [
+        "三国志·吴书·妃嫔传",
+        "孙破虏讨逆传裴注引江表传",
+        "吴书·徐盛传"
+      ],
+      "historicalNote": "孙坚之甥，母为坚妹；随坚征伐有功。孙策攻樊能于横江，兵少，琨母教伐芦苇作泭以济军，遂破之。后为丹阳太守。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "sunqing_heishan",
+      "name": "孙轻",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "zhangyan",
+      "roles": [
+        "盗寇",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·张燕传",
+        "后汉书·朱儁传"
+      ],
+      "historicalNote": "黑山诸帅之一，与王当等各以部曲从张燕；燕众至百万，号黑山。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "wangdang_heishan",
+      "name": "王当",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "zhangyan",
+      "roles": [
+        "盗寇",
+        "军事"
+      ],
+      "sources": [
+        "三国志·魏书·张燕传"
+      ],
+      "historicalNote": "黑山诸帅之一，与孙轻等以部曲属张燕。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "xuehong",
+      "name": "薛洪",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "zhangyang",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪",
+        "张杨传"
+      ],
+      "historicalNote": "张杨部将；建安初杨为杨丑所杀，洪与河内太守缪尚共守城，曹操遣董昭单身入城说之，遂举众降。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "miushang",
+      "name": "缪尚",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "zhangyang",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪",
+        "张杨传",
+        "董昭传"
+      ],
+      "historicalNote": "张杨所置河内太守；杨死，与薛洪共守，为董昭所说而降曹操。籍贯字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "zhaoqu",
+      "name": "赵衢",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "凉州汉阳郡",
+      "commandery": "汉阳郡",
+      "affiliation194": "mateng",
+      "roles": [
+        "内政",
+        "谋略"
+      ],
+      "sources": [
+        "三国志·魏书·武帝纪裴注引典略",
+        "蜀书·马超传",
+        "杨阜传"
+      ],
+      "historicalNote": "凉州人士，与杨阜、姜叙同谋讨马超；诳超使出，闭冀城门，尽杀超妻子，超遂奔汉中。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "liangkuan",
+      "name": "梁宽",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": "凉州汉阳郡",
+      "commandery": "汉阳郡",
+      "affiliation194": "mateng",
+      "roles": [
+        "内政"
+      ],
+      "sources": [
+        "三国志·蜀书·马超传",
+        "魏书·杨阜传"
+      ],
+      "historicalNote": "与赵衢共闭冀城拒马超，杀超妻子。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "shamoke",
+      "name": "沙摩柯",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": 222,
+      "origin": "荆州武陵郡",
+      "commandery": "武陵郡",
+      "affiliation194": null,
+      "roles": [
+        "异族",
+        "军事"
+      ],
+      "sources": [
+        "三国志·蜀书·先主传",
+        "吴书·潘璋传",
+        "吴主传"
+      ],
+      "historicalNote": "五溪蛮夷君长；章武元年刘备遣马良往招纳，蛮夷渠帅皆受印号，摩柯率众助汉。猇亭之败，为吴将所杀。字生卒不详。",
+      "fictional": false,
+      "certainty": "sparse",
+      "prominence": 4
+    },
+    {
+      "id": "mengyou",
+      "name": "孟优",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "nanzhongyi",
+      "roles": [
+        "异族"
+      ],
+      "sources": [
+        "三国演义第八十七回至第九十回"
+      ],
+      "historicalNote": "演义中孟获之弟，诈降诸葛亮而事泄。《华阳国志》《汉晋春秋》载孟获而不及其弟，正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "dongtuna",
+      "name": "董荼那",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "nanzhongyi",
+      "roles": [
+        "异族"
+      ],
+      "sources": [
+        "三国演义第八十七回至第八十八回"
+      ],
+      "historicalNote": "演义中南中三洞元帅之一，为诸葛亮所擒而释，后与阿会喃缚孟获献亮，反为孟获所杀。正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "ahuinan",
+      "name": "阿会喃",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "nanzhongyi",
+      "roles": [
+        "异族"
+      ],
+      "sources": [
+        "三国演义第八十七回至第八十八回"
+      ],
+      "historicalNote": "演义中南中三洞元帅之一，与董荼那同缚孟获献诸葛亮，为获所杀。正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "mangyachang",
+      "name": "忙牙长",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "nanzhongyi",
+      "roles": [
+        "异族",
+        "军事"
+      ],
+      "sources": [
+        "三国演义第八十七回"
+      ],
+      "historicalNote": "演义中孟获部将，使一口截头大刀骑黄骠马，为王平所退、马岱所斩。正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    },
+    {
+      "id": "dailaidongzhu",
+      "name": "带来洞主",
+      "courtesyName": null,
+      "birthYear": null,
+      "deathYear": null,
+      "origin": null,
+      "commandery": null,
+      "affiliation194": "nanzhongyi",
+      "roles": [
+        "异族"
+      ],
+      "sources": [
+        "三国演义第八十九回至第九十回"
+      ],
+      "historicalNote": "演义中八纳洞主，祝融夫人之兄，导孟获求兀突骨藤甲兵。正史无此人。",
+      "fictional": true,
+      "certainty": "romance",
+      "prominence": 4
+    }
+  ]
+}

@@ -1,0 +1,4713 @@
+{
+  "$schema": "https://mind-arena.local/schema/officer-renown-v1",
+  "meta": {
+    "version": "1.0.0",
+    "created": "2026-08-31",
+    "count": 578,
+    "targetFile": "lib/game/data/officers.json（578 人）",
+    "companionDoc": "docs/OFFICER-RENOWN.md",
+    "purpose": "拆分 officers.json 的 prominence 字段。原字段把「史料显著度」与「游戏重要度」混在一根轴上，结果是黄忠掉出五虎将档、典韦许褚低于徐晃张郃、诸夏侯曹与东吴名将整体压在二级，而刘禅、刘协、陈群、顾雍这些非武将却占着一级。本文件用两根互不干扰的轴取代它。",
+    "supersedes": "lib/game/data/officers.json 的 prominence 字段（本文件不修改该文件，只提供替代口径）",
+    "dimensions": {
+      "historicalWeight": {
+        "cn": "历史地位",
+        "range": [
+          1,
+          4
+        ],
+        "scope": "此人在史书中的分量与对历史进程的实际影响",
+        "evidenceSources": [
+          "是否有独立本传，本传篇幅（《三国志》《后汉书》《华阳国志》《晋书》）",
+          "是否为一卷之首或独立成卷",
+          "所决定的事件是否改变了政权兴替、疆域格局或制度走向",
+          "制度、学术、技术上的长期影响（选官法、经学、医学、屯田、律令）"
+        ],
+        "notEvidence": [
+          "演义戏份",
+          "民间知名度",
+          "战力高低",
+          "游戏里好不好用"
+        ],
+        "levels": {
+          "1": "独立本传且篇幅大，或对历史进程/制度有决定性影响。43 人。",
+          "2": "有独立传记或分量重的附传，影响及于一方或一代。104 人。",
+          "3": "附传、散见数处，事迹连贯可考但不改变进程。174 人。",
+          "4": "仅见姓名或一两句，含全部演义虚构人物（无史料可依）。257 人。"
+        }
+      },
+      "renown": {
+        "cn": "大众知名度与游戏重要度",
+        "range": [
+          1,
+          4
+        ],
+        "scope": "演义中的分量、历代三国题材作品中的地位、标志性事迹的传播度",
+        "evidenceSources": [
+          "《三国演义》中的戏份与名场面",
+          "成语、歇后语、俗谚、蒙学故事、中学课文、戏曲与庙祀",
+          "民间固定组合（五虎将、五子良将、十二虎臣、四庭柱……）——组内必须齐平",
+          "三国题材游戏中是否稳定作为可用/必备人物出场"
+        ],
+        "notEvidence": [
+          "史书篇幅",
+          "官阶高低",
+          "是否武将"
+        ],
+        "levels": {
+          "1": "家喻户晓，历代三国作品必为一线。120 人。",
+          "2": "三国爱好者熟知，作品中有名有姓的中坚。114 人。",
+          "3": "认得名字但印象模糊，多为一事一人。163 人。",
+          "4": "冷门，只有翻史料的人知道。181 人。"
+        },
+        "consumers": [
+          "地图：按 renown 决定该人在哪一级缩放上显示",
+          "UI：列表与检索的默认排序权重",
+          "数值推导：作为五维先验的强度（renown 越高，锚点约束越硬）"
+        ]
+      }
+    },
+    "rules": [
+      "两维独立评分，互不换算。华雄 historicalWeight=4 / renown=1，郑玄 historicalWeight=1 / renown=2，两个方向都允许。",
+      "民间固定组合内部 renown 必须齐平：五虎将、五子良将、江东十二虎臣、四英杰、五大谋士、蜀汉四相、河北四庭柱。齐平只约束 renown，不约束 historicalWeight——乐进本传是五子中最短的，historicalWeight 仍记 3。",
+      "合传不等于固定组合。《三国志》卷九「诸夏侯曹」是编纂单位，其中夏侯尚、曹爽的民间知名度确实低一档，renown 记 2，文档中列明。",
+      "演义虚构人物（fictional=true）historicalWeight 一律为 4，renown 按演义与民间传播度照给，basis 注明「演义形象」。",
+      "renown 不以「是否武将」为条件。刘禅、刘协、陈群、顾雍留在一级，理由是游戏重要度与大众知名度，不是战力。",
+      "每一条都写 basis，不允许出现无法解释的等级。"
+    ],
+    "sources": [
+      "《三国志》陈寿撰、裴松之注（公有领域）",
+      "《后汉书》范晔撰、李贤注；志三十卷司马彪《续汉书》（公有领域）",
+      "《华阳国志》常璩（公有领域）",
+      "《晋书》房玄龄等（公有领域）",
+      "《三国演义》罗贯中（公有领域，仅用于标注虚构人物）"
+    ],
+    "legalBoundary": "分级依据只有两类：公有领域史籍中的记载分量，与《三国演义》、成语俗谚、民间组合等公有领域的传播事实。不参照、不复算任何商业游戏的人物评级表或数值表。",
+    "schemaNote": "顶层为对象；人物数组在 officers 键下，与 lib/game/data/officers.json 的结构一致。"
+  },
+  "officers": [
+    {
+      "id": "caocao",
+      "name": "曹操",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·君主与宗室",
+      "basis": "魏武帝，《武帝纪》独占一卷，统一北方奠定曹魏；三国叙事的绝对主角，历代三国游戏的第一主公。"
+    },
+    {
+      "id": "caopi",
+      "name": "曹丕",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·君主与宗室",
+      "basis": "受禅代汉，终结东汉四百年；《文帝纪》独立成卷，兼建安文坛领袖，与曹植之争家喻户晓。"
+    },
+    {
+      "id": "chenqun_lb",
+      "name": "陈群",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·文臣",
+      "basis": "创九品官人法，笼罩此后三百年选官制度，魏书列传之首；游戏中稳定作为曹魏内政首席，故知名度亦列一级——它不是武将，但一级从不以能否上阵为条件。"
+    },
+    {
+      "id": "dengai",
+      "name": "邓艾",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·将领",
+      "basis": "偷渡阴平灭蜀，本传篇幅极大；口吃、屯田、灭国三事俱为大众熟知，后期名将中与姜维并列头号。"
+    },
+    {
+      "id": "dongzhuo",
+      "name": "董卓",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "董卓集团与凉州军",
+      "basis": "废立天子、焚洛阳，汉末乱局的起点；演义头号反派，游戏开局必备势力。"
+    },
+    {
+      "id": "fazheng",
+      "name": "法正",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·谋臣",
+      "basis": "定汉中之谋主，蜀汉唯一有谥的外姓谋臣；诸葛亮称其若在必阻东征，历代游戏中蜀汉智力顶档。"
+    },
+    {
+      "id": "gongsunzan",
+      "name": "公孙瓒",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "公孙瓒集团",
+      "basis": "白马义从威震塞北，与袁绍争河北十年；《后汉书》《三国志》皆有传，赵云刘备的出身舞台，游戏必设势力。"
+    },
+    {
+      "id": "guanyu",
+      "name": "关羽",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·五虎将",
+      "basis": "水淹七军威震华夏，荆州之失改变三国格局；后世封帝入祀，武圣，知名度无争议顶级。"
+    },
+    {
+      "id": "guojia",
+      "name": "郭嘉",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹操·五大谋士",
+      "basis": "十胜十败、遗计定辽东，三十八岁而卒故本传不长；\"郭嘉不死卧龙不出\"之说使大众知名度冲至顶格。"
+    },
+    {
+      "id": "guyong",
+      "name": "顾雍",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·文臣",
+      "basis": "为吴相十九年，吴郡四姓之首；游戏中长期作为东吴内政第一人。"
+    },
+    {
+      "id": "jiangwei",
+      "name": "姜维",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·将领",
+      "basis": "继诸葛亮北伐九次，蜀汉最后的支柱，本传篇幅大；演义后半部主角，游戏后期剧本核心，后期名将组内与邓艾齐平。"
+    },
+    {
+      "id": "jiaxu",
+      "name": "贾诩",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹操·五大谋士",
+      "basis": "劝李傕反攻长安改写汉末走向，后为魏太尉；毒士之名深入人心。"
+    },
+    {
+      "id": "liubei",
+      "name": "刘备",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·君主与宗室",
+      "basis": "昭烈帝，《先主传》独立成卷；三国鼎立的一方开创者，演义第一正面主角。"
+    },
+    {
+      "id": "liubiao",
+      "name": "刘表",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "荆州刘表集团",
+      "basis": "单骑定荆州，据地八郡近二十年，《三国志》《后汉书》皆有传；游戏中荆州势力主公，必备。"
+    },
+    {
+      "id": "liushan",
+      "name": "刘禅",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·君主与宗室",
+      "basis": "在位四十一年，蜀汉存亡系于其身；\"乐不思蜀\"与阿斗之名家喻户晓，游戏中必为蜀汉后期君主——旧分级把他和武将混在一张表里比较，本次两维拆开后他的位置反而更清楚：历史地位一级、知名度一级、武将属性为零。"
+    },
+    {
+      "id": "liuxie",
+      "name": "刘协",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "汉室宗亲与朝臣",
+      "basis": "汉献帝，东汉末代皇帝，衣带诏与禅让是全部剧情的合法性轴心；游戏中\"奉天子以令诸侯\"机制的对象。"
+    },
+    {
+      "id": "lubu",
+      "name": "吕布",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "吕布集团",
+      "basis": "人中吕布，辕门射戟、白门楼；《三国志》《后汉书》皆有传，武力标杆，三十年玩家公认武力第一。"
+    },
+    {
+      "id": "lusu",
+      "name": "鲁肃",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·四英杰",
+      "basis": "榻上策定东吴国策，力主联刘抗曹；四英杰组内齐平。"
+    },
+    {
+      "id": "luxun",
+      "name": "陆逊",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·四英杰",
+      "basis": "夷陵火攻破刘备、石亭破曹休，官至吴丞相；四英杰组内齐平。"
+    },
+    {
+      "id": "lvmeng",
+      "name": "吕蒙",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·四英杰",
+      "basis": "白衣渡江取荆州，士别三日刮目相看；四英杰组内齐平。"
+    },
+    {
+      "id": "machao",
+      "name": "马超",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·五虎将",
+      "basis": "渭水战曹操几至殒身，入蜀后无实权故本传中等；知名度与游戏地位稳居一线。"
+    },
+    {
+      "id": "pangtong",
+      "name": "庞统",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·谋臣",
+      "basis": "凤雏，与卧龙齐名；本传不长且早死落凤坡，\"伏龙凤雏得一可安天下\"之说使知名度顶格。"
+    },
+    {
+      "id": "simayi",
+      "name": "司马懿",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "抗诸葛亮、平辽东、高平陵夺权，晋室之基；《晋书·宣帝纪》独立成卷。"
+    },
+    {
+      "id": "sunce",
+      "name": "孙策",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·孙氏宗室",
+      "basis": "数年定江东六郡，小霸王；游戏中开局最强的成长型君主之一。"
+    },
+    {
+      "id": "sunjian",
+      "name": "孙坚",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·孙氏宗室",
+      "basis": "破华雄、入洛阳得传国玺，江东基业开创者；与孙策同卷。"
+    },
+    {
+      "id": "sunquan",
+      "name": "孙权",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·孙氏宗室",
+      "basis": "吴大帝，《吴主传》独立成卷，据江东五十二年。"
+    },
+    {
+      "id": "weiyan",
+      "name": "魏延",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·将领",
+      "basis": "汉中太守十年、子午谷奇谋；本传中等而结局\"反骨\"一节使知名度极高。"
+    },
+    {
+      "id": "xuhuang",
+      "name": "徐晃",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·五子良将",
+      "basis": "长驱直入解樊城之围，曹操比之周亚夫；组内齐平。"
+    },
+    {
+      "id": "xunyou",
+      "name": "荀攸",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹操·五大谋士",
+      "basis": "曹操谋主，官渡十二奇策；与荀彧、贾诩合卷，五大谋士组内齐平。"
+    },
+    {
+      "id": "xunyu",
+      "name": "荀彧",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹操·五大谋士",
+      "basis": "王佐之才，为曹操规大略、举人才二十年；空食盒之死为魏晋史一大关节。"
+    },
+    {
+      "id": "yuanshao",
+      "name": "袁绍",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "袁绍集团·其他",
+      "basis": "四世三公，讨董联军盟主，官渡前中原最强诸侯；《三国志》《后汉书》皆有长传。"
+    },
+    {
+      "id": "yuanshu",
+      "name": "袁术",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "袁术集团",
+      "basis": "僭号称帝，汉末第一个称帝者；与袁绍同卷立传，游戏中 194 剧本最强势力之一。"
+    },
+    {
+      "id": "zhangfei",
+      "name": "张飞",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·五虎将",
+      "basis": "当阳桥喝退曹军、义释严颜，程昱等称万人敌；本传不长而知名度顶格。"
+    },
+    {
+      "id": "zhanghe",
+      "name": "张郃",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·五子良将",
+      "basis": "自袁绍降曹，街亭破马谡，木门中矢；兼河北四庭柱之一，两组皆齐平。"
+    },
+    {
+      "id": "zhangliao",
+      "name": "张辽",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·五子良将",
+      "basis": "逍遥津八百破十万，止江东小儿夜啼；五子良将之首。"
+    },
+    {
+      "id": "zhangzhao",
+      "name": "张昭",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·文臣",
+      "basis": "孙策托孤、孙权仰仗的江东文臣领袖，《吴书》列传之首。"
+    },
+    {
+      "id": "zhaoyun",
+      "name": "赵云",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·五虎将",
+      "basis": "长坂单骑救主、汉水空营计；本传简短（裴注引《赵云别传》补足），历史分量二级、知名度一级，两维分离的样板。"
+    },
+    {
+      "id": "zhouyu",
+      "name": "周瑜",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·四英杰",
+      "basis": "赤壁破曹奠定三分，《三国志》独立本传；四英杰之首。"
+    },
+    {
+      "id": "zhugeliang",
+      "name": "诸葛亮",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "蜀汉·四相",
+      "basis": "《诸葛亮传》为《三国志》人臣中唯一单独成卷者，出师表入中学课本；中国智慧的符号。"
+    },
+    {
+      "id": "bushi",
+      "name": "步骘",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "东吴·文臣",
+      "basis": "吴丞相，平交州之功。"
+    },
+    {
+      "id": "caiyong",
+      "name": "蔡邕",
+      "historicalWeight": 1,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "汉末第一文宗，续《汉记》、定熹平石经；《后汉书》长传，历史一级，而大众多只因\"蔡文姬之父\"与哭董卓一事识其名。"
+    },
+    {
+      "id": "caohong",
+      "name": "曹洪",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "荥阳让马\"天下可无洪，不可无君\"；诸夏侯曹合卷成员，组内齐平。"
+    },
+    {
+      "id": "caoren",
+      "name": "曹仁",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "南郡拒周瑜岁余、樊城拒关羽，曹魏第一方面统帅，本传篇幅居合卷之最。"
+    },
+    {
+      "id": "caoxiu",
+      "name": "曹休",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "曹操称\"吾家千里驹\"，督扬州十余年，石亭败绩；组内齐平。"
+    },
+    {
+      "id": "caozhen",
+      "name": "曹真",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "抗诸葛亮首次北伐的魏军主帅，官至大司马；演义贬损而游戏中仍为魏国一线统帅，组内齐平。"
+    },
+    {
+      "id": "caozhi",
+      "name": "曹植",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·君主与宗室",
+      "basis": "七步诗与《洛神赋》，建安文学最高峰；无军政实权故历史分量止于二级，大众知名度则顶级。"
+    },
+    {
+      "id": "chendeng",
+      "name": "陈登",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "徐州豪族，破孙策军于匡琦，\"湖海之士\"；游戏中徐州系代表人物。"
+    },
+    {
+      "id": "chengong",
+      "name": "陈宫",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "吕布集团",
+      "basis": "叛曹迎吕布几夺兖州，白门楼从容就死；演义\"捉放曹\"使知名度极高，游戏中吕布阵营首席谋士。"
+    },
+    {
+      "id": "chengpu",
+      "name": "程普",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "三世老将，赤壁与周瑜为左右督；十二虎臣合传之首，组内齐平。"
+    },
+    {
+      "id": "chengyu",
+      "name": "程昱",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹操·五大谋士",
+      "basis": "兖州三城之守保住曹操根本，东阿死拒吕布；组内齐平。"
+    },
+    {
+      "id": "chenlin",
+      "name": "陈琳",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "袁绍集团·河北谋士",
+      "basis": "建安七子，讨曹檄文\"矢在弦上\"愈曹操头风；文名重于谋略，游戏中定位文官。"
+    },
+    {
+      "id": "chenwu",
+      "name": "陈武",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "庐江上甲督，合肥战死；本传极短，但为十二虎臣正式成员，组内齐平。"
+    },
+    {
+      "id": "cuiyan_yuan",
+      "name": "崔琰",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "清河名士，声姿高畅，为曹操主选举；因\"时乎时乎\"一语赐死，士林震动。"
+    },
+    {
+      "id": "dengzhi",
+      "name": "邓芝",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "夷陵后使吴复盟，\"蜀有邓芝，吴有张温\"。"
+    },
+    {
+      "id": "dianwei",
+      "name": "典韦",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·宿卫",
+      "basis": "宛城以身殉曹操，双戟八十斤；本传极短，但与许褚并称宿卫双璧，演义武力名列前茅，游戏中恒为魏国武力顶档——旧分级压在二级而五子在一级，说不通。"
+    },
+    {
+      "id": "diaochan",
+      "name": "貂蝉",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "吕布集团",
+      "basis": "演义形象。连环计的核心，民间四大美女之一；正史只有\"布与卓侍婢私通\"一句无名氏——史料几近于无而知名度顶级。"
+    },
+    {
+      "id": "dingfeng",
+      "name": "丁奉",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "雪中奋短兵破魏于东兴，历事四主；十二虎臣组内齐平，兼后期名将。"
+    },
+    {
+      "id": "dongzhao",
+      "name": "董昭",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "劝迎天子都许、建魏国九锡皆出其手；史迹重于名声。"
+    },
+    {
+      "id": "duji",
+      "name": "杜畿",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "单车入河东安集十六年，魏初治绩第一。"
+    },
+    {
+      "id": "duyu",
+      "name": "杜预",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "灭吴统帅，\"势如破竹\"典出于此；又注《左传》而配享文庙武庙，后期名将组内齐平。"
+    },
+    {
+      "id": "feiyi",
+      "name": "费祎",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·四相",
+      "basis": "主政期间与吴通好、节制姜维用兵；四相组内齐平。"
+    },
+    {
+      "id": "ganning",
+      "name": "甘宁",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "锦帆贼出身，百骑劫魏营，孙权\"孟德有张辽，孤有兴霸\"；十二虎臣中知名度最高者之一。"
+    },
+    {
+      "id": "gaorou",
+      "name": "高柔",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "掌法三十年，历仕四世至太尉；律法之臣，游戏中定位内政。"
+    },
+    {
+      "id": "gaoshun",
+      "name": "高顺",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "吕布集团",
+      "basis": "陷阵营七百人所向无前，破夏侯惇、败刘备；本传仅附吕布传数语，而陷阵营之名使玩家知名度极高。"
+    },
+    {
+      "id": "gongsundu",
+      "name": "公孙度",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "辽东公孙氏",
+      "basis": "割据辽东自立，跨海取东莱；边地政权开创者。"
+    },
+    {
+      "id": "guohuai",
+      "name": "郭淮",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·将领",
+      "basis": "都督雍凉三十年，姜维北伐的固定对手；后期名将组内与邓艾、陈泰同列。"
+    },
+    {
+      "id": "handang",
+      "name": "韩当",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "从孙坚起兵的三世老将；十二虎臣组内齐平。"
+    },
+    {
+      "id": "hansui",
+      "name": "韩遂",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "西凉韩遂集团",
+      "basis": "凉州叛军首领三十余年，与马腾分合；渭南抹书离间之计的对象，游戏中西凉势力主公。"
+    },
+    {
+      "id": "hejin",
+      "name": "何进",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "宦官与外戚",
+      "basis": "召外兵诛宦官，直接引出董卓入京，汉末乱局的开关；189 剧本君主，194 年已死。"
+    },
+    {
+      "id": "huangfusong",
+      "name": "皇甫嵩",
+      "historicalWeight": 1,
+      "renown": 2,
+      "group": "汉室宗亲与朝臣",
+      "basis": "平黄巾的实际统帅，《后汉书》长传，汉末最后的名将；黄巾剧本必备而大众知名度不及演义人物，故历史一级、知名度二级。"
+    },
+    {
+      "id": "huanggai",
+      "name": "黄盖",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "赤壁苦肉计与火船诈降，\"周瑜打黄盖\"成歇后语；本传极短而知名度顶级，组内齐平。"
+    },
+    {
+      "id": "huangquan",
+      "name": "黄权",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "谏刘璋拒刘备、夷陵后北降而蜀不罪其家；史评甚高，大众知名度中等。"
+    },
+    {
+      "id": "huangzhong",
+      "name": "黄忠",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·五虎将",
+      "basis": "定军山斩夏侯渊，一战定汉中；本传短，旧 prominence 因此把他压到二级而其余四人在一级——五虎将是三十年民间固定组合，必须齐平，此维改列一级。"
+    },
+    {
+      "id": "huatuo",
+      "name": "华佗",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "方术与医术",
+      "basis": "麻沸散与外科，《方技传》有传；刮骨疗毒与为曹操治头风两桩演义情节使其家喻户晓。"
+    },
+    {
+      "id": "huaxin",
+      "name": "华歆",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "魏司徒，管宁割席与逼宫收伏后皆出其事；演义中为反面配角。"
+    },
+    {
+      "id": "jiakui",
+      "name": "贾逵",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "豫州刺史，石亭救曹休；魏初能吏。"
+    },
+    {
+      "id": "jiangji",
+      "name": "蒋济",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "献疑城退敌之策，高平陵之变的关键担保人。"
+    },
+    {
+      "id": "jiangqin",
+      "name": "蒋钦",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "从孙策转战，后改节好学；十二虎臣组内齐平。"
+    },
+    {
+      "id": "jiangwan",
+      "name": "蒋琬",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·四相",
+      "basis": "诸葛亮指定的继任者，\"社稷之器\"；四相组内齐平。"
+    },
+    {
+      "id": "jushou",
+      "name": "沮授",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "袁绍集团·河北谋士",
+      "basis": "劝袁绍挟天子、谏勿轻进，不用而败，被俘不降；河北谋主核心，游戏中袁绍阵营智力第一。"
+    },
+    {
+      "id": "kebineng",
+      "name": "轲比能",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "鲜卑",
+      "basis": "鲜卑大人，控弦十余万，为幽州刺史遣刺客所杀；北疆最强异族势力。"
+    },
+    {
+      "id": "kongrong",
+      "name": "孔融",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "北海孔融集团",
+      "basis": "孔子二十世孙，让梨故事入蒙学，建安七子，因忤曹操被杀；知名度极高而全无武功，游戏中北海势力主公。"
+    },
+    {
+      "id": "kuaiyue",
+      "name": "蒯越",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "定荆州宗贼之谋主，曹操得荆州\"不喜得州，喜得异度\"。"
+    },
+    {
+      "id": "lejin",
+      "name": "乐进",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·五子良将",
+      "basis": "每战先登，本传是五子中最短的一篇——历史篇幅三级而知名度一级，正是两维分离之例；五子为固定组合，组内齐平。"
+    },
+    {
+      "id": "lidian",
+      "name": "李典",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·将领",
+      "basis": "逍遥津与张辽、乐进同守，\"国家大事，岂顾私怨\"；游戏中稳定为魏国前排。"
+    },
+    {
+      "id": "lijue",
+      "name": "李傕",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "董卓集团与凉州军",
+      "basis": "反攻长安、劫持献帝，董卓死后主宰朝廷三年；演义中期主要反派，194 剧本关中势力主公。"
+    },
+    {
+      "id": "lingtong",
+      "name": "凌统",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "合肥断后力战，与甘宁有杀父之仇；十二虎臣组内齐平。"
+    },
+    {
+      "id": "liuba",
+      "name": "刘巴",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "铸直百钱平蜀中物价、制《蜀科》；张飞求见不答一事有名。"
+    },
+    {
+      "id": "liuyan_yz",
+      "name": "刘焉",
+      "historicalWeight": 1,
+      "renown": 2,
+      "group": "益州刘焉刘璋集团",
+      "basis": "首倡废史立牧，直接造成州牧割据，汉末分裂的制度起点；据益州自立。历史影响远大于名声，故历史一级、知名度二级。"
+    },
+    {
+      "id": "liuyao",
+      "name": "刘繇",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "扬州刘繇集团",
+      "basis": "汉室宗亲、扬州刺史，为孙策所破；游戏中江东开局的对手势力主公。"
+    },
+    {
+      "id": "liuye",
+      "name": "刘晔",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "光武之后而佐魏，献霹雳车、料刘备必取蜀；谋士中的技术派。"
+    },
+    {
+      "id": "liuyu",
+      "name": "刘虞",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "汉室宗亲与朝臣",
+      "basis": "幽州牧，怀柔乌桓、拒受帝号，为公孙瓒所杀；北方民心的象征。"
+    },
+    {
+      "id": "liuzhang",
+      "name": "刘璋",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "益州刘焉刘璋集团",
+      "basis": "益州牧，迎刘备入蜀而失国；游戏中益州势力主公，必备。"
+    },
+    {
+      "id": "liyan",
+      "name": "李严",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "与诸葛亮同受托孤，后因运粮失期被废；蜀汉政争的另一极。"
+    },
+    {
+      "id": "luxun_kang",
+      "name": "陆抗",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "东吴·将领",
+      "basis": "西陵破步阐，与羊祜结羊陆之交，东吴最后的擎天柱；后期名将组内与羊祜、杜预齐平。"
+    },
+    {
+      "id": "luzhi",
+      "name": "卢植",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "名士与学者",
+      "basis": "破黄巾主帅之一、刘备之师、独抗董卓废立；《后汉书》长传，兼经学大家，游戏黄巾剧本必备。"
+    },
+    {
+      "id": "lvfan",
+      "name": "吕范",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "东吴·文臣",
+      "basis": "掌孙氏财计，后为大司马。"
+    },
+    {
+      "id": "maliang",
+      "name": "马良",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "白眉最良，抚五溪蛮，夷陵战殁；\"马氏五常\"之说流传。"
+    },
+    {
+      "id": "manchong",
+      "name": "满宠",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·将领",
+      "basis": "都督扬州拒吴，火烧攻具、徙合肥新城；魏国东线支柱，游戏一线。"
+    },
+    {
+      "id": "masu",
+      "name": "马谡",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "蜀汉·谋臣",
+      "basis": "街亭失守被斩，\"挥泪斩马谡\"成典故；本传附马良传极短，知名度顶级。"
+    },
+    {
+      "id": "mateng",
+      "name": "马腾",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "西凉马腾集团",
+      "basis": "凉州军阀，后入朝为卫尉，因马超之叛族诛；游戏中 194 剧本西凉势力主公。"
+    },
+    {
+      "id": "mizhu",
+      "name": "糜竺",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "徐州巨富，以妹与家财资刘备于最困处；蜀汉元从的代表。"
+    },
+    {
+      "id": "pangde",
+      "name": "庞德",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·将领",
+      "basis": "抬棺决战关羽，被擒不降而死；演义名场面使知名度居魏将前列。"
+    },
+    {
+      "id": "panzhang",
+      "name": "潘璋",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "擒关羽的实际执行者，十二虎臣组内齐平。"
+    },
+    {
+      "id": "qiaozhou",
+      "name": "谯周",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "《仇国论》反对北伐、劝刘禅降魏，蜀亡的关键一票；兼经学宗师。"
+    },
+    {
+      "id": "shenpei",
+      "name": "审配",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "袁绍集团·河北谋士",
+      "basis": "守邺至城破不屈，向北而死；河北谋主核心，组内齐平。"
+    },
+    {
+      "id": "shixie",
+      "name": "士燮",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "交州士燮集团",
+      "basis": "据交州四十年，中原士人南奔者赖以全，越南史称\"士王\"；地方史地位极高而中原叙事中边缘。"
+    },
+    {
+      "id": "simashi",
+      "name": "司马师",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "废齐王芳、平毌丘俭，稳住司马氏权柄；游戏后期剧本主公之一。"
+    },
+    {
+      "id": "simazhao",
+      "name": "司马昭",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "\"司马昭之心\"成为成语，遣钟会邓艾灭蜀。"
+    },
+    {
+      "id": "tadun",
+      "name": "蹋顿",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "乌桓",
+      "basis": "乌桓单于，收纳袁尚兄弟，白狼山为张辽所斩；曹操北征的对手。"
+    },
+    {
+      "id": "taishici",
+      "name": "太史慈",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·将领",
+      "basis": "北海解围、神亭岭酣斗孙策、\"大丈夫当带三尺之剑\"；虽早卒不入十二虎臣，知名度与游戏地位稳居东吴一线——旧分级压在二级不合理。"
+    },
+    {
+      "id": "taoqian",
+      "name": "陶谦",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "割据群雄",
+      "basis": "徐州牧，曹操屠徐州的起因，三让徐州予刘备；游戏中 194 剧本徐州势力主公。"
+    },
+    {
+      "id": "tianfeng",
+      "name": "田丰",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "袁绍集团·河北谋士",
+      "basis": "刚而犯上，谏袁绍勿轻进官渡，兵败而被杀；河北谋主核心，组内齐平。"
+    },
+    {
+      "id": "tianyu",
+      "name": "田豫",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "并州刺史，制御鲜卑数十年；北疆专家，大众知名度低。"
+    },
+    {
+      "id": "wangcan",
+      "name": "王粲",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "建安七子之冠冕，《登楼赋》《七哀诗》；文学史地位高于政治。"
+    },
+    {
+      "id": "wanglang",
+      "name": "王朗",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "会稽王朗集团",
+      "basis": "会稽太守拒孙策，后为魏司徒兼经学名家；演义\"武乡侯骂死王朗\"一节，加当代网络语境的长期传播，知名度居一级。"
+    },
+    {
+      "id": "wangping",
+      "name": "王平",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "蜀汉·将领",
+      "basis": "街亭独全其军，兴势之役以三万拒曹爽十万，统无当飞军；游戏中蜀汉后期第一线。"
+    },
+    {
+      "id": "wangyun",
+      "name": "王允",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "汉室宗亲与朝臣",
+      "basis": "连环计诛董卓，随后拒赦凉州军而覆亡；《后汉书》有传，演义前期核心谋士。"
+    },
+    {
+      "id": "wenpin",
+      "name": "文聘",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "守江夏数十年，孙权亲征不能下；游戏中魏国荆州方面稳定登场。"
+    },
+    {
+      "id": "xiahoudun",
+      "name": "夏侯惇",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "督二十六军、以宾客之礼见曹操，诸夏侯曹合卷之首；旧 prominence 压在二级明显失当，此维改列一级。"
+    },
+    {
+      "id": "xiahouyuan",
+      "name": "夏侯渊",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "虎步关右、三日五百六日一千，定军山战死；诸夏侯曹组内齐平。"
+    },
+    {
+      "id": "xinpi",
+      "name": "辛毗",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "袁绍集团·河北谋士",
+      "basis": "先事袁氏后归曹，持节杖立军门止司马懿出战；史迹清晰而大众印象浅。"
+    },
+    {
+      "id": "xuchu",
+      "name": "许褚",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·宿卫",
+      "basis": "虎痴，渭水单舟护曹操、瞋目使马超不敢动；与典韦齐平，游戏中恒为魏国武力顶档。"
+    },
+    {
+      "id": "xujing",
+      "name": "许靖",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "交州士燮集团",
+      "basis": "以名望见重，避难交州而入蜀为司徒；本传自载\"名过其实\"之评。"
+    },
+    {
+      "id": "xusheng",
+      "name": "徐盛",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "疑城退曹丕、濡须拒魏；十二虎臣组内齐平。"
+    },
+    {
+      "id": "xushu",
+      "name": "徐庶",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "蜀汉·谋臣",
+      "basis": "走马荐诸葛，因母被执入曹营，\"徐庶进曹营——一言不发\"成歇后语；本传仅附诸葛亮传数语，知名度顶级。"
+    },
+    {
+      "id": "xuyou",
+      "name": "许攸",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "袁绍集团·河北谋士",
+      "basis": "献计火烧乌巢直接决定官渡胜负，后以轻慢被杀；无独立传故历史三级，知名度一级。"
+    },
+    {
+      "id": "yanghu",
+      "name": "羊祜",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "都督荆州十年，与陆抗结羊陆之交，荐杜预以成灭吴；《晋书》长传，后期名将组内齐平。"
+    },
+    {
+      "id": "yuantan",
+      "name": "袁谭",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "袁绍集团·其他",
+      "basis": "袁绍长子，与袁尚相攻致河北速亡；史迹重要而形象模糊。"
+    },
+    {
+      "id": "yufan",
+      "name": "虞翻",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "东吴·文臣",
+      "basis": "《易》学名家，性疏直屡犯孙权而徙交州。"
+    },
+    {
+      "id": "yujin",
+      "name": "于禁",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "曹魏·五子良将",
+      "basis": "曹操外姓将中唯一假节钺者，樊城为水所没而降，晚节尽毁；组内齐平。"
+    },
+    {
+      "id": "zangba",
+      "name": "臧霸",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "吕布集团",
+      "basis": "泰山群帅之首，据青徐半独立二十年；游戏中徐州系代表武将。"
+    },
+    {
+      "id": "zhanghong",
+      "name": "张纮",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "东吴·文臣",
+      "basis": "与张昭并称\"江东二张\"，劝孙权都秣陵；史绩清晰而演义戏份与知名度远逊张昭，故本维不与张昭齐平。"
+    },
+    {
+      "id": "zhangji_wei",
+      "name": "张既",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "凉州刺史，安定河右十余年；本传详而无名场面。"
+    },
+    {
+      "id": "zhangjiao",
+      "name": "张角",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "黄巾与太平道",
+      "basis": "太平道教主，黄巾起义直接动摇东汉；\"苍天已死，黄天当立\"是全部三国叙事的开场白。"
+    },
+    {
+      "id": "zhanglu",
+      "name": "张鲁",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "汉中张鲁集团",
+      "basis": "五斗米道师君，据汉中近三十年行政教合一；游戏中汉中势力主公，必备。"
+    },
+    {
+      "id": "zhangmiao",
+      "name": "张邈",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "吕布集团",
+      "basis": "八厨之一，与曹操为奔走之友而叛迎吕布，几覆兖州。"
+    },
+    {
+      "id": "zhangsong",
+      "name": "张松",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "益州刘焉刘璋集团",
+      "basis": "献西川地图引刘备入蜀；本传附法正传，演义\"过目不忘\"一节使知名度居高。"
+    },
+    {
+      "id": "zhangxiu",
+      "name": "张绣",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "张济集团",
+      "basis": "宛城反曹操，杀曹昂、曹安民与典韦，后再降；游戏中 194–200 剧本必备势力，演义戏份重。"
+    },
+    {
+      "id": "zhangyan",
+      "name": "张燕",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "黑山军",
+      "basis": "黑山军百万之众，受汉封平难中郎将，后举众归曹操；游戏中并冀之间的固定势力。"
+    },
+    {
+      "id": "zhangyang",
+      "name": "张杨",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "张杨集团",
+      "basis": "河内太守，迎献帝东归有功；194 剧本河内势力主公。"
+    },
+    {
+      "id": "zhengxuan",
+      "name": "郑玄",
+      "historicalWeight": 1,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "遍注群经，郑学笼罩此后千年经学；《后汉书》长传。与军政无涉，游戏中多作特殊人物。"
+    },
+    {
+      "id": "zhonghui",
+      "name": "钟会",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "司马氏与西晋",
+      "basis": "与邓艾分兵灭蜀，旋即据成都谋反被杀；蜀汉终局的执行者，后期名将组内齐平。"
+    },
+    {
+      "id": "zhongyao",
+      "name": "钟繇",
+      "historicalWeight": 1,
+      "renown": 1,
+      "group": "曹魏·文臣",
+      "basis": "镇关中十余年输马给军，魏太傅；又是楷书之祖，史地两重，游戏中魏国文臣一线。"
+    },
+    {
+      "id": "zhoutai_wu",
+      "name": "周泰",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "数救孙权于乱军，体被数十创，孙权指其创痕行酒；十二虎臣组内齐平——旧分级把他与甘宁一并压在二级，与五子良将在一级不成比例。"
+    },
+    {
+      "id": "zhugejin",
+      "name": "诸葛瑾",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·文臣",
+      "basis": "吴大将军，蜀吴外交的固定通道，诸葛亮之兄；游戏中东吴一线文臣。"
+    },
+    {
+      "id": "zhugeke",
+      "name": "诸葛恪",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·将领",
+      "basis": "平山越得甲士四万，东兴大捷后新城惨败而遭族诛；东吴后期第一权臣。"
+    },
+    {
+      "id": "zhuhuan",
+      "name": "朱桓",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "东吴·将领",
+      "basis": "濡须以五千破曹仁数万；史绩硬而名声不彰。"
+    },
+    {
+      "id": "zhujun",
+      "name": "朱儁",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "汉室宗亲与朝臣",
+      "basis": "与皇甫嵩共平黄巾，后拒李傕而死。"
+    },
+    {
+      "id": "zhuran",
+      "name": "朱然",
+      "historicalWeight": 2,
+      "renown": 1,
+      "group": "东吴·将领",
+      "basis": "夷陵先锋，江陵拒魏六月不下而名震敌国；东吴中期第一名将，游戏一线。"
+    },
+    {
+      "id": "baoxin",
+      "name": "鲍信",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "割据群雄",
+      "basis": "最早看破董卓者，迎曹操领兖州而战死于济北；曹操霸业的起点人物。"
+    },
+    {
+      "id": "bianshi",
+      "name": "卞氏",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "女性",
+      "basis": "武宣皇后，出倡家而正位中宫，曹丕曹植之母；魏宫政治的稳定点。"
+    },
+    {
+      "id": "bingyuan",
+      "name": "邴原",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "与管宁、华歆齐名，\"一龙\"之说。"
+    },
+    {
+      "id": "budugen",
+      "name": "步度根",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "鲜卑",
+      "basis": "鲜卑首领，与轲比能相攻，后叛魏被斩。"
+    },
+    {
+      "id": "caimao",
+      "name": "蔡瑁",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "襄阳蔡氏，刘表姻亲掌兵；演义中与张允同掌曹操水军而死于蒋干反间，戏份远超史料。"
+    },
+    {
+      "id": "caiyan",
+      "name": "蔡琰",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "女性",
+      "basis": "《悲愤诗》与文姬归汉，汉末唯一有作品传世的女性；文学史地位高而游戏中多为特殊人物。"
+    },
+    {
+      "id": "caoang",
+      "name": "曹昂",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·君主与宗室",
+      "basis": "宛城让马于曹操而死，曹丕得立之由；本传极短。"
+    },
+    {
+      "id": "caochun",
+      "name": "曹纯",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "督虎豹骑，长坂追刘备、南皮斩袁谭；本传仅附曹仁传数语，但虎豹骑之名使玩家熟知，组内齐平。"
+    },
+    {
+      "id": "caoshuang",
+      "name": "曹爽",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "辅政十年而高平陵一日尽失，司马氏代魏之门由此开；历史分量重，形象负面模糊，知名度止于二级。"
+    },
+    {
+      "id": "caosong",
+      "name": "曹嵩",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·君主与宗室",
+      "basis": "曹操之父，其死为曹操屠徐州之由。"
+    },
+    {
+      "id": "caozhang",
+      "name": "曹彰",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·君主与宗室",
+      "basis": "黄须儿，北征乌桓、手格猛兽；本传短，但演义戏份与游戏中\"宗室猛将\"的固定定位使知名度居前。"
+    },
+    {
+      "id": "changxi",
+      "name": "昌豨",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "泰山群盗，屡叛屡降，终为于禁所斩。"
+    },
+    {
+      "id": "chendao",
+      "name": "陈到",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·将领",
+      "basis": "名位常亚赵云，督白毦兵；正史仅一句而玩家熟知。"
+    },
+    {
+      "id": "chenggongying",
+      "name": "成公英",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "西凉韩遂集团",
+      "basis": "韩遂心腹，遂败而不弃，曹操义之。"
+    },
+    {
+      "id": "chengui",
+      "name": "陈珪",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "与子陈登共谋离间吕布、袁术之婚，断吕布外援。"
+    },
+    {
+      "id": "chenjiao",
+      "name": "陈矫",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "曹丕即位时决断开府，魏司徒。"
+    },
+    {
+      "id": "chentai",
+      "name": "陈泰",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "郭淮之后的雍凉主帅，狄道解围挫姜维；后期名将中的实力派。"
+    },
+    {
+      "id": "chenzhen",
+      "name": "陈震",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "使吴共盟，定分天下之约。"
+    },
+    {
+      "id": "chunyuqiong",
+      "name": "淳于琼",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "袁绍集团·其他",
+      "basis": "西园八校尉之一，守乌巢失守致官渡崩盘；以败因人物而知名。"
+    },
+    {
+      "id": "cuilin",
+      "name": "崔林",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "崔琰从弟，魏司空，议不虚封外国。"
+    },
+    {
+      "id": "cuizhouping",
+      "name": "崔钧",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "崔州平，诸葛亮友人；演义中出场论天下治乱之势。"
+    },
+    {
+      "id": "dingyuan",
+      "name": "丁原",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "吕布集团",
+      "basis": "并州刺史，吕布杀之以投董卓；\"三姓家奴\"故事的第一环。"
+    },
+    {
+      "id": "dongcheng",
+      "name": "董承",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "汉室宗亲与朝臣",
+      "basis": "衣带诏主谋，事泄族诛；献帝反抗曹操的唯一一次实举。"
+    },
+    {
+      "id": "donghe",
+      "name": "董和",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "益州刘焉刘璋集团",
+      "basis": "为政清约，与诸葛亮共署左将军府事；董允之父。"
+    },
+    {
+      "id": "dongxi",
+      "name": "董袭",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "东吴·江东十二虎臣",
+      "basis": "濡须遇暴风覆舟不去而死；本传极短，十二虎臣正式成员，组内齐平。"
+    },
+    {
+      "id": "dongyun",
+      "name": "董允",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "蜀汉·四相",
+      "basis": "匡正刘禅、抑黄皓，《出师表》点名之臣；本传不长，但蜀汉四相为固定组合且出师表入课本，组内齐平。"
+    },
+    {
+      "id": "duanwei",
+      "name": "段煨",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "董卓集团与凉州军",
+      "basis": "华阴屯田，护送献帝东归。"
+    },
+    {
+      "id": "duqiong",
+      "name": "杜琼",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "蜀中术数，以谶纬言\"代汉者当涂高\"。"
+    },
+    {
+      "id": "duwei",
+      "name": "杜微",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "耳聋不仕，诸葛亮以书板与语。"
+    },
+    {
+      "id": "duxi",
+      "name": "杜袭",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "西鄂以数百人拒刘表军，后为曹操参军。"
+    },
+    {
+      "id": "fanchou",
+      "name": "樊稠",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "董卓集团与凉州军",
+      "basis": "与李傕郭汜同乱长安，后为李傕所杀。"
+    },
+    {
+      "id": "fengji",
+      "name": "逢纪",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "袁绍集团·河北谋士",
+      "basis": "劝袁绍夺冀州之谋，后助袁尚排田丰；河北谋士次层，知名度不及前五人。"
+    },
+    {
+      "id": "fugu",
+      "name": "傅嘏",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "料东关必败，司马师所倚重。"
+    },
+    {
+      "id": "fushou",
+      "name": "伏寿",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "女性",
+      "basis": "伏皇后，密书图曹操，事泄被幽杀。"
+    },
+    {
+      "id": "fuxie",
+      "name": "傅燮",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "汉阳太守，城陷不降而死；汉末忠节的标志之一。"
+    },
+    {
+      "id": "fuxun",
+      "name": "傅巽",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "劝刘琮降曹之谋。"
+    },
+    {
+      "id": "gaixun",
+      "name": "盖勋",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "凉州名臣，独抗董卓于朝。"
+    },
+    {
+      "id": "gaogan",
+      "name": "高幹",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "袁绍集团·其他",
+      "basis": "并州刺史，袁绍外甥，最后据壶关而败。"
+    },
+    {
+      "id": "gongsunkang",
+      "name": "公孙康",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "辽东公孙氏",
+      "basis": "斩袁尚袁熙首送曹操（\"遗计定辽东\"的另一半），破高句丽。"
+    },
+    {
+      "id": "gongsunyuan",
+      "name": "公孙渊",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "辽东公孙氏",
+      "basis": "自立燕王，为司马懿所灭；司马懿军功的重要一笔。"
+    },
+    {
+      "id": "guanjing",
+      "name": "关靖",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒长史，城破赴敌而死。"
+    },
+    {
+      "id": "guanlu",
+      "name": "管辂",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "方术与医术",
+      "basis": "《方技传》占卜第一人，射覆无不中；演义中数次预言。"
+    },
+    {
+      "id": "guanning",
+      "name": "管宁",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "割席分坐，避地辽东三十七年不仕；隐逸的标杆，成语流传。"
+    },
+    {
+      "id": "guanping",
+      "name": "关平",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "蜀汉·二代将门",
+      "basis": "关羽子，随父败死临沮；演义改为义子并大加戏份，游戏中常备。"
+    },
+    {
+      "id": "guanqiujian",
+      "name": "毌丘俭",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "东征高句丽刻石纪功，后起兵讨司马师而败；淮南三叛之一。"
+    },
+    {
+      "id": "guansuo",
+      "name": "关索",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "蜀汉·二代将门",
+      "basis": "演义形象。南征戏份，正史无此人；民间说唱与地方戏中知名度不低，历代游戏亦多收录。"
+    },
+    {
+      "id": "guanxing",
+      "name": "关兴",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "蜀汉·二代将门",
+      "basis": "关羽子，早卒；演义中与张苞并为北伐前期先锋，游戏固定登场。"
+    },
+    {
+      "id": "guosi",
+      "name": "郭汜",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "董卓集团与凉州军",
+      "basis": "与李傕共乱长安，二人相攻至天子播越；194–196 剧本的中枢反派，与李傕齐平。"
+    },
+    {
+      "id": "guotu",
+      "name": "郭图",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "袁绍集团·河北谋士",
+      "basis": "主战官渡、谗张郃使其降曹；演义中袁绍败亡的推手，河北谋士组内齐平。"
+    },
+    {
+      "id": "hanfu",
+      "name": "韩馥",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "割据群雄",
+      "basis": "冀州牧，让州予袁绍而自杀；讨董的一方。"
+    },
+    {
+      "id": "hanhao",
+      "name": "韩浩",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "首倡屯田之议，护军中不以质子取人。"
+    },
+    {
+      "id": "hansong",
+      "name": "韩嵩",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "使许还而称曹操之美，刘表几杀之。"
+    },
+    {
+      "id": "heqi",
+      "name": "贺齐",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "东吴·将领",
+      "basis": "平山越与鄱阳，军容甚盛；东吴内线平定的主力。"
+    },
+    {
+      "id": "hexuan",
+      "name": "何颙",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "汝南名士，识荀彧为王佐之才。"
+    },
+    {
+      "id": "heyan",
+      "name": "何晏",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "正始玄学开创者，敷粉何郎；随曹爽被诛。思想史分量重而大众印象浅。"
+    },
+    {
+      "id": "huangwan",
+      "name": "黄琬",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "汉室宗亲与朝臣",
+      "basis": "与王允共谋诛董卓，后为李傕所杀。"
+    },
+    {
+      "id": "huangzu",
+      "name": "黄祖",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "江夏太守，射杀孙坚、杀祢衡，为孙权所灭；孙氏三代之仇。"
+    },
+    {
+      "id": "huanjie",
+      "name": "桓阶",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "劝长沙拒刘表而附曹操，后为魏尚书令。"
+    },
+    {
+      "id": "huchuquan",
+      "name": "呼厨泉",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "南匈奴",
+      "basis": "南匈奴单于，降曹操留邺，其众分为五部。"
+    },
+    {
+      "id": "huojun",
+      "name": "霍峻",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "葭萌以数百人拒万人一年，蜀汉守将之典范。"
+    },
+    {
+      "id": "huoyi",
+      "name": "霍弋",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "霍峻子，南中都督，蜀亡后举郡全境而降。"
+    },
+    {
+      "id": "huzhao",
+      "name": "胡昭",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "隐居不仕，善书法，曾为司马懿之师。"
+    },
+    {
+      "id": "huzhi",
+      "name": "胡质",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "荆州刺史，家无余财。"
+    },
+    {
+      "id": "jiachong",
+      "name": "贾充",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "司马氏与西晋",
+      "basis": "指使成济弑曹髦，主持《晋律》与灭吴之议；晋初第一权臣，历史分量重而形象反面。"
+    },
+    {
+      "id": "jianyong",
+      "name": "简雍",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "刘备同乡旧友，优游谈谑，\"酒器\"之谏一节有名。"
+    },
+    {
+      "id": "jiling",
+      "name": "纪灵",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "袁术集团",
+      "basis": "袁术大将，辕门射戟一节的当事人；演义与游戏中袁术阵营首将。"
+    },
+    {
+      "id": "kanze",
+      "name": "阚泽",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "东吴·文臣",
+      "basis": "吴中书令、经学名家；演义中赴曹营献诈降书。"
+    },
+    {
+      "id": "kuailiang",
+      "name": "蒯良",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "蒯越之兄，同定荆州之谋。"
+    },
+    {
+      "id": "liangxi",
+      "name": "梁习",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "并州刺史，政绩常为天下最。"
+    },
+    {
+      "id": "liaohua",
+      "name": "廖化",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "蜀汉·将领",
+      "basis": "由关羽主簿至右车骑将军，历三世；\"蜀中无大将，廖化作先锋\"是流传最广的三国俗谚之一，知名度远高于史料分量。"
+    },
+    {
+      "id": "liaoli",
+      "name": "廖立",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "诸葛亮称楚之良才，后以诽谤废为民。"
+    },
+    {
+      "id": "lihui",
+      "name": "李恢",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "庲降都督，随诸葛亮平南中。"
+    },
+    {
+      "id": "liubian",
+      "name": "刘辩",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "少帝，为董卓所废，鸩杀于弘农。"
+    },
+    {
+      "id": "liuchong",
+      "name": "刘宠",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "陈国刘宠",
+      "basis": "陈王，善弩十发十中，拥兵自守；汉末宗室中唯一以武力见称者。"
+    },
+    {
+      "id": "liucong",
+      "name": "刘琮",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "刘表次子，举荆州降曹操。"
+    },
+    {
+      "id": "liudai",
+      "name": "刘岱",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "兖州刺史，讨黄巾战死，曹操由此得兖州。"
+    },
+    {
+      "id": "liufang",
+      "name": "刘放",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "与孙资共掌机密二十余年，定曹爽司马懿辅政之局。"
+    },
+    {
+      "id": "liufeng",
+      "name": "刘封",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·君主与宗室",
+      "basis": "刘备养子，不救关羽且陵孟达，赐死。"
+    },
+    {
+      "id": "liuqi",
+      "name": "刘琦",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "荆州刘表集团",
+      "basis": "刘表长子，求计于诸葛亮（上屋抽梯），后为江夏太守。"
+    },
+    {
+      "id": "liuxian_lb",
+      "name": "刘先",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "荆州别驾，使许应对称旨。"
+    },
+    {
+      "id": "liuxun",
+      "name": "刘勋",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "袁术集团",
+      "basis": "庐江太守，为孙策所袭破而奔曹操。"
+    },
+    {
+      "id": "luji",
+      "name": "陆绩",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "吴郡陆氏",
+      "basis": "怀橘遗母入二十四孝，兼通天文历算；本传不长而蒙学故事流传极广。"
+    },
+    {
+      "id": "lukang",
+      "name": "陆康",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "吴郡陆氏",
+      "basis": "庐江太守，拒袁术二年城陷；陆逊从祖。"
+    },
+    {
+      "id": "luojun",
+      "name": "骆俊",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "陈国刘宠",
+      "basis": "陈国相，与刘宠共守，为袁术所遣客刺杀。"
+    },
+    {
+      "id": "luotong",
+      "name": "骆统",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "陈民疾苦之表，濡须战功。"
+    },
+    {
+      "id": "luoxian",
+      "name": "罗宪",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·将领",
+      "basis": "蜀亡后守永安拒吴军六月，后归晋；后期名将中的守将代表。"
+    },
+    {
+      "id": "lvdai",
+      "name": "吕岱",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "东吴·将领",
+      "basis": "定交州，年九十六犹典军。"
+    },
+    {
+      "id": "lvkai",
+      "name": "吕凯",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "永昌拒雍闿，《答雍闿檄》一篇。"
+    },
+    {
+      "id": "lvqian",
+      "name": "吕虔",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "泰山太守，佩刀相印之说。"
+    },
+    {
+      "id": "lvyi",
+      "name": "吕乂",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "蜀汉尚书令，性简素，正史评为\"当官宽济\"。"
+    },
+    {
+      "id": "madai",
+      "name": "马岱",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "西凉马腾集团",
+      "basis": "马超从弟，斩魏延；演义与游戏中西凉将领的固定一员，知名度稳居一线。"
+    },
+    {
+      "id": "maojie",
+      "name": "毛玠",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "曹魏·文臣",
+      "basis": "首倡\"奉天子以令不臣，修耕植畜军资\"，与崔琰共典选举；曹操战略的制定者之一，名声不彰。"
+    },
+    {
+      "id": "mazhong_shu",
+      "name": "马忠",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "庲降都督，平南中牂柯，蜀汉南方支柱。"
+    },
+    {
+      "id": "mengda",
+      "name": "孟达",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·将领",
+      "basis": "叛蜀降魏又欲叛魏，为司马懿八日兼程所袭斩；两度背叛的著名案例。"
+    },
+    {
+      "id": "menghuo",
+      "name": "孟获",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "南中夷帅",
+      "basis": "七擒七纵（《汉晋春秋》《华阳国志》），南中夷汉并服；演义南征篇主角，游戏中南蛮势力主公，知名度一级。"
+    },
+    {
+      "id": "mifang",
+      "name": "糜芳",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "南郡太守，降吴致关羽败亡。"
+    },
+    {
+      "id": "pangdegong",
+      "name": "庞德公",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "襄阳隐士，\"卧龙\"\"凤雏\"\"水镜\"三号皆出其口。"
+    },
+    {
+      "id": "pangxi",
+      "name": "庞羲",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "巴西太守，刘璋姻亲，握兵自重。"
+    },
+    {
+      "id": "panjun",
+      "name": "潘濬",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "荆州旧臣归吴，平五溪蛮。"
+    },
+    {
+      "id": "pengyang",
+      "name": "彭羕",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "骤贵而狂悖，下狱死。"
+    },
+    {
+      "id": "qianzhao",
+      "name": "牵招",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "雁门太守，招抚鲜卑；与田豫并为北疆专家。"
+    },
+    {
+      "id": "qiaoxuan",
+      "name": "桥玄",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "识曹操于微时，\"安天下者，必君也\"。"
+    },
+    {
+      "id": "qinmi",
+      "name": "秦宓",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "天辩之才，答张温\"天有头乎\"一节；演义\"秦宓难张温\"一回。"
+    },
+    {
+      "id": "quancong",
+      "name": "全琮",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·将领",
+      "basis": "尚公主，督军数十年；吴末全氏之祸由其后人。"
+    },
+    {
+      "id": "qubei",
+      "name": "去卑",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "南匈奴",
+      "basis": "匈奴右贤王，护送献帝东归。"
+    },
+    {
+      "id": "quyi",
+      "name": "麹义",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "袁绍集团·其他",
+      "basis": "界桥以八百先登破公孙瓒白马义从；正史战功远超演义戏份，玩家中\"被低估的名将\"代表。"
+    },
+    {
+      "id": "renan",
+      "name": "任安",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "蜀中经学宗师，杜微、何宗之师。"
+    },
+    {
+      "id": "renjun",
+      "name": "任峻",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "典农中郎将，屯田得实，军国之饶始此。"
+    },
+    {
+      "id": "shibao",
+      "name": "石苞",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "司马氏与西晋",
+      "basis": "晋初大司马，都督扬州。"
+    },
+    {
+      "id": "shihuan",
+      "name": "史涣",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "中军校尉，与曹仁烧袁绍粮车。"
+    },
+    {
+      "id": "shisunrui",
+      "name": "士孙瑞",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "汉室宗亲与朝臣",
+      "basis": "与王允同谋诛董卓，功而不居。"
+    },
+    {
+      "id": "shiyi",
+      "name": "是仪",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "清恪贞素，孙权称其不欺。"
+    },
+    {
+      "id": "simafu",
+      "name": "司马孚",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "司马氏与西晋",
+      "basis": "司马懿弟，历魏晋而自称\"大魏之纯臣\"。"
+    },
+    {
+      "id": "simahui",
+      "name": "司马徽",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "水镜先生，荐卧龙凤雏；演义中引出诸葛亮的关键人物，正史仅数语。"
+    },
+    {
+      "id": "simalang",
+      "name": "司马朗",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "司马氏与西晋",
+      "basis": "司马懿兄，兖州刺史，巡视士卒疫病而染疾死。"
+    },
+    {
+      "id": "songjian",
+      "name": "宋建",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "凉州宋建",
+      "basis": "枹罕河首平汉王三十余年，为夏侯渊一月所灭。"
+    },
+    {
+      "id": "songzhong",
+      "name": "宋忠",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "荆州学官，注《太玄》，荆州学派的代表。"
+    },
+    {
+      "id": "sunben",
+      "name": "孙贲",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙坚侄，豫章太守，孙氏渡江的宗族支柱。"
+    },
+    {
+      "id": "sunguan",
+      "name": "孙观",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "泰山群帅之一，从臧霸归曹。"
+    },
+    {
+      "id": "sunqian",
+      "name": "孙乾",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "刘备的使者，出使袁绍、刘表皆办；元从三人（糜竺、孙乾、简雍）之一。"
+    },
+    {
+      "id": "sunshao",
+      "name": "孙邵",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "北海孔融集团",
+      "basis": "吴第一任丞相而《吴书》无传，史家指为阙文。"
+    },
+    {
+      "id": "sunshi_nv",
+      "name": "孙夫人",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "女性",
+      "basis": "孙权妹嫁刘备，才捷刚猛、侍婢百余人执刀侍立；正史仅数语，而演义\"甘露寺\"与\"截江夺阿斗\"两大名场面加历代游戏固定登场，知名度一级。"
+    },
+    {
+      "id": "sunyi",
+      "name": "孙翊",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙权弟，骁悍类孙策，为左右所杀。"
+    },
+    {
+      "id": "sunzi",
+      "name": "孙资",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "与刘放共掌机要，魏中书令。"
+    },
+    {
+      "id": "tanshihuai",
+      "name": "檀石槐",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "鲜卑",
+      "basis": "统一鲜卑、分立三部，东汉北疆最大威胁；卒于三国叙事开始之前，故知名度低。"
+    },
+    {
+      "id": "tianka",
+      "name": "田楷",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒所置青州刺史，与刘备共拒袁绍。"
+    },
+    {
+      "id": "wangchang",
+      "name": "王昶",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "征南大将军，破吴于江陵，著《治论》。"
+    },
+    {
+      "id": "wangji_wei",
+      "name": "王基",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "平诸葛诞、拒吴于江陵，魏末名将兼学者。"
+    },
+    {
+      "id": "wangjun",
+      "name": "王濬",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "司马氏与西晋",
+      "basis": "造楼船伐吴，\"王濬楼船下益州\"入唐诗；灭吴第一功。"
+    },
+    {
+      "id": "wanglian",
+      "name": "王连",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "掌盐铁之利以充军资。"
+    },
+    {
+      "id": "wanglie",
+      "name": "王烈",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "避地辽东，以教化止讼。"
+    },
+    {
+      "id": "wangling",
+      "name": "王凌",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "谋立楚王曹彪，淮南三叛之首。"
+    },
+    {
+      "id": "wangsu",
+      "name": "王肃",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "王朗子，遍注群经，《孔子家语》之疑；司马昭岳父。"
+    },
+    {
+      "id": "wangxiu",
+      "name": "王脩",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "北海孔融集团",
+      "basis": "为袁谭收尸，曹操义而用之。"
+    },
+    {
+      "id": "weiguan",
+      "name": "卫瓘",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "司马氏与西晋",
+      "basis": "监军收邓艾、破钟会之乱，蜀亡终局的收拾者。"
+    },
+    {
+      "id": "weijue",
+      "name": "卫觊",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "议置盐官以实关中，兼工书法。"
+    },
+    {
+      "id": "wenchou",
+      "name": "文丑",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "袁绍集团·四庭柱",
+      "basis": "延津为曹军所破而死；正史仅数语，与颜良并称，四庭柱组内齐平。"
+    },
+    {
+      "id": "wenhui",
+      "name": "温恢",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "扬州刺史，料关羽之动而预备。"
+    },
+    {
+      "id": "wenqin",
+      "name": "文钦",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "与毌丘俭同叛而奔吴，后为诸葛诞所杀；淮南三叛之一。"
+    },
+    {
+      "id": "wuban",
+      "name": "吴班",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "益州刘焉刘璋集团",
+      "basis": "吴懿族弟，夷陵前部督。"
+    },
+    {
+      "id": "wufuren",
+      "name": "吴夫人",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "女性",
+      "basis": "孙坚夫人，孙策孙权之母，临朝有决断。"
+    },
+    {
+      "id": "wujing",
+      "name": "吴景",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙坚妻弟，丹阳太守，孙策渡江的凭借。"
+    },
+    {
+      "id": "wuyi",
+      "name": "吴懿",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋姻亲而降刘备，后为汉中都督，穆皇后之兄。"
+    },
+    {
+      "id": "xiahouba",
+      "name": "夏侯霸",
+      "historicalWeight": 3,
+      "renown": 1,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "高平陵后奔蜀，为姜维北伐向导；魏蜀两栖的著名人物，历代游戏固定一线。"
+    },
+    {
+      "id": "xiahoushang",
+      "name": "夏侯尚",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·诸夏侯曹",
+      "basis": "征南大将军，江陵之役；诸夏侯曹合卷成员中知名度最低者，本维不强拉齐平。"
+    },
+    {
+      "id": "xiahouxuan",
+      "name": "夏侯玄",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "正始名士之首，\"朗朗如日月之入怀\"；谋诛司马师被夷三族。"
+    },
+    {
+      "id": "xianglang",
+      "name": "向朗",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "马谡逃亡不举而免官，晚年潜心典籍。"
+    },
+    {
+      "id": "xianyufu",
+      "name": "鲜于辅",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "刘虞旧部，率幽州兵报仇灭公孙瓒，后归曹操。"
+    },
+    {
+      "id": "xinping",
+      "name": "辛评",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "袁绍集团·河北谋士",
+      "basis": "袁谭谋臣，辛毗之兄，邺城破后死。"
+    },
+    {
+      "id": "xizheng",
+      "name": "郤正",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "蜀亡后教刘禅答晋文王\"先人坟墓远在陇蜀\"。"
+    },
+    {
+      "id": "xuezong",
+      "name": "薛综",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "交州学者，答蜀使张奉之嘲。"
+    },
+    {
+      "id": "xumiao",
+      "name": "徐邈",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "凉州刺史，\"中圣人\"之对。"
+    },
+    {
+      "id": "xunchen",
+      "name": "荀谌",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "袁绍集团·河北谋士",
+      "basis": "说韩馥让冀州，一言取一州；荀彧之兄。"
+    },
+    {
+      "id": "xunshuang",
+      "name": "荀爽",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "荀氏八龙之首，九十五日自布衣至三公。"
+    },
+    {
+      "id": "xunyue",
+      "name": "荀悦",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "《汉纪》作者，编年体史学名家。"
+    },
+    {
+      "id": "xurong",
+      "name": "徐荣",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "董卓集团与凉州军",
+      "basis": "败曹操于荥阳、败孙坚于梁；董卓军中唯一同时战胜二人者，玩家中\"被低估的名将\"代表。"
+    },
+    {
+      "id": "xushao",
+      "name": "许劭",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "名士与学者",
+      "basis": "月旦评，\"治世之能臣，乱世之奸雄\"一语定曹操。"
+    },
+    {
+      "id": "xuxuan",
+      "name": "徐宣",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "魏御史大夫，曹丕称为社稷之臣。"
+    },
+    {
+      "id": "yanbaihu",
+      "name": "严白虎",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "江东宗帅",
+      "basis": "吴郡宗帅，自称东吴德王，为孙策所破；游戏中江东开局的杂鱼势力。"
+    },
+    {
+      "id": "yangbiao",
+      "name": "杨彪",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "四世太尉，杨修之父，不肯为魏臣。"
+    },
+    {
+      "id": "yangfeng",
+      "name": "杨奉",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "白波军",
+      "basis": "白波帅，护献帝东归有功；徐晃旧主。"
+    },
+    {
+      "id": "yangfu_lz",
+      "name": "杨阜",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "举义兵逐马超复陇右，冀城之守；马超故事的另一面。"
+    },
+    {
+      "id": "yanghong",
+      "name": "杨洪",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "蜀郡太守，汉中\"男子当战、女子当运\"之对。"
+    },
+    {
+      "id": "yangyi",
+      "name": "杨仪",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·谋臣",
+      "basis": "诸葛亮死后统军全师而退、斩魏延；后怨望被废自杀。"
+    },
+    {
+      "id": "yanjun",
+      "name": "严畯",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "东吴·文臣",
+      "basis": "吴中儒者，自陈非将才而辞南郡太守。"
+    },
+    {
+      "id": "yanliang",
+      "name": "颜良",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "袁绍集团·四庭柱",
+      "basis": "白马为关羽所刺，孔融称其\"万人之敌\"；正史仅数语而演义与游戏中恒为袁绍武力代表，四庭柱组内齐平。"
+    },
+    {
+      "id": "yanpu",
+      "name": "阎圃",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "谏张鲁勿称汉宁王。"
+    },
+    {
+      "id": "yanrou_gz",
+      "name": "阎柔",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "为乌桓鲜卑所信，与鲜于辅共破公孙瓒。"
+    },
+    {
+      "id": "yanxing",
+      "name": "阎行",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "西凉韩遂集团",
+      "basis": "韩遂骁将，曾几杀马超。"
+    },
+    {
+      "id": "yanyan",
+      "name": "严颜",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "益州刘焉刘璋集团",
+      "basis": "\"但有断头将军，无有降将军\"，张飞义释；正史仅一节而演义大加渲染。"
+    },
+    {
+      "id": "yiji",
+      "name": "伊籍",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "使吴敏对，与诸葛亮等共造《蜀科》。"
+    },
+    {
+      "id": "yinmo",
+      "name": "尹默",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "古文经学，教蜀汉太子。"
+    },
+    {
+      "id": "yongkai",
+      "name": "雍闿",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "南中夷帅",
+      "basis": "杀太守据益州郡附吴，南中三叛的发动者。"
+    },
+    {
+      "id": "yuanshang",
+      "name": "袁尚",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "袁绍集团·其他",
+      "basis": "袁绍幼子，与兄相攻，奔辽东被斩。"
+    },
+    {
+      "id": "yuanxi",
+      "name": "袁熙",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "袁绍集团·其他",
+      "basis": "幽州刺史，甄氏之夫。"
+    },
+    {
+      "id": "yufuluo",
+      "name": "於夫罗",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "南匈奴",
+      "basis": "南匈奴单于，与白波合兵劫掠，刘豹之父。"
+    },
+    {
+      "id": "yuji",
+      "name": "于吉",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "方术与医术",
+      "basis": "琅邪道士，为孙策所杀；演义中作祟致孙策之死。"
+    },
+    {
+      "id": "zanghong",
+      "name": "臧洪",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "袁绍集团·其他",
+      "basis": "为张超死守东武阳，粮尽杀爱妾以食士；汉末烈士之极，而大众几乎不知。"
+    },
+    {
+      "id": "zaozhi",
+      "name": "枣祗",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "力主分田之术，屯田制的实际设计者；对曹魏国力有决定性影响而名声几无，历史二级、知名度三级。"
+    },
+    {
+      "id": "zerong",
+      "name": "笮融",
+      "historicalWeight": 2,
+      "renown": 3,
+      "group": "扬州刘繇集团",
+      "basis": "大起浮屠祠、浴佛设饭，中国早期佛教活动最早的明确记载之一；又屠杀太守数人。宗教史分量重而大众不知。"
+    },
+    {
+      "id": "zhangchao",
+      "name": "张超",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "张邈弟，广陵太守，臧洪为之而死。"
+    },
+    {
+      "id": "zhangji",
+      "name": "张济",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "张济集团",
+      "basis": "董卓部将，张绣之叔，攻南阳中流矢死。"
+    },
+    {
+      "id": "zhangji_yi",
+      "name": "张机",
+      "historicalWeight": 2,
+      "renown": 2,
+      "group": "方术与医术",
+      "basis": "张仲景，《伤寒杂病论》为中医四大经典之一，后世尊为医圣；正史无传，与三国叙事关联薄。"
+    },
+    {
+      "id": "zhangni",
+      "name": "张嶷",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "越巂太守十五年开复旧郡，狄道战死。"
+    },
+    {
+      "id": "zhangrang",
+      "name": "张让",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "宦官与外戚",
+      "basis": "十常侍之首，\"张常侍是我公\"；何进之死与洛阳大乱的另一方。"
+    },
+    {
+      "id": "zhangren",
+      "name": "张任",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋部将，被擒不降\"老臣终不复事二主\"；正史仅《益部耆旧杂记》数语，演义中射杀庞统，历代游戏恒为西川第一将——历史四级、知名度一级，落差样本。"
+    },
+    {
+      "id": "zhangwei",
+      "name": "张卫",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "汉中张鲁集团",
+      "basis": "张鲁弟，阳平关拒曹操。"
+    },
+    {
+      "id": "zhangwen_han",
+      "name": "张温",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "汉室宗亲与朝臣",
+      "basis": "太尉，讨凉州；孙坚曾请斩董卓于其军中。"
+    },
+    {
+      "id": "zhangwen_wu",
+      "name": "张温",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "使蜀称美蜀政，归而废黜；\"蜀有邓芝，吴有张温\"的另一半。"
+    },
+    {
+      "id": "zhangyi_by",
+      "name": "张翼",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "蜀汉·将领",
+      "basis": "屡谏姜维不可穷兵而仍随之征伐；蜀汉后期四将之一。"
+    },
+    {
+      "id": "zhangyi_sy",
+      "name": "张裔",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "为南中所执送吴，后为诸葛亮留府长史。"
+    },
+    {
+      "id": "zhaoqi",
+      "name": "赵岐",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "《孟子章句》作者，奉诏和解关东兵。"
+    },
+    {
+      "id": "zhaowei",
+      "name": "赵韪",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "益州刘焉刘璋集团",
+      "basis": "立刘璋而后举兵叛，为东州兵所破。"
+    },
+    {
+      "id": "zhaoyan",
+      "name": "赵俨",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·文臣",
+      "basis": "与杜袭、辛毗、陈群并称\"辛陈杜赵\"。"
+    },
+    {
+      "id": "zhengtai",
+      "name": "郑泰",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "论关东兵不足畏以缓董卓发兵。"
+    },
+    {
+      "id": "zhoucang",
+      "name": "周仓",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "蜀汉·将领",
+      "basis": "演义形象。关羽扛刀者，随之守麦城殉死；正史无此人，关帝庙祀与戏曲中知名度高，游戏常备。"
+    },
+    {
+      "id": "zhoufang",
+      "name": "周鲂",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "东吴·将领",
+      "basis": "断发赚曹休，石亭大捷的设局者。"
+    },
+    {
+      "id": "zhouqun",
+      "name": "周群",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "占天象，言汉中可得其地不得其民。"
+    },
+    {
+      "id": "zhugedan",
+      "name": "诸葛诞",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "曹魏·将领",
+      "basis": "据寿春连吴而败，淮南三叛之三；\"蜀得其龙，吴得其虎，魏得其狗\"之评。"
+    },
+    {
+      "id": "zhugexuan",
+      "name": "诸葛玄",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "诸葛亮叔父，携亮兄弟往依刘表。"
+    },
+    {
+      "id": "zhuju",
+      "name": "朱据",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·将领",
+      "basis": "尚公主，二宫之争中被赐死。"
+    },
+    {
+      "id": "zhuling_lb",
+      "name": "朱灵",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "名亚徐晃，曹操夺其营而后复用，官至后将军。"
+    },
+    {
+      "id": "zhuzhi",
+      "name": "朱治",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "东吴·文臣",
+      "basis": "孙策渡江的支持者，吴郡太守。"
+    },
+    {
+      "id": "zongyu",
+      "name": "宗预",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "使吴应对不卑，与吕岱论老。"
+    },
+    {
+      "id": "zuoci",
+      "name": "左慈",
+      "historicalWeight": 3,
+      "renown": 2,
+      "group": "方术与医术",
+      "basis": "《方技传》幻术之士；演义中戏耍曹操一回。"
+    },
+    {
+      "id": "agui",
+      "name": "阿贵",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "兴国氐王，为夏侯渊所灭。"
+    },
+    {
+      "id": "bairao",
+      "name": "白绕",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山别部渠帅，为曹操所破于濮阳。"
+    },
+    {
+      "id": "baolong",
+      "name": "鲍隆",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "演义形象。桂阳赵范部将，猎户出身。"
+    },
+    {
+      "id": "beigongboyu",
+      "name": "北宫伯玉",
+      "historicalWeight": 3,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "湟中义从胡首领，凉州之乱的发端。"
+    },
+    {
+      "id": "bianxi",
+      "name": "卞喜",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。汜水关守将，伏刀斧手于镇国寺，过五关斩六将之三。"
+    },
+    {
+      "id": "bianzhang",
+      "name": "边章",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "与韩遂同起凉州之乱，为边允改名。"
+    },
+    {
+      "id": "boci",
+      "name": "波才",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黄巾与太平道",
+      "basis": "颍川黄巾渠帅，尝败朱儁。"
+    },
+    {
+      "id": "caiyang",
+      "name": "蔡阳",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "曹操部将，为刘备所杀；演义作古城会中为关羽所斩，斩六将故事的收尾。"
+    },
+    {
+      "id": "caobao",
+      "name": "曹豹",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "陶谦部将，与张飞不和，吕布夺徐州之由。"
+    },
+    {
+      "id": "caoteng",
+      "name": "曹腾",
+      "historicalWeight": 3,
+      "renown": 3,
+      "group": "宦官与外戚",
+      "basis": "中常侍大长秋，曹操祖父，曹魏追尊高皇帝。"
+    },
+    {
+      "id": "caoxing",
+      "name": "曹性",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "郝萌部曲督，斫萌手；演义作射伤夏侯惇目者。"
+    },
+    {
+      "id": "chengbing",
+      "name": "程秉",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "东吴·文臣",
+      "basis": "吴太子太傅，经学。"
+    },
+    {
+      "id": "chengji",
+      "name": "程畿",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "从刘璋而后从刘备，夷陵战死不降。"
+    },
+    {
+      "id": "chengyi",
+      "name": "成宜",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "chengyin",
+      "name": "程银",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉韩遂集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "chengyuanzhi",
+      "name": "程远志",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。黄巾将，第一回为关羽所斩，全书第一个被斩者。"
+    },
+    {
+      "id": "chenlan",
+      "name": "陈兰",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "与雷薄据灊山，为张辽所破。"
+    },
+    {
+      "id": "chenrong",
+      "name": "陈容",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁绍集团·其他",
+      "basis": "臧洪之友，愿与同死于袁绍帐前。"
+    },
+    {
+      "id": "chenshi",
+      "name": "陈式",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "取武都阴平；演义中被斩以塞街亭之责。"
+    },
+    {
+      "id": "chenying",
+      "name": "陈应",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "演义形象。桂阳赵范部将。"
+    },
+    {
+      "id": "chezhou",
+      "name": "车胄",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "曹魏·将领",
+      "basis": "徐州刺史，为刘备袭杀（演义作关羽所斩）。"
+    },
+    {
+      "id": "cuanxi",
+      "name": "爨习",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "南中夷帅",
+      "basis": "南中大姓，随诸葛亮北迁为部曲。"
+    },
+    {
+      "id": "danjing",
+      "name": "单经",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒所置兖州刺史。"
+    },
+    {
+      "id": "dengmao",
+      "name": "邓茂",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。黄巾将，第一回为张飞所刺，与程远志同回出场，组内齐平。"
+    },
+    {
+      "id": "dengxi",
+      "name": "邓羲",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "谏刘表勿与袁绍连和。"
+    },
+    {
+      "id": "dengxian",
+      "name": "邓贤",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋将，与冷苞同拒刘备。"
+    },
+    {
+      "id": "dingfei",
+      "name": "丁斐",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "曹操同乡，典军校尉，以贪见免而曹操惜之。"
+    },
+    {
+      "id": "dongjue",
+      "name": "董厥",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "蜀汉辅国大将军，与诸葛瞻同辅政至国亡。"
+    },
+    {
+      "id": "dongyue",
+      "name": "董越",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "董卓集团与凉州军",
+      "basis": "董卓部将，为牛辅所杀。"
+    },
+    {
+      "id": "fanjian",
+      "name": "樊建",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "蜀汉·谋臣",
+      "basis": "蜀汉尚书令，入晋后为晋武帝称道。"
+    },
+    {
+      "id": "fanneng",
+      "name": "樊能",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "扬州刘繇集团",
+      "basis": "刘繇将，横江拒孙策。"
+    },
+    {
+      "id": "fanqin",
+      "name": "繁钦",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "建安文士，长于诗赋，与曹丕论乐。"
+    },
+    {
+      "id": "feiguan",
+      "name": "费观",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋姻亲，降刘备后为巴郡太守。"
+    },
+    {
+      "id": "fengxi",
+      "name": "冯习",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "夷陵大督，兵败战死。"
+    },
+    {
+      "id": "fuluohan",
+      "name": "扶罗韩",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "鲜卑",
+      "basis": "步度根兄，为轲比能所杀。"
+    },
+    {
+      "id": "fuqian",
+      "name": "傅佥",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "阳安关口力战而死，傅肜之子。"
+    },
+    {
+      "id": "furong",
+      "name": "傅肜",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "夷陵断后，\"吴狗！何有汉将军降者\"。"
+    },
+    {
+      "id": "gaoding",
+      "name": "高定",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "南中夷帅",
+      "basis": "越巂叟王，南中三叛之一。"
+    },
+    {
+      "id": "gaolan",
+      "name": "高览",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "袁绍集团·四庭柱",
+      "basis": "官渡与张郃同降曹操；正史仅数语，但\"河北四庭柱\"为民间固定组合且历代游戏皆收，组内与颜良、文丑、张郃齐平——四人齐一级，是本表最明显的\"知名度靠组合而非史料\"的例子。"
+    },
+    {
+      "id": "gaopei",
+      "name": "高沛",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "白水关将，与杨怀同为刘备所斩。"
+    },
+    {
+      "id": "gengwu",
+      "name": "耿武",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "韩馥别驾，谏勿让冀州，伏刃刺袁绍使者而死。"
+    },
+    {
+      "id": "gongsunfan",
+      "name": "公孙范",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒从弟，渤海太守。"
+    },
+    {
+      "id": "gongsungong",
+      "name": "公孙恭",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "辽东公孙氏",
+      "basis": "公孙康弟，为公孙渊所废。"
+    },
+    {
+      "id": "gongsunxu",
+      "name": "公孙续",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒子，求救于张燕而不及。"
+    },
+    {
+      "id": "gongsunyue",
+      "name": "公孙越",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒从弟，中流矢死，瓒与袁绍构怨之由。"
+    },
+    {
+      "id": "guanhai",
+      "name": "管亥",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "黄巾与太平道",
+      "basis": "青州黄巾，围北海孔融，太史慈突围求救一节的对手。"
+    },
+    {
+      "id": "handde",
+      "name": "韩德",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。西凉大将，与四子皆为赵云所杀。"
+    },
+    {
+      "id": "hanfu_yanyi",
+      "name": "韩福",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。洛阳太守，过五关斩六将之二。"
+    },
+    {
+      "id": "hanmeng",
+      "name": "韩猛",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁绍集团·其他",
+      "basis": "袁绍将，运粮为徐晃所破。"
+    },
+    {
+      "id": "hanxian",
+      "name": "韩暹",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "白波军",
+      "basis": "白波帅，护献帝东归后与杨奉同败。"
+    },
+    {
+      "id": "hanxuan",
+      "name": "韩玄",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "长沙太守，降刘备；演义作被魏延所杀，黄忠故事的背景人物。"
+    },
+    {
+      "id": "hanyin",
+      "name": "韩胤",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "为袁术求婚于吕布，为曹操所斩。"
+    },
+    {
+      "id": "haomeng",
+      "name": "郝萌",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吕布集团",
+      "basis": "吕布将，夜反为高顺所讨。"
+    },
+    {
+      "id": "hetaihou",
+      "name": "何太后",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "宦官与外戚",
+      "basis": "何进之妹、少帝之母，为董卓所鸩。"
+    },
+    {
+      "id": "hexia",
+      "name": "和洽",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "议刑不可过峻，魏光禄勋。"
+    },
+    {
+      "id": "hezong",
+      "name": "何宗",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "蜀中术数，劝进刘备。"
+    },
+    {
+      "id": "houcheng",
+      "name": "侯成",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吕布集团",
+      "basis": "盗马之罪见责，遂与宋宪等缚陈宫降曹。"
+    },
+    {
+      "id": "houxuan",
+      "name": "侯选",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉韩遂集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "huangchengyan",
+      "name": "黄承彦",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "名士与学者",
+      "basis": "诸葛亮岳父，\"莫作孔明择妇\"之谚。"
+    },
+    {
+      "id": "huanglong",
+      "name": "黄龙",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山别部渠帅。"
+    },
+    {
+      "id": "huaxiong",
+      "name": "华雄",
+      "historicalWeight": 4,
+      "renown": 1,
+      "group": "董卓集团与凉州军",
+      "basis": "正史仅\"为孙坚所枭\"一句；演义\"温酒斩华雄\"是全书最有名的段落之一，历代游戏必收——历史四级、知名度一级，本表落差最大的样本。"
+    },
+    {
+      "id": "hucai",
+      "name": "胡才",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "白波军",
+      "basis": "白波帅。"
+    },
+    {
+      "id": "huchuer",
+      "name": "胡车儿",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "张济集团",
+      "basis": "张绣骁将，演义中盗典韦双戟。"
+    },
+    {
+      "id": "hujin",
+      "name": "胡班",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "演义增补人物",
+      "basis": "演义形象。王植部下，私放关羽出荥阳。"
+    },
+    {
+      "id": "huzhen",
+      "name": "胡轸",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "董卓集团与凉州军",
+      "basis": "董卓大督护，阳人之战败于孙坚。"
+    },
+    {
+      "id": "jiangxu",
+      "name": "姜叙",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "与杨阜共举义兵讨马超。"
+    },
+    {
+      "id": "jiangyiqu",
+      "name": "蒋义渠",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁绍集团·其他",
+      "basis": "官渡败后收袁绍散卒。"
+    },
+    {
+      "id": "jianshuo",
+      "name": "蹇硕",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "宦官与外戚",
+      "basis": "上军校尉，谋诛何进不成而死；西园八校尉的统领。"
+    },
+    {
+      "id": "jinshang",
+      "name": "金尚",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "朝廷所署兖州刺史，为袁术所杀。"
+    },
+    {
+      "id": "jinxuan",
+      "name": "金旋",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "武陵太守，降刘备，演义作战死。"
+    },
+    {
+      "id": "kongxiu",
+      "name": "孔秀",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。东岭关守将，过五关斩六将第一人。"
+    },
+    {
+      "id": "kongzhou",
+      "name": "孔伷",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "豫州刺史，讨董一路，以清谈高论见称。"
+    },
+    {
+      "id": "laigong",
+      "name": "赖恭",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "交州刺史，后为蜀汉太常。"
+    },
+    {
+      "id": "leibo",
+      "name": "雷薄",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "与陈兰据灊山，拒袁术之归。"
+    },
+    {
+      "id": "leitong",
+      "name": "雷铜",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "降刘备，与吴兰同没于武都。"
+    },
+    {
+      "id": "lengbao",
+      "name": "冷苞",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋将，拒刘备于涪。"
+    },
+    {
+      "id": "liangmao",
+      "name": "凉茂",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "乐浪太守，抗辞公孙度。"
+    },
+    {
+      "id": "liangxing",
+      "name": "梁兴",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉韩遂集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "likan",
+      "name": "李堪",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉韩遂集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "lile",
+      "name": "李乐",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "白波军",
+      "basis": "白波帅。"
+    },
+    {
+      "id": "lingcao",
+      "name": "凌操",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "东吴·将领",
+      "basis": "凌统之父，为甘宁所射杀。"
+    },
+    {
+      "id": "liru",
+      "name": "李儒",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "董卓集团与凉州军",
+      "basis": "董卓郎中令，鸩杀弘农王；演义中为董卓首席谋士，戏份远超正史，游戏中固定登场。"
+    },
+    {
+      "id": "lisu",
+      "name": "李肃",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "董卓集团与凉州军",
+      "basis": "说吕布杀丁原（演义），后与吕布同诛董卓。"
+    },
+    {
+      "id": "liubao",
+      "name": "刘豹",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "南匈奴",
+      "basis": "左贤王，汉赵开国者刘渊之父。"
+    },
+    {
+      "id": "liubei_gan",
+      "name": "甘夫人",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·君主与宗室",
+      "basis": "甘夫人，刘禅之母，追谥昭烈皇后；正史仅数语。"
+    },
+    {
+      "id": "liuchan_lz",
+      "name": "刘阐",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋子，吴所署益州刺史。"
+    },
+    {
+      "id": "liudu",
+      "name": "刘度",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "零陵太守，降刘备。"
+    },
+    {
+      "id": "liugui",
+      "name": "刘璝",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋将，守雒城拒刘备。"
+    },
+    {
+      "id": "liuhui",
+      "name": "刘惠",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁绍集团·其他",
+      "basis": "韩馥治中，劝迎袁绍入冀州。"
+    },
+    {
+      "id": "liupan",
+      "name": "刘磐",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "刘表侄，骁勇寇艾陵，为太史慈所制。"
+    },
+    {
+      "id": "liuxun_lz",
+      "name": "刘循",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "刘璋子，守雒城一年。"
+    },
+    {
+      "id": "liuyan_dongjun",
+      "name": "刘延",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·将领",
+      "basis": "东郡太守，白马之守。"
+    },
+    {
+      "id": "liuyan_zhu",
+      "name": "刘琰",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "刘备集团·元从与徐州旧部",
+      "basis": "自豫州从刘备，位次李严之上；以妻见太后事被弃市。"
+    },
+    {
+      "id": "liwenhou",
+      "name": "李文侯",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "与北宫伯玉同起凉州之乱。"
+    },
+    {
+      "id": "lixiu",
+      "name": "李休",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "劝张鲁降曹操。"
+    },
+    {
+      "id": "lizhuan",
+      "name": "李譔",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "蜀中经学，注五经而多与郑玄异。"
+    },
+    {
+      "id": "louban",
+      "name": "楼班",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "乌桓",
+      "basis": "丘力居子，辽西单于。"
+    },
+    {
+      "id": "loufa",
+      "name": "娄发",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "与沈弥共叛刘璋，奔荆州；史仅见姓名。"
+    },
+    {
+      "id": "lujun",
+      "name": "陆儁",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吴郡陆氏",
+      "basis": "陆康子，陆绩之兄。"
+    },
+    {
+      "id": "matie",
+      "name": "马铁",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "马腾子，随父入朝而被诛。"
+    },
+    {
+      "id": "mawan",
+      "name": "马玩",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "maxiu",
+      "name": "马休",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "马腾子，随父入朝而被诛。"
+    },
+    {
+      "id": "mazhong_wu",
+      "name": "马忠",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "东吴·将领",
+      "basis": "潘璋部将，擒关羽父子。"
+    },
+    {
+      "id": "mengjian",
+      "name": "孟建",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "诸葛亮游学之友，仕魏至凉州刺史。"
+    },
+    {
+      "id": "mengyan",
+      "name": "孟琰",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "南中夷帅",
+      "basis": "南中大姓，随诸葛亮北伐。"
+    },
+    {
+      "id": "mijia",
+      "name": "弥加",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "鲜卑",
+      "basis": "鲜卑小帅，东部大人之一。"
+    },
+    {
+      "id": "muhe",
+      "name": "穆顺",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "张杨集团",
+      "basis": "张杨将，杀杨丑者之党。"
+    },
+    {
+      "id": "muludawang",
+      "name": "木鹿大王",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "南中夷帅",
+      "basis": "演义形象。八纳洞主，驱虎豹豺狼之术。"
+    },
+    {
+      "id": "nanhualaoxian",
+      "name": "南华老仙",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "方术与医术",
+      "basis": "演义形象。授张角《太平要术》，全书开篇的引子。"
+    },
+    {
+      "id": "nanlou",
+      "name": "难楼",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "乌桓",
+      "basis": "上谷乌桓大人。"
+    },
+    {
+      "id": "niufu",
+      "name": "牛辅",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "董卓集团与凉州军",
+      "basis": "董卓女婿，卓死后溃走被杀，贾诩劝李傕之事因之而起。"
+    },
+    {
+      "id": "panfeng",
+      "name": "潘凤",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "演义增补人物",
+      "basis": "演义形象。韩馥上将，为华雄所斩；\"吾有上将潘凤\"一句在当代中文网络语境中知名度极高，与史料分量完全脱钩。"
+    },
+    {
+      "id": "pangji",
+      "name": "庞季",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "与蒯越同说降江南宗贼。"
+    },
+    {
+      "id": "peiyuanshao",
+      "name": "裴元绍",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。黄巾余党，卧牛山遇关羽，后为赵云所杀。"
+    },
+    {
+      "id": "qiangduan",
+      "name": "强端",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "氐王，斩宋建余党以降。"
+    },
+    {
+      "id": "qiantong",
+      "name": "钱铜",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "江东宗帅",
+      "basis": "吴郡宗帅，与严白虎同党。"
+    },
+    {
+      "id": "qianwan",
+      "name": "千万",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "羌胡",
+      "basis": "兴国氐王，与阿贵同败。"
+    },
+    {
+      "id": "qiaomao",
+      "name": "桥瑁",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "东郡太守，诈作三公移书以起讨董之兵，为刘岱所杀。"
+    },
+    {
+      "id": "qiaorui",
+      "name": "桥蕤",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "袁术大将，为曹操所破斩。"
+    },
+    {
+      "id": "qiaoshi_da",
+      "name": "大桥",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "女性",
+      "basis": "孙策夫人，二乔之姊；\"铜雀春深锁二乔\"使知名度极高，而史料仅一句。"
+    },
+    {
+      "id": "qiaoshi_xiao",
+      "name": "小桥",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "女性",
+      "basis": "周瑜夫人，与姊并称二乔，同上。"
+    },
+    {
+      "id": "qimukai",
+      "name": "綦毋闿",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "荆州学官，与宋忠同掌五业。"
+    },
+    {
+      "id": "qingniujiao",
+      "name": "青牛角",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山渠帅。"
+    },
+    {
+      "id": "qinqi",
+      "name": "秦琪",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。黄河渡口守将，过五关斩六将之六。"
+    },
+    {
+      "id": "qiuliju",
+      "name": "丘力居",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "乌桓",
+      "basis": "辽西乌桓大人，与张纯同叛。"
+    },
+    {
+      "id": "qizhou",
+      "name": "齐周",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "刘虞从事，与鲜于辅共举兵。"
+    },
+    {
+      "id": "shenmi",
+      "name": "沈弥",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "与娄发共叛刘璋，奔荆州。"
+    },
+    {
+      "id": "shihui",
+      "name": "士徽",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "士燮子，叛吴而为吕岱所诛。"
+    },
+    {
+      "id": "shiren",
+      "name": "士仁",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "公安守将，与糜芳同降吴，关羽败亡的直接原因之一。"
+    },
+    {
+      "id": "shitao",
+      "name": "石韬",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "名士与学者",
+      "basis": "诸葛亮游学之友，仕魏至郡守典农。"
+    },
+    {
+      "id": "shiwu",
+      "name": "士武",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "士燮弟，南海太守。"
+    },
+    {
+      "id": "shiyi_jz",
+      "name": "士壹",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "士燮弟，合浦太守。"
+    },
+    {
+      "id": "shiyou",
+      "name": "士䵋",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "士燮弟，九真太守。"
+    },
+    {
+      "id": "songxian",
+      "name": "宋宪",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "与魏续、侯成缚吕布降曹；演义中为颜良所斩。"
+    },
+    {
+      "id": "suigu",
+      "name": "眭固",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "白兔，据射犬为曹操所破。"
+    },
+    {
+      "id": "suli",
+      "name": "素利",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "鲜卑",
+      "basis": "鲜卑小帅，与轲比能相攻。"
+    },
+    {
+      "id": "sunfu",
+      "name": "孙辅",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙贲弟，通书曹操被幽禁。"
+    },
+    {
+      "id": "sunhe",
+      "name": "孙河",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙氏族人，为妫览、戴员所杀。"
+    },
+    {
+      "id": "sunkuang",
+      "name": "孙匡",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "东吴·孙氏宗室",
+      "basis": "孙坚子，早卒。"
+    },
+    {
+      "id": "supuyan",
+      "name": "苏仆延",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "乌桓",
+      "basis": "辽东属国乌桓大人。"
+    },
+    {
+      "id": "sushuang",
+      "name": "苏双",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "中山马商，与张世平共资刘备起兵。"
+    },
+    {
+      "id": "taoshenghong",
+      "name": "陶升",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山别部，护袁绍家属而降。"
+    },
+    {
+      "id": "wangbi",
+      "name": "王必",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·文臣",
+      "basis": "曹操腹心，许都之乱中中流矢死。"
+    },
+    {
+      "id": "wangfu_shu",
+      "name": "王甫",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "劝关羽勿用糜芳守江陵，麦城殉难。"
+    },
+    {
+      "id": "wangkuang",
+      "name": "王匡",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "河内太守，讨董败于河阳津。"
+    },
+    {
+      "id": "wanglei",
+      "name": "王累",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "益州刘焉刘璋集团",
+      "basis": "谏刘璋勿迎刘备；演义作倒吊城门、割绳触地而死。"
+    },
+    {
+      "id": "wangrui",
+      "name": "王睿",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "荆州刺史，为孙坚所逼，吞金而死。"
+    },
+    {
+      "id": "wangshang",
+      "name": "王商",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "蜀郡太守，荐许靖，蜀中长者。"
+    },
+    {
+      "id": "wangwei",
+      "name": "王威",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "荆州刘表集团",
+      "basis": "劝刘琮乘曹操初至而袭之。"
+    },
+    {
+      "id": "wangyi_hd",
+      "name": "王邑",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉室宗亲与朝臣",
+      "basis": "河东太守，献帝东归时贡献不绝。"
+    },
+    {
+      "id": "wangyi_nv",
+      "name": "王异",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "女性",
+      "basis": "赵昂之妻，与杨阜共谋讨马超，冀城之守多其画策。"
+    },
+    {
+      "id": "wangzhi",
+      "name": "王植",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。荥阳太守，过五关斩六将之四。"
+    },
+    {
+      "id": "weixu",
+      "name": "魏续",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吕布集团",
+      "basis": "与宋宪同缚吕布降曹。"
+    },
+    {
+      "id": "weizi",
+      "name": "卫兹",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "陈留孝廉，出家财助曹操起兵，荥阳战死。"
+    },
+    {
+      "id": "wuanguo",
+      "name": "武安国",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "北海孔融集团",
+      "basis": "演义形象。孔融部将，虎牢关为吕布断腕；正史无此人。"
+    },
+    {
+      "id": "wudun",
+      "name": "吴敦",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吕布集团",
+      "basis": "泰山群帅之一。"
+    },
+    {
+      "id": "wufu",
+      "name": "伍孚",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "汉室宗亲与朝臣",
+      "basis": "越骑校尉，怀刃刺董卓不中而死。"
+    },
+    {
+      "id": "wuguotai",
+      "name": "吴国太",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "女性",
+      "basis": "演义形象。吴夫人之妹，甘露寺相刘备；正史无此人。"
+    },
+    {
+      "id": "wulan",
+      "name": "吴兰",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "降刘备，与雷铜同没于武都。"
+    },
+    {
+      "id": "wutugu",
+      "name": "兀突骨",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "南中夷帅",
+      "basis": "演义形象。乌戈国主，藤甲兵，为诸葛亮火烧于盘蛇谷。"
+    },
+    {
+      "id": "wuyan",
+      "name": "乌延",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "乌桓",
+      "basis": "右北平乌桓大人。"
+    },
+    {
+      "id": "xiahouen",
+      "name": "夏侯恩",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。曹操背剑之将，长坂为赵云所杀，青釭剑之由。"
+    },
+    {
+      "id": "xiahoujie",
+      "name": "夏侯杰",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "演义增补人物",
+      "basis": "演义形象。当阳桥下为张飞喝声所惊，肝胆碎裂坠马而死。"
+    },
+    {
+      "id": "xiangchong",
+      "name": "向宠",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "《出师表》\"性行淑均，晓畅军事\"所指，南征战死。"
+    },
+    {
+      "id": "xieguini",
+      "name": "泄归泥",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "鲜卑",
+      "basis": "鲜卑小帅，步度根之侄。"
+    },
+    {
+      "id": "xingdaorong",
+      "name": "邢道荣",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "演义形象。零陵上将，自称万夫不当而为张飞所擒；当代网络语境中知名度不低。"
+    },
+    {
+      "id": "xueli",
+      "name": "薛礼",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "扬州刘繇集团",
+      "basis": "秣陵相，为孙策所破。"
+    },
+    {
+      "id": "xuzhao",
+      "name": "许昭",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "江东宗帅",
+      "basis": "吴郡宗帅，纳严白虎余众。"
+    },
+    {
+      "id": "yangang",
+      "name": "杨昂",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "张鲁将，守阳平关。"
+    },
+    {
+      "id": "yangbo",
+      "name": "杨柏",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "张鲁将，杨松之弟。"
+    },
+    {
+      "id": "yangchou",
+      "name": "杨丑",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "张杨集团",
+      "basis": "杀张杨欲附曹操，为眭固所杀。"
+    },
+    {
+      "id": "yangding",
+      "name": "杨定",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "董卓集团与凉州军",
+      "basis": "凉州将，护献帝东归。"
+    },
+    {
+      "id": "yanghong_ys",
+      "name": "杨弘",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "袁术长史，术死后欲奉其众。"
+    },
+    {
+      "id": "yanghuai",
+      "name": "杨怀",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "白水关将，与高沛同为刘备所斩。"
+    },
+    {
+      "id": "yangqiu",
+      "name": "杨秋",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "关中十部将之一，降曹存安定。"
+    },
+    {
+      "id": "yangren",
+      "name": "杨任",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "张鲁将，拒夏侯渊。"
+    },
+    {
+      "id": "yangsong",
+      "name": "杨松",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "汉中张鲁集团",
+      "basis": "演义形象。张鲁谋臣，贪贿卖主而被斩；正史仅作杨柏之兄。"
+    },
+    {
+      "id": "yangzhong_hd",
+      "name": "杨众",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉室宗亲与朝臣",
+      "basis": "汉侍中，护献帝东归。"
+    },
+    {
+      "id": "yanshi",
+      "name": "严氏",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "吕布集团",
+      "basis": "吕布妻，谏勿听陈宫分兵之计，吕布用其言而败。"
+    },
+    {
+      "id": "yanxiang",
+      "name": "阎象",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "袁术集团",
+      "basis": "袁术主簿，谏勿称帝而不听。"
+    },
+    {
+      "id": "yanyu",
+      "name": "严舆",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "江东宗帅",
+      "basis": "严白虎弟，请和而为孙策所杀。"
+    },
+    {
+      "id": "yinfeng",
+      "name": "尹奉",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "与杨阜共讨马超。"
+    },
+    {
+      "id": "yinli",
+      "name": "尹礼",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "吕布集团",
+      "basis": "泰山群帅之一。"
+    },
+    {
+      "id": "yuanhui",
+      "name": "袁徽",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "避乱交州的学者，与荀彧书称士燮之治。"
+    },
+    {
+      "id": "yuanyin",
+      "name": "袁胤",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "袁术从弟，丹阳太守。"
+    },
+    {
+      "id": "yudu",
+      "name": "于毒",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山渠帅，攻邺杀太守。"
+    },
+    {
+      "id": "yumi",
+      "name": "于麋",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "扬州刘繇集团",
+      "basis": "刘繇将，横江之守。"
+    },
+    {
+      "id": "yushe",
+      "name": "俞涉",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "袁术集团",
+      "basis": "演义形象。袁术骁将，虎牢关前为华雄所斩。"
+    },
+    {
+      "id": "zhangbao_hj",
+      "name": "张宝",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "黄巾与太平道",
+      "basis": "张角之弟，地公将军。"
+    },
+    {
+      "id": "zhangbao_shu",
+      "name": "张苞",
+      "historicalWeight": 4,
+      "renown": 2,
+      "group": "蜀汉·二代将门",
+      "basis": "张飞子，早夭；演义中与关兴并为北伐前锋，游戏固定登场。"
+    },
+    {
+      "id": "zhangchun",
+      "name": "张纯",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "与丘力居同叛，自号弥天将军安定王；公孙瓒崛起的背景。"
+    },
+    {
+      "id": "zhangheng_gz",
+      "name": "张横",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉韩遂集团",
+      "basis": "关中十部将之一。"
+    },
+    {
+      "id": "zhangheng_wdm",
+      "name": "张衡",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "张陵子、张鲁父，五斗米道第二代师君。"
+    },
+    {
+      "id": "zhangju",
+      "name": "张举",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "与张纯同叛，自称天子。"
+    },
+    {
+      "id": "zhangkai",
+      "name": "张闿",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "陶谦部将，杀曹嵩，曹操屠徐州之由。"
+    },
+    {
+      "id": "zhangliang_hj",
+      "name": "张梁",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "黄巾与太平道",
+      "basis": "张角之弟，人公将军。"
+    },
+    {
+      "id": "zhangmancheng",
+      "name": "张曼成",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黄巾与太平道",
+      "basis": "南阳黄巾渠帅。"
+    },
+    {
+      "id": "zhangnan",
+      "name": "张南",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·将领",
+      "basis": "夷陵战死。"
+    },
+    {
+      "id": "zhangshiping",
+      "name": "张世平",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "割据群雄",
+      "basis": "中山马商，与苏双共资刘备起兵。"
+    },
+    {
+      "id": "zhangsu",
+      "name": "张肃",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "张松之兄，告发其弟以自免。"
+    },
+    {
+      "id": "zhangxian",
+      "name": "张羡",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "长沙太守，据三郡叛刘表三年而病死。"
+    },
+    {
+      "id": "zhangxiu_wdm",
+      "name": "张修",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "汉中张鲁集团",
+      "basis": "五斗米道别系，与张鲁同击汉中而为张鲁所并。"
+    },
+    {
+      "id": "zhangxun",
+      "name": "张勋",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "袁术大将军，攻吕布而败。"
+    },
+    {
+      "id": "zhangying",
+      "name": "张英",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "扬州刘繇集团",
+      "basis": "刘繇将，当利口拒孙策。"
+    },
+    {
+      "id": "zhangyun",
+      "name": "张允",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "刘表外甥，与蔡瑁同掌水军，演义中同死于反间。"
+    },
+    {
+      "id": "zhangzi",
+      "name": "张咨",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "割据群雄",
+      "basis": "南阳太守，为孙坚所斩。"
+    },
+    {
+      "id": "zhaoang",
+      "name": "赵昂",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "西凉马腾集团",
+      "basis": "王异之夫，与杨阜共讨马超。"
+    },
+    {
+      "id": "zhaofan",
+      "name": "赵范",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "荆州刘表集团",
+      "basis": "桂阳太守，降赵云而欲以寡嫂妻之，演义\"赵子龙拒婚\"一节。"
+    },
+    {
+      "id": "zhaozhong",
+      "name": "赵忠",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "宦官与外戚",
+      "basis": "十常侍之一，\"赵常侍是我母\"。"
+    },
+    {
+      "id": "zhengdu",
+      "name": "郑度",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "益州刘焉刘璋集团",
+      "basis": "献坚壁清野之策而刘璋不用。"
+    },
+    {
+      "id": "zhouang",
+      "name": "周昂",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "会稽王朗集团",
+      "basis": "袁绍所署九江太守，与孙坚、公孙越交兵。"
+    },
+    {
+      "id": "zhoushang",
+      "name": "周尚",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "袁术集团",
+      "basis": "周瑜从父，丹阳太守。"
+    },
+    {
+      "id": "zhoutai_wei",
+      "name": "州泰",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "曹魏·将领",
+      "basis": "司马懿所拔，破吴于巴丘，历新城太守。"
+    },
+    {
+      "id": "zhouxin",
+      "name": "周昕",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "会稽王朗集团",
+      "basis": "丹阳太守，助曹操募兵，为孙策所破。"
+    },
+    {
+      "id": "zhubao",
+      "name": "朱褒",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "南中夷帅",
+      "basis": "牂柯太守，南中三叛之一。"
+    },
+    {
+      "id": "zhufu",
+      "name": "朱符",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "交州士燮集团",
+      "basis": "交州刺史，赋敛过重为夷所杀。"
+    },
+    {
+      "id": "zhugejun",
+      "name": "诸葛均",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "蜀汉·谋臣",
+      "basis": "诸葛亮之弟，蜀汉长水校尉；演义三顾茅庐中出场。"
+    },
+    {
+      "id": "zhurongfuren",
+      "name": "祝融夫人",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "南中夷帅",
+      "basis": "演义形象。孟获之妻，飞刀擒张嶷马忠；游戏中南蛮女将的固定一员。"
+    },
+    {
+      "id": "zixushangren",
+      "name": "紫虚上人",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "方术与医术",
+      "basis": "演义形象。锦屏山隐者，为刘璋使者卜刘备之事。"
+    },
+    {
+      "id": "zoudan",
+      "name": "邹丹",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "公孙瓒集团",
+      "basis": "公孙瓒将，为刘虞旧部所杀。"
+    },
+    {
+      "id": "zoushi",
+      "name": "邹氏",
+      "historicalWeight": 4,
+      "renown": 3,
+      "group": "张济集团",
+      "basis": "张济遗孀，曹操纳之而致宛城之变；正史不载其名。"
+    },
+    {
+      "id": "zoutuo",
+      "name": "邹他",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "江东宗帅",
+      "basis": "吴郡宗帅。"
+    },
+    {
+      "id": "zuoxiao",
+      "name": "左校",
+      "historicalWeight": 4,
+      "renown": 4,
+      "group": "黑山军",
+      "basis": "黑山渠帅。"
+    }
+  ]
+}
