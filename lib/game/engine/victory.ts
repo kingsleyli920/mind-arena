@@ -99,3 +99,71 @@ export function gradeOf(st: Standing, start: StartStanding): Grade {
 }
 
 export const GRADE_RANK: Record<Grade, number> = { ding: 0, bing: 1, yi: 2, jia: 3 };
+
+/**
+ * 给模型看的态势简报。
+ *
+ * 候选标签只讲单个目标的攻防，讲不出「往哪个方向打才算数」。
+ * 而档位判据是州级的——吕布开局据兖州，豫州六郡里有三个无主，
+ * 占到四郡即多控一州升乙档；贪心地打最近最弱的目标则永远停在丁档。
+ * 若不把这层信息摆出来，胜负判据对模型就是不可见的，评测测的将是猜谜。
+ */
+export function briefFor(
+  s: GameState, geo: Geography, f: FactionId,
+  adj?: Map<CommanderyId, Array<{ to: CommanderyId }>>,
+): string {
+  const st = standingOf(s, geo, f);
+  const fs_ = s.factions[f];
+  if (!fs_) return "";
+  const lines: string[] = [];
+  lines.push(
+    `【态势】直辖 ${st.commanderies} 郡（开局 ${fs_.startCommanderies}），`
+    + `控制 ${st.controlledZhou} 州（开局 ${fs_.startZhou}）${st.zhouNames.length ? `：${st.zhouNames.join("、")}` : ""}，`
+    + `据州治 ${st.zhouSeats} 个（开局 ${fs_.startSeats}），夺自他方 ${st.conquests} 郡`,
+  );
+  lines.push(
+    `【档位】现为 ${fs_.bestGrade}。升档要相对开局有增量：`
+    + `多控 1 州或多据 1 州治 → 乙；多控 2 州 → 甲；`
+    + `郡数高于开局且至少一郡夺自他方 → 丙`,
+  );
+
+  // 逐州列出差多少，这是「往哪打」的直接依据。
+  // 只列够得着的州——把交州、并州这类隔着半个天下的地方也铺出来，
+  // 是在用无关信息稀释真正的选择
+  const reachable = new Set<string>();
+  if (adj) {
+    for (const c of Object.values(s.commanderies)) {
+      if (c.owner !== f) continue;
+      const z = geo.zhouOf.get(c.id);
+      if (z) reachable.add(z);
+      for (const e of adj.get(c.id) ?? []) {
+        const nz = geo.zhouOf.get(e.to);
+        if (nz) reachable.add(nz);
+      }
+    }
+  }
+  const rows: string[] = [];
+  for (const [z, members] of [...geo.zhouMembers].sort((a, b) => a[0].localeCompare(b[0]))) {
+    let mine = 0, vacant = 0;
+    const others = new Map<FactionId, number>();
+    for (const id of members) {
+      const o = s.commanderies[id]?.owner;
+      if (o === f) mine += 1;
+      else if (!o) vacant += 1;
+      else others.set(o, (others.get(o) ?? 0) + 1);
+    }
+    if (adj && !reachable.has(z)) continue;                   // 够不着的州不列
+    if (mine === 0 && vacant === 0) continue;
+    const need = Math.floor(members.length / 2) + 1 - mine;
+    const seat = geo.zhouSeat.get(z);
+    const seatWho = seat ? s.commanderies[seat]?.owner ?? "无主" : "?";
+    rows.push(
+      `  ${z}：共 ${members.length} 郡，我 ${mine}，无主 ${vacant}`
+      + `${others.size ? `，他方 ${[...others].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}${v}`).join("/")}` : ""}`
+      + `｜${need <= 0 ? "已控制" : `再取 ${need} 郡即控制`}`
+      + `｜州治 ${seat}（${seatWho === f ? "在我手" : seatWho}）`,
+    );
+  }
+  if (rows.length) lines.push("【各州】", ...rows);
+  return lines.join("\n");
+}

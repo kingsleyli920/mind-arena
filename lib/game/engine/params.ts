@@ -57,11 +57,22 @@ export interface EngineParams {
   musterTake: number;
   /** 开局在野可招募比例，由 seed 抽定 */
   wildRecruitRatio: number;
+  /** 兵种表：攻防系数、地形系数、克制关系 */
+  units: Record<string, {
+    name: string; attack: number; defense: number;
+    terrain: Record<string, number>; strongAgainst: string[];
+  }>;
+  counterBonus: number;
+  /** 器械：治械每次提升一级的顺序 */
+  gearLadder: string[];
 }
 
 interface RawPack {
   constants?: Record<string, Record<string, unknown>>;
-  units?: Array<{ id: string }>;
+  units?: Array<{
+    id: string; name: string; attack: number; defense: number;
+    terrainFactor?: Record<string, number>; strongAgainst?: string[];
+  }>;
   terrain?: Array<{ id: string; defenseBonus: number }>;
   actions?: Array<{ id: string; params?: Array<{ name: string; tiers?: Array<{ id: string; value: number }> }> }>;
 }
@@ -78,6 +89,24 @@ const num = (v: unknown, path: string): number => {
  * 从内容包提取引擎参数。任何缺失都抛错而非取默认值——
  * 静默兜底会让「包里改了数值但引擎没跟上」这类问题无声通过。
  */
+/** 兵种表。缺地形系数即抛错——静默当 1 会让「山地骑兵减半」无声失效 */
+function unitTable(pack: RawPack): EngineParams["units"] {
+  const out: EngineParams["units"] = {};
+  for (const u of pack.units ?? []) {
+    const tf = u.terrainFactor;
+    for (const k of ["plain", "hill", "mountain", "gate", "river"]) {
+      if (typeof tf?.[k] !== "number") throw new Error(`内容包 units.${u.id} 缺地形系数 ${k}`);
+    }
+    out[u.id] = { name: u.name, attack: num(u.attack, `units.${u.id}.attack`),
+                  defense: num(u.defense, `units.${u.id}.defense`),
+                  terrain: tf!, strongAgainst: u.strongAgainst ?? [] };
+  }
+  for (const k of ["infantry", "cavalry", "archer", "navy"]) {
+    if (!out[k]) throw new Error(`内容包缺兵种 ${k}`);
+  }
+  return out;
+}
+
 export function loadParams(pack: RawPack): EngineParams {
   const C = pack.constants ?? {};
   const g = (group: string, key: string) => num(C[group]?.[key], `constants.${group}.${key}`);
@@ -159,5 +188,8 @@ export function loadParams(pack: RawPack): EngineParams {
     fieldDefeatLoss: g("野战", "大败_攻方损"),
     musterTake: g("集结", "每郡抽调比"),
     wildRecruitRatio: g("随机", "在野可招募比例"),
+    units: unitTable(pack),
+    counterBonus: g("兵种", "克制加成"),
+    gearLadder: ["none", "ram", "mound"],
   };
 }

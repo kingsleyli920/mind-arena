@@ -3,7 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
-import { buildGeography, standingOf, gradeOf } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, gradeOf, briefFor } from "../lib/game/engine/victory.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
@@ -13,6 +13,7 @@ const DATA = {
   commanderyState: read("commandery-state.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
+  troopTypes: read("troop-types.json"),
 };
 const G = buildGraph(read("adjacency.json"));
 // 引擎参数唯一来源是内容包，测试也走同一条路径
@@ -39,15 +40,15 @@ test("开局状态自洽", () => {
 test("候选可枚举：任一势力都落在 O(10)–O(10²)", () => {
   const s = fresh();
   for (const id of Object.keys(s.factions)) {
-    const n = listActions(s, id, G).length;
+    const n = listActions(s, id, G, P, undefined, ROSTER).length;
     assert.ok(n <= 60, `${id} 候选 ${n} 条，超过上限`);
   }
 });
 
 test("候选列表对同一状态是稳定的", () => {
   const s = fresh();
-  const a = listActions(s, "yuanshao", G).map((c) => c.key);
-  const b = listActions(fresh(), "yuanshao", G).map((c) => c.key);
+  const a = listActions(s, "yuanshao", G, P, undefined, ROSTER).map((c) => c.key);
+  const b = listActions(fresh(), "yuanshao", G, P, undefined, ROSTER).map((c) => c.key);
   assert.deepEqual(a, b);
 });
 
@@ -115,7 +116,7 @@ test("R33 同 seed 同命令必得逐位相同的结果", () => {
 function sampleOrders(s, factions) {
   const orders = [];
   for (const f of factions) {
-    const cands = listActions(s, f, G, undefined, ROSTER);
+    const cands = listActions(s, f, G, P, undefined, ROSTER);
     const byType = new Map();
     for (const c of cands) if (!byType.has(c.action.type)) byType.set(c.action.type, c);
     for (const c of byType.values()) orders.push({ faction: f, action: c.action });
@@ -138,7 +139,7 @@ test("不同 seed 产生不同轨迹", () => {
 
 test("令数被正确扣减且不透支", () => {
   const s = fresh();
-  const cands = listActions(s, "yuanshao", G);
+  const cands = listActions(s, "yuanshao", G, P);
   const orders = cands.map((c) => ({ faction: "yuanshao", action: c.action }));
   const { state, rejected } = resolve(s, orders, G, P, ROSTER, GEO);
   assert.ok(state.factions.yuanshao.ap >= 0, "令数透支");
@@ -163,7 +164,7 @@ test("归隐：弃治所外全部郡国且不可再动", () => {
   const after = Object.values(state.commanderies).filter((c) => c.owner === f).length;
   assert.equal(after, 1, `归隐后应只剩治所，实为 ${after}（原 ${before}）`);
   assert.ok(state.factions[f].retired);
-  assert.equal(listActions(state, f, G).length, 0, "归隐后仍有候选");
+  assert.equal(listActions(state, f, G, P, undefined, ROSTER).length, 0, "归隐后仍有候选");
 });
 
 test("一局 16 季后自动结束", () => {
@@ -550,4 +551,75 @@ test("胜负：控制一州以过半郡国为准，州治齐备且唯一", () =>
   assert.equal(standingOf(probe, GEO, "lubu").controlledZhou, 0, "恰好半数不该算控制");
   probe.commanderies[yz[Math.floor(yz.length / 2)]].owner = "lubu";
   assert.equal(standingOf(probe, GEO, "lubu").controlledZhou, 1, "过半应算控制");
+});
+
+// ── 兵种与器械 ──────────────────────────────────────────────────────
+// 内容包定义了四个兵种和三级器械，引擎首版零引用——两者都是纯装饰。
+test("兵种：骑兵在山地关隘减半，水军在江河见长", () => {
+  const P2 = { ...P };
+  const at = (unit, terrain) => P2.units[unit].terrain[terrain];
+  assert.ok(at("cavalry", "plain") > at("cavalry", "mountain") * 2, "骑兵未因山地折损");
+  assert.ok(at("cavalry", "gate") <= 0.6, "骑兵在关隘不该占便宜");
+  assert.ok(at("navy", "river") > at("infantry", "river"), "水军在江河不占优");
+  assert.ok(at("archer", "mountain") >= at("infantry", "mountain"), "弓弩据险不占优");
+  // 每郡都有兵种，且都在包里定义过
+  for (const c of Object.values(fresh().commanderies)) {
+    assert.ok(P.units[c.unit], `${c.id} 的兵种 ${c.unit} 不在内容包里`);
+  }
+});
+
+test("兵种：换兵种会改变同一场攻城的结果", () => {
+  const s = fresh();
+  const from = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== "yuanshao");
+  const run = (unit, garrison) => {
+    const t = fresh();
+    t.commanderies[from.id].unit = unit;
+    t.commanderies[from.id].garrison = garrison;
+    const r = resolve(t, [{ faction: "yuanshao", action: { type: "campaign",
+      target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+      G, P, ROSTER, GEO);
+    return r.state.log.find((e) => e.kind.startsWith("siege-"))?.attribution;
+  };
+  assert.notEqual(String(run("cavalry", 20000).我军), String(run("navy", 20000).我军),
+    "换兵种归因未变");
+
+  // 缺口梯只有四档，单一兵力下两个兵种常落在同一档；扫一遍才测得出真影响
+  const differs = [8000, 12000, 16000, 20000, 26000, 34000, 45000]
+    .some((n) => run("cavalry", n).缺口 !== run("navy", n).缺口);
+  assert.ok(differs, `骑兵与水军在 ${edge.terrain} 上任何兵力下都打出同样的缺口`);
+});
+
+test("器械：须由内政「治械」逐级打造，出征即耗", () => {
+  const s = fresh();
+  const at = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
+  assert.equal(s.commanderies[at.id].gear, "none", "开局不该自带器械");
+
+  const one = resolve(s, [{ faction: "yuanshao",
+    action: { type: "govern", at: at.id, policy: "forge" } }], G, P, ROSTER, GEO).state;
+  assert.equal(one.commanderies[at.id].gear, "ram", "治械一次应得冲车");
+  const two = resolve(refreshAp(one, P), [{ faction: "yuanshao",
+    action: { type: "govern", at: at.id, policy: "forge" } }], G, P, ROSTER, GEO).state;
+  assert.equal(two.commanderies[at.id].gear, "mound", "治械两次应得土山，且不可越级");
+
+  // 出征带走，本郡回到无械
+  const edge = [...(G.adj.get(at.id) ?? [])]
+    .find((e) => two.commanderies[e.to]?.owner !== "yuanshao");
+  const out = resolve(refreshAp(two, P), [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: at.id, commander: null, strength: "main", siegeGear: "mound" } }],
+    G, P, ROSTER, GEO).state;
+  assert.equal(out.commanderies[at.id].gear, "none", "器械未随军出征");
+  const army = out.armies.find((a) => a.home === at.id);
+  if (army) assert.equal(army.gear, "mound", "军团未带上器械");
+});
+
+test("态势简报：把州级进度摆给模型看，且只列够得着的州", () => {
+  const s = fresh();
+  const brief = briefFor(s, GEO, "lubu", G.adj);
+  assert.match(brief, /控制 1 州（开局 1）/);
+  assert.match(brief, /豫州.*再取 \d+ 郡即控制/, "未给出「往哪打才算数」");
+  assert.ok(!brief.includes("交州"), "列出了够不着的交州，等于用无关信息稀释选择");
+  // 档位说明必须与引擎实际判据一致，否则模型按简报推算会算错
+  assert.match(brief, /多控 1 州或多据 1 州治 → 乙/);
 });

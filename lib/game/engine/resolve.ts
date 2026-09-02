@@ -77,6 +77,23 @@ function breachCount(P: EngineParams, attack: number, defend: number, defense: n
   return { breach: base + gearBonus + breachBonus, hold: hold + holdBonus };
 }
 
+/**
+ * 兵种系数。首版里内容包定义了四个兵种而引擎零引用——兵种是纯装饰。
+ * 地形系数缺项在 loadParams 就抛错，此处不再兜底。
+ */
+function unitPower(P: EngineParams, unit: string, terrain: string, foe: string | null): number {
+  const u = P.units[unit];
+  if (!u) return 1;
+  const counter = foe && u.strongAgainst.includes(foe) ? P.counterBonus : 0;
+  return u.attack * (u.terrain[terrain] ?? 1) * (1 + counter);
+}
+
+function unitGuard(P: EngineParams, unit: string): number {
+  return P.units[unit]?.defense ?? 1;
+}
+
+const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
+
 /** 撤围：把军团从围城名单里摘掉 */
 function lift(s: GameState, army: { id: string }): void {
   s.armies = s.armies.filter((x) => x.id !== army.id);
@@ -95,13 +112,13 @@ function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId
 
 function beginSiege(
   s: GameState, faction: FactionId, from: CommanderyId, target: CommanderyId,
-  troops: number, a: { commander: OfficerId | null; strength: Posture; siegeGear: SiegeGear },
-  lead: { id: string } | null,
+  troops: number, a: { commander: OfficerId | null; strength: Posture },
+  lead: { id: string } | null, gear: SiegeGear, unit: string,
 ): void {
   s.armies.push({
     id: `${faction}:${s.turn}:${from}>${target}`,
     faction, commander: a.commander ?? lead?.id ?? null, troops,
-    at: target, target, posture: a.strength, gear: a.siegeGear,
+    at: target, target, posture: a.strength, gear, unit,
     siegeSeasons: 0, home: from,
   });
 }
@@ -114,7 +131,7 @@ function beginSiege(
 function fieldBattle(
   s: GameState, P: EngineParams, roster: Roster | null,
   x: { atkFaction: FactionId; atkTroops: number; atkLead: OfficerRef | null;
-       foe: Army; at: CommanderyId; terrain: string; seq: number;
+       foe: Army; at: CommanderyId; terrain: string; seq: number; atkUnit: string;
        /** 攻方起兵郡，败退时残部退回此处 */
        from: CommanderyId },
 ): number {
@@ -123,8 +140,10 @@ function fieldBattle(
   const foeEff = roster ? attackEffect(foeLead, P, x.terrain) : null;
   const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
                                          faction: x.atkFaction, event: "field", seq: x.seq }) * P.jitter * 2;
-  const A = x.atkTroops * (atkEff?.attackMul ?? 1) * jitter;
-  const D = x.foe.troops * (foeEff?.attackMul ?? 1);
+  const A = x.atkTroops * (atkEff?.attackMul ?? 1) * jitter
+          * unitPower(P, x.atkUnit, x.terrain, x.foe.unit);
+  const D = x.foe.troops * (foeEff?.attackMul ?? 1)
+          * unitPower(P, x.foe.unit, x.terrain, x.atkUnit);
   const ratio = D > 0 ? A / D : 99;
 
   let outcome: string, atkLoss: number, foeLoss: number, atkWins: boolean;
@@ -143,6 +162,7 @@ function fieldBattle(
   const attribution = {
     我军: x.atkTroops, 敌军: x.foe.troops, 战力比: Number(ratio.toFixed(2)),
     结果: outcome, 我将: atkEff?.note ?? "无主将", 敌将: foeEff?.note ?? "无主将",
+    我兵种: unitName(P, x.atkUnit), 敌兵种: unitName(P, x.foe.unit), 地形: x.terrain,
   };
 
   if (atkWins) {
@@ -218,6 +238,13 @@ export function resolve(
                      c.moraleTier = Math.max(1, c.moraleTier - 1); break;
       case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
       case "soothe": c.moraleTier = Math.min(5, c.moraleTier + 1); break;
+      // 治械：逐级打造，不可越级。首版里器械是征伐时的自由选项，
+      // 不花任何代价就能给每次攻城白送缺口
+      case "forge": {
+        const i = P.gearLadder.indexOf(c.gear);
+        c.gear = (P.gearLadder[Math.min(i + 1, P.gearLadder.length - 1)] ?? "none") as typeof c.gear;
+        break;
+      }
     }
   }
 
@@ -265,9 +292,11 @@ export function resolve(
     s.armies.push({
       id: `${o.faction}:${s.turn}:${a.at}`,
       faction: o.faction, commander: a.commander, troops,
-      at: a.at, target: null, posture: "main", gear: "none",
+      at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
+      unit: s.commanderies[a.at].unit,
       siegeSeasons: 0, home: a.at,
     });
+    s.commanderies[a.at].gear = "none";
     log(s, { kind: "muster", faction: o.faction, text: `于 ${a.at} 集结 ${troops} 人待命` });
   }
 
@@ -322,6 +351,9 @@ export function resolve(
     } else {
       src.garrison -= troops;
     }
+    // 器械随军出征，本郡即刻回到无械状态：它是一次性的投入，不是永久加成
+    const gear = src.gear;
+    src.gear = "none";
 
     const besiegers = s.armies.filter((x) => x.target === a.target && x.faction !== o.faction);
     if (besiegers.length) {
@@ -330,11 +362,11 @@ export function resolve(
         || x.faction.localeCompare(y.faction))[0];
       const won = fieldBattle(s, P, roster, {
         atkFaction: o.faction, atkTroops: troops, atkLead: lead,
-        foe, at: a.target, terrain, seq: i, from: a.from,
+        foe, at: a.target, terrain, seq: i, from: a.from, atkUnit: src.unit,
       });
       if (won && tgt.owner !== o.faction) {
         // 击退围城军后接手围城
-        beginSiege(s, o.faction, a.from, a.target, won, a, lead);
+        beginSiege(s, o.faction, a.from, a.target, won, a, lead, gear, src.unit);
       } else if (won) {
         // 解自家之围：残部入城为戍
         tgt.garrison += won;
@@ -352,7 +384,7 @@ export function resolve(
                text: `增兵 ${a.target} 城下，共 ${mine.troops} 人` });
       continue;
     }
-    beginSiege(s, o.faction, a.from, a.target, troops, a, lead);
+    beginSiege(s, o.faction, a.from, a.target, troops, a, lead, gear, src.unit);
   }
 
   // ── 阶段七：围城结算 ──────────────────────────────────────────────
@@ -373,12 +405,18 @@ export function resolve(
 
     const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
                                            faction: army.faction, event: "siege", seq: i }) * P.jitter * 2;
-    const attack = army.troops * jitter * (atk?.attackMul ?? 1);
+    const power = unitPower(P, army.unit, terrain, tgt.unit);
+    const attack = army.troops * jitter * (atk?.attackMul ?? 1) * power;
     const persist = army.siegeSeasons * P.siegeBreachPerSeason;   // 围得越久缺口越大
-    const { breach, hold } = breachCount(P, attack, tgt.garrison, tgt.defense, army.gear,
-                                         terrain, atGate,
+    const { breach, hold } = breachCount(P, attack, tgt.garrison * unitGuard(P, tgt.unit),
+                                         tgt.defense, army.gear, terrain, atGate,
                                          (atk?.breachBonus ?? 0) + persist, def?.holdBonus ?? 0);
-    const who = { 主将: atk?.note ?? "无主将", 守将: def?.note ?? "无守将", 围城季: army.siegeSeasons };
+    const who = {
+      主将: atk?.note ?? "无主将", 守将: def?.note ?? "无守将", 围城季: army.siegeSeasons,
+      我军: `${unitName(P, army.unit)}×${power.toFixed(2)}`,
+      敌军: `${unitName(P, tgt.unit)}守`,
+      器械: army.gear,
+    };
 
     if (breach > hold) {
       const survivors = Math.max(1, Math.round(army.troops - tgt.garrison * P.captureSurvivalPenalty));

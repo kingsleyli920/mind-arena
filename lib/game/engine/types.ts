@@ -20,6 +20,10 @@ export interface CommanderyState {
   moraleTier: number;     // 1–5
   defense: number;        // 0–100
   governor: OfficerId | null;
+  /** 主力兵种。由地理定，不可更改——想要骑兵就得打边郡 */
+  unit: string;
+  /** 已备器械。由内政「治械」逐级打造，出征用毕即折损 */
+  gear: SiegeGear;
   /** 本季已下令数，用于 R12「同一郡国每季最多 2 令」 */
   ordersThisSeason: number;
 }
@@ -64,6 +68,8 @@ export interface Army {
   target: CommanderyId | null;
   posture: Posture;
   gear: SiegeGear;
+  /** 兵种，取自起兵郡 */
+  unit: string;
   /** 已围季数，满上限自动撤围 */
   siegeSeasons: number;
   /** 撤围或溃退时退回的郡 */
@@ -125,7 +131,7 @@ export type Action =
       strength: Posture; siegeGear: SiegeGear }
   | { type: "muster"; at: CommanderyId; from: CommanderyId[]; commander: OfficerId | null;
       deadline: 1 | 2 }
-  | { type: "govern"; at: CommanderyId; policy: "farm" | "levy" | "wall" | "soothe" }
+  | { type: "govern"; at: CommanderyId; policy: "farm" | "levy" | "wall" | "soothe" | "forge" }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
   | { type: "passage"; to: FactionId; through: CommanderyId }

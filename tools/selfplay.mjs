@@ -23,6 +23,7 @@ const DATA = {
   commanderyState: read("commandery-state.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
+  troopTypes: read("troop-types.json"),
 };
 const G = buildGraph(read("adjacency.json"));
 const P = loadParams(JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")));
@@ -53,7 +54,7 @@ function playOne(seed, rotation) {
     const orders = [];
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
-      orders.push(...decide(s, f, G, profileOf(f)));
+      orders.push(...decide(s, f, G, profileOf(f), undefined, ROSTER, P));
     }
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     for (const e of r.state.log.slice(s.log.length)) {

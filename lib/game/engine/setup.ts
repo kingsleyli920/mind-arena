@@ -14,6 +14,7 @@ export interface SetupData {
   }> };
   scenario: { factions: Array<{ id: string; name: string; seat?: string }> };
   commanderies: Array<{ id: string; name: string }>;
+  troopTypes: { commanderies: Array<{ id: string; unit: string }> };
 }
 
 export interface SetupOptions {
@@ -37,6 +38,7 @@ const PLACEHOLDER_FACTIONS = new Set(["wuzhu"]);
 
 export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams): GameState {
   const nameToId = new Map(data.commanderies.map((c) => [c.name, c.id]));
+  const unitOf = new Map(data.troopTypes.commanderies.map((c) => [c.id, c.unit]));
 
   const commanderies: Record<string, CommanderyState> = {};
   for (const c of data.commanderyState.commanderies) {
@@ -48,6 +50,8 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       moraleTier: c.moraleTier,
       defense: c.defense,
       governor: null,
+      unit: unitOf.get(c.id) ?? "infantry",
+      gear: "none",
       ordersThisSeason: 0,
     };
   }

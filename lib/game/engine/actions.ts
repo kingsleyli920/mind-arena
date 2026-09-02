@@ -5,6 +5,7 @@
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
 import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
+import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order,
 } from "./types.ts";
@@ -82,8 +83,12 @@ function freeLeft(s: GameState, f: FactionId, type: string, rules: Rules): numbe
  * 排序是确定性的：同一状态必得同一候选列表与同一顺序，
  * 否则模型看到的选项会随机漂移，重放也对不上。
  */
+/** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义 */
+const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
+const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
+
 export function listActions(
-  s: GameState, f: FactionId, g: Graph, rules: Rules = DEFAULT_RULES,
+  s: GameState, f: FactionId, g: Graph, P: EngineParams, rules: Rules = DEFAULT_RULES,
   roster: Roster | null = null,
 ): Candidate[] {
   const fs_ = s.factions[f];
@@ -114,6 +119,9 @@ export function listActions(
       // 让模型看得见「谁去打」，而不必自己再选一次人
       const lead = roster ? governorOf(s, roster, e.from) : null;
       const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
+      const src0 = s.commanderies[e.from];
+      const unitNote = `｜我${unitName(P, src0.unit)}对彼${unitName(P, tgt.unit)}`
+        + `，${e.terrain}地形，携${GEAR_CN[src0.gear]}`;
       const ongoing = s.armies.find((x) => x.target === tid);
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
@@ -135,13 +143,13 @@ export function listActions(
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
           action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
-                    strength, siegeGear: e.gates.length ? "ram" : "none" },
+                    strength, siegeGear: src0.gear },
           cost: rules.campaignAp,
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：我方戍兵 ${s.commanderies[e.from].garrison}，`
                + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`
                + `｜出 ${send} 人，${e.from} 城中余 ${left} 人`
-               + `${armyNote}${siegeNote}`,
+               + `${unitNote}${armyNote}${siegeNote}`,
         });
       }
     }
@@ -231,8 +239,11 @@ export function listActions(
       const isFront = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
       const policy = c.moraleTier <= 2 ? "soothe"
         : isFront && c.defense < 55 ? "wall"
-        : isFront && c.garrison < 4000 ? "levy" : "farm";
-      const why = { soothe: "民心低", wall: "临敌且城防薄", levy: "临敌且兵少", farm: "后方可劝农" }[policy];
+        : isFront && c.garrison < 4000 ? "levy"
+        : isFront && c.gear !== "mound" ? "forge" : "farm";
+      const why = { soothe: "民心低", wall: "临敌且城防薄", levy: "临敌且兵少",
+                    forge: `临敌且器械仅「${GEAR_CN[c.gear]}」`,
+                    farm: "后方可劝农" }[policy];
       return { c, policy, why };
     }).sort((a, b) => a.c.id.localeCompare(b.c.id)).slice(0, rules.perTypeCap);
     for (const { c, policy, why } of picks) {
@@ -240,8 +251,10 @@ export function listActions(
         key: `govern:${c.id}:${policy}`,
         action: { type: "govern", at: c.id, policy: policy as never },
         cost: rules.normalAp,
-        label: `${c.id} 行${{ farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民" }[policy]}`
-             + `（${why}；产出${c.yieldTier} 民心${c.moraleTier} 城防${c.defense}）`,
+        label: `${c.id} 行${{ farm: "劝农", levy: "募兵", wall: "修城",
+                              soothe: "安民", forge: "治械" }[policy]}`
+             + `（${why}；产出${c.yieldTier} 民心${c.moraleTier} 城防${c.defense}`
+             + ` ${unitName(P, c.unit)} 器械${GEAR_CN[c.gear]}）`,
       });
     }
   }

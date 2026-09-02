@@ -43,16 +43,16 @@ const MIN_RATIO: Record<Profile, number> = {
  */
 export function decide(
   s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
-  roster: Roster | null = null, P: EngineParams | null = null,
+  roster: Roster | null, P: EngineParams,
 ): Order[] {
   // 「出兵后余兵低到什么程度算把城送出去」由规则推导，不拍系数：
   // 邻敌最多带走自己八成守军，而破开「城防 30 以上 + 基数」的两档可防守
   // 需要兵力比 2.0，故余兵低于邻敌的 0.8/2.0 即一击可破。
   // 拿这个数去拟合出局率会得到 0.35，但那是对着指标调参，包一改就不成立了。
-  const maxStrength = P ? Math.max(...Object.values(P.strengthRatio)) : 0.8;
-  const breachTwo = P ? (P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2) : 2;
+  const maxStrength = Math.max(...Object.values(P.strengthRatio));
+  const breachTwo = P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2;
   const safeRatio = maxStrength / breachTwo;
-  const cands = listActions(s, f, g, rules, roster);
+  const cands = listActions(s, f, g, P, rules, roster);
   if (!cands.length) return [];
   const w = WEIGHTS[profile];
   const minRatio = MIN_RATIO[profile];

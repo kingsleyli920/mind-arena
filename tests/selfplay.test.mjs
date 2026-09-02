@@ -14,6 +14,7 @@ const DATA = {
   commanderyState: read("commandery-state.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
+  troopTypes: read("troop-types.json"),
 };
 const G = buildGraph(read("adjacency.json"));
 // 引擎参数唯一来源是内容包，测试也走同一条路径
@@ -36,7 +37,7 @@ function play(seed, rot) {
     const orders = [];
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
-      orders.push(...decide(s, f, G, prof(f)));
+      orders.push(...decide(s, f, G, prof(f), undefined, ROSTER, P));
     }
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     flips += r.state.log.slice(s.log.length).filter((e) => e.kind === "siege-win").length;
