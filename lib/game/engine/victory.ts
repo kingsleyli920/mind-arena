@@ -99,6 +99,8 @@ export function gradeOf(st: Standing, start: StartStanding): Grade {
 }
 
 export const GRADE_RANK: Record<Grade, number> = { ding: 0, bing: 1, yi: 2, jia: 3 };
+/** 档位的中文名。jia/yi/bing/ding 是固定的音写，不是可调数值，故不入内容包 */
+export const GRADE_CN: Record<Grade, string> = { jia: "甲", yi: "乙", bing: "丙", ding: "丁" };
 
 /**
  * 给模型看的态势简报。
@@ -122,7 +124,7 @@ export function briefFor(
     + `据州治 ${st.zhouSeats} 个（开局 ${fs_.startSeats}），夺自他方 ${st.conquests} 郡`,
   );
   lines.push(
-    `【档位】现为 ${fs_.bestGrade}。升档要相对开局有增量：`
+    `【档位】现为${GRADE_CN[fs_.bestGrade]}档。升档要相对开局有增量：`
     + `多控 1 州或多据 1 州治 → 乙；多控 2 州 → 甲；`
     + `郡数高于开局且至少一郡夺自他方 → 丙`,
   );

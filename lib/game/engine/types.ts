@@ -110,6 +110,8 @@ export interface GameState {
   /** 绝对季号，从 0 起。用于盟约到期等比较 */
   turn: number;
   epoch: number;
+  /** 本纪元自第几季起。纪元推进是双触发，不写死在固定季号上 */
+  epochStart: number;
   commanderies: Record<CommanderyId, CommanderyState>;
   factions: Record<FactionId, FactionState>;
   armies: Army[];

@@ -12,10 +12,10 @@ import { roll } from "./rng.ts";
 import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
 import { attackEffect, defendEffect, governEffect, governorOf } from "./officers.ts";
-import { GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
+import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
-  Army, GameState, Order, CommanderyId, FactionId, GameEvent, OfficerId,
+  Army, GameState, Order, Grade, CommanderyId, FactionId, GameEvent, OfficerId,
   Posture, SiegeGear,
 } from "./types.ts";
 
@@ -465,6 +465,17 @@ export function resolve(
   }
 
   // ── 阶段八：补给与产出 ────────────────────────────────────────────
+  // 无主郡国随纪元推进而豪强坐大，自守渐坚。这给「早取无主之地」一个时间
+  // 价值——若无主地永远同价，抢占时机就不成其为决策，模型大可无限期地
+  // 先把内政做满再扩张
+  const growth = P.neutralGrowth[s.epoch] ?? 0;
+  if (growth > 0) {
+    for (const c of Object.values(s.commanderies)) {
+      if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
+      c.garrison = Math.min(Math.round(c.garrison * (1 + growth)), P.garrisonCap);
+    }
+  }
+
   for (const f of Object.values(s.factions)) {
     if (f.eliminated) continue;
     const reach = supplyReach(s, g, f.id);
@@ -525,11 +536,25 @@ export function resolve(
     if (GRADE_RANK[grade] > GRADE_RANK[f.bestGrade]) f.bestGrade = grade;
   }
 
-  // ── 推进时钟 ──────────────────────────────────────────────────────
+  // ── 推进时钟与纪元 ────────────────────────────────────────────────
   s.turn += 1;
   s.season += 1;
   if (s.season > 4) { s.season = 1; s.year += 1; }
-  s.epoch = s.turn < 6 ? 1 : s.turn < 11 ? 2 : 3;
+
+  // 纪元按包里的双触发推进：本纪元满时限，或已有势力达到本纪元的目标档。
+  // 写死在固定季号上，纪元就只是个日历，与打法无关
+  if (s.epoch < P.epochCount) {
+    const target: Grade = s.epoch === 1 ? "bing" : "yi";
+    const reached = Object.values(s.factions)
+      .some((f) => GRADE_RANK[f.bestGrade] >= GRADE_RANK[target]);
+    if (s.turn - s.epochStart >= P.epochLimit || reached) {
+      s.epoch += 1;
+      s.epochStart = s.turn;
+      log(s, { kind: "epoch", text: `入第 ${s.epoch} 纪元`
+        + `（${reached ? `已有势力达${GRADE_CN[target]}档` : "本纪元逾时"}）：`
+        + `无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%` });
+    }
+  }
   if (s.turn >= P.seasonsPerGame) s.finished = true;
 
   return { state: s, rejected };

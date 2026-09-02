@@ -95,6 +95,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     season: 1,
     turn: 0,
     epoch: 1,
+    epochStart: 0,
     commanderies,
     factions,
     armies: [],

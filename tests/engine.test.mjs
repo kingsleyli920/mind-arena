@@ -623,3 +623,34 @@ test("态势简报：把州级进度摆给模型看，且只列够得着的州",
   // 档位说明必须与引擎实际判据一致，否则模型按简报推算会算错
   assert.match(brief, /多控 1 州或多据 1 州治 → 乙/);
 });
+
+// ── 纪元 ────────────────────────────────────────────────────────────
+// 首版里 epoch 只是按季号算出来的数字，不改变任何规则。
+test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
+  // 逾时触发：谁也不动，本纪元满时限即推进
+  let idle = fresh();
+  for (let t = 0; t < P.epochLimit; t += 1) {
+    idle = refreshAp(resolve(idle, [], G, P, ROSTER, GEO).state, P);
+  }
+  assert.equal(idle.epoch, 2, `静坐 ${P.epochLimit} 季后未入二纪元`);
+  assert.ok(idle.log.some((e) => e.kind === "epoch" && e.text.includes("逾时")));
+
+  // 达标触发：有势力升到丙档就提前推进
+  const s = fresh();
+  s.factions.yuanshao.bestGrade = "bing";
+  const early = resolve(s, [], G, P, ROSTER, GEO).state;
+  assert.equal(early.epoch, 2, "已有势力达丙档却未提前推进纪元");
+  assert.ok(early.log.some((e) => e.kind === "epoch" && e.text.includes("丙")));
+
+  // 无主郡国在一纪元不长兵，二纪元起自增
+  const neutral = Object.values(fresh().commanderies).find((c) => !c.owner);
+  const at1 = resolve(fresh(), [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
+  assert.equal(at1, neutral.garrison, "一纪元无主郡不该长兵");
+  const e2 = fresh(); e2.epoch = 2;
+  const at2 = resolve(e2, [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
+  assert.ok(at2 > neutral.garrison,
+    `二纪元无主郡未自守：${neutral.garrison} → ${at2}`);
+  const e3 = fresh(); e3.epoch = 3;
+  const at3 = resolve(e3, [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
+  assert.ok(at3 > at2, "三纪元自守未强于二纪元");
+});
