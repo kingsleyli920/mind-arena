@@ -103,7 +103,7 @@
 }
 .brief b { color: var(--ink); }
 
-.acts { display: grid; gap: 0.4rem; max-height: 46vh; overflow-y: auto; padding-inline-end: 0.2rem; }
+.acts { display: grid; gap: 0.4rem; overflow-y: auto; padding-inline-end: 0.2rem; }
 .acts details { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
 .acts summary {
   cursor: pointer; padding: 0.45rem 0.7rem; font-size: 0.85rem; letter-spacing: 0.08em;
@@ -225,3 +225,44 @@
   fill: #f4efe4; font-family: inherit; font-size: 34px; font-weight: 700;
   text-anchor: middle; letter-spacing: 0;
 }
+
+/* ── 面板顶部：状态条常驻，逐州明细折叠 ────────────────────────────
+   简报此前是 530px 的文字墙，占面板 57% 的高度，而真正要操作的候选
+   被挤进 200px 的窗口、要滚 3251px。常驻的应该是「我在哪一档、
+   离升档差什么」这一句，不是整段。 */
+.panel .status {
+  display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  padding: 0.55rem 0.8rem; background: #fbf8f1;
+  border: 1px solid var(--rule); border-inline-start: 3px solid var(--seal);
+  border-radius: 3px; font-size: 0.8rem; color: var(--ink-soft);
+}
+.panel .status b { font-size: 1.05rem; color: var(--ink); letter-spacing: 0.08em; }
+.panel .status em { font-style: normal; color: var(--seal); flex-basis: 100%; font-size: 0.78rem; }
+
+.panel .brief-fold { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.panel .brief-fold summary {
+  cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.78rem;
+  letter-spacing: 0.1em; color: var(--ink-soft);
+}
+.panel .brief-fold .brief { border: 0; border-top: 1px solid var(--rule); border-radius: 0; }
+
+/* 点城之后的筛选条 */
+.panel .pinned-bar {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.4rem 0.8rem; border-radius: 3px;
+  background: #fff4e8; border: 1px solid var(--seal); font-size: 0.8rem;
+}
+.panel .pinned-bar b { color: var(--seal); }
+.panel .pinned-bar span { color: var(--ink-soft); font-size: 0.75rem; }
+.panel .pinned-bar button {
+  margin-inline-start: auto; cursor: pointer; font: inherit; font-size: 0.74rem;
+  padding: 0.15rem 0.55rem; background: transparent; color: var(--seal);
+  border: 1px solid var(--seal); border-radius: 3px;
+}
+
+/* 地图上被选中的城 */
+.map-stage svg .mark.pinned .city > path { stroke: var(--seal); stroke-width: 3.5; }
+.map-stage svg .mark { cursor: pointer; }
+
+/* 候选区腾出来的高度 */
+.acts { max-height: 58vh; }

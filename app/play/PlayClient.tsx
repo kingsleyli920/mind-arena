@@ -206,6 +206,9 @@ export function PlayClient() {
   const [picked, setPicked] = useState<string[]>([]);
   const [flash, setFlash] = useState<{ mine: string[]; world: string[] }>({ mine: [], world: [] });
   const [focus, setFocus] = useState<string | null>(null);
+  // 点城筛选。地图此前是纯装饰：要打南阳，得去右边面板展开征伐、
+  // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
+  const [pinned, setPinned] = useState<string | null>(null);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -446,6 +449,15 @@ export function PlayClient() {
   }
 
   const me = game.factions[seat];
+  const standing = standingOf(game, engine.geo, seat);
+  // 「离升档还差什么」——这一句比整段简报更该常驻。
+  // 档位判的是相对开局的增量，不看绝对疆域
+  const nextStep = standing.controlledZhou >= me.startZhou + 2 ? "已达甲档条件"
+    : standing.controlledZhou > me.startZhou || standing.zhouSeats > me.startSeats
+      ? `再多控 ${me.startZhou + 2 - standing.controlledZhou} 州 → 甲`
+      : standing.commanderies > me.startCommanderies && standing.conquests > 0
+        ? "多控一州或多据一州治 → 乙"
+        : "郡数高于开局且至少一郡夺自他方 → 丙";
 
   // 城池与标注。标注在屏幕空间做贪心避让——冀州、兖州一带郡治密集，
   // 全部铺出来必然叠字，那正是「简略」的观感来源之一
@@ -498,8 +510,16 @@ export function PlayClient() {
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
+  // 与选中的城相关的候选：起点、目标、施政地、集结地、刺探对象都算
+  const touches = (c: Candidate, id: string) => {
+    const a = c.action as Record<string, unknown>;
+    if (a.at === id || a.target === id || a.from === id || a.through === id) return true;
+    return Array.isArray(a.from) && (a.from as string[]).includes(id);
+  };
+  const shown = pinned ? candidates.filter((c) => touches(c, pinned)) : candidates;
+
   const byType = new Map<string, Candidate[]>();
-  for (const c of candidates) {
+  for (const c of shown) {
     const cls = c.key.split(":")[0];
     if (!byType.has(cls)) byType.set(cls, []);
     byType.get(cls)!.push(c);
@@ -534,13 +554,19 @@ export function PlayClient() {
           }}
           onPointerDown={(e) => {
             if (view.k <= 1) return;
-            e.currentTarget.setPointerCapture(e.pointerId);
+            // 按下时**不**捕获指针。捕获会把后续事件全截走，城池的 click
+            // 永远收不到——地图于是点不动，只能拖
             dragRef.current = { x: e.clientX, y: e.clientY, ox: view.x, oy: view.y };
-            setDragging(true);
           }}
           onPointerMove={(e) => {
             const d = dragRef.current;
             if (!d) return;
+            // 移动超过阈值才算拖动，此时才捕获。阈值以内当作点击
+            if (!dragging && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 4) return;
+            if (!dragging) {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              setDragging(true);
+            }
             const box = e.currentTarget.getBoundingClientRect();
             const lim = (n: number) => Math.min(0, Math.max(-(view.k - 1) * 100, n));
             setView((v) => ({
@@ -549,7 +575,11 @@ export function PlayClient() {
               y: lim(d.oy + ((e.clientY - d.y) / box.height) * 100),
             }));
           }}
-          onPointerUp={() => { dragRef.current = null; setDragging(false); }}
+          onPointerUp={(e) => {
+            if (dragging) e.currentTarget.releasePointerCapture?.(e.pointerId);
+            dragRef.current = null;
+            setDragging(false);
+          }}
           style={{ cursor: view.k > 1 ? (dragging ? "grabbing" : "grab") : "default" }}
         >
           <div className="map-stage"
@@ -566,8 +596,10 @@ export function PlayClient() {
             ))}
             {marks.map((m) => (
               <g key={m.c.id}
-                className={`mark${m.mine ? " mine" : ""}${focus === m.c.id ? " focus" : ""}`}
-                onMouseEnter={() => setFocus(m.c.id)} onMouseLeave={() => setFocus(null)}>
+                className={`mark${m.mine ? " mine" : ""}${focus === m.c.id ? " focus" : ""}`
+                  + `${pinned === m.c.id ? " pinned" : ""}`}
+                onMouseEnter={() => setFocus(m.c.id)} onMouseLeave={() => setFocus(null)}
+                onClick={() => setPinned((p) => (p === m.c.id ? null : m.c.id))}>
                 <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
                   mine={m.mine} seat={m.isSeat} besieged={m.besieged}
                   fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
@@ -669,7 +701,27 @@ export function PlayClient() {
         </section>
 
         <aside className="panel">
-          <pre className="brief">{brief}</pre>
+          {/* 状态条常驻，逐州明细折叠。简报此前是 530px 的文字墙，
+              占了面板 57% 的高度，而真正要操作的候选被挤到 200px 的窗口里 */}
+          <div className="status">
+            <b>{GRADE_CN[me.bestGrade]} 档</b>
+            <span>{standing.commanderies} 郡（开局 {me.startCommanderies}）</span>
+            <span>{standing.controlledZhou} 州
+              {standing.zhouSeats > 0 ? `·州治 ${standing.zhouSeats}` : ""}</span>
+            <em>{nextStep}</em>
+          </div>
+          <details className="brief-fold">
+            <summary>逐州进度</summary>
+            <pre className="brief">{brief}</pre>
+          </details>
+
+          {pinned && (
+            <div className="pinned-bar">
+              <b>{pinned}</b>
+              <span>相关候选 {shown.length} 条</span>
+              <button onClick={() => setPinned(null)}>看全部</button>
+            </div>
+          )}
 
           {game.finished ? (
             <div className="over">
