@@ -203,7 +203,7 @@ export function PlayClient() {
   const [game, setGame] = useState<GameState | null>(null);
   const [seat, setSeat] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
-  const [flash, setFlash] = useState<string[]>([]);
+  const [flash, setFlash] = useState<{ mine: string[]; world: string[] }>({ mine: [], world: [] });
   const [focus, setFocus] = useState<string | null>(null);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
@@ -270,7 +270,7 @@ export function PlayClient() {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
       roster: engine.roster, geo: engine.geo,
     }, engine.P);
-    setSeat(factionId); setGame(s); setPicked([]); setFlash([]);
+    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] });
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
@@ -308,10 +308,14 @@ export function PlayClient() {
     const BIG = new Set(["siege-win", "eliminated", "epoch", "ally-break", "officer-captured"]);
     // 引擎的日志里势力写作 id（它不该知道显示名），在此换成中文
     const cn = (text: string) => text.replace(/[a-z]+/g, (m) => engine.nameOf.get(m) ?? m);
-    setFlash(r.state.log.slice(before)
-      .filter((e) => e.faction === seat || BIG.has(e.kind))
-      .map((e) => `${e.faction && e.faction !== seat
-        ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`));
+    const fresh = r.state.log.slice(before);
+    // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
+    // 补给消息埋掉——那是最该第一眼看到的东西
+    setFlash({
+      mine: fresh.filter((e) => e.faction === seat).map((e) => cn(e.text)),
+      world: fresh.filter((e) => e.faction !== seat && BIG.has(e.kind))
+        .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`),
+    });
     setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));
     setPicked([]);
   }, [engine, game, seat, candidates, picked]);
@@ -658,10 +662,20 @@ export function PlayClient() {
             </>
           )}
 
-          {flash.length > 0 && (
+          {(flash.mine.length > 0 || flash.world.length > 0) && (
             <div className="flash">
-              <h3>上季战报</h3>
-              <ul>{flash.slice(-40).map((t, i) => <li key={i}>{t}</li>)}</ul>
+              {flash.mine.length > 0 && (
+                <>
+                  <h3>上季战报<i>我方</i></h3>
+                  <ul className="mine">{flash.mine.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                </>
+              )}
+              {flash.world.length > 0 && (
+                <>
+                  <h3>天下大事</h3>
+                  <ul>{flash.world.slice(-24).map((x, i) => <li key={i}>{x}</li>)}</ul>
+                </>
+              )}
             </div>
           )}
         </aside>

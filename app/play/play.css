@@ -124,11 +124,18 @@
 
 .flash {
   border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1;
-  padding: 0.6rem 0.8rem; max-height: 22vh; overflow-y: auto;
+  padding: 0.6rem 0.8rem; max-height: 26vh; overflow-y: auto;
 }
-.flash h3 { margin: 0 0 0.4rem; font-size: 0.8rem; letter-spacing: 0.12em; color: var(--ink-soft); }
+.flash h3 {
+  margin: 0.5rem 0 0.35rem; font-size: 0.8rem; letter-spacing: 0.12em; color: var(--ink-soft);
+  display: flex; align-items: baseline; gap: 0.4rem;
+}
+.flash h3:first-child { margin-top: 0; }
+.flash h3 i { font-style: normal; font-size: 0.68rem; color: var(--seal); letter-spacing: 0.05em; }
+.flash ul.mine li { color: var(--ink); }
+.flash ul.mine li::marker { color: var(--seal); }
 .flash ul { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: 0.22rem; }
-.flash li { font-size: 0.76rem; line-height: 1.6; }
+.flash li { font-size: 0.76rem; line-height: 1.6; color: var(--ink-soft); }
 
 .over { display: grid; gap: 0.6rem; padding: 1rem; border: 1px solid var(--seal); border-radius: 3px; }
 .over h2 { margin: 0; font-size: 1.3rem; letter-spacing: 0.12em; }
