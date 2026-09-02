@@ -9,10 +9,11 @@
 // 归属由 territory-grid 逐格查表后按当前局势实时着色——烤进去的疆域
 // 一开打就不对了。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildGraph, listActions, type Graph } from "@/lib/game/engine/actions.ts";
+import { buildGraph, listActions, validate, type Graph } from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
+import { admit } from "@/lib/arena/seat/admit.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
@@ -26,6 +27,14 @@ const BASE = "/game/map/play-base.webp";
 const BASE_2X = "/game/map/play-base@2x.webp";
 const HD_AT = 1.8;
 const SEASON_CN = ["", "春", "夏", "秋", "冬"];
+/**
+ * 面板顺序按「有多急」写死，不按 key 的字母序。
+ * 字母序下实际是 ally → appoint → campaign → …→ relief 第六位：
+ * 最不紧急的外交顶在最上面，而「救我被围的城」被十几条征伐压在滚筒里。
+ */
+const PANEL_ORDER = ["relief", "withdraw", "campaign", "muster", "govern",
+                     "appoint", "scout", "ally", "passage", "retire"];
+
 const TYPE_CN: Record<string, string> = {
   campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结",
   govern: "内政", appoint: "任命", scout: "刺探", ally: "外交",
@@ -287,18 +296,20 @@ export function PlayClient() {
       (id) => engine.nameOf.get(id) ?? id);
   }, [engine, game, seat]);
 
-  const spent = useMemo(() => {
-    const map = new Map(candidates.map((c) => [c.key, c]));
-    return picked.reduce((n, k) => n + (map.get(k)?.cost ?? 0), 0);
-  }, [candidates, picked]);
+  // 准入判据走引擎自己的 admit，不在界面另写一套。
+  // 此前只判「令数够不够」，不认免费动作的次数上限（探 3 / 任命 5），
+  // 也不认「同一郡每季至多 2 令」——实测按界面判据勾选，
+  // 649 条里有 106 条（16%）被引擎静默丢弃，屏幕上零提示
+  const adm = useMemo(() => {
+    if (!engine || !game || !seat) return null;
+    return admit(game, seat, picked, candidates, engine.G, engine.roster);
+  }, [engine, game, seat, picked, candidates]);
+  const spent = adm?.spent ?? 0;
 
   const submit = useCallback(() => {
     if (!engine || !game || !seat) return;
-    const byKey = new Map(candidates.map((c) => [c.key, c]));
-    const orders: Order[] = picked
-      .map((k) => byKey.get(k))
-      .filter((c): c is Candidate => Boolean(c))
-      .map((c) => ({ faction: seat, action: c.action }));
+    const orders: Order[] = admit(game, seat, picked, candidates,
+      engine.G, engine.roster).orders;
 
     const ids = Object.keys(game.factions).sort();
     for (const [i, f] of ids.entries()) {
@@ -732,19 +743,26 @@ export function PlayClient() {
           ) : (
             <>
               <div className="acts">
-                {[...byType].sort((a, b) => a[0].localeCompare(b[0])).map(([cls, list]) => (
+                {[...byType].sort((a, b) => PANEL_ORDER.indexOf(a[0]) - PANEL_ORDER.indexOf(b[0]))
+                  .map(([cls, list]) => (
                   <details key={cls} open={cls === "campaign" || cls === "relief"}>
                     <summary>{TYPE_CN[cls] ?? cls}<i>{list.length}</i></summary>
                     {list.map((c) => {
                       const on = picked.includes(c.key);
-                      const afford = on || c.cost <= me.ap - spent;
+                      // 能不能再选这一条：令数够，且在「已选那些之后」引擎仍认它
+                      const why = on || !adm ? null
+                        : c.cost > me.ap - spent ? `令数不足（余 ${me.ap - spent}，需 ${c.cost}）`
+                        : validate(adm.state, { faction: seat, action: c.action },
+                                   engine.G, undefined, engine.roster);
+                      const afford = on || !why;
                       return (
-                        <label key={c.key} className={`act${on ? " on" : ""}${afford ? "" : " off"}`}>
+                        <label key={c.key} className={`act${on ? " on" : ""}${afford ? "" : " off"}`}
+                          title={why ?? undefined}>
                           <input type="checkbox" checked={on} disabled={!afford}
                             onChange={() => setPicked((p) =>
                               on ? p.filter((k) => k !== c.key) : [...p, c.key])} />
                           <span>{c.label}</span>
-                          <b>{c.cost === 0 ? "免费" : `${c.cost} 令`}</b>
+                          <b>{why ? why.slice(0, 12) : c.cost === 0 ? "免费" : `${c.cost} 令`}</b>
                         </label>
                       );
                     })}
@@ -752,8 +770,10 @@ export function PlayClient() {
                 ))}
                 {!candidates.length && <p className="play-note">本季无可行之事。</p>}
               </div>
-              <button className="go" onClick={submit}>
-                封令结算（已选 {picked.length} 条，耗 {spent} 令）
+              <button className="go" onClick={submit} disabled={!picked.length}>
+                封令结算 · {picked.length} 条 · 耗 {spent}/{me.ap} 令
+                {picked.length > 0 && spent < me.ap
+                  && <i>尚余 {me.ap - spent} 令，只结转 {engine.P.carryCap}</i>}
               </button>
             </>
           )}

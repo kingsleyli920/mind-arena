@@ -172,3 +172,39 @@ test("提示词：规则摘要与引擎一致——方针数不能对不上", ()
     `包里 ${policy.tiers.length} 个方针，引擎有 ${engine.length} 个 —— 摘要在向模型漏说一条`);
   assert.ok(sys.includes("治械"), "摘要里没有治械，而器械是攻城缺口的来源之一");
 });
+
+test("界面的准入判据与引擎一致：按它贪心勾选，引擎不应拒绝任何一条", () => {
+  // 对局界面此前只判「令数够不够」，不认免费动作的次数上限（探 3 / 任命 5），
+  // 也不认「同一郡每季至多 2 令」。实测按那套判据勾选，649 条里有 106 条
+  // （16%）被引擎静默丢弃，屏幕上零提示。现在界面走 admit，此测钉住这条。
+  let picked = 0, rejected = 0;
+  for (const seat of ["caocao", "yuanshao", "lubu"]) {
+    let s = fresh(`ui-${seat}`);
+    while (!s.finished) {
+      const orders = [];
+      for (const f of Object.keys(s.factions)) {
+        if (s.factions[f].eliminated || s.factions[f].retired) continue;
+        const cs = listActions(s, f, G, P, DEFAULT_RULES, ROSTER);
+        if (f === seat) {
+          // 照界面的做法：逐条问 admit 还能不能加，能就加
+          const keys = [];
+          for (const c of cs) {
+            const probe = admit(s, f, [...keys, c.key], cs, G, ROSTER, DEFAULT_RULES);
+            if (probe.admitted.includes(c.key)) keys.push(c.key);
+          }
+          const a = admit(s, f, keys, cs, G, ROSTER, DEFAULT_RULES);
+          picked += a.admitted.length;
+          orders.push(...a.orders);
+        } else {
+          orders.push(...admit(s, f, stubDecide(s, f, cs, "random-legal").picks, cs,
+            G, ROSTER, DEFAULT_RULES).orders);
+        }
+      }
+      const r = resolve(s, orders, G, P, ROSTER, GEO);
+      rejected += r.rejected.filter((x) => x.order.faction === seat).length;
+      s = refreshAp(r.state, P);
+    }
+  }
+  assert.ok(picked > 100, `样本太少（${picked} 条），测不出`);
+  assert.equal(rejected, 0, `按界面判据勾选的 ${picked} 条里，引擎拒绝了 ${rejected} 条`);
+});

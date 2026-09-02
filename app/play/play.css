@@ -99,7 +99,10 @@
 .brief {
   margin: 0; padding: 0.75rem 0.85rem; white-space: pre-wrap; word-break: break-word;
   background: #fbf8f1; border: 1px solid var(--rule); border-radius: 3px;
-  font: 0.78rem/1.75 inherit; color: var(--ink-soft);
+  /* 拆开写：font 简写里 inherit 是 CSS-wide 关键字，不能作组成值，
+     整条声明会在解析期被丢弃，于是这块按 preflight 的等宽字体渲染 */
+  font-family: inherit; font-size: 0.78rem; line-height: 1.75;
+  color: var(--ink-soft);
 }
 .brief b { color: var(--ink); }
 
@@ -116,8 +119,7 @@
   font-size: 0.76rem; line-height: 1.6; cursor: pointer;
 }
 .act:hover { background: #fff; }
-.act.on { background: #fff4e8; }
-.act.off { opacity: 0.42; cursor: not-allowed; }
+.act.off { cursor: not-allowed; }
 .act b { font-weight: 400; color: var(--ink-soft); white-space: nowrap; font-size: 0.72rem; }
 .act input { margin-block-start: 0.28rem; accent-color: var(--seal); }
 
@@ -266,3 +268,13 @@
 
 /* 候选区腾出来的高度 */
 .acts { max-height: 58vh; }
+
+/* 封令按钮：没选就不可点。一击消耗 1/16 的对局，不该能空点 */
+.go:disabled { background: var(--rule); color: #8b8579; cursor: not-allowed; }
+.go i { display: block; font-style: normal; font-size: 0.72rem; opacity: 0.85; margin-top: 0.15rem; }
+/* 选中态用左侧色条，不靠底色——原先 #fff4e8 与 #fbf8f1 亮度差 0.022，肉眼分不出 */
+.act.on { background: #fdf7ef; box-shadow: inset 3px 0 0 var(--seal); }
+/* 选不了的条目要说明原因，不能只是变淡看不清 */
+.act.off { opacity: 1; color: var(--ink-soft); background: #f3efe6; }
+.act.off b { color: var(--seal); opacity: 0.75; }
+.act.off span { opacity: 0.55; }

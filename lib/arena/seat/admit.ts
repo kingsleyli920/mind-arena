@@ -28,6 +28,12 @@ export interface Admission {
   spent: number;
   /** 非法率 = 丢弃数 / 提交数。0 表示这一季的输出全部合法 */
   illegalRate: number;
+  /**
+   * 采纳完这些命令之后的状态。界面用它判「下一条还能不能选」——
+   * 只看令数是不够的：免费动作有次数上限，同一郡每季至多 2 令，
+   * 这些规则界面若不知道，就会让玩家勾上引擎必然丢弃的条目。
+   */
+  state: GameState;
 }
 
 export function admit(
@@ -43,7 +49,7 @@ export function admit(
 
   // 在推进中的状态副本上校验：同一势力超额下令会被后面的条目自然拒绝，
   // 与 resolve 的做法一致，无需另建配额账本
-  let probe: GameState = JSON.parse(JSON.stringify(s));
+  const probe: GameState = JSON.parse(JSON.stringify(s));
   let spent = 0;
   const budget = s.factions[faction]?.ap ?? 0;
 
@@ -73,10 +79,8 @@ export function admit(
     orders.push(order);
     spent += c.cost;
   }
-  probe = null as unknown as GameState;
-
   return {
-    orders, admitted, dropped, spent,
+    orders, admitted, dropped, spent, state: probe,
     illegalRate: picks.length ? dropped.length / picks.length : 0,
   };
 }
