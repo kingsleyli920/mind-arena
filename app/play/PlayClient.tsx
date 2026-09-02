@@ -47,8 +47,11 @@ type MapPoint = {
 
 /**
  * 势力色提纯。剧本给的三十一种颜色都是土色系（配合墨底地图取的），
- * 叠在同样土色的地形上，正片叠底之后彼此难分。这里把彩度拉起来、
- * 亮度收进一个窄带，让邻境一眼可辨；色相不动，仍是原来的那一族颜色。
+ * 彼此难分，需要拉开。
+ *
+ * 提纯幅度是配着底图定的：底图改成纸底后平均明度从 0.61 升到 0.81，
+ * 而疆域是正片叠底，输出正比于底图亮度——同样的系数在新底图上会过冲成
+ * 糖果色。故从 s×2.2 收到 s×1.5，亮度上限相应抬高。
  */
 function vivid(hex: string): [number, number, number] {
   const n = parseInt(hex.replace("#", ""), 16);
@@ -62,8 +65,8 @@ function vivid(hex: string): [number, number, number] {
   }
   let l = (max + min) / 2;
   let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-  s = Math.min(1, s * 2.2 + 0.18);
-  l = Math.min(0.66, Math.max(0.40, l));
+  s = Math.min(1, s * 1.5 + 0.10);
+  l = Math.min(0.74, Math.max(0.46, l));
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
   const m = l - c / 2;
@@ -72,6 +75,37 @@ function vivid(hex: string): [number, number, number] {
     [c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x],
   ][seg];
   return [Math.round((rr + m) * 255), Math.round((gg + m) * 255), Math.round((bb + m) * 255)];
+}
+
+/**
+ * 逐通道方框模糊。只在 330×270 的归属栅格上跑（约 8.9 万像素），
+ * 代价可忽略，且不依赖 ctx.filter 的浏览器支持。
+ */
+function blurRGBA(d: Uint8ClampedArray, w: number, h: number, r: number): void {
+  const tmp = new Uint8ClampedArray(d.length);
+  const win = r * 2 + 1;
+  for (let c = 0; c < 4; c += 1) {
+    for (let y = 0; y < h; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        let acc = 0;
+        for (let k = -r; k <= r; k += 1) {
+          const xx = Math.min(w - 1, Math.max(0, x + k));
+          acc += d[(y * w + xx) * 4 + c];
+        }
+        tmp[(y * w + x) * 4 + c] = acc / win;
+      }
+    }
+    for (let x = 0; x < w; x += 1) {
+      for (let y = 0; y < h; y += 1) {
+        let acc = 0;
+        for (let k = -r; k <= r; k += 1) {
+          const yy = Math.min(h - 1, Math.max(0, y + k));
+          acc += tmp[(yy * w + x) * 4 + c];
+        }
+        d[(y * w + x) * 4 + c] = acc / win;
+      }
+    }
+  }
 }
 
 /** 底图尺寸与地理范围。SVG 用同一坐标系，图元尺寸才好按像素定 */
@@ -278,14 +312,19 @@ export function PlayClient() {
       if (!f) { img.data[o + 3] = 0; continue; }
       const c = rgb.get(f) ?? [122, 114, 102];
       img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2];
-      img.data[o + 3] = f === seat ? 172 : 108;
+      // 疆域是注记不是主角：地形墨色要透得出来。三十一个势力彼此接壤，
+      // 色块一重，整幅就退回「涂色地图」
+      img.data[o + 3] = f === seat ? 104 : 54;
     }
+    // 在小画布上先做一遍 JS 模糊，再平滑放大。
+    // 不用 ctx.filter：Safari 桌面到 17.6 不支持、18 起默认关闭，
+    // 那边看到的会是棱角分明的沃罗诺伊格子——正是这行想避免的观感
+    blurRGBA(img.data, cols, rows, 1);
+    blurRGBA(img.data, cols, rows, 1);
     pctx.putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    ctx.filter = "blur(2.5px)";                        // 化掉放大后的格点棱角
     ctx.drawImage(pad, 0, 0, cv.width, cv.height);
-    ctx.filter = "none";
 
     // 二、疆界墨线：只描不同势力之间的分界，同势力内部不描。
     // 每段中点按格坐标做确定性抖动后画成弧线——照直画格边，出来是一张
@@ -311,8 +350,8 @@ export function PlayClient() {
         const right = c + 1 < cols ? own[i + 1] : null;
         const down = r + 1 < rows ? own[i + cols] : null;
         const mine = f === seat;
-        ctx.strokeStyle = mine ? "rgba(118, 44, 34, 0.9)" : "rgba(52, 45, 37, 0.46)";
-        ctx.lineWidth = mine ? 3 : 1.7;
+        ctx.strokeStyle = mine ? "rgba(118, 44, 34, 0.82)" : "rgba(52, 45, 37, 0.38)";
+        ctx.lineWidth = mine ? 2.4 : 1.2;
         if (right !== f) seg((c + 1) * S, r * S, (c + 1) * S, (r + 1) * S, i);
         if (down !== f) seg(c * S, (r + 1) * S, (c + 1) * S, (r + 1) * S, i + 0.5);
       }
