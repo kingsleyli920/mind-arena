@@ -5,8 +5,9 @@
 // 刺探这条动作什么也买不到，而模型将在完全信息下被评测，
 // 情报这一整个维度测不出来。
 //
-// 内容包对此有明文规定（constants.情报）：未探按 13 档等比 1.4 显示，
-// 已探为 ±15% 的点估计。这里把它实现出来。
+// 内容包对此有明文规定（constants.情报）：未探只报档位区间，已探为点估计。
+// 档数、档比、误差比一律从 P 读，不在注释或文案里另写一份数——
+// 写死的话包一改就变成向模型谎报「刺探能买到什么」。
 import { roll } from "./rng.ts";
 import type { EngineParams } from "./params.ts";
 import type { CommanderyId, FactionId, GameState } from "./types.ts";
@@ -14,8 +15,13 @@ import type { CommanderyId, FactionId, GameState } from "./types.ts";
 export interface Observed {
   /** 给模型看的数值。未探时是档位中值，已探时是带偏差的点估计 */
   value: number;
-  /** 未探 / 已探 */
+  /** 观测带的上下界。预告攻城结果时要按带算，不能拿中值当真值 */
+  lo: number;
+  hi: number;
+  /** 已探（或盟友通报） */
   scouted: boolean;
+  /** 自家的郡，读的是账本不是情报 */
+  own: boolean;
   /** 写进 label 的说法 */
   text: string;
 }
@@ -31,30 +37,36 @@ export function observedGarrison(
   s: GameState, viewer: FactionId, id: CommanderyId, P: EngineParams,
 ): Observed {
   const c = s.commanderies[id];
-  if (!c) return { value: 0, scouted: false, text: "不详" };
-  // 己方与盟友的郡是自家账本，看得真切
-  if (c.owner === viewer) return { value: c.garrison, scouted: true, text: String(c.garrison) };
-  const allied = s.treaties.some((t) => t.until > s.turn
-    && ((t.a === viewer && t.b === c.owner) || (t.b === viewer && t.a === c.owner)));
-  if (allied) return { value: c.garrison, scouted: true, text: String(c.garrison) };
+  if (!c) return { value: 0, lo: 0, hi: 0, scouted: false, own: false, text: "不详" };
+  // 己方的郡是自家账本
+  if (c.owner === viewer) return { value: c.garrison, scouted: true, own: true, lo: c.garrison, hi: c.garrison, text: String(c.garrison) };
 
-  const until = s.intel[viewer]?.[id] ?? -1;
-  if (until >= s.turn) {
-    // 已探：±15% 点估计。偏差按坐标定死，一季之内不变
+  // 盟友只降到「已探级」，不给真值。
+  // 缔盟在本引擎里不需对方同意（resolve 阶段三），若盟友给真值，
+  // 花 1 令缔盟就能买断邻境全部实数——那是比刺探便宜得多的开天眼。
+  // 且必须查生效季：盟约延迟一季生效，未生效的盟友不该已经共享军情。
+  const allied = s.treaties.some((t) => t.from <= s.turn && t.until > s.turn
+    && ((t.a === viewer && t.b === c.owner) || (t.b === viewer && t.a === c.owner)));
+  const scoutedUntil = s.intel[viewer]?.[id] ?? -1;
+  if (allied || scoutedUntil >= s.turn) {
     const r = roll({ seed: s.seed, year: s.year, season: s.season,
                      faction: viewer, event: `intel:${id}`, seq: 0 });
     const v = Math.max(1, Math.round(c.garrison * (1 + (r - 0.5) * 2 * P.intelErrorRatio)));
-    return { value: v, scouted: true, text: `约 ${v}（已探，误差 ±15%）` };
+    const pct = Math.round(P.intelErrorRatio * 100);
+    return {
+      value: v, scouted: true, own: false,
+      lo: Math.round(v * (1 - P.intelErrorRatio)), hi: Math.round(v * (1 + P.intelErrorRatio)),
+      text: `约 ${v}（${allied && scoutedUntil < s.turn ? "盟友通报" : "已探"}，误差 ±${pct}%）`,
+    };
   }
 
-  // 未探：只知道档位。等比 1.4 分 13 档，报中值与区间
+  // 未探：只知道档位
   const tier = tierOf(c.garrison, P);
   const lo = Math.round(P.intelTierBase * P.intelTierRatio ** (tier - 1));
   const hi = Math.round(lo * P.intelTierRatio);
   return {
-    value: Math.round((lo + hi) / 2),
-    scouted: false,
-    text: `${lo}–${hi} 之间（第 ${tier} 档，未探）`,
+    value: Math.round((lo + hi) / 2), scouted: false, own: false, lo, hi,
+    text: `${lo}–${hi} 之间（第 ${tier}/${P.intelTiers} 档，未探）`,
   };
 }
 
@@ -77,7 +89,15 @@ export function visibleLog(s: GameState, viewer: FactionId, since = 0) {
     e.faction === viewer || !e.faction || PUBLIC_EVENTS.has(e.kind));
 }
 
-/** 守军的观测档位，1..13。等比 1.4 */
+/** 观测带。预告攻城要按带算，不能拿中值当真值 */
+export function garrisonBand(
+  s: GameState, viewer: FactionId, id: CommanderyId, P: EngineParams,
+): { lo: number; hi: number; scouted: boolean; own: boolean } {
+  const o = observedGarrison(s, viewer, id, P);
+  return { lo: o.lo, hi: o.hi, scouted: o.scouted, own: o.own };
+}
+
+/** 守军的观测档位，1..P.intelTiers */
 export function tierOf(garrison: number, P: EngineParams): number {
   const t = 1 + Math.floor(Math.log(Math.max(1, garrison) / P.intelTierBase)
                          / Math.log(P.intelTierRatio));

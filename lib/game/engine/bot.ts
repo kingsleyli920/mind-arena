@@ -8,7 +8,7 @@
 import { listActions, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
 import type { Roster } from "./officers.ts";
-import type { Candidate, FactionId, GameState, Order } from "./types.ts";
+import type { FactionId, GameState, Order } from "./types.ts";
 
 export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist";
 
@@ -27,14 +27,16 @@ const WEIGHTS: Record<Profile, Record<string, number>> = {
   opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7, withdraw: 5 },
 };
 
-/** 从候选的 label 里取回攻防比。label 由 listActions 生成，格式稳定 */
-function ratioOf(c: Candidate): number {
-  const m = /比 ([\d.]+)/.exec(c.label);
-  return m ? Number(m[1]) : 0;
-}
-
-const MIN_RATIO: Record<Profile, number> = {
-  turtle: Infinity, balanced: 1.4, aggressive: 1.1, opportunist: 1.25,
+/**
+ * 出兵门槛，单位是「缺口余量」= 我方最少缺口 − 敌方最多可防守。
+ * 大于 0 表示无论浮动与迷雾怎么走都破得了城。
+ *
+ * 此前这里是「兵力比」，从 label 里抠正则拿。两处都是错的：
+ * 比值与引擎判胜负用的量没有关系（实测比 4.35 打不下、比 2.26 能破城），
+ * 而从 label 抠正则意味着标签一改就静默读错。现在读 Candidate.forecast。
+ */
+const MIN_MARGIN: Record<Profile, number> = {
+  turtle: Infinity, balanced: 0, aggressive: -2, opportunist: -1,
 };
 
 /**
@@ -55,16 +57,18 @@ export function decide(
   const cands = listActions(s, f, g, P, rules, roster);
   if (!cands.length) return [];
   const w = WEIGHTS[profile];
-  const minRatio = MIN_RATIO[profile];
+  const minMargin = MIN_MARGIN[profile];
 
   const scored = cands.map((c) => {
     let score = w[c.action.type] ?? 0;
     // 救援必须先判：它的 label 里没有「比 X」，若落进下面的通用征伐闸门，
     // ratioOf 取到 0 而被当成「打不动」直接弃掉——实测 608 条救援候选无一被采纳
     if (c.key.startsWith("relief:")) {
-      // 丢城的代价高于野战失利，除苟活流外都应优先出兵解围
-      const m = /围军约 (\d+) 人）：我方可出 (\d+) 人/.exec(c.label);
-      const odds = m ? Number(m[2]) / Math.max(1, Number(m[1])) : 1;
+      // 丢城的代价高于野战失利，除苟活流外都应优先出兵解围。
+      // 围军兵力读结构化字段的档位上界（保守估计），不从 label 抠
+      const from = s.commanderies[(c.action as { from: string }).from];
+      const mine = Math.floor((from?.garrison ?? 0) * 0.8);
+      const odds = mine / Math.max(1, c.siegeBy?.troopsHi ?? 1);
       if (profile === "turtle" && odds < 1.5) return { c, score: -1e9 };
       if (odds < 0.9) return { c, score: -1e9 };            // 明显打不过就不送
       return { c, score: 14 + Math.min(8, (odds - 1) * 4) };
@@ -81,15 +85,20 @@ export function decide(
         .map((e) => s.commanderies[e.to].garrison));
       if (threat > 0 && left < threat * safeRatio) return { c, score: -1e9 };
 
-      const r = ratioOf(c);
+      const fc = c.forecast;
+      if (!fc) return { c, score: -1e9 };                    // 城下有兵，另一套判定
+      // 缺口余量：最少能开的缺口 − 最多要面对的可防守数
+      const margin = fc.breachLo - fc.holdHi;
       // 达不到该画像的出兵门槛就直接弃掉，而不是给低分——
-      // 给低分会让它在无仗可打时仍被选中，那是"被迫送死"而非策略
-      if (r < minRatio) return { c, score: -1e9 };
-      score += (r - minRatio) * 6;
+      // 给低分会让它在无仗可打时仍被选中，那是「被迫送死」而非策略
+      if (margin < minMargin) return { c, score: -1e9 };
+      score += (margin - minMargin) * 4 + (fc.verdict === "破城" ? 6 : 0);
+      // 迷雾里的仗要打折：未探时城防与守将不明，区间宽得多
+      if (fc.fog === "tier") score -= 3;
       // 投机流额外偏好无主之地：不树敌，扩张最快
       if (profile === "opportunist" && !s.commanderies[c.action.target]?.owner) score += 8;
-      // 倾国投入风险高，只在优势明显时选
-      if (c.action.strength === "allout") score += r >= minRatio + 0.5 ? 3 : -5;
+      // 倾国投入风险高，只在余量确实够时选
+      if (c.action.strength === "allout") score += margin >= minMargin + 1 ? 3 : -5;
     }
     if (c.action.type === "withdraw") {
       // 围城季数越多、残兵越少，越该收兵

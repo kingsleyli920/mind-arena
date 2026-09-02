@@ -668,7 +668,7 @@ test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
 // ── 迷雾 ────────────────────────────────────────────────────────────
 // 此前候选标签直接写真实守军，intel 只用来挑刺探目标——迷雾是装饰性的：
 // 刺探什么也买不到，模型也将在完全信息下被评测。
-test("迷雾：未探只报档位区间，已探转点估计，己方与盟友看真值", () => {
+test("迷雾：未探只报档位区间，已探转点估计，盟友只降到已探级", () => {
   const s = fresh();
   const mine = Object.values(s.commanderies).find((c) => c.owner === "caocao");
   const foe = Object.values(s.commanderies).find((c) => c.owner === "lubu");
@@ -681,7 +681,7 @@ test("迷雾：未探只报档位区间，已探转点估计，己方与盟友�
   // 敌方未探：报区间，且区间必须真的包含真值
   const dark = observedGarrison(s, "caocao", foe.id, P);
   assert.equal(dark.scouted, false);
-  assert.match(dark.text, /之间（第 \d+ 档，未探）/);
+  assert.match(dark.text, /之间（第 \d+\/\d+ 档，未探）/);
   const [lo, hi] = dark.text.match(/(\d+)–(\d+)/).slice(1, 3).map(Number);
   assert.ok(foe.garrison >= lo && foe.garrison <= hi,
     `真值 ${foe.garrison} 落在报出的区间 ${lo}–${hi} 之外`);
@@ -694,10 +694,20 @@ test("迷雾：未探只报档位区间，已探转点估计，己方与盟友�
   assert.ok(err <= P.intelErrorRatio + 1e-6,
     `已探误差 ${(err * 100).toFixed(1)}% 超出声明的 ±${P.intelErrorRatio * 100}%`);
 
-  // 盟友看真值
+  // 盟友只降到「已探级」，不给真值。
+  // 缔盟不需对方同意，若盟友给真值，1 令缔盟就能买断邻境全部实数
   const allied = { ...s, treaties: [{ a: "caocao", b: "lubu", kind: "alliance",
                                       from: 0, until: s.turn + 8 }] };
-  assert.equal(observedGarrison(allied, "caocao", foe.id, P).value, foe.garrison);
+  const ally = observedGarrison(allied, "caocao", foe.id, P);
+  assert.ok(ally.scouted, "盟友军情该是已探级");
+  assert.notEqual(ally.value, foe.garrison, "盟友不该看到真值 —— 那比刺探还便宜");
+  assert.ok(Math.abs(ally.value - foe.garrison) / foe.garrison <= P.intelErrorRatio + 1e-6);
+
+  // 未生效的盟约不共享军情：盟约延迟一季生效
+  const pending = { ...s, treaties: [{ a: "caocao", b: "lubu", kind: "alliance",
+                                       from: s.turn + 1, until: s.turn + 8 }] };
+  assert.equal(observedGarrison(pending, "caocao", foe.id, P).scouted, false,
+    "未生效的盟约不该已经共享军情");
 });
 
 test("迷雾：刺探真的收窄不确定度，档宽由破城梯定", () => {

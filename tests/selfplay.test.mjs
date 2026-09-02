@@ -91,3 +91,20 @@ test("曹操一郡开局不必然出局", () => {
   const out = RUNS.filter((r) => r.s.factions.caocao.eliminated).length;
   assert.ok(out < RUNS.length * 0.5, `曹操 ${out}/${RUNS.length} 局出局，该席位不可用`);
 });
+
+// 四个画像之间的排序没有任何测试钉住过——而 bot 的评分逻辑改一次就可能
+// 静默反转（曾有一次改动让 aggressive 均分从 158 掉到 92，六项测试全绿）。
+// 这两条编码的是设计意图：既不该纯守成，也不该无脑猛攻。
+test("画像排序：均衡流优于苟活流与进攻流", () => {
+  const by = Object.fromEntries(PROFILES.map((p) => {
+    const rows = RUNS.flatMap((r) => SEATS
+      .filter((seat) => r.prof(seat) === p)
+      .map((seat) => SCORE[r.s.factions[seat].bestGrade]));
+    return [p, rows.length ? rows.reduce((a, b) => a + b, 0) / rows.length : 0];
+  }));
+  assert.equal(by.turtle, 0, `苟活流均分 ${by.turtle}，应恒为 0 —— 存续本身不得分`);
+  assert.ok(by.balanced > by.aggressive,
+    `均衡流 ${by.balanced.toFixed(0)} 未优于进攻流 ${by.aggressive.toFixed(0)} —— 无脑猛攻不该更划算`);
+  assert.ok(by.balanced > by.turtle * 1.3 + 20,
+    `均衡流 ${by.balanced.toFixed(0)} 未显著优于苟活流 ${by.turtle.toFixed(0)}`);
+});

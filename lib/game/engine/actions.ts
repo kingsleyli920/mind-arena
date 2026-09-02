@@ -5,7 +5,8 @@
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
 import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
-import { observedGarrison } from "./intel.ts";
+import { observedGarrison, tierOf } from "./intel.ts";
+import { forecastCampaign } from "./forecast.ts";
 import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order,
@@ -84,6 +85,20 @@ function freeLeft(s: GameState, f: FactionId, type: string, rules: Rules): numbe
  * 排序是确定性的：同一状态必得同一候选列表与同一顺序，
  * 否则模型看到的选项会随机漂移，重放也对不上。
  */
+/**
+ * 他方军团兵力只报档位，不报数。
+ * 围城候选此前直接写 `正围此城 4231 人`——同一句里目标守军还标着「未探」，
+ * 等于在迷雾中开了一扇天窗：第三方军团的实数比守军还好用（它决定野战胜负）。
+ */
+const bandLo = (troops: number, P: EngineParams) =>
+  Math.round(P.intelTierBase * P.intelTierRatio ** (tierOf(troops, P) - 1));
+const bandHi = (troops: number, P: EngineParams) => Math.round(bandLo(troops, P) * P.intelTierRatio);
+
+function troopBand(troops: number, P: EngineParams): string {
+  return `约 ${bandLo(troops, P)}–${bandHi(troops, P)} 人`
+       + `（第 ${tierOf(troops, P)}/${P.intelTiers} 档）`;
+}
+
 /** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义 */
 const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
@@ -109,13 +124,15 @@ export function listActions(
         // 用观测值而非真值：候选标签是给对局方看的，写真实守军等于开天眼，
         // 刺探这条动作也就什么都买不到
         const seen = observedGarrison(s, f, tid, P);
+        // 这个比值只用来给候选排序（先列打得动的），不进 label——
+        // 它与引擎判胜负用的量不是一回事，写进 label 会误导
         return { tid, e, seen, ratio: seen.value > 0 ? src.garrison / seen.value : 99 };
       })
       .filter((x) => canOrder(x.e.from) && x.ratio > 0.35)   // 兵力比过低的不列
       .sort((a, b) => b.ratio - a.ratio || a.tid.localeCompare(b.tid))
       .slice(0, rules.perTypeCap);
 
-    for (const { tid, e, ratio, seen } of targets) {
+    for (const { tid, e, seen } of targets) {
       const tgt = s.commanderies[tid];
       const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
       // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
@@ -128,7 +145,7 @@ export function listActions(
       const ongoing = s.armies.find((x) => x.target === tid);
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
-        : `｜${ongoing.faction} 正围此城 ${ongoing.troops} 人（本令先野战）`;
+        : `｜${ongoing.faction} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
       const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
       const leadNote = lead
         ? `，${lead.name}领（统${lead.leadership} 武${lead.might}`
@@ -140,18 +157,30 @@ export function listActions(
         // 「倾国后城中仅余 1315」，模型看不见自己正在把老巢掏空——
         // 实测投机流曹操因此 10/10 全灭
         const send = ready ? ready.troops
-          : Math.floor(s.commanderies[e.from].garrison * (strength === "allout" ? 0.8 : 0.55));
+          : Math.floor(s.commanderies[e.from].garrison * P.strengthRatio[strength]);
         const left = ready ? s.commanderies[e.from].garrison
           : s.commanderies[e.from].garrison - send;
+        const fc = forecastCampaign(s, f, {
+          type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
+          strength, siegeGear: src0.gear,
+        }, g, P, roster, send);
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
           action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
                     strength, siegeGear: src0.gear },
           cost: rules.campaignAp,
+          forecast: fc ?? undefined,
+          siegeBy: ongoing && ongoing.faction !== f
+            ? { faction: ongoing.faction, seasons: ongoing.siegeSeasons,
+                troopsLo: bandLo(ongoing.troops, P), troopsHi: bandHi(ongoing.troops, P) }
+            : undefined,
+          // 不写「兵力比」：那个数与引擎判胜负用的数没有关系——
+          // 实测「比 4.35」的仗打不下来，「比 2.26」的能破城。
+          // 写缺口对可防守，那才是引擎真正比的两个量
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
-               + `：我方戍兵 ${s.commanderies[e.from].garrison}，`
-               + `敌守军 ${seen.text}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`
+               + `：敌守军 ${seen.text}，${e.terrain}${gateNote}${leadNote}`
                + `｜出 ${send} 人，${e.from} 城中余 ${left} 人`
+               + `${fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`,
         });
       }
@@ -182,8 +211,10 @@ export function listActions(
           action: { type: "campaign", target: foe.target!, from: src.id,
                     commander: lead?.id ?? null, strength: "allout", siegeGear: "none" },
           cost: rules.campaignAp,
+          siegeBy: { faction: foe.faction, seasons: foe.siegeSeasons,
+                     troopsLo: bandLo(foe.troops, P), troopsHi: bandHi(foe.troops, P) },
           label: `${isSortie ? `${src.id}出城迎战` : `自${src.id}赴援${foe.target}`}`
-               + `（${foe.faction} 围城第 ${foe.siegeSeasons} 季，围军约 ${foe.troops} 人）：`
+               + `（${foe.faction} 围城第 ${foe.siegeSeasons} 季，围军 ${troopBand(foe.troops, P)}）：`
                + `我方可出 ${Math.floor(src.garrison * 0.8)} 人`
                + `${lead ? `，${lead.name}领（统${lead.leadership}）` : "，无主将"}`
                + `${isSortie ? "；败则城中兵力大损" : ""}`,
@@ -200,7 +231,7 @@ export function listActions(
         key: `withdraw:${army.id}`,
         action: { type: "withdraw", army: army.id },
         cost: rules.normalAp,
-        label: `自${army.target}撤围（已围 ${army.siegeSeasons} 季，余 ${army.troops} 人；`
+        label: `自${army.target}撤围（本部，已围 ${army.siegeSeasons} 季，余 ${army.troops} 人；`
              + `撤回可保 ${Math.round(army.troops * 0.85)} 人，续围则每季再耗一成二）`,
       });
     }
@@ -275,8 +306,8 @@ export function listActions(
         action: { type: "scout", at: id },
         cost: 0,
         label: `刺探${id}（免费，本季余 ${freeLeft(s, f, "scout", rules)} 次；`
-             + `现为 ${observedGarrison(s, f, id, P).text}，探后转 ±15% 点估计，有效 ${
-               P.intelValidSeasons} 季）`,
+             + `现为 ${observedGarrison(s, f, id, P).text}，探后转 ±${
+               Math.round(P.intelErrorRatio * 100)}% 点估计，有效 ${P.intelValidSeasons} 季）`,
       });
     }
   }

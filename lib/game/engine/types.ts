@@ -154,4 +154,14 @@ export interface Candidate {
   cost: number;
   /** 给模型的一句话说明，含关键数字 */
   label: string;
+  /**
+   * 攻城预告。结构化字段，供机器人与模型共用——
+   * 此前机器人是从 label 里抠正则拿数的，标签一改就静默读错。
+   */
+  forecast?: {
+    breachLo: number; breachHi: number; holdLo: number; holdHi: number;
+    verdict: "破城" | "不破" | "未知"; fog: "own" | "scouted" | "tier";
+  };
+  /** 第三方围城军的观测兵力（已分档）。救援候选用 */
+  siegeBy?: { faction: FactionId; troopsLo: number; troopsHi: number; seasons: number };
 }

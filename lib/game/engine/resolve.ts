@@ -10,6 +10,7 @@
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
 import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
+import { breachCount, unitPower, unitGuard, unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
 import { attackEffect, defendEffect, governEffect, governorOf } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
@@ -49,50 +50,6 @@ export function supplyReach(s: GameState, g: Graph, f: FactionId): Set<Commander
   }
   return seen;
 }
-
-/**
- * 攻城判定：缺口数 vs 守方可防守数（MERS R23–R24）。
- * 用「缺口数」而非「兵力比」是刻意的——比值是连续量，模型难以心算出
- * 自己究竟够不够；缺口数是小整数，一眼可数。
- *
- * 全部系数来自内容包，不在此硬编码：引擎与模型提示词必须共用同一份定义，
- * 否则模型按包里的公式算、引擎按另一套结算，算出来对不上。
- */
-function breachCount(P: EngineParams, attack: number, defend: number, defense: number,
-                     gear: keyof EngineParams["gearBreach"],
-                     terrain: string, atGate: boolean,
-                     breachBonus = 0, holdBonus = 0): { breach: number; hold: number } {
-  const terrainDef = P.terrainDefense[terrain] ?? 0;
-  const eff = defend * (1 + terrainDef);
-  const ratio = eff > 0 ? attack / eff : 99;
-  let base = 0;
-  for (const [threshold, n] of P.breachLadder) { if (ratio >= threshold) { base = n; break; } }
-  const gearBonus = atGate ? Math.floor(P.gearBreach[gear] / 2) : P.gearBreach[gear];
-  // 可防守数必须把城防算进来。首版只看守军数，30–100 的城防等于白算，
-  // 「修城」这条内政毫无用处，攻城易如反掌——自对局实测第一季就有
-  // 17 个郡易主，96% 是势力互夺。
-  const hold = P.holdBase
-    + Math.floor(defense / P.defensePerHold)
-    + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / P.garrisonPerHold))));
-  return { breach: base + gearBonus + breachBonus, hold: hold + holdBonus };
-}
-
-/**
- * 兵种系数。首版里内容包定义了四个兵种而引擎零引用——兵种是纯装饰。
- * 地形系数缺项在 loadParams 就抛错，此处不再兜底。
- */
-function unitPower(P: EngineParams, unit: string, terrain: string, foe: string | null): number {
-  const u = P.units[unit];
-  if (!u) return 1;
-  const counter = foe && u.strongAgainst.includes(foe) ? P.counterBonus : 0;
-  return u.attack * (u.terrain[terrain] ?? 1) * (1 + counter);
-}
-
-function unitGuard(P: EngineParams, unit: string): number {
-  return P.units[unit]?.defense ?? 1;
-}
-
-const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 
 /** 撤围：把军团从围城名单里摘掉 */
 function lift(s: GameState, army: { id: string }): void {
@@ -534,6 +491,13 @@ export function resolve(
       zhouSeats: f.startSeats,
     });
     if (GRADE_RANK[grade] > GRADE_RANK[f.bestGrade]) f.bestGrade = grade;
+  }
+
+  // 令数结转（MERS R9）。此前 FactionState.carried 全项目没有任何写入方，
+  // 余令直接蒸发——而规则摘要里明写着「结转 ≤2」，等于在骗模型。
+  // refreshAp 会读它并在下季清零
+  for (const f of Object.values(s.factions)) {
+    f.carried = Math.max(0, Math.min(P.carryCap, f.ap));
   }
 
   // ── 推进时钟与纪元 ────────────────────────────────────────────────
