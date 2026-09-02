@@ -280,7 +280,8 @@ export function PlayClient() {
 
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
-    return listActions(game, seat, engine.G, engine.P, undefined, engine.roster);
+    return listActions(game, seat, engine.G, engine.P, undefined, engine.roster,
+      (id) => engine.nameOf.get(id) ?? id);
   }, [engine, game, seat]);
 
   const spent = useMemo(() => {

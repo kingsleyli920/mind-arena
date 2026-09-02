@@ -106,6 +106,9 @@ const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 export function listActions(
   s: GameState, f: FactionId, g: Graph, P: EngineParams, rules: Rules = DEFAULT_RULES,
   roster: Roster | null = null,
+  /** 势力 id → 显示名。不给则原样写 id——候选标签是给人和模型看的，
+      「与 lijue 缔盟」这种写法两边都读不懂 */
+  nameOf: (id: FactionId) => string = (id) => id,
 ): Candidate[] {
   const fs_ = s.factions[f];
   if (!fs_ || fs_.eliminated || fs_.retired || s.finished) return [];
@@ -147,7 +150,7 @@ export function listActions(
       const ongoing = s.armies.find((x) => x.target === tid);
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
-        : `｜${ongoing.faction} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
+        : `｜${nameOf(ongoing.faction)} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
       const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
       // 主将的统率/武力/适性已折进 forecast，这里只报是谁——
       // 没有太守才需要提醒，那是可以补救的
@@ -215,7 +218,7 @@ export function listActions(
           siegeBy: { faction: foe.faction, seasons: foe.siegeSeasons,
                      troopsLo: bandLo(foe.troops, P), troopsHi: bandHi(foe.troops, P) },
           label: `${isSortie ? `${src.id}出城迎战` : `自${src.id}赴援${foe.target}`}`
-               + `（${foe.faction} 围城第 ${foe.siegeSeasons} 季，围军 ${troopBand(foe.troops, P)}）：`
+               + `（${nameOf(foe.faction)} 围城第 ${foe.siegeSeasons} 季，围军 ${troopBand(foe.troops, P)}）：`
                + `我方可出 ${Math.floor(src.garrison * 0.8)} 人`
                + `${lead ? `，${lead.name}领（统${lead.leadership}）` : "，无主将"}`
                + `${isSortie ? "；败则城中兵力大损" : ""}`,
@@ -369,10 +372,10 @@ export function listActions(
     for (const to of [...neighbours].sort().slice(0, 5)) {
       if (allied.has(to)) {
         out.push({ key: `ally:break:${to}`, action: { type: "ally", to, act: "break", term: 4 },
-                   cost: rules.normalAp, label: `与${to}绝盟` });
+                   cost: rules.normalAp, label: `与${nameOf(to)}绝盟` });
       } else {
         out.push({ key: `ally:form:${to}`, action: { type: "ally", to, act: "form", term: 8 },
-                   cost: rules.normalAp, label: `与${to}缔盟八季` });
+                   cost: rules.normalAp, label: `与${nameOf(to)}缔盟八季` });
       }
     }
   }

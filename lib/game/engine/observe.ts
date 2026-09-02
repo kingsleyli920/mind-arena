@@ -76,7 +76,7 @@ export function observe(
   const nameOf = opts.nameOf ?? ((id: FactionId) => id);
   const f = s.factions[faction];
   const st = standingOf(s, geo, faction);
-  const cands = listActions(s, faction, g, P, opts.rules, roster);
+  const cands = listActions(s, faction, g, P, opts.rules, roster, nameOf);
   const log = visibleLog(s, faction, opts.since ?? 0);
 
   const mine = Object.values(s.commanderies)
