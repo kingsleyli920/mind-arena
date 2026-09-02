@@ -53,7 +53,8 @@ const TERRAIN_DEF = { plain: 0, hill: 0.12, mountain: 0.3, gate: 0.55, river: 0.
  * 用「缺口数」而非「兵力比」是刻意的——比值是连续量，模型难以心算出
  * 自己究竟够不够；缺口数是小整数，一眼可数。
  */
-function breachCount(attack: number, defend: number, gear: keyof typeof GEAR_BREACH,
+function breachCount(attack: number, defend: number, defense: number,
+                     gear: keyof typeof GEAR_BREACH,
                      terrain: string, atGate: boolean): { breach: number; hold: number } {
   const terrainDef = TERRAIN_DEF[terrain as keyof typeof TERRAIN_DEF] ?? 0;
   const eff = defend * (1 + terrainDef);
@@ -61,7 +62,13 @@ function breachCount(attack: number, defend: number, gear: keyof typeof GEAR_BRE
   // 基础缺口按兵力比分档；关隘处器械效果减半
   const base = ratio >= 3 ? 4 : ratio >= 2 ? 3 : ratio >= 1.5 ? 2 : ratio >= 1.2 ? 1 : 0;
   const gearBonus = atGate ? Math.floor(GEAR_BREACH[gear] / 2) : GEAR_BREACH[gear];
-  return { breach: base + gearBonus, hold: Math.max(1, Math.floor(Math.log2(Math.max(2, defend / 1000)))) };
+  // 可防守数必须把城防算进来。首版只看守军数，30–100 的城防等于白算，
+  // 结果是「修城」这条内政毫无用处，而攻城易如反掌——
+  // 自对局实测第一季就有 17 个郡易主，96% 是势力互夺。
+  const hold = 1
+    + Math.floor(defense / 30)                       // 城防 30→1, 60→2, 90→3
+    + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / 3000))));
+  return { breach: base + gearBonus, hold };
 }
 
 // ── 主裁决 ──────────────────────────────────────────────────────────
@@ -201,7 +208,7 @@ export function resolve(
     const jitter = 0.92 + roll({ seed: s.seed, year: s.year, season: s.season,
                                  faction: o.faction, event: "siege", seq: i }) * 0.16;
     const attack = troops * jitter;
-    const { breach, hold } = breachCount(attack, tgt.garrison, a.siegeGear, terrain, atGate);
+    const { breach, hold } = breachCount(attack, tgt.garrison, tgt.defense, a.siegeGear, terrain, atGate);
 
     if (breach > hold) {
       const survivors = Math.max(1, Math.round(troops - tgt.garrison * 0.55));
@@ -212,7 +219,7 @@ export function resolve(
       tgt.defense = Math.max(20, tgt.defense - 15);
       log(s, { kind: "siege-win", faction: o.faction,
                text: `自 ${a.from} 取 ${a.target}${loser ? `（原属 ${loser}）` : "（无主）"}`,
-               attribution: { 投入: troops, 敌守军: tgt.garrison, 缺口: breach, 可防守: hold, 地形: terrain } });
+               attribution: { 投入: troops, 缺口: breach, 可防守: hold, 城防: tgt.defense, 地形: terrain } });
     } else {
       const lost = Math.round(troops * 0.35);
       src.garrison += Math.max(0, troops - lost);
