@@ -66,7 +66,7 @@ export interface EngineParams {
   /** 器械：治械每次提升一级的顺序 */
   gearLadder: string[];
   /** 纪元 */
-  epochCount: number; epochLimit: number;
+  epochCount: number; epochLimit: number; epochMin: number;
   neutralGrowth: Record<number, number>;
 }
 
@@ -196,6 +196,7 @@ export function loadParams(pack: RawPack): EngineParams {
     gearLadder: ["none", "ram", "mound"],
     epochCount: g("时钟", "纪元数"),
     epochLimit: g("时钟", "纪元时限"),
+    epochMin: g("时钟", "纪元最短"),
     neutralGrowth: { 1: 0, 2: g("时钟", "无主自守_纪元二"), 3: g("时钟", "无主自守_纪元三") },
   };
 }

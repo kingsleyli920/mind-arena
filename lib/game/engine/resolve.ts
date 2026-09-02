@@ -544,9 +544,13 @@ export function resolve(
   // 纪元按包里的双触发推进：本纪元满时限，或已有势力达到本纪元的目标档。
   // 写死在固定季号上，纪元就只是个日历，与打法无关
   if (s.epoch < P.epochCount) {
-    const target: Grade = s.epoch === 1 ? "bing" : "yi";
-    const reached = Object.values(s.factions)
-      .some((f) => GRADE_RANK[f.bestGrade] >= GRADE_RANK[target]);
+    // 目标档不取丙：三十一个席位里总有人在第一季拿下一郡，
+    // 纪元会在开局当季就跳进第二段，三段纪元几季内走完，等于没有
+    const target: Grade = s.epoch === 1 ? "yi" : "jia";
+    // 达标触发要设下限：公孙瓒这类只差一郡即控一州的席位第一季就能升乙，
+    // 纪元会在开局当季跳段，三段纪元几季走完等于没有
+    const reached = s.turn - s.epochStart >= P.epochMin
+      && Object.values(s.factions).some((f) => GRADE_RANK[f.bestGrade] >= GRADE_RANK[target]);
     if (s.turn - s.epochStart >= P.epochLimit || reached) {
       s.epoch += 1;
       s.epochStart = s.turn;

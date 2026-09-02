@@ -113,7 +113,9 @@ export const GRADE_CN: Record<Grade, string> = { jia: "甲", yi: "乙", bing: "�
 export function briefFor(
   s: GameState, geo: Geography, f: FactionId,
   adj?: Map<CommanderyId, Array<{ to: CommanderyId }>>,
+  nameOf?: (id: FactionId) => string,
 ): string {
+  const who = (id: FactionId) => nameOf?.(id) ?? id;
   const st = standingOf(s, geo, f);
   const fs_ = s.factions[f];
   if (!fs_) return "";
@@ -161,9 +163,9 @@ export function briefFor(
     const seatWho = seat ? s.commanderies[seat]?.owner ?? "无主" : "?";
     rows.push(
       `  ${z}：共 ${members.length} 郡，我 ${mine}，无主 ${vacant}`
-      + `${others.size ? `，他方 ${[...others].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}${v}`).join("/")}` : ""}`
+      + `${others.size ? `，他方 ${[...others].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${who(k)} ${v}`).join("、")}` : ""}`
       + `｜${need <= 0 ? "已控制" : `再取 ${need} 郡即控制`}`
-      + `｜州治 ${seat}（${seatWho === f ? "在我手" : seatWho}）`,
+      + `｜州治 ${seat}（${seatWho === f ? "在我手" : seatWho === "无主" ? "无主" : who(seatWho)}）`,
     );
   }
   if (rows.length) lines.push("【各州】", ...rows);

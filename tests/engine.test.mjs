@@ -635,12 +635,21 @@ test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
   assert.equal(idle.epoch, 2, `静坐 ${P.epochLimit} 季后未入二纪元`);
   assert.ok(idle.log.some((e) => e.kind === "epoch" && e.text.includes("逾时")));
 
-  // 达标触发：有势力升到丙档就提前推进
+  // 达标触发：有势力升到乙档就提前推进。
+  // 目标档不能取丙——三十一个席位里总有人第一季就拿下一郡，纪元会当季就跳
   const s = fresh();
-  s.factions.yuanshao.bestGrade = "bing";
+  s.factions.yuanshao.bestGrade = "yi";
+  assert.equal(resolve(s, [], G, P, ROSTER, GEO).state.epoch, 1,
+    "第一季就达乙档不该触发纪元推进 —— 达标触发有最短季数下限");
+  s.turn = P.epochMin;                                    // 已满最短季数
   const early = resolve(s, [], G, P, ROSTER, GEO).state;
-  assert.equal(early.epoch, 2, "已有势力达丙档却未提前推进纪元");
-  assert.ok(early.log.some((e) => e.kind === "epoch" && e.text.includes("丙")));
+  assert.equal(early.epoch, 2, "满最短季数且已有势力达乙档，却未提前推进纪元");
+  assert.ok(early.log.some((e) => e.kind === "epoch" && e.text.includes("乙")));
+
+  const bing = fresh();
+  bing.turn = P.epochMin;
+  bing.factions.yuanshao.bestGrade = "bing";
+  assert.equal(resolve(bing, [], G, P, ROSTER, GEO).state.epoch, 1, "丙档不该触发纪元推进");
 
   // 无主郡国在一纪元不长兵，二纪元起自增
   const neutral = Object.values(fresh().commanderies).find((c) => !c.owner);

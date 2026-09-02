@@ -1,0 +1,162 @@
+/* 对局界面。用色与地图同源：宣纸底、墨线、朱批。 */
+.play {
+  --paper: #f4efe4;
+  --ink: #2e2a24;
+  --ink-soft: #6b6355;
+  --rule: #cec4b0;
+  --seal: #8c3b2f;
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Songti SC", "STSong", "Source Han Serif SC", serif;
+}
+
+.play-head { padding: 1.4rem clamp(1rem, 3vw, 2.4rem) 0.9rem; }
+.play-head h1 { margin: 0; font-size: 1.6rem; letter-spacing: 0.18em; }
+.play-head p { margin: 0.5rem 0 0; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.7; max-width: 62ch; }
+.play-note, .play-error { padding: 2rem; color: var(--ink-soft); }
+.play-error { color: var(--seal); }
+
+.play-bar {
+  display: flex; align-items: baseline; gap: 1.2rem; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); padding-bottom: 0.7rem;
+}
+.play-bar .era, .play-bar .ap { font-size: 0.86rem; color: var(--ink-soft); letter-spacing: 0.05em; }
+.play-bar .who {
+  font-size: 1.15rem; font-weight: 700; padding-inline: 0.5rem;
+  border-bottom: 3px solid var(--c);
+}
+.play-bar .ap { margin-inline-start: auto; }
+
+/* ── 选席 ── */
+.seat-grid {
+  list-style: none; margin: 1.4rem clamp(1rem, 3vw, 2.4rem); padding: 0;
+  display: grid; gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.seat-grid button {
+  width: 100%; text-align: start; cursor: pointer;
+  display: grid; gap: 0.28rem; padding: 0.75rem 0.85rem;
+  background: #fbf8f1; color: inherit; font: inherit;
+  border: 1px solid var(--rule); border-inline-start: 4px solid var(--c);
+  border-radius: 3px; transition: background 0.15s, transform 0.15s;
+}
+.seat-grid button:hover { background: #fff; transform: translateY(-1px); }
+.seat-grid b { font-size: 1rem; }
+.seat-grid span, .seat-grid em { font-size: 0.8rem; color: var(--ink-soft); font-style: normal; }
+
+/* ── 对局 ── */
+.play-body {
+  display: grid; gap: 1.1rem; align-items: start;
+  grid-template-columns: minmax(0, 1fr) clamp(340px, 30vw, 460px);
+  padding: 1rem clamp(0.8rem, 2vw, 1.8rem) 2.5rem;
+}
+@media (max-width: 1000px) { .play-body { grid-template-columns: 1fr; } }
+
+.map-wrap {
+  position: relative; border: 1px solid var(--rule); border-radius: 3px;
+  overflow: hidden; background: #e8e2d4;
+}
+.map-wrap { touch-action: none; user-select: none; }
+.map-stage { position: relative; transform-origin: 0 0; will-change: transform; }
+.map-stage img, .map-stage canvas, .map-stage svg {
+  display: block; width: 100%; height: auto; aspect-ratio: 1815 / 1485;
+}
+.map-stage canvas, .map-stage svg { position: absolute; inset: 0; }
+.map-stage canvas { mix-blend-mode: multiply; }
+.map-stage svg text {
+  fill: var(--ink); font-family: inherit; letter-spacing: 0.06em;
+}
+.map-stage svg .tag rect {
+  fill: rgba(250, 246, 237, 0.9); stroke: rgba(70, 61, 50, 0.35); stroke-width: 1;
+}
+.map-stage svg .tag.hot rect { fill: #fff6e6; stroke: var(--seal); stroke-width: 1.6; }
+.map-stage svg .tag.hot text { font-weight: 700; fill: var(--seal); }
+.map-wrap .tip {
+  position: absolute; inset-block-end: 0.6rem; inset-inline-start: 0.6rem;
+  display: grid; gap: 0.15rem; padding: 0.55rem 0.7rem;
+  background: rgba(251, 248, 241, 0.95); border: 1px solid var(--rule); border-radius: 3px;
+  font-size: 0.78rem; color: var(--ink-soft); max-width: 22rem;
+}
+.map-wrap .tip b { color: var(--ink); font-size: 0.9rem; }
+
+.panel { display: grid; gap: 0.8rem; }
+.brief {
+  margin: 0; padding: 0.75rem 0.85rem; white-space: pre-wrap; word-break: break-word;
+  background: #fbf8f1; border: 1px solid var(--rule); border-radius: 3px;
+  font: 0.78rem/1.75 inherit; color: var(--ink-soft);
+}
+.brief b { color: var(--ink); }
+
+.acts { display: grid; gap: 0.4rem; max-height: 46vh; overflow-y: auto; padding-inline-end: 0.2rem; }
+.acts details { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.acts summary {
+  cursor: pointer; padding: 0.45rem 0.7rem; font-size: 0.85rem; letter-spacing: 0.08em;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.acts summary i { font-style: normal; color: var(--ink-soft); font-size: 0.75rem; }
+.act {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: start;
+  padding: 0.4rem 0.7rem 0.5rem; border-top: 1px solid var(--rule);
+  font-size: 0.76rem; line-height: 1.6; cursor: pointer;
+}
+.act:hover { background: #fff; }
+.act.on { background: #fff4e8; }
+.act.off { opacity: 0.42; cursor: not-allowed; }
+.act b { font-weight: 400; color: var(--ink-soft); white-space: nowrap; font-size: 0.72rem; }
+.act input { margin-block-start: 0.28rem; accent-color: var(--seal); }
+
+.go {
+  padding: 0.7rem 1rem; cursor: pointer; font: inherit; font-size: 0.9rem;
+  letter-spacing: 0.12em; color: #fbf8f1; background: var(--seal);
+  border: none; border-radius: 3px;
+}
+.go:hover { background: #a04638; }
+
+.flash {
+  border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1;
+  padding: 0.6rem 0.8rem; max-height: 22vh; overflow-y: auto;
+}
+.flash h3 { margin: 0 0 0.4rem; font-size: 0.8rem; letter-spacing: 0.12em; color: var(--ink-soft); }
+.flash ul { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: 0.22rem; }
+.flash li { font-size: 0.76rem; line-height: 1.6; }
+
+.over { display: grid; gap: 0.6rem; padding: 1rem; border: 1px solid var(--seal); border-radius: 3px; }
+.over h2 { margin: 0; font-size: 1.3rem; letter-spacing: 0.12em; }
+.over p { margin: 0; font-size: 0.82rem; color: var(--ink-soft); }
+.over button {
+  justify-self: start; padding: 0.5rem 1rem; cursor: pointer; font: inherit;
+  background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;
+}
+
+/* ── 城池图元 ── */
+.map-stage svg { pointer-events: none; }
+.map-stage svg .mark { pointer-events: auto; cursor: pointer; }
+.map-stage svg .city path,
+.map-stage svg .city line { vector-effect: non-scaling-stroke; }
+.map-stage svg .city-halo {
+  fill: rgba(250, 246, 237, 0.72); stroke: none;
+}
+.map-stage svg .siege-ring {
+  fill: none; stroke: #8c3b2f; stroke-width: 3; stroke-dasharray: 7 6; opacity: 0.9;
+}
+.map-stage svg .mark.mine .city > path:first-of-type { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); }
+.map-stage svg .mark:hover .city { filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); }
+.map-stage svg text.hot { font-weight: 700; }
+
+.map-wrap .zoom {
+  position: absolute; inset-block-start: 0.6rem; inset-inline-end: 0.6rem;
+  display: grid; gap: 0.25rem;
+}
+.map-wrap .zoom button {
+  min-width: 2.2rem; padding: 0.28rem 0.4rem; cursor: pointer; font: inherit; font-size: 0.78rem;
+  background: rgba(251, 248, 241, 0.94); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 3px;
+}
+.map-wrap .zoom button:hover { background: #fff; }
+
+.map-stage svg text.zhou {
+  fill: rgba(46, 40, 33, 0.2); letter-spacing: 0.42em;
+  font-weight: 700; paint-order: stroke;
+  stroke: rgba(250, 246, 237, 0.35); stroke-width: 6; stroke-linejoin: round;
+}

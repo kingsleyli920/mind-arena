@@ -31,7 +31,8 @@ export default function Home() {
             用可复现的规则、完整回放和决策证据，观察它们如何真正做选择。
           </p>
           <div className="hero-actions">
-            <Link className="primary-action" href="/game">进入群雄沙盘 <span>↗</span></Link>
+            <Link className="primary-action" href="/play">入局对弈 <span>↗</span></Link>
+            <Link className="primary-action" href="/game">查阅沙盘 <span>↗</span></Link>
             <a className="text-action" href="#protocol">查看对战协议 <span>→</span></a>
           </div>
           <dl className="hero-stats">
