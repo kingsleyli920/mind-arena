@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
+import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
 import { buildGeography } from "../lib/game/engine/victory.ts";
@@ -27,7 +28,7 @@ const ROSTER = buildRoster(
 const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
 const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
-const SCORE = { jia: 300, yi: 200, bing: 100, ding: 0 };
+const SCORE = GRADE_SCORE;   // 唯一来源，不再另存副本
 
 function play(seed, rot) {
   let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);

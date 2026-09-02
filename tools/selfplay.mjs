@@ -10,6 +10,7 @@
 //   C 局长稳定
 //   D 胜负分布不等于开局国力排序
 import fs from "node:fs";
+import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
@@ -40,7 +41,7 @@ const GAMES = Number(process.env.GAMES ?? 100);
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
 const PROFILE_LIST = ["turtle", "balanced", "aggressive", "opportunist"];
 
-const GRADE_SCORE = { jia: 300, yi: 200, bing: 100, ding: 0 };
+// 计分表唯一来源在 lib/arena/scoring.ts。此处曾各存一份副本，迟早分家
 
 function playOne(seed, rotation) {
   let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
