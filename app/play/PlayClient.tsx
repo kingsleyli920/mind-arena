@@ -567,6 +567,29 @@ export function PlayClient() {
                   fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
               </g>
             ))}
+            {/* 围城旗：城下有谁、围了几季、多少人。只有一个虚线圈看不出这些，
+                而这三样正是「要不要去救」的全部依据 */}
+            {game.armies.filter((a) => a.target).map((a) => {
+              const p = engine.points.find((c) => c.id === a.target);
+              if (!p) return null;
+              const x = (p.longitude - MAP.west) * MAP.ppd;
+              const y = (MAP.north - p.latitude) * MAP.ppd;
+              const s = 30 / Math.sqrt(view.k);
+              const mine = a.faction === seat;
+              return (
+                <g key={a.id} className="siege-flag" transform={`translate(${x + s * 0.75} ${y - s * 0.5})`}>
+                  <line x1={0} y1={0} x2={0} y2={-s * 1.15} stroke="#2b251e"
+                    strokeWidth={s * 0.055} />
+                  <path d={`M 0 ${-s * 1.15} L ${s * 0.78} ${-s * 0.92} L 0 ${-s * 0.7} Z`}
+                    fill={engine.colorOf.get(a.faction) ?? "#7a7266"}
+                    stroke="#2b251e" strokeWidth={s * 0.04} />
+                  <text x={s * 0.16} y={-s * 0.2} fontSize={s * 0.4}
+                    className={mine ? "mine" : undefined}>
+                    {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
+                  </text>
+                </g>
+              );
+            })}
             {labels.map((l) => (
               <g key={l.id} className={`tag${l.hot ? " hot" : ""}`}>
                 {/* 牌记：地名压在纸签上，比裸字加描边干净，也更像舆图 */}

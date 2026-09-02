@@ -170,3 +170,12 @@
   font-weight: 700; paint-order: stroke;
   stroke: rgba(250, 246, 237, 0.35); stroke-width: 6; stroke-linejoin: round;
 }
+
+/* 围城旗 */
+.map-stage svg .siege-flag line,
+.map-stage svg .siege-flag path { vector-effect: non-scaling-stroke; }
+.map-stage svg .siege-flag text {
+  fill: var(--ink-soft); paint-order: stroke;
+  stroke: rgba(250, 246, 237, 0.9); stroke-width: 3; stroke-linejoin: round;
+}
+.map-stage svg .siege-flag text.mine { fill: var(--seal); font-weight: 700; }
