@@ -18,7 +18,8 @@
     "map:tiles": "SRC=public/game/map/han-terrain.png LEVELS=4 node --max-old-space-size=8192 tools/slice-map-tiles.mjs",
     "map:play": "node tools/make-play-base.mjs",
     "map:territory": "node tools/build-territory-grid.mjs",
-    "map:all": "npm run map:paper && npm run map:base && npm run map:tiles && npm run map:play && npm run map:territory"
+    "map:all": "npm run map:paper && npm run map:base && npm run map:tiles && npm run map:play && npm run map:territory && npm run map:audit",
+    "map:audit": "node tools/audit-ink.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

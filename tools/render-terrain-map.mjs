@@ -252,9 +252,13 @@ for (let y = 0; y < H; y += 1) {
     } else {
       [r, g, b] = PAPER;
       // 淡彩：低处汁绿，中高赭石，雪线以上留白。
-      // 设色带一点不匀，才像手染而非印刷
+      // 不匀要匀到能留出空白：手染的绫绢本就有跳笔，而传统舆图全景图的
+      // 留白该占两三成——罩染盖满每一寸陆地、一处纸也不留，出来仍是
+      // 「淡了的地形图」。让低频噪声偶尔把彩降到零。
+      // 噪声尺度按 PPD 换算，写成 x/46 在 220 px/度上会细成噪点
+      const wet = fbm(x / P(0.52), y / P(0.52), 3, 13);
       const green = Math.max(0, 1 - e / 900) * GREEN_W
-                  * (0.75 + fbm(x / 46, y / 46, 2, 13) * 0.5);
+                  * Math.min(1.15, Math.max(0, (wet - 0.28) / 0.48));
       const ochre = Math.max(0, Math.min(1, (e - 400) / 1300)) * OCHRE_W
                   * Math.max(0, 1 - e / 4200);
       r = r * (1 - green) + WASH_GREEN[0] * green;
