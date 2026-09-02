@@ -19,6 +19,8 @@ import { buildGeography } from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
+import { modelDecide } from "../lib/arena/seat/model-seat.ts";
+import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 
 const arg = (k, d) => {
@@ -46,10 +48,24 @@ const DATA = {
 
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const [agentKind, agentVariant = "random-legal"] = AGENT.split(":");
+const MODEL = arg("model", "");
+let client = null;
 if (agentKind === "model") {
-  console.error("model 对局方尚未接线（需 OPENROUTER_API_KEY）。先用 --agent=stub 跑通管道。");
-  process.exit(2);
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) {
+    console.error("缺少 OPENROUTER_API_KEY。在项目根目录执行（把 sk-… 换成你自己的 key）：");
+    console.error("  echo 'OPENROUTER_API_KEY=sk-…' >> .env.local");
+    console.error("然后：npm run eval -- --agent=model --model=<模型 id> --games=1");
+    console.error("\n先用 --agent=stub 可以在没有 key 的情况下跑通整条管道。");
+    process.exit(2);
+  }
+  if (!MODEL) { console.error("--agent=model 需要同时给 --model=<模型 id>"); process.exit(2); }
+  client = new OpenRouterClient(key, { referer: "http://localhost:3000", title: "Mind Arena" });
 }
+const MODEL_DEPS = client
+  ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
+      rules: DEFAULT_RULES, nameOf }
+  : null;
 
 const records = [];
 const results = [];
@@ -68,7 +84,19 @@ for (let gi = 0; gi < GAMES; gi += 1) {
     let mine = null;
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
-      if (f === under) {
+      if (f === under && MODEL_DEPS) {
+        const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS);
+        orders.push(...os);
+        mine = {
+          turn: s.turn, seat: f, obsTokens: Math.round(record.obsChars / 2.4),
+          candidates: record.candidates, picks: record.picks.length,
+          admitted: record.admission.admitted.length, spent: record.admission.spent,
+          ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
+          dropped: record.admission.dropped.map((d) => d.reason),
+          usage: record.usage, failure: record.failure, reason: record.reason,
+          structured: record.structured, elapsedMs: record.elapsedMs,
+        };
+      } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
         const cands = listActions(s, f, G, P, DEFAULT_RULES, ROSTER);
         const dec = stubDecide(s, f, cands, agentVariant);
@@ -123,6 +151,13 @@ for (const r of results) {
     String(r.obsPeak).padStart(7),
     `${(r.apUse * 100).toFixed(0)}%`.padStart(9),
   );
+}
+const usage = records.filter((r) => r.usage);
+if (usage.length) {
+  const sum = (k) => usage.reduce((a, r) => a + (r.usage[k] ?? 0), 0);
+  console.log(`\ntoken：入 ${sum("prompt")}（命中缓存 ${sum("cached")}）`
+    + `\u3000出 ${sum("completion")}\u3000调用 ${usage.length} 次`
+    + `\u3000失败 ${records.filter((r) => r.failure).length} 次`);
 }
 console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`
   + `\u3000非法率 ${(avg(results.map((r) => r.illegalRate)) * 100).toFixed(1)}%`

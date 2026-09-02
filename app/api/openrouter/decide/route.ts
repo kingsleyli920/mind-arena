@@ -1,97 +1,75 @@
-type DecisionRequest = {
+// 人机对战时替某一席位向模型请一季的令。
+//
+// 旧版每次只返回一个 actionIndex，且 observation 是 unknown 直接转发——
+// 与引擎对不上（一季要在令数预算内选多条），也没有任何调用方。
+// 现在：客户端只报 matchId/seat/observation 的**摘要**是不行的，
+// 观测必须由客户端装配（它有完整 state），服务端只负责把它送出去并解析回来。
+//
+// 评测跑不走这条路由：Cloudflare Worker 每次调用只有 6 个并发连接、
+// 免费版 50 个外部子请求，一局 16 次调用带重试会顶到；本地 Node 无此约束，
+// 还能直接写 JSONL、断点续跑。见 tools/eval-run.mjs。
+import { OpenRouterClient } from "@/lib/arena/llm/client.ts";
+import { parseDecision } from "@/lib/arena/seat/parse.ts";
+
+interface DecideBody {
   model?: string;
-  observation?: unknown;
-};
-
-function parseDecision(content: string): { actionIndex: number; reason?: string } | null {
-  const normalized = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  try {
-    const parsed = JSON.parse(normalized) as { actionIndex?: unknown; reason?: unknown };
-    if (!Number.isInteger(parsed.actionIndex) || Number(parsed.actionIndex) < 0) return null;
-    return {
-      actionIndex: Number(parsed.actionIndex),
-      reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 220) : undefined,
-    };
-  } catch {
-    const match = normalized.match(/"?actionIndex"?\s*:\s*(\d+)/i);
-    return match ? { actionIndex: Number(match[1]) } : null;
-  }
+  /** 静态前缀：规则摘要 + 交代。由客户端用 renderSystem 装配 */
+  system?: string;
+  /** 本季观测的 JSON 字符串 */
+  user?: string;
+  /** 本季候选的 key 列表，用来生成 enum */
+  keys?: string[];
 }
 
-async function callOpenRouter(apiKey: string, model: string, observation: unknown, structured: boolean) {
-  const body: Record<string, unknown> = {
-    model,
-    temperature: 0.35,
-    max_tokens: 220,
-    messages: [
-      {
-        role: "system",
-        content: "你是策略游戏中的一方统帅。只能从 legalActions 中选择一个 actionIndex。不得虚构动作或修改事实。只返回 JSON：{\"actionIndex\": number, \"reason\": string}。",
-      },
-      { role: "user", content: JSON.stringify(observation) },
-    ],
-  };
-  if (structured) {
-    body.response_format = {
-      type: "json_schema",
-      json_schema: {
-        name: "strategy_decision",
-        strict: true,
-        schema: {
-          type: "object",
-          properties: {
-            actionIndex: { type: "integer", minimum: 0 },
-            reason: { type: "string" },
-          },
-          required: ["actionIndex", "reason"],
-          additionalProperties: false,
-        },
-      },
-    };
-    body.provider = { require_parameters: true };
-  }
-
-  return fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "http://localhost:3000",
-      "X-Title": "Mind Arena",
-    },
-    body: JSON.stringify(body),
-  });
-}
+const MAX_SYSTEM = 40_000;
+const MAX_USER = 60_000;
 
 export async function POST(request: Request) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    return Response.json({ error: "OPENROUTER_API_KEY is not configured" }, { status: 503 });
+    return Response.json({
+      error: "未配置 OPENROUTER_API_KEY",
+      hint: "在项目根目录执行：echo 'OPENROUTER_API_KEY=你的key' >> .env.local",
+    }, { status: 503 });
   }
 
-  const payload = (await request.json()) as DecisionRequest;
-  if (!payload.model || payload.observation == null) {
-    return Response.json({ error: "model and observation are required" }, { status: 400 });
+  const b = (await request.json()) as DecideBody;
+  if (!b.model || !b.system || !b.user || !Array.isArray(b.keys) || !b.keys.length) {
+    return Response.json({ error: "需要 model / system / user / keys" }, { status: 400 });
   }
-  if (payload.model.length > 160 || JSON.stringify(payload.observation).length > 30_000) {
-    return Response.json({ error: "decision payload is too large" }, { status: 413 });
-  }
-
-  let response = await callOpenRouter(apiKey, payload.model, payload.observation, true);
-  if (!response.ok && [400, 404, 422].includes(response.status)) {
-    response = await callOpenRouter(apiKey, payload.model, payload.observation, false);
-  }
-  if (!response.ok) {
-    const detail = (await response.text()).slice(0, 500);
-    return Response.json({ error: `OpenRouter decision failed (${response.status})`, detail }, { status: response.status });
+  if (b.system.length > MAX_SYSTEM || b.user.length > MAX_USER || b.keys.length > 200) {
+    return Response.json({ error: "请求过大" }, { status: 413 });
   }
 
-  const result = (await response.json()) as {
-    model?: string;
-    choices?: Array<{ message?: { content?: string } }>;
-    usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-  };
-  const decision = parseDecision(result.choices?.[0]?.message?.content ?? "");
-  if (!decision) return Response.json({ error: "Model returned an invalid decision" }, { status: 422 });
-  return Response.json({ decision, model: result.model ?? payload.model, usage: result.usage ?? null });
+  const client = new OpenRouterClient(apiKey, {
+    referer: request.headers.get("origin") ?? undefined, title: "Mind Arena",
+  });
+  try {
+    const res = await client.chat({
+      model: b.model, system: b.system, user: b.user,
+      schema: {
+        name: "season_orders", strict: true,
+        schema: {
+          type: "object", additionalProperties: false,
+          required: ["picks", "reason"],
+          properties: {
+            picks: { type: "array", maxItems: 16,
+                     items: { type: "string", enum: b.keys } },
+            reason: { type: "string" },
+          },
+        },
+      },
+    });
+    const decision = parseDecision(res.content);
+    if (!decision) {
+      return Response.json({ error: "模型未给出可解析的决策", raw: res.content.slice(0, 500) },
+        { status: 422 });
+    }
+    return Response.json({
+      decision, model: res.model, usage: res.usage,
+      structured: res.structured, attempts: res.attempts, elapsedMs: res.elapsedMs,
+    });
+  } catch (e) {
+    return Response.json({ error: (e as Error).message }, { status: 502 });
+  }
 }

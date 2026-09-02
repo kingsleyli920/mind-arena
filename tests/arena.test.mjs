@@ -17,6 +17,7 @@ import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
 import { GRADE_SCORE, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
+import { renderSystem } from "../lib/arena/seat/prompt.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -136,4 +137,38 @@ test("整局：桩席位能打完 16 季，观测不泄 seed，非法输入不�
   for (const f of Object.values(s.factions)) {
     assert.ok(GRADE_SCORE[f.bestGrade] !== undefined, `${f.id} 的档位无法计分`);
   }
+});
+
+test("提示词：静态前缀逐字节稳定，且不含 seed / 席位 / 年份", () => {
+  const a = renderSystem(pack);
+  const b = renderSystem(JSON.parse(JSON.stringify(pack)));
+  assert.equal(a, b, "同一内容包两次装配不一致 —— 前缀缓存永远不会命中");
+  // 剧本名是包的一部分，随包一起变，不影响同一包内的缓存命中；
+  // 席位名与 seed 则是每局每席都变的，出现即等于缓存永不命中
+  for (const bad of ["曹操", "袁绍", "刘表"]) {
+    assert.ok(!a.includes(bad), `静态前缀里出现了席位名「${bad}」，跨席位就失效了`);
+  }
+  assert.ok(!/"seed"|seed=/.test(a), "静态前缀里出现了 seed");
+});
+
+test("提示词：规则摘要不含开发者旁白 —— 那是在教模型怎么想", () => {
+  const sys = renderSystem(pack);
+  // 这些词只会出现在设计札记里，不会出现在规则里
+  for (const w of ["设计意图", "自对局实测", "首版", "白送", "装饰性"]) {
+    assert.ok(!sys.includes(w), `摘要里残留开发者旁白：「${w}」`);
+  }
+  // 但真正的规则必须还在
+  for (const w of ["缺口", "可防守", "结转", "州治"]) {
+    assert.ok(sys.includes(w), `摘要里缺了规则关键词「${w}」`);
+  }
+});
+
+test("提示词：规则摘要与引擎一致——方针数不能对不上", () => {
+  const sys = renderSystem(pack);
+  const engine = ["farm", "levy", "wall", "soothe", "forge"];
+  const govern = pack.actions.find((a) => a.id === "govern");
+  const policy = govern.params.find((p) => p.name === "policy");
+  assert.equal(policy.tiers.length, engine.length,
+    `包里 ${policy.tiers.length} 个方针，引擎有 ${engine.length} 个 —— 摘要在向模型漏说一条`);
+  assert.ok(sys.includes("治械"), "摘要里没有治械，而器械是攻城缺口的来源之一");
 });

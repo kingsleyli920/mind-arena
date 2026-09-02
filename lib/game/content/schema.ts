@@ -155,8 +155,11 @@ export function validateContent(pack: ContentPack): Issue[] {
       if (prm.type === "tier" && (!prm.tiers || prm.tiers.length === 0)) {
         issues.push({ path: pp, message: "type=tier 必须给出 tiers" });
       }
-      if (prm.tiers && prm.tiers.length > 4) {
-        issues.push({ path: pp, message: `档位 ${prm.tiers.length} 个，超过 4 个模型难以权衡` });
+      // 上限 5：内政有五个方针（劝农/募兵/修城/安民/治械）。
+      // 卡在 4 会逼着包里少声明一条，而少声明的那条在引擎里照样存在——
+      // 规则摘要于是向模型漏说了器械的来源
+      if (prm.tiers && prm.tiers.length > 5) {
+        issues.push({ path: pp, message: `档位 ${prm.tiers.length} 个，超过 5 个难以权衡` });
       }
     }
     if (!a.cost || (a.cost.ap === undefined && a.cost.gold === undefined
@@ -182,12 +185,33 @@ export function validateContent(pack: ContentPack): Issue[] {
  * 把内容包压成给模型看的规则摘要。
  * 引擎与提示词共用同一份定义，从根上杜绝"说明与实现漂移"。
  */
+/**
+ * 内容包里有两类文字：规则（模型该看）与开发者旁白（模型不该看）。
+ *
+ * 旁白里写着「差别定价会诱使模型算价而非算势」「无主自守是给早取无主之地
+ * 一个时间价值」这样的话——那是在教模型该怎么想，会直接污染评测：
+ * 测出来的不是它的策略能力，是它照抄提示的能力。
+ * 还有大量「首版如何、实测如何、已修」的开发史，对局中一文不值却占 token。
+ */
+const COMMENTARY_KEYS = new Set([
+  "说明", "说明_免费", "设计意图", "定档依据", "损耗不对称", "接法", "产地判据",
+  "登场判定", "caveat", "_note", "_why",
+]);
+const COMMENTARY_RE = /实测|自对局|首版|此前|原先|等于没有|白送|装饰|评测|设计|踩过|漂移/;
+
+function isCommentary(key: string, value: unknown): boolean {
+  if (COMMENTARY_KEYS.has(key)) return true;
+  return typeof value === "string" && COMMENTARY_RE.test(value);
+}
+
 export function toRulesDigest(pack: ContentPack): string {
   const lines: string[] = [`# 规则摘要 v${pack.version} · ${pack.scenario}`];
 
   lines.push("\n## 数值常数");
   for (const [group, kv] of Object.entries(pack.constants ?? {})) {
-    lines.push(`- **${group}**：` + Object.entries(kv).map(([k, v]) => `${k}=${v}`).join("，"));
+    const kept = Object.entries(kv).filter(([k, v]) => !isCommentary(k, v));
+    if (!kept.length) continue;
+    lines.push(`- **${group}**：` + kept.map(([k, v]) => `${k}=${v}`).join("，"));
   }
 
   lines.push("\n## 可用动作");
