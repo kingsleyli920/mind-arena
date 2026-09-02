@@ -3,6 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
+import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
@@ -12,7 +13,9 @@ const DATA = {
   commanderies: read("commanderies.json"),
 };
 const G = buildGraph(read("adjacency.json"));
-const fresh = (seed = "t-001") => createGame(DATA, { seed });
+// 引擎参数唯一来源是内容包，测试也走同一条路径
+const P = loadParams(JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")));
+const fresh = (seed = "t-001") => createGame(DATA, { seed }, P);
 
 
 test("开局状态自洽", () => {
@@ -72,7 +75,7 @@ test("R6 裁决顺序不影响结果 —— 命令列表打乱后逐位相同", 
   assert.ok(orders.length >= 12, "样本太少，测不出顺序无关性");
   assert.ok(orders.some((o) => o.action.type === "campaign"), "命令集中无征伐，测不到冲突裁决");
 
-  const base = resolve(s, orders, G).state;
+  const base = resolve(s, orders, G, P).state;
   // 用确定性洗牌产生若干个不同排列，逐一比对
   for (let k = 1; k <= 6; k += 1) {
     const shuffled = [...orders];
@@ -82,7 +85,7 @@ test("R6 裁决顺序不影响结果 —— 命令列表打乱后逐位相同", 
     }
     assert.notDeepEqual(shuffled.map((o) => o.action.type), orders.map((o) => o.action.type),
       `第 ${k} 个排列与原序相同，未真正打乱`);
-    const got = resolve(s, shuffled, G).state;
+    const got = resolve(s, shuffled, G, P).state;
     assert.deepEqual(got, base, `第 ${k} 个排列结果不同 —— R6 失守`);
   }
 });
@@ -91,7 +94,7 @@ test("R33 同 seed 同命令必得逐位相同的结果", () => {
   const run = () => {
     let s = fresh("replay-seed");
     for (let t = 0; t < 5; t += 1) {
-      s = refreshAp(resolve(s, sampleOrders(s, ["caocao", "yuanshao", "lubu"]), G).state);
+      s = refreshAp(resolve(s, sampleOrders(s, ["caocao", "yuanshao", "lubu"]), G, P).state, P);
     }
     return s;
   };
@@ -116,7 +119,7 @@ test("不同 seed 产生不同轨迹", () => {
   const run = (seed) => {
     let s = fresh(seed);
     for (let t = 0; t < 8; t += 1) {
-      s = refreshAp(resolve(s, sampleOrders(s, Object.keys(s.factions)), G).state);
+      s = refreshAp(resolve(s, sampleOrders(s, Object.keys(s.factions)), G, P).state, P);
     }
     return JSON.stringify(s.log.filter((e) => e.kind.startsWith("siege")).map((e) => e.text));
   };
@@ -129,7 +132,7 @@ test("令数被正确扣减且不透支", () => {
   const s = fresh();
   const cands = listActions(s, "yuanshao", G);
   const orders = cands.map((c) => ({ faction: "yuanshao", action: c.action }));
-  const { state, rejected } = resolve(s, orders, G);
+  const { state, rejected } = resolve(s, orders, G, P);
   assert.ok(state.factions.yuanshao.ap >= 0, "令数透支");
   assert.ok(rejected.length > 0, "全部候选都被接受，说明令数上限没起作用");
   assert.ok(rejected.some((r) => r.reason.includes("令数不足")), "拒绝理由中没有令数不足");
@@ -148,7 +151,7 @@ test("归隐：弃治所外全部郡国且不可再动", () => {
   const s = fresh();
   const f = "yuanshao";
   const before = Object.values(s.commanderies).filter((c) => c.owner === f).length;
-  const { state } = resolve(s, [{ faction: f, action: { type: "retire" } }], G);
+  const { state } = resolve(s, [{ faction: f, action: { type: "retire" } }], G, P);
   const after = Object.values(state.commanderies).filter((c) => c.owner === f).length;
   assert.equal(after, 1, `归隐后应只剩治所，实为 ${after}（原 ${before}）`);
   assert.ok(state.factions[f].retired);
@@ -157,7 +160,44 @@ test("归隐：弃治所外全部郡国且不可再动", () => {
 
 test("一局 16 季后自动结束", () => {
   let s = fresh();
-  for (let t = 0; t < 16; t += 1) s = refreshAp(resolve(s, [], G).state);
+  for (let t = 0; t < P.seasonsPerGame; t += 1) s = refreshAp(resolve(s, [], G, P).state, P);
   assert.ok(s.finished, "16 季后未结束");
-  assert.equal(s.turn, 16);
+  assert.equal(s.turn, P.seasonsPerGame);
+});
+
+// 「规则即数据」若只是口号，引擎就会在包和硬编码之间漂移，
+// 模型按包里的公式算、引擎按另一套结算，评测立刻失效。
+// 这条测试用极端参数逼出行为差异，防止将来有人把常数写回引擎。
+test("规则即数据：改内容包必须改变引擎行为", () => {
+  const play = (params, turns = 4) => {
+    let s = fresh("param-probe");
+    for (let t = 0; t < turns && !s.finished; t += 1) {
+      const orders = sampleOrders(s, Object.keys(s.factions));
+      s = refreshAp(resolve(s, orders, G, params).state, params);
+    }
+    return s;
+  };
+  const wins = (s) => s.log.filter((e) => e.kind === "siege-win").length;
+
+  const base = play(P);
+  assert.ok(wins(base) > 0, "基准局没有任何破城，测不出参数影响");
+
+  // 门槛设成不可能达到 → 缺口恒为 0 → 一次也破不了城
+  const impossible = { ...P, breachLadder: P.breachLadder.map(([, n]) => [9999, n]) };
+  assert.equal(wins(play(impossible)), 0, "门槛设为不可达后仍有破城 —— 引擎没读 breachLadder");
+
+  // 兵力档归零 → 无兵可派 → 同样破不了城
+  const noTroops = { ...P, strengthRatio: { skirmish: 0, main: 0, allout: 0 } };
+  assert.equal(wins(play(noTroops)), 0, "兵力档归零后仍有破城 —— 引擎没读 strengthRatio");
+
+  // 局长由包决定
+  const short = { ...P, seasonsPerGame: 3 };
+  assert.equal(play(short, 10).turn, 3, "改 seasonsPerGame 后局长未跟随");
+
+  // 内政效果由包决定
+  const bigWall = { ...P, wallGain: 40 };
+  const at = Object.values(fresh().commanderies).find((c) => c.owner === "yuanshao").id;
+  const one = (params) => resolve(fresh(), [{ faction: "yuanshao",
+    action: { type: "govern", at, policy: "wall" } }], G, params).state.commanderies[at].defense;
+  assert.ok(one(bigWall) > one(P), "改 wallGain 后修城效果未跟随");
 });

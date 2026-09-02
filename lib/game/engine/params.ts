@@ -1,0 +1,119 @@
+// 引擎参数：唯一来源是内容包。
+//
+// 立内容层的理由是「引擎与模型提示词共用同一份定义」——规则若硬编码在
+// 引擎里，就得另写一份给模型看的说明，两份随迭代必然漂移，
+// **模型按包里的公式算，引擎按另一套结算，算出来对不上，评测即失效**。
+//
+// 首版引擎恰恰犯了这个错：pack-194.json 写着攻城判据，resolve.ts 里
+// 却是另一组硬编码常量。本模块把所有战斗与结算常数收回内容包，
+// 并在载入时校验缺失项——宁可启动即报错，也不要静默用默认值跑出错误结论。
+import type { Posture, SiegeGear } from "./types.ts";
+
+export interface EngineParams {
+  /** 兵力档 → 投入比例 */
+  strengthRatio: Record<Posture, number>;
+  /** 器械 → 缺口加成 */
+  gearBreach: Record<SiegeGear, number>;
+  /** 地形 → 守方加成 */
+  terrainDefense: Record<string, number>;
+  /** 缺口分档：[兵力比阈值, 缺口数]，降序 */
+  breachLadder: Array<[number, number]>;
+  /** 可防守数 = base + floor(城防/defensePerHold) + log2(守军/garrisonPerHold) */
+  holdBase: number;
+  defensePerHold: number;
+  garrisonPerHold: number;
+  /** 战力浮动幅度（±） */
+  jitter: number;
+  /** 破城后攻方存活率与守方折损 */
+  captureSurvivalPenalty: number;
+  failLossRatio: number;
+  defenderAttritionOnHold: number;
+  /** 内政效果 */
+  farmGain: number; levyMultiplier: number; wallGain: number;
+  /** 每季产出：守军增量 = 产出档 × yieldToGarrison × (moraleBase + 民心/moraleDivisor) */
+  yieldToGarrison: number; moraleBase: number; moraleDivisor: number;
+  garrisonCap: number;
+  /** 令数 */
+  apBase: number; apCap: number; carryCap: number;
+  /** 胜负：相对开局的倍数门槛 */
+  gradeJia: number; gradeYi: number;
+  /** 时钟 */
+  seasonsPerGame: number; intelValidSeasons: number;
+}
+
+interface RawPack {
+  constants?: Record<string, Record<string, unknown>>;
+  units?: Array<{ id: string }>;
+  terrain?: Array<{ id: string; defenseBonus: number }>;
+  actions?: Array<{ id: string; params?: Array<{ name: string; tiers?: Array<{ id: string; value: number }> }> }>;
+}
+
+const num = (v: unknown, path: string): number => {
+  const n = typeof v === "string" ? Number(v) : v;
+  if (typeof n !== "number" || !Number.isFinite(n)) {
+    throw new Error(`内容包缺少或非法：${path}（得到 ${JSON.stringify(v)}）`);
+  }
+  return n;
+};
+
+/**
+ * 从内容包提取引擎参数。任何缺失都抛错而非取默认值——
+ * 静默兜底会让「包里改了数值但引擎没跟上」这类问题无声通过。
+ */
+export function loadParams(pack: RawPack): EngineParams {
+  const C = pack.constants ?? {};
+  const g = (group: string, key: string) => num(C[group]?.[key], `constants.${group}.${key}`);
+
+  // 兵力档与器械档从动作定义里取，避免同一组数字在包中出现两次
+  const campaign = pack.actions?.find((a) => a.id === "campaign");
+  const tierMap = (paramName: string) => {
+    const p = campaign?.params?.find((x) => x.name === paramName);
+    if (!p?.tiers?.length) throw new Error(`内容包 campaign.${paramName} 缺少 tiers`);
+    return Object.fromEntries(p.tiers.map((t) => [t.id, t.value]));
+  };
+  const strength = tierMap("strength") as Record<Posture, number>;
+  const gear = tierMap("siegeGear") as Record<SiegeGear, number>;
+  for (const k of ["skirmish", "main", "allout"] as const) {
+    if (typeof strength[k] !== "number") throw new Error(`内容包缺兵力档 ${k}`);
+  }
+  for (const k of ["none", "ram", "mound"] as const) {
+    if (typeof gear[k] !== "number") throw new Error(`内容包缺器械档 ${k}`);
+  }
+
+  const terrainDefense: Record<string, number> = {};
+  for (const t of pack.terrain ?? []) terrainDefense[t.id] = t.defenseBonus;
+  for (const k of ["plain", "hill", "mountain", "gate", "river"]) {
+    if (typeof terrainDefense[k] !== "number") throw new Error(`内容包缺地形 ${k} 的 defenseBonus`);
+  }
+
+  return {
+    strengthRatio: strength,
+    gearBreach: gear,
+    terrainDefense,
+    breachLadder: [
+      [g("攻城", "缺口比_四"), 4], [g("攻城", "缺口比_三"), 3],
+      [g("攻城", "缺口比_二"), 2], [g("攻城", "缺口比_一"), 1],
+    ],
+    holdBase: g("攻城", "可防守基数"),
+    defensePerHold: g("攻城", "城防每档"),
+    garrisonPerHold: g("攻城", "守军每档"),
+    jitter: g("野战", "战力浮动"),
+    captureSurvivalPenalty: g("攻城", "破城后守军折算"),
+    failLossRatio: g("攻城", "攻城失利折损"),
+    defenderAttritionOnHold: g("攻城", "守住后守军损耗"),
+    farmGain: g("内政", "劝农增产出档"),
+    levyMultiplier: g("内政", "募兵倍率"),
+    wallGain: g("内政", "修城增城防"),
+    yieldToGarrison: g("产出", "产出档折兵"),
+    moraleBase: g("产出", "民心基数"),
+    moraleDivisor: g("产出", "民心除数"),
+    garrisonCap: g("产出", "守军上限"),
+    apBase: g("令数", "基数"),
+    apCap: g("令数", "上限"),
+    carryCap: g("令数", "结转上限"),
+    gradeJia: g("胜负", "甲档倍数"),
+    gradeYi: g("胜负", "乙档倍数"),
+    seasonsPerGame: g("时钟", "一局季数"),
+    intelValidSeasons: g("情报", "有效季数"),
+  };
+}

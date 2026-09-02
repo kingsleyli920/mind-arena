@@ -10,6 +10,7 @@
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
 import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
+import type { EngineParams } from "./params.ts";
 import type { GameState, Order, Grade, CommanderyId, FactionId, GameEvent } from "./types.ts";
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
@@ -43,31 +44,29 @@ export function supplyReach(s: GameState, g: Graph, f: FactionId): Set<Commander
   return seen;
 }
 
-// ── 战力 ────────────────────────────────────────────────────────────
-const STRENGTH_RATIO = { skirmish: 0.3, main: 0.55, allout: 0.8 } as const;
-const GEAR_BREACH = { none: 0, ram: 1, mound: 2 } as const;
-const TERRAIN_DEF = { plain: 0, hill: 0.12, mountain: 0.3, gate: 0.55, river: 0.35 } as const;
-
 /**
  * 攻城判定：缺口数 vs 守方可防守数（MERS R23–R24）。
  * 用「缺口数」而非「兵力比」是刻意的——比值是连续量，模型难以心算出
  * 自己究竟够不够；缺口数是小整数，一眼可数。
+ *
+ * 全部系数来自内容包，不在此硬编码：引擎与模型提示词必须共用同一份定义，
+ * 否则模型按包里的公式算、引擎按另一套结算，算出来对不上。
  */
-function breachCount(attack: number, defend: number, defense: number,
-                     gear: keyof typeof GEAR_BREACH,
+function breachCount(P: EngineParams, attack: number, defend: number, defense: number,
+                     gear: keyof EngineParams["gearBreach"],
                      terrain: string, atGate: boolean): { breach: number; hold: number } {
-  const terrainDef = TERRAIN_DEF[terrain as keyof typeof TERRAIN_DEF] ?? 0;
+  const terrainDef = P.terrainDefense[terrain] ?? 0;
   const eff = defend * (1 + terrainDef);
   const ratio = eff > 0 ? attack / eff : 99;
-  // 基础缺口按兵力比分档；关隘处器械效果减半
-  const base = ratio >= 3 ? 4 : ratio >= 2 ? 3 : ratio >= 1.5 ? 2 : ratio >= 1.2 ? 1 : 0;
-  const gearBonus = atGate ? Math.floor(GEAR_BREACH[gear] / 2) : GEAR_BREACH[gear];
+  let base = 0;
+  for (const [threshold, n] of P.breachLadder) { if (ratio >= threshold) { base = n; break; } }
+  const gearBonus = atGate ? Math.floor(P.gearBreach[gear] / 2) : P.gearBreach[gear];
   // 可防守数必须把城防算进来。首版只看守军数，30–100 的城防等于白算，
-  // 结果是「修城」这条内政毫无用处，而攻城易如反掌——
-  // 自对局实测第一季就有 17 个郡易主，96% 是势力互夺。
-  const hold = 1
-    + Math.floor(defense / 30)                       // 城防 30→1, 60→2, 90→3
-    + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / 3000))));
+  // 「修城」这条内政毫无用处，攻城易如反掌——自对局实测第一季就有
+  // 17 个郡易主，96% 是势力互夺。
+  const hold = P.holdBase
+    + Math.floor(defense / P.defensePerHold)
+    + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / P.garrisonPerHold))));
   return { breach: base + gearBonus, hold };
 }
 
@@ -78,7 +77,8 @@ export interface ResolveResult {
 }
 
 export function resolve(
-  prev: GameState, orders: readonly Order[], g: Graph, rules: Rules = DEFAULT_RULES,
+  prev: GameState, orders: readonly Order[], g: Graph, P: EngineParams,
+  rules: Rules = DEFAULT_RULES,
 ): ResolveResult {
   const s = clone(prev);
   const rejected: Array<{ order: Order; reason: string }> = [];
@@ -111,7 +111,7 @@ export function resolve(
   for (const o of accepted) {
     const a = o.action;
     if (a.type === "scout") {
-      (s.intel[o.faction] ??= {})[a.at] = s.turn + 4;      // 情报有效四季
+      (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
     } else if (a.type === "appoint") {
       s.commanderies[a.at].governor = a.officer;
     }
@@ -122,10 +122,10 @@ export function resolve(
     if (o.action.type !== "govern") continue;
     const c = s.commanderies[o.action.at];
     switch (o.action.policy) {
-      case "farm":   c.yieldTier = Math.min(10, c.yieldTier + 1); break;
-      case "levy":   c.garrison = Math.round(c.garrison * 1.18);
+      case "farm":   c.yieldTier = Math.min(10, c.yieldTier + P.farmGain); break;
+      case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
                      c.moraleTier = Math.max(1, c.moraleTier - 1); break;
-      case "wall":   c.defense = Math.min(100, c.defense + 8); break;
+      case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
       case "soothe": c.moraleTier = Math.min(5, c.moraleTier + 1); break;
     }
   }
@@ -186,7 +186,7 @@ export function resolve(
     .map((o, i) => {
       const a = o.action as Extract<Order["action"], { type: "campaign" }>;
       const src = s.commanderies[a.from];
-      const troops = Math.floor(src.garrison * STRENGTH_RATIO[a.strength]);
+      const troops = Math.floor(src.garrison * P.strengthRatio[a.strength]);
       return { o, a, troops, seq: i };
     })
     .sort((x, y) => y.troops - x.troops || x.o.faction.localeCompare(y.o.faction)
@@ -205,13 +205,13 @@ export function resolve(
 
     src.garrison -= troops;
     // 随机只影响 ±8% 的战力浮动，且在结算前就由坐标定死
-    const jitter = 0.92 + roll({ seed: s.seed, year: s.year, season: s.season,
-                                 faction: o.faction, event: "siege", seq: i }) * 0.16;
+    const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
+                                           faction: o.faction, event: "siege", seq: i }) * P.jitter * 2;
     const attack = troops * jitter;
-    const { breach, hold } = breachCount(attack, tgt.garrison, tgt.defense, a.siegeGear, terrain, atGate);
+    const { breach, hold } = breachCount(P, attack, tgt.garrison, tgt.defense, a.siegeGear, terrain, atGate);
 
     if (breach > hold) {
-      const survivors = Math.max(1, Math.round(troops - tgt.garrison * 0.55));
+      const survivors = Math.max(1, Math.round(troops - tgt.garrison * P.captureSurvivalPenalty));
       const loser = tgt.owner;
       tgt.owner = o.faction;
       tgt.garrison = survivors;
@@ -221,9 +221,9 @@ export function resolve(
                text: `自 ${a.from} 取 ${a.target}${loser ? `（原属 ${loser}）` : "（无主）"}`,
                attribution: { 投入: troops, 缺口: breach, 可防守: hold, 城防: tgt.defense, 地形: terrain } });
     } else {
-      const lost = Math.round(troops * 0.35);
+      const lost = Math.round(troops * P.failLossRatio);
       src.garrison += Math.max(0, troops - lost);
-      tgt.garrison = Math.max(200, Math.round(tgt.garrison * 0.88));
+      tgt.garrison = Math.max(200, Math.round(tgt.garrison * P.defenderAttritionOnHold));
       log(s, { kind: "siege-fail", faction: o.faction,
                text: `攻 ${a.target} 未克，折损 ${lost}`,
                attribution: { 投入: troops, 缺口: breach, 可防守: hold, 地形: terrain } });
@@ -241,8 +241,9 @@ export function resolve(
         log(s, { kind: "supply-cut", faction: f.id, text: `${c.id} 补给断绝，本季无产出` });
         continue;
       }
-      const factor = 0.6 + c.moraleTier / 8;
-      c.garrison = Math.min(Math.round(c.garrison + c.yieldTier * 40 * factor), 60000);
+      const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
+      c.garrison = Math.min(Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor),
+                            P.garrisonCap);
     }
   }
 
@@ -258,8 +259,8 @@ export function resolve(
       log(s, { kind: "eliminated", faction: f.id, text: "尽失疆土" });
     }
     // 档位按本局曾达到过的最高记，冲高后回落不扣分
-    const grade: Grade = n >= f.startCommanderies * 2.5 ? "jia"
-      : n >= f.startCommanderies * 1.8 ? "yi"
+    const grade: Grade = n >= f.startCommanderies * P.gradeJia ? "jia"
+      : n >= f.startCommanderies * P.gradeYi ? "yi"
       : n >= f.startCommanderies ? "bing" : "ding";
     const rank = { ding: 0, bing: 1, yi: 2, jia: 3 };
     if (rank[grade] > rank[f.bestGrade]) f.bestGrade = grade;
@@ -270,7 +271,7 @@ export function resolve(
   s.season += 1;
   if (s.season > 4) { s.season = 1; s.year += 1; }
   s.epoch = s.turn < 6 ? 1 : s.turn < 11 ? 2 : 3;
-  if (s.turn >= 16) s.finished = true;
+  if (s.turn >= P.seasonsPerGame) s.finished = true;
 
   return { state: s, rejected };
 }

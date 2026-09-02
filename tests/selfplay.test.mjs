@@ -3,6 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
+import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
 import { decide } from "../lib/game/engine/bot.ts";
 
@@ -13,13 +14,15 @@ const DATA = {
   commanderies: read("commanderies.json"),
 };
 const G = buildGraph(read("adjacency.json"));
+// 引擎参数唯一来源是内容包，测试也走同一条路径
+const P = loadParams(JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")));
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
-const P = ["turtle", "balanced", "aggressive", "opportunist"];
+const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const SCORE = { jia: 300, yi: 200, bing: 100, ding: 0 };
 
 function play(seed, rot) {
-  let s = createGame(DATA, { seed });
-  const prof = (f) => { const i = SEATS.indexOf(f); return i >= 0 ? P[(i + rot) % 4] : "balanced"; };
+  let s = createGame(DATA, { seed }, P);
+  const prof = (f) => { const i = SEATS.indexOf(f); return i >= 0 ? PROFILES[(i + rot) % 4] : "balanced"; };
   let flips = 0;
   while (!s.finished) {
     const orders = [];
@@ -27,9 +30,9 @@ function play(seed, rot) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       orders.push(...decide(s, f, G, prof(f)));
     }
-    const r = resolve(s, orders, G);
+    const r = resolve(s, orders, G, P);
     flips += r.state.log.slice(s.log.length).filter((e) => e.kind === "siege-win").length;
-    s = refreshAp(r.state);
+    s = refreshAp(r.state, P);
   }
   return { s, flips, prof };
 }
@@ -60,7 +63,7 @@ test("B 苟活不是最优：turtle 均分显著低于最优画像", () => {
 });
 
 test("C 局长恒为 16 季", () => {
-  for (const r of RUNS) assert.equal(r.s.turn, 16);
+  for (const r of RUNS) assert.equal(r.s.turn, P.seasonsPerGame);
 });
 
 test("D 得分不由开局国力决定", () => {

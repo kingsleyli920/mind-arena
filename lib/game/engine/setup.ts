@@ -2,6 +2,7 @@
 //
 // 数据全部来自 lib/game/data/，本模块不含任何硬编码的游戏数值——
 // 数值改动只该发生在数据文件与内容包里。
+import type { EngineParams } from "./params.ts";
 import type { GameState, CommanderyState, FactionState, Grade } from "./types.ts";
 
 export interface SetupData {
@@ -28,7 +29,7 @@ export interface SetupOptions {
  */
 const PLACEHOLDER_FACTIONS = new Set(["wuzhu"]);
 
-export function createGame(data: SetupData, opts: SetupOptions): GameState {
+export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams): GameState {
   const nameToId = new Map(data.commanderies.map((c) => [c.name, c.id]));
 
   const commanderies: Record<string, CommanderyState> = {};
@@ -91,11 +92,11 @@ export function createGame(data: SetupData, opts: SetupOptions): GameState {
     finished: false,
   };
   for (const id of Object.keys(factions)) state.intel[id] = {};
-  return refreshAp(state);
+  return refreshAp(state, P);
 }
 
-/** 季初重算令数：min(5 + floor(sqrt(郡国数)), 12)，结转 ≤2 */
-export function refreshAp(state: GameState): GameState {
+/** 季初重算令数。公式与上限来自内容包，不在此硬编码 */
+export function refreshAp(state: GameState, P: EngineParams): GameState {
   const count = new Map<string, number>();
   for (const c of Object.values(state.commanderies)) {
     if (c.owner) count.set(c.owner, (count.get(c.owner) ?? 0) + 1);
@@ -103,8 +104,8 @@ export function refreshAp(state: GameState): GameState {
   const factions = { ...state.factions };
   for (const [id, f] of Object.entries(factions)) {
     const n = count.get(id) ?? 0;
-    const base = Math.min(5 + Math.floor(Math.sqrt(n)), 12);
-    factions[id] = { ...f, ap: base + Math.min(2, f.carried), carried: 0, freeUsed: {} };
+    const base = Math.min(P.apBase + Math.floor(Math.sqrt(n)), P.apCap);
+    factions[id] = { ...f, ap: base + Math.min(P.carryCap, f.carried), carried: 0, freeUsed: {} };
   }
   const commanderies = { ...state.commanderies };
   for (const [id, c] of Object.entries(commanderies)) {
