@@ -6,6 +6,7 @@
 //   2. 策略画像必须真的不同 —— 若"苟活流"和"进攻流"打出同样的结果，
 //      要么是机器人没区分开，要么是玩法本身分不出高下。两者都必须查明
 import { listActions, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
+import type { EngineParams } from "./params.ts";
 import type { Roster } from "./officers.ts";
 import type { Candidate, FactionId, GameState, Order } from "./types.ts";
 
@@ -20,10 +21,10 @@ export const PROFILES: Record<Profile, string> = {
 
 /** 各画像对每类动作的偏好权重。数值本身无量纲，只用于排序 */
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 9 },
-  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8 },
-  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 8 },
-  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7 },
+  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 9, withdraw: 11 },
+  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8, withdraw: 3 },
+  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 8, withdraw: 0 },
+  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7, withdraw: 5 },
 };
 
 /** 从候选的 label 里取回攻防比。label 由 listActions 生成，格式稳定 */
@@ -42,8 +43,15 @@ const MIN_RATIO: Record<Profile, number> = {
  */
 export function decide(
   s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
-  roster: Roster | null = null,
+  roster: Roster | null = null, P: EngineParams | null = null,
 ): Order[] {
+  // 「出兵后余兵低到什么程度算把城送出去」由规则推导，不拍系数：
+  // 邻敌最多带走自己八成守军，而破开「城防 30 以上 + 基数」的两档可防守
+  // 需要兵力比 2.0，故余兵低于邻敌的 0.8/2.0 即一击可破。
+  // 拿这个数去拟合出局率会得到 0.35，但那是对着指标调参，包一改就不成立了。
+  const maxStrength = P ? Math.max(...Object.values(P.strengthRatio)) : 0.8;
+  const breachTwo = P ? (P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2) : 2;
+  const safeRatio = maxStrength / breachTwo;
   const cands = listActions(s, f, g, rules, roster);
   if (!cands.length) return [];
   const w = WEIGHTS[profile];
@@ -51,7 +59,28 @@ export function decide(
 
   const scored = cands.map((c) => {
     let score = w[c.action.type] ?? 0;
+    // 救援必须先判：它的 label 里没有「比 X」，若落进下面的通用征伐闸门，
+    // ratioOf 取到 0 而被当成「打不动」直接弃掉——实测 608 条救援候选无一被采纳
+    if (c.key.startsWith("relief:")) {
+      // 丢城的代价高于野战失利，除苟活流外都应优先出兵解围
+      const m = /围军约 (\d+) 人）：我方可出 (\d+) 人/.exec(c.label);
+      const odds = m ? Number(m[2]) / Math.max(1, Number(m[1])) : 1;
+      if (profile === "turtle" && odds < 1.5) return { c, score: -1e9 };
+      if (odds < 0.9) return { c, score: -1e9 };            // 明显打不过就不送
+      return { c, score: 14 + Math.min(8, (odds - 1) * 4) };
+    }
     if (c.action.type === "campaign") {
+      // 掏空老巢是所有画像共有的死法，不是某一流派的风格问题。
+      // 四个画像都该有这条常识，否则测出来的不是策略差异，而是同一个失误——
+      // 实测投机流曹操因此 10/10 全灭
+      const from = s.commanderies[c.action.from];
+      const m = /城中余 (\d+) 人/.exec(c.label);
+      const left = m ? Number(m[1]) : from?.garrison ?? 0;
+      const threat = Math.max(0, ...(g.adj.get(c.action.from) ?? [])
+        .filter((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== f)
+        .map((e) => s.commanderies[e.to].garrison));
+      if (threat > 0 && left < threat * safeRatio) return { c, score: -1e9 };
+
       const r = ratioOf(c);
       // 达不到该画像的出兵门槛就直接弃掉，而不是给低分——
       // 给低分会让它在无仗可打时仍被选中，那是"被迫送死"而非策略
@@ -61,6 +90,11 @@ export function decide(
       if (profile === "opportunist" && !s.commanderies[c.action.target]?.owner) score += 8;
       // 倾国投入风险高，只在优势明显时选
       if (c.action.strength === "allout") score += r >= minRatio + 0.5 ? 3 : -5;
+    }
+    if (c.action.type === "withdraw") {
+      // 围城季数越多、残兵越少，越该收兵
+      const m = /已围 (\d+) 季，余 (\d+) 人/.exec(c.label);
+      score += m ? Number(m[1]) * 2 + (Number(m[2]) < 3000 ? 4 : 0) : 0;
     }
     if (c.action.type === "appoint") {
       // 候选已按郡的性质预筛过人选，这里只再表达画像偏好：

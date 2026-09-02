@@ -192,9 +192,10 @@ test("规则即数据：改内容包必须改变引擎行为", () => {
   const impossible = { ...P, breachLadder: P.breachLadder.map(([, n]) => [9999, n]) };
   assert.equal(wins(play(impossible)), 0, "门槛设为不可达后仍有破城 —— 引擎没读 breachLadder");
 
-  // 兵力档归零 → 无兵可派 → 同样破不了城
-  const noTroops = { ...P, strengthRatio: { skirmish: 0, main: 0, allout: 0 } };
-  assert.equal(wins(play(noTroops)), 0, "兵力档归零后仍有破城 —— 引擎没读 strengthRatio");
+  // 兵力档与集结抽调比同时归零 → 无兵可派 → 同样破不了城。
+  // 两项都要归零：集结出的军团整建制出征，不走兵力档
+  const noTroops = { ...P, strengthRatio: { skirmish: 0, main: 0, allout: 0 }, musterTake: 0 };
+  assert.equal(wins(play(noTroops)), 0, "兵源归零后仍有破城 —— 引擎没读 strengthRatio/musterTake");
 
   // 局长由包决定
   const short = { ...P, seasonsPerGame: 3 };
@@ -278,14 +279,31 @@ test("武将：在野者须控制其籍贯郡方可征辟，他方之臣不可�
     action: { type: "appoint", officer: "guanyu", at: mine.id } }, G, undefined, ROSTER);
   assert.match(bad ?? "", /他方/, `本应拒绝，得到：${bad}`);
 
-  // 赵云在野，籍贯常山国属袁绍：袁绍可用，曹操不可用
-  const zhao = ROSTER.byId.get("zhaoyun");
-  assert.equal(zhao.faction, null, "赵云应为在野");
-  assert.equal(s.commanderies[zhao.home].owner, "yuanshao", "常山国应属袁绍");
+  // 在野者：籍贯郡的主人可用，别人不可用
+  const pool = new Set(s.recruitPool);
+  const wild = [...ROSTER.byId.values()]
+    .find((o) => !o.faction && o.home && pool.has(o.id)
+                 && s.commanderies[o.home]?.owner === "yuanshao");
+  assert.ok(wild, "本局名单中没有籍贯属袁绍的在野武将，测不出征辟");
   assert.equal(validate(s, { faction: "yuanshao",
-    action: { type: "appoint", officer: "zhaoyun", at: zhao.home } }, G, undefined, ROSTER), null);
+    action: { type: "appoint", officer: wild.id, at: wild.home } }, G, undefined, ROSTER), null);
   assert.ok(validate(s, { faction: "caocao",
-    action: { type: "appoint", officer: "zhaoyun", at: mine.id } }, G, undefined, ROSTER));
+    action: { type: "appoint", officer: wild.id, at: mine.id } }, G, undefined, ROSTER),
+    "别方不该能征辟不在其治下的在野武将");
+});
+
+test("在野名单由 seed 抽定，是开局唯一的随机源", () => {
+  const a = fresh("seed-a").recruitPool;
+  const b = fresh("seed-b").recruitPool;
+  assert.ok(a.length > 0, "在野名单为空");
+  assert.notDeepEqual(a, b, "换 seed 名单不变 —— seed 名不副实");
+  assert.deepEqual(fresh("seed-a").recruitPool, a, "同 seed 名单不稳定");
+  // 名单只含在野者，且比例大致落在包里声明的值附近
+  for (const id of a) assert.equal(ROSTER.byId.get(id).faction, null);
+  const wild = [...ROSTER.byId.values()].filter((o) => !o.faction && o.home).length;
+  const got = a.length / wild;
+  assert.ok(Math.abs(got - P.wildRecruitRatio) < 0.12,
+    `在野入选比 ${got.toFixed(2)}，包里声明 ${P.wildRecruitRatio}`);
 });
 
 test("武将：本年已故或未成年者不入名册", () => {
@@ -314,4 +332,155 @@ test("武将：太守政治抬高产出、魅力抬高民心", () => {
   const xun = after("xunyu");
   assert.ok(xun.garrison > none.garrison, "太守政治未影响产出");
   assert.ok(xun.morale > none.morale, "太守魅力未影响民心");
+});
+
+// ── 围城与野战 ──────────────────────────────────────────────────────
+// 首版里军团是空壳：muster 造出来后无人读取，征伐直接用郡守军，
+// 行军瞬时、围城无过程。这几条锁住「围城是持续的、可被解的」。
+const attackPair = (s, faction) => {
+  const from = Object.values(s.commanderies).find((c) => c.owner === faction);
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== faction);
+  return { from, edge };
+};
+
+test("围城：首攻未克则留在城下，缺口逐季累加", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  // 兵力刚好不足以首攻破城
+  s.commanderies[from.id].garrison = 9000;
+  s.commanderies[edge.to].garrison = 9000;
+  s.commanderies[edge.to].defense = 90;
+
+  const order = { faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "ram" } };
+  const r1 = resolve(s, [order], G, P, ROSTER);
+  const held = r1.state.log.find((e) => e.kind === "siege-hold");
+  assert.ok(held, `首攻应转入围困，实得：${r1.state.log.map((e) => e.kind).join(",")}`);
+  const army = r1.state.armies.find((a) => a.target === edge.to);
+  assert.ok(army, "围城军未留在城下 —— 军团仍是空壳");
+  assert.equal(army.siegeSeasons, 1);
+
+  // 下季不再下令，围城仍自动结算，缺口比首季多
+  const before = r1.state.log.length;
+  const r2 = resolve(refreshAp(r1.state, P), [], G, P, ROSTER);
+  const ev = r2.state.log.slice(before).find((e) => e.kind.startsWith("siege-"));
+  assert.ok(ev, "第二季围城未自动结算");
+  assert.ok(Number(ev.attribution.缺口) > Number(held.attribution.缺口),
+    `围城第二季缺口未累加：${held.attribution.缺口} → ${ev.attribution.缺口}`);
+});
+
+test("围城：满上限自动撤围，残兵退回起兵郡", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 9000;
+  s.commanderies[edge.to].garrison = 12000;
+  s.commanderies[edge.to].defense = 100;
+
+  let cur = s;
+  const order = { faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } };
+  cur = resolve(cur, [order], G, P, ROSTER).state;
+  for (let i = 0; i < P.siegeMaxSeasons; i += 1) cur = resolve(refreshAp(cur, P), [], G, P, ROSTER).state;
+  assert.ok(cur.log.some((e) => e.kind === "siege-abort"), "围满上限未自动撤围");
+  assert.equal(cur.armies.filter((a) => a.target === edge.to).length, 0, "撤围后军团仍在城下");
+});
+
+test("围城：撤围令可主动收兵，保住的残兵多于续围", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 9000;
+  s.commanderies[edge.to].garrison = 12000;
+  s.commanderies[edge.to].defense = 100;
+  const r1 = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER);
+  const army = r1.state.armies.find((a) => a.target === edge.to);
+  assert.ok(army, "未形成围城");
+
+  const next = refreshAp(r1.state, P);
+  const pulled = resolve(next, [{ faction: "yuanshao",
+    action: { type: "withdraw", army: army.id } }], G, P, ROSTER).state;
+  const stayed = resolve(next, [], G, P, ROSTER).state;
+  assert.ok(pulled.log.some((e) => e.kind === "siege-lift"), "撤围令未生效");
+  assert.ok(pulled.commanderies[from.id].garrison > stayed.commanderies[from.id].garrison,
+    "撤围后本郡兵力未增 —— 残兵没退回来");
+});
+
+test("野战：被围之郡可出城迎战，胜则解围", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  const victim = s.commanderies[edge.to];
+  const foe = victim.owner;
+  // 制造一支弱小的围城军：袁绍以少量兵力围城
+  s.commanderies[from.id].garrison = 3000;
+  victim.garrison = 30000;
+  victim.defense = 100;
+  const r1 = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: victim.id, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER);
+  const army = r1.state.armies.find((a) => a.target === victim.id);
+  assert.ok(army, "未形成围城，无法测出城迎战");
+
+  const next = refreshAp(r1.state, P);
+  // 出城迎战：起点即被围之郡，不需要邻接边
+  const sortie = { faction: foe, action: { type: "campaign",
+    target: victim.id, from: victim.id, commander: null, strength: "allout", siegeGear: "none" } };
+  assert.equal(validate(next, sortie, G, undefined, ROSTER), null, "出城迎战被判非法");
+  const out = resolve(next, [sortie], G, P, ROSTER).state;
+  assert.ok(out.log.some((e) => e.kind === "field-win"), 
+    `出城迎战应胜，实得：${out.log.map((e) => e.kind).join(",")}`);
+  assert.equal(out.armies.filter((a) => a.target === victim.id).length, 0, "胜后围城军仍在");
+});
+
+test("军团：后路断绝则粮尽溃散", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 9000;
+  s.commanderies[edge.to].garrison = 20000;
+  s.commanderies[edge.to].defense = 100;
+  const r1 = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER);
+  assert.ok(r1.state.armies.some((a) => a.target === edge.to), "未形成围城");
+
+  // 抽掉起兵郡：围城军的后方走廊断了
+  const cut = refreshAp(r1.state, P);
+  cut.commanderies[from.id].owner = "lubu";
+  const after = resolve(cut, [], G, P, ROSTER).state;
+  assert.ok(after.log.some((e) => e.kind === "army-scattered"),
+    "后路断绝的围城军未溃散 —— 「绕后断粮」仍是空话");
+});
+
+test("集结：待命军团可整建制出征，兵力大于按档抽调", () => {
+  const s = fresh();
+  const mine = Object.values(s.commanderies).filter((c) => c.owner === "yuanshao");
+  const hub = mine.find((c) => (G.adj.get(c.id) ?? [])
+    .filter((e) => s.commanderies[e.to]?.owner === "yuanshao").length >= 2);
+  assert.ok(hub, "袁绍无可集结的枢纽郡");
+  const srcs = [hub.id, ...(G.adj.get(hub.id) ?? [])
+    .filter((e) => s.commanderies[e.to]?.owner === "yuanshao").map((e) => e.to)].slice(0, 3);
+  const before = hub.garrison;
+
+  const r = resolve(s, [{ faction: "yuanshao", action: { type: "muster",
+    at: hub.id, from: srcs, commander: null, deadline: 1 } }], G, P, ROSTER);
+  const army = r.state.armies.find((a) => a.at === hub.id && !a.target);
+  assert.ok(army, "集结未产出待命军团 —— muster 仍是死数据");
+  assert.ok(army.troops > 0);
+  // 集结地本身也可出兵，因此集结的兵力应超过就地倾国而出
+  const byTier = Math.floor(before * P.strengthRatio.allout);
+  assert.ok(army.troops > byTier,
+    `集结 ${army.troops} 人未多于就地倾国 ${byTier} 人，集结失去意义`);
+
+  // 后续征伐整建制调用该军团，而非再按兵力档抽调
+  const tgt = [...(G.adj.get(hub.id) ?? [])]
+    .find((e) => r.state.commanderies[e.to]?.owner !== "yuanshao");
+  if (tgt) {
+    const r2 = resolve(refreshAp(r.state, P), [{ faction: "yuanshao", action: { type: "campaign",
+      target: tgt.to, from: hub.id, commander: null, strength: "skirmish", siegeGear: "none" } }],
+      G, P, ROSTER);
+    const ev = r2.state.log.find((e) => e.kind.startsWith("siege-"));
+    assert.ok(ev && Number(ev.attribution.投入 ?? army.troops) >= army.troops * 0.9,
+      "征伐未整建制调用待命军团");
+  }
 });

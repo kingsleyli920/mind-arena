@@ -44,21 +44,26 @@ export interface FactionState {
 export type Posture = "skirmish" | "main" | "allout";
 export type SiegeGear = "none" | "ram" | "mound";
 
+/**
+ * 军团。首版里它是个空壳——muster 造出来后再无人读取，征伐直接用郡守军，
+ * 于是行军瞬时、围城无过程、「绕后断粮」无从谈起。
+ * 现在它是实体：占据地图上的位置，围城要耗季，可被野战击溃，会断粮溃散。
+ */
 export interface Army {
   id: string;
   faction: FactionId;
   commander: OfficerId | null;
   troops: number;
-  /** 当前所在郡 */
+  /** 所在郡。围城时为被围郡，待命时为己方郡 */
   at: CommanderyId;
-  /** 进军目标；null 表示驻守 */
+  /** 围攻目标；null 表示驻守待命 */
   target: CommanderyId | null;
   posture: Posture;
   gear: SiegeGear;
-  /** 已围城旬数，满 6 自动撤围 */
-  siegeXun: number;
-  /** 剩余行军旬数 */
-  marchXun: number;
+  /** 已围季数，满上限自动撤围 */
+  siegeSeasons: number;
+  /** 撤围或溃退时退回的郡 */
+  home: CommanderyId;
 }
 
 export interface Treaty {
@@ -104,6 +109,8 @@ export interface GameState {
   intel: Record<FactionId, Record<CommanderyId, number>>;
   /** 破城被俘的守将，本局不再出场 */
   capturedOfficers: OfficerId[];
+  /** 本局可招募的在野武将。由 seed 抽定，是全局唯一的开局随机 */
+  recruitPool: OfficerId[];
   log: GameEvent[];
   finished: boolean;
 }
@@ -119,6 +126,7 @@ export type Action =
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
   | { type: "passage"; to: FactionId; through: CommanderyId }
   | { type: "scout"; at: CommanderyId }
+  | { type: "withdraw"; army: string }
   | { type: "retire" };
 
 export interface Order {

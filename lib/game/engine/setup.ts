@@ -3,7 +3,7 @@
 // 数据全部来自 lib/game/data/，本模块不含任何硬编码的游戏数值——
 // 数值改动只该发生在数据文件与内容包里。
 import type { EngineParams } from "./params.ts";
-import type { Roster } from "./officers.ts";
+import { rollRecruitPool, type Roster } from "./officers.ts";
 import type { GameState, CommanderyState, FactionState, Grade } from "./types.ts";
 
 export interface SetupData {
@@ -92,6 +92,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     passages: [],
     intel: {},
     capturedOfficers: [],
+    recruitPool: opts.roster ? rollRecruitPool(opts.roster, opts.seed, P.wildRecruitRatio) : [],
     log: [],
     finished: false,
   };

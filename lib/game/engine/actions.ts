@@ -113,12 +113,25 @@ export function listActions(
       // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
       // 让模型看得见「谁去打」，而不必自己再选一次人
       const lead = roster ? governorOf(s, roster, e.from) : null;
+      const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
+      const ongoing = s.armies.find((x) => x.target === tid);
+      const siegeNote = !ongoing ? ""
+        : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
+        : `｜${ongoing.faction} 正围此城 ${ongoing.troops} 人（本令先野战）`;
+      const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
       const leadNote = lead
         ? `，${lead.name}领（统${lead.leadership} 武${lead.might}`
           + `${lead.aptitudes.length ? " " + lead.aptitudes.join("/") : ""}）`
         : "，无主将（该郡未设太守，战力无加成）";
       // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
       for (const strength of ["main", "allout"] as const) {
+        // 出兵后本郡余兵必须写进 label。只写「我方戍兵 6576」而不写
+        // 「倾国后城中仅余 1315」，模型看不见自己正在把老巢掏空——
+        // 实测投机流曹操因此 10/10 全灭
+        const send = ready ? ready.troops
+          : Math.floor(s.commanderies[e.from].garrison * (strength === "allout" ? 0.8 : 0.55));
+        const left = ready ? s.commanderies[e.from].garrison
+          : s.commanderies[e.from].garrison - send;
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
           action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
@@ -126,9 +139,59 @@ export function listActions(
           cost: rules.campaignAp,
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：我方戍兵 ${s.commanderies[e.from].garrison}，`
-               + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`,
+               + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`
+               + `｜出 ${send} 人，${e.from} 城中余 ${left} 人`
+               + `${armyNote}${siegeNote}`,
         });
       }
+    }
+  }
+
+  // ── 救援：己方郡被围时，从邻郡发兵解围 ──────────────────────────────
+  // 这条不给出，围城就是单向的：敌人围我城，我只能干看着。
+  if (ap >= rules.campaignAp) {
+    const besieged = s.armies.filter((x) => x.target && s.commanderies[x.target]?.owner === f
+                                            && x.faction !== f);
+    for (const foe of besieged.sort((a, b) => a.target!.localeCompare(b.target!))) {
+      // 出击（背城一战）必须给：只有一个郡的势力无邻郡可派援，
+      // 若连出城迎战都不许，被围即等于必亡——曹操 194 年正是在濮阳突火而出的
+      const sortie = s.commanderies[foe.target!];
+      const routes = [
+        ...(canOrder(sortie.id) ? [sortie] : []),
+        ...mine
+          .filter((c) => canOrder(c.id) && (g.adj.get(c.id) ?? []).some((e) => e.to === foe.target))
+          .sort((a, b) => b.garrison - a.garrison)
+          .slice(0, 2),
+      ];
+      for (const src of routes) {
+        const isSortie = src.id === foe.target;
+        const lead = roster ? governorOf(s, roster, src.id) : null;
+        out.push({
+          key: `relief:${src.id}>${foe.target}`,
+          action: { type: "campaign", target: foe.target!, from: src.id,
+                    commander: lead?.id ?? null, strength: "allout", siegeGear: "none" },
+          cost: rules.campaignAp,
+          label: `${isSortie ? `${src.id}出城迎战` : `自${src.id}赴援${foe.target}`}`
+               + `（${foe.faction} 围城第 ${foe.siegeSeasons} 季，围军约 ${foe.troops} 人）：`
+               + `我方可出 ${Math.floor(src.garrison * 0.8)} 人`
+               + `${lead ? `，${lead.name}领（统${lead.leadership}）` : "，无主将"}`
+               + `${isSortie ? "；败则城中兵力大损" : ""}`,
+        });
+      }
+    }
+  }
+
+  // ── 撤围：围而不下时主动收兵，保住残部 ──────────────────────────────
+  if (ap >= rules.normalAp) {
+    for (const army of s.armies.filter((x) => x.faction === f && x.target)
+      .sort((a, b) => a.id.localeCompare(b.id)).slice(0, 4)) {
+      out.push({
+        key: `withdraw:${army.id}`,
+        action: { type: "withdraw", army: army.id },
+        cost: rules.normalAp,
+        label: `自${army.target}撤围（已围 ${army.siegeSeasons} 季，余 ${army.troops} 人；`
+             + `撤回可保 ${Math.round(army.troops * 0.85)} 人，续围则每季再耗一成二）`,
+      });
     }
   }
 
@@ -136,9 +199,14 @@ export function listActions(
   if (ap >= rules.normalAp) {
     const cands = mine
       .map((c) => {
-        const sources = (g.adj.get(c.id) ?? [])
-          .filter((e) => s.commanderies[e.to]?.owner === f && canOrder(e.to))
-          .map((e) => e.to);
+        // 集结地本身也应出兵。只从邻郡抽调时，集结往往还不如就地倾国而出，
+        // 这条动作就失去了存在理由
+        const sources = [
+          ...(canOrder(c.id) ? [c.id] : []),
+          ...(g.adj.get(c.id) ?? [])
+            .filter((e) => s.commanderies[e.to]?.owner === f && canOrder(e.to))
+            .map((e) => e.to),
+        ];
         return { at: c.id, sources };
       })
       .filter((x) => x.sources.length >= 2 && canOrder(x.at))
@@ -276,11 +344,16 @@ export function listActions(
   // 截断必须按类轮转，不能排序后一刀切。
   // 按 key 字母序截断会让字母靠后的整类消失——袁绍这类大势力候选本就超额，
   // scout 排在最后，结果是「版图越大越看不见刺探选项」，这不是设计，是排序副作用。
+  //
+  // 分桶按 key 前缀而非 action.type：救援与普通征伐同属 campaign，
+  // 若按 type 分桶，"relief:" 排在 "campaign:" 之后，会被整批截掉——
+  // 实测 530 条救援候选无一被采纳，被围的势力等于没有反制手段。
   out.sort((a, b) => a.key.localeCompare(b.key));
   const buckets = new Map<string, Candidate[]>();
   for (const c of out) {
-    if (!buckets.has(c.action.type)) buckets.set(c.action.type, []);
-    buckets.get(c.action.type)!.push(c);
+    const cls = c.key.split(":")[0];
+    if (!buckets.has(cls)) buckets.set(cls, []);
+    buckets.get(cls)!.push(c);
   }
   const types = [...buckets.keys()].sort();
   const picked: Candidate[] = [];
@@ -324,8 +397,17 @@ export function validate(
   switch (a.type) {
     case "campaign": {
       if (!own(a.from)) return "起点非己方所有";
-      if (own(a.target)) return "目标已属己方";
       if (!s.commanderies[a.target]) return "目标郡不存在";
+      // 己方郡正被围时可以发兵——那是救援。禁掉这条，「解围」就无从谈起
+      const underSiege = s.armies.some((x) => x.target === a.target && x.faction !== o.faction);
+      if (own(a.target) && !underSiege) return "目标已属己方";
+      // 出城迎战：起点即被围之郡，不需要邻接边
+      if (a.from === a.target) {
+        if (!underSiege) return "该郡未被围，无从出击";
+        if (!own(a.from)) return "非己方郡国";
+        if (!quota(a.from)) return "该郡本季令数已满";
+        return null;
+      }
       const edge = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target);
       if (!edge) return "目标与起点不邻接";
       if (!quota(a.from)) return "起点郡本季令数已满";
@@ -336,7 +418,9 @@ export function validate(
       if (a.from.length < 2 || a.from.length > 5) return "来源郡须 2–5 个";
       for (const src of a.from) {
         if (!own(src)) return `来源郡 ${src} 非己方所有`;
-        if (!(g.adj.get(src) ?? []).some((e) => e.to === a.at)) return `来源郡 ${src} 与集结地不连地`;
+        if (src !== a.at && !(g.adj.get(src) ?? []).some((e) => e.to === a.at)) {
+          return `来源郡 ${src} 与集结地不连地`;
+        }
         if (!quota(src)) return `来源郡 ${src} 本季令数已满`;
       }
       return null;
@@ -371,6 +455,13 @@ export function validate(
     case "scout":
       if (!s.commanderies[a.at]) return "目标郡不存在";
       return null;
+    case "withdraw": {
+      const army = s.armies.find((x) => x.id === a.army);
+      if (!army) return "无此军团";
+      if (army.faction !== o.faction) return "非己方军团";
+      if (!army.target) return "该军团未在围城";
+      return null;
+    }
     case "retire":
       if (f.retired) return "已归隐";
       return null;
@@ -382,7 +473,8 @@ export function validate(
 /** 规范化排序：使裁决顺序与提交顺序无关（MERS R6） */
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
-    ({ scout: 0, appoint: 1, govern: 2, passage: 3, ally: 4, muster: 5, campaign: 6, retire: 7 })[t] ?? 9;
+    ({ scout: 0, appoint: 1, govern: 2, passage: 3, ally: 4, muster: 5,
+       withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || x.faction.localeCompare(y.faction)

@@ -14,6 +14,7 @@
 //   政治 → 该郡产出
 //   魅力 → 该郡民心
 //   适性 → 地形与攻守的额外系数
+import { roll } from "./rng.ts";
 import type { EngineParams } from "./params.ts";
 import type { CommanderyId, FactionId, GameState, OfficerId } from "./types.ts";
 
@@ -83,6 +84,18 @@ export function buildRoster(
   return { byId, byFaction, byHome };
 }
 
+/**
+ * 抽定本局的在野可招募名单。同一 seed 必得同一名单，且与调用顺序无关：
+ * 每人的入选只由其在全表中的固定位次决定。
+ */
+export function rollRecruitPool(r: Roster, seed: string, ratio: number): OfficerId[] {
+  const wild = [...r.byId.values()].filter((o) => !o.faction && o.home)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  return wild
+    .filter((o, i) => roll({ seed, year: 0, season: 0, faction: "-", event: "recruit", seq: i }) < ratio)
+    .map((o) => o.id);
+}
+
 /** 已在任的武将（任一郡的太守）。一人不得兼两郡 */
 export function postedOfficers(s: GameState): Set<OfficerId> {
   const out = new Set<OfficerId>();
@@ -100,9 +113,13 @@ export function recruitable(s: GameState, r: Roster, f: FactionId): OfficerRef[]
   for (const o of r.byFaction.get(f) ?? []) {
     if (!busy.has(o.id) && !s.capturedOfficers.includes(o.id)) out.push(o);
   }
+  const pool = new Set(s.recruitPool);
   for (const c of Object.values(s.commanderies)) {
     if (c.owner !== f) continue;
     for (const o of r.byHome.get(c.id) ?? []) {
+      // 在野者还需落在本局抽定的名单里——同一剧本换个 seed，可用的人才就不同。
+      // 这是内容包声明的开局唯一随机源
+      if (!pool.has(o.id)) continue;
       if (!busy.has(o.id) && !s.capturedOfficers.includes(o.id)) out.push(o);
     }
   }

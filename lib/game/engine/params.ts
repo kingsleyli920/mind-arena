@@ -46,6 +46,19 @@ export interface EngineParams {
   siegeAptitudeBreach: number; holdAptitudeBonus: number;
   aptitudeTerrainBonus: number; civilAptitudeBonus: number;
   politicsYieldDivisor: number; charismaMoraleThreshold: number;
+  /** 围城：持续制 */
+  siegeMaxSeasons: number; siegeBreachPerSeason: number;
+  siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
+  siegeDefenseErosion: number;
+  /** 野战：援军进入被围郡时与围城军交战 */
+  fieldRout: number; fieldPush: number; fieldStall: number;
+  fieldRoutLoserLoss: number; fieldRoutWinnerLoss: number;
+  fieldPushLoserLoss: number; fieldPushWinnerLoss: number;
+  fieldStallLoss: number; fieldDefeatLoss: number;
+  /** 集结：每个来源郡抽调的守军比例 */
+  musterTake: number;
+  /** 开局在野可招募比例，由 seed 抽定 */
+  wildRecruitRatio: number;
 }
 
 interface RawPack {
@@ -133,5 +146,22 @@ export function loadParams(pack: RawPack): EngineParams {
     civilAptitudeBonus: g("武将", "治民适性加产出"),
     politicsYieldDivisor: g("武将", "政治产出除数"),
     charismaMoraleThreshold: g("武将", "魅力安民阈值"),
+    siegeMaxSeasons: g("围城", "上限季数"),
+    siegeBreachPerSeason: g("围城", "每季加缺口"),
+    siegeAttackerLoss: g("围城", "攻方每季损耗"),
+    siegeDefenderLoss: g("围城", "守方每季损耗"),
+    siegeWithdrawKeep: g("围城", "撤围残兵"),
+    siegeDefenseErosion: g("围城", "每季削城防"),
+    fieldRout: g("野战", "溃退比"),
+    fieldPush: g("野战", "后撤比"),
+    fieldStall: g("野战", "相持比"),
+    fieldRoutLoserLoss: g("野战", "溃退_败方损"),
+    fieldRoutWinnerLoss: g("野战", "溃退_胜方损"),
+    fieldPushLoserLoss: g("野战", "后撤_败方损"),
+    fieldPushWinnerLoss: g("野战", "后撤_胜方损"),
+    fieldStallLoss: g("野战", "相持_双方损"),
+    fieldDefeatLoss: g("野战", "大败_攻方损"),
+    musterTake: g("集结", "每郡抽调比"),
+    wildRecruitRatio: g("随机", "在野可招募比例"),
   };
 }
