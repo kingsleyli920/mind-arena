@@ -35,8 +35,6 @@ export interface EngineParams {
   garrisonCap: number;
   /** 令数 */
   apBase: number; apCap: number; carryCap: number;
-  /** 胜负：相对开局的倍数门槛 */
-  gradeJia: number; gradeYi: number;
   /** 时钟 */
   seasonsPerGame: number; intelValidSeasons: number;
   /** 武将：五维折算成战斗与内政系数的基准与除数 */
@@ -131,8 +129,6 @@ export function loadParams(pack: RawPack): EngineParams {
     apBase: g("令数", "基数"),
     apCap: g("令数", "上限"),
     carryCap: g("令数", "结转上限"),
-    gradeJia: g("胜负", "甲档倍数"),
-    gradeYi: g("胜负", "乙档倍数"),
     seasonsPerGame: g("时钟", "一局季数"),
     intelValidSeasons: g("情报", "有效季数"),
     officerBase: g("武将", "基准值"),

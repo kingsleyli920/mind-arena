@@ -13,6 +13,7 @@ import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
+import { buildGeography } from "../lib/game/engine/victory.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { decide, PROFILES } from "../lib/game/engine/bot.ts";
@@ -30,6 +31,7 @@ const ROSTER = buildRoster(
   read("officer-availability-194.json"),
   new Map(read("commanderies.json").map((c) => [c.name, c.id])),
 );
+const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
 const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]));
 
 const GAMES = Number(process.env.GAMES ?? 100);
@@ -40,7 +42,7 @@ const PROFILE_LIST = ["turtle", "balanced", "aggressive", "opportunist"];
 const GRADE_SCORE = { jia: 300, yi: 200, bing: 100, ding: 0 };
 
 function playOne(seed, rotation) {
-  let s = createGame(DATA, { seed, roster: ROSTER }, P);
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
   // 非六大席位的其余势力一律 balanced
   const profileOf = (f) => {
     const i = SEATS.indexOf(f);
@@ -53,7 +55,7 @@ function playOne(seed, rotation) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       orders.push(...decide(s, f, G, profileOf(f)));
     }
-    const r = resolve(s, orders, G, P, ROSTER);
+    const r = resolve(s, orders, G, P, ROSTER, GEO);
     for (const e of r.state.log.slice(s.log.length)) {
       if (e.kind === "siege-win") flips.push({ turn: e.turn, faction: e.faction });
     }

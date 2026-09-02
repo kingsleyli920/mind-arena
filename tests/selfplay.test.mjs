@@ -3,6 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
+import { buildGeography } from "../lib/game/engine/victory.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
@@ -22,12 +23,13 @@ const ROSTER = buildRoster(
   read("officer-availability-194.json"),
   new Map(read("commanderies.json").map((c) => [c.name, c.id])),
 );
+const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
 const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const SCORE = { jia: 300, yi: 200, bing: 100, ding: 0 };
 
 function play(seed, rot) {
-  let s = createGame(DATA, { seed, roster: ROSTER }, P);
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
   const prof = (f) => { const i = SEATS.indexOf(f); return i >= 0 ? PROFILES[(i + rot) % 4] : "balanced"; };
   let flips = 0;
   while (!s.finished) {
@@ -36,7 +38,7 @@ function play(seed, rot) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       orders.push(...decide(s, f, G, prof(f)));
     }
-    const r = resolve(s, orders, G, P, ROSTER);
+    const r = resolve(s, orders, G, P, ROSTER, GEO);
     flips += r.state.log.slice(s.log.length).filter((e) => e.kind === "siege-win").length;
     s = refreshAp(r.state, P);
   }

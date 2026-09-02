@@ -4,6 +4,7 @@
 // 数值改动只该发生在数据文件与内容包里。
 import type { EngineParams } from "./params.ts";
 import { rollRecruitPool, type Roster } from "./officers.ts";
+import { standingOf, type Geography } from "./victory.ts";
 import type { GameState, CommanderyState, FactionState, Grade } from "./types.ts";
 
 export interface SetupData {
@@ -19,6 +20,8 @@ export interface SetupOptions {
   seed: string;
   /** 武将名册。给出则开局把君主坐镇治所，其余席位留给任命 */
   roster?: Roster;
+  /** 州与州治。开局态势由它算出，是此后一切档位判定的基准 */
+  geo: Geography;
   year?: number;
   /** 只保留这些势力为可操作席位；其余转为规则驱动。不传则全部保留 */
   playable?: string[];
@@ -74,6 +77,9 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       freeUsed: {},
       retired: false,
       startCommanderies: mine.length,
+      startZhou: 0,
+      startSeats: 0,
+      conquests: 0,
       bestGrade: "ding" as Grade,
       eliminated: mine.length === 0,
     };
@@ -96,6 +102,13 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     log: [],
     finished: false,
   };
+
+  // 开局态势要在君主就位前算好，它是此后一切档位判定的基准
+  for (const f of Object.values(factions)) {
+    const st = standingOf(state, opts.geo, f.id);
+    f.startZhou = st.controlledZhou;
+    f.startSeats = st.zhouSeats;
+  }
 
   // 君主坐镇治所。其余郡的太守空缺，交给 appoint —— 人事本身即决策，
   // 开局替模型排好班等于把这一层决策拿掉了。

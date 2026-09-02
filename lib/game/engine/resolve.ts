@@ -12,9 +12,10 @@ import { roll } from "./rng.ts";
 import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
 import { attackEffect, defendEffect, governEffect, governorOf } from "./officers.ts";
+import { GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
-  Army, GameState, Order, Grade, CommanderyId, FactionId, GameEvent, OfficerId,
+  Army, GameState, Order, CommanderyId, FactionId, GameEvent, OfficerId,
   Posture, SiegeGear,
 } from "./types.ts";
 
@@ -167,7 +168,8 @@ export interface ResolveResult {
 
 export function resolve(
   prev: GameState, orders: readonly Order[], g: Graph, P: EngineParams,
-  roster: Roster | null = null, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null, geo: Geography,
+  rules: Rules = DEFAULT_RULES,
 ): ResolveResult {
   const s = clone(prev);
   const rejected: Array<{ order: Order; reason: string }> = [];
@@ -388,6 +390,7 @@ export function resolve(
         log(s, { kind: "officer-captured", faction: army.faction,
                  text: `${army.target} 守将 ${roster?.byId.get(caught)?.name ?? caught} 被俘` });
       }
+      if (loser) s.factions[army.faction].conquests += 1;   // 只捡无主之地不算进攻
       tgt.owner = army.faction;
       tgt.garrison = survivors;
       tgt.moraleTier = Math.max(1, tgt.moraleTier - 1);
@@ -471,12 +474,17 @@ export function resolve(
       f.eliminated = true;
       log(s, { kind: "eliminated", faction: f.id, text: "尽失疆土" });
     }
-    // 档位按本局曾达到过的最高记，冲高后回落不扣分
-    const grade: Grade = n >= f.startCommanderies * P.gradeJia ? "jia"
-      : n >= f.startCommanderies * P.gradeYi ? "yi"
-      : n >= f.startCommanderies ? "bing" : "ding";
-    const rank = { ding: 0, bing: 1, yi: 2, jia: 3 };
-    if (rank[grade] > rank[f.bestGrade]) f.bestGrade = grade;
+    // 档位按本局曾达到过的最高档记，冲高后回落不扣分。
+    // 判据是州级的（控制州数 / 州治 / 是否夺自他方），不是郡数倍数——
+    // 后者让「占十个散郡」与「占一整州」同分，扩张的方向性无从体现；
+    // 且「郡数不低于开局」在第一季自动成立，等于白送保底档，
+    // 与内容包明写的「存续本身不得分」直接冲突
+    const grade = gradeOf(standingOf(s, geo, f.id), {
+      commanderies: f.startCommanderies,
+      controlledZhou: f.startZhou,
+      zhouSeats: f.startSeats,
+    });
+    if (GRADE_RANK[grade] > GRADE_RANK[f.bestGrade]) f.bestGrade = grade;
   }
 
   // ── 推进时钟 ──────────────────────────────────────────────────────

@@ -34,8 +34,12 @@ export interface FactionState {
   /** 免费动作本季已用次数，按动作 id 计 */
   freeUsed: Record<string, number>;
   retired: boolean;
-  /** 开局郡国数，胜负判据用相对开局的增量 */
+  /** 开局态势。胜负判据用相对开局的增量，不用绝对位置 */
   startCommanderies: number;
+  startZhou: number;
+  startSeats: number;
+  /** 本局夺自他方（非无主）的郡国数。丙档要求「必须进攻才能拿」 */
+  conquests: number;
   /** 本局曾达到过的最高档 —— 冲高后回落不扣分 */
   bestGrade: Grade;
   eliminated: boolean;
