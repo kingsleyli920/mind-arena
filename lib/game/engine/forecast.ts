@@ -84,7 +84,8 @@ export function forecastCampaign(
   const range = (a2: number, b2: number) => (a2 === b2 ? String(a2) : `${a2}–${b2}`);
   return {
     breachLo, breachHi, holdLo, holdHi, verdict, fog,
-    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}，本季判「${verdict}」`
-        + (fog === "tier" ? "（未探，城防与守将不明，区间偏宽）" : ""),
+    // 只写这一条候选特有的数。「未探时区间为何偏宽」是规则，
+    // 该在规则摘要里说一次，不该在每条候选上重复一遍
+    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}→${verdict}`,
   };
 }

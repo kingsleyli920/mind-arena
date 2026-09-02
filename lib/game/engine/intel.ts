@@ -56,7 +56,7 @@ export function observedGarrison(
     return {
       value: v, scouted: true, own: false,
       lo: Math.round(v * (1 - P.intelErrorRatio)), hi: Math.round(v * (1 + P.intelErrorRatio)),
-      text: `约 ${v}（${allied && scoutedUntil < s.turn ? "盟友通报" : "已探"}，误差 ±${pct}%）`,
+      text: `约 ${v}±${pct}%（${allied && scoutedUntil < s.turn ? "盟友通报" : "已探"}）`,
     };
   }
 
@@ -66,7 +66,7 @@ export function observedGarrison(
   const hi = Math.round(lo * P.intelTierRatio);
   return {
     value: Math.round((lo + hi) / 2), scouted: false, own: false, lo, hi,
-    text: `${lo}–${hi} 之间（第 ${tier}/${P.intelTiers} 档，未探）`,
+    text: `${lo}–${hi}（未探·第 ${tier}/${P.intelTiers} 档）`,
   };
 }
 

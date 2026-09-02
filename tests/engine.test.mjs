@@ -5,6 +5,7 @@ import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
+import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
@@ -681,7 +682,7 @@ test("迷雾：未探只报档位区间，已探转点估计，盟友只降到�
   // 敌方未探：报区间，且区间必须真的包含真值
   const dark = observedGarrison(s, "caocao", foe.id, P);
   assert.equal(dark.scouted, false);
-  assert.match(dark.text, /之间（第 \d+\/\d+ 档，未探）/);
+  assert.match(dark.text, /（未探·第 \d+\/\d+ 档）/);
   const [lo, hi] = dark.text.match(/(\d+)–(\d+)/).slice(1, 3).map(Number);
   assert.ok(foe.garrison >= lo && foe.garrison <= hi,
     `真值 ${foe.garrison} 落在报出的区间 ${lo}–${hi} 之外`);
@@ -770,4 +771,78 @@ test("迷雾：战报的可见性由引擎定义，他方内情不外泄", () =>
   // 城池易主这类天下大事必须看得见
   const publicNews = s.log.filter((e) => e.kind === "siege-win" && e.faction !== "caocao");
   for (const e of publicNews) assert.ok(seen.includes(e), "城池易主该是天下皆知");
+});
+
+// ── 观测层 ──────────────────────────────────────────────────────────
+// 这是模型与引擎之间唯一的信息通道。漏一个字段，整个评测的迷雾维度就作废。
+test("观测：绝不含 seed —— 有 seed 就能反算情报偏差还原真值", () => {
+  const s = fresh("leak-probe");
+  for (const seat of ["caocao", "yuanshao", "lubu"]) {
+    const json = JSON.stringify(observe(s, seat, G, P, ROSTER, GEO));
+    assert.ok(!json.includes(s.seed), `观测里出现了 seed 值「${s.seed}」`);
+    assert.ok(!/"seed"/.test(json), "观测里出现了 seed 字段");
+  }
+});
+
+test("观测：只含白名单，他方真值一律不出现", () => {
+  const s = fresh();
+  const o = observe(s, "caocao", G, P, ROSTER, GEO);
+  const json = JSON.stringify(o);
+
+  // 己方郡是自家账本，可以有真值
+  const mineIds = new Set(o.mine.map((m) => m.id));
+  assert.ok(mineIds.size > 0);
+
+  // 他方郡的真实守军不得整数出现在观测里
+  let leaks = 0;
+  for (const c of Object.values(s.commanderies)) {
+    if (mineIds.has(c.id) || c.garrison < 1000) continue;
+    // 守军是四位数以上，直接搜字面量足够灵敏
+    if (json.includes(`:${c.garrison},`) || json.includes(` ${c.garrison} `)) leaks += 1;
+  }
+  assert.equal(leaks, 0, `${leaks} 个他方郡的真实守军出现在观测里`);
+
+  // 结构完整性
+  assert.ok(o.candidates.length > 0, "观测里没有候选，模型无从下令");
+  assert.ok(o.brief.includes("【态势】"), "缺态势简报");
+  assert.equal(o.clock.totalTurns, P.seasonsPerGame);
+});
+
+test("观测：候选与 listActions 逐条对应，按 key 引用", () => {
+  const s = fresh();
+  const o = observe(s, "yuanshao", G, P, ROSTER, GEO);
+  const cs = listActions(s, "yuanshao", G, P, undefined, ROSTER);
+  assert.deepEqual(o.candidates.map((c) => c.key), cs.map((c) => c.key));
+  // 征伐候选必须带结构化预告，否则模型只能从文字里抠数
+  const camp = o.candidates.filter((c) => c.key.startsWith("campaign:"));
+  assert.ok(camp.length > 0);
+  for (const c of camp) {
+    assert.ok(c.forecast, `${c.key} 缺预告`);
+    assert.ok(["破城", "不破", "未知"].includes(c.forecast.verdict));
+    assert.ok(c.forecast.breachLo <= c.forecast.breachHi);
+    assert.ok(c.forecast.holdLo <= c.forecast.holdHi);
+  }
+});
+
+test("观测：刺探后预告确实收窄——这是情报的价值所在", () => {
+  const s = fresh();
+  const before = observe(s, "caocao", G, P, ROSTER, GEO)
+    .candidates.filter((c) => c.forecast).map((c) => [c.key, c.forecast]);
+  assert.ok(before.length > 0);
+
+  // 把全部目标探明
+  const scouted = { ...s, intel: { ...s.intel, caocao: Object.fromEntries(
+    Object.keys(s.commanderies).map((id) => [id, s.turn + 4])) } };
+  const after = new Map(observe(scouted, "caocao", G, P, ROSTER, GEO)
+    .candidates.filter((c) => c.forecast).map((c) => [c.key, c.forecast]));
+
+  const width = (f) => (f.breachHi - f.breachLo) + (f.holdHi - f.holdLo);
+  let narrowed = 0, same = 0;
+  for (const [key, f0] of before) {
+    const f1 = after.get(key);
+    if (!f1) continue;
+    if (width(f1) < width(f0)) narrowed += 1; else same += 1;
+  }
+  assert.ok(narrowed > same,
+    `刺探后只有 ${narrowed}/${narrowed + same} 条候选的预告收窄了 —— 情报买不到东西`);
 });

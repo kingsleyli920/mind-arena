@@ -19,7 +19,8 @@
     "map:play": "node tools/make-play-base.mjs",
     "map:territory": "node tools/build-territory-grid.mjs",
     "map:all": "npm run map:paper && npm run map:base && npm run map:tiles && npm run map:play && npm run map:territory && npm run map:audit",
-    "map:audit": "node tools/audit-ink.mjs"
+    "map:audit": "node tools/audit-ink.mjs",
+    "obs:budget": "node --experimental-strip-types tools/obs-budget.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

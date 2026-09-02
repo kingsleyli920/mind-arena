@@ -140,17 +140,18 @@ export function listActions(
       const lead = roster ? governorOf(s, roster, e.from) : null;
       const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
       const src0 = s.commanderies[e.from];
-      const unitNote = `｜我${unitName(P, src0.unit)}对彼${unitName(P, tgt.unit)}`
-        + `，${e.terrain}地形，携${GEAR_CN[src0.gear]}`;
+      // 兵种对位与器械的效果已经折进 forecast 的缺口数里，标签只标一次名目。
+      // 用散文再复述一遍等于花两份 token 说同一件事
+      const unitNote = `｜${unitName(P, src0.unit)}对${unitName(P, tgt.unit)}`
+        + (src0.gear === "none" ? "" : `，携${GEAR_CN[src0.gear]}`);
       const ongoing = s.armies.find((x) => x.target === tid);
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
         : `｜${ongoing.faction} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
       const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
-      const leadNote = lead
-        ? `，${lead.name}领（统${lead.leadership} 武${lead.might}`
-          + `${lead.aptitudes.length ? " " + lead.aptitudes.join("/") : ""}）`
-        : "，无主将（该郡未设太守，战力无加成）";
+      // 主将的统率/武力/适性已折进 forecast，这里只报是谁——
+      // 没有太守才需要提醒，那是可以补救的
+      const leadNote = lead ? `，${lead.name}领` : "，无主将";
       // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
       for (const strength of ["main", "allout"] as const) {
         // 出兵后本郡余兵必须写进 label。只写「我方戍兵 6576」而不写
@@ -178,8 +179,8 @@ export function listActions(
           // 实测「比 4.35」的仗打不下来，「比 2.26」的能破城。
           // 写缺口对可防守，那才是引擎真正比的两个量
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
-               + `：敌守军 ${seen.text}，${e.terrain}${gateNote}${leadNote}`
-               + `｜出 ${send} 人，${e.from} 城中余 ${left} 人`
+               + `：出 ${send} 人，本郡余 ${left}；敌守军 ${seen.text}`
+               + `；${e.terrain}${gateNote}${leadNote}`
                + `${fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`,
         });
@@ -231,8 +232,8 @@ export function listActions(
         key: `withdraw:${army.id}`,
         action: { type: "withdraw", army: army.id },
         cost: rules.normalAp,
-        label: `自${army.target}撤围（本部，已围 ${army.siegeSeasons} 季，余 ${army.troops} 人；`
-             + `撤回可保 ${Math.round(army.troops * 0.85)} 人，续围则每季再耗一成二）`,
+        label: `自${army.target}撤围（已围 ${army.siegeSeasons} 季，余 ${army.troops} 人，`
+             + `撤回可保 ${Math.round(army.troops * P.siegeWithdrawKeep)}）`,
       });
     }
   }
@@ -261,7 +262,7 @@ export function listActions(
         key: `muster:${at}:${take.join("+")}`,
         action: { type: "muster", at, from: take, commander: null, deadline: 1 },
         cost: rules.normalAp,
-        label: `于${at}集结，自${take.join("、")}抽调约 ${total} 人（下季抵达，集结地公开）`,
+        label: `于${at}集结，自${take.join("、")}抽调约 ${total} 人`,
       });
     }
   }
@@ -287,8 +288,8 @@ export function listActions(
         cost: rules.normalAp,
         label: `${c.id} 行${{ farm: "劝农", levy: "募兵", wall: "修城",
                               soothe: "安民", forge: "治械" }[policy]}`
-             + `（${why}；产出${c.yieldTier} 民心${c.moraleTier} 城防${c.defense}`
-             + ` ${unitName(P, c.unit)} 器械${GEAR_CN[c.gear]}）`,
+             + `（${why}；产${c.yieldTier} 心${c.moraleTier} 防${c.defense}`
+             + ` ${unitName(P, c.unit)}·${GEAR_CN[c.gear]}）`,
       });
     }
   }
@@ -305,9 +306,8 @@ export function listActions(
         key: `scout:${id}`,
         action: { type: "scout", at: id },
         cost: 0,
-        label: `刺探${id}（免费，本季余 ${freeLeft(s, f, "scout", rules)} 次；`
-             + `现为 ${observedGarrison(s, f, id, P).text}，探后转 ±${
-               Math.round(P.intelErrorRatio * 100)}% 点估计，有效 ${P.intelValidSeasons} 季）`,
+        label: `刺探${id}（现 ${observedGarrison(s, f, id, P).text}，`
+             + `本季余 ${freeLeft(s, f, "scout", rules)} 次）`,
       });
     }
   }
@@ -369,10 +369,10 @@ export function listActions(
     for (const to of [...neighbours].sort().slice(0, 5)) {
       if (allied.has(to)) {
         out.push({ key: `ally:break:${to}`, action: { type: "ally", to, act: "break", term: 4 },
-                   cost: rules.normalAp, label: `与${to}绝盟（威望大损，全席位可见）` });
+                   cost: rules.normalAp, label: `与${to}绝盟` });
       } else {
         out.push({ key: `ally:form:${to}`, action: { type: "ally", to, act: "form", term: 8 },
-                   cost: rules.normalAp, label: `与${to}缔盟八季（延迟一季生效，全席位可见）` });
+                   cost: rules.normalAp, label: `与${to}缔盟八季` });
       }
     }
   }
