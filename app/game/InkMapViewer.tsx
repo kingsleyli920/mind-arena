@@ -86,8 +86,9 @@ export function InkMapViewer() {
       host.appendChild(app.canvas);
 
       const world = new PIXI.Container();        // 底图：随缩放变换
+      const terr = new PIXI.Container();         // 疆域：随缩放变换，压在底图之上
       const overlay = new PIXI.Container();      // 标注：屏幕空间，不随缩放
-      app.stage.addChild(world, overlay);
+      app.stage.addChild(world, terr, overlay);
 
       const { baseWidth, baseHeight, tileSize, levels, geo } = manifest;
       const EXT = manifest.format ?? "png";
@@ -146,6 +147,48 @@ export function InkMapViewer() {
           } catch { live.delete(key); }
         }
       }
+
+      // ── 疆域层 ──────────────────────────────────────────────────────
+      // 底图改成中性地形后（势力色不再烤进栅格），这一页就看不出谁占哪儿了，
+      // 而「群雄沙盘」正是为这个而存在。用与 /play 同一份 territory-grid 补上，
+      // 两页共用一条疆域真相——此前底图是地形加权 chamfer、前端是欧氏最近邻，
+      // 两套并存迟早对不上。
+      try {
+        const tg = await fetch("/game/territory-grid.json").then((r) => r.json());
+        const { cols, rows, none } = tg.meta as { cols: number; rows: number; none: number };
+        const bin = atob(tg.grid as string);
+        const cv = document.createElement("canvas");
+        cv.width = cols; cv.height = rows;
+        const ctx = cv.getContext("2d");
+        if (ctx) {
+          const img = ctx.createImageData(cols, rows);
+          const owner = new Map(data.labels
+            .filter((l) => l.kind === "commandery")
+            .map((l) => [l.id, l.factionId ?? null]));
+          const rgbOf = new Map<string, [number, number, number]>();
+          for (const f of data.factions) {
+            const m = /^#?([0-9a-f]{6})$/i.exec(f.color ?? "");
+            const n = m ? parseInt(m[1], 16) : 0x7a7266;
+            rgbOf.set(f.id, [(n >> 16) & 255, (n >> 8) & 255, n & 255]);
+          }
+          const order = tg.order as string[];
+          for (let i = 0; i < bin.length; i += 1) {
+            const k = bin.charCodeAt(i);
+            const o = i * 4;
+            if (k === none) { img.data[o + 3] = 0; continue; }
+            const f = owner.get(order[k]);
+            if (!f || f === "wuzhu") { img.data[o + 3] = 0; continue; }
+            const c = rgbOf.get(f) ?? [122, 114, 102];
+            img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2];
+            img.data[o + 3] = 96;
+          }
+          ctx.putImageData(img, 0, 0);
+          const sp = new PIXI.Sprite(PIXI.Texture.from(cv));
+          sp.width = baseWidth; sp.height = baseHeight;
+          sp.blendMode = "multiply";
+          terr.addChild(sp);
+        }
+      } catch { /* 疆域层缺失不影响看地形 */ }
 
       // ── 标注层：一次建好，之后只切换可见性与位置 ────────────────────
       const lon2wx = (lon: number) => ((lon - geo.west) / (geo.east - geo.west)) * baseWidth;
@@ -299,6 +342,8 @@ export function InkMapViewer() {
         clamp();
         world.position.set(tx, ty);
         world.scale.set(scale);
+        terr.position.set(tx, ty);
+        terr.scale.set(scale);
         setScaleLabel(`${Math.round(scale * 100)}%`);
         layoutLabels();
         void syncTiles();
