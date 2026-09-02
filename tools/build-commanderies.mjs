@@ -140,9 +140,8 @@ if (missing.length) { console.error("缺坐标:", missing.join(" ")); process.ex
 const extra = Object.keys(GEO).filter((k) => !raw.some((r) => r.name === k));
 if (extra.length) { console.error("坐标表多余条目:", extra.join(" ")); process.exit(1); }
 
-const pinyin = (n) => n; // 保留中文 id，避免转写歧义
 const out = raw.map((r) => {
-  const [seat, modern, lon, lat, certainty] = GEO[r.name];
+  const [, modern, lon, lat, certainty] = GEO[r.name];
   const fixed = SEAT_FIX[r.name];
   return {
     id: r.name,

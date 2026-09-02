@@ -4,6 +4,7 @@
 // 若让模型自由填参，仅征伐一项就是 目标 × 主将 × 兵力档 × 器械档，
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
+import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order,
 } from "./types.ts";
@@ -83,6 +84,7 @@ function freeLeft(s: GameState, f: FactionId, type: string, rules: Rules): numbe
  */
 export function listActions(
   s: GameState, f: FactionId, g: Graph, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null = null,
 ): Candidate[] {
   const fs_ = s.factions[f];
   if (!fs_ || fs_.eliminated || fs_.retired || s.finished) return [];
@@ -108,16 +110,23 @@ export function listActions(
     for (const { tid, e, ratio } of targets) {
       const tgt = s.commanderies[tid];
       const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
+      // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
+      // 让模型看得见「谁去打」，而不必自己再选一次人
+      const lead = roster ? governorOf(s, roster, e.from) : null;
+      const leadNote = lead
+        ? `，${lead.name}领（统${lead.leadership} 武${lead.might}`
+          + `${lead.aptitudes.length ? " " + lead.aptitudes.join("/") : ""}）`
+        : "，无主将（该郡未设太守，战力无加成）";
       // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
       for (const strength of ["main", "allout"] as const) {
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
-          action: { type: "campaign", target: tid, from: e.from, commander: null,
+          action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
                     strength, siegeGear: e.gates.length ? "ram" : "none" },
           cost: rules.campaignAp,
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：我方戍兵 ${s.commanderies[e.from].garrison}，`
-               + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}`,
+               + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`,
         });
       }
     }
@@ -186,6 +195,49 @@ export function listActions(
     }
   }
 
+  // ── 任命：免费但有次数上限。空缺席位 × 最合适的两人 ──────────────────
+  // 不铺开成「全部郡 × 全部可用武将」——袁绍二十六将十三郡就是三百余条。
+  // 引擎按郡的性质（临敌/后方）预筛出该郡最该要的人，模型只在人选间取舍。
+  if (roster && freeLeft(s, f, "appoint", rules) > 0) {
+    const pool = recruitable(s, roster, f);
+    if (pool.length) {
+      const vacancies = mine
+        .filter((c) => !c.governor)
+        .map((c) => {
+          const front = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
+          // 临敌郡看统率武力，后方郡看政治魅力——同一个人在两种郡上价值不同
+          const fit = (o: OfficerRef) => front
+            ? o.leadership * 2 + o.might + (o.aptitudes.includes("守城") ? 30 : 0)
+            : o.politics * 2 + o.charisma + (o.aptitudes.includes("治民") ? 30 : 0);
+          return { c, front, fit, weight: c.yieldTier * 10 + (front ? 25 : 0) };
+        })
+        .sort((a, b) => b.weight - a.weight || a.c.id.localeCompare(b.c.id))
+        .slice(0, 4);
+
+      // 首个空缺给最合适的两人（那里才是真正的人选取舍），
+      // 其余空缺给尚未出现过的人——否则八条候选实际只有两个人，
+      // 模型看到的是同一组重复，而非更多信息
+      const shown = new Set<string>();
+      for (const [vi, { c, front, fit }] of vacancies.entries()) {
+        const ranked = [...pool].sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
+        const best = vi === 0 ? ranked.slice(0, 2)
+          : ranked.filter((o) => !shown.has(o.id)).slice(0, 2);
+        for (const o of best) {
+          shown.add(o.id);
+          out.push({
+            key: `appoint:${c.id}:${o.id}`,
+            action: { type: "appoint", officer: o.id, at: c.id },
+            cost: 0,
+            label: `任 ${o.name} 为 ${c.id} 太守（${front ? "临敌" : "后方"}；`
+                 + `统${o.leadership} 武${o.might} 政${o.politics} 魅${o.charisma}`
+                 + `${o.aptitudes.length ? " " + o.aptitudes.join("/") : ""}）`
+                 + `${o.faction === f ? "" : "｜在野征辟"}`,
+          });
+        }
+      }
+    }
+  }
+
   // ── 盟：只对有共同边界或共同敌人的势力给出 ──────────────────────────
   if (ap >= rules.normalAp) {
     const neighbours = new Set<FactionId>();
@@ -221,14 +273,35 @@ export function listActions(
     }
   }
 
-  // 稳定排序后截断，保证同一状态得到同一列表
+  // 截断必须按类轮转，不能排序后一刀切。
+  // 按 key 字母序截断会让字母靠后的整类消失——袁绍这类大势力候选本就超额，
+  // scout 排在最后，结果是「版图越大越看不见刺探选项」，这不是设计，是排序副作用。
   out.sort((a, b) => a.key.localeCompare(b.key));
-  return out.slice(0, rules.totalCap);
+  const buckets = new Map<string, Candidate[]>();
+  for (const c of out) {
+    if (!buckets.has(c.action.type)) buckets.set(c.action.type, []);
+    buckets.get(c.action.type)!.push(c);
+  }
+  const types = [...buckets.keys()].sort();
+  const picked: Candidate[] = [];
+  for (let round = 0; picked.length < rules.totalCap; round += 1) {
+    let any = false;
+    for (const ty of types) {
+      const list = buckets.get(ty)!;
+      if (round >= list.length) continue;
+      any = true;
+      picked.push(list[round]);
+      if (picked.length >= rules.totalCap) break;
+    }
+    if (!any) break;
+  }
+  return picked.sort((a, b) => a.key.localeCompare(b.key));
 }
 
 /** 校验一条命令是否合法。返回 null 表示合法，否则给出拒绝理由 */
 export function validate(
   s: GameState, o: Order, g: Graph, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null = null,
 ): string | null {
   const f = s.factions[o.faction];
   if (!f) return "未知势力";
@@ -272,9 +345,18 @@ export function validate(
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
       return null;
-    case "appoint":
+    case "appoint": {
       if (!own(a.at)) return "非己方郡国";
+      if (!roster) return null;
+      const who = roster.byId.get(a.officer);
+      if (!who) return "该武将本年不登场";
+      if (s.capturedOfficers.includes(a.officer)) return "该武将已被俘";
+      if (!recruitable(s, roster, o.faction).some((x) => x.id === a.officer)) {
+        return who.faction && who.faction !== o.faction ? "该武将属于他方"
+          : "该武将已在任，或其籍贯郡不在己方治下";
+      }
       return null;
+    }
     case "ally":
       if (a.to === o.faction) return "不能与自己缔盟";
       if (!s.factions[a.to]) return "未知势力";

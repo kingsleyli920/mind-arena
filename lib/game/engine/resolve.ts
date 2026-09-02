@@ -11,6 +11,7 @@
 import { roll } from "./rng.ts";
 import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
+import { attackEffect, defendEffect, governEffect, governorOf, type Roster } from "./officers.ts";
 import type { GameState, Order, Grade, CommanderyId, FactionId, GameEvent } from "./types.ts";
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
@@ -54,7 +55,8 @@ export function supplyReach(s: GameState, g: Graph, f: FactionId): Set<Commander
  */
 function breachCount(P: EngineParams, attack: number, defend: number, defense: number,
                      gear: keyof EngineParams["gearBreach"],
-                     terrain: string, atGate: boolean): { breach: number; hold: number } {
+                     terrain: string, atGate: boolean,
+                     breachBonus = 0, holdBonus = 0): { breach: number; hold: number } {
   const terrainDef = P.terrainDefense[terrain] ?? 0;
   const eff = defend * (1 + terrainDef);
   const ratio = eff > 0 ? attack / eff : 99;
@@ -67,7 +69,7 @@ function breachCount(P: EngineParams, attack: number, defend: number, defense: n
   const hold = P.holdBase
     + Math.floor(defense / P.defensePerHold)
     + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / P.garrisonPerHold))));
-  return { breach: base + gearBonus, hold };
+  return { breach: base + gearBonus + breachBonus, hold: hold + holdBonus };
 }
 
 // ── 主裁决 ──────────────────────────────────────────────────────────
@@ -78,7 +80,7 @@ export interface ResolveResult {
 
 export function resolve(
   prev: GameState, orders: readonly Order[], g: Graph, P: EngineParams,
-  rules: Rules = DEFAULT_RULES,
+  roster: Roster | null = null, rules: Rules = DEFAULT_RULES,
 ): ResolveResult {
   const s = clone(prev);
   const rejected: Array<{ order: Order; reason: string }> = [];
@@ -90,7 +92,7 @@ export function resolve(
   // 超额下令会被后面的条目自然拒绝，无需额外配额账本。
   const accepted: Order[] = [];
   for (const o of queue) {
-    const reason = validate(s, o, g, rules);
+    const reason = validate(s, o, g, rules, roster);
     if (reason) { rejected.push({ order: o, reason }); continue; }
     const a = o.action;
     const cost = a.type === "campaign" ? rules.campaignAp
@@ -207,26 +209,40 @@ export function resolve(
     // 随机只影响 ±8% 的战力浮动，且在结算前就由坐标定死
     const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
                                            faction: o.faction, event: "siege", seq: i }) * P.jitter * 2;
-    const attack = troops * jitter;
-    const { breach, hold } = breachCount(P, attack, tgt.garrison, tgt.defense, a.siegeGear, terrain, atGate);
+    // 主将取自起兵郡的太守，守将取自目标郡的太守——太守领兵，见 officers.ts
+    const atk = roster ? attackEffect(governorOf(s, roster, a.from), P, terrain) : null;
+    const def = roster ? defendEffect(governorOf(s, roster, a.target), P) : null;
+    const attack = troops * jitter * (atk?.attackMul ?? 1);
+    const { breach, hold } = breachCount(P, attack, tgt.garrison, tgt.defense, a.siegeGear,
+                                         terrain, atGate, atk?.breachBonus ?? 0, def?.holdBonus ?? 0);
+    const who = { 主将: atk?.note ?? "无主将", 守将: def?.note ?? "无守将" };
 
     if (breach > hold) {
       const survivors = Math.max(1, Math.round(troops - tgt.garrison * P.captureSurvivalPenalty));
       const loser = tgt.owner;
+      // 守将被俘：名将镇要地因此有真实风险，也让「打下人才郡」有额外收益
+      const caught = tgt.governor;
+      if (caught) {
+        s.capturedOfficers.push(caught);
+        tgt.governor = null;
+        log(s, { kind: "officer-captured", faction: o.faction,
+                 text: `${a.target} 守将 ${roster?.byId.get(caught)?.name ?? caught} 被俘` });
+      }
       tgt.owner = o.faction;
       tgt.garrison = survivors;
       tgt.moraleTier = Math.max(1, tgt.moraleTier - 1);
       tgt.defense = Math.max(20, tgt.defense - 15);
       log(s, { kind: "siege-win", faction: o.faction,
                text: `自 ${a.from} 取 ${a.target}${loser ? `（原属 ${loser}）` : "（无主）"}`,
-               attribution: { 投入: troops, 缺口: breach, 可防守: hold, 城防: tgt.defense, 地形: terrain } });
+               attribution: { 投入: troops, 缺口: breach, 可防守: hold, 城防: tgt.defense,
+                              地形: terrain, ...who } });
     } else {
       const lost = Math.round(troops * P.failLossRatio);
       src.garrison += Math.max(0, troops - lost);
       tgt.garrison = Math.max(200, Math.round(tgt.garrison * P.defenderAttritionOnHold));
       log(s, { kind: "siege-fail", faction: o.faction,
                text: `攻 ${a.target} 未克，折损 ${lost}`,
-               attribution: { 投入: troops, 缺口: breach, 可防守: hold, 地形: terrain } });
+               attribution: { 投入: troops, 缺口: breach, 可防守: hold, 地形: terrain, ...who } });
     }
   }
 
@@ -241,9 +257,12 @@ export function resolve(
         log(s, { kind: "supply-cut", faction: f.id, text: `${c.id} 补给断绝，本季无产出` });
         continue;
       }
+      const gov = roster ? governEffect(governorOf(s, roster, c.id), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
-      c.garrison = Math.min(Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor),
-                            P.garrisonCap);
+      c.garrison = Math.min(
+        Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor * (gov?.yieldMul ?? 1)),
+        P.garrisonCap);
+      if (gov?.moraleGain) c.moraleTier = Math.min(5, c.moraleTier + gov.moraleGain);
     }
   }
 

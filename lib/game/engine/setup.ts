@@ -3,6 +3,7 @@
 // 数据全部来自 lib/game/data/，本模块不含任何硬编码的游戏数值——
 // 数值改动只该发生在数据文件与内容包里。
 import type { EngineParams } from "./params.ts";
+import type { Roster } from "./officers.ts";
 import type { GameState, CommanderyState, FactionState, Grade } from "./types.ts";
 
 export interface SetupData {
@@ -16,6 +17,8 @@ export interface SetupData {
 
 export interface SetupOptions {
   seed: string;
+  /** 武将名册。给出则开局把君主坐镇治所，其余席位留给任命 */
+  roster?: Roster;
   year?: number;
   /** 只保留这些势力为可操作席位；其余转为规则驱动。不传则全部保留 */
   playable?: string[];
@@ -88,9 +91,20 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     treaties: [],
     passages: [],
     intel: {},
+    capturedOfficers: [],
     log: [],
     finished: false,
   };
+
+  // 君主坐镇治所。其余郡的太守空缺，交给 appoint —— 人事本身即决策，
+  // 开局替模型排好班等于把这一层决策拿掉了。
+  if (opts.roster) {
+    for (const f of Object.values(factions)) {
+      if (!f.capital) continue;
+      const lord = opts.roster.byId.get(f.id);
+      if (lord && lord.faction === f.id) commanderies[f.capital].governor = lord.id;
+    }
+  }
   for (const id of Object.keys(factions)) state.intel[id] = {};
   return refreshAp(state, P);
 }

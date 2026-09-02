@@ -102,6 +102,8 @@ export interface GameState {
   passages: Passage[];
   /** 已探明的郡：faction → 郡 → 有效期至第几季 */
   intel: Record<FactionId, Record<CommanderyId, number>>;
+  /** 破城被俘的守将，本局不再出场 */
+  capturedOfficers: OfficerId[];
   log: GameEvent[];
   finished: boolean;
 }

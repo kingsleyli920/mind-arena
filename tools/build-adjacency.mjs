@@ -19,7 +19,7 @@ const commanderies = arr(read("commanderies.json"));
 const nodes = read("strategic-nodes.json").nodes ?? [];
 const hydro = read("hydrology.json");
 const grid = read("terrain-grid.json");
-const { west, east, south, north, cellSize, cols, rows } = grid.meta;
+const { west, south, north, cellSize, cols, rows } = grid.meta;
 const ELEV = grid.elevation, RELIEF = grid.relief;
 
 console.log(`郡国 ${commanderies.length}  关津 ${nodes.length}  水系 ${(hydro.rivers ?? []).length} 条`);
@@ -119,13 +119,6 @@ function sampleEdge(a, b) {
 
 // ── 与水系求交 ──────────────────────────────────────────────────────
 const MAIN_RIVERS = new Set(["黄河", "长江", "淮水", "汉水", "渭水"]);
-function seg(p1, p2, p3, p4) {                              // 线段相交
-  const d = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
-  if (Math.abs(d) < 1e-12) return false;
-  const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / d;
-  const ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / d;
-  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
-}
 function segPoint(p1, p2, p3, p4) {                          // 返回交点，无交返回 null
   const d = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
   if (Math.abs(d) < 1e-12) return null;

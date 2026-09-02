@@ -39,6 +39,13 @@ export interface EngineParams {
   gradeJia: number; gradeYi: number;
   /** 时钟 */
   seasonsPerGame: number; intelValidSeasons: number;
+  /** 武将：五维折算成战斗与内政系数的基准与除数 */
+  officerBase: number;
+  leadershipAttackDivisor: number; leadershipDefenseStep: number;
+  mightBreachThreshold: number; mightBreach: number;
+  siegeAptitudeBreach: number; holdAptitudeBonus: number;
+  aptitudeTerrainBonus: number; civilAptitudeBonus: number;
+  politicsYieldDivisor: number; charismaMoraleThreshold: number;
 }
 
 interface RawPack {
@@ -115,5 +122,16 @@ export function loadParams(pack: RawPack): EngineParams {
     gradeYi: g("胜负", "乙档倍数"),
     seasonsPerGame: g("时钟", "一局季数"),
     intelValidSeasons: g("情报", "有效季数"),
+    officerBase: g("武将", "基准值"),
+    leadershipAttackDivisor: g("武将", "统率攻势除数"),
+    leadershipDefenseStep: g("武将", "统率守备每档"),
+    mightBreachThreshold: g("武将", "武力摧锋阈值"),
+    mightBreach: g("武将", "武力加缺口"),
+    siegeAptitudeBreach: g("武将", "攻城适性加缺口"),
+    holdAptitudeBonus: g("武将", "守城适性加防守"),
+    aptitudeTerrainBonus: g("武将", "地形适性加战力"),
+    civilAptitudeBonus: g("武将", "治民适性加产出"),
+    politicsYieldDivisor: g("武将", "政治产出除数"),
+    charismaMoraleThreshold: g("武将", "魅力安民阈值"),
   };
 }

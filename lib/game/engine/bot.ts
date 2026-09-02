@@ -6,6 +6,7 @@
 //   2. 策略画像必须真的不同 —— 若"苟活流"和"进攻流"打出同样的结果，
 //      要么是机器人没区分开，要么是玩法本身分不出高下。两者都必须查明
 import { listActions, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
+import type { Roster } from "./officers.ts";
 import type { Candidate, FactionId, GameState, Order } from "./types.ts";
 
 export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist";
@@ -19,10 +20,10 @@ export const PROFILES: Record<Profile, string> = {
 
 /** 各画像对每类动作的偏好权重。数值本身无量纲，只用于排序 */
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0 },
-  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0 },
-  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0 },
-  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0 },
+  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 9 },
+  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8 },
+  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 8 },
+  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7 },
 };
 
 /** 从候选的 label 里取回攻防比。label 由 listActions 生成，格式稳定 */
@@ -41,8 +42,9 @@ const MIN_RATIO: Record<Profile, number> = {
  */
 export function decide(
   s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null = null,
 ): Order[] {
-  const cands = listActions(s, f, g, rules);
+  const cands = listActions(s, f, g, rules, roster);
   if (!cands.length) return [];
   const w = WEIGHTS[profile];
   const minRatio = MIN_RATIO[profile];
@@ -59,6 +61,12 @@ export function decide(
       if (profile === "opportunist" && !s.commanderies[c.action.target]?.owner) score += 8;
       // 倾国投入风险高，只在优势明显时选
       if (c.action.strength === "allout") score += r >= minRatio + 0.5 ? 3 : -5;
+    }
+    if (c.action.type === "appoint") {
+      // 候选已按郡的性质预筛过人选，这里只再表达画像偏好：
+      // 进攻流优先把人放到临敌郡，苟活流优先后方
+      const front = c.label.includes("临敌");
+      score += profile === "turtle" ? (front ? 0 : 3) : (front ? 3 : 0);
     }
     if (c.action.type === "govern") {
       const at = s.commanderies[(c.action as { at: string }).at];

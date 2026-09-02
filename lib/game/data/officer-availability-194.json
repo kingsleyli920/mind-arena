@@ -1,0 +1,4856 @@
+{
+ "year": 194,
+ "rule": "生年优先；无生年则以 affiliation194 为直证；再无则卒年距本年 >50 判为未成年；皆无则不登场",
+ "caveat": "卒年规则会误伤长寿者——甘宁 194 年已在益州，因生卒年俱无而判为不登场。此为已知假阴性，逐条修正需补生年，见各条 basis。",
+ "available": 470,
+ "officers": [
+  {
+   "id": "caocao",
+   "name": "曹操",
+   "available": true,
+   "basis": "生 155–卒 220，194 年年 39"
+  },
+  {
+   "id": "caochun",
+   "name": "曹纯",
+   "available": true,
+   "basis": "生 170–卒 210，194 年年 24"
+  },
+  {
+   "id": "caohong",
+   "name": "曹洪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caopi",
+   "name": "曹丕",
+   "available": false,
+   "basis": "生 187–卒 226，194 年未满 16"
+  },
+  {
+   "id": "caoren",
+   "name": "曹仁",
+   "available": true,
+   "basis": "生 168–卒 223，194 年年 26"
+  },
+  {
+   "id": "caoxiu",
+   "name": "曹休",
+   "available": true,
+   "basis": "无生年；卒 228，距本年 34 年，本年可为成人"
+  },
+  {
+   "id": "caozhang",
+   "name": "曹彰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caozhen",
+   "name": "曹真",
+   "available": true,
+   "basis": "无生年；卒 231，距本年 37 年，本年可为成人"
+  },
+  {
+   "id": "caozhi",
+   "name": "曹植",
+   "available": false,
+   "basis": "生 192–卒 232，194 年未满 16"
+  },
+  {
+   "id": "chengong",
+   "name": "陈宫",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengpu",
+   "name": "程普",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengyu",
+   "name": "程昱",
+   "available": true,
+   "basis": "生 141–卒 220，194 年年 53"
+  },
+  {
+   "id": "chenqun_lb",
+   "name": "陈群",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenwu",
+   "name": "陈武",
+   "available": true,
+   "basis": "生 178–卒 215，194 年年 16"
+  },
+  {
+   "id": "dengai",
+   "name": "邓艾",
+   "available": false,
+   "basis": "生 197–卒 264，194 年未满 16"
+  },
+  {
+   "id": "dianwei",
+   "name": "典韦",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "diaochan",
+   "name": "貂蝉",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dingfeng",
+   "name": "丁奉",
+   "available": false,
+   "basis": "无生年；卒 271，距本年 77 年＞50，本年必未成年"
+  },
+  {
+   "id": "dongxi",
+   "name": "董袭",
+   "available": true,
+   "basis": "无生年；卒 213，距本年 19 年，本年可为成人"
+  },
+  {
+   "id": "dongyun",
+   "name": "董允",
+   "available": false,
+   "basis": "无生年；卒 246，距本年 52 年＞50，本年必未成年"
+  },
+  {
+   "id": "dongzhuo",
+   "name": "董卓",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "duyu",
+   "name": "杜预",
+   "available": false,
+   "basis": "生 222–卒 285，194 年未满 16"
+  },
+  {
+   "id": "fazheng",
+   "name": "法正",
+   "available": true,
+   "basis": "生 176–卒 220，194 年年 18"
+  },
+  {
+   "id": "feiyi",
+   "name": "费祎",
+   "available": false,
+   "basis": "无生年；卒 253，距本年 59 年＞50，本年必未成年"
+  },
+  {
+   "id": "ganning",
+   "name": "甘宁",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "gaolan",
+   "name": "高览",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gaoshun",
+   "name": "高顺",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsunzan",
+   "name": "公孙瓒",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guanyu",
+   "name": "关羽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guohuai",
+   "name": "郭淮",
+   "available": false,
+   "basis": "无生年；卒 255，距本年 61 年＞50，本年必未成年"
+  },
+  {
+   "id": "guojia",
+   "name": "郭嘉",
+   "available": true,
+   "basis": "生 170–卒 207，194 年年 24"
+  },
+  {
+   "id": "guosi",
+   "name": "郭汜",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guotu",
+   "name": "郭图",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guyong",
+   "name": "顾雍",
+   "available": true,
+   "basis": "生 168–卒 243，194 年年 26"
+  },
+  {
+   "id": "handang",
+   "name": "韩当",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hansui",
+   "name": "韩遂",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huanggai",
+   "name": "黄盖",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangzhong",
+   "name": "黄忠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huatuo",
+   "name": "华佗",
+   "available": true,
+   "basis": "无生年；卒 208，距本年 14 年，本年可为成人"
+  },
+  {
+   "id": "huaxiong",
+   "name": "华雄",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "jiangqin",
+   "name": "蒋钦",
+   "available": true,
+   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+  },
+  {
+   "id": "jiangwan",
+   "name": "蒋琬",
+   "available": false,
+   "basis": "无生年；卒 246，距本年 52 年＞50，本年必未成年"
+  },
+  {
+   "id": "jiangwei",
+   "name": "姜维",
+   "available": false,
+   "basis": "生 202–卒 264，194 年未满 16"
+  },
+  {
+   "id": "jiaxu",
+   "name": "贾诩",
+   "available": true,
+   "basis": "生 147–卒 223，194 年年 47"
+  },
+  {
+   "id": "jushou",
+   "name": "沮授",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "kongrong",
+   "name": "孔融",
+   "available": true,
+   "basis": "生 153–卒 208，194 年年 41"
+  },
+  {
+   "id": "lejin",
+   "name": "乐进",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liaohua",
+   "name": "廖化",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "lidian",
+   "name": "李典",
+   "available": true,
+   "basis": "生 174，194 年年 20"
+  },
+  {
+   "id": "lijue",
+   "name": "李傕",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lingtong",
+   "name": "凌统",
+   "available": false,
+   "basis": "生 189–卒 237，194 年未满 16"
+  },
+  {
+   "id": "liubei",
+   "name": "刘备",
+   "available": true,
+   "basis": "生 161–卒 223，194 年年 33"
+  },
+  {
+   "id": "liubiao",
+   "name": "刘表",
+   "available": true,
+   "basis": "生 142–卒 208，194 年年 52"
+  },
+  {
+   "id": "liushan",
+   "name": "刘禅",
+   "available": false,
+   "basis": "生 207–卒 271，194 年未满 16"
+  },
+  {
+   "id": "liuxie",
+   "name": "刘协",
+   "available": false,
+   "basis": "生 181–卒 234，194 年未满 16"
+  },
+  {
+   "id": "liuzhang",
+   "name": "刘璋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lubu",
+   "name": "吕布",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lusu",
+   "name": "鲁肃",
+   "available": true,
+   "basis": "生 172–卒 217，194 年年 22"
+  },
+  {
+   "id": "luxun",
+   "name": "陆逊",
+   "available": false,
+   "basis": "生 183–卒 245，194 年未满 16"
+  },
+  {
+   "id": "luxun_kang",
+   "name": "陆抗",
+   "available": false,
+   "basis": "生 226–卒 274，194 年未满 16"
+  },
+  {
+   "id": "luzhi",
+   "name": "卢植",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "lvmeng",
+   "name": "吕蒙",
+   "available": true,
+   "basis": "生 178–卒 220，194 年年 16"
+  },
+  {
+   "id": "machao",
+   "name": "马超",
+   "available": true,
+   "basis": "生 176–卒 222，194 年年 18"
+  },
+  {
+   "id": "madai",
+   "name": "马岱",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "manchong",
+   "name": "满宠",
+   "available": true,
+   "basis": "无生年；卒 242，距本年 48 年，本年可为成人"
+  },
+  {
+   "id": "masu",
+   "name": "马谡",
+   "available": false,
+   "basis": "生 190–卒 228，194 年未满 16"
+  },
+  {
+   "id": "mateng",
+   "name": "马腾",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "menghuo",
+   "name": "孟获",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "pangde",
+   "name": "庞德",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "pangtong",
+   "name": "庞统",
+   "available": false,
+   "basis": "生 179–卒 214，194 年未满 16"
+  },
+  {
+   "id": "panzhang",
+   "name": "潘璋",
+   "available": true,
+   "basis": "无生年；卒 234，距本年 40 年，本年可为成人"
+  },
+  {
+   "id": "shenpei",
+   "name": "审配",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "simashi",
+   "name": "司马师",
+   "available": false,
+   "basis": "生 208–卒 255，194 年未满 16"
+  },
+  {
+   "id": "simayi",
+   "name": "司马懿",
+   "available": false,
+   "basis": "生 179–卒 251，194 年未满 16"
+  },
+  {
+   "id": "simazhao",
+   "name": "司马昭",
+   "available": false,
+   "basis": "生 211–卒 265，194 年未满 16"
+  },
+  {
+   "id": "sunce",
+   "name": "孙策",
+   "available": true,
+   "basis": "生 175–卒 200，194 年年 19"
+  },
+  {
+   "id": "sunjian",
+   "name": "孙坚",
+   "available": false,
+   "basis": "生 155–卒 191，194 年已卒"
+  },
+  {
+   "id": "sunquan",
+   "name": "孙权",
+   "available": false,
+   "basis": "生 182–卒 252，194 年未满 16"
+  },
+  {
+   "id": "sunshi_nv",
+   "name": "孙夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "taishici",
+   "name": "太史慈",
+   "available": true,
+   "basis": "生 166–卒 206，194 年年 28"
+  },
+  {
+   "id": "taoqian",
+   "name": "陶谦",
+   "available": true,
+   "basis": "生 132–卒 194，194 年年 62"
+  },
+  {
+   "id": "tianfeng",
+   "name": "田丰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wanglang",
+   "name": "王朗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wanglang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangping",
+   "name": "王平",
+   "available": false,
+   "basis": "无生年；卒 248，距本年 54 年＞50，本年必未成年"
+  },
+  {
+   "id": "wangyun",
+   "name": "王允",
+   "available": false,
+   "basis": "生 137–卒 192，194 年已卒"
+  },
+  {
+   "id": "weiyan",
+   "name": "魏延",
+   "available": true,
+   "basis": "无生年；卒 234，距本年 40 年，本年可为成人"
+  },
+  {
+   "id": "wenchou",
+   "name": "文丑",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xiahouba",
+   "name": "夏侯霸",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xiahoudun",
+   "name": "夏侯惇",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xiahouyuan",
+   "name": "夏侯渊",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xuchu",
+   "name": "许褚",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xuhuang",
+   "name": "徐晃",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xunyou",
+   "name": "荀攸",
+   "available": true,
+   "basis": "生 157–卒 214，194 年年 37"
+  },
+  {
+   "id": "xunyu",
+   "name": "荀彧",
+   "available": true,
+   "basis": "生 163–卒 212，194 年年 31"
+  },
+  {
+   "id": "xusheng",
+   "name": "徐盛",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xushu",
+   "name": "徐庶",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xuyou",
+   "name": "许攸",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanghu",
+   "name": "羊祜",
+   "available": false,
+   "basis": "生 221–卒 278，194 年未满 16"
+  },
+  {
+   "id": "yanliang",
+   "name": "颜良",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanshao",
+   "name": "袁绍",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanshu",
+   "name": "袁术",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yujin",
+   "name": "于禁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangfei",
+   "name": "张飞",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhanghe",
+   "name": "张郃",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangjiao",
+   "name": "张角",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "zhangliao",
+   "name": "张辽",
+   "available": true,
+   "basis": "生 169–卒 222，194 年年 25"
+  },
+  {
+   "id": "zhanglu",
+   "name": "张鲁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangren",
+   "name": "张任",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangsong",
+   "name": "张松",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangxiu",
+   "name": "张绣",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangji，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangzhao",
+   "name": "张昭",
+   "available": true,
+   "basis": "生 156–卒 236，194 年年 38"
+  },
+  {
+   "id": "zhaoyun",
+   "name": "赵云",
+   "available": true,
+   "basis": "无生年；卒 229，距本年 35 年，本年可为成人"
+  },
+  {
+   "id": "zhonghui",
+   "name": "钟会",
+   "available": false,
+   "basis": "生 225–卒 264，194 年未满 16"
+  },
+  {
+   "id": "zhongyao",
+   "name": "钟繇",
+   "available": true,
+   "basis": "生 151–卒 230，194 年年 43"
+  },
+  {
+   "id": "zhoutai_wu",
+   "name": "周泰",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhouyu",
+   "name": "周瑜",
+   "available": true,
+   "basis": "生 175–卒 210，194 年年 19"
+  },
+  {
+   "id": "zhugejin",
+   "name": "诸葛瑾",
+   "available": true,
+   "basis": "生 174–卒 241，194 年年 20"
+  },
+  {
+   "id": "zhugeke",
+   "name": "诸葛恪",
+   "available": false,
+   "basis": "生 203–卒 253，194 年未满 16"
+  },
+  {
+   "id": "zhugeliang",
+   "name": "诸葛亮",
+   "available": false,
+   "basis": "生 181–卒 234，194 年未满 16"
+  },
+  {
+   "id": "zhuran",
+   "name": "朱然",
+   "available": false,
+   "basis": "生 182–卒 249，194 年未满 16"
+  },
+  {
+   "id": "baoxin",
+   "name": "鲍信",
+   "available": false,
+   "basis": "生 152–卒 192，194 年已卒"
+  },
+  {
+   "id": "bianshi",
+   "name": "卞氏",
+   "available": true,
+   "basis": "生 161–卒 230，194 年年 33"
+  },
+  {
+   "id": "bushi",
+   "name": "步骘",
+   "available": false,
+   "basis": "无生年；卒 247，距本年 53 年＞50，本年必未成年"
+  },
+  {
+   "id": "caimao",
+   "name": "蔡瑁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caiyan",
+   "name": "蔡琰",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "caiyong",
+   "name": "蔡邕",
+   "available": false,
+   "basis": "生 133–卒 192，194 年已卒"
+  },
+  {
+   "id": "caoang",
+   "name": "曹昂",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caoshuang",
+   "name": "曹爽",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "chendao",
+   "name": "陈到",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "chendeng",
+   "name": "陈登",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengui",
+   "name": "陈珪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenlin",
+   "name": "陈琳",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chentai",
+   "name": "陈泰",
+   "available": false,
+   "basis": "无生年；卒 260，距本年 66 年＞50，本年必未成年"
+  },
+  {
+   "id": "chunyuqiong",
+   "name": "淳于琼",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "cuiyan_yuan",
+   "name": "崔琰",
+   "available": true,
+   "basis": "生 163–卒 216，194 年年 31"
+  },
+  {
+   "id": "cuizhouping",
+   "name": "崔钧",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "dengzhi",
+   "name": "邓芝",
+   "available": false,
+   "basis": "无生年；卒 251，距本年 57 年＞50，本年必未成年"
+  },
+  {
+   "id": "dingyuan",
+   "name": "丁原",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "dongcheng",
+   "name": "董承",
+   "available": true,
+   "basis": "无生年；卒 200，距本年 6 年，本年可为成人"
+  },
+  {
+   "id": "dongzhao",
+   "name": "董昭",
+   "available": true,
+   "basis": "生 156–卒 236，194 年年 38"
+  },
+  {
+   "id": "duji",
+   "name": "杜畿",
+   "available": true,
+   "basis": "生 163–卒 224，194 年年 31"
+  },
+  {
+   "id": "fengji",
+   "name": "逢纪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gaorou",
+   "name": "高柔",
+   "available": true,
+   "basis": "生 174–卒 263，194 年年 20"
+  },
+  {
+   "id": "gongsundu",
+   "name": "公孙度",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsundu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsunkang",
+   "name": "公孙康",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsundu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsunyuan",
+   "name": "公孙渊",
+   "available": true,
+   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+  },
+  {
+   "id": "guanlu",
+   "name": "管辂",
+   "available": false,
+   "basis": "生 209–卒 256，194 年未满 16"
+  },
+  {
+   "id": "guanning",
+   "name": "管宁",
+   "available": true,
+   "basis": "生 158–卒 241，194 年年 36"
+  },
+  {
+   "id": "guanping",
+   "name": "关平",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guanqiujian",
+   "name": "毌丘俭",
+   "available": false,
+   "basis": "无生年；卒 255，距本年 61 年＞50，本年必未成年"
+  },
+  {
+   "id": "guansuo",
+   "name": "关索",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guanxing",
+   "name": "关兴",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hanfu",
+   "name": "韩馥",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "hejin",
+   "name": "何进",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "heqi",
+   "name": "贺齐",
+   "available": true,
+   "basis": "无生年；卒 227，距本年 33 年，本年可为成人"
+  },
+  {
+   "id": "huangfusong",
+   "name": "皇甫嵩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangquan",
+   "name": "黄权",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangzu",
+   "name": "黄祖",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huaxin",
+   "name": "华歆",
+   "available": true,
+   "basis": "生 157–卒 232，194 年年 37"
+  },
+  {
+   "id": "jiachong",
+   "name": "贾充",
+   "available": false,
+   "basis": "生 217–卒 282，194 年未满 16"
+  },
+  {
+   "id": "jiakui",
+   "name": "贾逵",
+   "available": true,
+   "basis": "生 174–卒 228，194 年年 20"
+  },
+  {
+   "id": "jiangji",
+   "name": "蒋济",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "jianyong",
+   "name": "简雍",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "jiling",
+   "name": "纪灵",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "kanze",
+   "name": "阚泽",
+   "available": true,
+   "basis": "无生年；卒 243，距本年 49 年，本年可为成人"
+  },
+  {
+   "id": "kebineng",
+   "name": "轲比能",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "kuaiyue",
+   "name": "蒯越",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liru",
+   "name": "李儒",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liuba",
+   "name": "刘巴",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "liucong",
+   "name": "刘琮",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liufeng",
+   "name": "刘封",
+   "available": true,
+   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+  },
+  {
+   "id": "liuqi",
+   "name": "刘琦",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuyan_yz",
+   "name": "刘焉",
+   "available": true,
+   "basis": "无生年；卒 194，距本年 0 年，本年可为成人"
+  },
+  {
+   "id": "liuyao",
+   "name": "刘繇",
+   "available": true,
+   "basis": "生 156–卒 197，194 年年 38"
+  },
+  {
+   "id": "liuye",
+   "name": "刘晔",
+   "available": true,
+   "basis": "无生年；卒 234，距本年 40 年，本年可为成人"
+  },
+  {
+   "id": "liuyu",
+   "name": "刘虞",
+   "available": false,
+   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+  },
+  {
+   "id": "liyan",
+   "name": "李严",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "luji",
+   "name": "陆绩",
+   "available": false,
+   "basis": "生 188–卒 219，194 年未满 16"
+  },
+  {
+   "id": "luoxian",
+   "name": "罗宪",
+   "available": false,
+   "basis": "生 218–卒 270，194 年未满 16"
+  },
+  {
+   "id": "lvdai",
+   "name": "吕岱",
+   "available": true,
+   "basis": "生 161–卒 256，194 年年 33"
+  },
+  {
+   "id": "lvfan",
+   "name": "吕范",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "maliang",
+   "name": "马良",
+   "available": false,
+   "basis": "生 187–卒 222，194 年未满 16"
+  },
+  {
+   "id": "maojie",
+   "name": "毛玠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mengda",
+   "name": "孟达",
+   "available": true,
+   "basis": "无生年；卒 228，距本年 34 年，本年可为成人"
+  },
+  {
+   "id": "mifang",
+   "name": "糜芳",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mizhu",
+   "name": "糜竺",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "panfeng",
+   "name": "潘凤",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "pangdegong",
+   "name": "庞德公",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qiaoshi_da",
+   "name": "大桥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qiaoshi_xiao",
+   "name": "小桥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qiaozhou",
+   "name": "谯周",
+   "available": false,
+   "basis": "生 201–卒 270，194 年未满 16"
+  },
+  {
+   "id": "qinmi",
+   "name": "秦宓",
+   "available": true,
+   "basis": "无生年；卒 226，距本年 32 年，本年可为成人"
+  },
+  {
+   "id": "quyi",
+   "name": "麹义",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shixie",
+   "name": "士燮",
+   "available": true,
+   "basis": "生 137–卒 226，194 年年 57"
+  },
+  {
+   "id": "simahui",
+   "name": "司马徽",
+   "available": true,
+   "basis": "无生年；卒 208，距本年 14 年，本年可为成人"
+  },
+  {
+   "id": "sunqian",
+   "name": "孙乾",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "tadun",
+   "name": "蹋顿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wuhuan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "tianyu",
+   "name": "田豫",
+   "available": true,
+   "basis": "生 171–卒 252，194 年年 23"
+  },
+  {
+   "id": "wangcan",
+   "name": "王粲",
+   "available": true,
+   "basis": "生 177–卒 217，194 年年 17"
+  },
+  {
+   "id": "wangji_wei",
+   "name": "王基",
+   "available": false,
+   "basis": "生 190–卒 261，194 年未满 16"
+  },
+  {
+   "id": "wangjun",
+   "name": "王濬",
+   "available": false,
+   "basis": "生 206–卒 286，194 年未满 16"
+  },
+  {
+   "id": "wangling",
+   "name": "王凌",
+   "available": true,
+   "basis": "生 172–卒 251，194 年年 22"
+  },
+  {
+   "id": "weiguan",
+   "name": "卫瓘",
+   "available": false,
+   "basis": "生 220–卒 291，194 年未满 16"
+  },
+  {
+   "id": "wenpin",
+   "name": "文聘",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wenqin",
+   "name": "文钦",
+   "available": false,
+   "basis": "无生年；卒 257，距本年 63 年＞50，本年必未成年"
+  },
+  {
+   "id": "wufuren",
+   "name": "吴夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xiahoushang",
+   "name": "夏侯尚",
+   "available": true,
+   "basis": "无生年；卒 226，距本年 32 年，本年可为成人"
+  },
+  {
+   "id": "xiahouxuan",
+   "name": "夏侯玄",
+   "available": false,
+   "basis": "生 209–卒 254，194 年未满 16"
+  },
+  {
+   "id": "xinpi",
+   "name": "辛毗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xunchen",
+   "name": "荀谌",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xurong",
+   "name": "徐荣",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "xushao",
+   "name": "许劭",
+   "available": true,
+   "basis": "生 150–卒 195，194 年年 44"
+  },
+  {
+   "id": "yangyi",
+   "name": "杨仪",
+   "available": true,
+   "basis": "无生年；卒 235，距本年 41 年，本年可为成人"
+  },
+  {
+   "id": "yanyan",
+   "name": "严颜",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanshang",
+   "name": "袁尚",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuantan",
+   "name": "袁谭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yufan",
+   "name": "虞翻",
+   "available": true,
+   "basis": "生 164–卒 233，194 年年 30"
+  },
+  {
+   "id": "yuji",
+   "name": "于吉",
+   "available": true,
+   "basis": "无生年；卒 200，距本年 6 年，本年可为成人"
+  },
+  {
+   "id": "zangba",
+   "name": "臧霸",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangbao_shu",
+   "name": "张苞",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhanghong",
+   "name": "张纮",
+   "available": true,
+   "basis": "生 153–卒 212，194 年年 41"
+  },
+  {
+   "id": "zhangji_yi",
+   "name": "张机",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhangmiao",
+   "name": "张邈",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangrang",
+   "name": "张让",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "zhangyan",
+   "name": "张燕",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangyang",
+   "name": "张杨",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangyi_by",
+   "name": "张翼",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhengxuan",
+   "name": "郑玄",
+   "available": true,
+   "basis": "生 127–卒 200，194 年年 67"
+  },
+  {
+   "id": "zhoucang",
+   "name": "周仓",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhoufang",
+   "name": "周鲂",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhugedan",
+   "name": "诸葛诞",
+   "available": false,
+   "basis": "无生年；卒 258，距本年 64 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhuhuan",
+   "name": "朱桓",
+   "available": true,
+   "basis": "生 177–卒 238，194 年年 17"
+  },
+  {
+   "id": "zhujun",
+   "name": "朱儁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zuoci",
+   "name": "左慈",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "bianxi",
+   "name": "卞喜",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "bingyuan",
+   "name": "邴原",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "caiyang",
+   "name": "蔡阳",
+   "available": true,
+   "basis": "无生年；卒 201，距本年 7 年，本年可为成人"
+  },
+  {
+   "id": "caobao",
+   "name": "曹豹",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caosong",
+   "name": "曹嵩",
+   "available": false,
+   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+  },
+  {
+   "id": "caoteng",
+   "name": "曹腾",
+   "available": false,
+   "basis": "生 100–卒 159，194 年已卒"
+  },
+  {
+   "id": "caoxing",
+   "name": "曹性",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "changxi",
+   "name": "昌豨",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenggongying",
+   "name": "成公英",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengyuanzhi",
+   "name": "程远志",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "chenjiao",
+   "name": "陈矫",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "chenshi",
+   "name": "陈式",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "chenzhen",
+   "name": "陈震",
+   "available": true,
+   "basis": "无生年；卒 235，距本年 41 年，本年可为成人"
+  },
+  {
+   "id": "chezhou",
+   "name": "车胄",
+   "available": true,
+   "basis": "无生年；卒 199，距本年 5 年，本年可为成人"
+  },
+  {
+   "id": "cuilin",
+   "name": "崔林",
+   "available": true,
+   "basis": "无生年；卒 244，距本年 50 年，本年可为成人"
+  },
+  {
+   "id": "dengmao",
+   "name": "邓茂",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "donghe",
+   "name": "董和",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dongjue",
+   "name": "董厥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "duanwei",
+   "name": "段煨",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "duxi",
+   "name": "杜袭",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fanchou",
+   "name": "樊稠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "fengxi",
+   "name": "冯习",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "fugu",
+   "name": "傅嘏",
+   "available": false,
+   "basis": "生 209–卒 255，194 年未满 16"
+  },
+  {
+   "id": "fuqian",
+   "name": "傅佥",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "furong",
+   "name": "傅肜",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "fushou",
+   "name": "伏寿",
+   "available": true,
+   "basis": "无生年；卒 214，距本年 20 年，本年可为成人"
+  },
+  {
+   "id": "fuxie",
+   "name": "傅燮",
+   "available": false,
+   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+  },
+  {
+   "id": "gaixun",
+   "name": "盖勋",
+   "available": false,
+   "basis": "生 139–卒 191，194 年已卒"
+  },
+  {
+   "id": "gaoding",
+   "name": "高定",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gaogan",
+   "name": "高幹",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "guanhai",
+   "name": "管亥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "handde",
+   "name": "韩德",
+   "available": true,
+   "basis": "无生年；卒 228，距本年 34 年，本年可为成人"
+  },
+  {
+   "id": "hanfu_yanyi",
+   "name": "韩福",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hanhao",
+   "name": "韩浩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hanxuan",
+   "name": "韩玄",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hetaihou",
+   "name": "何太后",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "heyan",
+   "name": "何晏",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "huangchengyan",
+   "name": "黄承彦",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "huanjie",
+   "name": "桓阶",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huchuer",
+   "name": "胡车儿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangji，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huojun",
+   "name": "霍峻",
+   "available": true,
+   "basis": "生 178–卒 217，194 年年 16"
+  },
+  {
+   "id": "huoyi",
+   "name": "霍弋",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "huzhi",
+   "name": "胡质",
+   "available": false,
+   "basis": "无生年；卒 250，距本年 56 年＞50，本年必未成年"
+  },
+  {
+   "id": "jianshuo",
+   "name": "蹇硕",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "kongxiu",
+   "name": "孔秀",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "kuailiang",
+   "name": "蒯良",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liangxi",
+   "name": "梁习",
+   "available": true,
+   "basis": "无生年；卒 230，距本年 36 年，本年可为成人"
+  },
+  {
+   "id": "liaoli",
+   "name": "廖立",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lihui",
+   "name": "李恢",
+   "available": true,
+   "basis": "无生年；卒 231，距本年 37 年，本年可为成人"
+  },
+  {
+   "id": "lingcao",
+   "name": "凌操",
+   "available": true,
+   "basis": "无生年；卒 203，距本年 9 年，本年可为成人"
+  },
+  {
+   "id": "lisu",
+   "name": "李肃",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "liubei_gan",
+   "name": "甘夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liubian",
+   "name": "刘辩",
+   "available": false,
+   "basis": "生 176–卒 190，194 年已卒"
+  },
+  {
+   "id": "liuchong",
+   "name": "刘宠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuchong，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liudai",
+   "name": "刘岱",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "liufang",
+   "name": "刘放",
+   "available": false,
+   "basis": "无生年；卒 250，距本年 56 年＞50，本年必未成年"
+  },
+  {
+   "id": "liupan",
+   "name": "刘磐",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuxun",
+   "name": "刘勋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lukang",
+   "name": "陆康",
+   "available": true,
+   "basis": "生 126–卒 195，194 年年 68"
+  },
+  {
+   "id": "luotong",
+   "name": "骆统",
+   "available": false,
+   "basis": "生 193–卒 228，194 年未满 16"
+  },
+  {
+   "id": "lvkai",
+   "name": "吕凯",
+   "available": true,
+   "basis": "无生年；卒 225，距本年 31 年，本年可为成人"
+  },
+  {
+   "id": "lvqian",
+   "name": "吕虔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "mazhong_shu",
+   "name": "马忠",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "mazhong_wu",
+   "name": "马忠",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "muludawang",
+   "name": "木鹿大王",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "nanhualaoxian",
+   "name": "南华老仙",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "niufu",
+   "name": "牛辅",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "panjun",
+   "name": "潘濬",
+   "available": true,
+   "basis": "无生年；卒 239，距本年 45 年，本年可为成人"
+  },
+  {
+   "id": "peiyuanshao",
+   "name": "裴元绍",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qianzhao",
+   "name": "牵招",
+   "available": true,
+   "basis": "无生年；卒 231，距本年 37 年，本年可为成人"
+  },
+  {
+   "id": "qiaomao",
+   "name": "桥瑁",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "qiaoxuan",
+   "name": "桥玄",
+   "available": false,
+   "basis": "生 110–卒 184，194 年已卒"
+  },
+  {
+   "id": "qinqi",
+   "name": "秦琪",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qiuliju",
+   "name": "丘力居",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "quancong",
+   "name": "全琮",
+   "available": false,
+   "basis": "生 198–卒 249，194 年未满 16"
+  },
+  {
+   "id": "renjun",
+   "name": "任峻",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shibao",
+   "name": "石苞",
+   "available": false,
+   "basis": "无生年；卒 273，距本年 79 年＞50，本年必未成年"
+  },
+  {
+   "id": "shihuan",
+   "name": "史涣",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shiren",
+   "name": "士仁",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "shiyi",
+   "name": "是仪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=kongrong，本年任职于此，为在场直证"
+  },
+  {
+   "id": "simafu",
+   "name": "司马孚",
+   "available": false,
+   "basis": "生 180–卒 272，194 年未满 16"
+  },
+  {
+   "id": "simalang",
+   "name": "司马朗",
+   "available": true,
+   "basis": "生 171–卒 217，194 年年 23"
+  },
+  {
+   "id": "songxian",
+   "name": "宋宪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunben",
+   "name": "孙贲",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunguan",
+   "name": "孙观",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunyi",
+   "name": "孙翊",
+   "available": false,
+   "basis": "生 184–卒 204，194 年未满 16"
+  },
+  {
+   "id": "sunzi",
+   "name": "孙资",
+   "available": false,
+   "basis": "无生年；卒 251，距本年 57 年＞50，本年必未成年"
+  },
+  {
+   "id": "sushuang",
+   "name": "苏双",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "tanshihuai",
+   "name": "檀石槐",
+   "available": false,
+   "basis": "生 137–卒 181，194 年已卒"
+  },
+  {
+   "id": "tianka",
+   "name": "田楷",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangchang",
+   "name": "王昶",
+   "available": false,
+   "basis": "无生年；卒 259，距本年 65 年＞50，本年必未成年"
+  },
+  {
+   "id": "wangfu_shu",
+   "name": "王甫",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "wangkuang",
+   "name": "王匡",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "wanglei",
+   "name": "王累",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangsu",
+   "name": "王肃",
+   "available": false,
+   "basis": "生 195–卒 256，194 年未满 16"
+  },
+  {
+   "id": "wangxiu",
+   "name": "王脩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=kongrong，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangyi_nv",
+   "name": "王异",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangzhi",
+   "name": "王植",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "weijue",
+   "name": "卫觊",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wuanguo",
+   "name": "武安国",
+   "available": true,
+   "basis": "《officers.json》affiliation194=kongrong，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wuban",
+   "name": "吴班",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wufu",
+   "name": "伍孚",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "wuguotai",
+   "name": "吴国太",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wujing",
+   "name": "吴景",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wutugu",
+   "name": "兀突骨",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wuyi",
+   "name": "吴懿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xiahouen",
+   "name": "夏侯恩",
+   "available": true,
+   "basis": "无生年；卒 208，距本年 14 年，本年可为成人"
+  },
+  {
+   "id": "xiahoujie",
+   "name": "夏侯杰",
+   "available": true,
+   "basis": "无生年；卒 208，距本年 14 年，本年可为成人"
+  },
+  {
+   "id": "xiangchong",
+   "name": "向宠",
+   "available": true,
+   "basis": "无生年；卒 240，距本年 46 年，本年可为成人"
+  },
+  {
+   "id": "xianyufu",
+   "name": "鲜于辅",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xingdaorong",
+   "name": "邢道荣",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xinping",
+   "name": "辛评",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xizheng",
+   "name": "郤正",
+   "available": false,
+   "basis": "无生年；卒 278，距本年 84 年＞50，本年必未成年"
+  },
+  {
+   "id": "xuezong",
+   "name": "薛综",
+   "available": true,
+   "basis": "无生年；卒 243，距本年 49 年，本年可为成人"
+  },
+  {
+   "id": "xujing",
+   "name": "许靖",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xumiao",
+   "name": "徐邈",
+   "available": true,
+   "basis": "生 172–卒 249，194 年年 22"
+  },
+  {
+   "id": "xunshuang",
+   "name": "荀爽",
+   "available": false,
+   "basis": "生 128–卒 190，194 年已卒"
+  },
+  {
+   "id": "yanbaihu",
+   "name": "严白虎",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yanbaihu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangbiao",
+   "name": "杨彪",
+   "available": true,
+   "basis": "生 142–卒 225，194 年年 52"
+  },
+  {
+   "id": "yangfeng",
+   "name": "杨奉",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangfu_lz",
+   "name": "杨阜",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yangsong",
+   "name": "杨松",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanrou_gz",
+   "name": "阎柔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yanshi",
+   "name": "严氏",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanxiang",
+   "name": "阎象",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanxing",
+   "name": "阎行",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yiji",
+   "name": "伊籍",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yongkai",
+   "name": "雍闿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanxi",
+   "name": "袁熙",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yufuluo",
+   "name": "於夫罗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xiongnu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yushe",
+   "name": "俞涉",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zanghong",
+   "name": "臧洪",
+   "available": true,
+   "basis": "生 160–卒 196，194 年年 34"
+  },
+  {
+   "id": "zaozhi",
+   "name": "枣祗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zerong",
+   "name": "笮融",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuyao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangbao_hj",
+   "name": "张宝",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "zhangchao",
+   "name": "张超",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangchun",
+   "name": "张纯",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "zhangji",
+   "name": "张济",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangji，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangji_wei",
+   "name": "张既",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangkai",
+   "name": "张闿",
+   "available": true,
+   "basis": "无生年；卒 197，距本年 3 年，本年可为成人"
+  },
+  {
+   "id": "zhangliang_hj",
+   "name": "张梁",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "zhangnan",
+   "name": "张南",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "zhangni",
+   "name": "张嶷",
+   "available": false,
+   "basis": "无生年；卒 254，距本年 60 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhangshiping",
+   "name": "张世平",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhangwei",
+   "name": "张卫",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangwen_wu",
+   "name": "张温",
+   "available": false,
+   "basis": "生 193–卒 230，194 年未满 16"
+  },
+  {
+   "id": "zhangxian",
+   "name": "张羡",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangyi_sy",
+   "name": "张裔",
+   "available": true,
+   "basis": "生 165–卒 230，194 年年 29"
+  },
+  {
+   "id": "zhangyun",
+   "name": "张允",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhaofan",
+   "name": "赵范",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhaoqi",
+   "name": "赵岐",
+   "available": true,
+   "basis": "生 108–卒 201，194 年年 86"
+  },
+  {
+   "id": "zhaowei",
+   "name": "赵韪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhaoyan",
+   "name": "赵俨",
+   "available": true,
+   "basis": "生 171–卒 245，194 年年 23"
+  },
+  {
+   "id": "zhaozhong",
+   "name": "赵忠",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "zhengtai",
+   "name": "郑泰",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "zhugejun",
+   "name": "诸葛均",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhugexuan",
+   "name": "诸葛玄",
+   "available": true,
+   "basis": "无生年；卒 197，距本年 3 年，本年可为成人"
+  },
+  {
+   "id": "zhuju",
+   "name": "朱据",
+   "available": false,
+   "basis": "生 194–卒 250，194 年未满 16"
+  },
+  {
+   "id": "zhuling_lb",
+   "name": "朱灵",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhurongfuren",
+   "name": "祝融夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhuzhi",
+   "name": "朱治",
+   "available": true,
+   "basis": "生 156–卒 224，194 年年 38"
+  },
+  {
+   "id": "zongyu",
+   "name": "宗预",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "zoushi",
+   "name": "邹氏",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangji，本年任职于此，为在场直证"
+  },
+  {
+   "id": "agui",
+   "name": "阿贵",
+   "available": true,
+   "basis": "《officers.json》affiliation194=qianghu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "bairao",
+   "name": "白绕",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "baolong",
+   "name": "鲍隆",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "beigongboyu",
+   "name": "北宫伯玉",
+   "available": false,
+   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+  },
+  {
+   "id": "bianzhang",
+   "name": "边章",
+   "available": false,
+   "basis": "无生年；卒 186，早于本年 8 年，本年已故"
+  },
+  {
+   "id": "boci",
+   "name": "波才",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "budugen",
+   "name": "步度根",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengbing",
+   "name": "程秉",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "chengji",
+   "name": "程畿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengyi",
+   "name": "成宜",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chengyin",
+   "name": "程银",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenlan",
+   "name": "陈兰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenrong",
+   "name": "陈容",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenying",
+   "name": "陈应",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "cuanxi",
+   "name": "爨习",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "danjing",
+   "name": "单经",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dengxi",
+   "name": "邓羲",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dengxian",
+   "name": "邓贤",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dingfei",
+   "name": "丁斐",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dongyue",
+   "name": "董越",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "duqiong",
+   "name": "杜琼",
+   "available": true,
+   "basis": "生 163–卒 250，194 年年 31"
+  },
+  {
+   "id": "duwei",
+   "name": "杜微",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "fanjian",
+   "name": "樊建",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fanneng",
+   "name": "樊能",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuyao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "fanqin",
+   "name": "繁钦",
+   "available": true,
+   "basis": "无生年；卒 218，距本年 24 年，本年可为成人"
+  },
+  {
+   "id": "feiguan",
+   "name": "费观",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "fuluohan",
+   "name": "扶罗韩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "fuxun",
+   "name": "傅巽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gaopei",
+   "name": "高沛",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gengwu",
+   "name": "耿武",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "gongsunfan",
+   "name": "公孙范",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsungong",
+   "name": "公孙恭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsundu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsunxu",
+   "name": "公孙续",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gongsunyue",
+   "name": "公孙越",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "guanjing",
+   "name": "关靖",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hanmeng",
+   "name": "韩猛",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hansong",
+   "name": "韩嵩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hanxian",
+   "name": "韩暹",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hanyin",
+   "name": "韩胤",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "haomeng",
+   "name": "郝萌",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hexia",
+   "name": "和洽",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hexuan",
+   "name": "何颙",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "hezong",
+   "name": "何宗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "houcheng",
+   "name": "侯成",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "houxuan",
+   "name": "侯选",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huanglong",
+   "name": "黄龙",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangwan",
+   "name": "黄琬",
+   "available": false,
+   "basis": "生 141–卒 192，194 年已卒"
+  },
+  {
+   "id": "hucai",
+   "name": "胡才",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huchuquan",
+   "name": "呼厨泉",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xiongnu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hujin",
+   "name": "胡班",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "huzhao",
+   "name": "胡昭",
+   "available": true,
+   "basis": "生 162–卒 250，194 年年 32"
+  },
+  {
+   "id": "huzhen",
+   "name": "胡轸",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "jiangxu",
+   "name": "姜叙",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "jiangyiqu",
+   "name": "蒋义渠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "jinshang",
+   "name": "金尚",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "jinxuan",
+   "name": "金旋",
+   "available": true,
+   "basis": "无生年；卒 209，距本年 15 年，本年可为成人"
+  },
+  {
+   "id": "kongzhou",
+   "name": "孔伷",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "laigong",
+   "name": "赖恭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "leibo",
+   "name": "雷薄",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "leitong",
+   "name": "雷铜",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lengbao",
+   "name": "冷苞",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liangmao",
+   "name": "凉茂",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liangxing",
+   "name": "梁兴",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "likan",
+   "name": "李堪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lile",
+   "name": "李乐",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liubao",
+   "name": "刘豹",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xiongnu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuchan_lz",
+   "name": "刘阐",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liudu",
+   "name": "刘度",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liugui",
+   "name": "刘璝",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuhui",
+   "name": "刘惠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuxian_lb",
+   "name": "刘先",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuxun_lz",
+   "name": "刘循",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuyan_dongjun",
+   "name": "刘延",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuyan_zhu",
+   "name": "刘琰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liwenhou",
+   "name": "李文侯",
+   "available": false,
+   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+  },
+  {
+   "id": "lixiu",
+   "name": "李休",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lizhuan",
+   "name": "李譔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "louban",
+   "name": "楼班",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wuhuan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "loufa",
+   "name": "娄发",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lujun",
+   "name": "陆儁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lukang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "luojun",
+   "name": "骆俊",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuchong，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lvyi",
+   "name": "吕乂",
+   "available": false,
+   "basis": "无生年；卒 251，距本年 57 年＞50，本年必未成年"
+  },
+  {
+   "id": "matie",
+   "name": "马铁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mawan",
+   "name": "马玩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "maxiu",
+   "name": "马休",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mengjian",
+   "name": "孟建",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "mengyan",
+   "name": "孟琰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mijia",
+   "name": "弥加",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "muhe",
+   "name": "穆顺",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "nanlou",
+   "name": "难楼",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wuhuan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "pangji",
+   "name": "庞季",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "pangxi",
+   "name": "庞羲",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "pengyang",
+   "name": "彭羕",
+   "available": true,
+   "basis": "生 178–卒 214，194 年年 16"
+  },
+  {
+   "id": "qiangduan",
+   "name": "强端",
+   "available": true,
+   "basis": "《officers.json》affiliation194=qianghu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qiantong",
+   "name": "钱铜",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yanbaihu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qianwan",
+   "name": "千万",
+   "available": true,
+   "basis": "《officers.json》affiliation194=qianghu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qiaorui",
+   "name": "桥蕤",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qimukai",
+   "name": "綦毋闿",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qingniujiao",
+   "name": "青牛角",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "qizhou",
+   "name": "齐周",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "qubei",
+   "name": "去卑",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xiongnu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "renan",
+   "name": "任安",
+   "available": true,
+   "basis": "生 124–卒 202，194 年年 70"
+  },
+  {
+   "id": "shenmi",
+   "name": "沈弥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "shihui",
+   "name": "士徽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shisunrui",
+   "name": "士孙瑞",
+   "available": true,
+   "basis": "生 129–卒 195，194 年年 65"
+  },
+  {
+   "id": "shitao",
+   "name": "石韬",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "shiwu",
+   "name": "士武",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shiyi_jz",
+   "name": "士壹",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shiyou",
+   "name": "士䵋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "songjian",
+   "name": "宋建",
+   "available": true,
+   "basis": "《officers.json》affiliation194=songjian，本年任职于此，为在场直证"
+  },
+  {
+   "id": "songzhong",
+   "name": "宋忠",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "suigu",
+   "name": "眭固",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "suli",
+   "name": "素利",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunfu",
+   "name": "孙辅",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunhe",
+   "name": "孙河",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunkuang",
+   "name": "孙匡",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunshao",
+   "name": "孙邵",
+   "available": true,
+   "basis": "生 163–卒 225，194 年年 31"
+  },
+  {
+   "id": "supuyan",
+   "name": "苏仆延",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wuhuan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "taoshenghong",
+   "name": "陶升",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangbi",
+   "name": "王必",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wanglian",
+   "name": "王连",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wanglie",
+   "name": "王烈",
+   "available": true,
+   "basis": "生 142–卒 219，194 年年 52"
+  },
+  {
+   "id": "wangrui",
+   "name": "王睿",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "wangshang",
+   "name": "王商",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangwei",
+   "name": "王威",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wangyi_hd",
+   "name": "王邑",
+   "available": true,
+   "basis": "《officers.json》affiliation194=baibo，本年任职于此，为在场直证"
+  },
+  {
+   "id": "weixu",
+   "name": "魏续",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "weizi",
+   "name": "卫兹",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "wenhui",
+   "name": "温恢",
+   "available": true,
+   "basis": "生 178–卒 224，194 年年 16"
+  },
+  {
+   "id": "wudun",
+   "name": "吴敦",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wulan",
+   "name": "吴兰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wuyan",
+   "name": "乌延",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wuhuan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xianglang",
+   "name": "向朗",
+   "available": false,
+   "basis": "无生年；卒 247，距本年 53 年＞50，本年必未成年"
+  },
+  {
+   "id": "xieguini",
+   "name": "泄归泥",
+   "available": true,
+   "basis": "《officers.json》affiliation194=xianbei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xueli",
+   "name": "薛礼",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuyao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xunyue",
+   "name": "荀悦",
+   "available": true,
+   "basis": "生 148–卒 209，194 年年 46"
+  },
+  {
+   "id": "xuxuan",
+   "name": "徐宣",
+   "available": true,
+   "basis": "无生年；卒 236，距本年 42 年，本年可为成人"
+  },
+  {
+   "id": "xuzhao",
+   "name": "许昭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yanbaihu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangang",
+   "name": "杨昂",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangbo",
+   "name": "杨柏",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangchou",
+   "name": "杨丑",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangding",
+   "name": "杨定",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanghong",
+   "name": "杨洪",
+   "available": true,
+   "basis": "无生年；卒 228，距本年 34 年，本年可为成人"
+  },
+  {
+   "id": "yanghong_ys",
+   "name": "杨弘",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanghuai",
+   "name": "杨怀",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangqiu",
+   "name": "杨秋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangren",
+   "name": "杨任",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangzhong_hd",
+   "name": "杨众",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yanjun",
+   "name": "严畯",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yanpu",
+   "name": "阎圃",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yanyu",
+   "name": "严舆",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yanbaihu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yinfeng",
+   "name": "尹奉",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yinli",
+   "name": "尹礼",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lubu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yinmo",
+   "name": "尹默",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yuanhui",
+   "name": "袁徽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanyin",
+   "name": "袁胤",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yudu",
+   "name": "于毒",
+   "available": false,
+   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+  },
+  {
+   "id": "yumi",
+   "name": "于麋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuyao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangheng_gz",
+   "name": "张横",
+   "available": true,
+   "basis": "《officers.json》affiliation194=hansui，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangheng_wdm",
+   "name": "张衡",
+   "available": false,
+   "basis": "无生年；卒 179，早于本年 15 年，本年已故"
+  },
+  {
+   "id": "zhangju",
+   "name": "张举",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhangmancheng",
+   "name": "张曼成",
+   "available": false,
+   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+  },
+  {
+   "id": "zhangsu",
+   "name": "张肃",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangwen_han",
+   "name": "张温",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "zhangxiu_wdm",
+   "name": "张修",
+   "available": false,
+   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+  },
+  {
+   "id": "zhangxun",
+   "name": "张勋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangying",
+   "name": "张英",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuyao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangzi",
+   "name": "张咨",
+   "available": false,
+   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+  },
+  {
+   "id": "zhaoang",
+   "name": "赵昂",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhengdu",
+   "name": "郑度",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhouang",
+   "name": "周昂",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wanglang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhouqun",
+   "name": "周群",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhoushang",
+   "name": "周尚",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhoutai_wei",
+   "name": "州泰",
+   "available": false,
+   "basis": "无生年；卒 261，距本年 67 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhouxin",
+   "name": "周昕",
+   "available": true,
+   "basis": "《officers.json》affiliation194=wanglang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhubao",
+   "name": "朱褒",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhufu",
+   "name": "朱符",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zixushangren",
+   "name": "紫虚上人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zoudan",
+   "name": "邹丹",
+   "available": true,
+   "basis": "无生年；卒 194，距本年 0 年，本年可为成人"
+  },
+  {
+   "id": "zoutuo",
+   "name": "邹他",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yanbaihu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zuoxiao",
+   "name": "左校",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "ahuinan",
+   "name": "阿会喃",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "beiyan",
+   "name": "卑衍",
+   "available": true,
+   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+  },
+  {
+   "id": "bianrang",
+   "name": "边让",
+   "available": false,
+   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+  },
+  {
+   "id": "biguai",
+   "name": "毕轨",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "bulianshi",
+   "name": "步练师",
+   "available": true,
+   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+  },
+  {
+   "id": "cailushi_liubiao",
+   "name": "蔡夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "caode",
+   "name": "曹德",
+   "available": false,
+   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+  },
+  {
+   "id": "caohong_taoqian",
+   "name": "曹宏",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "caojie_xian",
+   "name": "曹节",
+   "available": false,
+   "basis": "无生年；卒 260，距本年 66 年＞50，本年必未成年"
+  },
+  {
+   "id": "cenhun",
+   "name": "岑昏",
+   "available": false,
+   "basis": "无生年；卒 280，距本年 86 年＞50，本年必未成年"
+  },
+  {
+   "id": "changbo",
+   "name": "常播",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "chenjiu",
+   "name": "陈就",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "chenqian",
+   "name": "陈骞",
+   "available": false,
+   "basis": "生 201–卒 281，194 年未满 16"
+  },
+  {
+   "id": "chenshu",
+   "name": "陈术",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "chongshao",
+   "name": "种劭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dailaidongzhu",
+   "name": "带来洞主",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dengyang",
+   "name": "邓飏",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "dingfuren",
+   "name": "丁夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dingmi",
+   "name": "丁谧",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "dingyi_jingli",
+   "name": "丁廙",
+   "available": true,
+   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+  },
+  {
+   "id": "dingyi_zhengli",
+   "name": "丁仪",
+   "available": true,
+   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+  },
+  {
+   "id": "dongbai",
+   "name": "董白",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "dongfu",
+   "name": "董扶",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "dongtaihou",
+   "name": "董太后",
+   "available": false,
+   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+  },
+  {
+   "id": "dongtuna",
+   "name": "董荼那",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "dufuren",
+   "name": "杜夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "dukui",
+   "name": "杜夔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fanae",
+   "name": "樊阿",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fanshi_guiyang",
+   "name": "樊氏",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fukuang",
+   "name": "辅匡",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "fuqian_jing",
+   "name": "服虔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "gaotanglong",
+   "name": "高堂隆",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "gaoyou",
+   "name": "高诱",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "gongchen",
+   "name": "龚谌",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "gonglu",
+   "name": "龚禄",
+   "available": true,
+   "basis": "无生年；卒 225，距本年 31 年，本年可为成人"
+  },
+  {
+   "id": "gongzhi",
+   "name": "巩志",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guantong",
+   "name": "关统",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guanyi",
+   "name": "关彝",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guanyinping",
+   "name": "关银屏",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guohuanghou_mingyuan",
+   "name": "郭皇后",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "guonvwang",
+   "name": "郭女王",
+   "available": false,
+   "basis": "生 184–卒 235，194 年未满 16"
+  },
+  {
+   "id": "guoyuan",
+   "name": "国渊",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "guoyuan_yuan",
+   "name": "郭援",
+   "available": true,
+   "basis": "无生年；卒 202，距本年 8 年，本年可为成人"
+  },
+  {
+   "id": "handanchun",
+   "name": "邯郸淳",
+   "available": true,
+   "basis": "生 132，194 年年 62"
+  },
+  {
+   "id": "hanheng",
+   "name": "韩珩",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "hanji",
+   "name": "韩暨",
+   "available": true,
+   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+  },
+  {
+   "id": "haozhao",
+   "name": "郝昭",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hekui",
+   "name": "何夔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "heshao_wu",
+   "name": "贺邵",
+   "available": false,
+   "basis": "生 227–卒 275，194 年未满 16"
+  },
+  {
+   "id": "hezeng",
+   "name": "何曾",
+   "available": false,
+   "basis": "生 199–卒 278，194 年未满 16"
+  },
+  {
+   "id": "hezhi",
+   "name": "何祗",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "huahe",
+   "name": "华核",
+   "available": false,
+   "basis": "生 219–卒 278，194 年未满 16"
+  },
+  {
+   "id": "huanfan",
+   "name": "桓范",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "huanfuren",
+   "name": "环夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangchong",
+   "name": "黄崇",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "huangfuguiqi",
+   "name": "皇甫规妻",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "huangfuli",
+   "name": "皇甫郦",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huangfumi",
+   "name": "皇甫谧",
+   "available": false,
+   "basis": "生 215–卒 282，194 年未满 16"
+  },
+  {
+   "id": "huangshe",
+   "name": "黄射",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huanye",
+   "name": "桓晔",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "hufen",
+   "name": "胡奋",
+   "available": false,
+   "basis": "无生年；卒 288，距本年 94 年＞50，本年必未成年"
+  },
+  {
+   "id": "huiqu",
+   "name": "惠衢",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "huzun",
+   "name": "胡遵",
+   "available": false,
+   "basis": "无生年；卒 256，距本年 62 年＞50，本年必未成年"
+  },
+  {
+   "id": "jiafan_liaodong",
+   "name": "贾范",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "jiangbin",
+   "name": "蒋斌",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "jikang",
+   "name": "嵇康",
+   "available": false,
+   "basis": "生 223–卒 262，194 年未满 16"
+  },
+  {
+   "id": "jufu",
+   "name": "句扶",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lejiu",
+   "name": "乐就",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lianggang",
+   "name": "梁纲",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liangkuan",
+   "name": "梁宽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lichunxiang",
+   "name": "李春香",
+   "available": true,
+   "basis": "无生年；卒 212，距本年 18 年，本年可为成人"
+  },
+  {
+   "id": "lidangzhi",
+   "name": "李当之",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lifeng_ys",
+   "name": "李丰",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "lifu",
+   "name": "李福",
+   "available": true,
+   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+  },
+  {
+   "id": "limeng_dz",
+   "name": "李蒙",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "limiao",
+   "name": "李邈",
+   "available": true,
+   "basis": "无生年；卒 234，距本年 40 年，本年可为成人"
+  },
+  {
+   "id": "linghuyu",
+   "name": "令狐愚",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "liqiu",
+   "name": "李球",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "liren_yz",
+   "name": "李仁",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lisheng",
+   "name": "李胜",
+   "available": false,
+   "basis": "无生年；卒 249，距本年 55 年＞50，本年必未成年"
+  },
+  {
+   "id": "litong",
+   "name": "李通",
+   "available": true,
+   "basis": "生 168–卒 209，194 年年 26"
+  },
+  {
+   "id": "liudan",
+   "name": "刘诞",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liufan",
+   "name": "刘范",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liufuren_yuanshao",
+   "name": "刘夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuhui_suan",
+   "name": "刘徽",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liumao_yz",
+   "name": "刘瑁",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liushi_caoang",
+   "name": "刘夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=caocao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuwangzhi",
+   "name": "刘望之",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuxi_jiao",
+   "name": "刘熙",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liuyi_gonggan",
+   "name": "刘廙",
+   "available": false,
+   "basis": "生 180–卒 221，194 年未满 16"
+  },
+  {
+   "id": "liuyi_liaodong",
+   "name": "柳毅",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsundu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "liuyin",
+   "name": "柳隐",
+   "available": false,
+   "basis": "生 190–卒 269，194 年未满 16"
+  },
+  {
+   "id": "liuyong_nanhe",
+   "name": "刘邕",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "liuzan",
+   "name": "留赞",
+   "available": false,
+   "basis": "生 183–卒 255，194 年未满 16"
+  },
+  {
+   "id": "liuzhen",
+   "name": "刘桢",
+   "available": true,
+   "basis": "无生年；卒 217，距本年 23 年，本年可为成人"
+  },
+  {
+   "id": "lougui",
+   "name": "娄圭",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "lucui",
+   "name": "路粹",
+   "available": true,
+   "basis": "无生年；卒 214，距本年 20 年，本年可为成人"
+  },
+  {
+   "id": "lukai",
+   "name": "陆凯",
+   "available": false,
+   "basis": "生 198–卒 269，194 年未满 16"
+  },
+  {
+   "id": "lunzhi_liaodong",
+   "name": "伦直",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "luyin",
+   "name": "陆胤",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "luyu",
+   "name": "卢毓",
+   "available": false,
+   "basis": "生 183–卒 257，194 年未满 16"
+  },
+  {
+   "id": "lvju",
+   "name": "吕据",
+   "available": false,
+   "basis": "无生年；卒 256，距本年 62 年＞50，本年必未成年"
+  },
+  {
+   "id": "majun",
+   "name": "马钧",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "mamiao",
+   "name": "马邈",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "mangyachang",
+   "name": "忙牙长",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "maohuanghou",
+   "name": "毛皇后",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "maridi",
+   "name": "马日磾",
+   "available": true,
+   "basis": "《officers.json》affiliation194=lijue，本年任职于此，为在场直证"
+  },
+  {
+   "id": "mengyou",
+   "name": "孟优",
+   "available": true,
+   "basis": "《officers.json》affiliation194=nanzhongyi，本年任职于此，为在场直证"
+  },
+  {
+   "id": "miaoxi",
+   "name": "缪袭",
+   "available": false,
+   "basis": "生 186–卒 245，194 年未满 16"
+  },
+  {
+   "id": "mifuren",
+   "name": "糜夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "miheng",
+   "name": "祢衡",
+   "available": true,
+   "basis": "生 173–卒 198，194 年年 21"
+  },
+  {
+   "id": "miushang",
+   "name": "缪尚",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "panfuren_wu",
+   "name": "潘夫人",
+   "available": false,
+   "basis": "无生年；卒 252，距本年 58 年＞50，本年必未成年"
+  },
+  {
+   "id": "pangshanmin",
+   "name": "庞山民",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "peiqian",
+   "name": "裴潜",
+   "available": true,
+   "basis": "无生年；卒 244，距本年 50 年，本年可为成人"
+  },
+  {
+   "id": "peixiu",
+   "name": "裴秀",
+   "available": false,
+   "basis": "生 224–卒 271，194 年未满 16"
+  },
+  {
+   "id": "puyangxing",
+   "name": "濮阳兴",
+   "available": false,
+   "basis": "无生年；卒 264，距本年 70 年＞50，本年必未成年"
+  },
+  {
+   "id": "qinlang",
+   "name": "秦朗",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "quanfuren_sunliang",
+   "name": "全夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "quanshang",
+   "name": "全尚",
+   "available": false,
+   "basis": "无生年；卒 258，距本年 64 年＞50，本年必未成年"
+  },
+  {
+   "id": "qujing",
+   "name": "区景",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "ruanji",
+   "name": "阮籍",
+   "available": false,
+   "basis": "生 210–卒 263，194 年未满 16"
+  },
+  {
+   "id": "ruanyu",
+   "name": "阮瑀",
+   "available": true,
+   "basis": "无生年；卒 212，距本年 18 年，本年可为成人"
+  },
+  {
+   "id": "shamoke",
+   "name": "沙摩柯",
+   "available": true,
+   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+  },
+  {
+   "id": "shantao",
+   "name": "山涛",
+   "available": false,
+   "basis": "生 205–卒 283，194 年未满 16"
+  },
+  {
+   "id": "shiji_zhuji",
+   "name": "施绩",
+   "available": false,
+   "basis": "无生年；卒 270，距本年 76 年＞50，本年必未成年"
+  },
+  {
+   "id": "shizhi",
+   "name": "士祗",
+   "available": true,
+   "basis": "《officers.json》affiliation194=shixie，本年任职于此，为在场直证"
+  },
+  {
+   "id": "shuzhongying",
+   "name": "舒仲应",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "simazhi",
+   "name": "司马芝",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "sufei",
+   "name": "苏飞",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubiao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunchen",
+   "name": "孙綝",
+   "available": false,
+   "basis": "生 231–卒 258，194 年未满 16"
+  },
+  {
+   "id": "sunhao",
+   "name": "孙皓",
+   "available": false,
+   "basis": "生 242–卒 284，194 年未满 16"
+  },
+  {
+   "id": "sunjing",
+   "name": "孙静",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "sunjun",
+   "name": "孙峻",
+   "available": false,
+   "basis": "生 219–卒 256，194 年未满 16"
+  },
+  {
+   "id": "sunli",
+   "name": "孙礼",
+   "available": false,
+   "basis": "无生年；卒 250，距本年 56 年＞50，本年必未成年"
+  },
+  {
+   "id": "sunliang",
+   "name": "孙亮",
+   "available": false,
+   "basis": "生 243–卒 260，194 年未满 16"
+  },
+  {
+   "id": "sunluban",
+   "name": "孙鲁班",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "sunluyu",
+   "name": "孙鲁育",
+   "available": false,
+   "basis": "无生年；卒 255，距本年 61 年＞50，本年必未成年"
+  },
+  {
+   "id": "sunqing_heishan",
+   "name": "孙轻",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "sunxiu",
+   "name": "孙休",
+   "available": false,
+   "basis": "生 235–卒 264，194 年未满 16"
+  },
+  {
+   "id": "suze",
+   "name": "苏则",
+   "available": true,
+   "basis": "无生年；卒 223，距本年 29 年，本年可为成人"
+  },
+  {
+   "id": "tangji",
+   "name": "唐姬",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "tangzi",
+   "name": "唐咨",
+   "available": false,
+   "basis": "无生年；卒 255，距本年 61 年＞50，本年必未成年"
+  },
+  {
+   "id": "tengmu",
+   "name": "滕牧",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "tengyin",
+   "name": "滕胤",
+   "available": false,
+   "basis": "无生年；卒 256，距本年 62 年＞50，本年必未成年"
+  },
+  {
+   "id": "tianchou",
+   "name": "田畴",
+   "available": true,
+   "basis": "生 169–卒 214，194 年年 25"
+  },
+  {
+   "id": "wangbi_fusi",
+   "name": "王弼",
+   "available": false,
+   "basis": "生 226–卒 249，194 年未满 16"
+  },
+  {
+   "id": "wangchen_jin",
+   "name": "王沈",
+   "available": false,
+   "basis": "无生年；卒 266，距本年 72 年＞50，本年必未成年"
+  },
+  {
+   "id": "wangdang_heishan",
+   "name": "王当",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangfan",
+   "name": "王蕃",
+   "available": false,
+   "basis": "生 228–卒 266，194 年未满 16"
+  },
+  {
+   "id": "wangfang_dz",
+   "name": "王方",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "wangfuren_hedadai",
+   "name": "王夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wangguan",
+   "name": "王观",
+   "available": false,
+   "basis": "无生年；卒 260，距本年 66 年＞50，本年必未成年"
+  },
+  {
+   "id": "wanghan",
+   "name": "王含",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wangmen",
+   "name": "王门",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsunzan，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangmou",
+   "name": "王谋",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wangrong_meiren",
+   "name": "王荣",
+   "available": false,
+   "basis": "无生年；卒 181，早于本年 13 年，本年已故"
+  },
+  {
+   "id": "wangshi_yz",
+   "name": "王士",
+   "available": true,
+   "basis": "无生年；卒 223，距本年 29 年，本年可为成人"
+  },
+  {
+   "id": "wangshuang_wei",
+   "name": "王双",
+   "available": true,
+   "basis": "无生年；卒 228，距本年 34 年，本年可为成人"
+  },
+  {
+   "id": "wangyuanji",
+   "name": "王元姬",
+   "available": false,
+   "basis": "生 217–卒 268，194 年未满 16"
+  },
+  {
+   "id": "wanyu",
+   "name": "万彧",
+   "available": false,
+   "basis": "无生年；卒 272，距本年 78 年＞50，本年必未成年"
+  },
+  {
+   "id": "weizhao",
+   "name": "韦昭",
+   "available": false,
+   "basis": "生 204–卒 273，194 年未满 16"
+  },
+  {
+   "id": "weizhen",
+   "name": "卫臻",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wenhu",
+   "name": "文虎",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wenji",
+   "name": "文稷",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wenyang",
+   "name": "文鸯",
+   "available": false,
+   "basis": "生 238–卒 291，194 年未满 16"
+  },
+  {
+   "id": "wuhuanghou_mu",
+   "name": "吴皇后",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "wuju_jiao",
+   "name": "吴巨",
+   "available": true,
+   "basis": "无生年；卒 210，距本年 16 年，本年可为成人"
+  },
+  {
+   "id": "wuliang",
+   "name": "五梁",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wupu",
+   "name": "吴普",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "wuzhi",
+   "name": "吴质",
+   "available": true,
+   "basis": "生 177–卒 230，194 年年 17"
+  },
+  {
+   "id": "xiahouhui",
+   "name": "夏侯徽",
+   "available": false,
+   "basis": "生 211–卒 234，194 年未满 16"
+  },
+  {
+   "id": "xiahoushi_zhangfei",
+   "name": "夏侯氏",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xiangcun",
+   "name": "向存",
+   "available": true,
+   "basis": "无生年；卒 223，距本年 29 年，本年可为成人"
+  },
+  {
+   "id": "xiefuren_wu",
+   "name": "谢夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xiegai",
+   "name": "谢该",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xingyong",
+   "name": "邢颙",
+   "available": true,
+   "basis": "无生年；卒 223，距本年 29 年，本年可为成人"
+  },
+  {
+   "id": "xinxianying",
+   "name": "辛宪英",
+   "available": false,
+   "basis": "生 191–卒 269，194 年未满 16"
+  },
+  {
+   "id": "xizhen",
+   "name": "习祯",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xudan",
+   "name": "许耽",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liubei，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xuehong",
+   "name": "薛洪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhangyang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xufuren_wu",
+   "name": "徐夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xugan",
+   "name": "徐干",
+   "available": true,
+   "basis": "生 171–卒 217，194 年年 23"
+  },
+  {
+   "id": "xukun",
+   "name": "徐琨",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "xuncai",
+   "name": "荀采",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "xunxu",
+   "name": "荀勖",
+   "available": false,
+   "basis": "无生年；卒 289，距本年 95 年＞50，本年必未成年"
+  },
+  {
+   "id": "xunyi",
+   "name": "荀顗",
+   "available": false,
+   "basis": "无生年；卒 274，距本年 80 年＞50，本年必未成年"
+  },
+  {
+   "id": "yangang_gsz",
+   "name": "严纲",
+   "available": false,
+   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+  },
+  {
+   "id": "yanghuiyu",
+   "name": "羊徽瑜",
+   "available": false,
+   "basis": "生 214–卒 278，194 年未满 16"
+  },
+  {
+   "id": "yangxi",
+   "name": "杨戏",
+   "available": false,
+   "basis": "无生年；卒 261，距本年 67 年＞50，本年必未成年"
+  },
+  {
+   "id": "yangxiu",
+   "name": "杨修",
+   "available": true,
+   "basis": "生 175–卒 219，194 年年 19"
+  },
+  {
+   "id": "yangyi_liaodong",
+   "name": "阳仪",
+   "available": true,
+   "basis": "《officers.json》affiliation194=gongsundu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yangzuo",
+   "name": "杨祚",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yanyu_shu",
+   "name": "阎宇",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yanzhi",
+   "name": "阎芝",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yaozhou",
+   "name": "姚伷",
+   "available": true,
+   "basis": "无生年；卒 242，距本年 48 年，本年可为成人"
+  },
+  {
+   "id": "yinfuren",
+   "name": "尹夫人",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "yingchang",
+   "name": "应玚",
+   "available": true,
+   "basis": "无生年；卒 217，距本年 23 年，本年可为成人"
+  },
+  {
+   "id": "yingshao",
+   "name": "应劭",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshao，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanfuren_wu",
+   "name": "袁夫人",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanhuan",
+   "name": "袁涣",
+   "available": true,
+   "basis": "《officers.json》affiliation194=yuanshu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "yuanzhong_jiao",
+   "name": "袁忠",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhangbiao",
+   "name": "张表",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhangchunhua",
+   "name": "张春华",
+   "available": false,
+   "basis": "生 189–卒 247，194 年未满 16"
+  },
+  {
+   "id": "zhangcun",
+   "name": "张存",
+   "available": true,
+   "basis": "无生年；卒 212，距本年 18 年，本年可为成人"
+  },
+  {
+   "id": "zhangfan_wei",
+   "name": "张范",
+   "available": true,
+   "basis": "无生年；卒 212，距本年 18 年，本年可为成人"
+  },
+  {
+   "id": "zhanghou_hou",
+   "name": "张皇后",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhanghou_jingai",
+   "name": "敬哀皇后",
+   "available": true,
+   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+  },
+  {
+   "id": "zhangjin_jiaozhou",
+   "name": "张津",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhanglumu",
+   "name": "张鲁母",
+   "available": true,
+   "basis": "《officers.json》affiliation194=zhanglu，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhangti",
+   "name": "张悌",
+   "available": false,
+   "basis": "无生年；卒 280，距本年 86 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhangzun",
+   "name": "张遵",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhaoe",
+   "name": "赵娥",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhaoguang",
+   "name": "赵广",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhaoqu",
+   "name": "赵衢",
+   "available": true,
+   "basis": "《officers.json》affiliation194=mateng，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhaotong",
+   "name": "赵统",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhaowen",
+   "name": "赵温",
+   "available": true,
+   "basis": "生 137–卒 208，194 年年 57"
+  },
+  {
+   "id": "zhaoyu",
+   "name": "赵昱",
+   "available": true,
+   "basis": "无生年；卒 194，距本年 0 年，本年可为成人"
+  },
+  {
+   "id": "zhaozhi",
+   "name": "赵直",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhengchong",
+   "name": "郑冲",
+   "available": false,
+   "basis": "无生年；卒 274，距本年 80 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhenshi",
+   "name": "甄氏",
+   "available": false,
+   "basis": "生 182–卒 221，194 年未满 16"
+  },
+  {
+   "id": "zhonglimu",
+   "name": "钟离牧",
+   "available": false,
+   "basis": "无生年；卒 272，距本年 78 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhongyu",
+   "name": "钟毓",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhouchu",
+   "name": "周处",
+   "available": false,
+   "basis": "生 236–卒 297，194 年未满 16"
+  },
+  {
+   "id": "zhouxuan",
+   "name": "周宣",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhugeshang",
+   "name": "诸葛尚",
+   "available": false,
+   "basis": "无生年；卒 263，距本年 69 年＞50，本年必未成年"
+  },
+  {
+   "id": "zhugezhan",
+   "name": "诸葛瞻",
+   "available": false,
+   "basis": "生 227–卒 263，194 年未满 16"
+  },
+  {
+   "id": "zhujianping",
+   "name": "朱建平",
+   "available": false,
+   "basis": "生卒年与本年归属俱无，无在场证据"
+  },
+  {
+   "id": "zhuoying",
+   "name": "卓膺",
+   "available": true,
+   "basis": "《officers.json》affiliation194=liuzhang，本年任职于此，为在场直证"
+  },
+  {
+   "id": "zhuyi_wu",
+   "name": "朱异",
+   "available": false,
+   "basis": "无生年；卒 257，距本年 63 年＞50，本年必未成年"
+  }
+ ]
+}
