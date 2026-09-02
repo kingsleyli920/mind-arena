@@ -19,7 +19,7 @@ import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
   from "@/lib/game/engine/victory.ts";
-import type { Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
+import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
 
 const BASE = "/game/map/play-base.webp";
 // 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
@@ -32,6 +32,31 @@ const SEASON_CN = ["", "春", "夏", "秋", "冬"];
  * 字母序下实际是 ally → appoint → campaign → …→ relief 第六位：
  * 最不紧急的外交顶在最上面，而「救我被围的城」被十几条征伐压在滚筒里。
  */
+/**
+ * 候选的短标题。从 c.action 直接生成——界面手里本来就有结构化的动作对象，
+ * 不必去解析引擎拼好的长句子（那正是机器人从 label 抠正则的老毛病）。
+ * label 留作展开后的细节，观测的 token 成本不变。
+ */
+function titleOf(a: Action): string {
+  switch (a.type) {
+    case "campaign":
+      return a.from === a.target ? `${a.from} 出城迎战` : `自${a.from} 征 ${a.target}`;
+    case "withdraw": return "自围城撤兵";
+    case "muster": return `于${a.at} 集结`;
+    case "govern": return `${a.at} ${{ farm: "劝农", levy: "募兵", wall: "修城",
+                                       soothe: "安民", forge: "治械" }[a.policy]}`;
+    case "appoint": return `任 ${a.officer} 守 ${a.at}`;
+    case "scout": return `刺探 ${a.at}`;
+    case "ally": return a.act === "form" ? `与 ${a.to} 缔盟` : `与 ${a.to} 绝盟`;
+    case "passage": return `许 ${a.to} 借道`;
+    case "retire": return "归隐";
+    default: return "";
+  }
+}
+
+/** 兵力档的中文 */
+const STRENGTH_CN: Record<string, string> = { skirmish: "偏师", main: "主力", allout: "倾国" };
+
 const PANEL_ORDER = ["relief", "withdraw", "campaign", "muster", "govern",
                      "appoint", "scout", "ally", "passage", "retire"];
 
@@ -218,6 +243,7 @@ export function PlayClient() {
   // 点城筛选。地图此前是纯装饰：要打南阳，得去右边面板展开征伐、
   // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
   const [pinned, setPinned] = useState<string | null>(null);
+  const [onlyWinnable, setOnlyWinnable] = useState(false);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -329,8 +355,27 @@ export function PlayClient() {
     // 补给消息埋掉——那是最该第一眼看到的东西
     setFlash({
       mine: fresh.filter((e) => e.faction === seat).map((e) => cn(e.text)),
-      world: fresh.filter((e) => e.faction !== seat && PUBLIC_EVENTS.has(e.kind))
-        .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`),
+      // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
+      // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
+      // 实测天下大事一季数十条，其中八成是 AI 之间的缔盟绝盟
+      world: (() => {
+        const RANK: Record<string, number> = {
+          eliminated: 0, "siege-win": 1, "officer-captured": 2, retire: 2, epoch: 3,
+        };
+        const rows = fresh.filter((e) => e.faction !== seat && PUBLIC_EVENTS.has(e.kind));
+        const isDip = (k: string) => k === "ally" || k === "ally-break";
+        const big = rows.filter((e) => !isDip(e.kind))
+          .sort((a, b) => (RANK[a.kind] ?? 9) - (RANK[b.kind] ?? 9))
+          .slice(0, 10)
+          .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`);
+        // 外交折成一行：它占了八成条数，却极少影响本季的决策
+        const dip = rows.filter((e) => isDip(e.kind));
+        if (dip.length) {
+          const form = dip.filter((e) => e.kind === "ally").length;
+          big.push(`本季天下另有 ${form} 起结盟、${dip.length - form} 起绝盟`);
+        }
+        return big;
+      })(),
     });
     setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));
     setPicked([]);
@@ -534,6 +579,17 @@ export function PlayClient() {
     const cls = c.key.split(":")[0];
     if (!byType.has(cls)) byType.set(cls, []);
     byType.get(cls)!.push(c);
+  }
+  // 征伐按「打不打得下」排：能破的在前，不破的沉底。
+  // 吕布二十条征伐里十七条引擎已经算出「不破」，而他一季最多下三条——
+  // 无序平铺等于让人逐条读到第七十个字才看见结论
+  const RANK: Record<string, number> = { 破城: 0, 未知: 1, 不破: 2 };
+  for (const list of byType.values()) {
+    list.sort((a, b) => (RANK[a.forecast?.verdict ?? "未知"] ?? 1)
+                      - (RANK[b.forecast?.verdict ?? "未知"] ?? 1)
+                      || (b.forecast ? b.forecast.breachLo - b.forecast.holdHi : 0)
+                       - (a.forecast ? a.forecast.breachLo - a.forecast.holdHi : 0)
+                      || a.key.localeCompare(b.key));
   }
 
   return (
@@ -746,8 +802,22 @@ export function PlayClient() {
                 {[...byType].sort((a, b) => PANEL_ORDER.indexOf(a[0]) - PANEL_ORDER.indexOf(b[0]))
                   .map(([cls, list]) => (
                   <details key={cls} open={cls === "campaign" || cls === "relief"}>
-                    <summary>{TYPE_CN[cls] ?? cls}<i>{list.length}</i></summary>
-                    {list.map((c) => {
+                    <summary>
+                      {TYPE_CN[cls] ?? cls}
+                      <i>{cls === "campaign" && onlyWinnable
+                        ? `${list.filter((c) => c.forecast?.verdict !== "不破").length}/${list.length}`
+                        : list.length}</i>
+                      {cls === "campaign" && list.some((c) => c.forecast?.verdict === "不破") && (
+                        <button className="only-winnable"
+                          onClick={(e) => { e.preventDefault(); setOnlyWinnable((v) => !v); }}>
+                          {onlyWinnable ? "看全部" : "只看打得下的"}
+                        </button>
+                      )}
+                    </summary>
+                    {(cls === "campaign" && onlyWinnable
+                        ? list.filter((c) => c.forecast?.verdict !== "不破")
+                        : list
+                      ).map((c) => {
                       const on = picked.includes(c.key);
                       // 能不能再选这一条：令数够，且在「已选那些之后」引擎仍认它
                       const why = on || !adm ? null
@@ -761,8 +831,35 @@ export function PlayClient() {
                           <input type="checkbox" checked={on} disabled={!afford}
                             onChange={() => setPicked((p) =>
                               on ? p.filter((k) => k !== c.key) : [...p, c.key])} />
-                          <span>{c.label}</span>
-                          <b>{why ? why.slice(0, 12) : c.cost === 0 ? "免费" : `${c.cost} 令`}</b>
+                          <span className="act-body">
+                            <span className="act-head">
+                              <b>{titleOf(c.action)}</b>
+                              {c.action.type === "campaign" && "strength" in c.action
+                                && <i className="tier">{STRENGTH_CN[c.action.strength]}</i>}
+                              {c.forecast && (
+                                <em className={`verdict v-${
+                                  c.forecast.verdict === "破城" ? "win"
+                                  : c.forecast.verdict === "不破" ? "no" : "maybe"}`}>
+                                  {c.forecast.verdict}
+                                </em>
+                              )}
+                            </span>
+                            {c.forecast && (
+                              <span className="act-nums">
+                                缺口 {c.forecast.breachLo === c.forecast.breachHi
+                                  ? c.forecast.breachLo
+                                  : `${c.forecast.breachLo}–${c.forecast.breachHi}`}
+                                {"\u3000"}可防守 {c.forecast.holdLo === c.forecast.holdHi
+                                  ? c.forecast.holdLo
+                                  : `${c.forecast.holdLo}–${c.forecast.holdHi}`}
+                                {c.forecast.fog === "tier" && <u>未探</u>}
+                              </span>
+                            )}
+                            <span className="act-detail">{c.label}</span>
+                          </span>
+                          <b className="cost">
+                            {why ? why.slice(0, 10) : c.cost === 0 ? "免费" : `${c.cost} 令`}
+                          </b>
                         </label>
                       );
                     })}
@@ -789,7 +886,7 @@ export function PlayClient() {
               {flash.world.length > 0 && (
                 <>
                   <h3>天下大事</h3>
-                  <ul>{flash.world.slice(-24).map((x, i) => <li key={i}>{x}</li>)}</ul>
+                  <ul>{flash.world.map((x, i) => <li key={i}>{x}</li>)}</ul>
                 </>
               )}
             </div>

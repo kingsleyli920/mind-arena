@@ -115,12 +115,42 @@
 .acts summary i { font-style: normal; color: var(--ink-soft); font-size: 0.75rem; }
 .act {
   display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: start;
-  padding: 0.4rem 0.7rem 0.5rem; border-top: 1px solid var(--rule);
-  font-size: 0.76rem; line-height: 1.6; cursor: pointer;
+  padding: 0.45rem 0.7rem 0.5rem; border-top: 1px solid var(--rule);
+  font-size: 0.76rem; line-height: 1.55; cursor: pointer;
 }
+/* 候选行分三层：标题一眼看清是什么、判定一眼看清能不能打、
+   细节默认收起。此前是一整段等长散文，结论埋在第七十个字 */
+.act-body { display: grid; gap: 0.12rem; min-width: 0; }
+.act-head { display: flex; align-items: baseline; gap: 0.38rem; flex-wrap: wrap; }
+.act-head b { font-size: 0.87rem; font-weight: 600; color: var(--ink); }
+.act-head .tier {
+  font-style: normal; font-size: 0.68rem; color: var(--ink-soft);
+  border: 1px solid var(--rule); border-radius: 2px; padding: 0 0.25rem;
+}
+.act-head .verdict {
+  font-style: normal; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+  padding: 0.02rem 0.32rem; border-radius: 2px;
+}
+.verdict.v-win { color: #1f4d2e; background: #d7e8d4; }
+.verdict.v-maybe { color: #6b5218; background: #f0e3c2; }
+.verdict.v-no { color: #6b3129; background: #ecd8d4; }
+.act-nums { font-size: 0.73rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.act-nums u { text-decoration: none; margin-inline-start: 0.4rem; color: var(--seal); }
+.act-detail {
+  font-size: 0.7rem; color: #8b8579; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.act.on .act-detail { -webkit-line-clamp: 4; }
+.act .cost { align-self: center; }
+.acts summary .only-winnable {
+  margin-inline-start: auto; cursor: pointer; font: inherit; font-size: 0.7rem;
+  padding: 0.1rem 0.45rem; background: transparent; color: var(--seal);
+  border: 1px solid var(--rule); border-radius: 2px;
+}
+.acts summary .only-winnable:hover { border-color: var(--seal); }
 .act:hover { background: #fff; }
 .act.off { cursor: not-allowed; }
-.act b { font-weight: 400; color: var(--ink-soft); white-space: nowrap; font-size: 0.72rem; }
+.act .cost { font-weight: 400; color: var(--ink-soft); white-space: nowrap; font-size: 0.72rem; }
 .act input { margin-block-start: 0.28rem; accent-color: var(--seal); }
 
 .go {
