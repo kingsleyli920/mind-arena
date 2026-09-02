@@ -604,6 +604,38 @@ export function PlayClient() {
             ))}
           </svg>
           </div>
+          {/* 图题：古地图的图题不在固定角落，是写在图面构图里的一个墨线框。
+              挂在屏幕固定层，随平移不动，像图例一样 */}
+          <div className="cartouche" aria-hidden="true">
+            <b>大漢輿地圖</b>
+            <span>每方折地百里</span>
+            <span>郡國山川縣邑名</span>
+            <span>{game.year === 194 ? "興平元年" : `${game.year} 年`}</span>
+          </div>
+
+          {/* 压角章。考据上压角章在左下与引首章成对角，但左下已被郡国详情占用，
+              且不做引首章就没有对角约束——「钤在下方一角」仍成立。
+              朱色取 #a8322a 而非颜料色银朱 #f43e06：真实钤印是油性朱泥压在
+              有纹理的纸上，明度饱和度都掉一档，直接用颜料色像荧光贴纸 */}
+          <div className="seal-corner" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <defs>
+                <filter id="seal-edge">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7" />
+                  <feDisplacementMap in="SourceGraphic" scale="1.6" />
+                </filter>
+              </defs>
+              <g filter="url(#seal-edge)">
+                <rect x="3" y="3" width="94" height="94" rx="2" />
+                {/* 白文（阴文）：朱底挖空文字。四字印读序为右上→右下→左上→左下 */}
+                <text x="72" y="40">漢</text>
+                <text x="72" y="82">末</text>
+                <text x="28" y="40">沙</text>
+                <text x="28" y="82">盤</text>
+              </g>
+            </svg>
+          </div>
+
           <div className="zoom">
             <button onClick={() => setView((v) => zoomAt(v, 1.4))}>＋</button>
             <button onClick={() => setView({ k: 1, x: 0, y: 0 })}>全图</button>
