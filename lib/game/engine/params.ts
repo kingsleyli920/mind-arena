@@ -37,6 +37,8 @@ export interface EngineParams {
   apBase: number; apCap: number; carryCap: number;
   /** 时钟 */
   seasonsPerGame: number; intelValidSeasons: number;
+  /** 情报：未探的档位表与已探的误差 */
+  intelTiers: number; intelTierRatio: number; intelTierBase: number; intelErrorRatio: number;
   /** 武将：五维折算成战斗与内政系数的基准与除数 */
   officerBase: number;
   leadershipAttackDivisor: number; leadershipDefenseStep: number;
@@ -163,6 +165,10 @@ export function loadParams(pack: RawPack): EngineParams {
     carryCap: g("令数", "结转上限"),
     seasonsPerGame: g("时钟", "一局季数"),
     intelValidSeasons: g("情报", "有效季数"),
+    intelTiers: g("情报", "档数"),
+    intelTierRatio: g("情报", "档比"),
+    intelTierBase: g("情报", "档基数"),
+    intelErrorRatio: g("情报", "误差比"),
     officerBase: g("武将", "基准值"),
     leadershipAttackDivisor: g("武将", "统率攻势除数"),
     leadershipDefenseStep: g("武将", "统率守备每档"),

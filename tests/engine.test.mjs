@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, briefFor } from "../lib/game/engine/victory.ts";
+import { observedGarrison } from "../lib/game/engine/intel.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
@@ -662,4 +663,76 @@ test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
   const e3 = fresh(); e3.epoch = 3;
   const at3 = resolve(e3, [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
   assert.ok(at3 > at2, "三纪元自守未强于二纪元");
+});
+
+// ── 迷雾 ────────────────────────────────────────────────────────────
+// 此前候选标签直接写真实守军，intel 只用来挑刺探目标——迷雾是装饰性的：
+// 刺探什么也买不到，模型也将在完全信息下被评测。
+test("迷雾：未探只报档位区间，已探转点估计，己方与盟友看真值", () => {
+  const s = fresh();
+  const mine = Object.values(s.commanderies).find((c) => c.owner === "caocao");
+  const foe = Object.values(s.commanderies).find((c) => c.owner === "lubu");
+
+  // 己方看真值
+  const own = observedGarrison(s, "caocao", mine.id, P);
+  assert.equal(own.value, mine.garrison);
+  assert.ok(own.scouted);
+
+  // 敌方未探：报区间，且区间必须真的包含真值
+  const dark = observedGarrison(s, "caocao", foe.id, P);
+  assert.equal(dark.scouted, false);
+  assert.match(dark.text, /之间（第 \d+ 档，未探）/);
+  const [lo, hi] = dark.text.match(/(\d+)–(\d+)/).slice(1, 3).map(Number);
+  assert.ok(foe.garrison >= lo && foe.garrison <= hi,
+    `真值 ${foe.garrison} 落在报出的区间 ${lo}–${hi} 之外`);
+
+  // 已探：点估计，误差在包里声明的范围内
+  const seen = { ...s, intel: { ...s.intel, caocao: { [foe.id]: s.turn + 4 } } };
+  const est = observedGarrison(seen, "caocao", foe.id, P);
+  assert.ok(est.scouted);
+  const err = Math.abs(est.value - foe.garrison) / foe.garrison;
+  assert.ok(err <= P.intelErrorRatio + 1e-6,
+    `已探误差 ${(err * 100).toFixed(1)}% 超出声明的 ±${P.intelErrorRatio * 100}%`);
+
+  // 盟友看真值
+  const allied = { ...s, treaties: [{ a: "caocao", b: "lubu", kind: "alliance",
+                                      from: 0, until: s.turn + 8 }] };
+  assert.equal(observedGarrison(allied, "caocao", foe.id, P).value, foe.garrison);
+});
+
+test("迷雾：刺探真的收窄不确定度，档宽由破城梯定", () => {
+  const s = fresh();
+  const foe = Object.values(s.commanderies).find((c) => c.owner === "lubu");
+  const dark = observedGarrison(s, "caocao", foe.id, P);
+  const [lo, hi] = dark.text.match(/(\d+)–(\d+)/).slice(1, 3).map(Number);
+  const darkBand = (hi - lo) / ((hi + lo) / 2);          // 相对中值的全宽
+
+  // 破城梯的级间比：不确定度要能跨一级，刺探才买得到东西
+  const rungs = P.breachLadder.map(([t]) => t).sort((a, b) => a - b);
+  const minGap = Math.min(...rungs.slice(1).map((v, i) => v / rungs[i]));
+  assert.ok(darkBand / 2 >= (minGap - 1) * 0.8,
+    `未探档宽 ±${(darkBand / 2 * 100).toFixed(0)}% 跨不过破城梯的一级（级间比 ${minGap.toFixed(2)}）`);
+  assert.ok(P.intelErrorRatio < minGap - 1,
+    `已探误差 ±${P.intelErrorRatio * 100}% 未落在一级之内，刺探等于白探`);
+});
+
+test("迷雾：观测确定，且不改变结算——真值只在结算里用", () => {
+  const s = fresh();
+  const foe = Object.values(s.commanderies).find((c) => c.owner === "lubu");
+  const seen = { ...s, intel: { ...s.intel, caocao: { [foe.id]: s.turn + 4 } } };
+  // 同一季反复读必得同一数，否则候选会自己抖动，R33 的逐位重放也不成立
+  const a = observedGarrison(seen, "caocao", foe.id, P).value;
+  const b = observedGarrison(seen, "caocao", foe.id, P).value;
+  assert.equal(a, b);
+
+  // 结算用真值：同一场攻城，观测方有没有情报都打出同样的结果
+  const from = Object.values(s.commanderies).find((c) => c.owner === "caocao");
+  const edge = [...(G.adj.get(from.id) ?? [])].find((e) => s.commanderies[e.to]?.owner === "lubu");
+  if (!edge) return;
+  const order = { faction: "caocao", action: { type: "campaign", target: edge.to,
+    from: from.id, commander: null, strength: "allout", siegeGear: "none" } };
+  const r1 = resolve(s, [order], G, P, ROSTER, GEO).state;
+  const r2 = resolve(seen, [order], G, P, ROSTER, GEO).state;
+  assert.equal(r1.commanderies[edge.to].garrison, r2.commanderies[edge.to].garrison,
+    "有无情报改变了结算 —— 迷雾只该影响观测");
 });

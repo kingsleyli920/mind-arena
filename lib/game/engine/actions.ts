@@ -5,6 +5,7 @@
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
 import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
+import { observedGarrison } from "./intel.ts";
 import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order,
@@ -105,14 +106,16 @@ export function listActions(
     const targets = [...frontier(s, g, f).entries()]
       .map(([tid, e]) => {
         const src = s.commanderies[e.from];
-        const tgt = s.commanderies[tid];
-        return { tid, e, ratio: tgt.garrison > 0 ? src.garrison / tgt.garrison : 99 };
+        // 用观测值而非真值：候选标签是给对局方看的，写真实守军等于开天眼，
+        // 刺探这条动作也就什么都买不到
+        const seen = observedGarrison(s, f, tid, P);
+        return { tid, e, seen, ratio: seen.value > 0 ? src.garrison / seen.value : 99 };
       })
       .filter((x) => canOrder(x.e.from) && x.ratio > 0.35)   // 兵力比过低的不列
       .sort((a, b) => b.ratio - a.ratio || a.tid.localeCompare(b.tid))
       .slice(0, rules.perTypeCap);
 
-    for (const { tid, e, ratio } of targets) {
+    for (const { tid, e, ratio, seen } of targets) {
       const tgt = s.commanderies[tid];
       const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
       // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
@@ -147,7 +150,7 @@ export function listActions(
           cost: rules.campaignAp,
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：我方戍兵 ${s.commanderies[e.from].garrison}，`
-               + `敌守军约 ${tgt.garrison}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`
+               + `敌守军 ${seen.text}，比 ${ratio.toFixed(2)}，${e.terrain}${gateNote}${leadNote}`
                + `｜出 ${send} 人，${e.from} 城中余 ${left} 人`
                + `${unitNote}${armyNote}${siegeNote}`,
         });
@@ -271,7 +274,9 @@ export function listActions(
         key: `scout:${id}`,
         action: { type: "scout", at: id },
         cost: 0,
-        label: `刺探${id}（免费，本季余 ${freeLeft(s, f, "scout", rules)} 次；探后守军由档位变为 ±15% 点估计）`,
+        label: `刺探${id}（免费，本季余 ${freeLeft(s, f, "scout", rules)} 次；`
+             + `现为 ${observedGarrison(s, f, id, P).text}，探后转 ±15% 点估计，有效 ${
+               P.intelValidSeasons} 季）`,
       });
     }
   }
