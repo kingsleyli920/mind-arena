@@ -58,6 +58,25 @@ export function observedGarrison(
   };
 }
 
+/**
+ * 哪些事件是天下皆知。
+ *
+ * 城池易主、势力覆灭、名将被俘、缔盟绝盟、纪元推进——这些瞒不住；
+ * 补给断绝、集结、内政、围城进度、军团溃散是自家内情。
+ *
+ * 这个划分必须由引擎给出而不是各处各写一遍：对局界面与模型观测若各判各的，
+ * 人看到的和模型看到的就不是同一场战争，评测也就不可比。
+ */
+export const PUBLIC_EVENTS = new Set([
+  "siege-win", "eliminated", "officer-captured", "ally", "ally-break", "retire", "epoch",
+]);
+
+/** 某方本季能看到的战报。己方全部可见，他方只见天下大事 */
+export function visibleLog(s: GameState, viewer: FactionId, since = 0) {
+  return s.log.slice(since).filter((e) =>
+    e.faction === viewer || !e.faction || PUBLIC_EVENTS.has(e.kind));
+}
+
 /** 守军的观测档位，1..13。等比 1.4 */
 export function tierOf(garrison: number, P: EngineParams): number {
   const t = 1 + Math.floor(Math.log(Math.max(1, garrison) / P.intelTierBase)

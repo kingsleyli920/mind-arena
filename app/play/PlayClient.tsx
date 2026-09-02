@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildGraph, listActions, type Graph } from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, type Roster } from "@/lib/game/engine/officers.ts";
-import { observedGarrison } from "@/lib/game/engine/intel.ts";
+import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
@@ -306,15 +306,15 @@ export function PlayClient() {
     const r = resolve(game, orders, engine.G, engine.P, engine.roster, engine.geo);
     // 一季全图能产生上百条事件，绝大多数是边地势力的补给消息。
     // 全铺出来等于把自己这一季的战况埋掉——只留我方的，与天下大事
-    const BIG = new Set(["siege-win", "eliminated", "epoch", "ally-break", "officer-captured"]);
-    // 引擎的日志里势力写作 id（它不该知道显示名），在此换成中文
+    // 可见性由引擎定义（intel.ts 的 PUBLIC_EVENTS），不在这里另判一套——
+    // 界面与模型观测若各判各的，人看到的和模型看到的就不是同一场战争
     const cn = (text: string) => text.replace(/[a-z]+/g, (m) => engine.nameOf.get(m) ?? m);
-    const fresh = r.state.log.slice(before);
+    const fresh = visibleLog(r.state, seat, before);
     // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
     // 补给消息埋掉——那是最该第一眼看到的东西
     setFlash({
       mine: fresh.filter((e) => e.faction === seat).map((e) => cn(e.text)),
-      world: fresh.filter((e) => e.faction !== seat && BIG.has(e.kind))
+      world: fresh.filter((e) => e.faction !== seat && PUBLIC_EVENTS.has(e.kind))
         .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`),
     });
     setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));

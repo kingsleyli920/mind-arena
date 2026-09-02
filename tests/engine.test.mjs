@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, briefFor } from "../lib/game/engine/victory.ts";
-import { observedGarrison } from "../lib/game/engine/intel.ts";
+import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
@@ -735,4 +735,29 @@ test("迷雾：观测确定，且不改变结算——真值只在结算里用",
   const r2 = resolve(seen, [order], G, P, ROSTER, GEO).state;
   assert.equal(r1.commanderies[edge.to].garrison, r2.commanderies[edge.to].garrison,
     "有无情报改变了结算 —— 迷雾只该影响观测");
+});
+
+test("迷雾：战报的可见性由引擎定义，他方内情不外泄", () => {
+  let s = fresh();
+  // 跑几季攒出各类事件
+  for (let t = 0; t < 3; t += 1) {
+    s = refreshAp(resolve(s, sampleOrders(s, Object.keys(s.factions)), G, P, ROSTER, GEO).state, P);
+  }
+  assert.ok(s.log.length > 20, "样本太少，测不出可见性");
+
+  const seen = visibleLog(s, "caocao");
+  for (const e of seen) {
+    assert.ok(e.faction === "caocao" || !e.faction || PUBLIC_EVENTS.has(e.kind),
+      `不该看见他方的 ${e.kind}：${e.text}`);
+  }
+  // 他方的补给断绝、围城进度这类内情必须被挡掉
+  const leaked = s.log.filter((e) => e.faction && e.faction !== "caocao"
+    && ["supply-cut", "besieged", "muster", "siege-hold", "army-scattered"].includes(e.kind));
+  assert.ok(leaked.length > 0, "样本里没有他方内情，测不出过滤");
+  for (const e of leaked) {
+    assert.ok(!seen.includes(e), `他方内情外泄：${e.kind} ${e.text}`);
+  }
+  // 城池易主这类天下大事必须看得见
+  const publicNews = s.log.filter((e) => e.kind === "siege-win" && e.faction !== "caocao");
+  for (const e of publicNews) assert.ok(seen.includes(e), "城池易主该是天下皆知");
 });
