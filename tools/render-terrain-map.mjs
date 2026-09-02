@@ -10,9 +10,12 @@
 // 数据：AWS Terrain Tiles（terrarium，公有领域）z=8 高程栅格，
 //      由 tools/fetch-dem.mjs 预取到 refs/dem-raster.raw。
 import fs from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
 import { fbm, hash } from "./ink-canvas.mjs";
+import {
+  rng, gauss, arcSpine, strokeInk, WPROF, APROF,
+  LPROF_CENTER, LPROF_SIDE, NEXT_CENTER,
+} from "./brush.mjs";
 
 // ── 输出参数 ────────────────────────────────────────────────────────
 const W_DEG = 94, E_DEG = 127, S_DEG = 16, N_DEG = 43;
@@ -137,6 +140,9 @@ const azRad = (360 - AZIMUTH + 90) * Math.PI / 180;
 const altRad = ALTITUDE * Math.PI / 180;
 const shade = new Float32Array(W * H);
 const slopeArr = new Float32Array(W * H);
+// 坡向与脊谷曲率此前算完就丢。皴笔的方向场与谷底闸都要用，存下来
+const aspectArr = new Float32Array(W * H);
+const lapArr = new Float32Array(W * H);
 const METER_PER_DEG = 111320;
 for (let y = 1; y < H - 1; y += 1) {
   const lat = N_DEG - (y + 0.5) / PX_PER_DEG;
@@ -153,6 +159,7 @@ for (let y = 1; y < H - 1; y += 1) {
     const slope = Math.atan(Math.hypot(dzdx, dzdy));
     const aspect = Math.atan2(dzdy, -dzdx);
     slopeArr[i] = slope;
+    aspectArr[i] = aspect;
     shade[i] = Math.max(0, Math.cos(altRad) * Math.cos(slope)
                          + Math.sin(altRad) * Math.sin(slope) * Math.cos(azRad - aspect));
   }
@@ -264,14 +271,16 @@ for (let y = 0; y < H; y += 1) {
       // 墨染（湿笔）：山体的体量。皴（干笔）落在它上面才有分量，
       // 只有皴则通篇干枯如尘
       const wash = (high * 0.62 + steep * 0.30) * WASH_W;
-      // 墨分五色：量化成档而非连续渐变——连续是照片，分档是画。
-      // 量化时加噪声抖动，否则档与档之间会显出等高线似的硬边
       // 墨量按到最近郡治的距离衰减：塔里木、青藏、南海诸岛自然退为远景
       const near = 0.26 + 0.74 * Math.exp(-seatDist[i] / P(2.2));
       let ink = (dark * steep * 0.66 + high * steep * 0.34) * INK_W * near;
-      ink = Math.round((ink + (hash((x / P(0.03)) | 0, (y / P(0.03)) | 0, 91) - 0.5) * 0.08) * 5) / 5;
       ink = Math.max(0, Math.min(1, ink)) + wash;
       if (ink > 0) {
+        // 墨染是连续的湿笔，不做色阶量化。
+        // 「墨分五色」指的是几次落墨的浓淡层次（淡打底、中墨重描、勾脊、
+        // 焦墨点），那是**笔**的事；把连续场 posterize 成五档，
+        // 在平缓处必然压出硬边色块——先是方格（抖动用了截断坐标），
+        // 换平滑噪声后变成迷彩。分档这件事交给皴层的几遍去做。
         const a = Math.min(0.92, ink);
         r = r * (1 - a) + INK[0] * a;
         g = g * (1 - a) + INK[1] * a;
@@ -297,6 +306,21 @@ for (let y = 0; y < H; y += 1) {
 }
 console.log("设色与墨染完成");
 
+// ── 脊谷曲率场：沿梯度方向的二阶差分，正为脊、负为谷 ──────────────
+// 勾脊与皴的谷底闸共用。此前只在勾脊的跳步循环里算，是稀疏的，
+// 取不了分位数
+for (let y = 2; y < H - 2; y += 1) {
+  for (let x = 2; x < W - 2; x += 1) {
+    const i = y * W + x;
+    if (isWater[i]) continue;
+    const gx = coarse[i + 1] - coarse[i - 1];
+    const gy = coarse[i + W] - coarse[i - W];
+    const len = Math.hypot(gx, gy) || 1;
+    const ux = Math.round(gx / len), uy = Math.round(gy / len);
+    lapArr[i] = 2 * coarse[i] - coarse[i + uy * W + ux] - coarse[i - uy * W - ux];
+  }
+}
+
 // ── 勾脊：沿分水岭落一道浓墨 ──────────────────────────────────────
 // 传统画山都是先勾轮廓再皴，只皴不勾则山没有骨。
 // 勾脊要用比皴更平滑的地势，照微地形逐条勾，出来是一头乱毛而不是山骨。
@@ -316,9 +340,8 @@ console.log("设色与墨染完成");
       const gx = coarse[i + 1] - coarse[i - 1];
       const gy = coarse[i + W] - coarse[i - W];
       const len = Math.hypot(gx, gy) || 1;
-      const ux = Math.round(gx / len), uy = Math.round(gy / len);
-      // 沿梯度方向的二阶差分为正 → 该点在脊上而非谷中
-      const lap = 2 * coarse[i] - coarse[i + uy * W + ux] - coarse[i - uy * W - ux];
+      // 沿梯度方向的二阶差分为正 → 该点在脊上而非谷中（lapArr 已稠密算好）
+      const lap = lapArr[i];
       if (lap <= 0) continue;
       // lap 是相邻像素的高程二阶差，量纲随 PPD 线性缩小，必须按 MPP 归一
       const a = Math.min(0.34, (lap / (MPP * 0.02)) * steep * steep * RIDGE);
@@ -348,70 +371,213 @@ console.log("设色与墨染完成");
   console.log(`勾脊 ${inked} 点`);
 }
 
-// ── 皴笔：山体的主要表现，不是给写实晕渲擦一层灰 ─────────────────
-// 旧版笔触只有 PPD*0.42 且强度 0.46，在成图上是十几像素的细屑，
-// 完全被 DEM 晕渲的密纹盖住——「施皴 2885 处」而一笔看不见。
+// ── 皴笔 ────────────────────────────────────────────────────────────
+// 程序化笔触，不用古画裁片图章。理由见 tools/brush.mjs 顶部：
+// 那批图章是被「方向性惩罚项」筛出来的乱纹区，落图是圆噪点盘不是笔，
+// 而且实测是净负贡献（带图章 coherence 0.226 < 不施皴 0.259）。
+//
+// 组织法照山水画的规矩，不是纹理填充：
+//   走向  —— 沿坡降线（自脊向谷），不是顺等高线。顺等高线画出来是缠绕的
+//            绳圈，那是解索/牛毛，不是披麻
+//   密度  —— 第一定律是「阳面留白皴阴面」，第二定律才是自上而下渐密
+//   成簇  —— 笔是成组下的，不是均匀撒开
+//   留白  —— 平畴、谷底、山脚一笔不落；山里另挖结构性的空
 {
-  const inkDir = "public/game/ink";
-  const manifest = JSON.parse(fs.readFileSync(path.join(inkDir, "manifest.json"), "utf8"));
-  const pool = [];
-  for (const s of manifest.stamps) {
-    const { data, info } = await sharp(path.join(inkDir, s.file)).raw().toBuffer({ resolveWithObject: true });
-    const ch = info.channels, size = info.width;
-    const gray = new Uint8Array(size * size);
-    for (let i = 0; i < size * size; i += 1) gray[i] = data[i * ch];
-    let sum = 0; for (const v of gray) sum += v;
-    if (sum / gray.length < 18) continue;               // 弃掉近乎素绢的图章
-    pool.push({ data: gray, size, cun: s.cun });
-  }
-  // 目标：笔触在成图上有 40–70px，才读得出是笔而不是尘
-  const SPAN = Math.round(PX_PER_DEG * Number(process.env.SPAN ?? 0.75));
-  let placed = 0;
-  for (let gy = 0; gy < H; gy += SPAN * 0.5) {
-    for (let gx = 0; gx < W; gx += SPAN * 0.5) {
-      const cx = Math.round(gx + (hash(gx, gy, 3) - 0.5) * SPAN * 0.6);
-      const cy = Math.round(gy + (hash(gx, gy, 5) - 0.5) * SPAN * 0.6);
-      if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
-      const i = cy * W + cx;
-      if (isWater[i]) continue;
-      const steep = Math.min(1, slopeArr[i] / SLOPE_HI);
-      if (steep < 0.11 || hash(gx, gy, 7) > steep * 1.9) continue;    // 丘陵亦施皴，只是笔轻
-      const tex = pool[Math.floor(hash(gx, gy, 11) * pool.length) % pool.length];
-      if (!tex) continue;
-      const scale = (SPAN * (0.8 + hash(gx, gy, 13) * 0.6)) / tex.size;
-      const angle = Math.atan2(
-        relief[Math.min(H - 2, cy + 1) * W + cx] - relief[Math.max(1, cy - 1) * W + cx],
-        relief[cy * W + Math.min(W - 2, cx + 1)] - relief[cy * W + Math.max(1, cx - 1)],
-      ) + Math.PI / 2;                                   // 顺等高线走笔
-      const half = (tex.size * scale) / 2;
-      const cos = Math.cos(-angle), sin = Math.sin(-angle);
-      // 皴也要跟着郡治距离衰减，否则墨染淡下去了而皴还在，西部依旧最脏
-      const near = 0.26 + 0.74 * Math.exp(-seatDist[i] / P(2.2));
-      const strength = Number(process.env.INK ?? 1.0) * steep * near
-                     * (0.6 + hash(gx, gy, 17) * 0.6);
-      for (let y = Math.max(0, cy - half | 0); y <= Math.min(H - 1, cy + half); y += 1) {
-        for (let x = Math.max(0, cx - half | 0); x <= Math.min(W - 1, cx + half); x += 1) {
-          const dx = x - cx, dy = y - cy;
-          const rr = Math.hypot(dx, dy) / half;
-          if (rr >= 1) continue;
-          const lx = (dx * cos - dy * sin) / scale + tex.size / 2;
-          const ly = (dx * sin + dy * cos) / scale + tex.size / 2;
-          if (lx < 0 || ly < 0 || lx >= tex.size || ly >= tex.size) continue;
-          const v = tex.data[(ly | 0) * tex.size + (lx | 0)] / 255;
-          const fade = 0.5 * (1 + Math.cos(Math.PI * rr));
-          const localSteep = Math.min(1, slopeArr[y * W + x] / SLOPE_HI);
-          const a = v * strength * fade * localSteep;
-          if (a <= 0.004 || isWater[y * W + x]) continue;
-          const o = (y * W + x) * 3;
-          rgb[o]     = Math.round(rgb[o]     * (1 - a) + INK[0] * a);
-          rgb[o + 1] = Math.round(rgb[o + 1] * (1 - a) + INK[1] * a);
-          rgb[o + 2] = Math.round(rgb[o + 2] * (1 - a) + INK[2] * a);
-        }
+  const WBASE = Math.max(4.1, P(0.0186));      // 笔宽基准。低于 4px 过不了 4:1 降采样
+  const BLOCK = P(0.42);                        // 石块单元，笔长以此为尺
+  const INK_MAX = Number(process.env.CUN_MAX ?? 25000);
+  const INK_MIN = Number(process.env.CUN_MIN ?? 6000);
+
+  // 局部起伏与相对高度：判断「这里是不是山」「在山的哪一段」。
+  // 用块级 min/max 近似滑动窗口，够用且便宜
+  const blockStat = (radius) => {
+    const d = Math.max(2, Math.round(radius));
+    const bw = Math.ceil(W / d), bh = Math.ceil(H / d);
+    const mn = new Float32Array(bw * bh).fill(Infinity);
+    const mx = new Float32Array(bw * bh).fill(-Infinity);
+    for (let y = 0; y < H; y += 1) {
+      const by = (y / d) | 0;
+      for (let x = 0; x < W; x += 1) {
+        const v = relief[y * W + x];
+        const b = by * bw + ((x / d) | 0);
+        if (v < mn[b]) mn[b] = v;
+        if (v > mx[b]) mx[b] = v;
       }
-      placed += 1;
+    }
+    // 3×3 块扩张，避免块边界处出现方格
+    const mn2 = new Float32Array(bw * bh), mx2 = new Float32Array(bw * bh);
+    for (let b = 0; b < bw * bh; b += 1) {
+      const bx = b % bw, by = (b / bw) | 0;
+      let lo = Infinity, hi = -Infinity;
+      for (let j = -1; j <= 1; j += 1) for (let i2 = -1; i2 <= 1; i2 += 1) {
+        const nx2 = bx + i2, ny2 = by + j;
+        if (nx2 < 0 || ny2 < 0 || nx2 >= bw || ny2 >= bh) continue;
+        const k = ny2 * bw + nx2;
+        if (mn[k] < lo) lo = mn[k];
+        if (mx[k] > hi) hi = mx[k];
+      }
+      mn2[b] = lo; mx2[b] = hi;
+    }
+    return { d, bw, mn: mn2, mx: mx2 };
+  };
+  const S60 = blockStat(P(0.27));
+  const S45 = blockStat(P(0.45));
+  const statAt = (S, x, y) => {
+    const b = ((y / S.d) | 0) * S.bw + ((x / S.d) | 0);
+    return { lo: S.mn[b], hi: S.mx[b] };
+  };
+
+  // 谷底闸用曲率的 p88：正曲率大者是脊，负者是谷；谷底不落笔
+  const sampleLap = [];
+  for (let i = 0; i < W * H; i += 977) if (!isWater[i]) sampleLap.push(lapArr[i]);
+  sampleLap.sort((a, b) => a - b);
+  const LAP_P88 = sampleLap[Math.floor(sampleLap.length * 0.88)] ?? 0;
+
+  const smoothstep = (a, b, v) => {
+    const u = Math.min(1, Math.max(0, (v - a) / (b - a || 1e-6)));
+    return u * u * (3 - 2 * u);
+  };
+
+  // 结构性留白：在受光的高处挖几块洞。「疏可走马」不是把密度调低，
+  // 是真的留出成片不落笔的地方
+  const holes = [];
+  {
+    const step = Math.round(P(1.4));
+    for (let y = step; y < H - step; y += step) {
+      for (let x = step; x < W - step; x += step) {
+        const i = y * W + x;
+        if (isWater[i] || shade[i] < 0.66) continue;
+        const { lo, hi } = statAt(S60, x, y);
+        if (hi - lo < 400) continue;
+        if (hash(x, y, 401) > 0.22) continue;
+        holes.push({ x, y, r: P(0.09) * (0.6 + hash(x, y, 403) * 0.8) });
+      }
     }
   }
-  console.log(`施皴 ${placed} 处`);
+  const inHole = (x, y) => holes.some((h) => (x - h.x) ** 2 + (y - h.y) ** 2 < h.r * h.r);
+
+  // ── 候选点：先按密度排序，再全局抽稀。让密度函数自己决定总量会失控 ──
+  const cand = [];
+  const gstep = Math.max(4, Math.round(P(0.05)));
+  for (let y = 2; y < H - 2; y += gstep) {
+    for (let x = 2; x < W - 2; x += gstep) {
+      const i = y * W + x;
+      if (isWater[i]) continue;
+      const steep = slopeArr[i] / SLOPE_HI;
+      if (steep < 0.20) continue;                            // 缓坡不皴
+      const { lo, hi } = statAt(S60, x, y);
+      if (hi - lo < 320) continue;                           // 起伏不足，不是山
+      if (lapArr[i] > LAP_P88) continue;                     // 谷底不落笔
+      const w45 = statAt(S45, x, y);
+      const hRel = (relief[i] - w45.lo) / Math.max(1, w45.hi - w45.lo);
+      if (hRel < 0.06) continue;                             // 山脚硬截断
+      if (inHole(x, y)) continue;
+
+      const kSlope = smoothstep(0.20, 0.50, steep);
+      // 阳面留白、阴面皴密——这是第一定律，压过「自上而下渐密」
+      const kLight = Math.min(1, Math.max(0.06, 0.06 + 0.94 * (1 - shade[i]) ** 2.2));
+      const kVert = 0.45 + 0.55 * (1 - hRel);
+      const kNear = 0.26 + 0.74 * Math.exp(-seatDist[i] / P(2.2));
+      const density = kSlope * kLight * kVert * kNear;
+      if (density < 0.02) continue;
+      cand.push({ x, y, i, density, hRel, steep, relief60: hi - lo });
+    }
+  }
+  // 排序键乘噪声：纯按密度排会整条等值线一起入选，出来是等高线不是笔群
+  cand.sort((a, b) => b.density * (0.75 + hash(b.x, b.y, 509) * 0.5)
+                    - a.density * (0.75 + hash(a.x, a.y, 509) * 0.5));
+
+  const D = new Float32Array(W * H);
+  const rnd = rng(20260902);
+  let strokes = 0;
+  const budget = Math.min(INK_MAX, Math.max(INK_MIN, Math.round(cand.length * 0.55)));
+
+  for (const c of cand) {
+    if (strokes >= budget) break;
+    const lit = shade[c.i] > 0.62;                           // 阳面：笔少、墨淡、笔细
+    // 皴种按山体性质分：起伏大而陡的石山用斧劈，土山用披麻，
+    // 密集中山用雨点。同一坡面内不混用
+    const kind = c.relief60 > 1400 && c.steep > 0.55 ? "fupi"
+      : c.relief60 > 700 ? "pima" : "yudian";
+    const nInCluster = Math.max(2, Math.round((3 + rnd() * 6) * (lit ? 0.45 : 1)));
+
+    // 方向：沿坡降线。坡太缓时坡向不可靠，退回图面竖直
+    const reliable = c.steep > 0.15;
+    const thetaBase = kind === "yudian" ? Math.PI / 2
+      : reliable ? aspectArr[c.i] : Math.PI / 2;
+    const sigma = kind === "fupi" ? 20 : kind === "pima" ? 14 : 15;
+    const thetaCluster = thetaBase + gauss(rnd) * sigma * Math.PI / 180;
+
+    for (let k = 0; k < nInCluster && strokes < budget; k += 1) {
+      const wMul = kind === "fupi" ? 2.0 : kind === "pima" ? 1.17 : 1.0;
+      const jitterW = kind === "yudian" ? 0.9 + rnd() * 0.2 : 0.78 + rnd() * 0.44;
+      const wMax = WBASE * wMul * jitterW * (lit ? 0.8 : 1);
+      const L = kind === "fupi" ? BLOCK * (0.13 + rnd() * 0.11)
+        : kind === "pima" ? BLOCK * (0.45 + rnd() * 0.45)
+        : wMax * (2.0 + rnd() * 1.4);
+      // 簇内横向错开，间距明确避开等距
+      const gapSet = [0.6, 1.0, 1.45, 1.9];
+      const gap = gapSet[(k + ((rnd() * 4) | 0)) % 4] * wMax * 1.7;
+      const side = (k - (nInCluster - 1) / 2) * gap;
+      const th = thetaCluster + (k - (nInCluster - 1) / 2) * 3.5 * Math.PI / 180
+               + gauss(rnd) * 4 * Math.PI / 180;
+      const nx2 = -Math.sin(thetaCluster), ny2 = Math.cos(thetaCluster);
+      const along = (rnd() - 0.5) * 0.56 * L;
+      const sx = c.x + nx2 * side + Math.cos(thetaCluster) * along;
+      const sy = c.y + ny2 * side + Math.sin(thetaCluster) * along;
+      if (sx < 2 || sy < 2 || sx >= W - 2 || sy >= H - 2) continue;
+
+      const inkTier = c.hRel > 0.75 ? 0.45 : c.hRel > 0.30 ? 0.78 : 1.05;
+      const dark = Math.min(1.45, Math.max(0.30, 0.30 + 1.20 * (1 - shade[c.i]) ** 1.3));
+      const A0 = 0.62 * inkTier * dark * (lit ? 0.55 : 1);
+
+      const spine = kind === "fupi"
+        ? arcSpine(sx, sy, th, L, 0, 6, rnd, 4)
+        : arcSpine(sx, sy, th, L, kind === "pima" ? 0.05 + gauss(rnd) * 0.02 : 0, 3, rnd, 10);
+      strokeInk(D, W, H, spine, {
+        wMax,
+        wProf: kind === "fupi" ? WPROF.fupiSmall : kind === "pima" ? WPROF.pima : WPROF.yudian,
+        aProf: APROF.wet,
+        lProf: kind === "fupi" ? LPROF_SIDE : LPROF_CENTER,
+        nExt: kind === "fupi" ? 1.0 : NEXT_CENTER,
+        ecc: kind === "fupi" ? 0.18 : 0,
+        A0: A0 * 0.42,                                       // 第一遍淡打底
+        fwTarget: kind === "yudian" ? 0.08 : 0.20,
+        coreFirst: kind === "fupi",
+        seed: (strokes * 2654435761) >>> 8,
+      });
+      // 五成半的笔中墨重描，位置微偏——一遍下去是刷子，两遍才是笔
+      if (rnd() < 0.55) {
+        strokeInk(D, W, H,
+          spine.map((p) => ({ x: p.x + (rnd() - 0.5) * 3, y: p.y + (rnd() - 0.5) * 3 })), {
+            wMax: wMax * 0.92,
+            wProf: kind === "fupi" ? WPROF.fupiSmall : kind === "pima" ? WPROF.pima : WPROF.yudian,
+            aProf: APROF.wet,
+            lProf: kind === "fupi" ? LPROF_SIDE : LPROF_CENTER,
+            nExt: kind === "fupi" ? 1.0 : NEXT_CENTER,
+            A0: A0 * 0.72,
+            fwTarget: kind === "yudian" ? 0.10 : 0.24,
+            coreFirst: kind === "fupi",
+            seed: (strokes * 40503 + 7) >>> 8,
+          });
+      }
+      strokes += 1;
+    }
+  }
+
+  // 统一光学合成：alpha = 1 - exp(-kD)。逐笔往 RGB 上叠会让重叠处过曝
+  let inked = 0;
+  for (let i = 0; i < W * H; i += 1) {
+    if (D[i] <= 0) continue;
+    const a = Math.min(0.92, 1 - Math.exp(-1.15 * D[i]));
+    if (a <= 0.003) continue;
+    const o = i * 3;
+    rgb[o]     = Math.round(rgb[o]     * (1 - a) + INK[0] * a);
+    rgb[o + 1] = Math.round(rgb[o + 1] * (1 - a) + INK[1] * a);
+    rgb[o + 2] = Math.round(rgb[o + 2] * (1 - a) + INK[2] * a);
+    inked += 1;
+  }
+  console.log(`皴 ${strokes} 笔（候选 ${cand.length}，留白洞 ${holes.length}），着墨 ${inked} 像素`);
 }
 
 // ── 岸线：陆侧留白一线，水侧淡墨一勾 ──────────────────────────────
