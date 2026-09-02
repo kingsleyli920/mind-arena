@@ -20,6 +20,10 @@ import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
 import type { Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
 
 const BASE = "/game/map/play-base.webp";
+// 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
+// 越拉越糊——而底图本来就有 7260 的细节可用
+const BASE_2X = "/game/map/play-base@2x.webp";
+const HD_AT = 1.8;
 const SEASON_CN = ["", "春", "夏", "秋", "冬"];
 const TYPE_CN: Record<string, string> = {
   campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结",
@@ -108,6 +112,27 @@ function blurRGBA(d: Uint8ClampedArray, w: number, h: number, r: number): void {
   }
 }
 
+/**
+ * 以视野中心为锚点缩放。按 (0,0) 缩放的话，每按一次加号都往左上角跑，
+ * 想看的地方反而离开视野。
+ */
+function zoomAt(v: { k: number; x: number; y: number }, mul: number) {
+  const k = Math.min(6, Math.max(1, v.k * mul));
+  const lim = (n: number) => Math.min(0, Math.max(-(k - 1) * 100, n));
+  // 视野中心在图上的归一化位置，缩放前后保持不变
+  const cx = (0.5 - v.x / 100) / v.k;
+  const cy = (0.5 - v.y / 100) / v.k;
+  return { k, x: lim((0.5 - cx * k) * 100), y: lim((0.5 - cy * k) * 100) };
+}
+
+/** 把某个经纬度移到视野中心 */
+function centerOn(lon: number, lat: number, k: number, MAPX: typeof MAP) {
+  const px = ((lon - MAPX.west) * MAPX.ppd) / MAPX.w;
+  const py = ((MAPX.north - lat) * MAPX.ppd) / MAPX.h;
+  const lim = (n: number) => Math.min(0, Math.max(-(k - 1) * 100, n));
+  return { k, x: lim((0.5 - px * k) * 100), y: lim((0.5 - py * k) * 100) };
+}
+
 /** 底图尺寸与地理范围。SVG 用同一坐标系，图元尺寸才好按像素定 */
 const MAP = { w: 1815, h: 1485, west: 94, north: 43, ppd: 55 };
 
@@ -140,7 +165,7 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
         <circle cx={x} cy={y} r={w * 1.15} className="siege-ring" />
       )}
       <path d={crown} fill={fill ?? "rgba(252,249,242,0.9)"}
-        stroke="#2b251e" strokeWidth={mine ? 2.6 : 1.7} strokeLinejoin="miter" />
+        stroke="#2b251e" strokeWidth={size * (mine ? 0.105 : 0.068)} strokeLinejoin="miter" />
       {/* 城门 */}
       <path d={`M ${x - notch * 0.8} ${b} L ${x - notch * 0.8} ${y + h * 0.06}
                  A ${notch * 0.8} ${notch * 0.8} 0 0 1 ${x + notch * 0.8} ${y + h * 0.06}
@@ -149,7 +174,7 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
       {isSeat && (
         <>
           {/* 州治：城上立旗 */}
-          <line x1={x} y1={tp} x2={x} y2={tp - h * 0.62} stroke="#332d25" strokeWidth={1.5} />
+          <line x1={x} y1={tp} x2={x} y2={tp - h * 0.62} stroke="#332d25" strokeWidth={size * 0.06} />
           <path d={`M ${x} ${tp - h * 0.62} L ${x + w * 0.42} ${tp - h * 0.44}
                      L ${x} ${tp - h * 0.26} Z`} fill="#8c3b2f" />
         </>
@@ -183,6 +208,14 @@ export function PlayClient() {
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const [dragging, setDragging] = useState(false);
+  // 高清底图按需加载：整幅可见时不必先下 671KB
+  const [hdReady, setHdReady] = useState(false);
+  useEffect(() => {
+    if (view.k < HD_AT || hdReady) return;
+    const im = new Image();
+    im.onload = () => setHdReady(true);
+    im.src = BASE_2X;
+  }, [view.k, hdReady]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // ── 载入 ────────────────────────────────────────────────────────
@@ -234,6 +267,10 @@ export function PlayClient() {
       roster: engine.roster, geo: engine.geo,
     }, engine.P);
     setSeat(factionId); setGame(s); setPicked([]); setFlash([]);
+    // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
+    const cap = s.factions[factionId]?.capital;
+    const p = cap ? engine.points.find((c) => c.id === cap) : null;
+    setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
   }, [engine]);
 
   const candidates: Candidate[] = useMemo(() => {
@@ -405,7 +442,9 @@ export function PlayClient() {
       y: (MAP.north - c.latitude) * MAP.ppd,
       mine: st.owner === seat,
       besieged: game.armies.some((a) => a.target === c.id),
-      base: isSeat ? 36 : hh > 150000 ? 30 : hh > 60000 ? 25 : 21,
+      // 按缩放的平方根衰减。完全跟着放大会成巨幅贴纸，完全屏幕恒定又
+      // 让「放大是为了看清」落空——取半衰：放大三倍，图元长到约 1.7 倍
+      base: (isSeat ? 36 : hh > 150000 ? 30 : hh > 60000 ? 25 : 21) / Math.sqrt(view.k),
     };
   }).filter((m): m is NonNullable<typeof m> => m !== null);
 
@@ -424,17 +463,19 @@ export function PlayClient() {
     .sort((a, b) => Number(focus === b.c.id) - Number(focus === a.c.id)
       || Number(b.mine) - Number(a.mine)
       || Number(b.isSeat) - Number(a.isSeat) || b.base - a.base)
-    .filter((m) => m.mine || m.isSeat || focus === m.c.id)
+    // 放大后铺开全部郡名：整幅可见时只标己方与州治是为了不叠字，
+    // 放大之后地方够了，还藏着就是白放大
+    .filter((m) => view.k >= 2.2 || m.mine || m.isSeat || focus === m.c.id)
     .map((m) => {
-      const size = m.isSeat ? 25 : 21;
+      const size = (m.isSeat ? 25 : 21) / Math.sqrt(view.k);
       const w = m.c.name.length * size * 1.02, h = size * 1.3;
-      const x = m.x - w / 2, y = m.y + m.base * 0.62 + 4;
+      const x = m.x - w / 2, y = m.y + m.base * 0.62 + 4 / Math.sqrt(view.k);
       const box: [number, number, number, number] = [x, y, w, h];
       const hit = placed.some(([px, py, pw, ph]) =>
         x < px + pw && x + w > px && y < py + ph && y + h > py);
       if (hit && focus !== m.c.id) return null;
       placed.push(box);
-      return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8,
+      return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8 / Math.sqrt(view.k),
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
@@ -498,12 +539,12 @@ export function PlayClient() {
           {/* 本地静态底图，尺寸固定且已压成 webp；套 next/image 只会多一层
               运行时开销与配置，不换来任何优化 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={BASE} alt="汉末地形" />
+          <img src={hdReady && view.k >= HD_AT ? BASE_2X : BASE} alt="汉末地形" />
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
-                fontSize={62 / Math.max(1, view.k * 0.75)}>{m.z}</text>
+                fontSize={62 / Math.sqrt(view.k)}>{m.z}</text>
             ))}
             {marks.map((m) => (
               <g key={m.c.id}
@@ -525,13 +566,9 @@ export function PlayClient() {
           </svg>
           </div>
           <div className="zoom">
-            <button onClick={() => setView((v) => ({ ...v, k: Math.min(6, v.k * 1.4) }))}>＋</button>
+            <button onClick={() => setView((v) => zoomAt(v, 1.4))}>＋</button>
             <button onClick={() => setView({ k: 1, x: 0, y: 0 })}>全图</button>
-            <button onClick={() => setView((v) => {
-              const k = Math.max(1, v.k / 1.4);
-              const lim = (n: number) => Math.min(0, Math.max(-(k - 1) * 100, n));
-              return { k, x: lim(v.x), y: lim(v.y) };
-            })}>－</button>
+            <button onClick={() => setView((v) => zoomAt(v, 1 / 1.4))}>－</button>
           </div>
           {focus && game.commanderies[focus] && (
             <div className="tip">

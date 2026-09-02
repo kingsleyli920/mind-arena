@@ -7,16 +7,22 @@ import fs from "node:fs";
 import sharp from "sharp";
 
 const SRC = process.env.SRC ?? "public/game/map/han-terrain.png";
-const OUT = process.env.OUT ?? "public/game/map/play-base.webp";
-const W = Number(process.env.W ?? 1815), H = Number(process.env.H ?? 1485);
 
 if (!fs.existsSync(SRC)) {
   console.error(`缺少 ${SRC}，先跑 npm run map:base`);
   process.exit(1);
 }
-await sharp(SRC, { limitInputPixels: false })
-  .resize(W, H, { kernel: "lanczos3" })
-  .webp({ quality: 88 })
-  .toFile(OUT);
-const m = await sharp(OUT).metadata();
-console.log(`→ ${OUT} ${m.width}×${m.height} ${(fs.statSync(OUT).size / 1024).toFixed(0)}KB`);
+
+// 出两档。整幅可见时用 1815；放大后换 3630——否则是把 1815 插值放大六倍，
+// 越拉越糊，而底图本来就有 7260 的细节可用
+const STEPS = [
+  { out: "public/game/map/play-base.webp", w: 1815, h: 1485, q: 88 },
+  { out: "public/game/map/play-base@2x.webp", w: 3630, h: 2970, q: 82 },
+];
+for (const s of STEPS) {
+  await sharp(SRC, { limitInputPixels: false })
+    .resize(s.w, s.h, { kernel: "lanczos3" })
+    .webp({ quality: s.q })
+    .toFile(s.out);
+  console.log(`→ ${s.out} ${s.w}×${s.h} ${(fs.statSync(s.out).size / 1024).toFixed(0)}KB`);
+}
