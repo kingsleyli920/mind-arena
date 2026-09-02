@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildGraph, listActions, type Graph } from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, type Roster } from "@/lib/game/engine/officers.ts";
+import { observedGarrison } from "@/lib/game/engine/intel.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
@@ -646,11 +647,21 @@ export function PlayClient() {
               <b>{focus}</b>
               <span>{game.commanderies[focus].owner
                 ? engine.nameOf.get(game.commanderies[focus].owner!) : "无主"}</span>
-              <span>戍兵 {game.commanderies[focus].garrison}{"\u3000"}城防 {game.commanderies[focus].defense}</span>
-              <span>产出 {game.commanderies[focus].yieldTier}{"\u3000"}民心 {game.commanderies[focus].moraleTier}{"\u3000"}
-                {engine.P.units[game.commanderies[focus].unit]?.name}</span>
-              {game.commanderies[focus].governor && (
-                <span>太守 {engine.roster.byId.get(game.commanderies[focus].governor!)?.name}</span>
+              {/* 悬停详情同样受迷雾约束。直接显示 garrison 真值，
+                  等于把鼠标当成开天眼——刺探就白做了 */}
+              <span>戍兵 {observedGarrison(game, seat, focus, engine.P).text}</span>
+              {game.commanderies[focus].owner === seat ? (
+                <>
+                  <span>城防 {game.commanderies[focus].defense}{"\u3000"}产出 {game.commanderies[focus].yieldTier}
+                    {"\u3000"}民心 {game.commanderies[focus].moraleTier}</span>
+                  <span>{engine.P.units[game.commanderies[focus].unit]?.name}
+                    {"\u3000"}器械 {{ none: "无", ram: "冲车", mound: "土山" }[game.commanderies[focus].gear]}
+                    {game.commanderies[focus].governor
+                      && `${"\u3000"}太守 ${engine.roster.byId.get(game.commanderies[focus].governor!)?.name}`}</span>
+                </>
+              ) : (
+                <span>{engine.P.units[game.commanderies[focus].unit]?.name}
+                  {"\u3000"}城防与内情不详</span>
               )}
             </div>
           )}
