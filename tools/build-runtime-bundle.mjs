@@ -29,7 +29,7 @@ const officers = read("officers.json")
 const bundle = {
   _note: "浏览器端引擎的最小数据包，由 tools/build-runtime-bundle.mjs 生成，勿手改。"
        + "史料判据与考订过程留在 lib/game/data 的全量文件里。",
-  scenario: read("scenario-194.json"),
+  scenario: read("scenario-194.json"),   // 含各方本年局势，选席界面要用
   commanderyState: read("commandery-state.json"),
   commanderies: commanderies.map((c) => ({
     id: c.id, name: c.name, zhou: c.zhou, seat: c.seat,

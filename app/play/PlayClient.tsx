@@ -32,7 +32,8 @@ const TYPE_CN: Record<string, string> = {
 };
 
 type Bundle = {
-  scenario: { factions: Array<{ id: string; name: string; color?: string; seat?: string }> };
+  scenario: { factions: Array<{ id: string; name: string; color?: string; seat?: string;
+                               courtesyName?: string; situation?: string }> };
   commanderyState: unknown; commanderies: Array<{ id: string; name: string; zhou: string;
     longitude: number; latitude: number }>;
   adjacency: unknown; troopTypes: unknown; provinceSeats: unknown;
@@ -186,6 +187,7 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
 interface Engine {
   P: EngineParams; G: Graph; roster: Roster; geo: Geography;
   colorOf: Map<string, string>; nameOf: Map<string, string>;
+  lore: Map<string, { courtesyName?: string; situation?: string }>;
   data: Parameters<typeof createGame>[0];
   /** 画点用的经纬度。SetupData 里的 commanderies 只声明 id/name */
   points: MapPoint[];
@@ -245,6 +247,8 @@ export function PlayClient() {
           P, G, roster, geo,
           colorOf: new Map(b.scenario.factions.map((f) => [f.id, f.color ?? "#7a7266"])),
           nameOf: new Map(b.scenario.factions.map((f) => [f.id, f.name])),
+          lore: new Map(b.scenario.factions.map((f) =>
+            [f.id, { courtesyName: f.courtesyName, situation: f.situation }])),
           points: b.commanderies,
           data: {
             commanderyState: b.commanderyState as never,
@@ -416,9 +420,17 @@ export function PlayClient() {
           {seats.map(({ f, n, st }) => (
             <li key={f.id}>
               <button onClick={() => start(f.id)} style={{ "--c": engine.colorOf.get(f.id) } as React.CSSProperties}>
-                <b>{engine.nameOf.get(f.id)}</b>
-                <span>{n} 郡{"\u3000"}{st.controlledZhou} 州{"\u3000"}州治 {st.zhouSeats}</span>
-                <em>{f.capital ?? "无治所"}</em>
+                <b>{engine.nameOf.get(f.id)}
+                  {engine.lore.get(f.id)?.courtesyName && (
+                    <i>字{engine.lore.get(f.id)!.courtesyName}</i>
+                  )}
+                </b>
+                <span>{n} 郡{"\u3000"}{st.controlledZhou} 州{"\u3000"}州治 {st.zhouSeats}
+                  {"\u3000"}治 {f.capital ?? "无"}</span>
+                {/* 本年局势取自剧本，逐条有史料出处。开局先让人知道自己接的是什么烂摊子 */}
+                {engine.lore.get(f.id)?.situation && (
+                  <em>{engine.lore.get(f.id)!.situation}</em>
+                )}
               </button>
             </li>
           ))}

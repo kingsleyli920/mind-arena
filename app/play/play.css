@@ -32,7 +32,7 @@
 .seat-grid {
   list-style: none; margin: 1.4rem clamp(1rem, 3vw, 2.4rem); padding: 0;
   display: grid; gap: 0.7rem;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 .seat-grid button {
   width: 100%; text-align: start; cursor: pointer;
@@ -42,8 +42,14 @@
   border-radius: 3px; transition: background 0.15s, transform 0.15s;
 }
 .seat-grid button:hover { background: #fff; transform: translateY(-1px); }
-.seat-grid b { font-size: 1rem; }
-.seat-grid span, .seat-grid em { font-size: 0.8rem; color: var(--ink-soft); font-style: normal; }
+.seat-grid b { font-size: 1.02rem; display: flex; align-items: baseline; gap: 0.4rem; }
+.seat-grid b i { font-size: 0.74rem; font-style: normal; font-weight: 400; color: var(--ink-soft); }
+.seat-grid span { font-size: 0.78rem; color: var(--ink-soft); }
+.seat-grid em {
+  font-size: 0.75rem; line-height: 1.75; color: var(--ink-soft); font-style: normal;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  border-top: 1px solid var(--rule); padding-top: 0.35rem; margin-top: 0.1rem;
+}
 
 /* ── 对局 ── */
 .play-body {
