@@ -15,6 +15,8 @@ import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officer
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
+import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
+  type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
@@ -285,6 +287,9 @@ export function PlayClient() {
   // 而全图一季平均易主 5.6 处，涉及自己的只有 0.4–1.2 处。
   // 全画等于把「什么都没动」换成「满屏都在闪」
   const [flips, setFlips] = useState<Array<{ id: string; gained: boolean; turn: number }>>([]);
+  /** 载入时发现的旧存档。在选席页上给「继续上局」，而不是自动恢复——
+      自动恢复会让「我想重开一局」变成一件要先找按钮的事 */
+  const [resume, setResume] = useState<SavedGame | null>(null);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -337,6 +342,7 @@ export function PlayClient() {
             troopTypes: b.troopTypes as never,
           },
         });
+        setResume(loadGame(packStamp(P.seasonsPerGame, b.commanderies.length, P.epochCount)));
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : String(e));
       }
@@ -344,12 +350,24 @@ export function PlayClient() {
     return () => { alive = false; };
   }, []);
 
+  // 每次状态推进就落盘。存的是 GameState 与席位，派生量一概不存——
+  // 候选表、简报、镜头都能重算，存进去只会多一份会过期的副本
+  useEffect(() => {
+    if (!engine || !game || !seat) return;
+    if (game.finished) { clearSave(); return; }   // 打完了就没什么可继续的
+    saveGame({
+      packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount),
+      seat, game, picked,
+    });
+  }, [engine, game, seat, picked]);
+
   const start = useCallback((factionId: string) => {
     if (!engine) return;
     const s = createGame(engine.data, {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
       roster: engine.roster, geo: engine.geo,
     }, engine.P);
+    clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
@@ -527,6 +545,35 @@ export function PlayClient() {
           <p>兴平元年·一九四{"\u3000"}择一席入局。十六季后按<b>相对开局的增量</b>定档——
             守成不得分，多控一州或多据一州治方入乙档。</p>
         </header>
+        {resume && (() => {
+          // 显式给「继续 / 重开」，不自动恢复：自动恢复会让「我想重开一局」
+          // 变成一件要先找按钮的事
+          const f = resume.game.factions[resume.seat];
+          const owned = Object.values(resume.game.commanderies)
+            .filter((c) => c.owner === resume.seat).length;
+          return (
+            <div className="resume">
+              <div>
+                <b>上次那局还没打完</b>
+                <span>{engine.nameOf.get(resume.seat) ?? resume.seat}
+                  {"\u3000"}第 {resume.game.turn + 1}/{engine.P.seasonsPerGame} 季
+                  {"\u3000"}{owned} 郡（开局 {f?.startCommanderies ?? "?"}）
+                  {"\u3000"}{GRADE_CN[f?.bestGrade ?? "ding"]} 档</span>
+              </div>
+              <button onClick={() => {
+                setSeat(resume.seat); setGame(resume.game); setPicked(resume.picked);
+                setFlash({ mine: [], world: [] }); setFlips([]);
+                const cap = resume.game.factions[resume.seat]?.capital;
+                const p = cap ? engine.points.find((c) => c.id === cap) : null;
+                setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
+                setResume(null);
+              }}>继续</button>
+              <button className="ghost" onClick={() => { clearSave(); setResume(null); }}>
+                弃掉，重开
+              </button>
+            </div>
+          );
+        })()}
         <ul className="seat-grid">
           {seats.map(({ f, n, st }) => (
             <li key={f.id}>

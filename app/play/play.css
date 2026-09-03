@@ -348,3 +348,18 @@
 .map-stage svg .mark:focus-visible .city > path:nth-of-type(1) {
   stroke: var(--seal); stroke-width: 4;
 }
+
+/* ── 继续上局 ── */
+.resume {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  margin: 0 0 1rem; padding: 0.7rem 0.9rem;
+  border: 1px solid var(--seal); border-radius: 3px; background: #f6efe2;
+}
+.resume > div { display: grid; gap: 0.15rem; margin-inline-end: auto; }
+.resume b { font-size: 0.9rem; }
+.resume span { font-size: 0.75rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.resume button {
+  padding: 0.4rem 0.9rem; cursor: pointer; font: inherit; font-size: 0.82rem;
+  background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;
+}
+.resume button.ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--rule); }
