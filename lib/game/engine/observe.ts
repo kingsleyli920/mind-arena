@@ -150,9 +150,25 @@ export function observe(
 /** 观测里若出现这些，就是漏了。给测试用 */
 export const FORBIDDEN_IN_OBSERVATION = ["seed"];
 
-/** 粗估 token：汉字约 1 个，ASCII 约 1/4 个 */
+/**
+ * 估算 token 数。系数由三家真实 tokenizer 标定，不是拍的。
+ *
+ * 拿 13 份真实提示词（规则摘要 + 各席位各季的观测，3.5k–13k 字符）
+ * 逐条发给 OpenRouter 读 prompt_tokens，最小二乘拟合每字符的 token 数：
+ *
+ *   anthropic/claude-haiku-4.5   汉字 1.300  ASCII 0.446
+ *   openai/gpt-5-nano            汉字 1.040  ASCII 0.420
+ *   deepseek/deepseek-v3.2       汉字 0.855  ASCII 0.467
+ *
+ * 原系数是 0.9 / 0.25，把实际用量低估了 1.33–1.59 倍——错得最狠的是 ASCII：
+ * 观测 JSON 里全是键名、标点、数字这类短片段，压不到四分之一个 token。
+ * 于是「袁绍峰值 5828 / 预算 6000」这句话是假的，真实值约 9300。
+ *
+ * 取 Claude 的系数（三家里最保守，也正是本项目主要要评的对象）：
+ * 预算闸门宁可报高，不可报低——报低会让人以为还有余量。
+ */
 export function estTokens(text: string): number {
   let cjk = 0, ascii = 0;
   for (const ch of text) { if (ch.codePointAt(0)! > 0x2e80) cjk += 1; else ascii += 1; }
-  return Math.round(cjk * 0.9 + ascii / 4);
+  return Math.round(cjk * 1.3 + ascii * 0.45);
 }

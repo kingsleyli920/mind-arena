@@ -29,7 +29,10 @@ const DATA = {
 };
 const nameOf = (id) => read("scenario-194.json").factions.find((f) => f.id === id)?.name ?? id;
 
-const LIMIT = Number(process.env.LIMIT ?? 6000);
+// 单位是**真实 token**（estTokens 已按三家 tokenizer 标定，取 Claude 系数）。
+// 此前是 6000「估算单位」，而估算低估 1.59 倍——那道闸门真正卡的是约 9500 真 token。
+// 这里换成同等严格的真实值，闸门的松紧不变，但数字终于表示它字面的意思
+const LIMIT = Number(process.env.LIMIT ?? 10_000);
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
 const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 

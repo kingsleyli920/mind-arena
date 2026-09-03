@@ -98,7 +98,9 @@ for (let gi = 0; gi < GAMES; gi += 1) {
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
           dropped: record.admission.dropped.map((d) => d.reason),
           usage: record.usage, failure: record.failure, reason: record.reason,
-          structured: record.structured, elapsedMs: record.elapsedMs,
+          structured: record.structured, rung: record.rung,
+          maxTokens: record.maxTokens, finishReason: record.finishReason,
+          elapsedMs: record.elapsedMs,
         };
       } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
@@ -159,9 +161,27 @@ for (const r of results) {
 const usage = records.filter((r) => r.usage);
 if (usage.length) {
   const sum = (k) => usage.reduce((a, r) => a + (r.usage[k] ?? 0), 0);
-  console.log(`\ntoken：入 ${sum("prompt")}（命中缓存 ${sum("cached")}）`
-    + `\u3000出 ${sum("completion")}\u3000调用 ${usage.length} 次`
+  const cacheRate = sum("prompt") ? sum("cached") / sum("prompt") : 0;
+  console.log(`\ntoken：入 ${sum("prompt")}（命中缓存 ${sum("cached")}，`
+    + `${(cacheRate * 100).toFixed(0)}%）`
+    + `\u3000出 ${sum("completion")}（其中推理 ${sum("reasoning")}）`
+    + `\u3000调用 ${usage.length} 次`
     + `\u3000失败 ${records.filter((r) => r.failure).length} 次`);
+  // 降到哪一档必须报出来：不同档位下模型受的约束不同（有无解码层强制、
+  // 有无 temperature），分数本来就不完全可比。此前只有一个 structured 布尔值
+  const byRung = {};
+  for (const r of records) if (r.rung) byRung[r.rung] = (byRung[r.rung] ?? 0) + 1;
+  console.log(`档位：${Object.entries(byRung).sort()
+    .map(([k, v]) => `${k} ${v}`).join("\u3000")}`);
+  // 出参预算被推理吃光是 harness 的配置问题，不是模型答不上来。
+  // 混进「失败」计数等于把自己的 bug 算到模型头上
+  const starved = records.filter((r) => (r.failure ?? "").startsWith("无内容"));
+  const grown = records.filter((r) => r.maxTokens > 8000);
+  if (starved.length || grown.length) {
+    console.log(`⚠ 出参预算：${starved.length} 季返回空内容，`
+      + `${grown.length} 季被推理顶到翻倍重试。这是 harness 的配置问题，不是模型的分`);
+    if (starved.length) console.log(`  样例：${starved[0].failure}`);
+  }
 }
 console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`
   + `\u3000非法率 ${(avg(results.map((r) => r.illegalRate)) * 100).toFixed(1)}%`

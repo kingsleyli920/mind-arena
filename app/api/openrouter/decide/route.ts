@@ -60,6 +60,14 @@ export async function POST(request: Request) {
         },
       },
     });
+    // 「没让它说完」与「它答不上来」是两回事，错误信息要说清楚，
+    // 否则界面上只会显示「模型未给出决策」，而真正该改的是出参预算
+    if (!res.content.trim()) {
+      return Response.json({
+        error: `模型未产出内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
+             + `${res.usage?.reasoning ? `，推理占 ${res.usage.reasoning}` : ""}）`,
+      }, { status: 502 });
+    }
     const decision = parseDecision(res.content);
     if (!decision) {
       return Response.json({ error: "模型未给出可解析的决策", raw: res.content.slice(0, 500) },
@@ -67,7 +75,8 @@ export async function POST(request: Request) {
     }
     return Response.json({
       decision, model: res.model, usage: res.usage,
-      structured: res.structured, attempts: res.attempts, elapsedMs: res.elapsedMs,
+      structured: res.structured, rung: res.rung, maxTokens: res.maxTokens,
+      finishReason: res.finishReason, attempts: res.attempts, elapsedMs: res.elapsedMs,
     });
   } catch (e) {
     return Response.json({ error: (e as Error).message }, { status: 502 });

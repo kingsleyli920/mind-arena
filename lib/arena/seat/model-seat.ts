@@ -9,7 +9,7 @@ import type { Roster } from "../../game/engine/officers.ts";
 import type { EngineParams } from "../../game/engine/params.ts";
 import type { Geography } from "../../game/engine/victory.ts";
 import type { FactionId, GameState, Order } from "../../game/engine/types.ts";
-import type { LlmClient } from "../llm/client.ts";
+import type { LlmClient, Rung } from "../llm/client.ts";
 import { admit, type Admission } from "./admit.ts";
 import { decisionSchema, parseDecision } from "./parse.ts";
 import { renderSystem, renderUser, PROMPT_VERSION } from "./prompt.ts";
@@ -25,8 +25,13 @@ export interface ModelTurnRecord {
   picks: string[];
   reason?: string;
   admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate">;
-  usage: { prompt: number; completion: number; cached: number } | null;
+  usage: { prompt: number; completion: number; cached: number; reasoning: number } | null;
   structured: boolean;
+  /** 请求实际落在哪一档降级。跨模型比分前要先看这个，否则约束不同分数不可比 */
+  rung: Rung;
+  /** 最终用的出参预算。被推理饿死翻倍过就与默认值不同 */
+  maxTokens: number;
+  finishReason: string | null;
   attempts: number;
   elapsedMs: number;
   /** 失败时记下原因，orders 为空 */
@@ -56,7 +61,8 @@ export async function modelDecide(
     turn: s.turn, seat: faction, model: deps.model, promptVersion: PROMPT_VERSION,
     obsChars: user.length, candidates: cands.length,
     picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0 },
-    usage: null, structured: false, attempts: 0, elapsedMs: 0,
+    usage: null, structured: false, rung: "text", maxTokens: 0,
+    finishReason: null, attempts: 0, elapsedMs: 0,
   };
   if (!cands.length) return { orders: [], record: base };
 
@@ -67,6 +73,15 @@ export async function modelDecide(
       user,
       schema: decisionSchema(cands),
     });
+    // 「没让它说完」与「它答不上来」必须分开记。前者是 harness 的配置问题
+    // ——推理模型把出参预算全花在 reasoning 上，content 返回空串——
+    // 记成后者会把每个推理模型都判成废物，而这个 harness 的立项目的就是比模型
+    if (!res.content.trim()) {
+      const r = res.usage?.reasoning ?? 0;
+      return { orders: [], record: { ...base, ...meta(res),
+        failure: `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
+               + `${r ? `，推理占 ${r}` : ""}）` } };
+    }
     const dec = parseDecision(res.content);
     if (!dec) {
       // 解析不出记为「无回应」，不是「什么都不做」——两者在评测里含义不同
@@ -87,7 +102,9 @@ export async function modelDecide(
 }
 
 const meta = (r: { model: string; usage: ModelTurnRecord["usage"]; structured: boolean;
+                   rung: Rung; maxTokens: number; finishReason: string | null;
                    attempts: number; elapsedMs: number }) => ({
   model: r.model, usage: r.usage, structured: r.structured,
+  rung: r.rung, maxTokens: r.maxTokens, finishReason: r.finishReason,
   attempts: r.attempts, elapsedMs: r.elapsedMs,
 });
