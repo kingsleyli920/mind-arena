@@ -67,6 +67,7 @@ function titleOf(
     case "muster": return `于${a.at} 集结`;
     case "govern": return `${a.at} ${POLICY_CN[a.policy] ?? a.policy}`;
     case "array": return `${a.at} 改${FORMATION_CN[a.to]}阵`;
+    case "suade": return `招降 ${officerOf(a.officer)}`;
     case "appoint": return `调 ${officerOf(a.officer)} 驻 ${a.at}`;
     case "scout": return `刺探 ${a.at}`;
     case "ally": return a.act === "form" ? `与${nameOf(a.to)}缔盟` : `与${nameOf(a.to)}绝盟`;

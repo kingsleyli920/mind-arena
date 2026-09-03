@@ -7,7 +7,7 @@ import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "../lib/game/engine/intel.ts";
-import { retinueAt, stationedAt, isFiller, attackRetinue }
+import { retinueAt, stationedAt, isFiller, attackRetinue, suadeChance }
   from "../lib/game/engine/officers.ts";
 import { fieldOutcome, formationEdge } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
@@ -25,7 +25,8 @@ const DATA = {
 };
 const G = buildGraph(read("adjacency.json"));
 // 引擎参数唯一来源是内容包，测试也走同一条路径
-const P = loadParams(JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")));
+const PACK = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+const P = loadParams(PACK);
 const ROSTER = buildRoster(
   read("officers.json"),
   read("officer-availability-194.json"),
@@ -388,26 +389,103 @@ const attackPair = (s, faction) => {
   return { from, edge };
 };
 
-test("界面的候选分组两张表都要覆盖引擎给出的每一类", () => {
+test("界面的候选分组两张表都要覆盖每一类动作", () => {
   // 加阵型时界面上直接显示了 `array` 这个内部 id：候选是新的，
-  // 而分组名表还是旧的。同类的规矩已经有一条（标签不露 id），
-  // 但那条只看候选自己的文字，看不到分组的表头。
+  // 而分组名表还是旧的。
   //
-  // 这里不查文案好坏，只查覆盖：引擎产出的每个分组键，
-  // 两张表都得有——顺序表决定它排在哪，中文表决定它叫什么
-  const s = fresh();
-  const keys = new Set();
-  for (const f of Object.keys(s.factions)) {
-    if (s.factions[f].eliminated) continue;
-    for (const c of listActions(s, f, G, P, DEFAULT_RULES, ROSTER)) {
-      keys.add(c.key.split(":")[0]);
-    }
-  }
-  assert.ok(keys.size >= 6, `只收到 ${keys.size} 类候选，样本不足以判定覆盖`);
+  // 第一版这条测试是从**开局状态**收集分组键的，于是加招降时它又漏了——
+  // 俘虏是中局才有的东西，开局枚举不到。判据因此改成「内容包里的每一类动作」：
+  // 那份清单与引擎同源，且不依赖某一局恰好走到哪一步
+  const ids = PACK.actions.map((a) => a.id);
+  // relief / withdraw 不是动作类型，是引擎从征伐派生出来的候选键
+  const keys = new Set([...ids, "relief"]);
+  assert.ok(keys.size >= 9, `只有 ${keys.size} 类动作，样本不足以判定覆盖`);
   for (const k of keys) {
     assert.ok(TYPE_CN[k], `分组「${k}」没有中文名 —— 界面会直接显示这个内部 id`);
     assert.ok(PANEL_ORDER.includes(k), `分组「${k}」不在面板顺序里 —— 会被排到末尾`);
   }
+});
+
+// ── 招降 ──────────────────────────────────────────────────────────────
+
+/** 打一场必破的城，返回破城后的状态与被俘者 */
+function sack(seed = "reg-0") {
+  const s = fresh(seed);
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 40000;
+  s.commanderies[edge.to].garrison = 3000;
+  s.commanderies[edge.to].defense = 20;
+  const order = { faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "ram" } };
+  const r = resolve(s, [order], G, P, ROSTER, GEO);
+  return { s: r.state, at: edge.to, from: from.id };
+}
+
+test("招降：破城即入窗，逾期自动出列", () => {
+  let { s, at } = sack();
+  const caught = s.captives.filter((x) => x.at === at);
+  assert.ok(caught.length, "破城后无人入招降之窗");
+  for (const c of caught) {
+    assert.equal(c.by, "yuanshao", "俘虏没记在攻方名下");
+    // 在窗期间对任何一方都不可用 —— 招过来之前这人不属于谁
+    assert.ok(s.capturedOfficers.includes(c.officer), "在窗俘虏仍可被原主使用");
+  }
+  // 空转到出窗。剔除只写在结算里一处，这里验的是那一处真的在跑
+  const who = caught[0].officer;
+  let seasons = 0;
+  while (s.captives.some((x) => x.officer === who) && seasons < 8) {
+    s = resolve(refreshAp(s, P), [], G, P, ROSTER, GEO).state;
+    seasons += 1;
+  }
+  assert.equal(seasons, P.suadeWindow,
+    `俘虏在册 ${seasons} 季，包里写的窗口是 ${P.suadeWindow} 季`);
+});
+
+test("招降：成则驻于所俘之郡，败则永久离场", () => {
+  // 走遍若干 seed，凑齐一成一败两个样本 —— 掷点是确定性的，不能靠重试
+  let won = null, lost = null;
+  for (let i = 0; i < 12 && (!won || !lost); i++) {
+    const { s: s0, at } = sack(`suade-${i}`);
+    const who = s0.captives.find((x) => x.at === at);
+    if (!who) continue;
+    const s1 = refreshAp(s0, P);
+    const r = resolve(s1, [{ faction: "yuanshao",
+      action: { type: "suade", officer: who.officer } }], G, P, ROSTER, GEO);
+    const ev = r.state.log.find((e) => e.kind === "suade");
+    assert.ok(ev, "下了招降令却没有结算事件");
+    if (/成，驻/.test(ev.text)) won ??= { r, who };
+    else lost ??= { r, who };
+  }
+  assert.ok(won && lost, "十二个 seed 里凑不出一成一败 —— 成功率可能被写死了");
+
+  assert.equal(won.r.state.stations[won.who.officer], won.who.at,
+    "招降成功却没驻进所俘之郡");
+  assert.ok(!won.r.state.capturedOfficers.includes(won.who.officer),
+    "招降成功却仍在被俘名单里 —— 这人还是不能用");
+  assert.ok(lost.r.state.capturedOfficers.includes(lost.who.officer),
+    "招降失败却没有永久离场");
+  for (const st of [won.r.state, lost.r.state]) {
+    assert.ok(!st.captives.some((x) => x.officer === won.who.officer
+                                    && x.officer === lost.who.officer),
+      "结算后仍留在俘虏名单里 —— 同一个人可以被反复招降");
+  }
+});
+
+test("招降：控其籍贯郡则成功率更高，名将则基本招不来", () => {
+  const pick = (want) => [...ROSTER.byId.values()]
+    .filter((o) => o.home)
+    .sort((a, b) => want(b) - want(a))[0];
+  const star = pick((o) => o.leadership + o.might + o.intellect + o.politics + o.charisma);
+  const plain = pick((o) => -(o.leadership + o.might + o.intellect + o.politics + o.charisma));
+  assert.ok(suadeChance(star, P, false) < suadeChance(plain, P, false),
+    `名将 ${star.name} 不比寻常之将难招`);
+  assert.ok(suadeChance(star, P, false) <= 0.1,
+    `五维最高的 ${star.name} 成功率 ${suadeChance(star, P, false)} —— 打赢就白捡一个名将`);
+  assert.equal(
+    Math.round((suadeChance(plain, P, true) - suadeChance(plain, P, false)) * 1000),
+    Math.round(P.suadeHomeBonus * 1000),
+    "控其籍贯郡没有加成",
+  );
 });
 
 // ── 阵型 ──────────────────────────────────────────────────────────────

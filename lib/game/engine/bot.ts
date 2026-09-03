@@ -36,13 +36,13 @@ export const PROFILES: Record<Profile, string> = {
 // 给高了各画像都无脑改阵，策略差异被抹平——极差掉三分之一。
 // 「一条几乎总是对的动作」正是评测最不需要的东西
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { array: 5, govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
-  balanced:    { array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
-  aggressive:  { array: 1, govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
-  opportunist: { array: 2, govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
+  turtle:      { suade: 6, array: 5, govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
+  balanced:    { suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  aggressive:  { suade: 6, array: 1, govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
+  opportunist: { suade: 6, array: 2, govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
   // 与均衡流同底，差别全在下面读 gain 的那几行——
   // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
-  purpose:     { array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  purpose:     { suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
 };
 
 /**

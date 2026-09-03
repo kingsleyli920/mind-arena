@@ -165,8 +165,10 @@ export interface GameState {
    * 因此是一条真决策，而不是出兵时顺手点的一个下拉框。
    */
   stations: Record<OfficerId, CommanderyId>;
-  /** 破城被俘的守将，本局不再出场 */
+  /** 破城被俘的守将，本局不再出场（招降成功者会从这里移出） */
   capturedOfficers: OfficerId[];
+  /** 尚在招降窗口内的俘虏。过窗即出列，名单因此不会只增不减 */
+  captives: Array<{ officer: OfficerId; by: FactionId; at: CommanderyId; since: number }>;
   /** 本局可招募的在野武将。由 seed 抽定，是全局唯一的开局随机 */
   recruitPool: OfficerId[];
   log: GameEvent[];
@@ -187,6 +189,8 @@ export type Action =
   | { type: "withdraw"; army: string }
   /** 改阵。阵型是郡的属性，这是唯一能改它的令 */
   | { type: "array"; at: CommanderyId; to: Formation }
+  /** 招降俘虏。成败由确定性随机定，失败则该人永久离场 */
+  | { type: "suade"; officer: OfficerId }
   | { type: "retire" };
 
 export interface Order {

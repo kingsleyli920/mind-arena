@@ -70,6 +70,8 @@ longer match.
   the whole model-seat pipeline exist and are tested, but wiring live models into
   the play UI is deliberately deferred until the game itself is complete.
 - Counties (县) are not a play unit; the map's atom is the commandery (郡).
+- No loyalty model. Officers never defect; the only way to gain someone else's
+  officer is to take the city and win the 招降 roll within two seasons.
 - One scenario only (194 兴平元年).
 - Desktop only.
 - No repository or public deploy yet.

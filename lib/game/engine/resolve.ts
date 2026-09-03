@@ -15,8 +15,8 @@ import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
-import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap, isFiller }
-  from "./officers.ts";
+import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
+  isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
@@ -224,6 +224,31 @@ export function resolve(
       (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
       // 报刚探到的那个值。只写「刺探了 X」等于没报——玩家要的是探到了什么
       receipt(o.faction).scout.push(`${a.at} ${observedGarrison(s, o.faction, a.at, P).text}`);
+    } else if (a.type === "suade") {
+      // 招降在阶段一结算：成了就当季即可随军，与调任同阶段。
+      // 随机键里带 officer，同一季招两个人不会共用一次掷点
+      const idx = s.captives.findIndex((x) => x.officer === a.officer);
+      const cap = s.captives[idx];
+      const who = roster?.byId.get(a.officer);
+      if (cap && who) {
+        const holdsHome = !!who.home && s.commanderies[who.home]?.owner === o.faction;
+        const p = suadeChance(who, P, holdsHome);
+        const r = roll({ seed: s.seed, year: s.year, season: s.season,
+                         faction: o.faction, event: `suade:${a.officer}`, seq: 0 });
+        s.captives.splice(idx, 1);
+        if (r < p) {
+          // 招过来即驻于所俘之郡：他本来就在那儿，且那多半是新的前线
+          s.capturedOfficers = s.capturedOfficers.filter((x) => x !== a.officer);
+          s.stations[a.officer] = cap.at;
+          log(s, { kind: "suade", faction: o.faction,
+                   text: `招降 ${who.name} 成，驻 ${cap.at}`,
+                   attribution: { 成功率: Math.round(p * 100), 掷点: Math.round(r * 100) } });
+        } else {
+          log(s, { kind: "suade", faction: o.faction,
+                   text: `招降 ${who.name} 不成，其人不屈`,
+                   attribution: { 成功率: Math.round(p * 100), 掷点: Math.round(r * 100) } });
+        }
+      }
     } else if (a.type === "array") {
       const was = s.commanderies[a.at].formation;
       s.commanderies[a.at].formation = a.to;
@@ -516,6 +541,10 @@ export function resolve(
         for (const o of caught) {
           s.capturedOfficers.push(o.id);
           delete s.stations[o.id];
+          // 同时进招降窗口：攻方两季内可下「招降」令把人招过来。
+          // 先入 capturedOfficers 是要害——在招过来之前，这人对谁都不可用
+          s.captives.push({ officer: o.id, by: army.faction,
+                            at: army.target!, since: s.turn });
         }
         log(s, { kind: "officer-captured", faction: army.faction,
                  text: `${army.target} ${caught.map((o) => o.name).join("、")} 被俘` });
@@ -691,6 +720,12 @@ export function resolve(
       : { kind: "supply-cut-scatter", faction: army.faction,
           text: `${who}后路断绝，粮尽溃散` });
   }
+
+  // 出窗的俘虏出列。剔除的判据写在这一处，别处只问「在不在册」——
+  // 时限散在候选、校验、结算三处各写一遍，迟早各写各的。
+  // 判的是**下一季还在不在窗**：破城发生在第七阶段，当季已无从下令，
+  // 所以能招的是此后的 suadeWindow 季
+  s.captives = s.captives.filter((x) => s.turn + 1 - x.since <= P.suadeWindow);
 
   // ── 阶段九：存亡与档位 ────────────────────────────────────────────
   const countByFaction = new Map<FactionId, number>();

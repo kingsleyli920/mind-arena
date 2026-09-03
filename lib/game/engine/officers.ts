@@ -103,6 +103,23 @@ export function rollRecruitPool(r: Roster, seed: string, ratio: number): Officer
     .map((o) => o.id);
 }
 
+/**
+ * 招降的成功率。
+ *
+ * 只读五维均值与「攻方是否控其籍贯郡」这两项——不引入忠诚。
+ * 忠诚要做成一个逐季演化的量才不假，而那是另一套系统；
+ * 这里要的只是「名将难招、乡人好招」这一条能被模型算清楚的规律。
+ * 均值 60 的寻常之将约 35%，均值 90 的名将约 5%——名将基本招不来，
+ * 这既符合史实，也让「杀还是招」不至于变成没有代价的稳赚
+ */
+export function suadeChance(
+  o: OfficerRef, P: EngineParams, holdsHome: boolean,
+): number {
+  const avg = (o.leadership + o.might + o.intellect + o.politics + o.charisma) / 5;
+  const p = P.suadeBase - avg * P.suadePerStat + (holdsHome ? P.suadeHomeBonus : 0);
+  return Math.max(0, Math.min(1, p));
+}
+
 /** 已有驻地的武将。一人只能驻一郡 */
 export function postedOfficers(s: GameState): Set<OfficerId> {
   return new Set(Object.keys(s.stations));

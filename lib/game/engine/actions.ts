@@ -10,6 +10,10 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
 import { forecastCampaign, forecastField } from "./forecast.ts";
 import { formationEdge, FORMATION_CN } from "./combat.ts";
+import { suadeChance } from "./officers.ts";
+
+const statSum = (o: OfficerRef) =>
+  o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
@@ -484,6 +488,39 @@ export function listActions(
     }
   }
 
+  // ── 招降：破城后两季内可招被俘之将 ────────────────────────────────
+  //
+  // 不设时限则俘虏名单只增不减，候选逐季膨胀（违背 R13）；
+  // 两季的窗口也让「先招人还是先修城」成为真取舍。
+  // 名将基本招不来（均值 90 约 5%），所以这不是「打赢就白捡一个关羽」
+  if (ap >= rules.normalAp && roster) {
+    const mine_ = new Set(mine.map((c) => c.id));
+    const pool = s.captives
+      .filter((x) => x.by === f)
+      .map((x) => ({ x, o: roster.byId.get(x.officer) }))
+      .filter((e) => !!e.o)
+      .sort((a, b) => statSum(b.o!) - statSum(a.o!) || a.x.officer.localeCompare(b.x.officer))
+      .slice(0, rules.perTypeCap);
+    for (const { x, o } of pool) {
+      const home = o!.home && mine_.has(o!.home);
+      const pct = Math.round(suadeChance(o!, P, !!home) * 100);
+      // 剔除发生在结算末尾（且在 turn 自增之前），判据是 turn + 1 − since <= 窗口。
+      // 所以最后一个能下令的季是 since + 窗口 —— 提示只在那一季给，
+      // 早一季给等于在撒谎，而这句提示正是要让人分清「还能等」和「不能等」
+      const last = s.turn - x.since >= P.suadeWindow;
+      out.push({
+        key: `suade:${x.officer}`,
+        action: { type: "suade", officer: x.officer },
+        cost: rules.normalAp,
+        label: `招降 ${o!.name}（于${x.at}｜统${o!.leadership} 武${o!.might} 智${o!.intellect}`
+             + ` 政${o!.politics} 魅${o!.charisma}`
+             + `${home ? `｜籍贯${o!.home}在我手，+${Math.round(P.suadeHomeBonus * 100)}%` : ""}`
+             + `｜成功 ${pct}%，不成则不屈永殁`
+             + `${last ? "｜本季末出窗，过期不可招" : ""}）`,
+      });
+    }
+  }
+
   // ── 改阵：只在「当面之敌的阵正克本郡」时列出 ────────────────────────
   //
   // 阵型是郡的属性（不乘候选数），改阵是唯一能动它的令。
@@ -741,6 +778,13 @@ export function validate(
     case "scout":
       if (!s.commanderies[a.at]) return "目标郡不存在";
       return null;
+    case "suade": {
+      // 只查归属：**在册即在窗**。出窗者每季末已被剔除，
+      // 时限判据因此只有一处（resolve 的剔除），不用在这里再写一遍
+      const cap = s.captives.find((x) => x.officer === a.officer);
+      if (!cap || cap.by !== o.faction) return "此人不在我方俘中";
+      return null;
+    }
     case "array": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
@@ -765,8 +809,8 @@ export function validate(
 /** 规范化排序：使裁决顺序与提交顺序无关（MERS R6） */
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
-    ({ scout: 0, appoint: 1, array: 2, govern: 2, passage: 3, ally: 4, muster: 5,
-       withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
+    ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, passage: 3, ally: 4,
+       muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || x.faction.localeCompare(y.faction)

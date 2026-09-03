@@ -21,7 +21,7 @@ const KEY = "mind-arena/play/v1";
  * 加字段（stations、allyBanUntil…）、改语义都算。
  * 旧档会被直接丢弃并提示重开，不做迁移。
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export interface SavedGame {
   version: number;

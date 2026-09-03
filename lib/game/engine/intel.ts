@@ -80,7 +80,8 @@ export function observedGarrison(
  * 人看到的和模型看到的就不是同一场战争，评测也就不可比。
  */
 export const PUBLIC_EVENTS = new Set([
-  "siege-win", "eliminated", "officer-captured", "ally", "ally-break", "retire", "epoch",
+  "siege-win", "eliminated", "officer-captured", "suade", "ally", "ally-break",
+  "retire", "epoch",
 ]);
 
 /** 某方本季能看到的战报。己方全部可见，他方只见天下大事 */

@@ -63,6 +63,11 @@ export interface EngineParams {
   /** 金这一层是否启用。关着时收入/军费/价格一律为零 */
   /** 阵型相克加减的缺口数。见内容包 constants.阵型 */
   formationBreach: number;
+  /** 招降：窗口季数、基础成功率、每点五维折减、同乡加成 */
+  suadeWindow: number;
+  suadeBase: number;
+  suadePerStat: number;
+  suadeHomeBonus: number;
   goldOn: boolean;
   goldPerTier: number;
   goldDecay: number;
@@ -224,6 +229,10 @@ export function loadParams(pack: RawPack): EngineParams {
     fillerPolitics: g("武将", "庸将_政治"),
     fillerCharisma: g("武将", "庸将_魅力"),
     formationBreach: g("阵型", "克制加缺口"),
+    suadeWindow: g("招降", "窗口季数"),
+    suadeBase: g("招降", "基础成功率"),
+    suadePerStat: g("招降", "每点五维折减"),
+    suadeHomeBonus: g("招降", "同乡加成"),
     goldOn: !!(pack.constants?.["金"]?.["启用"]),
     goldPerTier: g("产出", "金_每产出档"),
     goldDecay: g("金", "收入_逐郡递减"),

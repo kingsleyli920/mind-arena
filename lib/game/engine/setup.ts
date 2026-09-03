@@ -114,6 +114,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     passages: [],
     intel: {},
     capturedOfficers: [],
+    captives: [],
     recruitPool: opts.roster ? rollRecruitPool(opts.roster, opts.seed, P.wildRecruitRatio) : [],
     log: [],
     finished: false,
