@@ -9,7 +9,7 @@
 // 免费版 50 个外部子请求，一局 16 次调用带重试会顶到；本地 Node 无此约束，
 // 还能直接写 JSONL、断点续跑。见 tools/eval-run.mjs。
 import { OpenRouterClient } from "@/lib/arena/llm/client.ts";
-import { parseDecision } from "@/lib/arena/seat/parse.ts";
+import { decisionSchemaForKeys, parseDecision } from "@/lib/arena/seat/parse.ts";
 
 interface DecideBody {
   model?: string;
@@ -47,18 +47,9 @@ export async function POST(request: Request) {
   try {
     const res = await client.chat({
       model: b.model, system: b.system, user: b.user,
-      schema: {
-        name: "season_orders", strict: true,
-        schema: {
-          type: "object", additionalProperties: false,
-          required: ["picks", "reason"],
-          properties: {
-            picks: { type: "array", maxItems: 16,
-                     items: { type: "string", enum: b.keys } },
-            reason: { type: "string" },
-          },
-        },
-      },
+      // schema 的唯一来源在 parse.ts。此处曾各存一份副本，
+      // 两份的 required / maxItems / enum 策略迟早分家
+      schema: decisionSchemaForKeys(b.keys),
     });
     // 「没让它说完」与「它答不上来」是两回事，错误信息要说清楚，
     // 否则界面上只会显示「模型未给出决策」，而真正该改的是出参预算

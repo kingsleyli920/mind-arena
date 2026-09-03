@@ -45,6 +45,12 @@ export interface ModelSeatDeps {
   g: Graph; P: EngineParams; roster: Roster; geo: Geography;
   rules?: Rules;
   nameOf?: (id: FactionId) => string;
+  /**
+   * 候选 key 是否写成 schema 的 enum。默认 false —— schema 逐字节恒定，
+   * Anthropic 的前缀缓存才成立。实测 enum 拦下的错误是 0 而代价是 2.8 倍入参，
+   * 详见 decisionSchema。置 true 复现旧的解码层强制
+   */
+  keyEnum?: boolean;
 }
 
 export async function modelDecide(
@@ -71,7 +77,7 @@ export async function modelDecide(
       model: deps.model,
       system: renderSystem(deps.pack),
       user,
-      schema: decisionSchema(cands),
+      schema: decisionSchema(cands, deps.keyEnum ?? false),
     });
     // 「没让它说完」与「它答不上来」必须分开记。前者是 harness 的配置问题
     // ——推理模型把出参预算全花在 reasoning 上，content 返回空串——

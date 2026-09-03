@@ -15,8 +15,28 @@ export interface Decision {
   reason?: string;
 }
 
-/** 按本季候选表生成 JSON Schema。keys 是 enum，模型选不出表外的东西 */
-export function decisionSchema(candidates: readonly Candidate[]) {
+/**
+ * 决策的 JSON Schema。
+ *
+ * keyEnum=true 时把候选 key 写成 enum，「只能从候选里选」由解码层强制。
+ * 那是原设计，但它有个没算到的代价：schema 每季都变，而 OpenRouter 把
+ * json_schema 译成 Anthropic 的 tool，Anthropic 的缓存前缀顺序是
+ * tools → system → messages —— tool 一变，排在后面的 system 整块失效。
+ * 实测同一 system 连发两次：schema 恒定则第二次 cached 4534，
+ * schema 变则 cached 0 且重写整块。system 占入参 38–52%，
+ * 等于「system 逐字节稳定才命中前缀缓存」这条设计被自己的 schema 打掉了。
+ *
+ * 默认因此是 false。依据是实测而非省钱：五个跑、四个模型
+ * （haiku-4.5 / mistral-small / llama-3.1-8b / gpt-5-nano），
+ * **unknown-key 一次都没出现过**——所有丢弃都是 rejected（引擎判组合不合法），
+ * 而那是 enum 本来就拦不住的。也就是说 enum 拦下的错误是 0，
+ * 代价是 Claude 的入参贵 2.8 倍（同局 A/B：178071 → 等效 63789）。
+ *
+ * 关掉之后「只能从候选里选」退回 admit() 逐条丢弃并计入 illegalRate。
+ * 那不是失去保护：illegalRate 本来就是上报指标，将来真有模型开始
+ * 编造 key，它会直接显示出来。要复现旧行为用 --keyenum=on。
+ */
+export function decisionSchemaForKeys(keys: readonly string[], keyEnum = false) {
   return {
     name: "season_orders",
     strict: true,
@@ -28,13 +48,18 @@ export function decisionSchema(candidates: readonly Candidate[]) {
         picks: {
           type: "array",
           maxItems: 16,
-          items: { type: "string", enum: candidates.map((c) => c.key) },
-          description: "本季要下的令，按候选 key 引用；顺序即优先级，令数不足时先保前面的",
+          items: keyEnum ? { type: "string", enum: [...keys] } : { type: "string" },
+          description: "本季要下的令，按候选 key 逐字引用；顺序即优先级，令数不足时先保前面的",
         },
         reason: { type: "string", description: "一句话说明本季的意图" },
       },
     },
   };
+}
+
+/** 同上，直接吃候选表。引擎侧用这个，API 路由只有 key 用上面那个 */
+export function decisionSchema(candidates: readonly Candidate[], keyEnum = false) {
+  return decisionSchemaForKeys(candidates.map((c) => c.key), keyEnum);
 }
 
 /**

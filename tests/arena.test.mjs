@@ -90,13 +90,23 @@ test("准入：产出的命令 resolve 不会因令数不足而拒", () => {
   }
 });
 
-test("输出协议：schema 的 enum 把「只能从候选里选」提到解码层", () => {
+test("输出协议：keyEnum=true 时把「只能从候选里选」提到解码层", () => {
   const s = fresh();
   const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER);
-  const sch = decisionSchema(cs);
+  // 这已不是默认：它每季都变，会把 Anthropic 的整块 system 缓存打掉，
+  // 而实测它拦下的错误是 0（四个模型五个跑，unknown-key 一次没出现）。
+  // 仍保留为可选项——将来接进更弱的模型、illegalRate 抬头时可以开回来
+  const sch = decisionSchema(cs, true);
   assert.equal(sch.strict, true);
   assert.deepEqual(sch.schema.properties.picks.items.enum, cs.map((c) => c.key));
   assert.equal(sch.schema.additionalProperties, false);
+
+  // 默认那份不带 enum，但 strict / additionalProperties 这些约束一条不少
+  const dflt = decisionSchema(cs);
+  assert.equal(dflt.strict, true);
+  assert.equal(dflt.schema.additionalProperties, false);
+  assert.equal(dflt.schema.properties.picks.items.enum, undefined);
+  assert.deepEqual(dflt.schema.required, ["picks", "reason"]);
 });
 
 test("输出协议：宽容解析吃得下代码块与散文包裹，解析不出返回 null", () => {
@@ -221,3 +231,38 @@ test("候选标签不留英文 id：地形、势力、兵种都该是中文", ()
     }
   }
 });
+
+test("schema 逐字节恒定 —— Anthropic 的前缀缓存全靠这一条", () => {
+  const s = fresh();
+  const a = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+  const b = listActions(s, "liubiao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+  assert.notDeepEqual(a.map((c) => c.key), b.map((c) => c.key), "两席候选相同，测不出");
+
+  // OpenRouter 把 json_schema 译成 Anthropic 的 tool，而 Anthropic 的缓存
+  // 前缀顺序是 tools → system → messages。schema 一变，排在它后面的 system
+  // 整块失效——实测同一 system 连发两次，schema 恒定则 cached 4534，
+  // schema 变则 cached 0 且重写整块。system 占入参 38–52%
+  assert.equal(
+    JSON.stringify(decisionSchema(a)), JSON.stringify(decisionSchema(b)),
+    "默认 schema 随候选表变了 —— Claude 的前缀缓存会整块失效，入参贵 2.8 倍",
+  );
+  // 开了 enum 就必然随候选变。这条钉住那个代价是真实存在的，不是臆测
+  assert.notEqual(
+    JSON.stringify(decisionSchema(a, true)), JSON.stringify(decisionSchema(b, true)),
+    "keyEnum=true 却没随候选变，那 enum 就没起作用",
+  );
+});
+
+test("关掉 enum 后，编造的 key 仍被 admit 逐条丢弃", () => {
+  const s = fresh();
+  const cands = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+  const real = cands[0].key;
+  // 解码层不再强制「只能从候选里选」，那条约束退回 admit()。
+  // 它必须只丢非法的那条，不能作废整回合——一条错不该让整季空过
+  const a = admit(s, "yuanshao", ["campaign:不存在的郡>也不存在:main", real],
+                  cands, G, ROSTER, DEFAULT_RULES);
+  assert.deepEqual(a.dropped.map((d) => d.reason), ["unknown-key"]);
+  assert.equal(a.admitted.length, 1, "合法的那条也被牵连丢掉了");
+  assert.ok(a.illegalRate > 0, "illegalRate 没记上 —— 关掉 enum 后全靠它兜底");
+});
+

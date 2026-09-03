@@ -66,9 +66,12 @@ if (agentKind === "model") {
   if (!MODEL) { console.error("--agent=model 需要同时给 --model=<模型 id>"); process.exit(2); }
   client = new OpenRouterClient(key, { referer: "http://localhost:3000", title: "Mind Arena" });
 }
+// --keyenum=on 复现旧的解码层强制。默认关：实测 enum 拦下的错误是 0
+// （四个模型五个跑，unknown-key 一次没出现），代价是 Claude 入参贵 2.8 倍
+const KEY_ENUM = arg("keyenum", "off") === "on";
 const MODEL_DEPS = client
   ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
-      rules: DEFAULT_RULES, nameOf }
+      rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM }
   : null;
 
 const records = [];
