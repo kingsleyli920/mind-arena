@@ -53,9 +53,13 @@ let client = null;
 if (agentKind === "model") {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) {
-    console.error("缺少 OPENROUTER_API_KEY。在项目根目录执行（把 sk-… 换成你自己的 key）：");
-    console.error("  echo 'OPENROUTER_API_KEY=sk-…' >> .env.local");
+    // 这个脚本是 plain node，本身不加载任何 env 文件——npm script 里靠
+    // --env-file-if-exists=.env.local 把它读进来。直接 `node tools/eval-run.mjs`
+    // 是读不到的，必须走 npm run eval
+    console.error("缺少 OPENROUTER_API_KEY。在项目根目录把 key 写进 .env.local（该文件已在 .gitignore）：");
+    console.error("  printf 'OPENROUTER_API_KEY=%s\\n' 'sk-or-v1-…' >> .env.local");
     console.error("然后：npm run eval -- --agent=model --model=<模型 id> --games=1");
+    console.error("注意要走 npm run eval——直接 node 跑本脚本不会加载 .env.local。");
     console.error("\n先用 --agent=stub 可以在没有 key 的情况下跑通整条管道。");
     process.exit(2);
   }
