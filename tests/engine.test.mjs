@@ -3,7 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
-import { buildGeography, standingOf, gradeOf, briefFor } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
@@ -440,7 +440,17 @@ test("野战：被围之郡可出城迎战，胜则解围", () => {
 
 test("军团：后路断绝则粮尽溃散", () => {
   const s = fresh();
-  const { from, edge } = attackPair(s, "yuanshao");
+  // 起兵郡必须**不是治所**。此前这里取的是第一个己方郡，恰好是治所，
+  // 抽掉它等于治所失守——全境不可达，军团当然溃散，但那验的不是「绕后断粮」。
+  // 旧引擎把两种成因记在同一条日志里，于是这条测试一直以错误的理由通过
+  const cap = s.factions.yuanshao.capital;
+  const from = Object.values(s.commanderies)
+    .find((c) => c.owner === "yuanshao" && c.id !== cap
+      && [...(G.adj.get(c.id) ?? [])].some((e) =>
+        s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== "yuanshao"));
+  assert.ok(from, "袁绍没有非治所的临敌郡，样本选错了");
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== "yuanshao");
   s.commanderies[from.id].garrison = 9000;
   s.commanderies[edge.to].garrison = 20000;
   s.commanderies[edge.to].defense = 100;
@@ -452,9 +462,13 @@ test("军团：后路断绝则粮尽溃散", () => {
   // 抽掉起兵郡：围城军的后方走廊断了
   const cut = refreshAp(r1.state, P);
   cut.commanderies[from.id].owner = "lubu";
+  assert.equal(cut.commanderies[cap].owner, "yuanshao", "治所应仍在手，否则测的是别的东西");
   const after = resolve(cut, [], G, P, ROSTER, GEO).state;
-  assert.ok(after.log.some((e) => e.kind === "army-scattered"),
+  assert.ok(after.log.some((e) => e.kind === "supply-cut-scatter"),
     "后路断绝的围城军未溃散 —— 「绕后断粮」仍是空话");
+  // 起兵郡易主而治所尚在，这是真·走廊被切，不该记成治所失守
+  assert.ok(!after.log.some((e) => e.kind === "capital-lost-scatter"),
+    "治所尚在却报成治所失守 —— 两种成因又混回一条了");
 });
 
 test("集结：待命军团可整建制出征，兵力大于按档抽调", () => {
@@ -518,6 +532,53 @@ test("胜负：只捡无主之地不算进攻", () => {
     G, P, ROSTER, GEO).state;
   if (r.commanderies[empty.to].owner !== "yuanshao") return;
   assert.equal(r.factions.yuanshao.conquests, 0, "取无主之地不该计入 conquests");
+});
+
+test("目的：反事实定档与真实定档同源，不是另写一套启发式", () => {
+  const s = fresh();
+  let checked = 0;
+  for (const f of ["yuanshao", "liubiao", "lubu", "liuzhang"]) {
+    const fs_ = s.factions[f];
+    const start = { commanderies: fs_.startCommanderies, controlledZhou: fs_.startZhou,
+                    zhouSeats: fs_.startSeats };
+    for (const c of listActions(s, f, G, P, undefined, ROSTER, undefined, GEO)) {
+      if (c.action.type !== "campaign" || !c.gain) continue;
+      const tid = c.action.target;
+      // 真取一次：直接改归属，再走引擎自己的 standingOf + gradeOf
+      const truth = structuredClone(s);
+      const hadOwner = !!truth.commanderies[tid].owner;
+      truth.commanderies[tid].owner = f;
+      if (hadOwner) truth.factions[f].conquests += 1;
+      const real = gradeOf(standingOf(truth, GEO, f), start);
+      const cf = gradeIfTaken(s, GEO, f, tid);
+      assert.equal(cf.grade, real,
+        `${f} 取 ${tid}：反事实算出 ${cf.grade}，真取一次是 ${real} —— 两套判据已分家`);
+      // upgrade 只在高于**已到手的最高档**时给出：已经拿到的档再拿一次值 0 分
+      const now = fs_.bestGrade;
+      const RANK = { ding: 0, bing: 1, yi: 2, jia: 3 };
+      assert.equal(c.gain.upgrade, RANK[real] > RANK[now] ? real : null,
+        `${f} 取 ${tid} 的 upgrade 标注与实算不符`);
+      checked += 1;
+    }
+  }
+  assert.ok(checked > 30, `只核了 ${checked} 条，样本太少测不出分家`);
+});
+
+test("目的：gain 只走 label，不进观测——同一件事不花两份 token", () => {
+  const s = fresh();
+  const o = observe(s, "yuanshao", G, P, ROSTER, GEO);
+  const camp = o.candidates.filter((c) => c.key.startsWith("campaign:"));
+  assert.ok(camp.length > 0, "袁绍无征伐候选，测不出");
+  for (const c of camp) {
+    assert.equal(c.gain, undefined,
+      "观测里出现了结构化 gain —— 实测它占 719 tok 而 label 那份只占 169，"
+      + "袁绍峰值本就只剩 172 tok 余量");
+  }
+  // 但信息本身必须在：所属州总是写，值钱的目标要标出来
+  assert.ok(camp.every((c) => /｜[\u4e00-\u9fa5]+州|｜司隶/.test(c.label)),
+    "征伐候选没写目标属于哪个州 —— 郡→州 的映射模型别处拿不到");
+  assert.ok(camp.some((c) => /取下即升[甲乙]档/.test(c.label)),
+    "一条升州级档的候选都没有，「打赢了值什么」等于没说");
 });
 
 test("胜负：判的是相对开局的增量，不是绝对位置", () => {
@@ -763,7 +824,8 @@ test("迷雾：战报的可见性由引擎定义，他方内情不外泄", () =>
   }
   // 他方的补给断绝、围城进度这类内情必须被挡掉
   const leaked = s.log.filter((e) => e.faction && e.faction !== "caocao"
-    && ["supply-cut", "besieged", "muster", "siege-hold", "army-scattered"].includes(e.kind));
+    && ["supply-cut", "capital-lost", "besieged", "muster", "siege-hold",
+        "supply-cut-scatter", "capital-lost-scatter"].includes(e.kind));
   assert.ok(leaked.length > 0, "样本里没有他方内情，测不出过滤");
   for (const e of leaked) {
     assert.ok(!seen.includes(e), `他方内情外泄：${e.kind} ${e.text}`);

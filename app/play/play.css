@@ -134,6 +134,10 @@
 .verdict.v-win { color: #1f4d2e; background: #d7e8d4; }
 .verdict.v-maybe { color: #6b5218; background: #f0e3c2; }
 .verdict.v-no { color: #6b3129; background: #ecd8d4; }
+/* 升档：朱印色。判词用的是冷三色（能/不能/未知），这枚讲的是价值，
+   与它们不同族才不会被读成第四种胜负判断 */
+.verdict.v-gain { color: #7a2318; background: #f0d9c8; border: 1px solid #cfa38c; }
+.act-head .tier.t-cap { color: var(--seal); border-color: var(--seal); }
 .act-nums { font-size: 0.73rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .act-nums u { text-decoration: none; margin-inline-start: 0.4rem; color: var(--seal); }
 .act-detail {

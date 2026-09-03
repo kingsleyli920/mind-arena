@@ -323,7 +323,7 @@ export function PlayClient() {
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
     return listActions(game, seat, engine.G, engine.P, undefined, engine.roster,
-      (id) => engine.nameOf.get(id) ?? id);
+      (id) => engine.nameOf.get(id) ?? id, engine.geo);
   }, [engine, game, seat]);
 
   // 准入判据走引擎自己的 admit，不在界面另写一套。
@@ -345,7 +345,7 @@ export function PlayClient() {
     for (const [i, f] of ids.entries()) {
       if (f === seat) continue;
       orders.push(...decide(game, f, engine.G, PROFILE_KEYS[i % PROFILE_KEYS.length],
-        undefined, engine.roster, engine.P));
+        undefined, engine.roster, engine.P, engine.geo));
     }
     const before = game.log.length;
     const r = resolve(game, orders, engine.G, engine.P, engine.roster, engine.geo);
@@ -593,9 +593,16 @@ export function PlayClient() {
   // 吕布二十条征伐里十七条引擎已经算出「不破」，而他一季最多下三条——
   // 无序平铺等于让人逐条读到第七十个字才看见结论
   const RANK: Record<string, number> = { 破城: 0, 未知: 1, 不破: 2 };
+  // 同一判词内，升州级档的排前面。实测 40.8% 的席·季里余量最大的那条
+  // 并不是升档的那条——纯按余量排，值钱的那个会沉到十几行以下没人看见。
+  // 那不是「选了容易的」，那是根本没看见有得选。
+  // 丙档不参与排序：开局阶段几乎每次夺郡都升丙，参与了等于没参与
+  const UPRANK: Record<string, number> = { jia: 0, yi: 1 };
   for (const list of byType.values()) {
     list.sort((a, b) => (RANK[a.forecast?.verdict ?? "未知"] ?? 1)
                       - (RANK[b.forecast?.verdict ?? "未知"] ?? 1)
+                      || (UPRANK[a.gain?.upgrade ?? ""] ?? 9)
+                       - (UPRANK[b.gain?.upgrade ?? ""] ?? 9)
                       || (b.forecast ? b.forecast.breachLo - b.forecast.holdHi : 0)
                        - (a.forecast ? a.forecast.breachLo - a.forecast.holdHi : 0)
                       || a.key.localeCompare(b.key));
@@ -893,6 +900,17 @@ export function PlayClient() {
                                   {c.forecast.verdict}
                                 </em>
                               )}
+                              {/* 判词答「打不打得赢」，这枚答「值不值得打」。
+                                  两者常常不指向同一个目标，所以必须并排摆着，
+                                  而不是把后者埋在灰色长句的末尾。丙档不标——
+                                  开局阶段几乎每次夺郡都升丙，标了等于没标 */}
+                              {(c.gain?.upgrade === "jia" || c.gain?.upgrade === "yi") && (
+                                <em className="verdict v-gain">
+                                  升{c.gain.upgrade === "jia" ? "甲" : "乙"}档
+                                </em>
+                              )}
+                              {c.gain?.isSeat && <i className="tier">州治</i>}
+                              {c.gain?.isCapital && <i className="tier t-cap">敌治所</i>}
                             </span>
                             {c.forecast && (
                               <span className="act-nums">

@@ -164,4 +164,30 @@ export interface Candidate {
   };
   /** 第三方围城军的观测兵力（已分档）。救援候选用 */
   siegeBy?: { faction: FactionId; troopsLo: number; troopsHi: number; seasons: number };
+  /**
+   * 取下此郡在**记分函数**上值什么。只讲归属与地理，绝不含守军与城防——
+   * 那是 forecast 的事，这里再写一遍就成了第二个 forecast。
+   *
+   * 同世界配对 A/B（同 seed、只有一个席位读这个字段、360 组）实测 +17.2 ± 5.7 分；
+   * 同等量级、同等稀疏度但挂在产出档/城防/民心上的对照组是 −6.4 ± 5.9。
+   * 两者相差 23.6 分远超噪声——涨分来自「信息挂在记分函数上」，
+   * 不是「随便加个权重都能涨」。经济层、士气、粮草、适性四次实验全部打平，
+   * 因为它们都落在对照组那一侧。
+   */
+  gain?: {
+    /** 目标所属州。这是当前观测里缺失的 郡→州 映射，模型无从别处得知 */
+    zhou: string;
+    /** 取此郡**前**还差几郡即控该州（≤0 表示已控） */
+    needBefore: number;
+    /** 取此郡**后**还差几郡 */
+    needAfter: number;
+    /** 目标是否该州州治 */
+    isSeat: boolean;
+    /** 目标现属，null 为无主 */
+    owner: FactionId | null;
+    /** 目标是否其所有者的治所。治所一失全境断供，是全图杠杆最高的一击 */
+    isCapital: boolean;
+    /** 取下后本势力可达到的最高档，仅在高于现档时给出。由 gradeOf 实算，不是启发式 */
+    upgrade: Grade | null;
+  };
 }

@@ -7,6 +7,7 @@
 import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
 import { observedGarrison, tierOf } from "./intel.ts";
 import { forecastCampaign } from "./forecast.ts";
+import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order,
@@ -103,12 +104,57 @@ function troopBand(troops: number, P: EngineParams): string {
 const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 
+/**
+ * 取下 tid 在记分函数上值什么。只读地理与归属，一个守军数字都不碰。
+ *
+ * 实测分叉频率（20 局、1857 席·季）：65.8% 的「有征伐候选的席·季」里存在
+ * 至少一条「取下即升乙档以上」的候选，而其中 62.3%（占全部席·季 40.8%）
+ * 里余量最大的那条**不是**升档的那条——每五个席·季有两个，
+ * 「最好打的」和「值钱的」不是同一个目标。此前候选表上两者长得一模一样。
+ */
+function gainOf(
+  s: GameState, geo: Geography, f: FactionId, tid: CommanderyId,
+): Candidate["gain"] | undefined {
+  const z = geo.zhouOf.get(tid);
+  if (!z) return undefined;
+  const members = geo.zhouMembers.get(z) ?? [];
+  let mine = 0;
+  for (const id of members) if (s.commanderies[id]?.owner === f) mine += 1;
+  const needBefore = Math.floor(members.length / 2) + 1 - mine;
+  const owner = s.commanderies[tid]?.owner ?? null;
+  const now = s.factions[f]?.bestGrade ?? "ding";
+  const after = gradeIfTaken(s, geo, f, tid);
+  return {
+    zhou: z,
+    needBefore,
+    needAfter: needBefore - 1,
+    isSeat: geo.zhouSeat.get(z) === tid,
+    owner,
+    isCapital: !!owner && s.factions[owner]?.capital === tid,
+    upgrade: after && GRADE_RANK[after.grade] > GRADE_RANK[now] ? after.grade : null,
+  };
+}
+
+/**
+ * gain 的稀疏编码。观测预算只剩 145 tok 余量，能省的都省：
+ * 州名总是写（这是缺失的映射，别处拿不到）；「再取 N 即控」只在 N≤2 时写
+ * ——N≥3 占 75%，让 brief 去讲；「尚差 N 郡」与势力名一概不写，
+ * 稠密版实测把峰值从 5855 顶到 5921。
+ */
+function gainNote(gn: NonNullable<Candidate["gain"]>): string {
+  const near = gn.needBefore > 0 && gn.needBefore <= 2 ? `再取${gn.needBefore}即控` : "";
+  return `｜${gn.zhou}${near}${gn.isSeat ? "·州治" : ""}${gn.isCapital ? "·敌治所" : ""}`
+       + (gn.upgrade ? `｜取下即升${GRADE_CN[gn.upgrade]}档` : "");
+}
+
 export function listActions(
   s: GameState, f: FactionId, g: Graph, P: EngineParams, rules: Rules = DEFAULT_RULES,
   roster: Roster | null = null,
   /** 势力 id → 显示名。不给则原样写 id——候选标签是给人和模型看的，
       「与 lijue 缔盟」这种写法两边都读不懂 */
   nameOf: (id: FactionId) => string = (id) => id,
+  /** 地理。给了才算得出「取下这个郡值什么」——不给则候选只讲攻防，退回旧行为 */
+  geo: Geography | null = null,
 ): Candidate[] {
   const fs_ = s.factions[f];
   if (!fs_ || fs_.eliminated || fs_.retired || s.finished) return [];
@@ -137,6 +183,9 @@ export function listActions(
 
     for (const { tid, e, seen } of targets) {
       const tgt = s.commanderies[tid];
+      // 目标级，两个兵力档共用一份——同一目标的 main/allout 两条标签
+      // 本来就有六成字是逐字重复的，不必再算两遍
+      const gn = geo ? gainOf(s, geo, f, tid) : undefined;
       const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
       // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
       // 让模型看得见「谁去打」，而不必自己再选一次人
@@ -174,6 +223,7 @@ export function listActions(
                     strength, siegeGear: src0.gear },
           cost: rules.campaignAp,
           forecast: fc ?? undefined,
+          gain: gn,
           siegeBy: ongoing && ongoing.faction !== f
             ? { faction: ongoing.faction, seasons: ongoing.siegeSeasons,
                 troopsLo: bandLo(ongoing.troops, P), troopsHi: bandHi(ongoing.troops, P) }
@@ -185,7 +235,8 @@ export function listActions(
                + `：出 ${send} 人，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${fc ? `｜${fc.text}` : ""}`
-               + `${unitNote}${armyNote}${siegeNote}`,
+               + `${unitNote}${armyNote}${siegeNote}`
+               + `${gn ? gainNote(gn) : ""}`,
         });
       }
     }

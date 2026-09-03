@@ -39,7 +39,12 @@ const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]
 const GAMES = Number(process.env.GAMES ?? 100);
 /** 席位轮换：每局给六大势力换一遍画像，避免"画像与开局绑定"混淆结论 */
 const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
-const PROFILE_LIST = ["turtle", "balanced", "aggressive", "opportunist"];
+// 默认四画像，与历次验收同口径。PROFILES=5 时把目的流一并放进轮换，
+// 用来看「看不看目的」这一条本身值多少分——均衡流与目的流权重表同底，
+// 差别只在读不读 gain，所以两者同场的分差可直接归因
+const PROFILE_LIST = process.env.PROFILES === "5"
+  ? ["turtle", "balanced", "aggressive", "opportunist", "purpose"]
+  : ["turtle", "balanced", "aggressive", "opportunist"];
 
 // 计分表唯一来源在 lib/arena/scoring.ts。此处曾各存一份副本，迟早分家
 
@@ -55,7 +60,7 @@ function playOne(seed, rotation) {
     const orders = [];
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
-      orders.push(...decide(s, f, G, profileOf(f), undefined, ROSTER, P));
+      orders.push(...decide(s, f, G, profileOf(f), undefined, ROSTER, P, GEO));
     }
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     for (const e of r.state.log.slice(s.log.length)) {
@@ -123,7 +128,17 @@ for (const r of rows) {
 const turtle = rows.find((r) => r.p === "turtle");
 const best = rows[0];
 const passB = turtle && best.p !== "turtle" && best.score > turtle.score * 1.3;
-console.log(`  ${passB ? "✓" : "✗"} 判据：苟活流不是最高分，且最高分 > 苟活流 ×1.3\n`);
+console.log(`  ${passB ? "✓" : "✗"} 判据：苟活流不是最高分，且最高分 > 苟活流 ×1.3`);
+// 这条判据本身是退化的：苟活流恒为 0 分（存续不得分是设计），于是
+// 「最高分 − 最低分」永远等于最高分本身，任何裁剪型改动结构上只能把它压低。
+// 并列打印「非苟活极差」——那才是「会玩与不会玩差多少」的可用刻度，
+// 它有余量、也刷不高：把所有画像都调强会同时抬高两端
+const nonTurtle = rows.filter((r) => r.p !== "turtle");
+if (nonTurtle.length >= 2) {
+  const gap = nonTurtle[0].score - nonTurtle[nonTurtle.length - 1].score;
+  console.log(`  · 非苟活极差 ${gap.toFixed(1)}（${nonTurtle[0].p} − ${nonTurtle[nonTurtle.length - 1].p}）`);
+}
+console.log("");
 
 // ── C 局长 ──────────────────────────────────────────────────────────
 const turns = new Set(results.map((r) => r.turns));

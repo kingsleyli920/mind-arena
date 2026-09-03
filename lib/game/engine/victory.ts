@@ -103,6 +103,52 @@ export const GRADE_RANK: Record<Grade, number> = { ding: 0, bing: 1, yi: 2, jia:
 export const GRADE_CN: Record<Grade, string> = { jia: "甲", yi: "乙", bing: "丙", ding: "丁" };
 
 /**
+ * 反事实定档：此刻若取下 target，本势力能到哪一档。
+ *
+ * 候选表把「这仗能不能打赢」算到了小数点后——forecast 给出缺口区间、
+ * 可防守区间、三值判词——却一个字不提**「打赢了值什么」**。
+ * 而记分函数是州级的：第五个散郡值 0 分，凑成半州的那一个郡值一整档。
+ * 这道阶梯此前对模型完全不可见：brief 讲州、候选讲郡，中间的
+ * 「这个郡属于哪个州」在观测里根本没有。于是模型能做的唯一判断是
+ * 「哪个目标最好打」，那不是决策，是排序。
+ *
+ * 与现档比的是 bestGrade（历史最高档）而非当前实位——记分取的就是最高档，
+ * 已经拿到手的乙档再拿一次值 0 分。
+ *
+ * 纯函数：不改状态、不进 RNG，与 forecast 同性质，不影响 R6 / R33。
+ */
+export function gradeIfTaken(
+  s: GameState, geo: Geography, f: FactionId, target: CommanderyId,
+): { st: Standing; grade: Grade } | null {
+  const fs_ = s.factions[f];
+  const tgt = s.commanderies[target];
+  if (!fs_ || !tgt || tgt.owner === f) return null;
+  const st = standingOf(s, geo, f);
+  const z = geo.zhouOf.get(target);
+  const zhouNames = [...st.zhouNames];
+  if (z && !zhouNames.includes(z)) {
+    const members = geo.zhouMembers.get(z) ?? [];
+    let mine = 0;
+    for (const id of members) if (s.commanderies[id]?.owner === f) mine += 1;
+    if (members.length > 0 && (mine + 1) * 2 > members.length) zhouNames.push(z);
+  }
+  const next: Standing = {
+    commanderies: st.commanderies + 1,
+    controlledZhou: zhouNames.length,
+    zhouSeats: st.zhouSeats + (z && geo.zhouSeat.get(z) === target ? 1 : 0),
+    // 只捡无主之地不算「夺自他方」，与 gradeOf 的丙档判据同源
+    conquests: st.conquests + (tgt.owner ? 1 : 0),
+    zhouNames,
+  };
+  const start = {
+    commanderies: fs_.startCommanderies,
+    controlledZhou: fs_.startZhou,
+    zhouSeats: fs_.startSeats,
+  };
+  return { st: next, grade: gradeOf(next, start) };
+}
+
+/**
  * 给模型看的态势简报。
  *
  * 候选标签只讲单个目标的攻防，讲不出「往哪个方向打才算数」。

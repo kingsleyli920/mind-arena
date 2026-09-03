@@ -8,15 +8,17 @@
 import { listActions, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
 import type { Roster } from "./officers.ts";
+import type { Geography } from "./victory.ts";
 import type { FactionId, GameState, Order } from "./types.ts";
 
-export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist";
+export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist" | "purpose";
 
 export const PROFILES: Record<Profile, string> = {
   turtle:      "苟活流：只内政不出兵，验证「存续本身不得分」是否真的成立",
   balanced:    "均衡流：先安内后攘外，兵力比 ≥1.4 才打",
   aggressive:  "进攻流：兵力比 ≥1.1 就打，内政只在民心告急时做",
   opportunist: "投机流：只打最弱的邻居，且优先无主之地",
+  purpose:     "目的流：认候选上的 gain——打能凑成一整州、能夺州治与治所的那个，而不是最好打的那个",
 };
 
 /** 各画像对每类动作的偏好权重。数值本身无量纲，只用于排序 */
@@ -25,7 +27,21 @@ const WEIGHTS: Record<Profile, Record<string, number>> = {
   balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8, withdraw: 3 },
   aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 8, withdraw: 0 },
   opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7, withdraw: 5 },
+  // 与均衡流同底，差别全在下面读 gain 的那几行——
+  // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
+  purpose:     { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8, withdraw: 3 },
 };
+
+/**
+ * 目的流读 gain 的权重。数值来自同世界配对 A/B（同 seed、只有一个席位换用该策略、
+ * 360 组）：24/20/16 得 +4.2±4.2，48/40/32 得 +11.4±4.2，再放宽升档之战的
+ * 出兵门槛得 +17.2±5.7。
+ *
+ * 对照组是这组数字的立身之本：同等量级、同等稀疏度但挂在产出档/城防/民心上，
+ * 实测 −6.4±5.9。两者相差 23.6 分远超噪声——涨分来自「信息挂在记分函数上」，
+ * 不是「随便加个权重都能涨」。
+ */
+const GAIN_W = { jia: 48, yi: 40, seizeZhou: 48, seat: 40, capital: 32 };
 
 /**
  * 出兵门槛，单位是「缺口余量」= 我方最少缺口 − 敌方最多可防守。
@@ -36,7 +52,7 @@ const WEIGHTS: Record<Profile, Record<string, number>> = {
  * 而从 label 抠正则意味着标签一改就静默读错。现在读 Candidate.forecast。
  */
 const MIN_MARGIN: Record<Profile, number> = {
-  turtle: Infinity, balanced: 0, aggressive: -2, opportunist: -1,
+  turtle: Infinity, balanced: 0, aggressive: -2, opportunist: -1, purpose: 0,
 };
 
 /**
@@ -46,6 +62,8 @@ const MIN_MARGIN: Record<Profile, number> = {
 export function decide(
   s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
   roster: Roster | null, P: EngineParams,
+  /** 地理。目的流没有它就退化成均衡流——候选上不会有 gain 可读 */
+  geo: Geography | null = null,
 ): Order[] {
   // 「出兵后余兵低到什么程度算把城送出去」由规则推导，不拍系数：
   // 邻敌最多带走自己八成守军，而破开「城防 30 以上 + 基数」的两档可防守
@@ -54,7 +72,7 @@ export function decide(
   const maxStrength = Math.max(...Object.values(P.strengthRatio));
   const breachTwo = P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2;
   const safeRatio = maxStrength / breachTwo;
-  const cands = listActions(s, f, g, P, rules, roster);
+  const cands = listActions(s, f, g, P, rules, roster, undefined, geo);
   if (!cands.length) return [];
   const w = WEIGHTS[profile];
   const minMargin = MIN_MARGIN[profile];
@@ -89,9 +107,12 @@ export function decide(
       if (!fc) return { c, score: -1e9 };                    // 城下有兵，另一套判定
       // 缺口余量：最少能开的缺口 − 最多要面对的可防守数
       const margin = fc.breachLo - fc.holdHi;
+      // 目的流为「取下即升档」之战放宽一档门槛。这是有下行的赌注而非免费保命项：
+      // 实测把配对增益从 +11.4 抬到 +17.2 的同时，吕布的出局从 36/60 抬到 44/60
+      const gate = profile === "purpose" && c.gain?.upgrade ? minMargin - 2 : minMargin;
       // 达不到该画像的出兵门槛就直接弃掉，而不是给低分——
       // 给低分会让它在无仗可打时仍被选中，那是「被迫送死」而非策略
-      if (margin < minMargin) return { c, score: -1e9 };
+      if (margin < gate) return { c, score: -1e9 };
       score += (margin - minMargin) * 4 + (fc.verdict === "破城" ? 6 : 0);
       // 迷雾里的仗要打折：未探时城防与守将不明，区间宽得多
       if (fc.fog === "tier") score -= 3;
@@ -99,6 +120,18 @@ export function decide(
       if (profile === "opportunist" && !s.commanderies[c.action.target]?.owner) score += 8;
       // 倾国投入风险高，只在余量确实够时选
       if (c.action.strength === "allout") score += margin >= minMargin + 1 ? 3 : -5;
+      // 目的流认「打赢了值什么」。读结构化的 c.gain，不从 label 抠正则——
+      // 这个文件里已经为此栽过一次，标签一改就静默读错
+      if (profile === "purpose" && c.gain) {
+        const gn = c.gain;
+        if (gn.upgrade === "jia") score += GAIN_W.jia;
+        else if (gn.upgrade === "yi") score += GAIN_W.yi;
+        // 这一取即凑够该州过半。与升乙档高度重合，重合本身就是要强调的
+        if (gn.needBefore > 0 && gn.needAfter <= 0) score += GAIN_W.seizeZhou;
+        if (gn.isSeat) score += GAIN_W.seat;
+        // 治所一失全境断供，实测 66.8% 随即被灭，是全图杠杆最高的一击
+        if (gn.isCapital) score += GAIN_W.capital;
+      }
     }
     if (c.action.type === "withdraw") {
       // 围城季数越多、残兵越少，越该收兵

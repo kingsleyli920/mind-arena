@@ -46,7 +46,8 @@ export async function modelDecide(
   s: GameState, faction: FactionId, since: number, deps: ModelSeatDeps,
 ): Promise<{ orders: Order[]; record: ModelTurnRecord }> {
   const rules = deps.rules ?? DEFAULT_RULES;
-  const cands = listActions(s, faction, deps.g, deps.P, rules, deps.roster);
+  const cands = listActions(s, faction, deps.g, deps.P, rules, deps.roster,
+    deps.nameOf, deps.geo);
   const o = observe(s, faction, deps.g, deps.P, deps.roster, deps.geo,
     { nameOf: deps.nameOf, rules, since });
   const user = renderUser(o);

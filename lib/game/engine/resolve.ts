@@ -436,11 +436,24 @@ export function resolve(
   for (const f of Object.values(s.factions)) {
     if (f.eliminated) continue;
     const reach = supplyReach(s, g, f.id);
+    // 治所已失时 supplyReach 返回空集：全境不可达。但那不是「补给线被切断」，
+    // 是一个不可逆的状态——实测断供里 63% 是这一种，且其中 66.8% 随即被灭，
+    // 而真·走廊被切只占郡·季 8.3%。两者此前共用一条 supply-cut，于是
+    // 「被观测到的补给现象」有六成根本不是补给问题；一个十五郡的势力
+    // 还会为此刷出十五条一模一样的话，把战报和观测预算一起吃掉
+    const capLost = !f.capital || s.commanderies[f.capital]?.owner !== f.id;
+    if (capLost && Object.values(s.commanderies).some((c) => c.owner === f.id)) {
+      log(s, { kind: "capital-lost", faction: f.id,
+               text: `治所${f.capital ? ` ${f.capital}` : ""}已失，全境政令不通，本季无产出` });
+    }
     for (const c of Object.values(s.commanderies)) {
       if (c.owner !== f.id) continue;
       if (!reach.has(c.id)) {
-        // 不可达：产出归零，仍属己方，守军仍在（R28）
-        log(s, { kind: "supply-cut", faction: f.id, text: `${c.id} 补给断绝，本季无产出` });
+        // 不可达：产出归零，仍属己方，守军仍在（R28）。
+        // 治所已失的那一种上面整势力报过一次了，不再逐郡复述
+        if (!capLost) {
+          log(s, { kind: "supply-cut", faction: f.id, text: `${c.id} 补给断绝，本季无产出` });
+        }
         continue;
       }
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
@@ -462,11 +475,20 @@ export function resolve(
   // 它就是一支没有补给的孤军——「绕后断粮」由此成为真战术。
   for (const army of [...s.armies]) {
     const reach = supplyReach(s, g, army.faction);
+    // 围城军挂在**起兵郡**上，不是它脚下站的那块地——它身在敌境，
+    // 脚下的郡本来就不可能在己方连通分量里。所以「绕后断粮」要断的是
+    // 它的后方走廊，不是围着的那座城。包里的补给条目已写明这一条
     const anchor = army.target ? army.home : army.at;
     if (reach.has(anchor)) continue;
+    const capLost = !s.factions[army.faction]?.capital
+      || s.commanderies[s.factions[army.faction].capital!]?.owner !== army.faction;
     s.armies = s.armies.filter((x) => x.id !== army.id);
-    log(s, { kind: "army-scattered", faction: army.faction,
-             text: `${army.target ? `围 ${army.target} 之师` : `${army.at} 驻军`}后路断绝，粮尽溃散` });
+    const who = army.target ? `围 ${army.target} 之师` : `${army.at} 驻军`;
+    log(s, capLost
+      ? { kind: "capital-lost-scatter", faction: army.faction,
+          text: `治所已失，${who}无所归，粮尽溃散` }
+      : { kind: "supply-cut-scatter", faction: army.faction,
+          text: `${who}后路断绝，粮尽溃散` });
   }
 
   // ── 阶段九：存亡与档位 ────────────────────────────────────────────

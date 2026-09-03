@@ -17,7 +17,7 @@ import type { EngineParams } from "./params.ts";
 import { briefFor, standingOf, GRADE_CN, type Geography } from "./victory.ts";
 import type { Candidate, FactionId, GameState } from "./types.ts";
 
-export const OBSERVATION_VERSION = "1.0.0";
+export const OBSERVATION_VERSION = "1.1.0";
 
 export interface ObsCandidate {
   key: string;
@@ -25,6 +25,11 @@ export interface ObsCandidate {
   label: string;
   /** 攻城预告。结构化给出，模型不必从文字里抠数 */
   forecast?: Candidate["forecast"];
+  // Candidate.gain（取下此郡值什么）**故意不放进观测**，只走 label。
+  // 与 forecast 不同：forecast 有四个数要比大小，抠文字容易错；
+  // gain 的全部内容一句话就写完了，而结构化那份实测占 719 tok、
+  // label 那份只占 169——同一件事花四倍的钱，还要顶破 6000 的闸门。
+  // 机器人读的是 Candidate.gain 原件，不受此影响。
 }
 
 export interface Observation {
@@ -76,7 +81,7 @@ export function observe(
   const nameOf = opts.nameOf ?? ((id: FactionId) => id);
   const f = s.factions[faction];
   const st = standingOf(s, geo, faction);
-  const cands = listActions(s, faction, g, P, opts.rules, roster, nameOf);
+  const cands = listActions(s, faction, g, P, opts.rules, roster, nameOf, geo);
   const log = visibleLog(s, faction, opts.since ?? 0);
 
   const mine = Object.values(s.commanderies)

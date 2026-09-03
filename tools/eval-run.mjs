@@ -98,7 +98,7 @@ for (let gi = 0; gi < GAMES; gi += 1) {
         };
       } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
-        const cands = listActions(s, f, G, P, DEFAULT_RULES, ROSTER);
+        const cands = listActions(s, f, G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
         const dec = stubDecide(s, f, cands, agentVariant);
         const a = admit(s, f, dec.picks, cands, G, ROSTER, DEFAULT_RULES);
         orders.push(...a.orders);
@@ -112,7 +112,7 @@ for (let gi = 0; gi < GAMES; gi += 1) {
       } else {
         const i = SEATS.indexOf(f);
         orders.push(...decide(s, f, G, i >= 0 ? BOT_PROFILES[(i + rot) % 4] : "balanced",
-          undefined, ROSTER, P));
+          undefined, ROSTER, P, GEO));
       }
     }
     if (mine) turns.push(mine);
