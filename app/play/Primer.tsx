@@ -1,0 +1,96 @@
+"use client";
+// 规则速览。
+//
+// 新玩家进来看到的是「缺口 4 对可防守 3→破城」「取下即升乙档」这类
+// 高度压缩的判词，全靠候选标签自解释——而那些标签是为**已经懂规则的人**
+// 写的。这一页补上前置知识。
+//
+// **所有数字从 EngineParams 取，不在这里抄第二份。**
+// 内容包一改，这一页跟着变；抄一份就会有一天说的是三个月前的规则。
+import { DEFAULT_RULES } from "@/lib/game/engine/actions.ts";
+import type { EngineParams } from "@/lib/game/engine/params.ts";
+
+export function Primer({ P }: { P: EngineParams }) {
+  // 令数同样不许在这里抄第二份——它们在 DEFAULT_RULES 里
+  const R = DEFAULT_RULES;
+  const ladder = P.breachLadder.map(([r, n]) => `比 ${r} 起开 ${n} 个缺口`).join("；");
+  return (
+    <div className="primer">
+      <section>
+        <h3>怎么算赢</h3>
+        <p>十六季之后按<b>相对开局的增量</b>定档，<b>守成不得分</b>——
+          守着祖业到底也是丁档。</p>
+        <ul>
+          <li><b>甲</b>{"\u3000"}多控 2 州，或多控 1 州且多据 2 个州治</li>
+          <li><b>乙</b>{"\u3000"}多控 1 州，或多据 1 个州治</li>
+          <li><b>丙</b>{"\u3000"}郡数高于开局，且至少一郡是从他方手里夺来的</li>
+          <li><b>丁</b>{"\u3000"}以上都没做到</li>
+        </ul>
+        <p>「控制一州」＝拥有该州过半郡国。所以占十个散郡不如凑齐一个州——
+          侧栏的「逐州进度」逐州写着还差几郡。</p>
+      </section>
+
+      <section>
+        <h3>一季能做多少事</h3>
+        <p>每季按疆域给令数，季末最多结转 {P.carryCap} 令，多的作废。
+          同一郡每季至多 {R.perCommanderyOrders} 令。</p>
+        <ul>
+          <li>征伐 / 赴援{"\u3000"}<b>{R.campaignAp} 令</b></li>
+          <li>内政 / 集结 / 外交 / 借道{"\u3000"}<b>{R.normalAp} 令</b></li>
+          <li>刺探{"\u3000"}<b>免费</b>，每季 {R.freeUses.scout} 次</li>
+          <li>调任{"\u3000"}首次就任<b>免费</b>（每季 {R.freeUses.appoint} 次），
+            调动已在任者 <b>{R.normalAp} 令</b></li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>攻城看的是缺口，不是兵力比</h3>
+        <p>兵力比不直接决定胜负。引擎把「我方战力 ÷ 敌方战力」查表折成
+          <b>缺口数</b>，再与守方的<b>可防守数</b>比——<b>缺口严格大于可防守才破城</b>。</p>
+        <p className="mono">{ladder}</p>
+        <p>可防守数 ＝ {P.holdBase} ＋ 城防/{P.defensePerHold} ＋ 守军规模档
+          ＋ 守将加成。所以「修城」不是白做的，而一座空城再多兵也未必守得住。</p>
+        <p>器械（冲车、土山）直接加缺口，关隘处减半；武力 ≥ {P.mightBreachThreshold} 的
+          主将阵前摧锋，也加缺口。缺口是小整数，加一个就相当于多带三成兵。</p>
+      </section>
+
+      <section>
+        <h3>你看到的敌情是有误差的</h3>
+        <ul>
+          <li><b>自家</b>{"\u3000"}真值</li>
+          <li><b>已探</b>{"\u3000"}带 ±{Math.round(P.intelErrorRatio * 100)}% 误差的点估计，有效 {P.intelValidSeasons} 季</li>
+          <li><b>未探</b>{"\u3000"}只知道落在第几档（共 {P.intelTiers} 档，每档相差 {P.intelTierRatio} 倍）</li>
+          <li><b>盟友通报</b>{"\u3000"}盟友给的也只到「已探」级，不是真值</li>
+        </ul>
+        <p>刺探免费。未探时城防（20–100）与守将加成都不明，判词多半是「未知」
+          ——那不是引擎算不出来，是你还没看清。</p>
+      </section>
+
+      <section>
+        <h3>武将不是装饰</h3>
+        <p>武将驻在郡里。出征时该郡武将随军，至多 {P.retinueCap} 人：
+          主将全额加成，副将按 {P.deputyWeight} 折算。</p>
+        <p><b>出征兵力上限 ＝ 随军武将数 × {P.troopsPerOfficer}</b>。
+          一个没有名将的郡，纵有十万戍兵也只出得动一支偏师——
+          「我的郡国」那张表里「将」这一列是空的，就是这个意思。</p>
+        <p>破城时<b>城内武将尽数被俘</b>，本局不再出场。名将镇要地是有代价的赌注。</p>
+      </section>
+
+      <section>
+        <h3>粮道与盟约</h3>
+        <p>每季末从治所出发算连通分量。不通的郡<b>产出归零</b>，在外的军团
+          <b>下季溃散</b>——所以「绕后断粮」是真战术，而治所一失全境断供。</p>
+        <p>盟约给的是情报与借道，<b>不是不可攻</b>。可以打盟友，但那即是背盟：
+          全境民心 −{P.betrayMoralePenalty}，且 {P.betrayBanSeasons} 季内不得再缔盟。
+          盟约到期自动回落中立，不算背盟。</p>
+      </section>
+
+      <section>
+        <h3>同时裁决</h3>
+        <p>所有人的令同时结算，顺序不影响结果。你出兵攻城时，别人可能同一季
+          也围了上去——那时打的是野战，不是攻城。候选表能预告的都预告了，
+          但「同一季撞车」谁都预测不到，对双方一样。</p>
+      </section>
+    </div>
+  );
+}

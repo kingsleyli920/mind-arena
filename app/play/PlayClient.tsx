@@ -16,6 +16,7 @@ import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officer
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
+import { Primer } from "./Primer.tsx";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
@@ -311,6 +312,7 @@ export function PlayClient() {
   /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showPrimer, setShowPrimer] = useState(false);
 
   /**
    * 把日志文本里的势力 id 换成中文名。
@@ -581,6 +583,10 @@ export function PlayClient() {
           <p>兴平元年·一九四{"\u3000"}择一席入局。十六季后按<b>相对开局的增量</b>定档——
             守成不得分，多控一州或多据一州治方入乙档。</p>
         </header>
+        <details className="primer-fold">
+          <summary>怎么玩<i>没玩过先看这个</i></summary>
+          <Primer P={engine.P} />
+        </details>
         {resume && (() => {
           // 显式给「继续 / 重开」，不自动恢复：自动恢复会让「我想重开一局」
           // 变成一件要先找按钮的事
@@ -822,8 +828,18 @@ export function PlayClient() {
           {engine.nameOf.get(seat)}
         </span>
         <span className="ap">令数 {me.ap - spent}/{me.ap}{"\u3000"}现档 {GRADE_CN[me.bestGrade]}</span>
+        <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
+          aria-expanded={showPrimer}>规则</button>
       </header>
 
+      {showPrimer && (
+        <div className="primer-sheet" role="dialog" aria-label="规则速览">
+          <div>
+            <button className="primer-close" onClick={() => setShowPrimer(false)}>关闭</button>
+            <Primer P={engine.P} />
+          </div>
+        </div>
+      )}
       <div className="play-body">
         <section
           className="map-wrap"
