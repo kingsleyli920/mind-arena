@@ -11,9 +11,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildGraph, listActions, validate, type Graph } from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
-import { buildRoster, type Roster } from "@/lib/game/engine/officers.ts";
+import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
+import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve } from "@/lib/game/engine/resolve.ts";
@@ -57,12 +58,48 @@ function titleOf(a: Action): string {
 /** 兵力档的中文 */
 const STRENGTH_CN: Record<string, string> = { skirmish: "偏师", main: "主力", allout: "倾国" };
 
+/**
+ * 终局时说清「差的那一步是什么」。对局中状态栏另有一句 nextStep，
+ * 那句只报下一档的判据；这里要把现状与判据的差摊开算给玩家看。
+ *
+ * 判据是州级的（多控一州 / 多据一州治 / 多控两州），而整局十六季都在郡这一层
+ * 做决定。只报一个「丁档」，玩家算不出自己离下一档差多少，也就无从改进——
+ * 那正是十六季之后最该回答的问题。数字全部现算，与 victory.ts 的 gradeOf 同源。
+ */
+function endingGap(
+  me: { bestGrade: string; startCommanderies: number; startZhou: number; startSeats: number },
+  st: { commanderies: number; controlledZhou: number; zhouSeats: number; conquests: number },
+): string {
+  const zhouGain = st.controlledZhou - me.startZhou;
+  const seatGain = st.zhouSeats - me.startSeats;
+  if (me.bestGrade === "jia") return "已至甲档，本剧本的顶。";
+  if (me.bestGrade === "yi") {
+    const byZhou = 2 - zhouGain;
+    const bySeat = zhouGain >= 1 ? 2 - seatGain : null;
+    return `距甲档：再多控 ${byZhou} 州`
+      + (bySeat !== null && bySeat > 0 ? `，或再多据 ${bySeat} 个州治` : "")
+      + "。";
+  }
+  if (me.bestGrade === "bing") {
+    return "距乙档：相对开局多控一整州（拥有该州过半郡国），或多据一个州治。"
+      + `现控 ${st.controlledZhou} 州（开局 ${me.startZhou}）、`
+      + `据 ${st.zhouSeats} 个州治（开局 ${me.startSeats}）。`;
+  }
+  // 丁档：拆开说，两个条件缺哪个是两回事——只捡无主之地永远拿不到丙
+  const need: string[] = [];
+  if (st.commanderies <= me.startCommanderies) {
+    need.push(`郡数要高于开局（现 ${st.commanderies}，开局 ${me.startCommanderies}）`);
+  }
+  if (st.conquests < 1) need.push("且至少一郡是从他方手里夺来的（只捡无主之地不算进攻）");
+  return need.length ? `距丙档：${need.join("，")}。` : "距丙档：条件已足，本局未及结算。";
+}
+
 const PANEL_ORDER = ["relief", "withdraw", "campaign", "muster", "govern",
                      "appoint", "scout", "ally", "passage", "retire"];
 
 const TYPE_CN: Record<string, string> = {
   campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结",
-  govern: "内政", appoint: "任命", scout: "刺探", ally: "外交",
+  govern: "内政", appoint: "调任", scout: "刺探", ally: "外交",
   passage: "借道", retire: "归隐",
 };
 
@@ -796,8 +833,13 @@ export function PlayClient() {
                     {"\u3000"}民心 {game.commanderies[focus].moraleTier}</span>
                   <span>{engine.P.units[game.commanderies[focus].unit]?.name}
                     {"\u3000"}器械 {{ none: "无", ram: "冲车", mound: "土山" }[game.commanderies[focus].gear]}
-                    {game.commanderies[focus].governor
-                      && `${"\u3000"}太守 ${engine.roster.byId.get(game.commanderies[focus].governor!)?.name}`}</span>
+                    {(() => {
+                      // 驻将名单：兵力上限由人数定，所以这是选郡时最该看见的一项
+                      const os = stationedAt(game, engine.roster, focus);
+                      return os.length
+                        ? `${"\u3000"}驻将 ${os.map((o) => o.name).join("、")}`
+                        : `${"\u3000"}无名将`;
+                    })()}</span>
                 </>
               ) : (
                 <span>{engine.P.units[game.commanderies[focus].unit]?.name}
@@ -849,16 +891,36 @@ export function PlayClient() {
 
           {game.finished ? (
             <div className="over">
-              <h2>终局{"\u3000"}{GRADE_CN[me.bestGrade]} 档</h2>
-              <p>十六季既尽。档位按本局曾达到过的最高档记。</p>
+              <h2>终局{"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
+                <b>{GRADE_SCORE[me.bestGrade]} 分</b></h2>
+              {/* 只报一个档位等于不报。玩家要知道的是「我把局面推进了多少」，
+                  以及「差一步的那一步是什么」——判据是州级的，而对局十六季
+                  都在郡这一层做决定，不摊开写没人算得出来 */}
+              <dl className="over-stat">
+                <div><dt>郡国</dt><dd>{standing.commanderies}
+                  <i>开局 {me.startCommanderies}</i></dd></div>
+                <div><dt>控制州</dt><dd>{standing.controlledZhou}
+                  <i>开局 {me.startZhou}</i></dd></div>
+                <div><dt>州治</dt><dd>{standing.zhouSeats}
+                  <i>开局 {me.startSeats}</i></dd></div>
+                <div><dt>夺自他方</dt><dd>{standing.conquests}<i>郡</i></dd></div>
+              </dl>
+              <p>{endingGap(me, standing)}</p>
+              <p className="over-note">档位按本局曾达到过的最高档记，判的是相对开局的增量——
+                守成不得分。</p>
               <button onClick={() => { setGame(null); setSeat(null); }}>再来一局</button>
             </div>
           ) : (
             <>
               <div className="acts">
                 {[...byType].sort((a, b) => PANEL_ORDER.indexOf(a[0]) - PANEL_ORDER.indexOf(b[0]))
+                  // 默认只展开救援（自家城被围，属急事且条数少）。
+                  // 征伐曾默认展开，实测它一个面板就有 2128px 高而容器只有 522px——四屏。
+                  // 后果是免费的刺探排在第五个面板，玩家得先滚过二十条「因为没探所以
+                  // 全是未知」的候选才找得到那件最该先做的事。全折叠时六个面板连同条数
+                  // 一屏可见，离任何一类都只有一次点击
                   .map(([cls, list]) => (
-                  <details key={cls} open={cls === "campaign" || cls === "relief"}>
+                  <details key={cls} open={cls === "relief"}>
                     <summary>
                       {TYPE_CN[cls] ?? cls}
                       <i>{cls === "campaign" && onlyWinnable

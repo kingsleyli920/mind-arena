@@ -182,6 +182,17 @@
 .over { display: grid; gap: 0.6rem; padding: 1rem; border: 1px solid var(--seal); border-radius: 3px; }
 .over h2 { margin: 0; font-size: 1.3rem; letter-spacing: 0.12em; }
 .over p { margin: 0; font-size: 0.82rem; color: var(--ink-soft); }
+.over-stat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 0; }
+.over-stat div { display: grid; gap: 0.15rem; }
+.over-stat dt { font-size: 0.7rem; color: var(--ink-soft); letter-spacing: 0.06em; }
+.over-stat dd {
+  margin: 0; font-size: 1.35rem; font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 0.3rem;
+}
+.over-stat dd i { font-size: 0.66rem; font-weight: 400; font-style: normal; color: var(--ink-soft); }
+.over h2 b { color: var(--seal); font-weight: 600; }
+.over-note { font-size: 0.72rem !important; opacity: 0.8; }
+
 .over button {
   justify-self: start; padding: 0.5rem 1rem; cursor: pointer; font: inherit;
   background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;

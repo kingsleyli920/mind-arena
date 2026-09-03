@@ -12,6 +12,7 @@
 import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
 import { unitName } from "./combat.ts";
+import { retinueAt, isFiller } from "./officers.ts";
 import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
 import { briefFor, standingOf, GRADE_CN, type Geography } from "./victory.ts";
@@ -52,7 +53,9 @@ export interface Observation {
   mine: Array<{
     id: string; zhou: string; garrison: number; defense: number;
     yieldTier: number; moraleTier: number; unit: string; gear: string;
-    governor: string | null; besiegedBy: FactionId | null;
+    /** 能随军的驻将（至多 retinueCap 人）。兵力上限 = 人数 × 每将统兵 */
+    officers: string[];
+    besiegedBy: FactionId | null;
   }>;
   /** 我在外的军团 */
   armies: Array<{ id: string; at: string; target: string | null; troops: number;
@@ -96,7 +99,13 @@ export function observe(
       moraleTier: c.moraleTier,
       unit: unitName(P, c.unit),
       gear: c.gear,
-      governor: c.governor ? roster?.byId.get(c.governor)?.name ?? c.governor : null,
+      // 驻将：只报实际能随军的那几人（retinueCap），外加总数。
+      // 全列出来会把观测撑爆——刘表十三郡各驻数人时峰值一度只剩 94 tok 余量，
+      // 而多出来的名字对决策没有用：超过上限的人不随军也不加成
+      officers: roster
+        ? retinueAt(s, roster, c.id, P).filter((o) => !isFiller(o))
+            .slice(0, P.retinueCap).map((o) => o.name)
+        : [],
       besiegedBy: s.armies.find((x) => x.target === c.id)?.faction ?? null,
     }));
 

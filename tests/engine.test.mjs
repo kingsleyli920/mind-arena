@@ -5,6 +5,7 @@ import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
+import { retinueAt, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
@@ -215,11 +216,24 @@ test("规则即数据：改内容包必须改变引擎行为", () => {
 });
 
 // ── 武将 ────────────────────────────────────────────────────────────
+/**
+ * 把某郡的驻将设成恰好这些人（不给则只剩龙套郡守）。
+ * 现在武将有驻地且开局按籍贯落位，测试若不先清干净，
+ * 量到的是「这个郡本来就驻着谁」而不是想验的那一条
+ */
+const station = (t, at, ...officerIds) => {
+  for (const [oid, where] of Object.entries(t.stations)) {
+    if (where === at) delete t.stations[oid];
+  }
+  for (const oid of officerIds) if (oid) t.stations[oid] = at;
+  return t;
+};
+
 // 808 人的五维此前完全没进引擎。这几条锁住「数据真的在影响结算」，
 // 防止将来重构时武将又退回成装饰性字段。
 test("武将：守将统率与守城适性抬高可防守数", () => {
   const s = fresh();
-  const tgt = Object.values(s.commanderies).find((c) => c.owner === "lubu" && !c.governor);
+  const tgt = Object.values(s.commanderies).find((c) => c.owner === "lubu");
   // 找一个与该郡邻接、属他方的起兵郡
   const from = [...(G.adj.get(tgt.id) ?? [])]
     .map((e) => s.commanderies[e.to])
@@ -228,7 +242,8 @@ test("武将：守将统率与守城适性抬高可防守数", () => {
 
   const attack = (governor) => {
     const t = fresh();
-    t.commanderies[tgt.id].governor = governor;
+    station(t, tgt.id, governor);
+    station(t, from.id);                       // 攻方也清干净，只留龙套
     t.commanderies[from.id].garrison = 40000;
     const r = resolve(t, [{ faction: from.owner, action: { type: "campaign",
       target: tgt.id, from: from.id, commander: null, strength: "allout", siegeGear: "ram" } }],
@@ -253,9 +268,9 @@ test("武将：主将统率抬高战力，破城后守将被俘", () => {
 
   const run = (leader, defender) => {
     const t = fresh();
-    t.commanderies[from.id].governor = leader;
+    station(t, from.id, leader);
     t.commanderies[from.id].garrison = 80000;
-    t.commanderies[edge.to].governor = defender;
+    station(t, edge.to, defender);
     const r = resolve(t, [{ faction: "yuanshao", action: { type: "campaign",
       target: edge.to, from: from.id, commander: leader, strength: "allout", siegeGear: "ram" } }],
       G, P, ROSTER, GEO);
@@ -265,14 +280,18 @@ test("武将：主将统率抬高战力，破城后守将被俘", () => {
   const noLead = run(null, null);
   const g1 = withLead.log.find((e) => e.kind.startsWith("siege-"))?.attribution;
   const g0 = noLead.log.find((e) => e.kind.startsWith("siege-"))?.attribution;
-  assert.equal(g0.主将, "无主将");
+  // 「无主将」这一档已不存在：无名将驻守的郡自动有龙套郡守，弱但不为零。
+  // 该验的是名将确实强于龙套，而不是龙套等于零
+  assert.ok(String(g0.主将).includes("守将") || g0.主将 === "无主将",
+    `无名将时应由龙套顶上：${JSON.stringify(g0)}`);
   assert.ok(String(g1.主将).includes("袁绍"), `主将归因缺失：${JSON.stringify(g1)}`);
+  assert.ok(Number(g1.缺口) >= Number(g0.缺口), "名将带兵不该弱于龙套郡守");
 
   // 破城时守将被俘，且此后不可再任命
   const cap = run("yuanshao", "huangfusong");
   if (cap.log.some((e) => e.kind === "siege-win")) {
     assert.ok(cap.capturedOfficers.includes("huangfusong"), "破城未俘获守将");
-    assert.equal(cap.commanderies[edge.to].governor, null, "被俘者仍挂在太守位上");
+    assert.equal(cap.stations.huangfusong, undefined, "被俘者仍挂在驻地上");
   }
 });
 
@@ -327,7 +346,7 @@ test("武将：太守政治抬高产出、魅力抬高民心", () => {
   const at = Object.values(fresh().commanderies).find((c) => c.owner === "yuanshao").id;
   const after = (gov) => {
     const t = fresh();
-    t.commanderies[at].governor = gov;
+    station(t, at, gov);
     t.commanderies[at].moraleTier = 2;
     const r = resolve(t, [], G, P, ROSTER, GEO).state.commanderies[at];
     return { garrison: r.garrison, morale: r.moraleTier };
@@ -366,13 +385,21 @@ test("围城：首攻未克则留在城下，缺口逐季累加", () => {
   assert.ok(army, "围城军未留在城下 —— 军团仍是空壳");
   assert.equal(army.siegeSeasons, 1);
 
-  // 下季不再下令，围城仍自动结算，缺口比首季多
+  // 下季不再下令，围城仍自动结算，且**进度必须推得动**。
+  //
+  // 此前这里断言的是「缺口比首季多」。那个量单看会卡在阶梯边界上：
+  // 缺口来自战力比查表，攻方换个主将、战力比跨到相邻一档，
+  // 累加的 +1 就恰被基数的 −1 抵掉，看起来像机制坏了，其实没有。
+  // 该验的是包里写的那条设计意图：「损耗不对称，否则围困永远推不动进度」——
+  // 也就是「缺口 − 可防守」这个余量必须逐季变好。
   const before = r1.state.log.length;
   const r2 = resolve(refreshAp(r1.state, P), [], G, P, ROSTER, GEO);
   const ev = r2.state.log.slice(before).find((e) => e.kind.startsWith("siege-"));
   assert.ok(ev, "第二季围城未自动结算");
-  assert.ok(Number(ev.attribution.缺口) > Number(held.attribution.缺口),
-    `围城第二季缺口未累加：${held.attribution.缺口} → ${ev.attribution.缺口}`);
+  const margin = (x) => Number(x.attribution.缺口) - Number(x.attribution.可防守);
+  assert.ok(margin(ev) > margin(held),
+    `围城第二季未推进：缺口−可防守 ${margin(held)} → ${margin(ev)}`
+    + `（${held.attribution.缺口}对${held.attribution.可防守} → ${ev.attribution.缺口}对${ev.attribution.可防守}）`);
 });
 
 test("围城：满上限自动撤围，残兵退回起兵郡", () => {
@@ -907,4 +934,52 @@ test("观测：刺探后预告确实收窄——这是情报的价值所在", ()
   }
   assert.ok(narrowed > same,
     `刺探后只有 ${narrowed}/${narrowed + same} 条候选的预告收窄了 —— 情报买不到东西`);
+});
+
+test("编制：出征只带 retinueCap 人，其余留守；兵力上限由随军人数定", () => {
+  const s = fresh();
+  const from = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== "yuanshao");
+  assert.ok(edge, "袁绍无可攻目标");
+
+  // 把袁绍全部武将塞进起兵郡，看出征会不会把人全带走
+  const t = fresh();
+  const all = (ROSTER.byFaction.get("yuanshao") ?? []).map((o) => o.id);
+  assert.ok(all.length > P.retinueCap + 3, "袁绍武将不足，测不出截断");
+  for (const oid of all) t.stations[oid] = from.id;
+  t.commanderies[from.id].garrison = 60000;
+  // 目标调硬，让围城持续一季以上——一击破城的话军团当场解散，验不到 retinue
+  t.commanderies[edge.to].garrison = 30000;
+  t.commanderies[edge.to].defense = 100;
+
+  const r = resolve(t, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO);
+  const army = r.state.armies.find((a) => a.target === edge.to);
+  assert.ok(army, "未形成围城");
+  // 首版没截断：一支偏师能带走全部二十余将，治所当场空城
+  assert.ok(army.retinue.length <= P.retinueCap,
+    `随军 ${army.retinue.length} 人，超过上限 ${P.retinueCap}`);
+  assert.equal(stationedAt(r.state, ROSTER, from.id).length, all.length - army.retinue.length,
+    "留守人数对不上——随军者应当且仅当离开驻地");
+
+  // 兵力上限：结算里也要卡，不能只写在候选标签上
+  assert.ok(army.troops <= P.retinueCap * P.troopsPerOfficer,
+    `出兵 ${army.troops} 超过 ${P.retinueCap} 将的统兵上限`);
+});
+
+test("编制：无名将之郡由龙套顶上，弱但不为零", () => {
+  const t = fresh();
+  const at = Object.values(t.commanderies).find((c) => c.owner === "yuanshao").id;
+  for (const [oid, where] of Object.entries(t.stations)) {
+    if (where === at) delete t.stations[oid];
+  }
+  const corps = retinueAt(t, ROSTER, at, P);
+  assert.equal(corps.length, 1, "无名将之郡应恰有一名龙套");
+  assert.ok(isFiller(corps[0]), "顶上的不是龙套");
+  assert.ok(corps[0].leadership > 0 && corps[0].leadership < 60,
+    "龙套五维应弱于基准值，但不为零");
+  // 龙套不进 stations，也就不会被调走、被俘、或被算成「已有驻将」
+  assert.equal(t.stations[corps[0].id], undefined, "龙套混进了驻地表");
 });

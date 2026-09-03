@@ -9,10 +9,13 @@
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
-import { canonicalOrder, type Graph, type Rules, DEFAULT_RULES, validate } from "./actions.ts";
+import { canonicalOrder, GEAR_CN, POLICY_CN, type Graph, type Rules, DEFAULT_RULES, validate }
+  from "./actions.ts";
+import { observedGarrison } from "./intel.ts";
 import { breachCount, unitPower, unitGuard, unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
-import { attackEffect, defendEffect, governEffect, governorOf } from "./officers.ts";
+import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap, isFiller }
+  from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
@@ -70,11 +73,13 @@ function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId
 function beginSiege(
   s: GameState, faction: FactionId, from: CommanderyId, target: CommanderyId,
   troops: number, a: { commander: OfficerId | null; strength: Posture },
-  lead: { id: string } | null, gear: SiegeGear, unit: string,
+  retinue: readonly OfficerRef[], gear: SiegeGear, unit: string,
 ): void {
+  // 龙套不进 retinue：它是「这个郡没人」的占位，不该被记成随军出征的实体
+  const ids = retinue.filter((o) => !isFiller(o)).map((o) => o.id);
   s.armies.push({
     id: `${faction}:${s.turn}:${from}>${target}`,
-    faction, commander: a.commander ?? lead?.id ?? null, troops,
+    faction, commander: a.commander ?? ids[0] ?? null, retinue: ids, troops,
     at: target, target, posture: a.strength, gear, unit,
     siegeSeasons: 0, home: from,
   });
@@ -87,14 +92,17 @@ function beginSiege(
  */
 function fieldBattle(
   s: GameState, P: EngineParams, roster: Roster | null,
-  x: { atkFaction: FactionId; atkTroops: number; atkLead: OfficerRef | null;
+  x: { atkFaction: FactionId; atkTroops: number; atkCorps: readonly OfficerRef[];
        foe: Army; at: CommanderyId; terrain: string; seq: number; atkUnit: string;
        /** 攻方起兵郡，败退时残部退回此处 */
        from: CommanderyId },
 ): number {
-  const atkEff = roster ? attackEffect(x.atkLead, P, x.terrain) : null;
-  const foeLead = roster ? roster.byId.get(x.foe.commander ?? "") ?? null : null;
-  const foeEff = roster ? attackEffect(foeLead, P, x.terrain) : null;
+  // 两侧都按整支编制算：援军带三员将去解围，与只带一员将不是一回事
+  const atkEff = roster ? attackRetinue(x.atkCorps, P, x.terrain) : null;
+  const foeCorps = roster
+    ? x.foe.retinue.map((id) => roster.byId.get(id)).filter((o) => !!o)
+    : [];
+  const foeEff = roster ? attackRetinue(foeCorps, P, x.terrain) : null;
   const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
                                          faction: x.atkFaction, event: "field", seq: x.seq }) * P.jitter * 2;
   const A = x.atkTroops * (atkEff?.attackMul ?? 1) * jitter
@@ -176,12 +184,32 @@ export function resolve(
   }
 
   // ── 阶段一：观测与任命（无冲突）────────────────────────────────────
+  //
+  // 这三类令（刺探/内政/任命）此前一条日志都不记。后果是：打出正确的开局
+  // ——先花一季探明敌情、修内政——战报里我方一个字都没有，玩家不知道
+  // 自己那十条令发生了什么，只能把二十条候选重读一遍去发现措辞变了。
+  // 回执**按类型合并成每季一行**而不是每令一行：一个十五郡的势力
+  // 逐令记会刷出十几行，把战报和观测预算一起吃掉。
+  const receipts = new Map<FactionId, { scout: string[]; govern: string[]; appoint: string[] }>();
+  const receipt = (f: FactionId) => {
+    if (!receipts.has(f)) receipts.set(f, { scout: [], govern: [], appoint: [] });
+    return receipts.get(f)!;
+  };
+  const officerName = (id: OfficerId | null) =>
+    (id && roster?.byId.get(id)?.name) || id || "无";
+
   for (const o of accepted) {
     const a = o.action;
     if (a.type === "scout") {
       (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
+      // 报刚探到的那个值。只写「刺探了 X」等于没报——玩家要的是探到了什么
+      receipt(o.faction).scout.push(`${a.at} ${observedGarrison(s, o.faction, a.at, P).text}`);
     } else if (a.type === "appoint") {
-      s.commanderies[a.at].governor = a.officer;
+      // 调任：改的是驻地。太守是从驻地武将里派生的，不必也不能另存一份
+      const from = s.stations[a.officer];
+      s.stations[a.officer] = a.at;
+      receipt(o.faction).appoint.push(
+        `${officerName(a.officer)} 驻 ${a.at}${from && from !== a.at ? `（自 ${from}）` : ""}`);
     }
   }
 
@@ -189,6 +217,9 @@ export function resolve(
   for (const o of accepted) {
     if (o.action.type !== "govern") continue;
     const c = s.commanderies[o.action.at];
+    // 回执写的是**变化量**，不是「执行了内政」。产出档从 5 到 6 是玩家
+    // 唯一能据以判断这一令值不值的东西
+    const was = { y: c.yieldTier, m: c.moraleTier, d: c.defense, g: c.garrison, gear: c.gear };
     switch (o.action.policy) {
       case "farm":   c.yieldTier = Math.min(10, c.yieldTier + P.farmGain); break;
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
@@ -203,6 +234,21 @@ export function resolve(
         break;
       }
     }
+    const d: string[] = [];
+    if (c.yieldTier !== was.y) d.push(`产${was.y}→${c.yieldTier}`);
+    if (c.moraleTier !== was.m) d.push(`心${was.m}→${c.moraleTier}`);
+    if (c.defense !== was.d) d.push(`防${was.d}→${c.defense}`);
+    if (c.garrison !== was.g) d.push(`兵${was.g}→${c.garrison}`);
+    if (c.gear !== was.gear) d.push(`${GEAR_CN[was.gear] ?? was.gear}→${GEAR_CN[c.gear] ?? c.gear}`);
+    receipt(o.faction).govern.push(
+      `${c.id} ${POLICY_CN[o.action.policy] ?? o.action.policy}` + (d.length ? ` ${d.join(" ")}` : "（已至上限）"));
+  }
+
+  // 三类回执各合并成一行。kind 分开，界面与观测都可按类挑
+  for (const [f, r] of [...receipts].sort((a, b) => a[0].localeCompare(b[0]))) {
+    if (r.scout.length) log(s, { kind: "scout", faction: f, text: `刺探回报：${r.scout.join("、")}` });
+    if (r.govern.length) log(s, { kind: "govern", faction: f, text: `内政：${r.govern.join("、")}` });
+    if (r.appoint.length) log(s, { kind: "appoint", faction: f, text: `任命：${r.appoint.join("、")}` });
   }
 
   // ── 阶段三：外交（变更延迟一季生效）────────────────────────────────
@@ -248,7 +294,8 @@ export function resolve(
     }
     s.armies.push({
       id: `${o.faction}:${s.turn}:${a.at}`,
-      faction: o.faction, commander: a.commander, troops,
+      faction: o.faction, commander: a.commander, retinue: a.commander ? [a.commander] : [],
+      troops,
       at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
       unit: s.commanderies[a.at].unit,
       siegeSeasons: 0, home: a.at,
@@ -284,23 +331,32 @@ export function resolve(
       const src = s.commanderies[a.from];
       // 起兵郡若有待命军团，整建制出征；否则按兵力档从郡守军抽调
       const ready = s.armies.find((x) => x.faction === o.faction && x.at === a.from && !x.target);
-      const troops = ready ? ready.troops : Math.floor(src.garrison * P.strengthRatio[a.strength]);
-      return { o, a, troops, ready, seq: i };
+      // 兵力上限在**结算里**也要卡。此前它只写在候选标签上，
+      // 于是绕过候选表直接下令就能无视上限——那样的上限等于没有
+      const terrain = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target)?.terrain ?? "plain";
+      const corps = roster
+        ? attackRetinue(retinueAt(s, roster, a.from, P), P, terrain).members
+        : [];
+      const cap = roster ? troopCap(corps.length ? corps : retinueAt(s, roster, a.from, P), P)
+                         : Infinity;
+      const want = ready ? ready.troops : Math.floor(src.garrison * P.strengthRatio[a.strength]);
+      const troops = Math.min(want, cap);
+      return { o, a, troops, ready, corps, terrain, seq: i };
     })
     .sort((x, y) => y.troops - x.troops || x.o.faction.localeCompare(y.o.faction)
                  || x.a.target.localeCompare(y.a.target));
 
   for (const [i, c] of campaigns.entries()) {
-    const { o, a, troops, ready } = c;
+    const { o, a, troops, ready, corps, terrain } = c;
     const src = s.commanderies[a.from];
     const tgt = s.commanderies[a.target];
     if (!tgt) continue;
     if (troops <= 0) continue;
     if (!ready && src.garrison < troops) continue;
 
-    // 攻城判定在阶段七统一做，这里只需要野战用的地形
-    const terrain = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target)?.terrain ?? "plain";
-    const lead = roster ? governorOf(s, roster, a.from) : null;
+    // 随军编制在上面按攻势排位截过 retinueCap 了：出征的是那几员，
+    // 不是把全郡武将都拉走——首版没截，一支四千人的偏师能带走袁绍全部
+    // 二十三员将，治所当场空城
 
     // 出兵：要么带走待命军团，要么从郡守军抽调
     if (ready) {
@@ -318,12 +374,12 @@ export function resolve(
       const foe = [...besiegers].sort((x, y) => y.troops - x.troops
         || x.faction.localeCompare(y.faction))[0];
       const won = fieldBattle(s, P, roster, {
-        atkFaction: o.faction, atkTroops: troops, atkLead: lead,
+        atkFaction: o.faction, atkTroops: troops, atkCorps: corps,
         foe, at: a.target, terrain, seq: i, from: a.from, atkUnit: src.unit,
       });
       if (won && tgt.owner !== o.faction) {
         // 击退围城军后接手围城
-        beginSiege(s, o.faction, a.from, a.target, won, a, lead, gear, src.unit);
+        beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit);
       } else if (won) {
         // 解自家之围：残部入城为戍
         tgt.garrison += won;
@@ -341,7 +397,7 @@ export function resolve(
                text: `增兵 ${a.target} 城下，共 ${mine.troops} 人` });
       continue;
     }
-    beginSiege(s, o.faction, a.from, a.target, troops, a, lead, gear, src.unit);
+    beginSiege(s, o.faction, a.from, a.target, troops, a, corps, gear, src.unit);
   }
 
   // ── 阶段七：围城结算 ──────────────────────────────────────────────
@@ -356,9 +412,12 @@ export function resolve(
     const edge = (g.adj.get(army.home) ?? []).find((e) => e.to === army.target);
     const terrain = edge?.terrain ?? "plain";
     const atGate = (edge?.gates.length ?? 0) > 0;
-    const lead = roster ? roster.byId.get(army.commander ?? "") ?? null : null;
-    const atk = roster ? attackEffect(lead, P, terrain) : null;
-    const def = roster ? defendEffect(governorOf(s, roster, army.target!), P) : null;
+    // 攻方按随军编制，守方按城内编制。两侧都与 forecast 走同一对函数
+    const corps = roster
+      ? army.retinue.map((id) => roster.byId.get(id)).filter((o) => !!o)
+      : [];
+    const atk = roster ? attackRetinue(corps, P, terrain) : null;
+    const def = roster ? defendRetinue(retinueAt(s, roster, army.target!, P), P) : null;
 
     const jitter = (1 - P.jitter) + roll({ seed: s.seed, year: s.year, season: s.season,
                                            faction: army.faction, event: "siege", seq: i }) * P.jitter * 2;
@@ -378,12 +437,16 @@ export function resolve(
     if (breach > hold) {
       const survivors = Math.max(1, Math.round(army.troops - tgt.garrison * P.captureSurvivalPenalty));
       const loser = tgt.owner;
-      const caught = tgt.governor;
-      if (caught) {
-        s.capturedOfficers.push(caught);
-        tgt.governor = null;
+      // 城破则**城内武将尽数被俘**，不只是守将一人。名将镇要地因此是真赌注：
+      // 三员大将同守一城，破城就是一次损失三人
+      const caught = roster ? retinueAt(s, roster, army.target!, P).filter((o) => !isFiller(o)) : [];
+      if (caught.length) {
+        for (const o of caught) {
+          s.capturedOfficers.push(o.id);
+          delete s.stations[o.id];
+        }
         log(s, { kind: "officer-captured", faction: army.faction,
-                 text: `${army.target} 守将 ${roster?.byId.get(caught)?.name ?? caught} 被俘` });
+                 text: `${army.target} ${caught.map((o) => o.name).join("、")} 被俘` });
       }
       if (loser) s.factions[army.faction].conquests += 1;   // 只捡无主之地不算进攻
       tgt.owner = army.faction;
@@ -462,7 +525,7 @@ export function resolve(
         log(s, { kind: "besieged", faction: f.id, text: `${c.id} 被围，本季无产出` });
         continue;
       }
-      const gov = roster ? governEffect(governorOf(s, roster, c.id), P) : null;
+      const gov = roster ? governEffect(governorOf(s, roster, c.id, P), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
       c.garrison = Math.min(
         Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor * (gov?.yieldMul ?? 1)),

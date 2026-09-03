@@ -4,7 +4,9 @@
 // 若让模型自由填参，仅征伐一项就是 目标 × 主将 × 兵力档 × 器械档，
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
-import { recruitable, governorOf, type OfficerRef, type Roster } from "./officers.ts";
+import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
+  type OfficerRef, type Roster }
+  from "./officers.ts";
 import { observedGarrison, tierOf } from "./intel.ts";
 import { forecastCampaign } from "./forecast.ts";
 import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
@@ -100,8 +102,13 @@ function troopBand(troops: number, P: EngineParams): string {
        + `（第 ${tierOf(troops, P)}/${P.intelTiers} 档）`;
 }
 
-/** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义 */
-const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
+/** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义。
+    导出给 resolve 的内政回执共用——各存一份迟早写出两套说法 */
+export const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
+/** 内政方针的中文名。同上，候选标签与结算回执必须是同一套字 */
+export const POLICY_CN: Record<string, string> = {
+  farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民", forge: "治械",
+};
 const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 
 /**
@@ -187,9 +194,11 @@ export function listActions(
       // 本来就有六成字是逐字重复的，不必再算两遍
       const gn = geo ? gainOf(s, geo, f, tid) : undefined;
       const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
-      // 主将由起兵郡的太守唯一确定（太守领兵），因此写进 label 与 action，
-      // 让模型看得见「谁去打」，而不必自己再选一次人
-      const lead = roster ? governorOf(s, roster, e.from) : null;
+      // 随军编制由起兵郡唯一确定（驻地编制），写进 label 让模型看得见「谁去打」、
+      // 也看得见「能带多少兵」——出征兵力上限就是随军人数 × 每将统兵
+      const corps = roster ? retinueAt(s, roster, e.from, P) : [];
+      const lead = corps[0] ?? null;
+      const cap = roster ? troopCap(corps, P) : Infinity;
       const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
       const src0 = s.commanderies[e.from];
       // 兵种对位与器械的效果已经折进 forecast 的缺口数里，标签只标一次名目。
@@ -201,18 +210,28 @@ export function listActions(
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
         : `｜${nameOf(ongoing.faction)} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
       const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
-      // 主将的统率/武力/适性已折进 forecast，这里只报是谁——
-      // 没有太守才需要提醒，那是可以补救的
-      const leadNote = lead ? `，${lead.name}领` : "，无主将";
+      // 五维已折进 forecast，这里只报是谁、几人——人数决定兵力上限，
+      // 那是玩家/模型唯一能据以判断「该不该先调将过来」的东西
+      // 只报主将与人数：人数定兵力上限，主将定五维加成，副将是谁不影响判断。
+      // 全名铺开会把候选 token 撑爆——刘表一度顶到 10059/10000
+      const named = corps.filter((o) => !isFiller(o));
+      const leadNote = named.length
+        ? `，${named[0].name}${named.length > 1 ? `等 ${Math.min(named.length, P.retinueCap)} 将` : ""}领`
+        : "，仅郡守（无名将）";
       // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
       for (const strength of ["main", "allout"] as const) {
         // 出兵后本郡余兵必须写进 label。只写「我方戍兵 6576」而不写
         // 「倾国后城中仅余 1315」，模型看不见自己正在把老巢掏空——
         // 实测投机流曹操因此 10/10 全灭
-        const send = ready ? ready.troops
+        // 兵力上限：带多少兵由随军武将数定。这条是「一个城里有多少武将、
+        // 就能带多少兵」的落点——没将的郡纵有十万戍兵也只出得动一支偏师
+        const want = ready ? ready.troops
           : Math.floor(s.commanderies[e.from].garrison * P.strengthRatio[strength]);
+        const send = Math.min(want, cap);
         const left = ready ? s.commanderies[e.from].garrison
           : s.commanderies[e.from].garrison - send;
+        const capNote = send < want
+          ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const fc = forecastCampaign(s, f, {
           type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
           strength, siegeGear: src0.gear,
@@ -232,7 +251,7 @@ export function listActions(
           // 实测「比 4.35」的仗打不下来，「比 2.26」的能破城。
           // 写缺口对可防守，那才是引擎真正比的两个量
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
-               + `：出 ${send} 人，本郡余 ${left}；敌守军 ${seen.text}`
+               + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`
@@ -260,7 +279,7 @@ export function listActions(
       ];
       for (const src of routes) {
         const isSortie = src.id === foe.target;
-        const lead = roster ? governorOf(s, roster, src.id) : null;
+        const lead = roster ? retinueAt(s, roster, src.id, P)[0] ?? null : null;
         out.push({
           key: `relief:${src.id}>${foe.target}`,
           action: { type: "campaign", target: foe.target!, from: src.id,
@@ -340,8 +359,7 @@ export function listActions(
         key: `govern:${c.id}:${policy}`,
         action: { type: "govern", at: c.id, policy: policy as never },
         cost: rules.normalAp,
-        label: `${c.id} 行${{ farm: "劝农", levy: "募兵", wall: "修城",
-                              soothe: "安民", forge: "治械" }[policy]}`
+        label: `${c.id} 行${POLICY_CN[policy]}`
              + `（${why}；产${c.yieldTier} 心${c.moraleTier} 防${c.defense}`
              + ` ${unitName(P, c.unit)}·${GEAR_CN[c.gear]}）`,
       });
@@ -366,21 +384,30 @@ export function listActions(
     }
   }
 
-  // ── 任命：免费但有次数上限。空缺席位 × 最合适的两人 ──────────────────
+  // ── 调任：免费但有次数上限。缺将之郡 × 最合适的两人 ──────────────────
   // 不铺开成「全部郡 × 全部可用武将」——袁绍二十六将十三郡就是三百余条。
-  // 引擎按郡的性质（临敌/后方）预筛出该郡最该要的人，模型只在人选间取舍。
+  // 引擎按郡的性质（临敌/后方、现有几将）预筛出该郡最该要的人，
+  // 模型只在人选间取舍。
+  //
+  // 语义从「任命到空缺」改成了「调驻」：现在人人都有驻地，按空缺筛的话
+  // 候选恒为空。而调任正是这套编制的决策面——把将堆到要打的方向，
+  // 后方就空虚；分散驻守则处处能守而处处打不动。
   if (roster && freeLeft(s, f, "appoint", rules) > 0) {
     const pool = recruitable(s, roster, f);
     if (pool.length) {
       const vacancies = mine
-        .filter((c) => !c.governor)
+        .filter((c) => stationedAt(s, roster, c.id).length < P.retinueCap)
         .map((c) => {
           const front = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
           // 临敌郡看统率武力，后方郡看政治魅力——同一个人在两种郡上价值不同
           const fit = (o: OfficerRef) => front
             ? o.leadership * 2 + o.might + (o.aptitudes.includes("守城") ? 30 : 0)
             : o.politics * 2 + o.charisma + (o.aptitudes.includes("治民") ? 30 : 0);
-          return { c, front, fit, weight: c.yieldTier * 10 + (front ? 25 : 0) };
+          // 名将越少越该补人：兵力上限直接由驻将数定，零名将的前线郡
+          // 纵有十万戍兵也只出得动一支偏师
+          const have = stationedAt(s, roster, c.id).length;
+          return { c, front, fit, have,
+                   weight: c.yieldTier * 10 + (front ? 25 : 0) + (P.retinueCap - have) * 20 };
         })
         .sort((a, b) => b.weight - a.weight || a.c.id.localeCompare(b.c.id))
         .slice(0, 4);
@@ -389,8 +416,10 @@ export function listActions(
       // 其余空缺给尚未出现过的人——否则八条候选实际只有两个人，
       // 模型看到的是同一组重复，而非更多信息
       const shown = new Set<string>();
-      for (const [vi, { c, front, fit }] of vacancies.entries()) {
-        const ranked = [...pool].sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
+      for (const [vi, { c, front, fit, have }] of vacancies.entries()) {
+        // 已驻此郡的人不必再调过来
+        const ranked = pool.filter((o) => s.stations[o.id] !== c.id)
+          .sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
         const best = vi === 0 ? ranked.slice(0, 2)
           : ranked.filter((o) => !shown.has(o.id)).slice(0, 2);
         for (const o of best) {
@@ -399,9 +428,10 @@ export function listActions(
             key: `appoint:${c.id}:${o.id}`,
             action: { type: "appoint", officer: o.id, at: c.id },
             cost: 0,
-            label: `任 ${o.name} 为 ${c.id} 太守（${front ? "临敌" : "后方"}；`
+            label: `调 ${o.name} 驻 ${c.id}（${front ? "临敌" : "后方"}，现 ${have} 将；`
                  + `统${o.leadership} 武${o.might} 政${o.politics} 魅${o.charisma}`
                  + `${o.aptitudes.length ? " " + o.aptitudes.join("/") : ""}）`
+                 + `${s.stations[o.id] && s.stations[o.id] !== c.id ? `｜自 ${s.stations[o.id]}` : ""}`
                  + `${o.faction === f ? "" : "｜在野征辟"}`,
           });
         }

@@ -49,7 +49,6 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       yieldTier: c.yieldTier,
       moraleTier: c.moraleTier,
       defense: c.defense,
-      governor: null,
       unit: unitOf.get(c.id) ?? "infantry",
       gear: "none",
       ordersThisSeason: 0,
@@ -90,6 +89,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
   }
 
   const state: GameState = {
+    stations: {},
     seed: opts.seed,
     year: opts.year ?? 194,
     season: 1,
@@ -115,13 +115,31 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     f.startSeats = st.zhouSeats;
   }
 
-  // 君主坐镇治所。其余郡的太守空缺，交给 appoint —— 人事本身即决策，
-  // 开局替模型排好班等于把这一层决策拿掉了。
+  // 初始驻地：籍贯郡属本势力则驻籍贯，否则回治所。
+  //
+  // 首版是「只有君主坐镇治所，其余全空，交给 appoint」。那在一郡一将下尚可，
+  // 但现在一郡可驻多人，全空意味着开局所有郡都只有龙套守将——
+  // 二十六员将在名册里干看着，玩家得先花十几令把人一个个放出去。
+  // 按籍贯落位既有史据（本地豪族守本乡），也让开局的「调兵遣将」
+  // 成为一个有起点的决策，而不是从零排班。
   if (opts.roster) {
     for (const f of Object.values(factions)) {
-      if (!f.capital) continue;
+      // 君主坐镇治所
       const lord = opts.roster.byId.get(f.id);
-      if (lord && lord.faction === f.id) commanderies[f.capital].governor = lord.id;
+      if (lord && lord.faction === f.id && f.capital) state.stations[lord.id] = f.capital;
+      for (const o of (opts.roster.byFaction.get(f.id) ?? [])
+        .slice().sort((a, b) => a.id.localeCompare(b.id))) {
+        if (state.stations[o.id]) continue;
+        // **只按籍贯落位**：籍贯郡在己方治下才驻，否则转入待命，靠调任投放。
+        //
+        // 曾经把落不下的人一律堆到治所。那让大势力开局就满编——曹操二十四将
+        // 全压在济阴一郡——而满编直接换成兵力上限与攻防加成。实测
+        // 「开局郡数 ↔ 得分」的相关系数因此从 0.03 涨到 0.60，逼近
+        // 「得分完全由开局决定」的红线，评测的区分度当场塌掉一半。
+        // 现在人才的投放重新成为逐季的决策，而不是发牌时就分完。
+        const at = o.home && commanderies[o.home]?.owner === f.id ? o.home : null;
+        if (at) state.stations[o.id] = at;
+      }
     }
   }
   for (const id of Object.keys(factions)) state.intel[id] = {};

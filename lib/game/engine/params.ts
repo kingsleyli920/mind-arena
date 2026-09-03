@@ -48,6 +48,16 @@ export interface EngineParams {
   siegeAptitudeBreach: number; holdAptitudeBonus: number;
   aptitudeTerrainBonus: number; civilAptitudeBonus: number;
   politicsYieldDivisor: number; charismaMoraleThreshold: number;
+  /** 随军武将上限（含主将）。副将按 deputyWeight 递减折算 */
+  retinueCap: number;
+  deputyWeight: number;
+  /** 副将的摧锋/攻城适性合计最多加几个缺口。不设上限则堆将可无限加 */
+  deputyBreachCap: number;
+  /** 每名随军武将能带多少兵。这是「多少武将能带多少兵」的唯一出处 */
+  troopsPerOfficer: number;
+  /** 龙套郡守的五维。无名将驻守的郡自动有一名，弱但不为零 */
+  fillerLeadership: number; fillerMight: number;
+  fillerPolitics: number; fillerCharisma: number;
   /** 围城：持续制 */
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
@@ -187,6 +197,14 @@ export function loadParams(pack: RawPack): EngineParams {
     civilAptitudeBonus: g("武将", "治民适性加产出"),
     politicsYieldDivisor: g("武将", "政治产出除数"),
     charismaMoraleThreshold: g("武将", "魅力安民阈值"),
+    retinueCap: g("武将", "随军上限"),
+    deputyWeight: g("武将", "副将权重"),
+    deputyBreachCap: g("武将", "副将缺口上限"),
+    troopsPerOfficer: g("武将", "每将统兵"),
+    fillerLeadership: g("武将", "庸将_统率"),
+    fillerMight: g("武将", "庸将_武力"),
+    fillerPolitics: g("武将", "庸将_政治"),
+    fillerCharisma: g("武将", "庸将_魅力"),
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeBreachPerSeason: g("围城", "每季加缺口"),
     siegeAttackerLoss: g("围城", "攻方每季损耗"),

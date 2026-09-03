@@ -11,7 +11,7 @@
 // 什么时候打」（S1/S2），不是心算能力。
 import { breachCount, unitPower, unitGuard } from "./combat.ts";
 import { garrisonBand } from "./intel.ts";
-import { attackEffect, defendEffect, governorOf, type Roster } from "./officers.ts";
+import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
 import type { Action, FactionId, GameState } from "./types.ts";
@@ -57,17 +57,17 @@ export function forecastCampaign(
   const band = garrisonBand(s, viewer, a.target, P);
   const fog: SiegeForecast["fog"] = band.own ? "own" : band.scouted ? "scouted" : "tier";
 
-  // 我方这一侧全是自家账本，算得准
-  const lead = roster ? governorOf(s, roster, a.from) : null;
-  const atk = roster ? attackEffect(lead, P, terrain) : null;
+  // 我方这一侧全是自家账本，算得准。取的是**整支编制**：
+  // 主将全额、副将递减，与结算走同一个 attackRetinue，两边没有分家的机会
+  const atk = roster ? attackRetinue(retinueAt(s, roster, a.from, P), P, terrain) : null;
   const power = unitPower(P, src.unit, terrain, tgt.unit);
   const mul = (atk?.attackMul ?? 1) * power;
 
   // 城防与敌方守将：已探才知道，未探只能给范围
   const [defLo, defHi] = fog === "tier" ? DEFENSE_DARK : [tgt.defense, tgt.defense];
-  const [hbLo, hbHi] = fog === "tier" ? HOLDBONUS_DARK
-    : [defendEffect(roster ? governorOf(s, roster, a.target) : null, P).holdBonus,
-       defendEffect(roster ? governorOf(s, roster, a.target) : null, P).holdBonus];
+  // 敌方守将同样按编制算——一座城里驻着三员将，可防守数与只有一人不同
+  const defHold = roster ? defendRetinue(retinueAt(s, roster, a.target, P), P).holdBonus : 0;
+  const [hbLo, hbHi] = fog === "tier" ? HOLDBONUS_DARK : [defHold, defHold];
 
   const guard = unitGuard(P, tgt.unit);
   // 战力浮动在结算前由坐标定死，攻方算不出，只能按 ±jitter 取两端

@@ -19,7 +19,11 @@ export interface CommanderyState {
   yieldTier: number;      // 1–10
   moraleTier: number;     // 1–5
   defense: number;        // 0–100
-  governor: OfficerId | null;
+  /**
+   * 太守。**派生字段，不存**——见 officers.ts 的 governorOf：
+   * 取驻此郡的武将中政治最高者。此前它是唯一的武将槽位，
+   * 一郡只装得下一人，于是袁绍二十六将里有十三人整局无所事事。
+   */
   /** 主力兵种。由地理定，不可更改——想要骑兵就得打边郡 */
   unit: string;
   /** 已备器械。由内政「治械」逐级打造，出征用毕即折损 */
@@ -60,7 +64,14 @@ export type SiegeGear = "none" | "ram" | "mound";
 export interface Army {
   id: string;
   faction: FactionId;
+  /** 主将。retinue[0]，单列一份便于战报与标签引用 */
   commander: OfficerId | null;
+  /**
+   * 随军的整支编制（含主将）。这些人**离开了驻地**——
+   * 带将出征则后方空虚，那正是这套编制要制造的取舍。
+   * 驻地本身不动（stations 不变），军团一散人就自动回位。
+   */
+  retinue: OfficerId[];
   troops: number;
   /** 所在郡。围城时为被围郡，待命时为己方郡 */
   at: CommanderyId;
@@ -119,6 +130,14 @@ export interface GameState {
   passages: Passage[];
   /** 已探明的郡：faction → 郡 → 有效期至第几季 */
   intel: Record<FactionId, Record<CommanderyId, number>>;
+  /**
+   * 武将驻地：武将 id → 所在郡。这是「谁在哪」的唯一出处。
+   *
+   * 出征时该郡武将随军（主将全额、副将按 deputyWeight 递减），
+   * 出征兵力上限也由随军人数定。换将靠调任——「把关羽调到江夏」
+   * 因此是一条真决策，而不是出兵时顺手点的一个下拉框。
+   */
+  stations: Record<OfficerId, CommanderyId>;
   /** 破城被俘的守将，本局不再出场 */
   capturedOfficers: OfficerId[];
   /** 本局可招募的在野武将。由 seed 抽定，是全局唯一的开局随机 */
