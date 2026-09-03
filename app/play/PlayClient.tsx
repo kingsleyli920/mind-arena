@@ -9,7 +9,8 @@
 // 归属由 territory-grid 逐格查表后按当前局势实时着色——烤进去的疆域
 // 一开打就不对了。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildGraph, listActions, validate, type Graph } from "@/lib/game/engine/actions.ts";
+import { buildGraph, listActions, validate, POLICY_CN, type Graph }
+  from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
@@ -40,18 +41,32 @@ const SEASON_CN = ["", "春", "夏", "秋", "冬"];
  * 不必去解析引擎拼好的长句子（那正是机器人从 label 抠正则的老毛病）。
  * label 留作展开后的细节，观测的 token 成本不变。
  */
-function titleOf(a: Action): string {
+/**
+ * 候选行的标题。**势力与武将一律取显示名，不许露 id**。
+ *
+ * 此前这里直接写 a.to / a.officer，于是标题栏是「与 lijue 缔盟」
+ * 「任 weiyan 守 桂阳郡」，而下面那行灰字写着「与李傕、郭汜缔盟八季」
+ * ——同一条候选，标题是机器 id、正文是人话。actions.ts 的注释早就写过
+ * 「与 lijue 缔盟」这种写法两边都读不懂，只是界面这一层没照做。
+ *
+ * 方针的中文名走引擎的 POLICY_CN，不在这里再存第三份
+ * （包里一份、actions.ts 一份，这里曾经还有一份）。
+ */
+function titleOf(
+  a: Action,
+  nameOf: (id: string) => string = (id) => id,
+  officerOf: (id: string) => string = (id) => id,
+): string {
   switch (a.type) {
     case "campaign":
       return a.from === a.target ? `${a.from} 出城迎战` : `自${a.from} 征 ${a.target}`;
     case "withdraw": return "自围城撤兵";
     case "muster": return `于${a.at} 集结`;
-    case "govern": return `${a.at} ${{ farm: "劝农", levy: "募兵", wall: "修城",
-                                       soothe: "安民", forge: "治械" }[a.policy]}`;
-    case "appoint": return `任 ${a.officer} 守 ${a.at}`;
+    case "govern": return `${a.at} ${POLICY_CN[a.policy] ?? a.policy}`;
+    case "appoint": return `调 ${officerOf(a.officer)} 驻 ${a.at}`;
     case "scout": return `刺探 ${a.at}`;
-    case "ally": return a.act === "form" ? `与 ${a.to} 缔盟` : `与 ${a.to} 绝盟`;
-    case "passage": return `许 ${a.to} 借道`;
+    case "ally": return a.act === "form" ? `与${nameOf(a.to)}缔盟` : `与${nameOf(a.to)}绝盟`;
+    case "passage": return `许${nameOf(a.to)}借道`;
     case "retire": return "归隐";
     default: return "";
   }
@@ -293,6 +308,8 @@ export function PlayClient() {
   /** 载入时发现的旧存档。在选席页上给「继续上局」，而不是自动恢复——
       自动恢复会让「我想重开一局」变成一件要先找按钮的事 */
   const [resume, setResume] = useState<SavedGame | null>(null);
+  /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -661,6 +678,25 @@ export function PlayClient() {
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
+  // 出兵箭头：已勾选的用实线，正指向的用虚线。
+  // 「自南阳郡征河南尹」——不熟地理的人根本不知道这两个郡在哪，
+  // 候选表与地图此前完全没有联动，读到的只是两个地名
+  const xy = (id: string) => {
+    const p = engine.points.find((c) => c.id === id);
+    return p ? { x: (p.longitude - MAP.west) * MAP.ppd, y: (MAP.north - p.latitude) * MAP.ppd }
+             : null;
+  };
+  const arrows = [...new Set([...picked, hoverKey].filter((k): k is string => !!k))]
+    .map((k) => {
+      const c = candidates.find((x) => x.key === k);
+      if (!c || c.action.type !== "campaign") return null;
+      const a = xy(c.action.from), b = xy(c.action.target);
+      if (!a || !b) return null;
+      return { key: k, a, b, on: picked.includes(k),
+               sortie: c.action.from === c.action.target };
+    })
+    .filter((v): v is NonNullable<typeof v> => v !== null);
+
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
 
   const centerOnId = (id: string) => {
@@ -780,10 +816,25 @@ export function PlayClient() {
           <img src={hdReady && view.k >= HD_AT ? BASE_2X : BASE} alt="汉末地形" />
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
+            <defs>
+              <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+              </marker>
+            </defs>
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
                 fontSize={62 / Math.sqrt(view.k)}>{m.z}</text>
             ))}
+            {arrows.map((ar) => (ar.sortie ? (
+              // 出城迎战：起点即目标，画一圈而不是一条线
+              <circle key={ar.key} className={`sortie${ar.on ? " on" : ""}`}
+                cx={ar.a.x} cy={ar.a.y} r={30 / Math.sqrt(view.k)} />
+            ) : (
+              <line key={ar.key} className={`arrow${ar.on ? " on" : ""}`}
+                x1={ar.a.x} y1={ar.a.y} x2={ar.b.x} y2={ar.b.y}
+                strokeWidth={5 / Math.sqrt(view.k)} markerEnd="url(#arrowhead)" />
+            )))}
             {marks.map((m) => (
               <g key={m.c.id}
                 className={`mark${m.mine ? " mine" : ""}${focus === m.c.id ? " focus" : ""}`
@@ -1044,13 +1095,18 @@ export function PlayClient() {
                       const afford = on || !why;
                       return (
                         <label key={c.key} className={`act${on ? " on" : ""}${afford ? "" : " off"}`}
-                          title={why ?? undefined}>
+                          title={why ?? undefined}
+                          onMouseEnter={() => setHoverKey(c.key)}
+                          onMouseLeave={() => setHoverKey((k) => (k === c.key ? null : k))}
+                          onFocus={() => setHoverKey(c.key)}
+                          onBlur={() => setHoverKey((k) => (k === c.key ? null : k))}>
                           <input type="checkbox" checked={on} disabled={!afford}
                             onChange={() => setPicked((p) =>
                               on ? p.filter((k) => k !== c.key) : [...p, c.key])} />
                           <span className="act-body">
                             <span className="act-head">
-                              <b>{titleOf(c.action)}</b>
+                              <b>{titleOf(c.action, (id) => engine.nameOf.get(id) ?? id,
+                                (id) => engine.roster.byId.get(id)?.name ?? id)}</b>
                               {c.action.type === "campaign" && "strength" in c.action
                                 && <i className="tier">{STRENGTH_CN[c.action.strength]}</i>}
                               {c.forecast && (

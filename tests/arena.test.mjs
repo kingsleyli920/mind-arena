@@ -26,6 +26,8 @@ const P = loadParams(pack);
 const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
   new Map(read("commanderies.json").map((c) => [c.name, c.id])));
 const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+/** 势力 id → 中文名。id 是拼音，漏进标签就是「与 lijue 缔盟」 */
+const NAMES = new Map(read("scenario-194.json").factions.map((f) => [f.id, f.name]));
 const G = buildGraph(read("adjacency.json"));
 const DATA = {
   commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
@@ -296,4 +298,26 @@ test("桩席位遇到不认识的变体必须炸，不能悄悄跑成随机基�
   assert.throws(() => stubDecide(s, "yuanshao", cands, "balanced"), /未知的桩变体/);
   assert.doesNotThrow(() => stubDecide(s, "yuanshao", cands, "random-legal"));
   assert.doesNotThrow(() => stubDecide(s, "yuanshao", cands, "idle"));
+});
+
+test("候选标签一律不露内部 id：势力名、武将名、方针名都要是人话", () => {
+  const s = fresh();
+  const nameOf = (id) => NAMES.get(id) ?? id;
+  const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, nameOf, GEO);
+  assert.ok(cs.length > 0);
+  // 势力 id 是拼音（lijue / lukang / shixie…），漏进标签就是「与 lijue 缔盟」
+  const ids = [...NAMES.keys()];
+  for (const c of cs) {
+    for (const id of ids) {
+      assert.ok(!c.label.includes(id),
+        `标签里出现了势力 id「${id}」：${c.label}`);
+    }
+  }
+  // 武将 id 同理：「任 weiyan 守 桂阳郡」
+  for (const c of cs.filter((x) => x.action.type === "appoint")) {
+    assert.ok(!c.label.includes(c.action.officer),
+      `标签里出现了武将 id：${c.label}`);
+    assert.ok(c.label.includes(ROSTER.byId.get(c.action.officer).name),
+      `标签里没有武将的名字：${c.label}`);
+  }
 });

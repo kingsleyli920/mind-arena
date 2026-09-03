@@ -389,3 +389,21 @@
 .lands tbody tr:hover { background: #f2ead9; }
 /* 被围与断供直接决定这一季能不能出兵，必须一眼看见 */
 .lands tbody tr.warn td:last-child { color: var(--seal); font-weight: 600; }
+
+/* ── 出兵箭头：候选与地图的联动 ── */
+.map-stage svg #arrowhead path { fill: var(--seal); }
+.map-stage svg .arrow {
+  stroke: var(--seal); fill: none; opacity: 0.45;
+  stroke-dasharray: 10 8; stroke-linecap: round; pointer-events: none;
+}
+/* 已勾选的用实线：那是「我要下的令」，与「我正在看的」不是一回事 */
+.map-stage svg .arrow.on { opacity: 0.85; stroke-dasharray: none; }
+.map-stage svg .sortie {
+  stroke: var(--seal); fill: none; stroke-width: 4; opacity: 0.45;
+  stroke-dasharray: 8 7; pointer-events: none;
+}
+.map-stage svg .sortie.on { opacity: 0.85; stroke-dasharray: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .map-stage svg .arrow { animation: march 1.6s linear infinite; }
+}
+@keyframes march { to { stroke-dashoffset: -18; } }
