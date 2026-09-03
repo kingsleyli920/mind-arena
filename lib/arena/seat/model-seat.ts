@@ -52,9 +52,9 @@ export interface ModelSeatDeps {
   rules?: Rules;
   nameOf?: (id: FactionId) => string;
   /**
-   * 候选 key 是否写成 schema 的 enum。默认 false —— schema 逐字节恒定，
-   * Anthropic 的前缀缓存才成立。实测 enum 拦下的错误是 0 而代价是 2.8 倍入参，
-   * 详见 decisionSchema。置 true 复现旧的解码层强制
+   * 候选 key 是否写成 schema 的 enum。默认 true（解码层强制，R13）。
+   * 置 false 换回 Anthropic 的前缀缓存，代价是实测 8.3% 的令被丢掉。
+   * 详见 decisionSchema 里的两组实测
    */
   keyEnum?: boolean;
   /** 推理档位。不给则各模型用自己的默认值，见 ChatRequest.reasoning */
@@ -85,7 +85,7 @@ export async function modelDecide(
       model: deps.model,
       system: renderSystem(deps.pack),
       user,
-      schema: decisionSchema(cands, deps.keyEnum ?? false),
+      schema: decisionSchema(cands, deps.keyEnum ?? true),
       reasoning: deps.reasoning,
     });
     // 「没让它说完」与「它答不上来」必须分开记。前者是 harness 的配置问题

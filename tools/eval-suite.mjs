@@ -34,6 +34,10 @@ const CONCURRENCY = Number(arg("jobs", "3"));
 // 基线必须是**指定的**那一个，不能是「碰巧排最高的那个 bot」——
 // 后者会让每个对局方都显示成「不如基线」，而基线本身在换人
 const BASELINE = arg("baseline", "bot:balanced");
+// 单个对局方的墙钟上限（分钟，0 为不限）。超时只判这一个失败，其余照常收尾——
+// 此前一个卡住的提供方会把整跑无限期挂住，跑了半小时的其他模型一个字都拿不到。
+// 实测同一批 6 局里，最快的对局方 391s，最慢的两个 29 分钟仍未结束
+const DEADLINE_MIN = Number(arg("deadline", "0"));
 
 if (OUT_DIR) fs.mkdirSync(OUT_DIR, { recursive: true });
 const tmp = OUT_DIR || fs.mkdtempSync(path.join(process.env.TMPDIR ?? "/tmp", "eval-suite-"));
@@ -51,6 +55,9 @@ async function priceTable() {
   } catch { return new Map(); }
 }
 
+/** 各对局方的实时进度，供心跳行显示 */
+const progress = new Map();
+
 function runOne(spec) {
   const [kind, ...rest] = spec.split(":");
   const variant = rest.join(":");
@@ -66,10 +73,27 @@ function runOne(spec) {
     const t0 = Date.now();
     const p = spawn("node", args, { stdio: ["ignore", "pipe", "pipe"] });
     let err = "";
+    progress.set(spec, { done: 0, total: Number(GAMES), t0 });
     p.stdout.on("data", () => {});
-    p.stderr.on("data", (d) => { err += d; });
+    p.stderr.on("data", (d) => {
+      const t = String(d);
+      // eval-run 的每局进度走 stderr
+      for (const m of t.matchAll(/\[progress\] (\d+)\/(\d+)/g)) {
+        progress.set(spec, { done: Number(m[1]), total: Number(m[2]), t0 });
+      }
+      err += t.replace(/\[progress\][^\n]*\n/g, "");
+    });
+    let killer = null;
+    if (DEADLINE_MIN > 0) {
+      killer = setTimeout(() => {
+        p.kill("SIGTERM");
+        err += `\n墙钟超过 ${DEADLINE_MIN} 分钟，已终止`;
+      }, DEADLINE_MIN * 60_000);
+    }
     p.on("close", (code) => {
+      if (killer) clearTimeout(killer);
       const elapsed = Date.now() - t0;
+      progress.delete(spec);
       if (code !== 0 || !fs.existsSync(jsonOut)) {
         console.log(`  ✗ ${spec}\u3000退出码 ${code}\u3000${err.trim().split("\n").slice(-2).join(" / ")}`);
         return resolve({ spec, failed: true, error: err.trim().slice(-300) });
@@ -157,7 +181,18 @@ if (Number(GAMES) < MIN_GAMES_FOR_POWER) {
 console.log("");
 
 const px = await priceTable();
+// 心跳：每 60 秒报一次各对局方跑到哪。没有它，一个慢的提供方在外面看
+// 与「挂死了」没有区别，而这两种情况的处置完全不同
+const beat = setInterval(() => {
+  if (!progress.size) return;
+  const rows = [...progress].sort()
+    .map(([k, v]) => `${k.split(":").pop().split("/").pop()} ${v.done}/${v.total}`
+      + `（${((Date.now() - v.t0) / 60_000).toFixed(0)}分）`);
+  console.log(`  … 仍在跑：${rows.join("\u3000")}`);
+}, 60_000);
+beat.unref?.();
 const runs = await runAll(AGENTS);
+clearInterval(beat);
 const rows = runs.filter((r) => !r.failed).map((r) => summarize(r, px));
 rows.sort((a, b) => b.score - a.score || b.growth - a.growth);
 

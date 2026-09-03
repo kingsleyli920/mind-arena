@@ -91,23 +91,23 @@ test("准入：产出的命令 resolve 不会因令数不足而拒", () => {
   }
 });
 
-test("输出协议：keyEnum=true 时把「只能从候选里选」提到解码层", () => {
+test("输出协议：默认把「只能从候选里选」提到解码层", () => {
   const s = fresh();
   const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER);
-  // 这已不是默认：它每季都变，会把 Anthropic 的整块 system 缓存打掉，
-  // 而实测它拦下的错误是 0（四个模型五个跑，unknown-key 一次没出现）。
-  // 仍保留为可选项——将来接进更弱的模型、illegalRate 抬头时可以开回来
-  const sch = decisionSchema(cs, true);
+  // 它每季都变，会把 Anthropic 的整块 system 缓存打掉（入参贵约 2.8 倍）。
+  // 那个代价是知情选择：同规模实测关掉后 haiku 有 47 条令因 key 写错被丢，
+  // 占其下令数 8.3%，非法率 0.7%→8.6%
+  const sch = decisionSchema(cs);
   assert.equal(sch.strict, true);
   assert.deepEqual(sch.schema.properties.picks.items.enum, cs.map((c) => c.key));
   assert.equal(sch.schema.additionalProperties, false);
 
-  // 默认那份不带 enum，但 strict / additionalProperties 这些约束一条不少
-  const dflt = decisionSchema(cs);
-  assert.equal(dflt.strict, true);
-  assert.equal(dflt.schema.additionalProperties, false);
-  assert.equal(dflt.schema.properties.picks.items.enum, undefined);
-  assert.deepEqual(dflt.schema.required, ["picks", "reason"]);
+  // 关掉 enum 换缓存时，strict / additionalProperties 这些约束一条不能少
+  const off = decisionSchema(cs, false);
+  assert.equal(off.strict, true);
+  assert.equal(off.schema.additionalProperties, false);
+  assert.equal(off.schema.properties.picks.items.enum, undefined);
+  assert.deepEqual(off.schema.required, ["picks", "reason"]);
 });
 
 test("输出协议：宽容解析吃得下代码块与散文包裹，解析不出返回 null", () => {
@@ -233,28 +233,31 @@ test("候选标签不留英文 id：地形、势力、兵种都该是中文", ()
   }
 });
 
-test("schema 逐字节恒定 —— Anthropic 的前缀缓存全靠这一条", () => {
+test("schema：默认随候选变（解码层强制），keyEnum=off 才逐字节恒定", () => {
   const s = fresh();
   const a = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
   const b = listActions(s, "liubiao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
   assert.notDeepEqual(a.map((c) => c.key), b.map((c) => c.key), "两席候选相同，测不出");
 
-  // OpenRouter 把 json_schema 译成 Anthropic 的 tool，而 Anthropic 的缓存
-  // 前缀顺序是 tools → system → messages。schema 一变，排在它后面的 system
-  // 整块失效——实测同一 system 连发两次，schema 恒定则 cached 4534，
-  // schema 变则 cached 0 且重写整块。system 占入参 38–52%
-  assert.equal(
-    JSON.stringify(decisionSchema(a)), JSON.stringify(decisionSchema(b)),
-    "默认 schema 随候选表变了 —— Claude 的前缀缓存会整块失效，入参贵 2.8 倍",
-  );
-  // 开了 enum 就必然随候选变。这条钉住那个代价是真实存在的，不是臆测
+  // 默认带 enum，因此必然随候选变。代价是 Anthropic 的前缀缓存整块失效：
+  // OpenRouter 把 json_schema 译成 tool，而 Anthropic 的缓存前缀顺序是
+  // tools → system → messages。实测同一 system 连发两次，schema 恒定则
+  // cached 4534，schema 变则 cached 0 且重写整块，system 占入参 38–52%。
+  // 这条钉住那个代价是真实的，不是臆测——换回缓存要显式 keyEnum=false
   assert.notEqual(
-    JSON.stringify(decisionSchema(a, true)), JSON.stringify(decisionSchema(b, true)),
-    "keyEnum=true 却没随候选变，那 enum 就没起作用",
+    JSON.stringify(decisionSchema(a)), JSON.stringify(decisionSchema(b)),
+    "默认没带 enum —— 解码层不再强制「只能从候选里选」，实测 haiku 会有 8.3% 的令被丢掉",
+  );
+  assert.deepEqual(decisionSchema(a).schema.properties.picks.items.enum,
+    a.map((c) => c.key), "enum 与本季候选表不一致");
+  // 关掉才逐字节恒定。这是拿 8.3% 的令换 2.8 倍入参，不是免费午餐
+  assert.equal(
+    JSON.stringify(decisionSchema(a, false)), JSON.stringify(decisionSchema(b, false)),
+    "keyEnum=false 却仍随候选变，那就连缓存也换不回来",
   );
 });
 
-test("关掉 enum 后，编造的 key 仍被 admit 逐条丢弃", () => {
+test("即便关掉 enum，编造的 key 仍被 admit 逐条丢弃", () => {
   const s = fresh();
   const cands = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
   const real = cands[0].key;

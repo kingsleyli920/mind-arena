@@ -85,9 +85,10 @@ if (agentKind === "model") {
   if (!MODEL) { console.error("--agent=model 需要同时给 --model=<模型 id>"); process.exit(2); }
   client = new OpenRouterClient(key, { referer: "http://localhost:3000", title: "Mind Arena" });
 }
-// --keyenum=on 复现旧的解码层强制。默认关：实测 enum 拦下的错误是 0
-// （四个模型五个跑，unknown-key 一次没出现），代价是 Claude 入参贵 2.8 倍
-const KEY_ENUM = arg("keyenum", "off") === "on";
+// --keyenum=off 换回 Anthropic 的前缀缓存（入参便宜约 2.8 倍），代价是实测
+// haiku 有 8.3% 的令因 key 写错被丢掉、非法率 0.7%→8.6%、均分 233.3→216.7。
+// 默认开：逐字复现长中文 key 是转写能力不是策略能力，不该计进分数
+const KEY_ENUM = arg("keyenum", "on") !== "off";
 // --reasoning=low|medium|high 统一各模型的推理档位。不给则各用各的默认值——
 // 实测 gpt-5-nano 每次烧 6739 出参 tok（97.7% 是 reasoning），haiku 只烧 103，
 // 差 65 倍。不控这一项，跨模型比的就不是策略能力，而是各家默认给多少算力
@@ -97,10 +98,17 @@ const MODEL_DEPS = client
       rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM, reasoning: REASONING }
   : null;
 
+// 每局同时跑几局。局与局之间**完全独立**——各自的 seed、各自的 GameState，
+// RNG 是 H(seed,…) 的纯函数，不存在跨局串扰——所以并行不改结果，只省墙钟。
+// 实测各模型每次调用的耗时：mistral 4s、haiku 12s、deepseek 40s；
+// 48 局是 768 次调用，串行跑 deepseek 要 8.5 小时。瓶颈是墙钟不是钱。
+// 429 由客户端的退避兜住。--gamejobs=1 恢复串行。
+const GAME_JOBS = Math.max(1, Number(arg("gamejobs", agentKind === "model" ? "4" : "1")));
+
 const records = [];
 const results = [];
 
-for (let gi = 0; gi < GAMES; gi += 1) {
+async function playGame(gi) {
   const seed = `eval-${gi}`;
   // 席位轮换：同一 seed 下每个被测席位都轮过一遍位置，消掉席位固有优劣
   const rot = gi % SEATS.length;
@@ -162,17 +170,35 @@ for (let gi = 0; gi < GAMES; gi += 1) {
   }
 
   const f = s.factions[under];
-  results.push({
-    game: gi, seed, seat: under, seatName: nameOf(under),
-    grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
-    commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,
-    start: f.startCommanderies, eliminated: f.eliminated,
-    illegalRate: turns.reduce((a, t) => a + t.illegalRate, 0) / Math.max(1, turns.length),
-    obsPeak: Math.max(...turns.map((t) => t.obsTokens)),
-    apUse: turns.reduce((a, t) => a + t.spent, 0) / Math.max(1, turns.reduce((a, t) => a + t.ap, 0)),
-  });
-  records.push(...turns.map((t) => ({ game: gi, seed, ...t })));
+  return {
+    result: {
+      game: gi, seed, seat: under, seatName: nameOf(under),
+      grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
+      commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,
+      start: f.startCommanderies, eliminated: f.eliminated,
+      illegalRate: turns.reduce((a, t) => a + t.illegalRate, 0) / Math.max(1, turns.length),
+      obsPeak: Math.max(...turns.map((t) => t.obsTokens)),
+      apUse: turns.reduce((a, t) => a + t.spent, 0)
+             / Math.max(1, turns.reduce((a, t) => a + t.ap, 0)),
+    },
+    records: turns.map((t) => ({ game: gi, seed, ...t })),
+  };
 }
+
+// 有限并发。完成一局报一次进度——进度走 stderr，不污染报告；
+// 没有它，一个慢的提供方在外面看就是「什么都没发生」
+const queue = Array.from({ length: GAMES }, (_, i) => i);
+const done = [];
+await Promise.all(Array.from({ length: Math.min(GAME_JOBS, GAMES) }, async () => {
+  while (queue.length) {
+    const gi = queue.shift();
+    done.push(await playGame(gi));
+    process.stderr.write(`[progress] ${done.length}/${GAMES}\n`);
+  }
+}));
+// 并发完成的顺序不定，按局号排回来——报告与 jsonl 的行序必须可复现
+done.sort((a, b) => a.result.game - b.result.game);
+for (const d of done) { results.push(d.result); records.push(...d.records); }
 
 const avg = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
 console.log(`对局方 ${AGENT}\u3000${GAMES} 局\u3000席位轮换 ${SEATS.length} 席\n`);
