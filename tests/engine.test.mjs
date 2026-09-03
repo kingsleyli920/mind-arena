@@ -11,6 +11,7 @@ import { retinueAt, stationedAt, isFiller, attackRetinue }
   from "../lib/game/engine/officers.ts";
 import { fieldOutcome, formationEdge } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
+import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
@@ -386,6 +387,28 @@ const attackPair = (s, faction) => {
     .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== faction);
   return { from, edge };
 };
+
+test("界面的候选分组两张表都要覆盖引擎给出的每一类", () => {
+  // 加阵型时界面上直接显示了 `array` 这个内部 id：候选是新的，
+  // 而分组名表还是旧的。同类的规矩已经有一条（标签不露 id），
+  // 但那条只看候选自己的文字，看不到分组的表头。
+  //
+  // 这里不查文案好坏，只查覆盖：引擎产出的每个分组键，
+  // 两张表都得有——顺序表决定它排在哪，中文表决定它叫什么
+  const s = fresh();
+  const keys = new Set();
+  for (const f of Object.keys(s.factions)) {
+    if (s.factions[f].eliminated) continue;
+    for (const c of listActions(s, f, G, P, DEFAULT_RULES, ROSTER)) {
+      keys.add(c.key.split(":")[0]);
+    }
+  }
+  assert.ok(keys.size >= 6, `只收到 ${keys.size} 类候选，样本不足以判定覆盖`);
+  for (const k of keys) {
+    assert.ok(TYPE_CN[k], `分组「${k}」没有中文名 —— 界面会直接显示这个内部 id`);
+    assert.ok(PANEL_ORDER.includes(k), `分组「${k}」不在面板顺序里 —— 会被排到末尾`);
+  }
+});
 
 // ── 阵型 ──────────────────────────────────────────────────────────────
 //

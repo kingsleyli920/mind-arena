@@ -18,6 +18,7 @@ import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
+import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
@@ -117,14 +118,6 @@ function endingGap(
 /** 器械的中文名。与 actions.ts 的 GEAR_CN 同源，只是那边没导出给界面用 */
 const GEAR_LABEL: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 
-const PANEL_ORDER = ["relief", "withdraw", "campaign", "muster", "govern",
-                     "appoint", "scout", "ally", "passage", "retire"];
-
-const TYPE_CN: Record<string, string> = {
-  campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结",
-  govern: "内政", appoint: "调任", scout: "刺探", ally: "外交",
-  passage: "借道", retire: "归隐",
-};
 
 type Bundle = {
   scenario: { factions: Array<{ id: string; name: string; color?: string; seat?: string;
