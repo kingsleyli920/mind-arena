@@ -6,11 +6,16 @@
 // 否则这些代码在密钥到位前一行都没跑过，真接上模型时分不清是谁的问题。
 //
 // 用法：
-//   node --experimental-strip-types tools/eval-run.mjs --agent=stub --games=6
-//   node --experimental-strip-types tools/eval-run.mjs --agent=stub:chaos --games=2
+//   npm run eval -- --agent=bot:balanced --games=6      ← 基线，不花钱
+//   npm run eval -- --agent=stub:chaos --games=2
+//   npm run eval -- --agent=model --model=<id> --games=6
+//
+// **bot 基线是所有模型分数的参照物**：没有它，「均分 200」说明不了任何事。
+// 它走的是与模型完全相同的那条路（picks → admit → orders），
+// 同 seed 同对手，因此可直接比。
 import fs from "node:fs";
 import { buildGraph, listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
-import { decide } from "../lib/game/engine/bot.ts";
+import { decide, pick as botPick, PROFILES } from "../lib/game/engine/bot.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
@@ -30,6 +35,9 @@ const arg = (k, d) => {
 const AGENT = arg("agent", "stub");
 const GAMES = Number(arg("games", 6));
 const OUT = arg("out", "");
+// --json=<file>：把整跑的结构化结果写出来，供 eval-suite 汇总。
+// 套件不复制这里的对局循环，只做编排与汇总——复制一份迟早与这里分家
+const JSON_OUT = arg("json", "");
 const SEATS = (arg("seats", "caocao,yuanshao,liubiao,liuzhang,yuanshu,lubu")).split(",");
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
@@ -47,7 +55,18 @@ const DATA = {
 };
 
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
-const [agentKind, agentVariant = "random-legal"] = AGENT.split(":");
+const [agentKind, agentVariantRaw] = AGENT.split(":");
+if (!["bot", "stub", "model"].includes(agentKind)) {
+  console.error(`未知的对局方 ${agentKind}（只有 bot / stub / model）`);
+  process.exit(2);
+}
+// bot 与 stub 的默认变体不同，且都必须校验——`--agent=bot:balanced` 此前会
+// 落进 stubDecide 静默跑成 random-legal，而报告照样标着 bot:balanced
+const agentVariant = agentVariantRaw ?? (agentKind === "bot" ? "balanced" : "random-legal");
+if (agentKind === "bot" && !(agentVariant in PROFILES)) {
+  console.error(`未知的机器人画像 ${agentVariant}（有 ${Object.keys(PROFILES).join(" / ")}）`);
+  process.exit(2);
+}
 const MODEL = arg("model", "");
 let client = null;
 if (agentKind === "model") {
@@ -99,7 +118,7 @@ for (let gi = 0; gi < GAMES; gi += 1) {
         const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS);
         orders.push(...os);
         mine = {
-          turn: s.turn, seat: f, obsTokens: Math.round(record.obsChars / 2.4),
+          turn: s.turn, seat: f, obsTokens: record.obsTokens,
           candidates: record.candidates, picks: record.picks.length,
           admitted: record.admission.admitted.length, spent: record.admission.spent,
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
@@ -112,7 +131,11 @@ for (let gi = 0; gi < GAMES; gi += 1) {
       } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
         const cands = listActions(s, f, G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
-        const dec = stubDecide(s, f, cands, agentVariant);
+        // 机器人也走 picks → admit：绕过准入层的话，illegalRate 与令数用率
+        // 两列对基线是空的，而那正是判「模型有没有在乱下令」的参照
+        const dec = agentKind === "bot"
+          ? botPick(s, f, G, agentVariant, DEFAULT_RULES, ROSTER, P, GEO)
+          : stubDecide(s, f, cands, agentVariant);
         const a = admit(s, f, dec.picks, cands, G, ROSTER, DEFAULT_RULES);
         orders.push(...a.orders);
         mine = {
@@ -206,4 +229,12 @@ console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`
 if (OUT) {
   fs.writeFileSync(OUT, records.map((r) => JSON.stringify(r)).join("\n") + "\n");
   console.log(`\n→ ${OUT}\u3000${records.length} 条席·季记录`);
+}
+
+if (JSON_OUT) {
+  fs.writeFileSync(JSON_OUT, JSON.stringify({
+    agent: AGENT, model: MODEL || null, games: GAMES, seats: SEATS,
+    keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null,
+    results, records,
+  }));
 }

@@ -14,6 +14,7 @@ import { resolve } from "../lib/game/engine/resolve.ts";
 import { buildGeography } from "../lib/game/engine/victory.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
+import { pick as botPick } from "../lib/game/engine/bot.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
 import { GRADE_SCORE, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
@@ -266,3 +267,30 @@ test("关掉 enum 后，编造的 key 仍被 admit 逐条丢弃", () => {
   assert.ok(a.illegalRate > 0, "illegalRate 没记上 —— 关掉 enum 后全靠它兜底");
 });
 
+test("机器人基线走的是与模型同一条路：picks → admit → orders", () => {
+  const s = fresh();
+  // 评测拿机器人当基线，前提是它和模型受同一套准入。若它绕过 admit，
+  // illegalRate 与令数用率两列对基线是空的，而那正是判「模型有没有乱下令」的参照。
+  // 更早之前 `--agent=bot:balanced` 会静默落进 stubDecide 跑成随机基线
+  for (const profile of ["balanced", "purpose", "aggressive"]) {
+    const cands = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+    const p = botPick(s, "yuanshao", G, profile, DEFAULT_RULES, ROSTER, P, GEO);
+    const known = new Set(cands.map((c) => c.key));
+    for (const k of p.picks) assert.ok(known.has(k), `${profile} 选了候选表外的 ${k}`);
+    assert.equal(p.picks.length, p.orders.length, `${profile} 的 picks 与 orders 数量不符`);
+    // 走一遍准入必须一条不掉：机器人自己已经模拟过令数与郡国配额
+    const a = admit(s, "yuanshao", p.picks, cands, G, ROSTER, DEFAULT_RULES);
+    assert.equal(a.dropped.length, 0,
+      `${profile} 被准入层丢了 ${a.dropped.map((d) => d.reason).join()} —— 基线不该有非法令`);
+    assert.equal(a.orders.length, p.orders.length);
+  }
+});
+
+test("桩席位遇到不认识的变体必须炸，不能悄悄跑成随机基线", () => {
+  const s = fresh();
+  const cands = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+  // 排行榜上一个悄悄跑错的基线比没有基线更坏
+  assert.throws(() => stubDecide(s, "yuanshao", cands, "balanced"), /未知的桩变体/);
+  assert.doesNotThrow(() => stubDecide(s, "yuanshao", cands, "random-legal"));
+  assert.doesNotThrow(() => stubDecide(s, "yuanshao", cands, "idle"));
+});

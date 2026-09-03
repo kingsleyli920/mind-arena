@@ -61,10 +61,32 @@ const MIN_MARGIN: Record<Profile, number> = {
  */
 export function decide(
   s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null, P: EngineParams, geo: Geography | null = null,
+): Order[] {
+  return pick(s, f, g, profile, rules, roster, P, geo).orders;
+}
+
+/**
+ * 同上，但把选中的**候选 key** 一并给出。
+ *
+ * 评测要拿机器人当基线，就必须让它走与模型完全相同的那条路：
+ * picks → admit() → orders。否则机器人绕过准入层，illegalRate 与
+ * 令数用率两列对它是空的，而那两列正是用来判「模型有没有在乱下令」的。
+ * 没有同场基线，模型拿到的 200 分说明不了任何事。
+ */
+export function pick(
+  s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null, P: EngineParams, geo: Geography | null = null,
+): { orders: Order[]; picks: string[] } {
+  return decideInner(s, f, g, profile, rules, roster, P, geo);
+}
+
+function decideInner(
+  s: GameState, f: FactionId, g: Graph, profile: Profile, rules: Rules = DEFAULT_RULES,
   roster: Roster | null, P: EngineParams,
   /** 地理。目的流没有它就退化成均衡流——候选上不会有 gain 可读 */
   geo: Geography | null = null,
-): Order[] {
+): { orders: Order[]; picks: string[] } {
   // 「出兵后余兵低到什么程度算把城送出去」由规则推导，不拍系数：
   // 邻敌最多带走自己八成守军，而破开「城防 30 以上 + 基数」的两档可防守
   // 需要兵力比 2.0，故余兵低于邻敌的 0.8/2.0 即一击可破。
@@ -73,7 +95,7 @@ export function decide(
   const breachTwo = P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2;
   const safeRatio = maxStrength / breachTwo;
   const cands = listActions(s, f, g, P, rules, roster, undefined, geo);
-  if (!cands.length) return [];
+  if (!cands.length) return { orders: [], picks: [] };
   const w = WEIGHTS[profile];
   const minMargin = MIN_MARGIN[profile];
 
@@ -156,6 +178,7 @@ export function decide(
 
   // 按令数预算贪心取，免费动作不占预算但受 freeUses 限制
   const orders: Order[] = [];
+  const picks: string[] = [];
   let ap = s.factions[f]?.ap ?? 0;
   const freeUsed: Record<string, number> = {};
   const touched = new Map<string, number>();               // 郡 → 本季已下令数
@@ -179,6 +202,7 @@ export function decide(
     }
     ap -= c.cost;
     orders.push({ faction: f, action: a });
+    picks.push(c.key);
   }
-  return orders;
+  return { orders, picks };
 }

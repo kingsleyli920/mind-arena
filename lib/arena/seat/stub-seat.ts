@@ -20,6 +20,12 @@ export function stubDecide(
   s: GameState, faction: FactionId, candidates: readonly Candidate[], kind: StubKind,
 ): Decision {
   if (kind === "idle") return { picks: [], reason: "按兵不动" };
+  // 不认识的变体必须炸，不能悄悄跑成 random-legal——
+  // `--agent=bot:balanced` 曾因此静默跑成随机基线，而报告照样标着 bot:balanced。
+  // 排行榜上一个悄悄跑错的基线比没有基线更坏
+  if (kind !== "random-legal" && kind !== "chaos") {
+    throw new Error(`未知的桩变体 ${kind}（只有 random-legal / idle / chaos）`);
+  }
 
   const order = shuffle(candidates,
     { seed: s.seed, year: s.year, season: s.season, faction, event: `stub:${kind}` });

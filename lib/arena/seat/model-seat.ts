@@ -4,7 +4,7 @@
 // 中途因为一个 429 断掉是不可接受的。降级到「本季不下令」也是一种结果，
 // 它会体现在分数里，且非法率/无回应率是独立上报的指标。
 import { listActions, type Graph, type Rules, DEFAULT_RULES } from "../../game/engine/actions.ts";
-import { observe } from "../../game/engine/observe.ts";
+import { observe, estTokens } from "../../game/engine/observe.ts";
 import type { Roster } from "../../game/engine/officers.ts";
 import type { EngineParams } from "../../game/engine/params.ts";
 import type { Geography } from "../../game/engine/victory.ts";
@@ -21,6 +21,12 @@ export interface ModelTurnRecord {
   promptVersion: string;
   /** 观测的哈希，用于审计「模型看到的是不是同一份东西」 */
   obsChars: number;
+  /**
+   * 观测的 token 数，走 estTokens（已按三家 tokenizer 标定）。
+   * 此前评测跑是拿 obsChars/2.4 现算的，而桩席位那条路走的是 estTokens——
+   * 同一列「观测峰」对模型和对桩是两把不同的尺子，跨对局方比不了
+   */
+  obsTokens: number;
   candidates: number;
   picks: string[];
   reason?: string;
@@ -67,7 +73,7 @@ export async function modelDecide(
 
   const base: ModelTurnRecord = {
     turn: s.turn, seat: faction, model: deps.model, promptVersion: PROMPT_VERSION,
-    obsChars: user.length, candidates: cands.length,
+    obsChars: user.length, obsTokens: estTokens(user), candidates: cands.length,
     picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0 },
     usage: null, structured: false, rung: "text", maxTokens: 0,
     finishReason: null, attempts: 0, elapsedMs: 0,
