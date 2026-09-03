@@ -120,6 +120,26 @@ function troopBand(troops: number, P: EngineParams): string {
        + `（第 ${tierOf(troops, P)}/${P.intelTiers} 档）`;
 }
 
+/**
+ * 一条内政令要多少金。**校验、结算、候选表三处共用这一个函数**——
+ * 与 orderCost 同理：价钱一分档，两份副本立刻会算出不同的数。
+ */
+export function governPrice(
+  c: { garrison: number; gear: string }, policy: string, P: EngineParams,
+): number {
+  if (!P.goldOn) return 0;
+  if (policy === "levy") {
+    return Math.round(c.garrison * (P.levyMultiplier - 1) * P.goldPerLevyTroop);
+  }
+  if (policy === "wall") return P.goldPerWall * P.wallGain;
+  if (policy === "forge") {
+    const next = P.gearLadder[Math.min(P.gearLadder.indexOf(c.gear) + 1,
+                                       P.gearLadder.length - 1)];
+    return P.goldGear[next] ?? 0;
+  }
+  return 0;
+}
+
 /** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义。
     导出给 resolve 的内政回执共用——各存一份迟早写出两套说法 */
 export const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
@@ -394,26 +414,38 @@ export function listActions(
     const picks = mine.filter((c) => canOrder(c.id)).map((c) => {
       // 民心低先安民，守军薄先募兵，城防低且临敌先修城，否则劝农
       const isFront = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
-      const policy = c.moraleTier <= 2 && c.moraleTier < 5 ? "soothe"
-        : isFront && c.defense < 55 ? "wall"
-        : isFront && c.garrison < 4000 ? "levy"
-        : isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1] ? "forge"
-        : c.yieldTier < 10 ? "farm"
-        : c.moraleTier < 5 ? "soothe"
-        : c.defense < 100 ? "wall" : null;
-      if (!policy) return null;
-      const why = { soothe: "民心可安", wall: "城防可修", levy: "临敌且兵少",
-                    forge: `器械仅「${GEAR_CN[c.gear]}」`,
-                    farm: "产出可增" }[policy];
-      return { c, policy, why };
+      // 优先级从高到低。**逐项回退**：最该做的那一项若已至上限或付不起，
+      // 就退到下一项，而不是把整个郡的内政候选删掉。
+      //
+      // 此前是「算出一个 policy，不合适就返回 null」。加上金之后这条直接
+      // 要了小势力的命：曹操只有一个郡，若临敌优先治械（900 金）而国库不够，
+      // 他这一季就一条内政候选都没有——实测出局率因此从 42% 升到 53%，
+      // 而他死时国库还有上千金。删掉的不是钱，是选项
+      const wants: Array<[string, boolean, string]> = [
+        ["soothe", c.moraleTier <= 2 && c.moraleTier < 5, "民心告急"],
+        ["wall", isFront && c.defense < 55, "临敌且城防薄"],
+        ["levy", isFront && c.garrison < 4000, "临敌且兵少"],
+        ["forge", isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1],
+         `器械仅「${GEAR_CN[c.gear]}」`],
+        ["farm", c.yieldTier < 10, "产出可增"],
+        ["soothe", c.moraleTier < 5, "民心可安"],
+        ["wall", c.defense < 100, "城防可修"],
+      ];
+      for (const [policy, want, why] of wants) {
+        if (!want) continue;
+        const price = governPrice(c, policy, P);
+        if (price > (fs_.gold ?? 0)) continue;      // 付不起就看下一项
+        return { c, policy, why, price };
+      }
+      return null;
     }).filter((x) => !!x)
       .sort((a, b) => a.c.id.localeCompare(b.c.id)).slice(0, rules.perTypeCap);
-    for (const { c, policy, why } of picks) {
+    for (const { c, policy, why, price } of picks) {
       out.push({
         key: `govern:${c.id}:${policy}`,
         action: { type: "govern", at: c.id, policy: policy as never },
         cost: rules.normalAp,
-        label: `${c.id} 行${POLICY_CN[policy]}`
+        label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}`
              + `（${why}；产${c.yieldTier} 心${c.moraleTier} 防${c.defense}`
              + ` ${unitName(P, c.unit)}·${GEAR_CN[c.gear]}）`,
       });

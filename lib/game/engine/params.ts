@@ -59,6 +59,18 @@ export interface EngineParams {
   fillerLeadership: number; fillerMight: number;
   fillerPolitics: number; fillerCharisma: number;
   /** 背盟的民心罚（全境每郡 −N）。民心直接乘进产出，这是可算的代价 */
+  /** ── 金 ── 唯一货币，军费也用它付。见内容包 constants.金 */
+  /** 金这一层是否启用。关着时收入/军费/价格一律为零 */
+  goldOn: boolean;
+  goldPerTier: number;
+  goldDecay: number;
+  goldBase: number;
+  goldUpkeepPerTroop: number;
+  goldPerLevyTroop: number;
+  goldPerWall: number;
+  goldGear: Record<string, number>;
+  goldStart: number;
+  goldCap: number;
   betrayMoralePenalty: number;
   /** 背盟后禁止缔盟的季数 */
   betrayBanSeasons: number;
@@ -209,6 +221,16 @@ export function loadParams(pack: RawPack): EngineParams {
     fillerMight: g("武将", "庸将_武力"),
     fillerPolitics: g("武将", "庸将_政治"),
     fillerCharisma: g("武将", "庸将_魅力"),
+    goldOn: !!(pack.constants?.["金"]?.["启用"]),
+    goldPerTier: g("产出", "金_每产出档"),
+    goldDecay: g("金", "收入_逐郡递减"),
+    goldBase: g("金", "基础收入"),
+    goldUpkeepPerTroop: g("金", "军费_每兵每季"),
+    goldPerLevyTroop: g("金", "募兵_每兵"),
+    goldPerWall: g("金", "修城_每点"),
+    goldGear: { none: 0, ram: g("金", "治械_冲车"), mound: g("金", "治械_土山") },
+    goldStart: g("金", "开局金"),
+    goldCap: g("金", "上限"),
     betrayMoralePenalty: g("外交", "背盟_民心罚"),
     betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),

@@ -41,6 +41,12 @@ export interface Observation {
   clock: { year: number; season: number; turn: number; totalTurns: number; epoch: number };
   /** 本季可用令数与结转 */
   budget: { ap: number; carried: number; campaignAp: number; normalAp: number };
+  /**
+   * 国库与军费。金与令数是两条不同的约束：
+   * 令数管「一季能做几件事」且几乎不结转，金**可积累**、按郡的贫富分布不均、
+   * 且要为全部兵力持续付费。看不见国库就没法做「这季省着点」这类决策
+   */
+  treasury: { gold: number; upkeep: number };
   /** 现档与升档条件 */
   standing: {
     grade: string; commanderies: number; controlledZhou: number; zhouSeats: number;
@@ -115,6 +121,15 @@ export function observe(
     clock: {
       year: s.year, season: s.season, turn: s.turn,
       totalTurns: P.seasonsPerGame, epoch: s.epoch,
+    },
+    treasury: {
+      gold: Math.round(f?.gold ?? 0),
+      // 下季要交的军费：全部兵力 × 每兵每季
+      upkeep: Math.round(
+        (Object.values(s.commanderies).filter((c) => c.owner === faction)
+          .reduce((n, c) => n + c.garrison, 0)
+         + s.armies.filter((a) => a.faction === faction)
+          .reduce((n, a) => n + a.troops, 0)) * P.goldUpkeepPerTroop),
     },
     budget: {
       ap: f?.ap ?? 0, carried: f?.carried ?? 0,

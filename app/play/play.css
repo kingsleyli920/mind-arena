@@ -487,3 +487,4 @@
   padding: 0.22rem 0.7rem; cursor: pointer; font: inherit; font-size: 0.74rem;
   background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;
 }
+.play-bar .ap .upkeep { font-style: normal; color: var(--ink-soft); font-size: 0.72rem; }

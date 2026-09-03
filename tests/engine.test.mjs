@@ -210,12 +210,27 @@ test("规则即数据：改内容包必须改变引擎行为", () => {
   const short = { ...P, seasonsPerGame: 3 };
   assert.equal(play(short, 10).turn, 3, "改 seasonsPerGame 后局长未跟随");
 
-  // 内政效果由包决定
+  // 内政效果由包决定。修城的价钱是 goldPerWall × wallGain，改大 wallGain
+  // 也就改大了价钱——这条验的是「效果跟随参数」，不是国库，先把钱给足
   const bigWall = { ...P, wallGain: 40 };
   const at = Object.values(fresh().commanderies).find((c) => c.owner === "yuanshao").id;
-  const one = (params) => resolve(fresh(), [{ faction: "yuanshao",
-    action: { type: "govern", at, policy: "wall" } }], G, params, ROSTER, GEO).state.commanderies[at].defense;
+  const one = (params) => {
+    const t = fresh();
+    t.factions.yuanshao.gold = 99999;
+    return resolve(t, [{ faction: "yuanshao", action: { type: "govern", at, policy: "wall" } }],
+      G, params, ROSTER, GEO).state.commanderies[at].defense;
+  };
   assert.ok(one(bigWall) > one(P), "改 wallGain 后修城效果未跟随");
+
+  // 金也由包决定：每产出档的金一改，国库收入必须跟随。
+  // 金这一层默认关闭（constants.金.启用），所以这里显式打开来验
+  const on = { ...P, goldOn: true };
+  const rich = { ...on, goldPerTier: on.goldPerTier * 4 };
+  const gold = (params) => resolve(fresh(), [], G, params, ROSTER, GEO)
+    .state.factions.yuanshao.gold;
+  assert.ok(gold(rich) > gold(on), "改 金_每产出档 后国库收入未跟随");
+  // 关着时必须逐位回到「没有金」的行为
+  assert.equal(gold(P), 0, "金关闭时不该有收入");
 });
 
 // ── 武将 ────────────────────────────────────────────────────────────
@@ -688,6 +703,9 @@ test("器械：须由内政「治械」逐级打造，出征即耗", () => {
   const s = fresh();
   const at = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
   assert.equal(s.commanderies[at.id].gear, "none", "开局不该自带器械");
+  // 治械要花金（冲车 900 / 土山 1800），开局金不够打两级——这条验的是
+  // 「逐级不可越级」，不是国库，所以先把钱给足
+  s.factions.yuanshao.gold = 99999;
 
   const one = resolve(s, [{ faction: "yuanshao",
     action: { type: "govern", at: at.id, policy: "forge" } }], G, P, ROSTER, GEO).state;

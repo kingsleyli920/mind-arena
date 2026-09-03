@@ -764,6 +764,12 @@ export function PlayClient() {
   // 收尾的三种情形：十六季打满、被灭光、主动归隐。后两种此前不收尾，
   // 玩家得对着空候选把剩下的季数一季季点完
   const over = game.finished || me.eliminated || me.retired;
+  // 下季要交的军费：全部兵力 × 每兵每季。金看不见就没法做「这季省着点」的决策
+  const upkeep = Math.round(
+    (Object.values(game.commanderies).filter((c) => c.owner === seat)
+      .reduce((n, c) => n + c.garrison, 0)
+     + game.armies.filter((a) => a.faction === seat).reduce((n, a) => n + a.troops, 0))
+    * engine.P.goldUpkeepPerTroop);
 
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
 
@@ -827,7 +833,10 @@ export function PlayClient() {
         <span className="who" style={{ "--c": engine.colorOf.get(seat) } as React.CSSProperties}>
           {engine.nameOf.get(seat)}
         </span>
-        <span className="ap">令数 {me.ap - spent}/{me.ap}{"\u3000"}现档 {GRADE_CN[me.bestGrade]}</span>
+        <span className="ap">令数 {me.ap - spent}/{me.ap}
+          {engine.P.goldOn && <>{"\u3000"}国库 {Math.round(me.gold)} 金
+            {upkeep > 0 && <i className="upkeep">（军费 {upkeep}）</i>}</>}
+          {"\u3000"}现档 {GRADE_CN[me.bestGrade]}</span>
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
           aria-expanded={showPrimer}>规则</button>
       </header>

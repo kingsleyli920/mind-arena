@@ -84,6 +84,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       startSeats: 0,
       conquests: 0,
       allyBanUntil: 0,
+      gold: P.goldOn ? P.goldStart : 0,
       bestGrade: "ding" as Grade,
       eliminated: mine.length === 0,
     };

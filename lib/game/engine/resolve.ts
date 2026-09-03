@@ -9,8 +9,8 @@
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
-import { canonicalOrder, orderCost, GEAR_CN, POLICY_CN, type Graph, type Rules,
-  DEFAULT_RULES, validate } from "./actions.ts";
+import { canonicalOrder, orderCost, governPrice, GEAR_CN, POLICY_CN, type Graph,
+  type Rules, DEFAULT_RULES, validate } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, unitPower, unitGuard, unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
@@ -241,6 +241,16 @@ export function resolve(
     // 回执写的是**变化量**，不是「执行了内政」。产出档从 5 到 6 是玩家
     // 唯一能据以判断这一令值不值的东西
     const was = { y: c.yieldTier, m: c.moraleTier, d: c.defense, g: c.garrison, gear: c.gear };
+    // 花钱的三项先看付不付得起。付不起就不执行——候选表已按国库筛过，
+    // 走到这里通常是同一季多条令抢同一笔钱，属于同时裁决的正常撞车
+    const fs2 = s.factions[o.faction];
+    const price = governPrice(c, o.action.policy, P);
+    if (price > 0 && fs2.gold < price) {
+      receipt(o.faction).govern.push(
+        `${c.id} ${POLICY_CN[o.action.policy] ?? o.action.policy}（国库不足，需 ${price} 金，余 ${Math.round(fs2.gold)}）`);
+      continue;
+    }
+    fs2.gold -= price;
     switch (o.action.policy) {
       case "farm":   c.yieldTier = Math.min(10, c.yieldTier + P.farmGain); break;
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
@@ -262,7 +272,9 @@ export function resolve(
     if (c.garrison !== was.g) d.push(`兵${was.g}→${c.garrison}`);
     if (c.gear !== was.gear) d.push(`${GEAR_CN[was.gear] ?? was.gear}→${GEAR_CN[c.gear] ?? c.gear}`);
     receipt(o.faction).govern.push(
-      `${c.id} ${POLICY_CN[o.action.policy] ?? o.action.policy}` + (d.length ? ` ${d.join(" ")}` : "（已至上限）"));
+      `${c.id} ${POLICY_CN[o.action.policy] ?? o.action.policy}`
+      + (d.length ? ` ${d.join(" ")}` : "（已至上限）")
+      + (price > 0 ? ` −${price} 金` : ""));
   }
 
   // 三类回执各合并成一行。kind 分开，界面与观测都可按类挑
@@ -545,6 +557,7 @@ export function resolve(
 
   for (const f of Object.values(s.factions)) {
     if (f.eliminated) continue;
+    const goldRows: number[] = [];
     const reach = supplyReach(s, g, f.id);
     // 治所已失时 supplyReach 返回空集：全境不可达。但那不是「补给线被切断」，
     // 是一个不可逆的状态——实测断供里 63% 是这一种，且其中 66.8% 随即被灭，
@@ -587,7 +600,62 @@ export function resolve(
       c.garrison = Math.min(
         Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor * (gov?.yieldMul ?? 1)),
         P.garrisonCap);
+      // 金与兵同源同条件：补给通畅、未被围的郡才产出。
+      // 金按**产出档**算而非原始户数——户数跨度 42–528551（一万两千倍），
+      // 而产出档本身就是 log10(户数)（实测相关 0.95），已把户口编码进去了
+      // 先记下每个郡的产金，稍后按产出档降序逐郡递减后再求和——
+      // 线性求和是纯粹的滚雪球放大器，见内容包 constants.金.为何递减
+      if (P.goldOn) goldRows.push(c.yieldTier * P.goldPerTier * factor * (gov?.yieldMul ?? 1));
       if (gov?.moraleGain) c.moraleTier = Math.min(5, c.moraleTier + gov.moraleGain);
+    }
+
+    // ── 军费 ──────────────────────────────────────────────────────
+    // **全部兵力**逐季收费，守军与在外军团一并计。
+    //
+    // 只收军团是不够的：实测那样军费一次都不触发（军团既少又小），
+    // 金只会对小势力卡壳、对大势力堆到两万，成了对弱者的惩罚，
+    // 正好放大滚雪球。收入随疆域涨、成本随兵力涨，而兵力本来就随疆域涨
+    // ——这与令数那条「占得越多管得越吃力」是同一个刹车。
+    //
+    // 付不起就按缺口比例从守军与军团一并逃亡，并写进战报：
+    // 静默扣兵是这个仓库反复栽过的坑
+    // 逐郡递减：头部郡最值钱，第二十个郡几乎不值钱
+    // 基础收入 + 逐郡递减。基础那一笔是给小势力的地板：没有它，
+    // 一郡开局的席位会被经济层直接判死——不是缺钱，而是穷则候选表里的
+    // 内政项被门禁筛光、只剩打仗
+    const income = !P.goldOn ? 0 : P.goldBase + goldRows.sort((a, b) => b - a)
+      .reduce((n, v, i) => n + v * P.goldDecay ** i, 0);
+
+    const myArmies = s.armies.filter((x) => x.faction === f.id);
+    const myLands = Object.values(s.commanderies).filter((c) => c.owner === f.id);
+    const troops = myArmies.reduce((n, a) => n + a.troops, 0)
+                 + myLands.reduce((n, c) => n + c.garrison, 0);
+    const upkeep = P.goldOn ? Math.round(troops * P.goldUpkeepPerTroop) : 0;
+    f.gold = Math.min(P.goldCap, f.gold + Math.round(income));
+    if (upkeep > 0) {
+      if (f.gold >= upkeep) {
+        f.gold -= upkeep;
+      } else {
+        const short = Math.min(1, 1 - f.gold / upkeep);
+        f.gold = 0;
+        let lost = 0;
+        for (const a of myArmies) {
+          const go = Math.round(a.troops * short * 0.5);
+          a.troops -= go; lost += go;
+        }
+        for (const c of myLands) {
+          const go = Math.round(c.garrison * short * 0.5);
+          c.garrison -= go; lost += go;
+        }
+        s.armies = s.armies.filter((a) => a.faction !== f.id || a.troops > 0);
+        log(s, { kind: "unpaid", faction: f.id,
+                 text: `军费不继（需 ${upkeep} 金，兵 ${troops}），${lost} 人逃亡` });
+      }
+    }
+    if (income > 0 || upkeep > 0) {
+      log(s, { kind: "treasury", faction: f.id,
+               text: `国库 ${Math.round(f.gold)} 金（本季入 ${Math.round(income)}`
+                   + `${upkeep > 0 ? `，军费 ${upkeep}` : ""}）` });
     }
   }
 
