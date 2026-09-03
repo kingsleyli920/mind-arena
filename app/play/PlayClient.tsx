@@ -310,6 +310,18 @@ export function PlayClient() {
   const [resume, setResume] = useState<SavedGame | null>(null);
   /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
   const [hoverKey, setHoverKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  /**
+   * 把日志文本里的势力 id 换成中文名。
+   *
+   * 引擎写日志时手上没有显示名（resolve 不该依赖界面的东西），于是
+   * 「自 南阳郡 取 京兆尹（原属 lijue）」这类文本里留着 id，由界面翻译。
+   * 此前这个函数定义在封令回调**内部**，只有战报用得到——终局年表读的是
+   * 同一批日志却没经过它，于是年表上写着「原属 lijue」「原属 shixie」。
+   */
+  const cnText = useCallback((text: string) =>
+    text.replace(/[a-z]+/g, (m) => engineRef.current?.nameOf.get(m) ?? m), []);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -324,6 +336,9 @@ export function PlayClient() {
     im.src = BASE_2X;
   }, [view.k, hdReady]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // cnText 要在 engine 载入前后都可用，用 ref 取当前值而不进依赖数组
+  const engineRef = useRef<Engine | null>(null);
+  useEffect(() => { engineRef.current = engine; }, [engine]);
 
   // ── 载入 ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -433,12 +448,11 @@ export function PlayClient() {
     // 全铺出来等于把自己这一季的战况埋掉——只留我方的，与天下大事
     // 可见性由引擎定义（intel.ts 的 PUBLIC_EVENTS），不在这里另判一套——
     // 界面与模型观测若各判各的，人看到的和模型看到的就不是同一场战争
-    const cn = (text: string) => text.replace(/[a-z]+/g, (m) => engine.nameOf.get(m) ?? m);
     const fresh = visibleLog(r.state, seat, before);
     // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
     // 补给消息埋掉——那是最该第一眼看到的东西
     setFlash({
-      mine: fresh.filter((e) => e.faction === seat).map((e) => cn(e.text)),
+      mine: fresh.filter((e) => e.faction === seat).map((e) => cnText(e.text)),
       // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
       // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
       // 实测天下大事一季数十条，其中八成是 AI 之间的缔盟绝盟
@@ -451,7 +465,7 @@ export function PlayClient() {
         const big = rows.filter((e) => !isDip(e.kind))
           .sort((a, b) => (RANK[a.kind] ?? 9) - (RANK[b.kind] ?? 9))
           .slice(0, 10)
-          .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cn(e.text)}`);
+          .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cnText(e.text)}`);
         // 外交折成一行：它占了八成条数，却极少影响本季的决策
         const dip = rows.filter((e) => isDip(e.kind));
         if (dip.length) {
@@ -463,7 +477,7 @@ export function PlayClient() {
     });
     setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));
     setPicked([]);
-  }, [engine, game, seat, candidates, picked]);
+  }, [engine, game, seat, candidates, picked, cnText]);
 
   // ── 疆域绘制 ────────────────────────────────────────────────────
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），
@@ -696,6 +710,37 @@ export function PlayClient() {
                sortie: c.action.from === c.action.target };
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
+
+  // ── 终局要用的三样：年表、名将去向、天下排名 ──────────────────────
+  // 一局十六季，只报一个档位等于什么都没留下
+  const BIG = new Set(["siege-win", "siege-lift", "siege-abort", "officer-captured",
+    "besieged", "capital-lost", "field-win", "field-fail", "relief", "retire", "eliminated"]);
+  const chronicle = game.log
+    .filter((e) => e.faction === seat && BIG.has(e.kind))
+    .map((e) => ({
+      // SEASON_CN 是 1-based（["", "春", "夏", "秋", "冬"]），而 turn 从 0 起。
+      // 直接取 turn % 4 会整体差一季，年表上每条都错标
+      when: `${Math.floor(e.turn / 4) + 194} · ${SEASON_CN[(e.turn % 4) + 1]}`,
+      text: cnText(e.text),
+    }));
+  const caught = { mine: [] as string[], theirs: [] as string[] };
+  for (const e of game.log) {
+    if (e.kind !== "officer-captured") continue;
+    const names = (/ (.+?) 被俘$/.exec(e.text)?.[1] ?? "").split("、").filter(Boolean);
+    (e.faction === seat ? caught.theirs : caught.mine).push(...names);
+  }
+  // 我方被俘只算真属于我的人：他方互相俘获与我无关
+  caught.mine = caught.mine.filter((n) => {
+    const o = [...engine.roster.byId.values()].find((x) => x.name === n);
+    return o?.faction === seat;
+  });
+  const byLand = Object.values(game.factions)
+    .map((f) => ({ id: f.id,
+      n: Object.values(game.commanderies).filter((c) => c.owner === f.id).length }))
+    .filter((x) => x.n > 0)
+    .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
+  const rank = { at: Math.max(1, byLand.findIndex((x) => x.id === seat) + 1),
+                 of: byLand.length };
 
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
 
@@ -1041,7 +1086,8 @@ export function PlayClient() {
           {game.finished ? (
             <div className="over">
               <h2>终局{"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
-                <b>{GRADE_SCORE[me.bestGrade]} 分</b></h2>
+                <b>{GRADE_SCORE[me.bestGrade]} 分</b>
+                <u>天下第 {rank.at}/{rank.of}</u></h2>
               {/* 只报一个档位等于不报。玩家要知道的是「我把局面推进了多少」，
                   以及「差一步的那一步是什么」——判据是州级的，而对局十六季
                   都在郡这一层做决定，不摊开写没人算得出来 */}
@@ -1055,9 +1101,56 @@ export function PlayClient() {
                 <div><dt>夺自他方</dt><dd>{standing.conquests}<i>郡</i></dd></div>
               </dl>
               <p>{endingGap(me, standing)}</p>
+              {/* 年表：十六季不该只剩一个档位。哪一季拿下了什么、哪一季被围、
+                  哪一季折了名将——这些是这一局唯一留得下来的东西 */}
+              <details className="over-fold" open>
+                <summary>十六季年表<i>{chronicle.length} 事</i></summary>
+                <ol className="chron">
+                  {chronicle.map((e, i) => (
+                    <li key={i}><b>{e.when}</b><span>{e.text}</span></li>
+                  ))}
+                  {!chronicle.length && <li><span>十六季平静无事。</span></li>}
+                </ol>
+              </details>
+
+              {(caught.mine.length > 0 || caught.theirs.length > 0) && (
+                <details className="over-fold">
+                  <summary>名将去向<i>{caught.mine.length + caught.theirs.length} 人</i></summary>
+                  <dl className="captives">
+                    {caught.theirs.length > 0 && (
+                      <div><dt>我所俘</dt><dd>{caught.theirs.join("、")}</dd></div>
+                    )}
+                    {caught.mine.length > 0 && (
+                      <div><dt>我方被俘</dt><dd>{caught.mine.join("、")}</dd></div>
+                    )}
+                  </dl>
+                </details>
+              )}
+
               <p className="over-note">档位按本局曾达到过的最高档记，判的是相对开局的增量——
-                守成不得分。</p>
-              <button onClick={() => { setGame(null); setSeat(null); }}>再来一局</button>
+                守成不得分。天下排名按终局郡数，仅供参照，不进计分。</p>
+              <div className="over-acts">
+                <button onClick={() => { clearSave(); setGame(null); setSeat(null); }}>再来一局</button>
+                <button className="ghost" onClick={() => {
+                  // 把这一局抄成一段纯文本，方便贴出去。replay 尚未做界面，
+                  // 但至少让人能把自己那一局带走
+                  const lines = [
+                    `汉末沙盘\u3000${engine.nameOf.get(seat) ?? seat}\u3000`
+                      + `${GRADE_CN[me.bestGrade]}档 ${GRADE_SCORE[me.bestGrade]}分\u3000`
+                      + `天下第 ${rank.at}/${rank.of}`,
+                    `郡国 ${me.startCommanderies}→${standing.commanderies}\u3000`
+                      + `控制州 ${me.startZhou}→${standing.controlledZhou}\u3000`
+                      + `州治 ${me.startSeats}→${standing.zhouSeats}\u3000`
+                      + `夺自他方 ${standing.conquests}`,
+                    `seed ${game.seed}`,
+                    "",
+                    ...chronicle.map((e) => `${e.when}\u3000${e.text}`),
+                  ];
+                  navigator.clipboard?.writeText(lines.join("\n"));
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 2000);
+                }}>{copied ? "已复制" : "抄一份战绩"}</button>
+              </div>
             </div>
           ) : (
             <>

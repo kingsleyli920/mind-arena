@@ -407,3 +407,35 @@
   .map-stage svg .arrow { animation: march 1.6s linear infinite; }
 }
 @keyframes march { to { stroke-dashoffset: -18; } }
+
+/* ── 终局结算 ── */
+.over h2 u { text-decoration: none; font-size: 0.8rem; color: var(--ink-soft); font-weight: 400; }
+.over-fold { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.over-fold summary {
+  cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.78rem;
+  letter-spacing: 0.1em; color: var(--ink-soft);
+}
+.over-fold summary i {
+  font-style: normal; margin-inline-start: 0.4rem; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.chron {
+  margin: 0; padding: 0.3rem 0.8rem 0.6rem; list-style: none;
+  max-height: 15rem; overflow-y: auto;
+}
+.chron li {
+  display: grid; grid-template-columns: 5.4rem 1fr; gap: 0.5rem;
+  padding: 0.16rem 0; font-size: 0.74rem; line-height: 1.5;
+}
+.chron b {
+  color: var(--ink-soft); font-weight: 400; font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.captives { margin: 0; padding: 0.35rem 0.8rem 0.6rem; display: grid; gap: 0.3rem; }
+.captives div { display: grid; grid-template-columns: 5.4rem 1fr; gap: 0.5rem; }
+.captives dt { font-size: 0.72rem; color: var(--ink-soft); }
+.captives dd { margin: 0; font-size: 0.74rem; line-height: 1.6; }
+.over-acts { display: flex; gap: 0.5rem; }
+.over-acts button.ghost {
+  background: transparent; color: var(--ink-soft); border: 1px solid var(--rule);
+}
