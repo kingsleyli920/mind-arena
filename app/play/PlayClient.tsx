@@ -389,7 +389,9 @@ export function PlayClient() {
   // 候选表、简报、镜头都能重算，存进去只会多一份会过期的副本
   useEffect(() => {
     if (!engine || !game || !seat) return;
-    if (game.finished) { clearSave(); return; }   // 打完了就没什么可继续的
+    // 打完、被灭、归隐都没什么可继续的
+    if (game.finished || game.factions[seat]?.eliminated
+        || game.factions[seat]?.retired) { clearSave(); return; }
     saveGame({
       packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount),
       seat, game, picked,
@@ -715,14 +717,25 @@ export function PlayClient() {
   // 一局十六季，只报一个档位等于什么都没留下
   const BIG = new Set(["siege-win", "siege-lift", "siege-abort", "officer-captured",
     "besieged", "capital-lost", "field-win", "field-fail", "relief", "retire", "eliminated"]);
-  const chronicle = game.log
-    .filter((e) => e.faction === seat && BIG.has(e.kind))
-    .map((e) => ({
-      // SEASON_CN 是 1-based（["", "春", "夏", "秋", "冬"]），而 turn 从 0 起。
-      // 直接取 turn % 4 会整体差一季，年表上每条都错标
-      when: `${Math.floor(e.turn / 4) + 194} · ${SEASON_CN[(e.turn % 4) + 1]}`,
-      text: cnText(e.text),
-    }));
+  const when = (t: number) => `${Math.floor(t / 4) + 194} · ${SEASON_CN[(t % 4) + 1]}`;
+  // 连续同文合并。治所失守之后「全境政令不通」会逐季重复，
+  // 一个第 9 季覆灭的局面里这一句能占掉年表的一半——那不是年表，是回声
+  const chronicle: Array<{ when: string; text: string; from: number; to: number; n: number }> = [];
+  for (const e of game.log) {
+    if (e.faction !== seat || !BIG.has(e.kind)) continue;
+    const text = cnText(e.text);
+    const last = chronicle[chronicle.length - 1];
+    // 只合并**相邻季**的同一句。跨季合并会让「194 秋—195 冬（×2 季）」
+    // 读起来像连续六季，其实只是首末两次
+    if (last && last.text === text && e.turn === last.to + 1) {
+      last.to = e.turn; last.n += 1;
+      continue;
+    }
+    chronicle.push({ when: "", text, from: e.turn, to: e.turn, n: 1 });
+  }
+  for (const c of chronicle) {
+    c.when = c.n > 1 ? `${when(c.from)}—${when(c.to)}` : when(c.from);
+  }
   const caught = { mine: [] as string[], theirs: [] as string[] };
   for (const e of game.log) {
     if (e.kind !== "officer-captured") continue;
@@ -741,6 +754,10 @@ export function PlayClient() {
     .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
   const rank = { at: Math.max(1, byLand.findIndex((x) => x.id === seat) + 1),
                  of: byLand.length };
+
+  // 收尾的三种情形：十六季打满、被灭光、主动归隐。后两种此前不收尾，
+  // 玩家得对着空候选把剩下的季数一季季点完
+  const over = game.finished || me.eliminated || me.retired;
 
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
 
@@ -1083,11 +1100,20 @@ export function PlayClient() {
             </div>
           )}
 
-          {game.finished ? (
+          {over ? (
             <div className="over">
-              <h2>终局{"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
+              {/* 出局与归隐也要在这里收尾。此前只认 game.finished：
+                  一个第 8 季就被灭光的玩家，要对着「本季无可行之事」
+                  再点八次「封令结算」才看得到结果——那不是结局，是罚站 */}
+              <h2>{me.eliminated ? "覆灭" : me.retired ? "归隐" : "终局"}
+                {"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
                 <b>{GRADE_SCORE[me.bestGrade]} 分</b>
-                <u>天下第 {rank.at}/{rank.of}</u></h2>
+                {!me.eliminated && <u>天下第 {rank.at}/{rank.of}</u>}</h2>
+              {me.eliminated && (
+                <p className="over-lead">尽失疆土，止于 {game.year} 年 · {SEASON_CN[game.season]}
+                  （第 {game.turn}/{engine.P.seasonsPerGame} 季）。
+                  档位仍按本局曾达到过的最高档记——打下来过的，不因后来失守而作废。</p>
+              )}
               {/* 只报一个档位等于不报。玩家要知道的是「我把局面推进了多少」，
                   以及「差一步的那一步是什么」——判据是州级的，而对局十六季
                   都在郡这一层做决定，不摊开写没人算得出来 */}
@@ -1107,7 +1133,8 @@ export function PlayClient() {
                 <summary>十六季年表<i>{chronicle.length} 事</i></summary>
                 <ol className="chron">
                   {chronicle.map((e, i) => (
-                    <li key={i}><b>{e.when}</b><span>{e.text}</span></li>
+                    <li key={i}><b>{e.when}</b>
+                      <span>{e.text}{e.n > 1 ? `（连 ${e.n} 季）` : ""}</span></li>
                   ))}
                   {!chronicle.length && <li><span>十六季平静无事。</span></li>}
                 </ol>
@@ -1144,7 +1171,7 @@ export function PlayClient() {
                       + `夺自他方 ${standing.conquests}`,
                     `seed ${game.seed}`,
                     "",
-                    ...chronicle.map((e) => `${e.when}\u3000${e.text}`),
+                    ...chronicle.map((e) => `${e.when}\u3000${e.text}${e.n > 1 ? `（连 ${e.n} 季）` : ""}`),
                   ];
                   navigator.clipboard?.writeText(lines.join("\n"));
                   setCopied(true);
