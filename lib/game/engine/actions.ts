@@ -9,6 +9,7 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
   from "./officers.ts";
 import { observedGarrison, tierOf } from "./intel.ts";
 import { forecastCampaign, forecastField } from "./forecast.ts";
+import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
 import type {
@@ -214,7 +215,11 @@ export function listActions(
       // 随军编制由起兵郡唯一确定（驻地编制），写进 label 让模型看得见「谁去打」、
       // 也看得见「能带多少兵」——出征兵力上限就是随军人数 × 每将统兵
       const corps = roster ? retinueAt(s, roster, e.from, P) : [];
-      const lead = corps[0] ?? null;
+      // 主将由**攻势排位**定，与结算用的是同一个函数。
+      // 此前这里取 corps[0]（按 id 排序的第一个），于是标签写着「蔡瑁领」
+      // 而实际出战的是文聘——告诉对局方的主将和真打的不是同一个人
+      const march = roster ? attackRetinue(corps, P, e.terrain).members : [];
+      const lead = march[0] ?? null;
       const cap = roster ? troopCap(corps, P) : Infinity;
       const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
       const src0 = s.commanderies[e.from];
@@ -242,9 +247,10 @@ export function listActions(
       // 那是玩家/模型唯一能据以判断「该不该先调将过来」的东西
       // 只报主将与人数：人数定兵力上限，主将定五维加成，副将是谁不影响判断。
       // 全名铺开会把候选 token 撑爆——刘表一度顶到 10059/10000
-      const named = corps.filter((o) => !isFiller(o));
+      // 只报随军的那几人：march 已按 retinueCap 截过，报全员会多报出不出征的人
+      const named = march.filter((o) => !isFiller(o));
       const leadNote = named.length
-        ? `，${named[0].name}${named.length > 1 ? `等 ${Math.min(named.length, P.retinueCap)} 将` : ""}领`
+        ? `，${named[0].name}${named.length > 1 ? `等 ${named.length} 将` : ""}领`
         : "，仅郡守（无名将）";
       // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
       for (const strength of ["main", "allout"] as const) {
@@ -311,8 +317,12 @@ export function listActions(
       for (const src of routes) {
         const isSortie = src.id === foe.target;
         const corps = roster ? retinueAt(s, roster, src.id, P) : [];
-        const lead = corps[0] ?? null;
-        const named = corps.filter((o) => !isFiller(o));
+        // 赴援打的是野战，主将同样按攻势排位定。出城迎战没有边，地形按平原算
+        const rTerrain = isSortie ? "plain"
+          : (g.adj.get(src.id) ?? []).find((e2) => e2.to === foe.target)?.terrain ?? "plain";
+        const march = roster ? attackRetinue(corps, P, rTerrain).members : [];
+        const lead = march[0] ?? null;
+        const named = march.filter((o) => !isFiller(o));
         const send = Math.min(Math.floor(src.garrison * P.strengthRatio.allout),
                               roster ? troopCap(corps, P) : Infinity);
         const ff = forecastField(s, f, src.id, foe, send, g, P, roster);

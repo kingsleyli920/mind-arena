@@ -6,7 +6,8 @@ import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
   from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
-import { retinueAt, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
+import { retinueAt, stationedAt, isFiller, attackRetinue }
+  from "../lib/game/engine/officers.ts";
 import { fieldOutcome } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
@@ -1103,4 +1104,32 @@ test("野战：预告的判词与结算的判词同源", () => {
   }
   assert.equal(fieldOutcome(P, P.fieldRout).atkWins, true);
   assert.equal(fieldOutcome(P, P.fieldStall).atkWins, false, "相持不算攻方胜");
+});
+
+test("标签：候选报的主将与人数，必须是真出征的那几个", () => {
+  const t = fresh();
+  const from = Object.values(t.commanderies).find((c) => c.owner === "yuanshao");
+  // 把远多于上限的武将堆进起兵郡
+  const all = (ROSTER.byFaction.get("yuanshao") ?? []).map((o) => o.id);
+  for (const oid of all) t.stations[oid] = from.id;
+  t.commanderies[from.id].garrison = 40000;
+
+  const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO)
+    .filter((c) => c.action.type === "campaign" && c.action.from === from.id
+                   && c.key.startsWith("campaign:"));
+  assert.ok(cs.length > 0, "无征伐候选");
+  // 主将那一段夹在最后一个「，」与「领」之间，且不跨越分隔符
+  const m = /[，,]([^，,；｜（]+?)(?:等 (\d+) 将)?领/.exec(cs[0].label.split("｜")[0]);
+  assert.ok(m, `标签里没有主将：${cs[0].label}`);
+  // 随军上限是 3，标签报「等 6 将领」就是在多报不出征的人
+  if (m[2]) {
+    assert.ok(Number(m[2]) <= P.retinueCap,
+      `标签报了 ${m[2]} 将随军，上限是 ${P.retinueCap}：${cs[0].label}`);
+  }
+  // 主将必须是攻势排位第一，而不是按 id 排序的第一个
+  const terrain = (G.adj.get(from.id) ?? []).find((e) => e.to === cs[0].action.target)?.terrain
+    ?? "plain";
+  const want = attackRetinue(retinueAt(t, ROSTER, from.id, P), P, terrain).members[0];
+  assert.equal(m[1], want.name,
+    `标签写着 ${m[1]} 领，实际出战的是 ${want.name}——两者必须一致`);
 });
