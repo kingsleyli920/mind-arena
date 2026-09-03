@@ -209,4 +209,22 @@ export interface Candidate {
     /** 取下后本势力可达到的最高档，仅在高于现档时给出。由 gradeOf 实算，不是启发式 */
     upgrade: Grade | null;
   };
+  /**
+   * 调任候选的结构化信息。机器人读这个，不从 label 抠正则——
+   * 这个文件里已经为此栽过一次（forecast 之前就是抠出来的）。
+   *
+   * have 是要紧的那个数：出征兵力上限 = 驻将数 × 每将统兵，
+   * 所以「零将的临敌郡」纵有十万戍兵也只出得动一支偏师。
+   */
+  post?: {
+    at: CommanderyId;
+    officer: OfficerId;
+    /** 该郡现有驻将数 */
+    have: number;
+    /** 是否临敌 */
+    front: boolean;
+    leadership: number; might: number; politics: number; charisma: number;
+    /** 自何处调来；在野征辟为 null */
+    from: CommanderyId | null;
+  };
 }

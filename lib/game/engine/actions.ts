@@ -428,6 +428,10 @@ export function listActions(
             key: `appoint:${c.id}:${o.id}`,
             action: { type: "appoint", officer: o.id, at: c.id },
             cost: 0,
+            post: { at: c.id, officer: o.id, have, front,
+                    leadership: o.leadership, might: o.might,
+                    politics: o.politics, charisma: o.charisma,
+                    from: s.stations[o.id] ?? null },
             label: `调 ${o.name} 驻 ${c.id}（${front ? "临敌" : "后方"}，现 ${have} 将；`
                  + `统${o.leadership} 武${o.might} 政${o.politics} 魅${o.charisma}`
                  + `${o.aptitudes.length ? " " + o.aptitudes.join("/") : ""}）`
