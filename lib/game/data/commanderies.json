@@ -1122,7 +1122,8 @@
   "certainty": "attested",
   "counties": 9,
   "households": 2706,
-  "population": null
+  "population": 12842,
+  "populationBasis": "《续汉书·郡国志》本郡记 2706 户而缺口数。按凉州有数各郡的口/户中位 4.75 推得。为估值，非原文。"
  },
  {
   "id": "敦煌郡",
@@ -1466,8 +1467,9 @@
   "latitude": 41.54,
   "certainty": "approx",
   "counties": null,
-  "households": null,
-  "population": null
+  "households": 2000,
+  "population": 12542,
+  "populationBasis": "《续汉书·郡国志》辽东属国下无户口亦无县数——该属国安帝时始置，本表按幽州诸属国的量级估作 2000 户。为估值，非原文。"
  },
  {
   "id": "南海郡",
@@ -1511,8 +1513,9 @@
   "latitude": 23.4,
   "certainty": "approx",
   "counties": 11,
-  "households": null,
-  "population": null
+  "households": 102329,
+  "population": 428970,
+  "populationBasis": "《续汉书·郡国志》本郡缺户口数，仅记 11 县。以交州有数各郡的县均户 9303 推得户数，再按口/户 4.19 推得口数。为估值，非原文。"
  },
  {
   "id": "合浦郡",
@@ -1541,8 +1544,9 @@
   "latitude": 21.18,
   "certainty": "approx",
   "counties": 12,
-  "households": null,
-  "population": null
+  "households": 111631,
+  "population": 467964,
+  "populationBasis": "《续汉书·郡国志》本郡缺户口数，仅记 12 县。以交州有数各郡的县均户 9303 推得户数，再按口/户 4.19 推得口数。为估值，非原文。"
  },
  {
   "id": "九真郡",

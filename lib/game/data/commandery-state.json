@@ -355,7 +355,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 6
+   "degree": 7
   },
   {
    "id": "沛国",
@@ -421,7 +421,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 5
+   "degree": 6
   },
   {
    "id": "魏郡",
@@ -883,7 +883,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "下邳国",
@@ -905,7 +905,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "济南国",
@@ -927,7 +927,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 4
+   "degree": 5
   },
   {
    "id": "平原郡",
@@ -949,7 +949,7 @@
    "garrisonTier": 8,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 5
+   "degree": 6
   },
   {
    "id": "乐安国",
@@ -993,7 +993,7 @@
    "garrisonTier": 7,
    "moraleTier": 3,
    "defense": 65,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "东莱郡",
@@ -1015,7 +1015,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 2
+   "degree": 3
   },
   {
    "id": "齐国",
@@ -1773,11 +1773,11 @@
    "factionId": "lijue",
    "control": "nominal",
    "households140": 2706,
-   "population140": 13530,
+   "population140": 12842,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
    "households194": 1488,
-   "population194": 7442,
+   "population194": 7063,
    "terrainFactor": 0.545,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -2278,19 +2278,19 @@
    "seat": "昌辽",
    "factionId": "wuhuan",
    "control": "firm",
-   "households140": 0,
-   "population140": 0,
+   "households140": 2000,
+   "population140": 12542,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 0,
-   "population194": 0,
+   "households194": 1500,
+   "population194": 9407,
    "terrainFactor": 0.991,
    "dominantTerrain": "plain",
-   "yieldTier": 1,
+   "yieldTier": 2,
    "garrison": 300,
    "garrisonTier": 0,
    "moraleTier": 4,
-   "defense": 35,
+   "defense": 40,
    "degree": 3
   },
   {
@@ -2344,19 +2344,19 @@
    "seat": "布山",
    "factionId": "wuzhu",
    "control": "nominal",
-   "households140": 0,
-   "population140": 0,
+   "households140": 102329,
+   "population140": 428970,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 0,
-   "population194": 0,
+   "households194": 107445,
+   "population194": 450419,
    "terrainFactor": 0.973,
    "dominantTerrain": "plain",
-   "yieldTier": 1,
-   "garrison": 300,
-   "garrisonTier": 0,
+   "yieldTier": 7,
+   "garrison": 9008,
+   "garrisonTier": 7,
    "moraleTier": 4,
-   "defense": 35,
+   "defense": 65,
    "degree": 3
   },
   {
@@ -2388,19 +2388,19 @@
    "seat": "龙编",
    "factionId": "shixie",
    "control": "firm",
-   "households140": 0,
-   "population140": 0,
+   "households140": 111631,
+   "population140": 467964,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 0,
-   "population194": 0,
+   "households194": 117213,
+   "population194": 491362,
    "terrainFactor": 0.998,
    "dominantTerrain": "plain",
-   "yieldTier": 1,
-   "garrison": 300,
-   "garrisonTier": 0,
+   "yieldTier": 7,
+   "garrison": 9827,
+   "garrisonTier": 7,
    "moraleTier": 5,
-   "defense": 41,
+   "defense": 71,
    "degree": 2
   },
   {
