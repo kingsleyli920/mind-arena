@@ -133,6 +133,7 @@ async function playGame(gi) {
           dropped: record.admission.dropped.map((d) => d.reason),
           usage: record.usage, failure: record.failure, reason: record.reason,
           structured: record.structured, rung: record.rung,
+          failureKind: record.failureKind,
           maxTokens: record.maxTokens, finishReason: record.finishReason,
           elapsedMs: record.elapsedMs,
         };
@@ -239,12 +240,24 @@ if (usage.length) {
       + `每次调用 ${Math.round(sum("completion") / usage.length)} tok。`
       + `未指定 --reasoning，该模型用的是自家默认档位`);
   }
-  const starved = records.filter((r) => (r.failure ?? "").startsWith("无内容"));
+  // 失败必须三分栏。混成一个计数就会出现「kimi 55 季答不上来」这种结论，
+  // 而实测其中 54 季是 180s 超时——按提供方的快慢排名，与策略能力无关
+  const by = { infra: [], budget: [], model: [] };
+  for (const r of records) if (r.failure) (by[r.failureKind ?? "model"] ??= []).push(r);
+  if (by.infra.length || by.budget.length || by.model.length) {
+    console.log(`失败拆分：基础设施（超时/网络）${by.infra.length} 季`
+      + `\u3000harness（出参预算）${by.budget.length} 季`
+      + `\u3000模型（答不上来/解析不出）${by.model.length} 季`);
+    for (const k of ["infra", "budget", "model"]) {
+      if (by[k].length) console.log(`  ${k} 样例：${by[k][0].failure}`);
+    }
+    if (by.infra.length) {
+      console.log("  ⚠ 基础设施失败不该计进模型的分。若占比高，加大 --timeout 或降并发再跑");
+    }
+  }
   const grown = records.filter((r) => r.maxTokens > 8000);
-  if (starved.length || grown.length) {
-    console.log(`⚠ 出参预算：${starved.length} 季返回空内容，`
-      + `${grown.length} 季被推理顶到翻倍重试。这是 harness 的配置问题，不是模型的分`);
-    if (starved.length) console.log(`  样例：${starved[0].failure}`);
+  if (grown.length) {
+    console.log(`⚠ ${grown.length} 季被推理顶到翻倍重试（harness 的配置问题，不是模型的分）`);
   }
 }
 console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`

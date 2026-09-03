@@ -43,6 +43,10 @@ export interface ChatRequest {
   schema?: { name: string; strict: boolean; schema: unknown };
   maxTokens?: number;
   temperature?: number;
+  /**
+   * 单次调用的超时。默认 300s——原值 180s 对慢提供方不够：
+   * deepseek 单次实测 38–69s，八路并发下常顶穿，而超时会被误记成模型的失败
+   */
   timeoutMs?: number;
   /**
    * 推理档位。不传则各模型用自己的默认值——实测 gpt-5-nano 每次调用烧
@@ -122,7 +126,10 @@ export class OpenRouterClient implements LlmClient {
       const rung = LADDER[rungIdx];
       const res = await this.once(req, rung, budget).catch((e: unknown) => e as Error);
       if (res instanceof Error) {
-        last = { kind: "retryable", status: 0, message: res.message };
+        // 超时与网络错都是**基础设施**问题，不是模型答不上来。
+        // 实测 deepseek 单次 38–69s、八路并发下顶穿 180s，
+        // 于是 35/96 季被记成「模型答不上来」——评测据此排名就是在惩罚慢的提供方
+        last = { kind: "infra", status: 0, message: res.message };
         await sleep(backoffMs(attempts));
         continue;
       }
@@ -168,7 +175,7 @@ export class OpenRouterClient implements LlmClient {
         rungIdx += 1;
         continue;
       }
-      if (last.kind !== "retryable") break;
+      if (last.kind !== "retryable" && last.kind !== "infra") break;
       await sleep(backoffMs(attempts, res.headers.get("retry-after")));
     }
     throw Object.assign(new Error(`OpenRouter 调用失败：${last?.message ?? "未知"}`), {
@@ -208,7 +215,7 @@ export class OpenRouterClient implements LlmClient {
         ...(this.opts.title ? { "X-Title": this.opts.title } : {}),
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(req.timeoutMs ?? 180_000),
+      signal: AbortSignal.timeout(req.timeoutMs ?? 300_000),
     });
   }
 

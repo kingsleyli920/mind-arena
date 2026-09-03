@@ -125,11 +125,16 @@ function summarize(run, px) {
   const grades = {};
   for (const r of rs) grades[r.grade] = (grades[r.grade] ?? 0) + 1;
   const rungs = {};
-  for (const r of recs) if (r.rung) rungs[r.rung] = (rungs[r.rung] ?? 0) + 1;
+  // 只统计真发生过的档位：失败记录的 rung 是 null，混进来会虚构出
+  // 「kimi text×54」这种从未发生的分布
+  for (const r of recs) if (r.rung && !r.failure) rungs[r.rung] = (rungs[r.rung] ?? 0) + 1;
 
-  // harness 的锅与模型的锅分开：出参预算被推理吃光是我们没让它说完
-  const starved = recs.filter((r) => (r.failure ?? "").startsWith("无内容")).length;
-  const modelFail = recs.filter((r) => r.failure && !r.failure.startsWith("无内容")).length;
+  // 失败三分栏。混成一个计数就会出现「kimi 55 季答不上来」这种结论，
+  // 而实测其中 54 季是 180s 超时——那是按提供方的快慢排名，与策略能力无关
+  const fk = (r) => r.failureKind ?? "model";
+  const infraFail = recs.filter((r) => r.failure && fk(r) === "infra").length;
+  const starved = recs.filter((r) => r.failure && fk(r) === "budget").length;
+  const modelFail = recs.filter((r) => r.failure && fk(r) === "model").length;
 
   let cost = null;
   const p = run.model ? px.get(run.model) : null;
@@ -152,7 +157,7 @@ function summarize(run, px) {
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
     outTok: sum("completion"), reasonTok: sum("reasoning"),
-    rungs, starved, modelFail, cost,
+    rungs, infraFail, starved, modelFail, cost,
     reasoning: run.reasoning, keyEnum: run.keyEnum,
     elapsed: run.elapsed,
   };
@@ -227,12 +232,20 @@ for (const r of rows.filter((x) => x.calls)) {
     + `\u3000${r.reasoning ? `档 ${r.reasoning}` : "默认档"}`);
 }
 
-const anyIssue = rows.some((r) => r.starved || r.modelFail);
+const anyIssue = rows.some((r) => r.infraFail || r.starved || r.modelFail);
 if (anyIssue) {
-  console.log(`\n失败拆分（harness 的锅不能算到模型头上）`);
-  for (const r of rows.filter((x) => x.starved || x.modelFail)) {
+  console.log(`\n失败拆分（只有最后一栏算模型的分）`);
+  for (const r of rows.filter((x) => x.infraFail || x.starved || x.modelFail)) {
     console.log(`  ${r.spec.slice(0, 38).padEnd(40)}`
-      + `harness（出参预算不足）${r.starved} 季\u3000模型（答不上来/解析不出）${r.modelFail} 季`);
+      + `基础设施（超时/网络）${String(r.infraFail).padStart(3)} 季`
+      + `\u3000harness（出参预算）${String(r.starved).padStart(3)} 季`
+      + `\u3000模型${String(r.modelFail).padStart(3)} 季`);
+  }
+  const worst = rows.filter((r) => r.calls && r.infraFail / (r.calls + r.infraFail) > 0.2);
+  for (const r of worst) {
+    console.log(`  ⚠ ${r.spec} 的基础设施失败占 `
+      + `${(r.infraFail / (r.calls + r.infraFail) * 100).toFixed(0)}%，`
+      + `这一行的名次不可信——降并发或加大超时再跑`);
   }
 }
 

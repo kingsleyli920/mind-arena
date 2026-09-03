@@ -21,7 +21,7 @@ npm run eval:suite -- --agents=bot:balanced,bot:purpose,model:<id>,model:<id> \
 plain node，靠 npm script 里的 `--env-file-if-exists=.env.local` 才读得到，
 直接 `node tools/eval-run.mjs` 读不到。
 
-## 五条硬约束
+## 六条硬约束
 
 ### 1. 少于 48 局，名次不可当结论
 
@@ -87,7 +87,25 @@ claude-haiku-4.5 只烧 103，相差 65 倍。不指定 `--reasoning`，比的�
 - 统一档位：`--reasoning=low`。实测 gpt-5-nano 出参 107830 → 25338（少 4.3 倍），档位不变
 - 按出厂设置比也是正当口径，但必须是显式选择。报告会在推理占比过半且未指定时提醒
 
-### 5. harness 的失败不能算到模型头上
+### 5. 失败要分三栏，只有一栏算模型的分
+
+    infra   超时 / 网络 —— 基础设施，与模型能力无关
+    budget  出参预算被推理吃光 —— harness 的配置问题
+    model   答不上来 / 解析不出 —— 只有这一栏算模型的分
+
+实测教训：一轮 6 局的套件里，kimi-k2.5 有 55/96 季、deepseek-v3.2 有 35/96 季
+被记成「模型答不上来」。查下来 **54 季与 35 季全部是 `The operation was
+aborted due to timeout`**——180s 的单次超时对慢提供方不够（deepseek 单次
+实测 38–69s，八路并发下常顶穿）。按那份报告排名，等于按提供方的快慢排名。
+
+默认超时因此提到 300s。基础设施失败占比超过 20% 时，套件会直接标注
+「这一行的名次不可信」。
+
+同一批数据还暴露另一处虚构：失败记录里的 `rung` 留着初始占位值 `"text"`，
+于是报告里出现「kimi text×54」这种从未发生过的档位分布。现在失败记录的
+rung 是 null，档位分布只统计成功的调用。
+
+### 6. harness 的失败不能算到模型头上
 
 出参预算被推理吃光（内容为空、`finish_reason=length`）是我们没让它说完，
 不是模型答不上来。默认 `max_tokens` 8000，饿死则翻倍重试至 32000；

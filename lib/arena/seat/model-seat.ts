@@ -10,6 +10,7 @@ import type { EngineParams } from "../../game/engine/params.ts";
 import type { Geography } from "../../game/engine/victory.ts";
 import type { FactionId, GameState, Order } from "../../game/engine/types.ts";
 import type { LlmClient, Rung } from "../llm/client.ts";
+import type { Failure } from "../llm/errors.ts";
 import { admit, type Admission } from "./admit.ts";
 import { decisionSchema, parseDecision } from "./parse.ts";
 import { renderSystem, renderUser, PROMPT_VERSION } from "./prompt.ts";
@@ -33,8 +34,12 @@ export interface ModelTurnRecord {
   admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate">;
   usage: { prompt: number; completion: number; cached: number; reasoning: number } | null;
   structured: boolean;
-  /** 请求实际落在哪一档降级。跨模型比分前要先看这个，否则约束不同分数不可比 */
-  rung: Rung;
+  /**
+   * 请求实际落在哪一档降级。跨模型比分前要先看这个，否则约束不同分数不可比。
+   * **整跑失败时为 null**——此前这里留着初始占位值 "text"，
+   * 于是报告里出现「kimi text×54」这种纯属虚构的档位分布
+   */
+  rung: Rung | null;
   /** 最终用的出参预算。被推理饿死翻倍过就与默认值不同 */
   maxTokens: number;
   finishReason: string | null;
@@ -42,6 +47,14 @@ export interface ModelTurnRecord {
   elapsedMs: number;
   /** 失败时记下原因，orders 为空 */
   failure?: string;
+  /**
+   * 失败归谁。评测报告按这个分栏，不能混成一个「失败」计数：
+   *   infra   超时 / 网络 —— 基础设施，与模型能力无关
+   *   budget  出参预算被推理吃光 —— harness 的配置问题
+   *   model   答不上来 / 解析不出 —— 这一类才算模型的分
+   * 实测 kimi 96 季里 54 季是超时，此前全部记在了 model 名下
+   */
+  failureKind?: "infra" | "budget" | "model";
 }
 
 export interface ModelSeatDeps {
@@ -75,7 +88,7 @@ export async function modelDecide(
     turn: s.turn, seat: faction, model: deps.model, promptVersion: PROMPT_VERSION,
     obsChars: user.length, obsTokens: estTokens(user), candidates: cands.length,
     picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0 },
-    usage: null, structured: false, rung: "text", maxTokens: 0,
+    usage: null, structured: false, rung: null, maxTokens: 0,
     finishReason: null, attempts: 0, elapsedMs: 0,
   };
   if (!cands.length) return { orders: [], record: base };
@@ -93,14 +106,15 @@ export async function modelDecide(
     // 记成后者会把每个推理模型都判成废物，而这个 harness 的立项目的就是比模型
     if (!res.content.trim()) {
       const r = res.usage?.reasoning ?? 0;
-      return { orders: [], record: { ...base, ...meta(res),
+      return { orders: [], record: { ...base, ...meta(res), failureKind: "budget",
         failure: `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
                + `${r ? `，推理占 ${r}` : ""}）` } };
     }
     const dec = parseDecision(res.content);
     if (!dec) {
       // 解析不出记为「无回应」，不是「什么都不做」——两者在评测里含义不同
-      return { orders: [], record: { ...base, ...meta(res), failure: "解析不出决策" } };
+      return { orders: [], record: { ...base, ...meta(res),
+        failureKind: "model", failure: "解析不出决策" } };
     }
     const a = admit(s, faction, dec.picks, cands, deps.g, deps.roster, rules);
     return {
@@ -112,7 +126,12 @@ export async function modelDecide(
       },
     };
   } catch (e) {
-    return { orders: [], record: { ...base, failure: (e as Error).message } };
+    // 客户端把最后一次失败的分级挂在错误上。超时与网络错归 infra——
+    // 记成模型的失败等于按提供方的快慢排名，而那与策略能力无关
+    const f = (e as { failure?: Failure }).failure;
+    const kind = f?.kind === "infra" || f?.kind === "retryable" ? "infra"
+      : f?.kind === "starved" ? "budget" : "model";
+    return { orders: [], record: { ...base, failureKind: kind, failure: (e as Error).message } };
   }
 }
 
