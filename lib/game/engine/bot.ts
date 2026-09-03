@@ -21,15 +21,22 @@ export const PROFILES: Record<Profile, string> = {
   purpose:     "目的流：认候选上的 gain——打能凑成一整州、能夺州治与治所的那个，而不是最好打的那个",
 };
 
-/** 各画像对每类动作的偏好权重。数值本身无量纲，只用于排序 */
+/**
+ * 各画像对每类动作的偏好权重。数值本身无量纲，只用于排序。
+ *
+ * **appoint 的权重是当年「调任免费」时定的**（均衡流 8，高于内政的 6）。
+ * 调任改为「调动已在任者收 1 令」之后，同样的优先级会把本该用于内政与征伐的
+ * 令挤掉：实测均分从 179 掉到 157、非苟活极差从 39.3 掉到 21.3。
+ * 免费动作排在前面无所谓（它不占预算），收费之后就必须重排。
+ */
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 9, withdraw: 11 },
-  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8, withdraw: 3 },
-  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 8, withdraw: 0 },
-  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 7, withdraw: 5 },
+  turtle:      { govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
+  balanced:    { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  aggressive:  { govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
+  opportunist: { govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
   // 与均衡流同底，差别全在下面读 gain 的那几行——
   // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
-  purpose:     { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 8, withdraw: 3 },
+  purpose:     { govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
 };
 
 /**

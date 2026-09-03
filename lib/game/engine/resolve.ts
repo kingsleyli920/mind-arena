@@ -9,8 +9,8 @@
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
-import { canonicalOrder, GEAR_CN, POLICY_CN, type Graph, type Rules, DEFAULT_RULES, validate }
-  from "./actions.ts";
+import { canonicalOrder, orderCost, GEAR_CN, POLICY_CN, type Graph, type Rules,
+  DEFAULT_RULES, validate } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, unitPower, unitGuard, unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
@@ -169,8 +169,9 @@ export function resolve(
     const reason = validate(s, o, g, rules, roster);
     if (reason) { rejected.push({ order: o, reason }); continue; }
     const a = o.action;
-    const cost = a.type === "campaign" ? rules.campaignAp
-      : a.type === "scout" || a.type === "appoint" ? 0 : rules.normalAp;
+    // 计费口径只有 actions.ts 的 orderCost 一份。此前这里各写了一遍三元表达式，
+    // 调任的价钱一分档，两份副本立刻会算出不同的数
+    const cost = orderCost(a, s, rules);
     const f = s.factions[o.faction];
     f.ap -= cost;
     if (cost === 0) f.freeUsed[a.type] = (f.freeUsed[a.type] ?? 0) + 1;

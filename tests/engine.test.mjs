@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
-import { buildGraph, listActions, validate, canonicalOrder } from "../lib/game/engine/actions.ts";
+import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
+  from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
 import { retinueAt, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
@@ -982,4 +983,41 @@ test("编制：无名将之郡由龙套顶上，弱但不为零", () => {
     "龙套五维应弱于基准值，但不为零");
   // 龙套不进 stations，也就不会被调走、被俘、或被算成「已有驻将」
   assert.equal(t.stations[corps[0].id], undefined, "龙套混进了驻地表");
+});
+
+test("内政不给空操作：已至上限的方针不该出现在候选里", () => {
+  const t = fresh();
+  const at = Object.values(t.commanderies).find((c) => c.owner === "yuanshao").id;
+  // 顶满：产出 10、民心 5、城防 100、器械最高
+  Object.assign(t.commanderies[at], { yieldTier: 10, moraleTier: 5, defense: 100,
+    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000 });
+  const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO);
+  const noop = cs.filter((c) => c.action.type === "govern" && c.action.at === at);
+  // 「南郡 劝农（已至上限）」曾经每季都出现，白耗一条令
+  assert.equal(noop.length, 0,
+    `顶满的郡仍有 ${noop.length} 条内政候选：${noop.map((c) => c.key).join()}`);
+});
+
+test("调任：首次就任免费，调动已在任者收 1 令", () => {
+  const t = fresh();
+  const mineIds = Object.values(t.commanderies).filter((c) => c.owner === "yuanshao").map((c) => c.id);
+  const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO)
+    .filter((c) => c.action.type === "appoint");
+  assert.ok(cs.length > 0, "无调任候选");
+  for (const c of cs) {
+    const posted = !!t.stations[c.action.officer];
+    assert.equal(c.cost, posted ? DEFAULT_RULES.normalAp : 0,
+      `${c.key} 计费错了：已在任=${posted} 却收 ${c.cost} 令`);
+  }
+  // 免费无摩擦的调任会无限空转——实测同五人来回搬了十一季
+  const moves = cs.filter((c) => t.stations[c.action.officer]);
+  assert.ok(moves.length > 0, "没有一条是调动已在任者，测不到收费那一档");
+
+  // 且只许由人多处调往人少处，否则 A→B 与 B→A 会同时是候选
+  for (const c of moves) {
+    const from = t.stations[c.action.officer];
+    assert.ok(stationedAt(t, ROSTER, from).length > stationedAt(t, ROSTER, c.action.at).length,
+      `${c.key} 是把人从少处调往多处，这会与反向那条构成来回搬`);
+    assert.ok(mineIds.includes(c.action.at));
+  }
 });

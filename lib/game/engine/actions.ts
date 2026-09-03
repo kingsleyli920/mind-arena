@@ -77,6 +77,23 @@ function frontier(s: GameState, g: Graph, f: FactionId) {
 
 const remainingAp = (s: GameState, f: FactionId) => s.factions[f]?.ap ?? 0;
 
+/**
+ * 一条命令要几令。**校验、结算、候选表三处共用这一个函数**——
+ * 此前它在 actions.ts 与 resolve.ts 各写了一遍三元表达式，
+ * 而调任的计费一旦分档，两份副本立刻会算出不同的价钱。
+ *
+ * 调任分两档：**首次就任免费，调动已在任者要 1 令**。
+ * 免费无摩擦的调任会无限空转——实测机器人让同五个人每季来回搬十一季，
+ * 黄忠的轨迹是 南阳→长沙→桂阳→江夏→零陵→京兆→南海→京兆→长沙…
+ * 把人从 A 调到 B 就让 A 又缺人，下季再调回去。没有代价就必然震荡。
+ */
+export function orderCost(a: Action, s: GameState, rules: Rules): number {
+  if (a.type === "campaign") return rules.campaignAp;
+  if (a.type === "scout") return 0;
+  if (a.type === "appoint") return s.stations[a.officer] ? rules.normalAp : 0;
+  return rules.normalAp;
+}
+
 function freeLeft(s: GameState, f: FactionId, type: string, rules: Rules): number {
   const cap = rules.freeUses[type];
   if (cap === undefined) return Infinity;
@@ -345,15 +362,20 @@ export function listActions(
     const picks = mine.filter((c) => canOrder(c.id)).map((c) => {
       // 民心低先安民，守军薄先募兵，城防低且临敌先修城，否则劝农
       const isFront = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
-      const policy = c.moraleTier <= 2 ? "soothe"
+      const policy = c.moraleTier <= 2 && c.moraleTier < 5 ? "soothe"
         : isFront && c.defense < 55 ? "wall"
         : isFront && c.garrison < 4000 ? "levy"
-        : isFront && c.gear !== "mound" ? "forge" : "farm";
-      const why = { soothe: "民心低", wall: "临敌且城防薄", levy: "临敌且兵少",
-                    forge: `临敌且器械仅「${GEAR_CN[c.gear]}」`,
-                    farm: "后方可劝农" }[policy];
+        : isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1] ? "forge"
+        : c.yieldTier < 10 ? "farm"
+        : c.moraleTier < 5 ? "soothe"
+        : c.defense < 100 ? "wall" : null;
+      if (!policy) return null;
+      const why = { soothe: "民心可安", wall: "城防可修", levy: "临敌且兵少",
+                    forge: `器械仅「${GEAR_CN[c.gear]}」`,
+                    farm: "产出可增" }[policy];
       return { c, policy, why };
-    }).sort((a, b) => a.c.id.localeCompare(b.c.id)).slice(0, rules.perTypeCap);
+    }).filter((x) => !!x)
+      .sort((a, b) => a.c.id.localeCompare(b.c.id)).slice(0, rules.perTypeCap);
     for (const { c, policy, why } of picks) {
       out.push({
         key: `govern:${c.id}:${policy}`,
@@ -417,9 +439,17 @@ export function listActions(
       // 模型看到的是同一组重复，而非更多信息
       const shown = new Set<string>();
       for (const [vi, { c, front, fit, have }] of vacancies.entries()) {
-        // 已驻此郡的人不必再调过来
-        const ranked = pool.filter((o) => s.stations[o.id] !== c.id)
-          .sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
+        const ranked = pool.filter((o) => {
+          const at = s.stations[o.id];
+          if (at === c.id) return false;                 // 已驻此郡
+          if (!at) return true;                          // 在野/待命，随时可就任
+          // **只许从人多处调往人少处**。不加这一条，候选里就会同时存在
+          // A→B 与 B→A，把人从 A 调走使 A 又缺人，下季再调回去——
+          // 实测机器人让同五个人来回搬了十一季，黄忠的轨迹是
+          // 南阳→长沙→桂阳→江夏→零陵→京兆→南海→京兆→长沙…
+          // 有了这条，反向那一步下季就不再是候选，震荡自然消失
+          return stationedAt(s, roster, at).length > have;
+        }).sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
         const best = vi === 0 ? ranked.slice(0, 2)
           : ranked.filter((o) => !shown.has(o.id)).slice(0, 2);
         for (const o of best) {
@@ -427,7 +457,7 @@ export function listActions(
           out.push({
             key: `appoint:${c.id}:${o.id}`,
             action: { type: "appoint", officer: o.id, at: c.id },
-            cost: 0,
+            cost: s.stations[o.id] ? rules.normalAp : 0,
             post: { at: c.id, officer: o.id, have, front,
                     leadership: o.leadership, might: o.might,
                     politics: o.politics, charisma: o.charisma,
@@ -520,8 +550,7 @@ export function validate(
   if (s.finished) return "对局已结束";
 
   const a = o.action;
-  const cost = a.type === "campaign" ? rules.campaignAp
-    : a.type === "scout" || a.type === "appoint" ? 0 : rules.normalAp;
+  const cost = orderCost(a, s, rules);
   if (cost > f.ap) return `令数不足（需 ${cost}，余 ${f.ap}）`;
   if (cost === 0 && freeLeft(s, o.faction, a.type, rules) <= 0) {
     return `${a.type} 本季免费次数已用尽`;
