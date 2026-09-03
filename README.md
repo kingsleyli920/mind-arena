@@ -36,7 +36,9 @@ This starter does not use `wrangler.jsonc`.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the match protocol,
 fairness modes, MVP boundaries, and open-source path. The researched historical
 and game-design baseline is in
-[docs/THREE_KINGDOMS_RESEARCH.md](docs/THREE_KINGDOMS_RESEARCH.md).
+[docs/research/THREE_KINGDOMS_RESEARCH.md](docs/research/THREE_KINGDOMS_RESEARCH.md).
+How to run an evaluation — and the measured constraints that bound it — is in
+[docs/EVAL.md](docs/EVAL.md).
 
 ## Useful Commands
 
@@ -44,6 +46,10 @@ and game-design baseline is in
 - `npm run build`: verify the vinext build output
 - `npm test`: build and verify the rendered product surface
 - `npm run lint`: run static checks
+- `npm run selfplay`: bot-only self-play plus the four gameplay acceptance gates
+- `npm run obs:budget`: per-seat observation token gate (exits 1 when over)
+- `npm run eval`: run one agent (bot / stub / model) over N games
+- `npm run eval:suite`: run several agents over the same seeds and print a leaderboard
 
 ## Current limits
 
