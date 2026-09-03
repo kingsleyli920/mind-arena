@@ -9,8 +9,9 @@
 // 这一层不替模型做决策：它只把引擎已有的公式在观测量上跑一遍，
 // 结果是一个**区间**与三值判断，不是断言。MERS 要测的是「往哪打、
 // 什么时候打」（S1/S2），不是心算能力。
-import { breachCount, fieldOutcome, unitPower, unitGuard } from "./combat.ts";
-import { garrisonBand, tierOf } from "./intel.ts";
+import { breachCount, fieldOutcome, formationEdge, FORMATION_CN,
+         unitPower, unitGuard } from "./combat.ts";
+import { garrisonBand, observedFormation, tierOf } from "./intel.ts";
 import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
@@ -63,6 +64,14 @@ export function forecastCampaign(
   const power = unitPower(P, src.unit, terrain, tgt.unit);
   const mul = (atk?.attackMul ?? 1) * power;
 
+  // 阵型：已探才看得见。未探时不假设任何加成，但区间要覆盖三种可能
+  // ——这正是刺探新买到的东西：不探则「可能被克也可能克他」，区间宽一格
+  const myForm = src.formation;
+  const theirForm = observedFormation(s, viewer, a.target);
+  const [feLo, feHi] = theirForm !== null
+    ? [formationEdge(P, myForm, theirForm), formationEdge(P, myForm, theirForm)]
+    : [-P.formationBreach, P.formationBreach];
+
   // 城防与敌方守将：已探才知道，未探只能给范围
   const [defLo, defHi] = fog === "tier" ? DEFENSE_DARK : [tgt.defense, tgt.defense];
   // 敌方守将同样按编制算——一座城里驻着三员将，可防守数与只有一人不同
@@ -72,9 +81,9 @@ export function forecastCampaign(
   const guard = unitGuard(P, tgt.unit);
   // 战力浮动在结算前由坐标定死，攻方算不出，只能按 ±jitter 取两端
   const lo = breachCount(P, troops * (1 - P.jitter) * mul, band.hi * guard, defHi,
-                         a.siegeGear, terrain, atGate, atk?.breachBonus ?? 0, hbHi);
+                         a.siegeGear, terrain, atGate, (atk?.breachBonus ?? 0) + feLo, hbHi);
   const hi = breachCount(P, troops * (1 + P.jitter) * mul, band.lo * guard, defLo,
-                         a.siegeGear, terrain, atGate, atk?.breachBonus ?? 0, hbLo);
+                         a.siegeGear, terrain, atGate, (atk?.breachBonus ?? 0) + feHi, hbLo);
 
   const breachLo = Math.min(lo.breach, hi.breach), breachHi = Math.max(lo.breach, hi.breach);
   const holdLo = Math.min(lo.hold, hi.hold), holdHi = Math.max(lo.hold, hi.hold);
@@ -86,7 +95,11 @@ export function forecastCampaign(
     breachLo, breachHi, holdLo, holdHi, verdict, fog,
     // 只写这一条候选特有的数。「未探时区间为何偏宽」是规则，
     // 该在规则摘要里说一次，不该在每条候选上重复一遍
-    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}→${verdict}`,
+    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}→${verdict}`
+        + (theirForm !== null
+            ? (feLo === 0 ? "" : `｜阵${FORMATION_CN[myForm]}对${FORMATION_CN[theirForm]}`
+                                 + `（${feLo > 0 ? "克" : "被克"}，${feLo > 0 ? "+" : ""}${feLo} 缺口）`)
+            : `｜敌阵未探（已计入区间 ±${P.formationBreach} 缺口）`),
   };
 }
 

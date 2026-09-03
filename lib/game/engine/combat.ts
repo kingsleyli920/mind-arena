@@ -4,7 +4,7 @@
 // 警告过的失败模式：模型按一套算、引擎按另一套结算，算出来对不上，
 // 而且不会报错。放在同一个函数里，两边就没有机会分家。
 import type { EngineParams } from "./params.ts";
-import type { SiegeGear } from "./types.ts";
+import type { Formation, SiegeGear } from "./types.ts";
 
 /**
  * 兵种系数。内容包定义了四个兵种而引擎一度零引用——兵种是纯装饰。
@@ -41,7 +41,11 @@ export function breachCount(
   for (const [threshold, n] of P.breachLadder) { if (ratio >= threshold) { base = n; break; } }
   const gearBonus = atGate ? Math.floor(P.gearBreach[gear] / 2) : P.gearBreach[gear];
   return {
-    breach: base + gearBonus + breachBonus,
+    // 兵力比够不着最低门槛（base = 0）时，任何加成都不能凭空造出缺口。
+    // 器械、主将、阵型都只是放大已经撕开的口子，不是口子的来源——
+    // 否则「三千人带冲车破两万人的城」就成立了，
+    // 而且「把门槛调到不可达则永不破城」这条不变量会悄悄失效
+    breach: base === 0 ? 0 : Math.max(0, base + gearBonus + breachBonus),
     hold: holdOf(P, defend, defense, holdBonus),
   };
 }
@@ -84,4 +88,34 @@ export function fieldOutcome(P: EngineParams, ratio: number): {
   }
   return { outcome: "大败", atkLoss: P.fieldDefeatLoss,
            foeLoss: P.fieldRoutWinnerLoss, atkWins: false };
+}
+
+/**
+ * 三阵相克：鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞。
+ * 一个三元环，一张表就说得完——可枚举、可推理、奖励侦察。
+ */
+const BEATS: Record<Formation, Formation> = {
+  scale: "wings", wings: "square", square: "scale",
+};
+
+export const FORMATION_CN: Record<Formation, string> = {
+  scale: "鱼鳞", wings: "鹤翼", square: "方圆",
+};
+
+/**
+ * 攻方阵型对守方阵型的缺口修正：克之 +1，被克 −1，其余 0。
+ *
+ * **加缺口而不是乘战力**——破城判据是粗整数阶梯，±20% 的乘数常常一个缺口
+ * 都不改（经济层与野战预告都栽过这个坑）。实测「缺口 − 可防守」的余量有
+ * 43.1% 落在 {0,1}，所以 ±1 能翻转近半攻城的胜负。
+ *
+ * 守方阵型未探明时传 null：不知道就不该算加成，那正是刺探要买的东西。
+ */
+export function formationEdge(
+  P: EngineParams, atk: Formation, def: Formation | null,
+): number {
+  if (!def) return 0;
+  if (BEATS[atk] === def) return P.formationBreach;
+  if (BEATS[def] === atk) return -P.formationBreach;
+  return 0;
 }

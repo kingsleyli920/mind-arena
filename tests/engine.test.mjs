@@ -5,10 +5,11 @@ import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
   from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
-import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
+import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
+  from "../lib/game/engine/intel.ts";
 import { retinueAt, stationedAt, isFiller, attackRetinue }
   from "../lib/game/engine/officers.ts";
-import { fieldOutcome } from "../lib/game/engine/combat.ts";
+import { fieldOutcome, formationEdge } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
@@ -385,6 +386,77 @@ const attackPair = (s, faction) => {
     .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== faction);
   return { from, edge };
 };
+
+// ── 阵型 ──────────────────────────────────────────────────────────────
+//
+// 这一层能立项，靠的是一个实测：2081 次攻城结算里，「缺口 − 可防守」的余量
+// 有 43.1% 落在 {0,1}。也就是说 ±1 个缺口能翻转将近一半的攻城。
+// 下面三条钉住的分别是：相克真的改变结果、加成不能凭空造缺口、未探则看不见。
+
+test("阵型：相克改变破城与否，且方向正确", () => {
+  const base = fresh();
+  const { from, edge } = attackPair(base, "yuanshao");
+  const setup = (mine, theirs) => {
+    const s = fresh();
+    s.commanderies[from.id].garrison = 20000;
+    s.commanderies[from.id].formation = mine;
+    s.commanderies[edge.to].garrison = 9000;
+    s.commanderies[edge.to].defense = 60;
+    s.commanderies[edge.to].formation = theirs;
+    const order = { faction: "yuanshao", action: { type: "campaign",
+      target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } };
+    const r = resolve(s, [order], G, P, ROSTER, GEO);
+    const ev = r.state.log.find((e) => e.kind.startsWith("siege-"));
+    return Number(ev.attribution.缺口);
+  };
+  // 鱼鳞克鹤翼；方圆克鱼鳞。同一场仗，只换阵型
+  const win = setup("scale", "wings");
+  const even = setup("scale", "scale");
+  const lose = setup("scale", "square");
+  assert.equal(win - even, P.formationBreach,
+    `克制未加缺口：${even} → ${win}`);
+  assert.equal(even - lose, P.formationBreach,
+    `被克未减缺口：${even} → ${lose}`);
+});
+
+test("阵型：兵力比够不着门槛时，任何加成都造不出缺口", () => {
+  // 相克 +1 若能从 0 起算，「三千人带冲车破两万人的城」就成立了。
+  // 缺口只能来自兵力比，器械和阵型都只放大已经撕开的口子
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 3000;
+  s.commanderies[from.id].formation = "scale";
+  s.commanderies[edge.to].garrison = 20000;
+  s.commanderies[edge.to].formation = "wings";      // 被我方克
+  const order = { faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "ram" } };
+  const r = resolve(s, [order], G, P, ROSTER, GEO);
+  const ev = r.state.log.find((e) => e.kind.startsWith("siege-"));
+  assert.equal(Number(ev.attribution.缺口), 0,
+    `兵力比不足却撕开了缺口：${JSON.stringify(ev.attribution)}`);
+});
+
+test("阵型：未刺探则看不见敌阵，改阵候选也不给", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  const foe = s.commanderies[edge.to];
+  // 敌郡摆成正克我方的阵。未探时既看不见，也不该因此列出改阵候选
+  s.commanderies[from.id].formation = "wings";
+  foe.formation = "scale";
+  assert.equal(observedFormation(s, "yuanshao", edge.to), null, "未探却看得见敌阵");
+  const before = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER)
+    .filter((c) => c.key.startsWith("array:"));
+  assert.equal(before.length, 0, `未探却给出了改阵候选：${before.map((c) => c.key)}`);
+
+  // 刺探之后：看得见，且候选指向能反克对方的那一阵
+  s.intel.yuanshao = { ...(s.intel.yuanshao ?? {}), [edge.to]: s.turn + 4 };
+  assert.equal(observedFormation(s, "yuanshao", edge.to), "scale");
+  const after = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER)
+    .filter((c) => c.action.type === "array" && c.action.at === from.id);
+  assert.equal(after.length, 1, `刺探后未给出改阵候选`);
+  assert.ok(formationEdge(P, after[0].action.to, "scale") > 0,
+    `改阵候选给的阵反克不了对方：${after[0].action.to}`);
+});
 
 test("围城：首攻未克则留在城下，缺口逐季累加", () => {
   const s = fresh();

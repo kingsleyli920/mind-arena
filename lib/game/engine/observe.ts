@@ -11,7 +11,7 @@
 //    过滤法在字段增长时必然漏。
 import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
-import { unitName } from "./combat.ts";
+import { unitName, FORMATION_CN } from "./combat.ts";
 import { retinueAt, isFiller } from "./officers.ts";
 import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
@@ -59,6 +59,8 @@ export interface Observation {
   mine: Array<{
     id: string; zhou: string; garrison: number; defense: number;
     yieldTier: number; moraleTier: number; unit: string; gear: string;
+    /** 本郡阵型。鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，攻守各差一个缺口 */
+    formation: string;
     /** 能随军的驻将（至多 retinueCap 人）。兵力上限 = 人数 × 每将统兵 */
     officers: string[];
     besiegedBy: FactionId | null;
@@ -105,6 +107,7 @@ export function observe(
       moraleTier: c.moraleTier,
       unit: unitName(P, c.unit),
       gear: c.gear,
+      formation: FORMATION_CN[c.formation],
       // 驻将：只报实际能随军的那几人（retinueCap），外加总数。
       // 全列出来会把观测撑爆——刘表十三郡各驻数人时峰值一度只剩 94 tok 余量，
       // 而多出来的名字对决策没有用：超过上限的人不随军也不加成

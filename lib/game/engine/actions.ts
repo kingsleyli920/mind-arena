@@ -7,13 +7,14 @@
 import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
   type OfficerRef, type Roster }
   from "./officers.ts";
-import { observedGarrison, tierOf } from "./intel.ts";
+import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
 import { forecastCampaign, forecastField } from "./forecast.ts";
+import { formationEdge, FORMATION_CN } from "./combat.ts";
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
 import type {
-  Action, Candidate, CommanderyId, FactionId, GameState, Order,
+  Action, Candidate, CommanderyId, FactionId, GameState, Order, Formation,
 } from "./types.ts";
 
 export interface Graph {
@@ -88,6 +89,19 @@ const remainingAp = (s: GameState, f: FactionId) => s.factions[f]?.ap ?? 0;
  * 黄忠的轨迹是 南阳→长沙→桂阳→江夏→零陵→京兆→南海→京兆→长沙…
  * 把人从 A 调到 B 就让 A 又缺人，下季再调回去。没有代价就必然震荡。
  */
+/**
+ * 一条令占用哪几个郡的「本季令数」配额。
+ *
+ * 这条规则曾经在 admit / bot / resolve 三处各抄了一遍，加改阵时只改了 resolve，
+ * 于是界面判据放行的令被引擎拒收。凡是三处都要问同一个问题的，只留一份答案
+ */
+export function orderSites(a: Action): CommanderyId[] {
+  return a.type === "campaign" ? [a.from]
+    : a.type === "muster" ? [...a.from]
+    : a.type === "govern" || a.type === "array" ? [a.at]
+    : [];
+}
+
 export function orderCost(a: Action, s: GameState, rules: Rules): number {
   if (a.type === "campaign") return rules.campaignAp;
   if (a.type === "scout") return 0;
@@ -470,6 +484,48 @@ export function listActions(
     }
   }
 
+  // ── 改阵：只在「当面之敌的阵正克本郡」时列出 ────────────────────────
+  //
+  // 阵型是郡的属性（不乘候选数），改阵是唯一能动它的令。
+  // 引擎不铺开「每郡 × 三阵」——那是 105×3；只在**看得见的**邻敌正克本郡时
+  // 给一条，并指明改成哪一阵可反克。看不见（未探）就不给：
+  // 那正是刺探要买的东西，替对局方猜等于把迷雾送掉
+  if (ap >= rules.normalAp) {
+    const fixes = mine
+      .filter((c) => canOrder(c.id))
+      .map((c) => {
+        // 当面之敌里，阵型看得见且正克本郡的
+        const foes = (g.adj.get(c.id) ?? [])
+          .map((e) => s.commanderies[e.to])
+          .filter((t) => t?.owner && t.owner !== f)
+          .map((t) => ({ t, form: observedFormation(s, f, t.id) }))
+          .filter((x) => x.form !== null
+            && formationEdge(P, x.form, c.formation) > 0);
+        if (!foes.length) return null;
+        const threat = foes[0];
+        const tf = threat.form as Formation;
+        // 改成克制对方的那一阵
+        const want = (Object.keys(FORMATION_CN) as Formation[])
+          .find((x) => formationEdge(P, x, tf) > 0);
+        if (!want || want === c.formation) return null;
+        return { c, want, tf, at: threat.t.id };
+      })
+      .filter((x) => !!x)
+      .sort((a, b) => b.c.garrison - a.c.garrison || a.c.id.localeCompare(b.c.id))
+      .slice(0, rules.perTypeCap);
+    for (const { c, want, tf, at } of fixes) {
+      out.push({
+        key: `array:${c.id}:${want}`,
+        action: { type: "array", at: c.id, to: want },
+        cost: rules.normalAp,
+        label: `${c.id} 改${FORMATION_CN[want]}阵`
+             + `（现${FORMATION_CN[c.formation]}，`
+             + `当面 ${at} 为${FORMATION_CN[tf]}正克我；`
+             + `改后反克，攻守各差 ${P.formationBreach} 个缺口）`,
+      });
+    }
+  }
+
   // ── 调任：免费但有次数上限。缺将之郡 × 最合适的两人 ──────────────────
   // 不铺开成「全部郡 × 全部可用武将」——袁绍二十六将十三郡就是三百余条。
   // 引擎按郡的性质（临敌/后方、现有几将）预筛出该郡最该要的人，
@@ -685,6 +741,12 @@ export function validate(
     case "scout":
       if (!s.commanderies[a.at]) return "目标郡不存在";
       return null;
+    case "array": {
+      if (!own(a.at)) return "非己方郡国";
+      if (!quota(a.at)) return "该郡本季令数已满";
+      if (s.commanderies[a.at].formation === a.to) return "本已是此阵";
+      return null;
+    }
     case "withdraw": {
       const army = s.armies.find((x) => x.id === a.army);
       if (!army) return "无此军团";
@@ -703,7 +765,7 @@ export function validate(
 /** 规范化排序：使裁决顺序与提交顺序无关（MERS R6） */
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
-    ({ scout: 0, appoint: 1, govern: 2, passage: 3, ally: 4, muster: 5,
+    ({ scout: 0, appoint: 1, array: 2, govern: 2, passage: 3, ally: 4, muster: 5,
        withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)

@@ -10,9 +10,10 @@
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
 import { canonicalOrder, orderCost, governPrice, GEAR_CN, POLICY_CN, type Graph,
-  type Rules, DEFAULT_RULES, validate } from "./actions.ts";
+  type Rules, DEFAULT_RULES, validate, orderSites } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
-import { breachCount, fieldOutcome, unitPower, unitGuard, unitName } from "./combat.ts";
+import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
+  unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap, isFiller }
   from "./officers.ts";
@@ -196,10 +197,7 @@ export function resolve(
     f.ap -= cost;
     if (cost === 0) f.freeUsed[a.type] = (f.freeUsed[a.type] ?? 0) + 1;
     // 占用郡国令数配额
-    const touched: CommanderyId[] =
-      a.type === "campaign" ? [a.from]
-      : a.type === "muster" ? a.from
-      : a.type === "govern" ? [a.at] : [];
+    const touched = orderSites(a);
     for (const id of touched) s.commanderies[id].ordersThisSeason += 1;
     accepted.push(o);
   }
@@ -211,9 +209,10 @@ export function resolve(
   // 自己那十条令发生了什么，只能把二十条候选重读一遍去发现措辞变了。
   // 回执**按类型合并成每季一行**而不是每令一行：一个十五郡的势力
   // 逐令记会刷出十几行，把战报和观测预算一起吃掉。
-  const receipts = new Map<FactionId, { scout: string[]; govern: string[]; appoint: string[] }>();
+  const receipts = new Map<FactionId,
+    { scout: string[]; govern: string[]; appoint: string[]; array: string[] }>();
   const receipt = (f: FactionId) => {
-    if (!receipts.has(f)) receipts.set(f, { scout: [], govern: [], appoint: [] });
+    if (!receipts.has(f)) receipts.set(f, { scout: [], govern: [], appoint: [], array: [] });
     return receipts.get(f)!;
   };
   const officerName = (id: OfficerId | null) =>
@@ -225,6 +224,11 @@ export function resolve(
       (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
       // 报刚探到的那个值。只写「刺探了 X」等于没报——玩家要的是探到了什么
       receipt(o.faction).scout.push(`${a.at} ${observedGarrison(s, o.faction, a.at, P).text}`);
+    } else if (a.type === "array") {
+      const was = s.commanderies[a.at].formation;
+      s.commanderies[a.at].formation = a.to;
+      receipt(o.faction).array.push(
+        `${a.at} ${FORMATION_CN[was]}→${FORMATION_CN[a.to]}`);
     } else if (a.type === "appoint") {
       // 调任：改的是驻地。太守是从驻地武将里派生的，不必也不能另存一份
       const from = s.stations[a.officer];
@@ -282,6 +286,7 @@ export function resolve(
     if (r.scout.length) log(s, { kind: "scout", faction: f, text: `刺探回报：${r.scout.join("、")}` });
     if (r.govern.length) log(s, { kind: "govern", faction: f, text: `内政：${r.govern.join("、")}` });
     if (r.appoint.length) log(s, { kind: "appoint", faction: f, text: `任命：${r.appoint.join("、")}` });
+    if (r.array.length) log(s, { kind: "array", faction: f, text: `改阵：${r.array.join("、")}` });
   }
 
   // ── 阶段三：外交（变更延迟一季生效）────────────────────────────────
@@ -483,12 +488,20 @@ export function resolve(
     const power = unitPower(P, army.unit, terrain, tgt.unit);
     const attack = army.troops * jitter * (atk?.attackMul ?? 1) * power;
     const persist = army.siegeSeasons * P.siegeBreachPerSeason;   // 围得越久缺口越大
+    // 阵型相克：结算用真值（预告那边才走迷雾）。攻方起兵郡的阵对被攻郡的阵，
+    // 克之 +1 缺口、被克 −1。实测余量有 43.1% 落在 {0,1}，这一项能翻转近半攻城
+    const formEdge = formationEdge(P, s.commanderies[army.home]?.formation ?? "square",
+                                   tgt.formation);
     const { breach, hold } = breachCount(P, attack, tgt.garrison * unitGuard(P, tgt.unit),
                                          tgt.defense, army.gear, terrain, atGate,
-                                         (atk?.breachBonus ?? 0) + persist, def?.holdBonus ?? 0);
+                                         (atk?.breachBonus ?? 0) + persist + formEdge,
+                                         def?.holdBonus ?? 0);
     const who = {
       主将: atk?.note ?? "无主将", 守将: def?.note ?? "无守将", 围城季: army.siegeSeasons,
       我军: `${unitName(P, army.unit)}×${power.toFixed(2)}`,
+      阵: `${FORMATION_CN[s.commanderies[army.home]?.formation ?? "square"]}`
+        + `对${FORMATION_CN[tgt.formation]}`
+        + (formEdge > 0 ? "（克，+1 缺口）" : formEdge < 0 ? "（被克，−1 缺口）" : ""),
       敌军: `${unitName(P, tgt.unit)}守`,
       器械: army.gear,
     };

@@ -5,7 +5,8 @@
 import type { EngineParams } from "./params.ts";
 import { rollRecruitPool, type Roster } from "./officers.ts";
 import { standingOf, type Geography } from "./victory.ts";
-import type { GameState, CommanderyState, FactionState, Grade } from "./types.ts";
+import type { GameState, CommanderyState, FactionState, Formation, Grade }
+  from "./types.ts";
 
 export interface SetupData {
   commanderyState: { commanderies: Array<{
@@ -36,6 +37,11 @@ export interface SetupOptions {
  */
 const PLACEHOLDER_FACTIONS = new Set(["wuzhu"]);
 
+/** 初始阵型按兵种定：骑兵→鱼鳞、弓弩→鹤翼、步卒与水军→方圆 */
+const INITIAL_FORMATION: Record<string, Formation> = {
+  cavalry: "scale", archer: "wings", infantry: "square", navy: "square",
+};
+
 export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams): GameState {
   const nameToId = new Map(data.commanderies.map((c) => [c.name, c.id]));
   const unitOf = new Map(data.troopTypes.commanderies.map((c) => [c.id, c.unit]));
@@ -50,6 +56,9 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       moraleTier: c.moraleTier,
       defense: c.defense,
       unit: unitOf.get(c.id) ?? "infantry",
+      // 初始阵型由兵种定，确定且有由头：骑兵密阵突击、弓弩两翼展开、
+      // 步卒与水军结圆自守。改阵是一条令，开局不替对局方排好
+      formation: INITIAL_FORMATION[unitOf.get(c.id) ?? "infantry"] ?? "square",
       gear: "none",
       ordersThisSeason: 0,
     };

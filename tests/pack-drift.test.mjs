@@ -58,3 +58,16 @@ test("包：规则摘要的散文里不出现裸的内部枚举", () => {
       `规则摘要的散文里出现裸的内部枚举「${id}」`);
   }
 });
+
+test("包：界面读的运行时包必须与内容包同源", () => {
+  // 界面不直接读 lib/game/content/pack-194.json，而是读
+  // public/game/runtime-194.json —— 那是 tools/build-runtime-bundle.mjs 的产物。
+  //
+  // 这条挡的是一次真实事故：加完阵型后所有测试全绿、构建也过，
+  // 一进浏览器却是「载入失败：内容包缺少 constants.阵型.克制加缺口」——
+  // 引擎读新包，界面读的是几个月前打的旧包。
+  // 凡是同一份数据存在第二份副本的，都要有一条测试把两份钉在一起
+  const runtime = JSON.parse(fs.readFileSync("public/game/runtime-194.json", "utf8"));
+  assert.deepEqual(runtime.pack, pack,
+    "public/game/runtime-194.json 里的内容包已过期 —— 跑 node tools/build-runtime-bundle.mjs");
+});

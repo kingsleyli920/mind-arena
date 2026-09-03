@@ -10,6 +10,8 @@ export type OfficerId = string;
 
 export type Control = "firm" | "contested" | "nominal";
 export type Grade = "jia" | "yi" | "bing" | "ding";
+/** 三阵。鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞 */
+export type Formation = "scale" | "wings" | "square";
 
 export interface CommanderyState {
   id: CommanderyId;
@@ -28,6 +30,14 @@ export interface CommanderyState {
   unit: string;
   /** 已备器械。由内政「治械」逐级打造，出征用毕即折损 */
   gear: SiegeGear;
+  /**
+   * 阵型。与兵种同为郡的属性：出兵按起兵郡的阵、守城按被攻郡的阵。
+   * 三阵循环相克（鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞），克制方 +1 缺口。
+   *
+   * 加缺口而不是乘战力：破城是粗整数阶梯，±20% 的乘数常常一个缺口都不改。
+   * 实测「缺口 − 可防守」的余量有 43.1% 落在 {0,1}，±1 缺口能翻转近半攻城。
+   */
+  formation: Formation;
   /** 本季已下令数，用于 R12「同一郡国每季最多 2 令」 */
   ordersThisSeason: number;
 }
@@ -175,6 +185,8 @@ export type Action =
   | { type: "passage"; to: FactionId; through: CommanderyId }
   | { type: "scout"; at: CommanderyId }
   | { type: "withdraw"; army: string }
+  /** 改阵。阵型是郡的属性，这是唯一能改它的令 */
+  | { type: "array"; at: CommanderyId; to: Formation }
   | { type: "retire" };
 
 export interface Order {

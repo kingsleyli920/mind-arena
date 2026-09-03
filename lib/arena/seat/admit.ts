@@ -7,7 +7,7 @@
 //
 // 预算裁剪也在这里，不在 resolve：resolve 若还见到「令数不足」的拒绝，
 // 就说明准入层有 bug（resolve 里有断言）。
-import { validate, type Graph, type Rules, DEFAULT_RULES } from "../../game/engine/actions.ts";
+import { validate, orderSites, type Graph, type Rules, DEFAULT_RULES } from "../../game/engine/actions.ts";
 import type { Roster } from "../../game/engine/officers.ts";
 import type { Candidate, FactionId, GameState, Order } from "../../game/engine/types.ts";
 
@@ -69,9 +69,7 @@ export function admit(
     const f = probe.factions[faction];
     f.ap -= c.cost;
     if (c.cost === 0) f.freeUsed[c.action.type] = (f.freeUsed[c.action.type] ?? 0) + 1;
-    const touched = c.action.type === "campaign" ? [c.action.from]
-      : c.action.type === "muster" ? c.action.from
-      : c.action.type === "govern" ? [c.action.at] : [];
+    const touched = orderSites(c.action);
     for (const id of touched) probe.commanderies[id].ordersThisSeason += 1;
 
     seen.add(key);

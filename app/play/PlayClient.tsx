@@ -14,6 +14,7 @@ import { buildGraph, listActions, validate, POLICY_CN, type Graph }
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
+import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
@@ -64,6 +65,7 @@ function titleOf(
     case "withdraw": return "自围城撤兵";
     case "muster": return `于${a.at} 集结`;
     case "govern": return `${a.at} ${POLICY_CN[a.policy] ?? a.policy}`;
+    case "array": return `${a.at} 改${FORMATION_CN[a.to]}阵`;
     case "appoint": return `调 ${officerOf(a.officer)} 驻 ${a.at}`;
     case "scout": return `刺探 ${a.at}`;
     case "ally": return a.act === "form" ? `与${nameOf(a.to)}缔盟` : `与${nameOf(a.to)}绝盟`;
@@ -1081,7 +1083,7 @@ export function PlayClient() {
             <table className="lands">
               <thead>
                 <tr><th>郡国</th><th>兵</th><th>产</th><th>心</th><th>防</th>
-                  <th>将</th><th>状况</th></tr>
+                  <th>阵</th><th>将</th><th>状况</th></tr>
               </thead>
               <tbody>
                 {myLands.map((L) => (
@@ -1092,6 +1094,7 @@ export function PlayClient() {
                     <td>{L.c.yieldTier}</td>
                     <td>{L.c.moraleTier}</td>
                     <td>{L.c.defense}</td>
+                    <td>{FORMATION_CN[L.c.formation]}</td>
                     <td>{L.officers.length ? L.officers.map((o) => o.name).join("、") : "—"}</td>
                     <td>{L.note}</td>
                   </tr>

@@ -10,7 +10,7 @@
 // 写死的话包一改就变成向模型谎报「刺探能买到什么」。
 import { roll } from "./rng.ts";
 import type { EngineParams } from "./params.ts";
-import type { CommanderyId, FactionId, GameState } from "./types.ts";
+import type { CommanderyId, FactionId, Formation, GameState } from "./types.ts";
 
 export interface Observed {
   /** 给模型看的数值。未探时是档位中值，已探时是带偏差的点估计 */
@@ -102,4 +102,23 @@ export function tierOf(garrison: number, P: EngineParams): number {
   const t = 1 + Math.floor(Math.log(Math.max(1, garrison) / P.intelTierBase)
                          / Math.log(P.intelTierRatio));
   return Math.min(P.intelTiers, Math.max(1, t));
+}
+
+/**
+ * 某郡的阵型，按观测层级给：自家与盟友看真值，刺探过看得见，未探则 null。
+ *
+ * 与城防同级。未探时预告不该假设任何加成——那正是刺探要买的东西。
+ * 判据与 observedGarrison 完全一致，只是不加误差：阵型是离散的三选一，
+ * 「带 ±8% 的阵型」没有意义
+ */
+export function observedFormation(
+  s: GameState, viewer: FactionId, id: CommanderyId,
+): Formation | null {
+  const c = s.commanderies[id];
+  if (!c) return null;
+  if (c.owner === viewer) return c.formation;
+  const allied = s.treaties.some((t) => t.from <= s.turn && t.until > s.turn
+    && ((t.a === viewer && t.b === c.owner) || (t.b === viewer && t.a === c.owner)));
+  const scoutedUntil = s.intel[viewer]?.[id] ?? -1;
+  return allied || scoutedUntil >= s.turn ? c.formation : null;
 }
