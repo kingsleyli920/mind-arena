@@ -222,15 +222,15 @@ test("规则即数据：改内容包必须改变引擎行为", () => {
   };
   assert.ok(one(bigWall) > one(P), "改 wallGain 后修城效果未跟随");
 
-  // 金也由包决定：每产出档的金一改，国库收入必须跟随。
-  // 金这一层默认关闭（constants.金.启用），所以这里显式打开来验
-  const on = { ...P, goldOn: true };
-  const rich = { ...on, goldPerTier: on.goldPerTier * 4 };
+  // 金也由包决定：每产出档的金一改，国库收入必须跟随；
+  // 而 constants.金.启用 关掉时必须逐位回到「没有金」的行为
   const gold = (params) => resolve(fresh(), [], G, params, ROSTER, GEO)
     .state.factions.yuanshao.gold;
-  assert.ok(gold(rich) > gold(on), "改 金_每产出档 后国库收入未跟随");
-  // 关着时必须逐位回到「没有金」的行为
-  assert.equal(gold(P), 0, "金关闭时不该有收入");
+  const rich = { ...P, goldOn: true, goldPerTier: P.goldPerTier * 4 };
+  assert.ok(gold(rich) > gold({ ...P, goldOn: true }), "改 金_每产出档 后国库收入未跟随");
+  // 关掉时不该**增长**（开局金由 createGame 按包里的 P 给出，与这里的覆盖无关）
+  const start = fresh().factions.yuanshao.gold;
+  assert.equal(gold({ ...P, goldOn: false }), start, "金关闭时国库不该变动");
 });
 
 // ── 武将 ────────────────────────────────────────────────────────────

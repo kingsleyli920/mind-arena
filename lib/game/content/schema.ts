@@ -194,13 +194,19 @@ export function validateContent(pack: ContentPack): Issue[] {
  * 还有大量「首版如何、实测如何、已修」的开发史，对局中一文不值却占 token。
  */
 const COMMENTARY_KEYS = new Set([
-  "说明", "说明_免费", "设计意图", "定档依据", "损耗不对称", "接法", "产地判据",
-  "登场判定", "caveat", "_note", "_why",
+  "接法", "产地判据", "登场判定", "损耗不对称", "caveat", "_note", "_why",
 ]);
+/**
+ * 键名里带这些字的一律是旁白。**用规则而不是白名单**——
+ * 白名单每加一个新的注释键就漏一次：这次是「定价依据」，
+ * 它把「满价把曹操的出局率从 42% 推到 57%」写进了模型读的规则摘要，
+ * 既泄漏席位名（毁掉前缀缓存），也是在教模型怎么想。
+ */
+const COMMENTARY_KEY_RE = /说明|依据|理由|为何|意图|意义|教训|代价|注$/;
 const COMMENTARY_RE = /实测|自对局|首版|此前|原先|等于没有|白送|装饰|评测|设计|踩过|漂移/;
 
 function isCommentary(key: string, value: unknown): boolean {
-  if (COMMENTARY_KEYS.has(key)) return true;
+  if (COMMENTARY_KEYS.has(key) || COMMENTARY_KEY_RE.test(key)) return true;
   return typeof value === "string" && COMMENTARY_RE.test(value);
 }
 
