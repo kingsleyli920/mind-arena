@@ -83,6 +83,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       startZhou: 0,
       startSeats: 0,
       conquests: 0,
+      allyBanUntil: 0,
       bestGrade: "ding" as Grade,
       eliminated: mine.length === 0,
     };

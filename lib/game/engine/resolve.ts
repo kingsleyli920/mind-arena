@@ -70,6 +70,31 @@ function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId
   if (fallback) fallback.garrison += troops;
 }
 
+/**
+ * 背盟：盟约到期前撕毁，或攻打盟友。
+ *
+ * 代价必须是**可算的**：全境民心 −1（民心直接乘进产出），且 N 季内不得再缔盟。
+ * 此前「背盟有代价」只写在内容包的文案里，引擎一分代价都不收——
+ * 于是 30 局里缔盟 9506 次、绝盟 6761 次，外交沦为战报里的噪声。
+ */
+function betray(
+  s: GameState, who: FactionId, victim: FactionId, P: EngineParams, how: string,
+): void {
+  const f = s.factions[who];
+  if (!f) return;
+  f.allyBanUntil = Math.max(f.allyBanUntil, s.turn + P.betrayBanSeasons);
+  let hit = 0;
+  for (const c of Object.values(s.commanderies)) {
+    if (c.owner !== who) continue;
+    const was = c.moraleTier;
+    c.moraleTier = Math.max(1, c.moraleTier - P.betrayMoralePenalty);
+    if (c.moraleTier !== was) hit += 1;
+  }
+  log(s, { kind: "ally-break", faction: who,
+           text: `背盟：${how}，与 ${victim} 之约作废。全境民心 −${P.betrayMoralePenalty}`
+               + `（${hit} 郡），${P.betrayBanSeasons} 季内不得再缔盟` });
+}
+
 function beginSiege(
   s: GameState, faction: FactionId, from: CommanderyId, target: CommanderyId,
   troops: number, a: { commander: OfficerId | null; strength: Posture },
@@ -266,8 +291,10 @@ export function resolve(
       } else if (idx >= 0) {
         const broke = s.treaties[idx].until > s.turn;
         s.treaties.splice(idx, 1);
-        log(s, { kind: "ally-break", faction: o.faction,
-                 text: `与 ${a.to} 绝盟${broke ? "（背盟，全席位可见）" : ""}` });
+        if (broke) betray(s, o.faction, a.to, P, "主动绝盟");
+        else {
+          log(s, { kind: "ally-break", faction: o.faction, text: `与 ${a.to} 解约（盟约本已到期）` });
+        }
       }
     } else if (a.type === "passage") {
       s.passages.push({ grantor: o.faction, grantee: a.to, through: [a.through], from: s.turn + 1 });
@@ -351,6 +378,18 @@ export function resolve(
     const { o, a, troops, ready, corps, terrain } = c;
     const src = s.commanderies[a.from];
     const tgt = s.commanderies[a.target];
+    // 攻打盟友即背盟，盟约当场作废、代价照收。
+    // 此前这里什么都不做：可以一边保着盟友给的情报、一边打他，零成本
+    if (tgt?.owner && tgt.owner !== o.faction) {
+      const key = [o.faction, tgt.owner].sort();
+      const ti = s.treaties.findIndex((t) => t.a === key[0] && t.b === key[1]
+        && t.from <= s.turn && t.until > s.turn);
+      if (ti >= 0) {
+        const victim = tgt.owner;
+        s.treaties.splice(ti, 1);
+        betray(s, o.faction, victim, P, `攻 ${a.target}`);
+      }
+    }
     if (!tgt) continue;
     if (troops <= 0) continue;
     if (!ready && src.garrison < troops) continue;

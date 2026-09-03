@@ -38,7 +38,8 @@ function play(seed, rot) {
     const orders = [];
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
-      orders.push(...decide(s, f, G, prof(f), undefined, ROSTER, P));
+      // 传 GEO：不传的话候选上没有 gain，与 tools/selfplay.mjs 口径不一致
+      orders.push(...decide(s, f, G, prof(f), undefined, ROSTER, P, GEO));
     }
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     flips += r.state.log.slice(s.log.length).filter((e) => e.kind === "siege-win").length;
@@ -47,7 +48,11 @@ function play(seed, rot) {
   return { s, flips, prof };
 }
 
-const RUNS = Array.from({ length: 8 }, (_, i) => play(`reg-${i}`, i % 4));
+// 24 局而非 8。8 局对着「出局率 < 50%」这个阈值没有统计功效：
+// 曹操的真实出局率约 36%（100 局实测），而 n=8 时「≥4 局出局」的概率
+// 接近三分之一——测试会毫无理由地红三分之一的时间。机器人一局约 0.3 秒，
+// 24 局仍在秒级
+const RUNS = Array.from({ length: 24 }, (_, i) => play(`reg-${i}`, i % 4));
 
 test("自对局可复现", () => {
   assert.deepEqual(play("reg-0", 0).s, RUNS[0].s);
@@ -90,6 +95,8 @@ test("D 得分不由开局国力决定", () => {
 
 test("曹操一郡开局不必然出局", () => {
   const out = RUNS.filter((r) => r.s.factions.caocao.eliminated).length;
+  // 阈值仍是 50%：这条要挡的是「一郡开局必死」，不是把出局率钉在某个数上。
+  // 曹操 194 年本就险些覆灭，三成多的出局率是合理的，全灭才是设计失败
   assert.ok(out < RUNS.length * 0.5, `曹操 ${out}/${RUNS.length} 局出局，该席位不可用`);
 });
 

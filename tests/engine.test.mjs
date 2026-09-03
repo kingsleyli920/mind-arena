@@ -1021,3 +1021,45 @@ test("调任：首次就任免费，调动已在任者收 1 令", () => {
     assert.ok(mineIds.includes(c.action.at));
   }
 });
+
+test("外交：攻打盟友即背盟，全境民心 −1 且数季不得再缔盟", () => {
+  const t = fresh();
+  const from = Object.values(t.commanderies).find((c) => c.owner === "yuanshao");
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => t.commanderies[e.to]?.owner && t.commanderies[e.to].owner !== "yuanshao");
+  assert.ok(edge, "袁绍无可攻目标");
+  const victim = t.commanderies[edge.to].owner;
+
+  // 结成生效中的盟约
+  const key = ["yuanshao", victim].sort();
+  t.treaties.push({ a: key[0], b: key[1], kind: "alliance", from: 0, until: t.turn + 8 });
+  const before = Object.values(t.commanderies)
+    .filter((c) => c.owner === "yuanshao").map((c) => c.moraleTier);
+  t.commanderies[from.id].garrison = 30000;
+
+  const r = resolve(t, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "main", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+
+  // 此前这里什么都不做：可以一边保着盟友给的情报、一边打他，零成本
+  assert.ok(!r.treaties.some((x) => x.a === key[0] && x.b === key[1]), "盟约未作废");
+  assert.ok(r.log.some((e) => e.kind === "ally-break" && e.text.includes("背盟")),
+    `未记背盟：${r.log.map((e) => e.kind).join(",")}`);
+  const after = Object.values(r.commanderies)
+    .filter((c) => c.owner === "yuanshao").map((c) => c.moraleTier);
+  assert.ok(after.some((m, i) => m < before[i]), "全境民心未受罚");
+  assert.ok(r.factions.yuanshao.allyBanUntil > r.turn, "未禁缔盟");
+});
+
+test("外交：盟约到期后解约不算背盟，不收代价", () => {
+  const t = fresh();
+  const key = ["yuanshao", "caocao"].sort();
+  // until 已过：这是自然到期，不是撕毁
+  t.treaties.push({ a: key[0], b: key[1], kind: "alliance", from: 0, until: t.turn });
+  const r = resolve(t, [{ faction: "yuanshao",
+    action: { type: "ally", to: "caocao", act: "break", term: 4 } }],
+    G, P, ROSTER, GEO).state;
+  assert.equal(r.factions.yuanshao.allyBanUntil, 0, "到期解约不该禁缔盟");
+  assert.ok(r.log.some((e) => e.kind === "ally-break" && !e.text.includes("背盟")),
+    "到期解约被记成了背盟");
+});

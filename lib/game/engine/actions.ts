@@ -222,6 +222,12 @@ export function listActions(
       // 用散文再复述一遍等于花两份 token 说同一件事
       const unitNote = `｜${unitName(P, src0.unit)}对${unitName(P, tgt.unit)}`
         + (src0.gear === "none" ? "" : `，携${GEAR_CN[src0.gear]}`);
+      // 打盟友是合法的，但要标出来：这一击会当场背盟，全境民心 −1、
+      // 数季内不得再缔盟。不标的话，模型与玩家都会在毫不知情下付这笔账
+      const allyKey = tgt.owner ? [f, tgt.owner].sort() : null;
+      const betrayNote = allyKey && s.treaties.some((t) => t.a === allyKey[0] && t.b === allyKey[1]
+        && t.from <= s.turn && t.until > s.turn)
+        ? `｜⚠此举背盟：全境民心 −${P.betrayMoralePenalty}，${P.betrayBanSeasons} 季不得缔盟` : "";
       const ongoing = s.armies.find((x) => x.target === tid);
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
@@ -272,7 +278,7 @@ export function listActions(
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`
-               + `${gn ? gainNote(gn) : ""}`,
+               + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }
     }
@@ -488,7 +494,7 @@ export function listActions(
       if (allied.has(to)) {
         out.push({ key: `ally:break:${to}`, action: { type: "ally", to, act: "break", term: 4 },
                    cost: rules.normalAp, label: `与${nameOf(to)}绝盟` });
-      } else {
+      } else if (fs_.allyBanUntil <= s.turn) {
         out.push({ key: `ally:form:${to}`, action: { type: "ally", to, act: "form", term: 8 },
                    cost: rules.normalAp, label: `与${nameOf(to)}缔盟八季` });
       }

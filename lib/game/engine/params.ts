@@ -58,6 +58,10 @@ export interface EngineParams {
   /** 龙套郡守的五维。无名将驻守的郡自动有一名，弱但不为零 */
   fillerLeadership: number; fillerMight: number;
   fillerPolitics: number; fillerCharisma: number;
+  /** 背盟的民心罚（全境每郡 −N）。民心直接乘进产出，这是可算的代价 */
+  betrayMoralePenalty: number;
+  /** 背盟后禁止缔盟的季数 */
+  betrayBanSeasons: number;
   /** 围城：持续制 */
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
@@ -205,6 +209,8 @@ export function loadParams(pack: RawPack): EngineParams {
     fillerMight: g("武将", "庸将_武力"),
     fillerPolitics: g("武将", "庸将_政治"),
     fillerCharisma: g("武将", "庸将_魅力"),
+    betrayMoralePenalty: g("外交", "背盟_民心罚"),
+    betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeBreachPerSeason: g("围城", "每季加缺口"),
     siegeAttackerLoss: g("围城", "攻方每季损耗"),

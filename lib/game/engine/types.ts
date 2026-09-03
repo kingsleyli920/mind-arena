@@ -48,6 +48,11 @@ export interface FactionState {
   startSeats: number;
   /** 本局夺自他方（非无主）的郡国数。丙档要求「必须进攻才能拿」 */
   conquests: number;
+  /**
+   * 背盟后禁止缔盟至第几季。0 为无禁令。
+   * 「背盟有代价」此前只写在包的文案里，引擎一分代价都不收
+   */
+  allyBanUntil: number;
   /** 本局曾达到过的最高档 —— 冲高后回落不扣分 */
   bestGrade: Grade;
   eliminated: boolean;
