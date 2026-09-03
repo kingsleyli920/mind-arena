@@ -16,6 +16,8 @@ export interface EngineParams {
   gearBreach: Record<SiegeGear, number>;
   /** 地形 → 守方加成 */
   terrainDefense: Record<string, number>;
+  /** 地形的中文名。候选标签是给人和模型两边看的，plain / gate 两边都读不顺 */
+  terrainName: Record<string, string>;
   /** 缺口分档：[兵力比阈值, 缺口数]，降序 */
   breachLadder: Array<[number, number]>;
   /** 可防守数 = base + floor(城防/defensePerHold) + log2(守军/garrisonPerHold) */
@@ -78,7 +80,7 @@ interface RawPack {
     id: string; name: string; attack: number; defense: number;
     terrainFactor?: Record<string, number>; strongAgainst?: string[];
   }>;
-  terrain?: Array<{ id: string; defenseBonus: number }>;
+  terrain?: Array<{ id: string; defenseBonus: number; label?: string }>;
   actions?: Array<{ id: string; params?: Array<{ name: string; tiers?: Array<{ id: string; value: number }> }> }>;
 }
 
@@ -133,7 +135,11 @@ export function loadParams(pack: RawPack): EngineParams {
   }
 
   const terrainDefense: Record<string, number> = {};
-  for (const t of pack.terrain ?? []) terrainDefense[t.id] = t.defenseBonus;
+  const terrainName: Record<string, string> = {};
+  for (const t of pack.terrain ?? []) {
+    terrainDefense[t.id] = t.defenseBonus;
+    terrainName[t.id] = t.label ?? t.id;
+  }
   for (const k of ["plain", "hill", "mountain", "gate", "river"]) {
     if (typeof terrainDefense[k] !== "number") throw new Error(`内容包缺地形 ${k} 的 defenseBonus`);
   }
@@ -142,6 +148,7 @@ export function loadParams(pack: RawPack): EngineParams {
     strengthRatio: strength,
     gearBreach: gear,
     terrainDefense,
+    terrainName,
     breachLadder: [
       [g("攻城", "缺口比_四"), 4], [g("攻城", "缺口比_三"), 3],
       [g("攻城", "缺口比_二"), 2], [g("攻城", "缺口比_一"), 1],

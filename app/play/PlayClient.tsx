@@ -244,6 +244,10 @@ export function PlayClient() {
   // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
   const [pinned, setPinned] = useState<string | null>(null);
   const [onlyWinnable, setOnlyWinnable] = useState(false);
+  // 本季与自己相关的易主。封令之后地图上什么都不动，你不知道刚才发生了什么——
+  // 而全图一季平均易主 5.6 处，涉及自己的只有 0.4–1.2 处。
+  // 全画等于把「什么都没动」换成「满屏都在闪」
+  const [flips, setFlips] = useState<Array<{ id: string; gained: boolean; turn: number }>>([]);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
@@ -309,7 +313,7 @@ export function PlayClient() {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
       roster: engine.roster, geo: engine.geo,
     }, engine.P);
-    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] });
+    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
@@ -345,6 +349,11 @@ export function PlayClient() {
     }
     const before = game.log.length;
     const r = resolve(game, orders, engine.G, engine.P, engine.roster, engine.geo);
+    // resolve 走的是深拷贝，所以逐郡比对 owner 是有效差分
+    setFlips(Object.values(r.state.commanderies)
+      .filter((c) => c.owner !== game.commanderies[c.id]?.owner)
+      .filter((c) => c.owner === seat || game.commanderies[c.id]?.owner === seat)
+      .map((c) => ({ id: c.id, gained: c.owner === seat, turn: r.state.turn })));
     // 一季全图能产生上百条事件，绝大多数是边地势力的补给消息。
     // 全铺出来等于把自己这一季的战况埋掉——只留我方的，与天下大事
     // 可见性由引擎定义（intel.ts 的 PUBLIC_EVENTS），不在这里另判一套——
@@ -666,12 +675,36 @@ export function PlayClient() {
                 className={`mark${m.mine ? " mine" : ""}${focus === m.c.id ? " focus" : ""}`
                   + `${pinned === m.c.id ? " pinned" : ""}`}
                 onMouseEnter={() => setFocus(m.c.id)} onMouseLeave={() => setFocus(null)}
-                onClick={() => setPinned((p) => (p === m.c.id ? null : m.c.id))}>
+                onFocus={() => setFocus(m.c.id)} onBlur={() => setFocus(null)}
+                onClick={() => setPinned((p) => (p === m.c.id ? null : m.c.id))}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  setPinned((p) => (p === m.c.id ? null : m.c.id));
+                }}
+                tabIndex={0} role="button"
+                aria-label={`${m.c.id}${m.mine ? "（我方）" : ""}`}>
+                {/* 独立的透明命中圆：视觉上的城印只有十来像素，
+                    远低于可点区域的最低尺寸 */}
+                <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / Math.sqrt(view.k))}
+                  fill="transparent" />
                 <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
                   mine={m.mine} seat={m.isSeat} besieged={m.besieged}
                   fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
               </g>
             ))}
+            {/* 本季易主：得手画朱环，失守画墨环。key 带上季号，
+                连续两季易主的同一郡才会重播 */}
+            {flips.map((fl) => {
+              const p = engine.points.find((c) => c.id === fl.id);
+              if (!p) return null;
+              const x = (p.longitude - MAP.west) * MAP.ppd;
+              const y = (MAP.north - p.latitude) * MAP.ppd;
+              return (
+                <circle key={`${fl.turn}-${fl.id}`} className={`flip ${fl.gained ? "gain" : "loss"}`}
+                  cx={x} cy={y} r={44 / Math.sqrt(view.k)} />
+              );
+            })}
             {/* 围城旗：城下有谁、围了几季、多少人。只有一个虚线圈看不出这些，
                 而这三样正是「要不要去救」的全部依据 */}
             {game.armies.filter((a) => a.target).map((a) => {
@@ -782,6 +815,23 @@ export function PlayClient() {
             <pre className="brief">{brief}</pre>
           </details>
 
+          {(flash.mine.length > 0 || flash.world.length > 0) && (
+            <div className="flash" role="status" aria-live="polite">
+              {flash.mine.length > 0 && (
+                <>
+                  <h3>上季战报<i>我方</i></h3>
+                  <ul className="mine">{flash.mine.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                </>
+              )}
+              {flash.world.length > 0 && (
+                <>
+                  <h3>天下大事</h3>
+                  <ul>{flash.world.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                </>
+              )}
+            </div>
+          )}
+
           {pinned && (
             <div className="pinned-bar">
               <b>{pinned}</b>
@@ -875,22 +925,6 @@ export function PlayClient() {
             </>
           )}
 
-          {(flash.mine.length > 0 || flash.world.length > 0) && (
-            <div className="flash">
-              {flash.mine.length > 0 && (
-                <>
-                  <h3>上季战报<i>我方</i></h3>
-                  <ul className="mine">{flash.mine.map((x, i) => <li key={i}>{x}</li>)}</ul>
-                </>
-              )}
-              {flash.world.length > 0 && (
-                <>
-                  <h3>天下大事</h3>
-                  <ul>{flash.world.map((x, i) => <li key={i}>{x}</li>)}</ul>
-                </>
-              )}
-            </div>
-          )}
         </aside>
       </div>
     </main>

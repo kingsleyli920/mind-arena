@@ -537,7 +537,8 @@
    "marchCost": 1.0,
    "defenseBonus": 0.0,
    "yieldFactor": 1.0,
-   "description": "华北、江汉、成都平原，行军与产出的基准"
+   "description": "华北、江汉、成都平原，行军与产出的基准",
+   "label": "平原"
   },
   {
    "id": "hill",
@@ -545,7 +546,8 @@
    "marchCost": 1.35,
    "defenseBonus": 0.12,
    "yieldFactor": 0.8,
-   "description": "行军渐慢，守方略占便宜"
+   "description": "行军渐慢，守方略占便宜",
+   "label": "丘陵"
   },
   {
    "id": "mountain",
@@ -553,7 +555,8 @@
    "marchCost": 2.1,
    "defenseBonus": 0.3,
    "yieldFactor": 0.45,
-   "description": "秦岭、太行、巴山，大军难行"
+   "description": "秦岭、太行、巴山，大军难行",
+   "label": "山地"
   },
   {
    "id": "gate",
@@ -561,7 +564,8 @@
    "marchCost": 2.6,
    "defenseBonus": 0.55,
    "yieldFactor": 0.2,
-   "description": "虎牢、函谷、剑门之类，以寡当众"
+   "description": "虎牢、函谷、剑门之类，以寡当众",
+   "label": "关隘"
   },
   {
    "id": "river",
@@ -569,7 +573,8 @@
    "marchCost": 1.8,
    "defenseBonus": 0.35,
    "yieldFactor": 1.1,
-   "description": "黄河长江，无渡口不可过"
+   "description": "黄河长江，无渡口不可过",
+   "label": "水道"
   },
   {
    "id": "marsh",
@@ -577,7 +582,8 @@
    "marchCost": 1.9,
    "defenseBonus": 0.1,
    "yieldFactor": 0.5,
-   "description": "云梦、彭蠡一带，行军损耗大"
+   "description": "云梦、彭蠡一带，行军损耗大",
+   "label": "marsh"
   }
  ],
  "units": [

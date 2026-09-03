@@ -308,3 +308,28 @@
 .act.off { opacity: 1; color: var(--ink-soft); background: #f3efe6; }
 .act.off b { color: var(--seal); opacity: 0.75; }
 .act.off span { opacity: 0.55; }
+
+/* ── 本季易主：得手朱环，失守墨环 ────────────────────────────────
+   封令之后地图上什么都不动，玩家不知道刚才发生了什么。
+   只画与自己相关的——全图一季平均易主 5.6 处，涉及自己的只有 0.4–1.2 处，
+   全画等于把「什么都没动」换成「满屏都在闪」。 */
+.map-stage svg circle.flip {
+  fill: none; stroke-width: 5; vector-effect: non-scaling-stroke;
+  animation: flip-ring 1.6s ease-out forwards;
+}
+.map-stage svg circle.flip.gain { stroke: var(--seal); }
+.map-stage svg circle.flip.loss { stroke: #3a332a; }
+@keyframes flip-ring {
+  0%   { opacity: 0; transform: scale(0.35); transform-box: fill-box; transform-origin: center; }
+  25%  { opacity: 0.95; }
+  100% { opacity: 0; transform: scale(1.6); transform-box: fill-box; transform-origin: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-stage svg circle.flip { animation: none; opacity: 0; }
+}
+
+/* 城池的键盘焦点 */
+.map-stage svg .mark:focus { outline: none; }
+.map-stage svg .mark:focus-visible .city > path:nth-of-type(1) {
+  stroke: var(--seal); stroke-width: 4;
+}

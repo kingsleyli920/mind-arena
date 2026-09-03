@@ -183,7 +183,7 @@ export function listActions(
           // 写缺口对可防守，那才是引擎真正比的两个量
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：出 ${send} 人，本郡余 ${left}；敌守军 ${seen.text}`
-               + `；${e.terrain}${gateNote}${leadNote}`
+               + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`,
         });

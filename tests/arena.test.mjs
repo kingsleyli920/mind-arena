@@ -208,3 +208,16 @@ test("界面的准入判据与引擎一致：按它贪心勾选，引擎不应�
   assert.ok(picked > 100, `样本太少（${picked} 条），测不出`);
   assert.equal(rejected, 0, `按界面判据勾选的 ${picked} 条里，引擎拒绝了 ${rejected} 条`);
 });
+
+test("候选标签不留英文 id：地形、势力、兵种都该是中文", () => {
+  const s = fresh();
+  for (const seat of ["caocao", "yuanshao", "liubiao"]) {
+    const labels = listActions(s, seat, G, P, DEFAULT_RULES, ROSTER,
+      (id) => ({ caocao: "曹操", lubu: "吕布" })[id] ?? id).map((c) => c.label).join(" ");
+    // 引擎内部的英文枚举不该出现在给人和模型看的标签里
+    for (const leak of ["plain", "gate", "mountain", "river", "hill",
+                        "infantry", "cavalry", "archer", "navy", "none", "ram", "mound"]) {
+      assert.ok(!labels.includes(leak), `${seat} 的候选标签里漏出了「${leak}」`);
+    }
+  }
+});
