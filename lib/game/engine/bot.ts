@@ -112,13 +112,18 @@ function decideInner(
     // ratioOf 取到 0 而被当成「打不动」直接弃掉——实测 608 条救援候选无一被采纳
     if (c.key.startsWith("relief:")) {
       // 丢城的代价高于野战失利，除苟活流外都应优先出兵解围。
-      // 围军兵力读结构化字段的档位上界（保守估计），不从 label 抠
-      const from = s.commanderies[(c.action as { from: string }).from];
-      const mine = Math.floor((from?.garrison ?? 0) * 0.8);
-      const odds = mine / Math.max(1, c.siegeBy?.troopsHi ?? 1);
-      if (profile === "turtle" && odds < 1.5) return { c, score: -1e9 };
-      if (odds < 0.9) return { c, score: -1e9 };            // 明显打不过就不送
-      return { c, score: 14 + Math.min(8, (odds - 1) * 4) };
+      //
+      // 判据读 c.field（野战预告），不再自己拿「兵力比 ≥0.9」估。
+      // 那个比值与引擎判胜负用的量不是一回事——野战比的是
+      // 兵力 × 武将加成 × 兵种系数。实测按兵力比判的结果是：
+      // 62% 的野战在战力比 <0.8 时发起、直接大败，五次里输四次。
+      // 这与征伐早就修过的那个错误是同一个（见 forecast.ts 开头）
+      const ff = c.field;
+      if (!ff) return { c, score: -1e9 };
+      if (profile === "turtle" && ff.verdict !== "可解围") return { c, score: -1e9 };
+      if (ff.verdict === "解不了") return { c, score: -1e9 };   // 送人头不叫救援
+      // 区间下界才是保守估计：上界赢下界输的仗，本质是赌浮动
+      return { c, score: 14 + Math.min(8, (ff.ratioLo - 1) * 6) };
     }
     if (c.action.type === "campaign") {
       // 掏空老巢是所有画像共有的死法，不是某一流派的风格问题。
@@ -132,6 +137,14 @@ function decideInner(
         .map((e) => s.commanderies[e.to].garrison));
       if (threat > 0 && left < threat * safeRatio) return { c, score: -1e9 };
 
+      // 城下有第三方围城军时，这一令结算的是野战——按 c.field 判，
+      // 而不是按攻城的缺口数。此前这里只是「没有 forecast 就弃掉」，
+      // 而 forecast 其实还在（且描述的是打不成的那场仗）
+      if (c.field) {
+        if (c.field.verdict === "解不了") return { c, score: -1e9 };
+        if (profile === "turtle") return { c, score: -1e9 };
+        return { c, score: score + Math.min(10, (c.field.ratioLo - 1) * 6) };
+      }
       const fc = c.forecast;
       if (!fc) return { c, score: -1e9 };                    // 城下有兵，另一套判定
       // 缺口余量：最少能开的缺口 − 最多要面对的可防守数

@@ -189,6 +189,17 @@ export interface Candidate {
   /** 第三方围城军的观测兵力（已分档）。救援候选用 */
   siegeBy?: { faction: FactionId; troopsLo: number; troopsHi: number; seasons: number };
   /**
+   * 野战预告。赴援候选此前只有 siegeBy 的兵力档而**没有任何胜负预告**，
+   * 于是机器人拿「兵力比 ≥0.9」当判据——而野战比的是
+   * 兵力 × 武将加成 × 兵种系数。实测 62% 的野战在战力比 <0.8 时发起、
+   * 直接大败。这与征伐的 forecast 是同一类东西，同一个理由
+   */
+  field?: {
+    ratioLo: number; ratioHi: number;
+    verdict: "可解围" | "解不了" | "未知";
+    text: string;
+  };
+  /**
    * 取下此郡在**记分函数**上值什么。只讲归属与地理，绝不含守军与城防——
    * 那是 forecast 的事，这里再写一遍就成了第二个 forecast。
    *

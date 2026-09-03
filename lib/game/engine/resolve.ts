@@ -12,7 +12,7 @@ import { roll } from "./rng.ts";
 import { canonicalOrder, orderCost, GEAR_CN, POLICY_CN, type Graph, type Rules,
   DEFAULT_RULES, validate } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
-import { breachCount, unitPower, unitGuard, unitName } from "./combat.ts";
+import { breachCount, fieldOutcome, unitPower, unitGuard, unitName } from "./combat.ts";
 import type { EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap, isFiller }
   from "./officers.ts";
@@ -136,21 +136,16 @@ function fieldBattle(
           * unitPower(P, x.foe.unit, x.terrain, x.atkUnit);
   const ratio = D > 0 ? A / D : 99;
 
-  let outcome: string, atkLoss: number, foeLoss: number, atkWins: boolean;
-  if (ratio >= P.fieldRout) {
-    outcome = "溃退"; atkLoss = P.fieldRoutWinnerLoss; foeLoss = P.fieldRoutLoserLoss; atkWins = true;
-  } else if (ratio >= P.fieldPush) {
-    outcome = "后撤"; atkLoss = P.fieldPushWinnerLoss; foeLoss = P.fieldPushLoserLoss; atkWins = true;
-  } else if (ratio >= P.fieldStall) {
-    outcome = "相持"; atkLoss = P.fieldStallLoss; foeLoss = P.fieldStallLoss; atkWins = false;
-  } else {
-    outcome = "大败"; atkLoss = P.fieldDefeatLoss; foeLoss = P.fieldRoutWinnerLoss; atkWins = false;
-  }
+  const { outcome, atkLoss, foeLoss, atkWins } = fieldOutcome(P, ratio);
 
   const atkLeft = Math.round(x.atkTroops * (1 - atkLoss));
   const foeLeft = Math.round(x.foe.troops * (1 - foeLoss));
   const attribution = {
     我军: x.atkTroops, 敌军: x.foe.troops, 战力比: Number(ratio.toFixed(2)),
+    // 围城季要写进来：它区分「敌军本季刚围上（我下令时还看不见）」与
+    // 「已围数季（候选里本该有预告）」。少了这一项，就分不清一场败仗
+    // 是同时裁决的运气，还是判据给错了
+    围城季: x.foe.siegeSeasons,
     结果: outcome, 我将: atkEff?.note ?? "无主将", 敌将: foeEff?.note ?? "无主将",
     我兵种: unitName(P, x.atkUnit), 敌兵种: unitName(P, x.foe.unit), 地形: x.terrain,
   };

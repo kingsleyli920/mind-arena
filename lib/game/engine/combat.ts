@@ -57,3 +57,31 @@ export function holdOf(P: EngineParams, defend: number, defense: number, holdBon
     + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / P.garrisonPerHold))))
     + holdBonus;
 }
+
+/**
+ * 野战判词。抽出来的理由与 breachCount 完全相同：
+ * 预告与结算若各写一份阶梯，两边算出的结果对不上，而且不会报错。
+ *
+ * 此前赴援候选**根本没有预告**，机器人只好拿「兵力比 ≥0.9」当判据——
+ * 而野战比的是 兵力 × 武将加成 × 兵种系数，不是raw 兵力。
+ * 后果实测：62% 的野战在战力比 <0.8 时发起，直接大败，中位战力比 0.71。
+ */
+export function fieldOutcome(P: EngineParams, ratio: number): {
+  outcome: "溃退" | "后撤" | "相持" | "大败";
+  atkLoss: number; foeLoss: number; atkWins: boolean;
+} {
+  if (ratio >= P.fieldRout) {
+    return { outcome: "溃退", atkLoss: P.fieldRoutWinnerLoss,
+             foeLoss: P.fieldRoutLoserLoss, atkWins: true };
+  }
+  if (ratio >= P.fieldPush) {
+    return { outcome: "后撤", atkLoss: P.fieldPushWinnerLoss,
+             foeLoss: P.fieldPushLoserLoss, atkWins: true };
+  }
+  if (ratio >= P.fieldStall) {
+    return { outcome: "相持", atkLoss: P.fieldStallLoss,
+             foeLoss: P.fieldStallLoss, atkWins: false };
+  }
+  return { outcome: "大败", atkLoss: P.fieldDefeatLoss,
+           foeLoss: P.fieldRoutWinnerLoss, atkWins: false };
+}

@@ -8,7 +8,7 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
   type OfficerRef, type Roster }
   from "./officers.ts";
 import { observedGarrison, tierOf } from "./intel.ts";
-import { forecastCampaign } from "./forecast.ts";
+import { forecastCampaign, forecastField } from "./forecast.ts";
 import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
 import type {
@@ -232,6 +232,11 @@ export function listActions(
       const siegeNote = !ongoing ? ""
         : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
         : `｜${nameOf(ongoing.faction)} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
+      // 城下有第三方围城军时，这一令结算的是**野战**而不是攻城。
+      // 此前标签里写着「本令先野战」，而结构化的 forecast 仍是缺口对可防守——
+      // 机器人按攻城的判断去打野战，实测 57% 的野战在战力比 <0.8 时发起。
+      // 判词与结算必须对得上，光在散文里提一句不算
+      const foeSiege = ongoing && ongoing.faction !== f ? ongoing : null;
       const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
       // 五维已折进 forecast，这里只报是谁、几人——人数决定兵力上限，
       // 那是玩家/模型唯一能据以判断「该不该先调将过来」的东西
@@ -255,6 +260,7 @@ export function listActions(
           : s.commanderies[e.from].garrison - send;
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
+        const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
         const fc = forecastCampaign(s, f, {
           type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
           strength, siegeGear: src0.gear,
@@ -265,6 +271,8 @@ export function listActions(
                     strength, siegeGear: src0.gear },
           cost: rules.campaignAp,
           forecast: fc ?? undefined,
+          field: ffc ? { ratioLo: ffc.ratioLo, ratioHi: ffc.ratioHi,
+                         verdict: ffc.verdict, text: ffc.text } : undefined,
           gain: gn,
           siegeBy: ongoing && ongoing.faction !== f
             ? { faction: ongoing.faction, seasons: ongoing.siegeSeasons,
@@ -276,7 +284,7 @@ export function listActions(
           label: `自${e.from}征${tid}（${strength === "main" ? "主力" : "倾国"}）`
                + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
-               + `${fc ? `｜${fc.text}` : ""}`
+               + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
                + `${unitNote}${armyNote}${siegeNote}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
@@ -302,7 +310,12 @@ export function listActions(
       ];
       for (const src of routes) {
         const isSortie = src.id === foe.target;
-        const lead = roster ? retinueAt(s, roster, src.id, P)[0] ?? null : null;
+        const corps = roster ? retinueAt(s, roster, src.id, P) : [];
+        const lead = corps[0] ?? null;
+        const named = corps.filter((o) => !isFiller(o));
+        const send = Math.min(Math.floor(src.garrison * P.strengthRatio.allout),
+                              roster ? troopCap(corps, P) : Infinity);
+        const ff = forecastField(s, f, src.id, foe, send, g, P, roster);
         out.push({
           key: `relief:${src.id}>${foe.target}`,
           action: { type: "campaign", target: foe.target!, from: src.id,
@@ -310,10 +323,13 @@ export function listActions(
           cost: rules.campaignAp,
           siegeBy: { faction: foe.faction, seasons: foe.siegeSeasons,
                      troopsLo: bandLo(foe.troops, P), troopsHi: bandHi(foe.troops, P) },
+          field: ff ? { ratioLo: ff.ratioLo, ratioHi: ff.ratioHi,
+                        verdict: ff.verdict, text: ff.text } : undefined,
           label: `${isSortie ? `${src.id}出城迎战` : `自${src.id}赴援${foe.target}`}`
                + `（${nameOf(foe.faction)} 围城第 ${foe.siegeSeasons} 季，围军 ${troopBand(foe.troops, P)}）：`
-               + `我方可出 ${Math.floor(src.garrison * 0.8)} 人`
-               + `${lead ? `，${lead.name}领（统${lead.leadership}）` : "，无主将"}`
+               + `我方可出 ${send} 人`
+               + `${named.length ? `，${named[0].name}${named.length > 1 ? `等 ${named.length} 将` : ""}领` : "，仅郡守"}`
+               + `${ff ? `｜${ff.text}` : ""}`
                + `${isSortie ? "；败则城中兵力大损" : ""}`,
         });
       }

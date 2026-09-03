@@ -7,6 +7,7 @@ import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "../lib/game/engine/intel.ts";
 import { retinueAt, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
+import { fieldOutcome } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
@@ -1062,4 +1063,44 @@ test("外交：盟约到期后解约不算背盟，不收代价", () => {
   assert.equal(r.factions.yuanshao.allyBanUntil, 0, "到期解约不该禁缔盟");
   assert.ok(r.log.some((e) => e.kind === "ally-break" && !e.text.includes("背盟")),
     "到期解约被记成了背盟");
+});
+
+test("野战：城下已有敌围城军时，候选给的是野战预告而非攻城预告", () => {
+  const t = fresh();
+  const from = Object.values(t.commanderies).find((c) => c.owner === "yuanshao");
+  const edge = [...(G.adj.get(from.id) ?? [])]
+    .find((e) => t.commanderies[e.to]?.owner && t.commanderies[e.to].owner !== "yuanshao");
+  assert.ok(edge, "袁绍无可攻目标");
+
+  // 让第三方在目标城下驻一支围城军
+  t.armies.push({ id: "x:0:foe", faction: "lubu", commander: null, retinue: [],
+    troops: 30000, at: edge.to, target: edge.to, posture: "allout", gear: "none",
+    unit: "infantry", siegeSeasons: 1, home: from.id });
+  t.commanderies[from.id].garrison = 6000;
+
+  const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith(`campaign:${from.id}>${edge.to}`));
+  assert.ok(cs.length > 0, "无该目标的征伐候选");
+  for (const c of cs) {
+    // 标签里写着「本令先野战」而结构化字段仍是攻城预告——机器人按攻城的
+    // 缺口数打分，实际打的是野战。实测因此 57% 的野战在战力比 <0.8 时发起
+    assert.ok(c.field, `${c.key} 缺野战预告`);
+    assert.ok(c.field.ratioLo <= c.field.ratioHi);
+    assert.ok(["可解围", "解不了", "未知"].includes(c.field.verdict));
+    // 六千打三万，无论浮动怎么走都赢不了
+    assert.equal(c.field.verdict, "解不了", `${c.key} 判词 ${c.field.text}`);
+  }
+});
+
+test("野战：预告的判词与结算的判词同源", () => {
+  // 阶梯若在 forecast 与 resolve 各写一份，两边算出的结果会对不上且不报错
+  const ladder = [
+    [P.fieldRout + 0.01, "溃退"], [P.fieldPush + 0.01, "后撤"],
+    [P.fieldStall + 0.01, "相持"], [P.fieldStall - 0.01, "大败"],
+  ];
+  for (const [r, want] of ladder) {
+    assert.equal(fieldOutcome(P, r).outcome, want, `战力比 ${r} 应判 ${want}`);
+  }
+  assert.equal(fieldOutcome(P, P.fieldRout).atkWins, true);
+  assert.equal(fieldOutcome(P, P.fieldStall).atkWins, false, "相持不算攻方胜");
 });

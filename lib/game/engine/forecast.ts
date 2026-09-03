@@ -9,12 +9,12 @@
 // 这一层不替模型做决策：它只把引擎已有的公式在观测量上跑一遍，
 // 结果是一个**区间**与三值判断，不是断言。MERS 要测的是「往哪打、
 // 什么时候打」（S1/S2），不是心算能力。
-import { breachCount, unitPower, unitGuard } from "./combat.ts";
-import { garrisonBand } from "./intel.ts";
+import { breachCount, fieldOutcome, unitPower, unitGuard } from "./combat.ts";
+import { garrisonBand, tierOf } from "./intel.ts";
 import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
-import type { Action, FactionId, GameState } from "./types.ts";
+import type { Action, Army, CommanderyId, FactionId, GameState } from "./types.ts";
 
 export interface SiegeForecast {
   /** 我方能开的缺口数。取战力浮动的下界，保守报 */
@@ -87,5 +87,70 @@ export function forecastCampaign(
     // 只写这一条候选特有的数。「未探时区间为何偏宽」是规则，
     // 该在规则摘要里说一次，不该在每条候选上重复一遍
     text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}→${verdict}`,
+  };
+}
+
+export interface FieldForecast {
+  /** 有效战力比的区间。上下界来自战力浮动与围城军的兵力档 */
+  ratioLo: number;
+  ratioHi: number;
+  /** 区间两端各自的判词。两端一致时就是确定的结果 */
+  verdictLo: "溃退" | "后撤" | "相持" | "大败";
+  verdictHi: "溃退" | "后撤" | "相持" | "大败";
+  /** 解得了围吗：区间两端都赢才算「可解」，都输才算「不可解」 */
+  verdict: "可解围" | "解不了" | "未知";
+  text: string;
+}
+
+/**
+ * 野战预告：赴援打得过城下这支围城军吗。
+ *
+ * 此前赴援候选**没有任何预告**——只给了围城军的兵力档，而野战比的是
+ * 兵力 × 武将加成 × 兵种系数。机器人只好拿「兵力比 ≥0.9」当判据，
+ * 实测 62% 的野战在战力比 <0.8 时发起、直接大败，中位战力比 0.71，
+ * 五次里输四次。这与「让解围成为真选项」那条设计直接冲突。
+ *
+ * 与攻城预告同构：只跑引擎已有的公式，给区间与判词，不替对局方决策。
+ * 阶梯来自 combat.ts 的 fieldOutcome，与结算共用一份。
+ */
+export function forecastField(
+  s: GameState, viewer: FactionId, from: CommanderyId, foe: Army,
+  troops: number, g: Graph, P: EngineParams, roster: Roster | null,
+): FieldForecast | null {
+  const src = s.commanderies[from];
+  const at = s.commanderies[foe.target ?? ""];
+  if (!src || !at) return null;
+  // 出城迎战时起点即被围之郡，没有边；取该郡自身地形的替身「平原」
+  const terrain = from === foe.target
+    ? "plain"
+    : (g.adj.get(from) ?? []).find((e) => e.to === foe.target)?.terrain ?? "plain";
+
+  // 我方：自家账本，算得准
+  const corps = roster ? retinueAt(s, roster, from, P) : [];
+  const atkMul = roster ? attackRetinue(corps, P, terrain).attackMul : 1;
+  const A = troops * atkMul * unitPower(P, src.unit, terrain, foe.unit);
+
+  // 敌围城军：兵力只知档位，主将读得到（军团是公开的）——
+  // 与 observedGarrison 同一条口径：能看见的看真值，看不见的给区间
+  const foeCorps = roster
+    ? foe.retinue.map((id) => roster.byId.get(id)).filter((o): o is NonNullable<typeof o> => !!o)
+    : [];
+  const foeMul = roster ? attackRetinue(foeCorps, P, terrain).attackMul : 1;
+  const tier = tierOf(foe.troops, P);
+  const lo = Math.round(P.intelTierBase * P.intelTierRatio ** (tier - 1));
+  const hi = Math.round(lo * P.intelTierRatio);
+  const power = unitPower(P, foe.unit, terrain, src.unit);
+
+  const rHi = A * (1 + P.jitter) / Math.max(1, lo * foeMul * power);
+  const rLo = A * (1 - P.jitter) / Math.max(1, hi * foeMul * power);
+  const oLo = fieldOutcome(P, rLo), oHi = fieldOutcome(P, rHi);
+  const verdict = oLo.atkWins && oHi.atkWins ? "可解围"
+    : !oLo.atkWins && !oHi.atkWins ? "解不了" : "未知";
+  return {
+    ratioLo: Number(rLo.toFixed(2)), ratioHi: Number(rHi.toFixed(2)),
+    verdictLo: oLo.outcome, verdictHi: oHi.outcome, verdict,
+    text: `战力比 ${rLo.toFixed(2)}–${rHi.toFixed(2)}`
+        + `（${oLo.outcome === oHi.outcome ? oLo.outcome : `${oLo.outcome}–${oHi.outcome}`}）`
+        + `→${verdict}`,
   };
 }
