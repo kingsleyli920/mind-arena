@@ -51,6 +51,8 @@ export interface ModelSeatDeps {
    * 详见 decisionSchema。置 true 复现旧的解码层强制
    */
   keyEnum?: boolean;
+  /** 推理档位。不给则各模型用自己的默认值，见 ChatRequest.reasoning */
+  reasoning?: { effort: "low" | "medium" | "high" } | { max_tokens: number };
 }
 
 export async function modelDecide(
@@ -78,6 +80,7 @@ export async function modelDecide(
       system: renderSystem(deps.pack),
       user,
       schema: decisionSchema(cands, deps.keyEnum ?? false),
+      reasoning: deps.reasoning,
     });
     // 「没让它说完」与「它答不上来」必须分开记。前者是 harness 的配置问题
     // ——推理模型把出参预算全花在 reasoning 上，content 返回空串——

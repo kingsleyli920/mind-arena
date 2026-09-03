@@ -44,6 +44,14 @@ export interface ChatRequest {
   maxTokens?: number;
   temperature?: number;
   timeoutMs?: number;
+  /**
+   * 推理档位。不传则各模型用自己的默认值——实测 gpt-5-nano 每次调用烧
+   * 6739 出参 token（97.7% 是 reasoning），而 claude-haiku-4.5 只烧 103，
+   * 相差 65 倍。不控这一项，比的就不是策略能力而是各家默认给多少测试时算力。
+   * 控与不控都说得通（「按出厂设置比」也是一种口径），但必须是显式选择，
+   * 且无论选哪种，reasoning token 都记进结果
+   */
+  reasoning?: { effort: "low" | "medium" | "high" } | { max_tokens: number };
 }
 
 export interface ChatResult {
@@ -184,6 +192,7 @@ export class OpenRouterClient implements LlmClient {
     // temperature 只在最上一档发。推理模型的端点不接受它，而它与
     // require_parameters 一撞就是 404 —— 实测 4 个端点被筛成 0
     if (rung === "schema") body.temperature = req.temperature ?? 0.3;
+    if (req.reasoning) body.reasoning = req.reasoning;
     if (rung !== "text" && req.schema) {
       body.response_format = { type: "json_schema", json_schema: req.schema };
       // 宁可 404 也不要静默忽略：某些端点会当没看见 response_format。

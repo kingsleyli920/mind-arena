@@ -69,9 +69,13 @@ if (agentKind === "model") {
 // --keyenum=on 复现旧的解码层强制。默认关：实测 enum 拦下的错误是 0
 // （四个模型五个跑，unknown-key 一次没出现），代价是 Claude 入参贵 2.8 倍
 const KEY_ENUM = arg("keyenum", "off") === "on";
+// --reasoning=low|medium|high 统一各模型的推理档位。不给则各用各的默认值——
+// 实测 gpt-5-nano 每次烧 6739 出参 tok（97.7% 是 reasoning），haiku 只烧 103，
+// 差 65 倍。不控这一项，跨模型比的就不是策略能力，而是各家默认给多少算力
+const REASONING = arg("reasoning", "") ? { effort: arg("reasoning", "") } : undefined;
 const MODEL_DEPS = client
   ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
-      rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM }
+      rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM, reasoning: REASONING }
   : null;
 
 const records = [];
@@ -167,7 +171,8 @@ if (usage.length) {
   const cacheRate = sum("prompt") ? sum("cached") / sum("prompt") : 0;
   console.log(`\ntoken：入 ${sum("prompt")}（命中缓存 ${sum("cached")}，`
     + `${(cacheRate * 100).toFixed(0)}%）`
-    + `\u3000出 ${sum("completion")}（其中推理 ${sum("reasoning")}）`
+    + `\u3000出 ${sum("completion")}（其中推理 ${sum("reasoning")}，`
+    + `${sum("completion") ? (sum("reasoning") / sum("completion") * 100).toFixed(0) : 0}%）`
     + `\u3000调用 ${usage.length} 次`
     + `\u3000失败 ${records.filter((r) => r.failure).length} 次`);
   // 降到哪一档必须报出来：不同档位下模型受的约束不同（有无解码层强制、
@@ -178,6 +183,13 @@ if (usage.length) {
     .map(([k, v]) => `${k} ${v}`).join("\u3000")}`);
   // 出参预算被推理吃光是 harness 的配置问题，不是模型答不上来。
   // 混进「失败」计数等于把自己的 bug 算到模型头上
+  // 推理占比高说明这个模型在花大量测试时算力。跨模型比分前要看这个，
+  // 否则比的是各家默认给多少算力，不是策略能力。--reasoning=low|medium|high 可统一
+  if (sum("reasoning") > sum("completion") * 0.5 && !REASONING) {
+    console.log(`注：出参有 ${(sum("reasoning") / sum("completion") * 100).toFixed(0)}% 是推理，`
+      + `每次调用 ${Math.round(sum("completion") / usage.length)} tok。`
+      + `未指定 --reasoning，该模型用的是自家默认档位`);
+  }
   const starved = records.filter((r) => (r.failure ?? "").startsWith("无内容"));
   const grown = records.filter((r) => r.maxTokens > 8000);
   if (starved.length || grown.length) {
