@@ -423,7 +423,19 @@ export function resolve(
       continue;
     }
 
-    if (tgt.owner === o.faction) continue;              // 城已在手，无须再攻
+    if (tgt.owner === o.faction) {
+      // 围已解、或城已在手：本令无从执行，**兵马与器械原路退回**。
+      //
+      // 此前这里是一句裸 continue，而出兵的扣减在上面已经发生——
+      // 实测一条 2 令的赴援令，围在它落地前被别人解掉，13961 人凭空消失，
+      // 战报里一个字都没有。玩家得到的回执是「什么都没发生」。
+      // 同时裁决下这种撞车是常态，不能让它变成静默的兵力黑洞
+      returnHome(s, { faction: o.faction, home: a.from }, troops);
+      src.gear = gear;
+      log(s, { kind: "campaign-void", faction: o.faction,
+               text: `${a.target} 之围已解，${a.from} 之师未及出战，${troops} 人退回` });
+      continue;
+    }
 
     const mine = s.armies.find((x) => x.target === a.target && x.faction === o.faction);
     if (mine) {

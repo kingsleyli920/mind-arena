@@ -1133,3 +1133,35 @@ test("标签：候选报的主将与人数，必须是真出征的那几个", ()
   assert.equal(m[1], want.name,
     `标签写着 ${m[1]} 领，实际出战的是 ${want.name}——两者必须一致`);
 });
+
+test("赴援：围在落地前被解掉，兵马必须退回而不是凭空消失", () => {
+  const t = fresh();
+  const from = Object.values(t.commanderies).find((c) => c.owner === "liubiao");
+  const mine2 = Object.values(t.commanderies)
+    .find((c) => c.owner === "liubiao" && c.id !== from.id
+      && (G.adj.get(from.id) ?? []).some((e) => e.to === c.id));
+  assert.ok(mine2, "刘表没有两个相邻的己方郡，测不了");
+
+  // 己方郡被围 → 赴援候选成立；但结算时围城军已不在（本季撤围）
+  // 围城方必须是剧本里真存在的势力，否则它的撤围令会被判「未知势力」
+  t.armies.push({ id: "foe:0", faction: "yuanshu", commander: null, retinue: [],
+    troops: 5000, at: mine2.id, target: mine2.id, posture: "allout", gear: "none",
+    unit: "infantry", siegeSeasons: 1, home: from.id });
+  // 对照必须是「同一季只有对方撤围」，不能拿季初的数比——
+  // resolve 会跑完整一季，产出本来就会让守军增长
+  const lift = { faction: "yuanshu", action: { type: "withdraw", army: "foe:0" } };
+  const idle = resolve(structuredClone(t), [lift], G, P, ROSTER, GEO).state
+    .commanderies[from.id].garrison;
+
+  // 真实路径：围城方**同一季撤围**（撤围在征伐之前的阶段结算），
+  // 而我的赴援令是在围还在时通过校验的。于是它落地时城下已无敌军
+  const r = resolve(structuredClone(t), [lift, { faction: "liubiao",
+    action: { type: "campaign", target: mine2.id, from: from.id,
+              commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+
+  // 此前：扣了兵、直接 continue，一万多人凭空消失且战报一字不提
+  assert.equal(r.commanderies[from.id].garrison, idle, "出征的兵没有退回");
+  assert.ok(r.log.some((e) => e.kind === "campaign-void"),
+    `未记「未及出战」：${r.log.map((e) => e.kind).join(",")}`);
+});
