@@ -49,12 +49,17 @@ export interface ModelTurnRecord {
   failure?: string;
   /**
    * 失败归谁。评测报告按这个分栏，不能混成一个「失败」计数：
-   *   infra   超时 / 网络 —— 基础设施，与模型能力无关
+   *   credits 账户额度耗尽 —— 与模型能力毫无关系，整跑作废
+   *   infra   超时 / 网络 —— 基础设施
    *   budget  出参预算被推理吃光 —— harness 的配置问题
-   *   model   答不上来 / 解析不出 —— 这一类才算模型的分
-   * 实测 kimi 96 季里 54 季是超时，此前全部记在了 model 名下
+   *   model   答不上来 / 解析不出 —— 只有这一类才算模型的分
+   *
+   * 两次教训都是同一个洞：**没有桶的失败会掉进 model**。
+   * 第一次是超时（kimi 96 季里 54 季），第二次是额度耗尽——一份
+   * 「国产模型全线 4–35 分、机器人 148 分」的排行榜，真相是账户没钱了，
+   * 每个模型 768 季里有 688–765 季根本没发出请求。
    */
-  failureKind?: "infra" | "budget" | "model";
+  failureKind?: "credits" | "infra" | "budget" | "model";
 }
 
 export interface ModelSeatDeps {
@@ -129,7 +134,8 @@ export async function modelDecide(
     // 客户端把最后一次失败的分级挂在错误上。超时与网络错归 infra——
     // 记成模型的失败等于按提供方的快慢排名，而那与策略能力无关
     const f = (e as { failure?: Failure }).failure;
-    const kind = f?.kind === "infra" || f?.kind === "retryable" ? "infra"
+    const kind = f?.kind === "budget" ? "credits"
+      : f?.kind === "infra" || f?.kind === "retryable" ? "infra"
       : f?.kind === "starved" ? "budget" : "model";
     return { orders: [], record: { ...base, failureKind: kind, failure: (e as Error).message } };
   }

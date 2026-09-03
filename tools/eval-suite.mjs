@@ -57,6 +57,8 @@ async function priceTable() {
 
 /** 各对局方的实时进度，供心跳行显示 */
 const progress = new Map();
+/** 一旦有人撞上额度耗尽，剩下的都不必再跑 */
+let creditsOut = false;
 
 function runOne(spec) {
   const [kind, ...rest] = spec.split(":");
@@ -94,6 +96,13 @@ function runOne(spec) {
       if (killer) clearTimeout(killer);
       const elapsed = Date.now() - t0;
       progress.delete(spec);
+      if (code === 3) {
+        // 额度耗尽：整跑作废，不必再让别的模型去撞同一堵墙
+        console.log(`  ✗ ${spec}\u3000账户额度耗尽，整跑中止`);
+        creditsOut = true;
+        return resolve({ spec, failed: true, credits: true,
+                         error: err.trim().slice(-300) });
+      }
       if (code !== 0 || !fs.existsSync(jsonOut)) {
         console.log(`  ✗ ${spec}\u3000退出码 ${code}\u3000${err.trim().split("\n").slice(-2).join(" / ")}`);
         return resolve({ spec, failed: true, error: err.trim().slice(-300) });
@@ -109,7 +118,10 @@ async function runAll(specs) {
   const out = [];
   const queue = [...specs];
   const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
-    while (queue.length) out.push(await runOne(queue.shift()));
+    while (queue.length) {
+      if (creditsOut) { queue.length = 0; break; }
+      out.push(await runOne(queue.shift()));
+    }
   });
   await Promise.all(workers);
   return specs.map((s) => out.find((o) => o.spec === s)).filter(Boolean);
@@ -132,6 +144,7 @@ function summarize(run, px) {
   // 失败三分栏。混成一个计数就会出现「kimi 55 季答不上来」这种结论，
   // 而实测其中 54 季是 180s 超时——那是按提供方的快慢排名，与策略能力无关
   const fk = (r) => r.failureKind ?? "model";
+  const creditsFail = recs.filter((r) => r.failure && fk(r) === "credits").length;
   const infraFail = recs.filter((r) => r.failure && fk(r) === "infra").length;
   const starved = recs.filter((r) => r.failure && fk(r) === "budget").length;
   const modelFail = recs.filter((r) => r.failure && fk(r) === "model").length;
@@ -157,7 +170,7 @@ function summarize(run, px) {
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
     outTok: sum("completion"), reasonTok: sum("reasoning"),
-    rungs, infraFail, starved, modelFail, cost,
+    rungs, creditsFail, infraFail, starved, modelFail, cost,
     reasoning: run.reasoning, keyEnum: run.keyEnum,
     elapsed: run.elapsed,
   };
@@ -202,6 +215,11 @@ const rows = runs.filter((r) => !r.failed).map((r) => summarize(r, px));
 rows.sort((a, b) => b.score - a.score || b.growth - a.growth);
 
 const bot = rows.find((r) => r.spec === BASELINE);
+if (creditsOut) {
+  console.log(`\n${"═".repeat(96)}`);
+  console.log("✗ 账户额度耗尽，整跑中止。**下面的名次不可用**——");
+  console.log("  失败的席·季根本没发出请求，那不是模型答不上来。充值后重跑。\n");
+}
 console.log(`\n${"═".repeat(96)}`);
 console.log(`排行榜（同 seed、同对手、席位轮换）`
   + `${Number(GAMES) < MIN_GAMES_FOR_POWER
@@ -232,14 +250,18 @@ for (const r of rows.filter((x) => x.calls)) {
     + `\u3000${r.reasoning ? `档 ${r.reasoning}` : "默认档"}`);
 }
 
-const anyIssue = rows.some((r) => r.infraFail || r.starved || r.modelFail);
+const anyIssue = rows.some((r) => r.creditsFail || r.infraFail || r.starved || r.modelFail);
 if (anyIssue) {
   console.log(`\n失败拆分（只有最后一栏算模型的分）`);
   for (const r of rows.filter((x) => x.infraFail || x.starved || x.modelFail)) {
     console.log(`  ${r.spec.slice(0, 38).padEnd(40)}`
-      + `基础设施（超时/网络）${String(r.infraFail).padStart(3)} 季`
+      + `额度${String(r.creditsFail).padStart(4)} 季`
+      + `\u3000基础设施${String(r.infraFail).padStart(3)} 季`
       + `\u3000harness（出参预算）${String(r.starved).padStart(3)} 季`
       + `\u3000模型${String(r.modelFail).padStart(3)} 季`);
+  }
+  for (const r of rows.filter((x) => x.creditsFail > 0)) {
+    console.log(`  ✗ ${r.spec} 有 ${r.creditsFail} 季因账户额度耗尽而未发出请求，此行不可用`);
   }
   const worst = rows.filter((r) => r.calls && r.infraFail / (r.calls + r.infraFail) > 0.2);
   for (const r of worst) {

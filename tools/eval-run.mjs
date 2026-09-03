@@ -160,6 +160,15 @@ async function playGame(gi) {
           undefined, ROSTER, P, GEO));
       }
     }
+    // 额度耗尽就地停跑。继续跑只会用七百条「请求都没发出去」的记录
+    // 堆出一份看起来煞有介事的假榜——实测正是如此：一份「国产模型全线
+    // 4–35 分、机器人 148 分」的排行榜，真相是账户没钱了
+    if (mine?.failureKind === "credits") {
+      console.error(`\n✗ 账户额度耗尽，第 ${gi + 1} 局第 ${s.turn + 1} 季停跑。`);
+      console.error(`  ${mine.failure}`);
+      console.error("  这与模型能力无关。充值后重跑，本次结果不可用。");
+      process.exit(3);
+    }
     if (mine) turns.push(mine);
     since = s.log.length;
     const r = resolve(s, orders, G, P, ROSTER, GEO);
@@ -242,13 +251,16 @@ if (usage.length) {
   }
   // 失败必须三分栏。混成一个计数就会出现「kimi 55 季答不上来」这种结论，
   // 而实测其中 54 季是 180s 超时——按提供方的快慢排名，与策略能力无关
-  const by = { infra: [], budget: [], model: [] };
+  const by = { credits: [], infra: [], budget: [], model: [] };
   for (const r of records) if (r.failure) (by[r.failureKind ?? "model"] ??= []).push(r);
   if (by.infra.length || by.budget.length || by.model.length) {
+    if (by.credits.length) {
+      console.log(`✗ 账户额度耗尽 ${by.credits.length} 季——本次结果不可用，与模型能力无关`);
+    }
     console.log(`失败拆分：基础设施（超时/网络）${by.infra.length} 季`
       + `\u3000harness（出参预算）${by.budget.length} 季`
       + `\u3000模型（答不上来/解析不出）${by.model.length} 季`);
-    for (const k of ["infra", "budget", "model"]) {
+    for (const k of ["credits", "infra", "budget", "model"]) {
       if (by[k].length) console.log(`  ${k} 样例：${by[k][0].failure}`);
     }
     if (by.infra.length) {
