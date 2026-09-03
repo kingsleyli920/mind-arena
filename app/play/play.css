@@ -363,3 +363,29 @@
   background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;
 }
 .resume button.ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--rule); }
+
+/* ── 我的郡国 ── */
+.panel .mine-fold { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.panel .mine-fold summary {
+  cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.78rem;
+  letter-spacing: 0.1em; color: var(--ink-soft);
+}
+.panel .mine-fold summary i {
+  font-style: normal; margin-inline-start: 0.4rem; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.lands { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.lands th, .lands td {
+  padding: 0.24rem 0.4rem; text-align: right; border-top: 1px solid var(--rule);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lands th { color: var(--ink-soft); font-weight: 400; letter-spacing: 0.06em; }
+.lands th:first-child, .lands td:first-child,
+.lands th:nth-last-child(-n+2), .lands td:nth-last-child(-n+2) { text-align: start; }
+.lands td:nth-last-child(2) {
+  max-width: 9rem; overflow: hidden; text-overflow: ellipsis;
+}
+.lands tbody tr { cursor: pointer; }
+.lands tbody tr:hover { background: #f2ead9; }
+/* 被围与断供直接决定这一季能不能出兵，必须一眼看见 */
+.lands tbody tr.warn td:last-child { color: var(--seal); font-weight: 600; }

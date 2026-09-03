@@ -19,7 +19,7 @@ import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
-import { resolve } from "@/lib/game/engine/resolve.ts";
+import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
   from "@/lib/game/engine/victory.ts";
 import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
@@ -95,6 +95,9 @@ function endingGap(
   if (st.conquests < 1) need.push("且至少一郡是从他方手里夺来的（只捡无主之地不算进攻）");
   return need.length ? `距丙档：${need.join("，")}。` : "距丙档：条件已足，本局未及结算。";
 }
+
+/** 器械的中文名。与 actions.ts 的 GEAR_CN 同源，只是那边没导出给界面用 */
+const GEAR_LABEL: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 
 const PANEL_ORDER = ["relief", "withdraw", "campaign", "muster", "govern",
                      "appoint", "scout", "ally", "passage", "retire"];
@@ -659,6 +662,26 @@ export function PlayClient() {
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
+
+  const centerOnId = (id: string) => {
+    const p = engine.points.find((c) => c.id === id);
+    if (p) setView(centerOn(p.longitude, p.latitude, 3.2, MAP));
+  };
+  // 家底一览。被围与断供直接决定这一季能不能出兵，排在最前面
+  const supplied = supplyReach(game, engine.G, seat);
+  const myLands = Object.values(game.commanderies)
+    .filter((c) => c.owner === seat)
+    .map((c) => {
+      const besieger = game.armies.find((a) => a.target === c.id && a.faction !== seat);
+      const cut = !supplied.has(c.id);
+      const officers = stationedAt(game, engine.roster, c.id);
+      const note = besieger ? `被 ${engine.nameOf.get(besieger.faction) ?? besieger.faction} 围`
+        : cut ? "补给断绝"
+        : c.gear !== "none" ? `备${GEAR_LABEL[c.gear] ?? c.gear}`
+        : "";
+      return { c, officers, note, warn: !!besieger || cut };
+    })
+    .sort((a, b) => Number(b.warn) - Number(a.warn) || a.c.id.localeCompare(b.c.id));
   // 与选中的城相关的候选：起点、目标、施政地、集结地、刺探对象都算
   const touches = (c: Candidate, id: string) => {
     const a = c.action as Record<string, unknown>;
@@ -909,6 +932,34 @@ export function PlayClient() {
           <details className="brief-fold">
             <summary>逐州进度</summary>
             <pre className="brief">{brief}</pre>
+          </details>
+
+          {/* 我的郡国：十几个郡的家底，此前只能在地图上一个个点开看。
+              兵力上限由驻将数定、产出由产出档定、被围与断供直接决定这一季
+              能不能出兵——这几项摊在一张表里，比在地图上找快得多。
+              点一行即定位地图并筛出该郡的候选 */}
+          <details className="mine-fold">
+            <summary>我的郡国<i>{myLands.length}</i></summary>
+            <table className="lands">
+              <thead>
+                <tr><th>郡国</th><th>兵</th><th>产</th><th>心</th><th>防</th>
+                  <th>将</th><th>状况</th></tr>
+              </thead>
+              <tbody>
+                {myLands.map((L) => (
+                  <tr key={L.c.id} className={L.warn ? "warn" : undefined}
+                    onClick={() => { setPinned(L.c.id); setFocus(L.c.id); centerOnId(L.c.id); }}>
+                    <td>{L.c.id}</td>
+                    <td>{L.c.garrison}</td>
+                    <td>{L.c.yieldTier}</td>
+                    <td>{L.c.moraleTier}</td>
+                    <td>{L.c.defense}</td>
+                    <td>{L.officers.length ? L.officers.map((o) => o.name).join("、") : "—"}</td>
+                    <td>{L.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </details>
 
           {(flash.mine.length > 0 || flash.world.length > 0) && (
