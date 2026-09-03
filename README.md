@@ -51,8 +51,30 @@ How to run an evaluation — and the measured constraints that bound it — is i
 - `npm run eval`: run one agent (bot / stub / model) over N games
 - `npm run eval:suite`: run several agents over the same seeds and print a leaderboard
 
+## Playing it
+
+Run `npm run dev` and open `/play`. Pick a seat, issue orders for sixteen
+seasons, get graded on how far you moved the board — not on how big you started.
+The seat-select page has a rules primer (怎么玩); the in-game header has the same
+panel behind 规则.
+
+Progress is saved to `localStorage` after every season, including the picks you
+have ticked but not yet committed. Reloading offers 继续 / 弃掉重开. A save is
+dropped when the pack or state shape changes rather than migrated — the engine is
+still moving, and silently loading a stale save gives you a board whose rules no
+longer match.
+
 ## Current limits
 
-The first strategy match is playable with local AI. OpenRouter decisions require
-the server-only key above. The project does not yet publish a repository or deploy
-a public site.
+- **Opponents are the deterministic bot, not models.** The OpenRouter route and
+  the whole model-seat pipeline exist and are tested, but wiring live models into
+  the play UI is deliberately deferred until the game itself is complete.
+- Counties (县) are not a play unit; the map's atom is the commandery (郡).
+- One scenario only (194 兴平元年).
+- Desktop only.
+- No repository or public deploy yet.
+
+Evaluation tooling (`npm run eval`, `npm run eval:suite`) does drive real models
+and needs the key above. See [docs/EVAL.md](docs/EVAL.md) for the measured
+constraints that bound it — including the two ways a leaderboard can silently
+become a lie.
