@@ -50,6 +50,15 @@ const SEASONS = Number(arg("seasons", "0")) || 0;
  * 观测里全是「此刻的状态」，没有一条是「我上季打算干什么」
  */
 const MEMORY = arg("memory", "on") !== "off";
+/**
+ * --provider=A,B：钉住提供方。
+ *
+ * 不钉的话同一个模型 id 会在提供方之间跳——一份 24 季实录里跳了 7 家，
+ * 单次用时中位 11.2s 而最慢 723.9s（差 45 倍），前缀缓存也几乎不命中（2%）。
+ * 上一份排行榜正是被这个拖垮的：两个模型跑到墙钟上限只完成 38/48 与 26/48。
+ * 量化精度与上下文实现各家不同，「同一个模型」其实不是同一个东西
+ */
+const PROVIDER = arg("provider", "");
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -106,6 +115,7 @@ const KEY_ENUM = arg("keyenum", "on") !== "off";
 const REASONING = arg("reasoning", "") ? { effort: arg("reasoning", "") } : undefined;
 const MODEL_DEPS = client
   ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
+      ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}),
       rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM, reasoning: REASONING }
   : null;
 

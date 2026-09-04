@@ -61,6 +61,8 @@ const progress = new Map();
 let creditsOut = false;
 /** --budget=<美元>：整批的实扣上限，按花钱的对局方均摊后透传给子进程 */
 const BUDGET = Number(arg("budget", "0")) || 0;
+/** --provider=A,B：钉住提供方，见 eval-run 的同名参数 */
+const PROVIDER = arg("provider", "");
 const payingCount = Math.max(1, AGENTS.filter((a) => a.startsWith("model:")).length);
 
 function runOne(spec) {
@@ -73,6 +75,7 @@ function runOne(spec) {
   else args.push(`--agent=${spec}`);
   if (REASONING && kind === "model") args.push(`--reasoning=${REASONING}`);
   if (KEYENUM && kind === "model") args.push(`--keyenum=${KEYENUM}`);
+  if (PROVIDER && kind === "model") args.push(`--provider=${PROVIDER}`);
   // 预算按**花钱的对局方**均摊。bot 与 stub 不发请求，把额度分给它们
   // 等于白扔——此前这个闸门根本没被透传，加了等于没加
   if (BUDGET && kind === "model") args.push(`--budget=${(BUDGET / payingCount).toFixed(4)}`);
