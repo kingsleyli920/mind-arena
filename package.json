@@ -22,7 +22,8 @@
     "map:audit": "node tools/audit-ink.mjs",
     "obs:budget": "node --experimental-strip-types tools/obs-budget.mjs",
     "eval": "node --env-file-if-exists=.env.local --experimental-strip-types tools/eval-run.mjs",
-    "eval:suite": "node --env-file-if-exists=.env.local --experimental-strip-types tools/eval-suite.mjs"
+    "eval:suite": "node --env-file-if-exists=.env.local --experimental-strip-types tools/eval-suite.mjs",
+    "match": "node --env-file-if-exists=.env.local --experimental-strip-types tools/match-log.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
