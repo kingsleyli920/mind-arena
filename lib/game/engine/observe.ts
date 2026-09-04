@@ -13,7 +13,7 @@ import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
 import { supplyReach } from "./resolve.ts";
 import { unitName, FORMATION_CN } from "./combat.ts";
-import { retinueAt, isFiller } from "./officers.ts";
+import { retinueAt, isFiller, defendRetinue } from "./officers.ts";
 import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
 import { briefFor, standingOf, GRADE_CN, type Geography } from "./victory.ts";
@@ -65,12 +65,15 @@ export interface Observation {
   /** 我的郡：自家账本，看得真切 */
   mine: Array<{
     id: string; zhou: string; garrison: number; defense: number;
-    yieldTier: number; moraleTier: number; unit: string; gear: string;
+    yieldTier: number; moraleTier: number; unit: string;
+    /** 器械。**无械时不发**——那是最常见的取值，逐郡写一遍纯属浪费 */
+    gear?: string;
     /** 本郡阵型。鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，攻守各差一个缺口 */
     formation: string;
     /** 能随军的驻将（至多 retinueCap 人）。兵力上限 = 人数 × 每将统兵 */
     officers: string[];
-    besiegedBy: FactionId | null;
+    /** 被谁围。**未被围时不发** */
+    besiegedBy?: FactionId;
     /**
      * 本郡是否**补给断绝**。断供则本季产出归零，且以此郡为后方的军团粮尽溃散。
      *
@@ -136,16 +139,29 @@ export function observe(
       yieldTier: c.yieldTier,
       moraleTier: c.moraleTier,
       unit: unitName(P, c.unit),
-      gear: c.gear,
+      ...(c.gear === "none" ? {} : { gear: c.gear }),
       formation: FORMATION_CN[c.formation],
       // 驻将：只报实际能随军的那几人（retinueCap），外加总数。
       // 全列出来会把观测撑爆——刘表十三郡各驻数人时峰值一度只剩 94 tok 余量，
       // 而多出来的名字对决策没有用：超过上限的人不随军也不加成
-      officers: roster
-        ? retinueAt(s, roster, c.id, P).filter((o) => !isFiller(o))
-            .slice(0, P.retinueCap).map((o) => o.name)
-        : [],
-      besiegedBy: s.armies.find((x) => x.target === c.id)?.faction ?? null,
+      // **按结算真正会用的排位取**，不是 id 序。此前用的是 retinueAt 的原序，
+      // 实测 624 个超编郡·席·季里 63.6% 报的三人与实际随军/守城不是同一批
+      //（例：观测报「杜微、任安、王累」，实际出战的是「郑度、王商、王累」，
+      // 而郑度、王商在整份观测里根本不存在）。模型据此调将，调的是不上场的人。
+      // 守方排位与攻方排位各不相同，这里取守方——攻方那一侧候选标签已按
+      // attackRetinue 写明「某某等 N 将领」，有出口
+      officers: (() => {
+        if (!roster) return [];
+        const here = retinueAt(s, roster, c.id, P).filter((o) => !isFiller(o));
+        return defendRetinue(here, P).members.slice(0, P.retinueCap).map((o) => o.name);
+      })(),
+      // 默认值不发。被围与无械是少数情形，逐郡写一遍 null 与 "none"
+      // 在十几郡的势力上就是几百 tok。**supplyCut 例外**：它必须每郡都写，
+      // 缺席让模型去猜「没写是通还是漏了」，正是这一项刚补上的理由
+      ...(() => {
+        const sieger = s.armies.find((x) => x.target === c.id);
+        return sieger ? { besiegedBy: sieger.faction } : {};
+      })(),
       supplyCut: !reach.has(c.id),
     }));
 
@@ -195,7 +211,23 @@ export function observe(
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
     plan: opts?.plan ?? null,
     report: {
-      mine: log.filter((e) => e.faction === faction).map((e) => e.text),
+      // 攻城的**缺口对可防守**要跟着战报回来。这两个数就在事件的 attribution 上，
+      // 此前只抄 text 就把它丢了——而围城是唯一一类跨季、可逐季加码的决策，
+      // 「加码还是撤」全靠它。实录里袁绍看到的是「强攻广陵郡未克，转为围困」，
+      // 引擎在同一条事件上算出的是「缺口 0 对可防守 4」（差四级，等于打不动）；
+      // 它下一季又花 2 令增兵续围，结算仍是打不动。
+      //
+      // 只补攻城这一类、只补这两个数：全量回传 attribution 贵得多，
+      // 而内政、任命那些类别的归因对下一步决策没有用。
+      //
+      // 另加**条数上限**。此前自家战报没有上限，而天下大事有（worldCap）——
+      // 方向反了：一个四十郡的势力全境断供时，「X 补给断绝」一条郡写一行
+      // 就能吃掉五百多 tok。取 24 条，实测 104 季长局的最大值是 15 条
+      mine: log.filter((e) => e.faction === faction).map((e) => {
+        const a = e.attribution;
+        return a && a["缺口"] !== undefined && a["可防守"] !== undefined
+          ? `${e.text}\u3000缺口 ${a["缺口"]} 对可防守 ${a["可防守"]}` : e.text;
+      }).slice(-24),
       // 天下大事只留最近若干条。三十家势力一季能产出上百条公开事件，
       // 全铺出来会把观测预算吃掉一半，而模型真正需要的是最近的动向。
       // 砍这里而不砍候选：砍候选等于用观测预算去交换动作空间
@@ -204,7 +236,16 @@ export function observe(
         .slice(-(opts.worldCap ?? 14)),
     },
     candidates: cands.map((c) => ({
-      key: c.key, cost: c.cost, label: c.label, forecast: c.forecast,
+      key: c.key, cost: c.cost, label: c.label,
+      // 只带**数值**。forecast 与 field 各自还挂着一个 text，
+      // 而那两句话在 label 里逐字都有（「｜缺口 3–5 对可防守 1–6→未知」
+      // 与「｜先野战：…」）。实测重复的这一份在袁绍峰值处占 533 tok，
+      // 占它当时全部余量的六倍——白发一遍同样的话
+      forecast: c.forecast && {
+        breachLo: c.forecast.breachLo, breachHi: c.forecast.breachHi,
+        holdLo: c.forecast.holdLo, holdHi: c.forecast.holdHi,
+        verdict: c.forecast.verdict, fog: c.forecast.fog,
+      },
     })),
   };
 }

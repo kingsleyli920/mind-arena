@@ -39,13 +39,29 @@ const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const digest = toRulesDigest(pack);
 console.log(`规则摘要（系统提示词，一局只发一次）：${estTokens(digest)} tok\n`);
 
-let s = createGame(DATA, { seed: process.env.SEED ?? "budget-gate", roster: ROSTER, geo: GEO }, P);
+/**
+ * 闸门必须按**最坏情形**测，否则它给出的余量是假的。
+ *
+ * 两处曾经系统性低报：
+ *   一、只跑默认 16 季。而对局界面给了 104 季选项，观测里的 mine 段
+ *       随疆域线性长（实测 95 tok/郡），长局的大势力才是真正的峰值。
+ *       实测 104 季某 seed 下刘表从第 42 季起**连续 50 席·季超顶**。
+ *   二、plan 按 null 计 2 tok。而跨季方略实跑中位 173 tok、最长 247，
+ *       parse.ts 允许到 600 字。按满额算才是最坏情形。
+ * 修之前闸门报「袁绍余量 +86 ✓」，真实是 −87 —— 差了一个符号，
+ * 而所有「这个字段加不进来」的取舍都建立在那个数上
+ */
+const SEASONS = Number(process.env.SEASONS ?? 64);
+/** 按 parse.ts 允许的上限造一段方略，测最坏情形 */
+const WORST_PLAN = "先".repeat(300);
+let s = createGame(DATA, { seed: process.env.SEED ?? "budget-gate",
+  roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
 const rows = [];
 let since = 0;
 while (!s.finished) {
   for (const seat of SEATS) {
     if (s.factions[seat].eliminated) continue;
-    const o = observe(s, seat, G, P, ROSTER, GEO, { nameOf, since });
+    const o = observe(s, seat, G, P, ROSTER, GEO, { nameOf, since, plan: WORST_PLAN });
     const json = JSON.stringify(o);
     if (json.includes(`"${s.seed}"`) || /"seed"/.test(json)) {
       console.error(`✗ 第 ${s.turn} 季 ${seat} 的观测里出现了 seed —— 迷雾作废`);
