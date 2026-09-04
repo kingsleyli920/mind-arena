@@ -709,8 +709,9 @@ export function PlayClient() {
       <main className="play">
         <header className="play-head">
           <h1>汉末沙盘</h1>
-          <p>兴平元年·一九四{"\u3000"}择一席入局。十六季后按<b>相对开局的增量</b>定档——
-            守成不得分，多控一州或多据一州治方入乙档。</p>
+          <p>兴平元年·一九四{"\u3000"}择一席入局。
+            <b>谁先一统天下谁赢</b>；打满 {seasons ?? engine.P.seasonsPerGame} 季仍未定于一，
+            则按<b>相对开局的增量</b>定档——守成不得分，多控一州或多据一州治方入乙档。</p>
         </header>
         <details className="primer-fold">
           <summary>怎么玩<i>没玩过先看这个</i></summary>
@@ -1366,10 +1367,24 @@ export function PlayClient() {
               {/* 出局与归隐也要在这里收尾。此前只认 game.finished：
                   一个第 8 季就被灭光的玩家，要对着「本季无可行之事」
                   再点八次「封令结算」才看得到结果——那不是结局，是罚站 */}
-              <h2>{me.eliminated ? "覆灭" : me.retired ? "归隐" : "终局"}
+              {/* 统一是这局游戏真正的胜负，档位只是评测用的量尺——两者不能混为一谈。
+                  此前这里只认「打满季数」，一个真把天下打下来的玩家看到的
+                  也是「终局」两个字，赢了却不知道自己赢了 */}
+              <h2>{game.winner === seat ? "一统天下"
+                : game.winner ? `天下归${engine.nameOf.get(game.winner) ?? game.winner}`
+                : me.eliminated ? "覆灭" : me.retired ? "归隐" : "终局"}
                 {"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
                 <b>{GRADE_SCORE[me.bestGrade]} 分</b>
                 {!me.eliminated && <u>天下第 {rank.at}/{rank.of}</u>}</h2>
+              {game.winner === seat && (
+                <p className="over-lead">控 {standing.controlledZhou} 州，
+                  于 {game.year} 年 · {SEASON_CN[game.season]}（第 {game.turn}/{game.seasonsPerGame} 季）
+                  戡定天下。汉末群雄至此而终。</p>
+              )}
+              {game.winner && game.winner !== seat && (
+                <p className="over-lead">{engine.nameOf.get(game.winner) ?? game.winner}
+                  于第 {game.turn}/{game.seasonsPerGame} 季戡定天下，本局提前结束。</p>
+              )}
               {me.eliminated && (
                 <p className="over-lead">尽失疆土，止于 {game.year} 年 · {SEASON_CN[game.season]}
                   （第 {game.turn}/{game.seasonsPerGame} 季）。
@@ -1391,7 +1406,7 @@ export function PlayClient() {
               {/* 年表：十六季不该只剩一个档位。哪一季拿下了什么、哪一季被围、
                   哪一季折了名将——这些是这一局唯一留得下来的东西 */}
               <details className="over-fold" open>
-                <summary>十六季年表<i>{chronicle.length} 事</i></summary>
+                <summary>{game.seasonsPerGame} 季年表<i>{chronicle.length} 事</i></summary>
                 <ol className="chron">
                   {chronicle.map((e, i) => (
                     <li key={i}><b>{e.when}</b>
