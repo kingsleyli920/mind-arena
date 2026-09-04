@@ -95,10 +95,19 @@ export function parseDecision(content: string): Decision | null {
   const text = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
   const tryParse = (src: string): Decision | null => {
     try {
-      const v = JSON.parse(src) as { picks?: unknown; reason?: unknown };
+      const v = JSON.parse(src) as { picks?: unknown; reason?: unknown; plan?: unknown };
       if (!Array.isArray(v.picks)) return null;
       const picks = v.picks.filter((x): x is string => typeof x === "string").slice(0, 16);
-      return { picks, reason: typeof v.reason === "string" ? v.reason.slice(0, 400) : undefined };
+      // plan 必须读回来，否则跨季记忆整条链是断的：schema 里要它、提示词讲了它、
+      // 观测里留了位置、eval-run 与对局界面都在传它——唯独这里没接，
+      // 于是模型每季写下的方略被直接扔掉，观测里的 plan 恒为 null。
+      // 一份 24 季的实录里 0 次记录，是核算实录时才发现的：
+      // 功能全链路都在，只差解析这一步，而单测只测了 picks 与 reason
+      return {
+        picks,
+        reason: typeof v.reason === "string" ? v.reason.slice(0, 400) : undefined,
+        plan: typeof v.plan === "string" ? v.plan.slice(0, 600) : undefined,
+      };
     } catch { return null; }
   };
   const direct = tryParse(text);

@@ -582,9 +582,17 @@ export function resolve(
                                          tgt.defense, army.gear, terrain, atGate,
                                          (atk?.breachBonus ?? 0) + persist + formEdge,
                                          def?.holdBonus ?? 0);
+    // 算式要能**自乘得通**，否则这一行比没有还坏：读者按它验算会算出别的数。
+    // 此前把 unitPower 的返回值标成「主将加成」，又漏了战力浮动与真正的主将加成，
+    // 三场全部乘不通（+12.6% / −14.9% / −61）。核算实录时被逐场抓出来
     tr(army.faction, `  【攻城】${army.home} → ${army.target}`
-      + `\n    我方：${fmt0(army.troops)} 人 × 兵种 ${unitName(P, army.unit)}`
-      + ` × 主将加成 ${power.toFixed(3)} = 有效战力 ${fmt0(attack)}`
+      + `\n    我方：${fmt0(army.troops)} 人 × 兵种地形系数 ${power.toFixed(4)}`
+      + `（${unitName(P, army.unit)}攻 × ${P.terrainName[terrain] ?? terrain}系数`
+      + ` × 对${unitName(P, tgt.unit)}克制）`
+      + ` × 主将 ${(atk?.attackMul ?? 1).toFixed(4)}`
+      + `（${atk?.note ?? "无主将"}）`
+      + ` × 战力浮动 ${jitter.toFixed(4)}`
+      + ` = 有效战力 ${fmt0(attack)}`
       + `\n    守方：${fmt0(tgt.garrison)} 人 × 兵种守备 ${unitGuard(P, tgt.unit).toFixed(2)}`
       + ` = ${fmt0(tgt.garrison * unitGuard(P, tgt.unit))}`
       + `\u3000城防 ${tgt.defense}\u3000地形 ${P.terrainName[terrain] ?? terrain}`

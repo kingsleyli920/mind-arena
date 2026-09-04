@@ -118,7 +118,14 @@ test("输出协议：默认把「只能从候选里选」提到解码层", () =>
 
 test("输出协议：宽容解析吃得下代码块与散文包裹，解析不出返回 null", () => {
   assert.deepEqual(parseDecision('{"picks":["a","b"],"reason":"x"}'),
-    { picks: ["a", "b"], reason: "x" });
+    { picks: ["a", "b"], reason: "x", plan: undefined });
+  // plan 也要读回来。**这条测试原本只钉 picks 与 reason，于是 plan 被丢了整整一版**：
+  // schema 里要它、提示词讲了它、观测留了位置、eval-run 与对局界面都在传它，
+  // 唯独解析这一步没接——一份 24 季的实录里 0 次记录，核算实录时才发现。
+  // 跨季记忆是模型执行多季战役的唯一凭借，断在这里等于整个功能没上线
+  assert.deepEqual(
+    parseDecision('{"picks":["a"],"reason":"x","plan":"先取幽州三郡"}'),
+    { picks: ["a"], reason: "x", plan: "先取幽州三郡" });
   assert.deepEqual(parseDecision('```json\n{"picks":["a"]}\n```').picks, ["a"]);
   assert.deepEqual(parseDecision('我的决定是：\n{"picks":["a"],"reason":"y"}\n以上。').picks, ["a"]);
   // 解析不出必须是 null 而不是空决策——「无回应」与「什么都不做」在评测里含义不同

@@ -154,7 +154,10 @@ export function observe(
     seat: { faction, name: nameOf(faction), capital: f?.capital ?? null },
     clock: {
       year: s.year, season: s.season, turn: s.turn,
-      totalTurns: P.seasonsPerGame, epoch: s.epoch,
+      // 本局季数，不是内容包里的默认值。局长做成每局属性之后这里没跟着改，
+      // 于是打 104 季的局也告诉模型「共 16 季」——它按四年的时间尺度做决策，
+      // 而实际有二十六年。一份 24 季实录里模型看到的 totalTurns 就是 16
+      totalTurns: s.seasonsPerGame, epoch: s.epoch,
     },
     treasury: {
       gold: Math.round(f?.gold ?? 0),

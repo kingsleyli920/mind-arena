@@ -99,7 +99,10 @@ export function forecastCampaign(
         + (theirForm !== null
             ? (feLo === 0 ? "" : `｜阵${FORMATION_CN[myForm]}对${FORMATION_CN[theirForm]}`
                                  + `（${feLo > 0 ? "克" : "被克"}，${feLo > 0 ? "+" : ""}${feLo} 缺口）`)
-            : `｜敌阵未探（已计入区间 ±${P.formationBreach} 缺口）`),
+            // 只留标记，不重复解释。这句话在一季的候选表里出现 23 次、
+            // 占 460 tok——凡是逐条重复的同一句话，都该搬进只发一次
+            // 且能被前缀缓存的规则摘要里，而不是占用每条候选的位置
+            : "｜阵未探"),
   };
 }
 
