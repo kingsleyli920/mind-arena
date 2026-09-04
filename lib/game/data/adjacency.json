@@ -3,7 +3,7 @@
   "note": "郡国通行图。Delaunay 取候选边，沿边采样地形网格定档，与水系求交判跨河，关津按垂距挂载。",
   "generatedFrom": "tools/build-adjacency.mjs",
   "commanderies": 105,
-  "edges": 231,
+  "edges": 232,
   "maxEdgeKm": 420,
   "costUnit": "1 = 100km 平原",
   "terrainCost": {
@@ -162,6 +162,19 @@
    "crossings": [],
    "nodes": [],
    "via": "同州连通（青州）"
+  },
+  {
+   "from": "东莱郡",
+   "to": "辽东郡",
+   "km": 489,
+   "terrain": "river",
+   "cost": 8.8,
+   "maxElev": 0,
+   "crossings": [
+    "渤海"
+   ],
+   "nodes": [],
+   "fix": "渤海海路。《三国志·公孙度传》「越海收东莱诸县，置营州刺史」——公孙度据辽东而有东莱，走的正是蓬莱至旅顺这条约百公里的海道。缺了它，东莱与辽东在图上不连通：实录里公孙度执子的一局，东莱十三季断供十二季、整局产出为零，却仍占着郡数。生成器按陆路取候选边，海路只能补"
   },
   {
    "from": "东郡",
