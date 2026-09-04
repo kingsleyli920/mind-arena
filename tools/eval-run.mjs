@@ -43,6 +43,13 @@ const JSON_OUT = arg("json", "");
 const SEATS = (arg("seats", "caocao,yuanshao,liubiao,liuzhang,yuanshu,lubu")).split(",");
 /** --seasons=<季数>：本局多长。不给则用内容包的 16（评测口径） */
 const SEASONS = Number(arg("seasons", "0")) || 0;
+/**
+ * --memory=off：不把上季的跨季方略回传给模型。
+ *
+ * 这是「记忆值多少分」的对照臂。默认开——每次决策本来是无状态的，
+ * 观测里全是「此刻的状态」，没有一条是「我上季打算干什么」
+ */
+const MEMORY = arg("memory", "on") !== "off";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -145,7 +152,8 @@ async function playGame(gi) {
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       if (f === under && MODEL_DEPS) {
-        const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS, plan);
+        const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS,
+          MEMORY ? plan : null);
         // 只在模型给出新方略时更新。答不上来的那一季不该把记忆抹掉
         if (record.plan) plan = record.plan;
         orders.push(...os);
@@ -350,7 +358,7 @@ if (JSON_OUT) {
     // 预算停手时，games 与实际跑完的局数不同。报告必须看得见这件事，
     // 否则「48 局的排名」可能其实只有 11 局
     played: results.length, spentUsd: +spent.toFixed(4), halted,
-    keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null,
+    keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null, memory: MEMORY,
     // 这一跑是在什么条件下跑的。缺了这些，两周后这份结果与新结果之间
     // 的差是「模型变了」还是「我们改了提示词/内容包/引擎」就分不清——
     // 而这个仓库的提示词、内容包、引擎每周都在动
