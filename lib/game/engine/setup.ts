@@ -101,6 +101,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       gold: P.goldOn ? P.goldStart : 0,
       bestGrade: "ding" as Grade,
       eliminated: mine.length === 0,
+      submittedTo: null,
     };
   }
 

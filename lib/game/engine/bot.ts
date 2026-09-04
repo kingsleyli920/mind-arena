@@ -29,6 +29,9 @@ export const PROFILES: Record<Profile, string> = {
  * 令挤掉：实测均分从 179 掉到 157、非苟活极差从 39.3 掉到 21.3。
  * 免费动作排在前面无所谓（它不占预算），收费之后就必须重排。
  */
+// 劝降（submit）权重给得高：它只在对方已近覆亡时才出现（≤2 郡且被碾压 6 倍），
+// 门槛本身就是稀缺性，不必再靠权重压。一次成功抵得上打好几季。
+//
 // 改阵（array）的权重刻意压低。同 seed 100 局实测三档：
 //   权重 0（不认这条令）      非苟活极差 40.0  曹操出局 47%  ρ 0.60
 //   权重 5/3/1/2             非苟活极差 45.3  曹操出局 45%  ρ 0.60  ← 用这档
@@ -36,13 +39,13 @@ export const PROFILES: Record<Profile, string> = {
 // 给高了各画像都无脑改阵，策略差异被抹平——极差掉三分之一。
 // 「一条几乎总是对的动作」正是评测最不需要的东西
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { suade: 6, array: 5, govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
-  balanced:    { suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
-  aggressive:  { suade: 6, array: 1, govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
-  opportunist: { suade: 6, array: 2, govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
+  turtle:      { submit: 9, suade: 6, array: 5, govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
+  balanced:    { submit: 9, suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  aggressive:  { submit: 9, suade: 6, array: 1, govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
+  opportunist: { submit: 9, suade: 6, array: 2, govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
   // 与均衡流同底，差别全在下面读 gain 的那几行——
   // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
-  purpose:     { suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  purpose:     { submit: 9, suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
 };
 
 /**

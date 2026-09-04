@@ -10,7 +10,7 @@
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
 import { canonicalOrder, orderCost, governPrice, GEAR_CN, POLICY_CN, type Graph,
-  type Rules, DEFAULT_RULES, validate, orderSites } from "./actions.ts";
+  type Rules, DEFAULT_RULES, validate, orderSites, submitChance } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
@@ -224,6 +224,46 @@ export function resolve(
       (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
       // 报刚探到的那个值。只写「刺探了 X」等于没报——玩家要的是探到了什么
       receipt(o.faction).scout.push(`${a.at} ${observedGarrison(s, o.faction, a.at, P).text}`);
+    } else if (a.type === "submit") {
+      // 劝降在阶段一结算：成则当季即接管其疆土，与调任同阶段。
+      // 掷点键里带目标势力，同一季劝两家不会共用一次掷点
+      const tgt = s.factions[a.to];
+      const mineN = Object.values(s.commanderies).filter((c) => c.owner === o.faction).length;
+      const theirs = Object.values(s.commanderies).filter((c) => c.owner === a.to);
+      // 结算处与候选必须同一套判据，否则界面放行的令会被引擎悄悄吃掉
+      if (tgt && !tgt.eliminated && theirs.length
+          && standingOf(s, geo, o.faction).controlledZhou >= P.submitMinZhou) {
+        const morale = theirs.reduce((n, c) => n + c.moraleTier, 0) / theirs.length;
+        const p = submitChance(P, mineN, theirs.length, morale);
+        const r = roll({ seed: s.seed, year: s.year, season: s.season,
+                         faction: o.faction, event: `submit:${a.to}`, seq: 0 });
+        if (r < p) {
+          // 疆土、武将、国库整体过户。军团一并易帜——归降是整个势力过户，
+          // 不是只交出城池：留下一支无主孤军在外，既不合理也会让状态失配
+          for (const c of theirs) c.owner = o.faction;
+          for (const [oid, at] of Object.entries(s.stations)) {
+            if (theirs.some((c) => c.id === at)) s.stations[oid] = at;
+          }
+          for (const army of s.armies) if (army.faction === a.to) army.faction = o.faction;
+          s.factions[o.faction].gold += tgt.gold;
+          // 归降来的郡算不算「夺自他方」：算。丙档要的是「必须进攻才能拿」，
+          // 而劝降只在把对方打到只剩一两郡之后才够得着，那本来就是打出来的
+          s.factions[o.faction].conquests += theirs.length;
+          tgt.gold = 0;
+          tgt.capital = null;
+          tgt.eliminated = true;
+          tgt.submittedTo = o.faction;
+          log(s, { kind: "submitted", faction: o.faction,
+                   text: `${a.to} 举 ${theirs.length} 郡来降`,
+                   attribution: { 成功率: Math.round(p * 100), 掷点: Math.round(r * 100) } });
+        } else {
+          // 拒降写进日志，禁劝期从日志里读——不另开状态字段。
+          // `::id::` 是给 submitBanUntil 认的标记，前面的中文是给人看的
+          log(s, { kind: "submit-refuse", faction: o.faction,
+                   text: `劝降 ${a.to} 不从，两季内不再受劝\u3000::${a.to}::`,
+                   attribution: { 成功率: Math.round(p * 100), 掷点: Math.round(r * 100) } });
+        }
+      }
     } else if (a.type === "suade") {
       // 招降在阶段一结算：成了就当季即可随军，与调任同阶段。
       // 随机键里带 officer，同一季招两个人不会共用一次掷点

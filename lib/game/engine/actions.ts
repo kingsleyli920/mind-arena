@@ -15,7 +15,7 @@ import { suadeChance } from "./officers.ts";
 const statSum = (o: OfficerRef) =>
   o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
-import { gradeIfTaken, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
+import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order, Formation,
@@ -99,6 +99,34 @@ const remainingAp = (s: GameState, f: FactionId) => s.factions[f]?.ap ?? 0;
  * 这条规则曾经在 admit / bot / resolve 三处各抄了一遍，加改阵时只改了 resolve，
  * 于是界面判据放行的令被引擎拒收。凡是三处都要问同一个问题的，只留一份答案
  */
+/**
+ * 劝降的成功率。
+ *
+ * 民心高的势力不肯降（每档折减），碾压得越狠越肯降（超出门槛的倍数加成）。
+ * 夹在 [0.05, 0.9]：留 5% 是不让「必不成功」，压到 9 成是不让它变成必然，
+ * 否则一到门槛就自动过户，劝降就不是决策了
+ */
+export function submitChance(
+  P: EngineParams, mine: number, theirs: number, morale: number,
+): number {
+  const ratio = theirs > 0 ? mine / theirs : P.submitRatio;
+  const p = P.submitBase - morale * P.submitPerMorale
+    + Math.max(0, ratio - P.submitRatio) * P.submitPerRatio;
+  return Math.max(0.05, Math.min(0.9, p));
+}
+
+/**
+ * 该势力拒降后的禁劝期。拒降记在日志里，不另开状态字段——
+ * 状态字段要落存档、要进观测，而这条只需从最近两季的日志里读得出来
+ */
+export function submitBanUntil(s: GameState, target: FactionId): number {
+  for (let i = s.log.length - 1; i >= 0 && i > s.log.length - 400; i -= 1) {
+    const e = s.log[i];
+    if (e.kind === "submit-refuse" && e.text.includes(`::${target}::`)) return e.turn + 2;
+  }
+  return 0;
+}
+
 export function orderSites(a: Action): CommanderyId[] {
   return a.type === "campaign" ? [a.from]
     : a.type === "muster" ? [...a.from]
@@ -500,6 +528,64 @@ export function listActions(
     }
   }
 
+  // ── 劝降势力：接壤、弱小、且被自己碾压时才给 ────────────────────────
+  //
+  // 门槛定得严（对方 ≤2 郡且自己是其 6 倍以上），是为了让它只在
+  // 「对方已近覆亡」时出现。放宽就是一台滚雪球放大器：它会把评测最看重的
+  // 「开局↔得分相关系数」推高，而那正是测得出模型强弱的前提。
+  //
+  // 没有这一条天下就收不拢：实测长局终局是「两强 + 长尾」，
+  // 四局合计 32 家以整整一个郡活到最后，硬打打不动
+  //
+  // 判据看的是**劝降方够不够强**，不是对方有多小。曹操建安二十年能收汉中，
+  // 是因为他已据有大半个北方；兴平元年谁也做不到。这一条同时挡住了两件事：
+  //   一、开局就小的席位被规则直接判死——只看绝对大小时，曹操（开局一郡）
+  //       第一季就符合「弱小」，实测出局率从 45% 飙到 92%、
+  //       策略差异从 48.9 塌到 22.2；
+  //   二、16 季评测被污染——十六季里没有势力控得到三州，
+  //       所以评测口径完全不受影响，而长局的霸主够得着
+  //
+  // 门槛用**州数**而不是郡数：郡数 20 在十六季里就够得着（实测曹操出局率
+  // 45%→67%），而「据三州之地」是霸主的量级，短局里到不了
+  const myZhou = geo ? standingOf(s, geo, f).controlledZhou : 0;
+  if (ap >= rules.normalAp && myZhou >= P.submitMinZhou) {
+    const mineCount = mine.length;
+    const owned = new Set(mine.map((c) => c.id));
+    const foes = new Map<FactionId, { n: number; morale: number }>();
+    for (const c of Object.values(s.commanderies)) {
+      if (!c.owner || c.owner === f) continue;
+      const cur = foes.get(c.owner) ?? { n: 0, morale: 0 };
+      cur.n += 1; cur.morale += c.moraleTier;
+      foes.set(c.owner, cur);
+    }
+    const adjacent = new Set<FactionId>();
+    for (const id of owned) {
+      for (const e of g.adj.get(id) ?? []) {
+        const o2 = s.commanderies[e.to]?.owner;
+        if (o2 && o2 !== f) adjacent.add(o2);
+      }
+    }
+    const cands2 = [...foes]
+      .filter(([id, v]) => adjacent.has(id)
+        && !s.factions[id]?.eliminated && !s.factions[id]?.retired
+        && v.n <= P.submitMaxCommanderies
+        && mineCount >= v.n * P.submitRatio
+        && s.turn >= (submitBanUntil(s, id) ?? 0))
+      .sort((a, b) => a[1].n - b[1].n || a[0].localeCompare(b[0]))
+      .slice(0, rules.perTypeCap);
+    for (const [id, v] of cands2) {
+      const pct = Math.round(submitChance(P, mineCount, v.n, v.morale / v.n) * 100);
+      out.push({
+        key: `submit:${id}`,
+        action: { type: "submit", to: id },
+        cost: rules.normalAp,
+        label: `劝降${nameOf(id)}（其 ${v.n} 郡，我 ${mineCount} 郡；`
+             + `其民心均 ${(v.morale / v.n).toFixed(1)} 档`
+             + `｜成功 ${pct}%，成则疆土武将尽归我；不成则两季内不再受劝）`,
+      });
+    }
+  }
+
   // ── 招降：破城后两季内可招被俘之将 ────────────────────────────────
   //
   // 不设时限则俘虏名单只增不减，候选逐季膨胀（违背 R13）；
@@ -790,6 +876,13 @@ export function validate(
     case "scout":
       if (!s.commanderies[a.at]) return "目标郡不存在";
       return null;
+    case "submit": {
+      const tgt = s.factions[a.to];
+      if (!tgt || tgt.eliminated || tgt.retired) return "该势力已不在场";
+      if (a.to === o.faction) return "不能劝降自己";
+      if (s.turn < (submitBanUntil(s, a.to) ?? 0)) return "该势力新近拒降，暂不再受劝";
+      return null;
+    }
     case "suade": {
       // 只查归属：**在册即在窗**。出窗者每季末已被剔除，
       // 时限判据因此只有一处（resolve 的剔除），不用在这里再写一遍
@@ -822,7 +915,7 @@ export function validate(
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
     ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, passage: 3, ally: 4,
-       muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
+       submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || x.faction.localeCompare(y.faction)

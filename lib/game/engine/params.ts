@@ -70,6 +70,14 @@ export interface EngineParams {
   suadeBase: number;
   suadePerStat: number;
   suadeHomeBonus: number;
+  /** 劝降势力：目标郡数上限、实力倍数门槛、基础成功率、民心折减、倍数加成 */
+  submitMaxCommanderies: number;
+  /** 劝降方自身的控制州数门槛。看的是「自己够不够强」而不是「对方有多小」 */
+  submitMinZhou: number;
+  submitRatio: number;
+  submitBase: number;
+  submitPerMorale: number;
+  submitPerRatio: number;
   goldOn: boolean;
   goldPerTier: number;
   goldDecay: number;
@@ -239,6 +247,12 @@ export function loadParams(pack: RawPack): EngineParams {
     suadeBase: g("招降", "基础成功率"),
     suadePerStat: g("招降", "每点五维折减"),
     suadeHomeBonus: g("招降", "同乡加成"),
+    submitMaxCommanderies: g("归降", "门槛_目标郡数"),
+    submitMinZhou: g("归降", "门槛_劝降方州数"),
+    submitRatio: g("归降", "门槛_实力倍数"),
+    submitBase: g("归降", "基础成功率"),
+    submitPerMorale: g("归降", "民心每档折减"),
+    submitPerRatio: g("归降", "倍数加成"),
     goldOn: !!(pack.constants?.["金"]?.["启用"]),
     goldPerTier: g("产出", "金_每产出档"),
     goldDecay: g("金", "收入_逐郡递减"),

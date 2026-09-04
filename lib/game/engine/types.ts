@@ -83,6 +83,8 @@ export interface FactionState {
   /** 本局曾达到过的最高档 —— 冲高后回落不扣分 */
   bestGrade: Grade;
   eliminated: boolean;
+  /** 归降于谁。null 为未归降。归降者与被灭者都退出，但死因不同，报告要分得开 */
+  submittedTo: FactionId | null;
 }
 
 export type Posture = "skirmish" | "main" | "allout";
@@ -212,6 +214,16 @@ export type Action =
   | { type: "array"; at: CommanderyId; to: Formation }
   /** 招降俘虏。成败由确定性随机定，失败则该人永久离场 */
   | { type: "suade"; officer: OfficerId }
+  /**
+   * 劝降一方势力。成则其疆土与武将整体归入，该势力退出。
+   *
+   * 没有这一条，天下就收不拢：实测长局的终局是「两强 + 长尾」，
+   * 四局合计 32 家以整整一个郡活到最后——一郡势力把全部兵力、武将、
+   * 满城防堆在一点（守军上限 60000），而进攻方压得上的中位只有 2894 人，
+   * 硬打永远打不动。历史上的统一本来也不是逐城拔取：
+   * 刘琮献荆州、张鲁降汉中，都是整个势力过户
+   */
+  | { type: "submit"; to: FactionId }
   | { type: "retire" };
 
 export interface Order {

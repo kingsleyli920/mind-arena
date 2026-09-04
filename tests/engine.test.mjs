@@ -417,6 +417,96 @@ test("界面的候选分组两张表都要覆盖每一类动作", () => {
   }
 });
 
+// ── 劝降势力 ──────────────────────────────────────────────────────────
+//
+// 这一层的立项理由是实测：长局终局是「两强 + 长尾」，四局合计 32 家以整整
+// 一个郡活到最后——一郡势力把全部兵力武将与满城防堆在一点（守军上限 60000），
+// 而进攻方压得上的中位只有 2894 人，硬打打不动。调了七个数值旋钮
+//（令数上限与指数、收入递减、每将统兵、集结郡数与跳数）没有一个能推动统一。
+
+/** 把 who 做成「已控 N 州」的霸主：把够多的郡划给它 */
+function overlord(s, who, zhou = 4) {
+  const byZhou = new Map();
+  for (const c of Object.values(s.commanderies)) {
+    const z = GEO.zhouOf.get(c.id);
+    if (!byZhou.has(z)) byZhou.set(z, []);
+    byZhou.get(z).push(c);
+  }
+  let done = 0;
+  for (const [, list] of [...byZhou].sort()) {
+    if (done >= zhou) break;
+    for (const c of list) c.owner = who;
+    done += 1;
+  }
+  s.factions[who].capital = Object.values(s.commanderies).find((c) => c.owner === who)?.id ?? null;
+  return s;
+}
+
+test("劝降：我方未控足够州数时，一条候选都不给", () => {
+  const s = fresh();
+  const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith("submit:"));
+  assert.equal(cs.length, 0,
+    `开局袁绍只控 ${standingOf(s, GEO, "yuanshao").controlledZhou} 州，不该给劝降候选`);
+});
+
+test("劝降：16 季局里永不触发 —— 评测口径与「无此机制」逐位相同", () => {
+  // 门槛用**州数**而非郡数，正是为了这一条：郡数 20 在十六季里就够得着
+  //（实测把曹操出局率从 45% 推到 67%），而十六季里没有势力控得到 4 州。
+  // 这不是「影响很小」，是**零触发**——实测 100 局 × 6 席，劝降成功 0 次，
+  // 曹操出局 43%、ρ 0.15、非苟活极差 48.0 与关掉时完全一致
+  let s = fresh("submit-window");
+  let fired = 0, maxZhou = 0;
+  for (let t = 0; t < P.seasonsPerGame && !s.finished; t += 1) {
+    for (const f of Object.keys(s.factions)) {
+      if (s.factions[f].eliminated) continue;
+      maxZhou = Math.max(maxZhou, standingOf(s, GEO, f).controlledZhou);
+      fired += listActions(s, f, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+        .filter((c) => c.key.startsWith("submit:")).length;
+    }
+    s = refreshAp(resolve(s, sampleOrders(s, Object.keys(s.factions)), G, P, ROSTER, GEO).state, P);
+  }
+  assert.equal(fired, 0,
+    `16 季内出现了 ${fired} 条劝降候选（全局最高控 ${maxZhou} 州，门槛 ${P.submitMinZhou}）`);
+});
+
+test("劝降：成则疆土武将整体过户，败则两季内不再受劝", () => {
+  let won = null, lost = null;
+  for (let i = 0; i < 14 && (!won || !lost); i += 1) {
+    const s = overlord(fresh(`sub-${i}`), "yuanshao", P.submitMinZhou);
+    // 找一个弱小的邻方
+    const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+      .filter((c) => c.key.startsWith("submit:"));
+    if (!cs.length) continue;
+    const target = cs[0].action.to;
+    const before = Object.values(s.commanderies).filter((c) => c.owner === target).length;
+    const r = resolve(s, [{ faction: "yuanshao", action: { type: "submit", to: target } }],
+      G, P, ROSTER, GEO);
+    const ev = r.state.log.find((e) => e.kind === "submitted" || e.kind === "submit-refuse");
+    assert.ok(ev, "下了劝降令却没有结算事件");
+    if (ev.kind === "submitted") won ??= { r, target, before };
+    else lost ??= { r, target };
+  }
+  assert.ok(won && lost, "十四个 seed 里凑不出一成一败 —— 成功率可能被写死了");
+
+  const after = Object.values(won.r.state.commanderies)
+    .filter((c) => c.owner === won.target).length;
+  assert.equal(after, 0, "归降后仍有郡属原主");
+  assert.ok(won.r.state.factions[won.target].eliminated, "归降方未退出");
+  assert.equal(won.r.state.factions[won.target].submittedTo, "yuanshao",
+    "没记下归降于谁 —— 归降与被灭死因不同，报告要分得开");
+  assert.ok(won.r.state.factions.yuanshao.conquests >= won.before,
+    "归降来的郡没有计入「夺自他方」");
+  assert.ok(!won.r.state.armies.some((a) => a.faction === won.target),
+    "归降方还留着无主孤军在外");
+
+  // 拒降后进入禁劝期
+  const s2 = refreshAp(lost.r.state, P);
+  const again = listActions(s2, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key === `submit:${lost.target}`);
+  assert.equal(again.length, 0, "拒降后仍可逐季重掷 —— 成功率形同虚设");
+});
+
 // ── 招降 ──────────────────────────────────────────────────────────────
 
 /** 打一场必破的城，返回破城后的状态与被俘者 */
@@ -1270,10 +1360,14 @@ test("外交：盟约到期后解约不算背盟，不收代价", () => {
 
 test("野战：城下已有敌围城军时，候选给的是野战预告而非攻城预告", () => {
   const t = fresh();
-  const from = Object.values(t.commanderies).find((c) => c.owner === "yuanshao");
-  const edge = [...(G.adj.get(from.id) ?? [])]
-    .find((e) => t.commanderies[e.to]?.owner && t.commanderies[e.to].owner !== "yuanshao");
-  assert.ok(edge, "袁绍无可攻目标");
+  // 在引擎**确实给出**的征伐目标上布置，而不是自己挑一个郡去假定它会被列出。
+  // 候选表是有限预算（totalCap 60，各类型轮转填充），加一个动作类型就会挤掉
+  // 别的类型的名额——写死某个目标的测试会在下次加动作时无端红掉
+  const first = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO)
+    .find((c) => c.key.startsWith("campaign:") && c.action.from !== c.action.target);
+  assert.ok(first, "袁绍无可攻目标");
+  const from = t.commanderies[first.action.from];
+  const edge = { to: first.action.target };
 
   // 让第三方在目标城下驻一支围城军
   t.armies.push({ id: "x:0:foe", faction: "lubu", commander: null, retinue: [],
