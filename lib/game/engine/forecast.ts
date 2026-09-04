@@ -42,6 +42,57 @@ const HOLDBONUS_DARK: [number, number] = [0, 2];
  * 绝不读 tgt.garrison / tgt.defense 的真值——那样预告就成了开天眼，
  * 刺探也就白做了。
  */
+/**
+ * **续围**的预告：军团已在城下，不撤则本季照常结算，这一季会怎样。
+ *
+ * forecastCampaign 在城下有兵时返回 null，注释写着「另一套判定」——
+ * 而那一套一直没写。实测「己方有围城军」的席·季里，100% 拿不到该目标的预告：
+ * 模型只知道上季没打下来，不知道再围一季有没有戏。围城是唯一一类跨季、
+ * 可逐季加码的决策（缺口每季 +1、守方每季掉兵、城防每季掉），
+ * 「加码还是撤」正需要这个前瞻。
+ *
+ * 与结算同一套算式：所以它不是估计，是「不撤的话本季就会这样」。
+ * 唯一的不确定是战力浮动（±jitter），故给区间。
+ */
+export function forecastSiege(
+  s: GameState, viewer: FactionId, army: Army,
+  g: Graph, P: EngineParams, roster: Roster | null,
+): SiegeForecast | null {
+  const tgt = army.target ? s.commanderies[army.target] : null;
+  const src = s.commanderies[army.home];
+  if (!tgt || !src || army.faction !== viewer) return null;
+
+  const edge = (g.adj.get(army.home) ?? []).find((e) => e.to === army.target);
+  const terrain = edge?.terrain ?? "plain";
+  const corps = roster
+    ? army.retinue.map((id) => roster.byId.get(id)).filter((o) => !!o)
+    : [];
+  const atk = roster ? attackRetinue(corps, P, terrain) : null;
+  const def = roster ? defendRetinue(retinueAt(s, roster, army.target!, P), P) : null;
+  const power = unitPower(P, army.unit, terrain, tgt.unit);
+  const persist = army.siegeSeasons * P.siegeBreachPerSeason;
+  const formEdge = formationEdge(P, src.formation, tgt.formation);
+  const atGate = terrain === "gate";
+  const bonus = (atk?.breachBonus ?? 0) + persist + formEdge;
+  const mul = power * (atk?.attackMul ?? 1);
+  const guard = unitGuard(P, tgt.unit);
+
+  // 围城时守军是**真值**：自家军团就在城下，看得见
+  const lo = breachCount(P, army.troops * (1 - P.jitter) * mul, tgt.garrison * guard,
+                         tgt.defense, army.gear, terrain, atGate, bonus, def?.holdBonus ?? 0);
+  const hi = breachCount(P, army.troops * (1 + P.jitter) * mul, tgt.garrison * guard,
+                         tgt.defense, army.gear, terrain, atGate, bonus, def?.holdBonus ?? 0);
+  const verdict = lo.breach > lo.hold ? "破城" : hi.breach > hi.hold ? "未知" : "不破";
+  return {
+    breachLo: lo.breach, breachHi: hi.breach,
+    holdLo: lo.hold, holdHi: hi.hold, verdict, fog: "own",
+    text: `续围：缺口 ${lo.breach === hi.breach ? lo.breach : `${lo.breach}–${hi.breach}`}`
+        + ` 对可防守 ${lo.hold}→${verdict}`
+        + `（已围 ${army.siegeSeasons} 季，累加 +${persist} 缺口；`
+        + `满 ${P.siegeMaxSeasons} 季自动撤围）`,
+  };
+}
+
 export function forecastCampaign(
   s: GameState, viewer: FactionId, a: Extract<Action, { type: "campaign" }>,
   g: Graph, P: EngineParams, roster: Roster | null, troops: number,

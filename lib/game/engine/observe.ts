@@ -11,6 +11,7 @@
 //    过滤法在字段增长时必然漏。
 import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
+import { forecastSiege } from "./forecast.ts";
 import { supplyReach } from "./resolve.ts";
 import { unitName, FORMATION_CN } from "./combat.ts";
 import { retinueAt, isFiller, defendRetinue } from "./officers.ts";
@@ -86,7 +87,18 @@ export interface Observation {
   }>;
   /** 我在外的军团 */
   armies: Array<{ id: string; at: string; target: string | null; troops: number;
-                  seasons: number; unit: string; gear: string }>;
+                  seasons: number; unit: string; gear: string;
+                  /**
+                   * 正在围城时的**续围预告**：不撤则本季就会这样。
+                   *
+                   * 此前一条都没有——forecastCampaign 在城下有兵时返回 null，
+                   * 注释写着「另一套判定」，而那一套一直没写。实测「己方有围城军」
+                   * 的席·季里 100% 拿不到预告：模型只知道上季没打下来，
+                   * 不知道再围一季有没有戏。围城是唯一一类跨季、可逐季加码的决策
+                   */
+                  siege?: { breachLo: number; breachHi: number; hold: number;
+                            verdict: string; text: string };
+                }>;
   /** 现行盟约 */
   treaties: Array<{ with: FactionId; from: number; until: number }>;
   /** 上季战报：我方全部 + 天下大事 */
@@ -202,10 +214,15 @@ export function observe(
     },
     brief: briefFor(s, geo, faction, g.adj, nameOf),
     mine,
-    armies: s.armies.filter((a) => a.faction === faction).map((a) => ({
-      id: a.id, at: a.at, target: a.target, troops: a.troops,
-      seasons: a.siegeSeasons, unit: unitName(P, a.unit), gear: a.gear,
-    })),
+    armies: s.armies.filter((a) => a.faction === faction).map((a) => {
+      const fc = a.target ? forecastSiege(s, faction, a, g, P, roster) : null;
+      return {
+        id: a.id, at: a.at, target: a.target, troops: a.troops,
+        seasons: a.siegeSeasons, unit: unitName(P, a.unit), gear: a.gear,
+        ...(fc ? { siege: { breachLo: fc.breachLo, breachHi: fc.breachHi,
+                            hold: fc.holdLo, verdict: fc.verdict, text: fc.text } } : {}),
+      };
+    }),
     treaties: s.treaties
       .filter((t) => t.a === faction || t.b === faction)
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
