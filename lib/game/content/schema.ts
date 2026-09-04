@@ -51,7 +51,7 @@ export interface ActionDef {
   preconditions: string[];
   /** 效果的自然语言表述 */
   effects: string[];
-  /** 生效延迟（旬）。0 表示立即 */
+  /** 生效延迟（**季**）。0 表示立即。引擎里没有「旬」这个时间单位，一切按季 */
   delay?: number;
   /** 是否为持续命令：下达后自动推进直到中断 */
   standing?: boolean;
@@ -76,7 +76,7 @@ export interface UnitDef {
   strongAgainst: string[];
   attack: number;
   defense: number;
-  /** 每旬每人粮耗（石） */
+  /** 已废：引擎里没有粮这个量，金节明写「不另设兵粮」 */
   upkeep: number;
   marchSpeed: number;
   /** 招募所需，写成表达式或定值 */
@@ -228,7 +228,7 @@ export function toRulesDigest(pack: ContentPack): string {
       a.cost.grain ? `${a.cost.grain} 粮` : null,
       a.cost.formula ?? null,
     ].filter(Boolean).join(" + ") || "无";
-    lines.push(`\n### ${a.id} ${a.name}（${cost}${a.delay ? `，${a.delay} 旬后生效` : ""}${a.standing ? "，持续命令" : ""}）`);
+    lines.push(`\n### ${a.id} ${a.name}（${cost}${a.delay ? `，${a.delay} 季后生效` : ""}${a.standing ? "，持续命令" : ""}）`);
     lines.push(a.summary);
     for (const prm of a.params) {
       const opts = prm.tiers ? `：${prm.tiers.map((t) => `${t.id}(${t.label})`).join(" / ")}` : "";

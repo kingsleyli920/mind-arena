@@ -71,3 +71,31 @@ test("包：界面读的运行时包必须与内容包同源", () => {
   assert.deepEqual(runtime.pack, pack,
     "public/game/runtime-194.json 里的内容包已过期 —— 跑 node tools/build-runtime-bundle.mjs");
 });
+
+test("包：写给模型的数必须与引擎实际用的一致", () => {
+  // 这条挡的是「规则摘要教模型一套、引擎跑另一套」。三处真实漂移：
+  //   攻城节写「6 旬未破自动撤围」，而引擎读的是围城节的「上限季数 3」。
+  //     六十日不足一季 —— 模型照它判会以为围城撑不过一季，
+  //     于是每季重开强攻（2 令、折损 0.35）而不用增兵续围（0.12、缺口每季 +1）。
+  //   情报节写「已探 ±15%」，而误差比是 0.08。
+  //   scout 的效果许了产出与民心，引擎一次都没给 —— 而民心是劝降成功率的直接输入，
+  //     模型会按「能探到民心」去分配每季仅有的三次免费刺探。
+  const digest = toRulesDigest(pack);
+  assert.ok(!/旬/.test(digest), "摘要里还留着以「旬」计的围城上限 —— 引擎按季算");
+  // 测**摘要**而不是原始包：包里的「定档依据」会解释档宽是怎么定的
+  //（提到未探的 ±28%、旧版的 ±17%/±15%），那些是设计说明，
+  // 且键名含「依据」会被注解过滤器挡在摘要之外。模型读不到的东西不必测
+  const err = Math.round(pack.constants.情报.误差比 * 100);
+  for (const m of digest.matchAll(/±(\d+)%/g)) {
+    assert.equal(Number(m[1]), err,
+      `摘要里出现 ±${m[1]}%，而误差比是 ${err}% —— 模型会按错的带宽估敌情`);
+  }
+  const scout = pack.actions.find((a) => a.id === "scout");
+  for (const bad of ["产出", "民心"]) {
+    assert.ok(!scout.effects.some((e) => e.includes(bad) && !e.includes("不在")),
+      `scout 的效果里许了「${bad}」，而引擎只给守军与阵型`);
+  }
+  // 纪元时限是随局长缩放的，包里那个数只是 16 季的默认值，必须说明
+  assert.ok(pack.constants.时钟.纪元时限说明?.includes("epochLimitFor"),
+    "纪元时限没写明它随局长缩放 —— 长局里这个数是错的");
+});

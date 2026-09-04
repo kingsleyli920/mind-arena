@@ -389,8 +389,16 @@ export function listActions(
         const march = roster ? attackRetinue(corps, P, rTerrain).members : [];
         const lead = march[0] ?? null;
         const named = march.filter((o) => !isFiller(o));
-        const send = Math.min(Math.floor(src.garrison * P.strengthRatio.allout),
-                              roster ? troopCap(corps, P) : Infinity);
+        // 取兵必须与结算同一套：resolve 在起兵郡有**待命军团**时整建制派它，
+        // 而不是按守军抽调。此前这里只算守军，于是标签与预告都算错了——
+        // 实测 386 条赴援候选里 18 条落在这个分叉上，且有高报的
+        //（标签写「可出 2425 人」，引擎实际只派 1084，倍数 0.45）。
+        // 高报是更危险的方向：模型读到「可解围」下令，派出去的不到一半，
+        // 判词与结果直接反号
+        const rReady = s.armies.find((x) => x.faction === f && x.at === src.id && !x.target);
+        const cap = roster ? troopCap(corps, P) : Infinity;
+        const send = Math.min(rReady ? rReady.troops
+                                     : Math.floor(src.garrison * P.strengthRatio.allout), cap);
         const ff = forecastField(s, f, src.id, foe, send, g, P, roster);
         out.push({
           key: `relief:${src.id}>${foe.target}`,
@@ -403,7 +411,7 @@ export function listActions(
                         verdict: ff.verdict, text: ff.text } : undefined,
           label: `${isSortie ? `${src.id}出城迎战` : `自${src.id}赴援${foe.target}`}`
                + `（${nameOf(foe.faction)} 围城第 ${foe.siegeSeasons} 季，围军 ${troopBand(foe.troops, P)}）：`
-               + `我方可出 ${send} 人`
+               + `我方可出 ${send} 人${rReady ? `（整建制调用待命军团）` : ""}`
                + `${named.length ? `，${named[0].name}${named.length > 1 ? `等 ${named.length} 将` : ""}领` : "，仅郡守"}`
                + `${ff ? `｜${ff.text}` : ""}`
                + `${isSortie ? "；败则城中兵力大损" : ""}`,
