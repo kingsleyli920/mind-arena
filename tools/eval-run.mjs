@@ -230,6 +230,9 @@ async function playGame(gi) {
       grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
       // 长局看的是疆域与统一，不是档位——档位是给 16 季评测用的量尺
       zhou: standingOf(s, GEO, under).controlledZhou,
+      // 细分名次要用：档位太粗，同档的两个结局会被记成平手
+      seats: standingOf(s, GEO, under).zhouSeats,
+      startZhou: f.startZhou, startSeats: f.startSeats,
       unified: s.winner === under, winner: s.winner ?? null,
       seasons: s.seasonsPerGame,
       commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,
