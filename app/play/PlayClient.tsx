@@ -86,14 +86,25 @@ type ModelRow = {
 };
 
 /**
- * 默认模型选一个**免费**的。
+ * 默认模型选一个**免费且实测跑得通**的。
  *
- * 这不是省钱，是为了「打开就能试」：付费模型在账户余额为负时一律 402，
- * 而新来的人第一次点「让对手用大模型」如果直接撞上一条报错，
- * 他不会知道该去充值还是该改配置。免费模型有速率限制、也不算强，
- * 但它能让整条路先跑通，强弱是下一步的事
+ * 免费不是为了省钱，是为了「打开就能试」：付费模型在账户余额为负时一律拒绝，
+ * 而第一次点「让对手用大模型」的人如果直接撞上一条报错，
+ * 他不会知道该去充值还是该改配置。
+ *
+ * 具体选哪个是实测出来的，不是挑的。拿真实观测（袁绍开局，system 6969 字、
+ * user 13119 字、候选 60 条、带 enum 的 json_schema）把 18 个免费模型全跑一遍，
+ * 只有 5 个能回出可解析且合法的决策：
+ *   ✓ nemotron-3-super-120b-a12b   58.5s  推理 4085  挑 12 全合法  ← 用这个
+ *   ✓ dots-3-note-preview          64.8s  推理 5374  挑  9 全合法
+ *   ✓ minimax-m2.7                 85.0s  推理 4396  挑  4 全合法
+ *   ✓ nemotron-3-nano-omni         99.2s  推理 4397  挑  1
+ *   ✓ minimax-m3                  131.5s  finish=length，挑 7
+ * 其余或 429/403，或把 8000 出参全烧在推理上被截断。
+ * 尤其 nemotron-3-ultra-550b（曾经的默认）：7244 tok 推理、finish=length，
+ * 一季要重试三次、拖十分钟——「参数量最大」和「能用」是两回事。
  */
-const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+const DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
 
 /** 一次调用的花费（美元）。价格是每 token 的字符串，缓存命中部分仍按入参计价 */
 function costOf(r: ModelTurnRecord, price: Map<string, ModelRow>): number {
@@ -755,6 +766,9 @@ export function PlayClient() {
               <button onClick={() => {
                 setSeat(resume.seat); setGame(resume.game); setPicked(resume.picked);
                 setFlash({ mine: [], world: [] }); setFlips([]);
+                // since 决定模型看到的战报从哪一条起。读档不重置它会从 0 起算，
+                // 于是模型收到整局的日志——观测直接撑爆 token 预算
+                setSince(resume.game.log.length); setRecords([]); setThinking({});
                 const cap = resume.game.factions[resume.seat]?.capital;
                 const p = cap ? engine.points.find((c) => c.id === cap) : null;
                 setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });

@@ -66,13 +66,25 @@ longer match.
 
 ## Current limits
 
-- **Opponents are the deterministic bot, not models.** The OpenRouter route and
-  the whole model-seat pipeline exist and are tested, but wiring live models into
-  the play UI is deliberately deferred until the game itself is complete.
+- **Model opponents are wired but slow on free models.** On the seat-select page,
+  「让对手用大模型」 assigns a model to the strongest N factions; the rest stay bots.
+  The browser runs the same `modelDecide` the eval harness runs — same observation,
+  same admission, same failure buckets — with `/api/openrouter/chat` acting as a
+  server-side `LlmClient` proxy so the key never reaches the browser. Needs
+  `OPENROUTER_API_KEY` in `.env.local`. The default is a free model so it works at
+  zero balance; free models are heavy reasoners and a large seat (袁绍, 13 郡,
+  ~9k observation tokens) can take several minutes and two starvation retries.
+  Paid models are much faster. Failures never silently fall back to the bot —
+  that seat simply issues no orders, and the status bar says why.
 - Counties (县) are not a play unit; the map's atom is the commandery (郡).
 - No loyalty model. Officers never defect; the only way to gain someone else's
   officer is to take the city and win the 招降 roll within two seasons.
-- One scenario only (194 兴平元年).
+- One scenario only (194 兴平元年). It has been audited across eight dimensions
+  (ownership, officer availability, province seats, population/garrison
+  derivation, adjacency, cross-file consistency, seat playability) with every
+  finding adversarially re-checked; see the `剧本核对` commit for what that found
+  and fixed. `tools/build-adjacency.mjs` now fails rather than writing a map that
+  drops a required corridor.
 - Desktop only.
 - No repository or public deploy yet.
 

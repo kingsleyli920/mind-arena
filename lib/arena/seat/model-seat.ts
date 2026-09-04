@@ -111,9 +111,21 @@ export async function modelDecide(
     // 记成后者会把每个推理模型都判成废物，而这个 harness 的立项目的就是比模型
     if (!res.content.trim()) {
       const r = res.usage?.reasoning ?? 0;
-      return { orders: [], record: { ...base, ...meta(res), failureKind: "budget",
-        failure: `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
-               + `${r ? `，推理占 ${r}` : ""}）` } };
+      const c = res.usage?.completion ?? 0;
+      // 空内容有两种，含义完全不同，不能都记成「出参预算不够」：
+      //   花掉了出参才空 → 被推理吃光了，是 harness 的配置问题（budget）
+      //   一个 token 都没花就空 → 提供方回了个空壳，多半是限流或路由抽风（infra）
+      // 实测见过后者：某免费模型 0.6 秒返回空内容、无 usage 无 finish_reason，
+      // 而同一份载荷手工重发就正常。把它记成 budget 会让人去调出参预算，
+      // 而该做的是重试或换提供方
+      const spent = res.finishReason === "length" || r > 0 || c > 0;
+      return { orders: [], record: { ...base, ...meta(res),
+        failureKind: spent ? "budget" : "infra",
+        failure: spent
+          ? `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
+            + `${r ? `，推理占 ${r}` : ""}）`
+          : `提供方回了空壳（finish=${res.finishReason ?? "无"}，未计出参`
+            + `，耗时 ${res.elapsedMs}ms）——多半是限流或路由问题，非模型能力` } };
     }
     const dec = parseDecision(res.content);
     if (!dec) {
