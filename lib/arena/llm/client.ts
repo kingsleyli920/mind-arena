@@ -65,6 +65,24 @@ export interface ChatResult {
     prompt: number; completion: number; cached: number;
     /** 出参里被推理吃掉的部分。推理模型的真实成本在这里，不在 content 长度上 */
     reasoning: number;
+    /**
+     * 提供方回报的**真实扣费**（美元）。取不到则 null。
+     *
+     * 这一项优先于「按价目表乘 token 数」重算。同一局实测：价目表算出 $0.0081，
+     * 而提供方自报 $0.0162——**价目表少算一半**。两个原因叠加：
+     *   一、/models 报的是该模型的**最低**价，而 OpenRouter 实际路由到的
+     *       提供方可能更贵；
+     *   二、有的提供方 completion_tokens **不含** reasoning
+     *      （一次回包里 completion 26、reasoning 38），而计费按两者之和。
+     * 余额有限时，一个少算一半的预算表就是「以为花五块、实际花十块」，
+     * 正好复刻历史上那次跑到一半没钱、产出一份假榜的事故。
+     *
+     * 校准方法要留一句：**别拿账户余额端点做短窗口校准**——实测 5 次调用后
+     * 余额一动不动，它有分钟级结算延迟，短窗口的「余额差」里混着上一批的尾账。
+     * 要核就核累计：充值后余额共掉 $0.088，同期各次 usage.cost 合计 $0.086，
+     * 吻合到 2% 以内
+     */
+    cost: number | null;
   } | null;
   /** 实际用的是结构化输出还是退回了自由文本。等价于 rung !== "text" */
   structured: boolean;
@@ -95,6 +113,7 @@ interface RawResponse {
   usage?: {
     prompt_tokens?: number;
     completion_tokens?: number;
+    cost?: number;
     prompt_tokens_details?: { cached_tokens?: number };
     completion_tokens_details?: { reasoning_tokens?: number };
   };
@@ -113,6 +132,11 @@ export class OpenRouterClient implements LlmClient {
 
   async chat(req: ChatRequest): Promise<ChatResult> {
     const started = Date.now();
+    // 被丢弃的那次尝试**照样计费**。只报最后一次的扣费会系统性少算：
+    // 实测一局里有 1 季被推理顶到翻倍重试，自报 $0.0200 而实扣 $0.0226，
+    // 差的正是那一次被丢掉的请求。重试是 harness 自己的浪费，
+    // 更应该算进账里——不然「加大出参预算」这类决定就是在拿看不见的钱做的
+    let costAccum = 0;
     const maxAttempts = this.opts.maxAttempts ?? 6;
     // 没给 schema 就直接从 text 档起步，不必把上面三档白试一遍
     let rungIdx = req.schema ? 0 : LADDER.length - 1;
@@ -141,6 +165,8 @@ export class OpenRouterClient implements LlmClient {
         const finishReason = choice?.finish_reason ?? null;
         const completion = json.usage?.completion_tokens ?? 0;
         const reasoning = json.usage?.completion_tokens_details?.reasoning_tokens ?? 0;
+        // 每次尝试都累加，包括下面因饥饿被丢弃的那一次
+        if (typeof json.usage?.cost === "number") costAccum += json.usage.cost;
 
         // 出参被推理吃光了。这是我们的配置问题，不是模型答不上来，
         // 两者在评测里含义完全不同。翻倍再给一次机会。
@@ -172,6 +198,7 @@ export class OpenRouterClient implements LlmClient {
             completion,
             cached: json.usage.prompt_tokens_details?.cached_tokens ?? 0,
             reasoning,
+            cost: costAccum || (typeof json.usage.cost === "number" ? json.usage.cost : null),
           } : null,
           structured: rung !== "text",
           rung, maxTokens: budget, finishReason,

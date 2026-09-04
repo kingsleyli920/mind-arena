@@ -149,14 +149,28 @@ function summarize(run, px) {
   const starved = recs.filter((r) => r.failure && fk(r) === "budget").length;
   const modelFail = recs.filter((r) => r.failure && fk(r) === "model").length;
 
-  let cost = null;
+  // 成本以**提供方回报的实际扣费**为准，价目表重算只作兜底。
+  //
+  // 实测同一局：价目表算出 $0.0081，提供方自报 $0.0162——**价目表少算一半**。
+  // 一是 /models 报的是最低价而非实际路由到的提供方价，
+  // 二是有的提供方 completion_tokens 不含 reasoning 而计费按两者之和。
+  // 余额有限时少算就是跑到一半没钱，而那正是这套管线出过的最坏事故。
+  const priced = usage.filter((r) => typeof r.usage.cost === "number");
+  let cost = null, costSource = null;
+  if (priced.length) {
+    cost = priced.reduce((a, r) => a + r.usage.cost, 0);
+    costSource = priced.length === usage.length ? "实扣" : `实扣${priced.length}/${usage.length}`;
+  }
   const p = run.model ? px.get(run.model) : null;
-  if (p && usage.length) {
+  if (cost == null && p && usage.length) {
     const M = 1e6;
     const inM = Number(p.prompt) * M, outM = Number(p.completion) * M;
     const readM = p.input_cache_read != null ? Number(p.input_cache_read) * M : inM;
     const fresh = sum("prompt") - sum("cached");
-    cost = (fresh * inM + sum("cached") * readM + sum("completion") * outM) / M;
+    // 出参按 completion + reasoning 算：两者分开上报的提供方，计费是按和
+    cost = (fresh * inM + sum("cached") * readM
+            + (sum("completion") + sum("reasoning")) * outM) / M;
+    costSource = "估算";
   }
   return {
     spec: run.spec, model: run.model, games: rs.length,
@@ -170,7 +184,7 @@ function summarize(run, px) {
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
     outTok: sum("completion"), reasonTok: sum("reasoning"),
-    rungs, creditsFail, infraFail, starved, modelFail, cost,
+    rungs, creditsFail, infraFail, starved, modelFail, cost, costSource,
     reasoning: run.reasoning, keyEnum: run.keyEnum,
     elapsed: run.elapsed,
   };
@@ -237,13 +251,16 @@ for (const r of rows) {
     + `${r.elim}/${r.games}`.padStart(6)
     + `${(r.illegal * 100).toFixed(1)}%`.padStart(7)
     + `${(r.apUse * 100).toFixed(0)}%`.padStart(9)
-    + (r.cost == null ? "—" : `$${r.cost.toFixed(3)}`).padStart(9));
+    + (r.cost == null ? "—" : `$${r.cost.toFixed(3)}${r.costSource === "估算" ? "≈" : ""}`).padStart(10));
 }
 
 console.log(`\n档位分布（模型受的约束不同则分数不完全可比）`);
 for (const r of rows.filter((x) => x.calls)) {
   const cache = r.promptTok ? (r.cachedTok / r.promptTok * 100).toFixed(0) : 0;
-  const reason = r.outTok ? (r.reasonTok / r.outTok * 100).toFixed(0) : 0;
+  // 分母取 completion + reasoning。只除 completion 会出现 108% 这种无意义的数——
+  // 有的提供方 completion_tokens 不含 reasoning
+  const outAll = r.outTok + r.reasonTok;
+  const reason = outAll ? (r.reasonTok / outAll * 100).toFixed(0) : 0;
   console.log(`  ${r.spec.slice(0, 38).padEnd(40)}`
     + `${Object.entries(r.rungs).sort().map(([k, v]) => `${k}×${v}`).join(" ").padEnd(24)}`
     + `缓存 ${String(cache).padStart(3)}%\u3000推理占出参 ${String(reason).padStart(3)}%`

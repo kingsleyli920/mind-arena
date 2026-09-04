@@ -32,7 +32,9 @@ export interface ModelTurnRecord {
   picks: string[];
   reason?: string;
   admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate">;
-  usage: { prompt: number; completion: number; cached: number; reasoning: number } | null;
+  usage: { prompt: number; completion: number; cached: number; reasoning: number;
+           /** 提供方回报的真实扣费（美元）。价目表重算会少算，见 client.ts */
+           cost: number | null } | null;
   structured: boolean;
   /**
    * 请求实际落在哪一档降级。跨模型比分前要先看这个，否则约束不同分数不可比。

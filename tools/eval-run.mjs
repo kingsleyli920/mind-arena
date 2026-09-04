@@ -108,6 +108,21 @@ const GAME_JOBS = Math.max(1, Number(arg("gamejobs", agentKind === "model" ? "4"
 const records = [];
 const results = [];
 
+/**
+ * --budget=<美元>：累计实扣超过它就停手，不再开新局。
+ *
+ * 余额有限时这道闸是必需的。这套管线出过的最坏事故就是**跑到一半没钱**：
+ * 一份「国产模型全线 4–35 分、机器人 148 分」的排行榜，真相是每个模型
+ * 768 季里有 688–765 季根本没发出请求，而报告照常排了名。
+ * 停手比跑完一份假榜好——停手至少还知道自己停了。
+ *
+ * 判的是**提供方回报的实扣**，不是价目表重算：实测重算少算 74%
+ *（有的提供方 completion_tokens 不含 reasoning），拿它当闸门等于没有闸门。
+ */
+const BUDGET = Number(arg("budget", "0")) || 0;
+let spent = 0;
+let halted = null;
+
 async function playGame(gi) {
   const seed = `eval-${gi}`;
   // 席位轮换：同一 seed 下每个被测席位都轮过一遍位置，消掉席位固有优劣
@@ -125,6 +140,9 @@ async function playGame(gi) {
       if (f === under && MODEL_DEPS) {
         const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS);
         orders.push(...os);
+        // 实扣逐次累加，供预算闸门判断。取不到就不加——宁可闸门失灵报得少，
+        // 也不要拿一个估算值去冒充实扣
+        if (typeof record.usage?.cost === "number") spent += record.usage.cost;
         mine = {
           turn: s.turn, seat: f, obsTokens: record.obsTokens,
           candidates: record.candidates, picks: record.picks.length,
@@ -201,9 +219,14 @@ const queue = Array.from({ length: GAMES }, (_, i) => i);
 const done = [];
 await Promise.all(Array.from({ length: Math.min(GAME_JOBS, GAMES) }, async () => {
   while (queue.length) {
+    if (halted) { queue.length = 0; break; }
     const gi = queue.shift();
     done.push(await playGame(gi));
     process.stderr.write(`[progress] ${done.length}/${GAMES}\n`);
+    if (BUDGET && spent >= BUDGET) {
+      halted = `累计实扣 $${spent.toFixed(4)} 达到预算 $${BUDGET.toFixed(2)}`;
+      process.stderr.write(`[halt] ${halted}，已完成 ${done.length}/${GAMES} 局\n`);
+    }
   }
 }));
 // 并发完成的顺序不定，按局号排回来——报告与 jsonl 的行序必须可复现
@@ -285,6 +308,9 @@ if (OUT) {
 if (JSON_OUT) {
   fs.writeFileSync(JSON_OUT, JSON.stringify({
     agent: AGENT, model: MODEL || null, games: GAMES, seats: SEATS,
+    // 预算停手时，games 与实际跑完的局数不同。报告必须看得见这件事，
+    // 否则「48 局的排名」可能其实只有 11 局
+    played: results.length, spentUsd: +spent.toFixed(4), halted,
     keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null,
     results, records,
   }));
