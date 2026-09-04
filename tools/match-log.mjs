@@ -174,6 +174,10 @@ async function main() {
   say("");
 
   let since = 0, plan = null, spentUsd = 0, calls = 0, halted = null;
+  // ── 游戏外元数据 ────────────────────────────────────────────────
+  // 与游戏内信息分开记：token 与钱不是这一局里发生的事，
+  // 它们是「我们花了多少代价去问模型」的账，两者混在一起谁也看不清
+  const meta = [];
   let prev = snapshot(s, SEAT);
   const gained = [];   // 逐季净增，用来说趋势
 
@@ -268,6 +272,16 @@ async function main() {
         + `\u3000档位 ${rec.rung ?? "—"}\u3000尝试 ${rec.attempts}`
         + `${rec.usage?.cost != null ? `\u3000$${rec.usage.cost.toFixed(4)}` : ""}`);
       if (rec.failure) say(`\n> ⚠ **本季无回应**（${rec.failureKind}）：${rec.failure}`);
+      meta.push({
+        turn: turn + 1, ms: rec.elapsedMs,
+        prompt: rec.usage?.prompt ?? 0, cached: rec.usage?.cached ?? 0,
+        completion: rec.usage?.completion ?? 0, reasoning: rec.usage?.reasoning ?? 0,
+        cost: rec.usage?.cost ?? null, rung: rec.rung, attempts: rec.attempts,
+        maxTokens: rec.maxTokens, finish: rec.finishReason,
+        provider: rec.provider, generationId: rec.generationId,
+        picks: rec.picks?.length ?? 0, admitted: 0, spent: 0, illegalRate: 0,
+        failure: rec.failure ?? null, failureKind: rec.failureKind ?? null,
+      });
     } else {
       const variant = AGENT.split(":")[1] ?? "balanced";
       if (!PROFILES[variant]) { console.error(`未知画像 ${variant}`); process.exit(2); }
@@ -282,6 +296,11 @@ async function main() {
     if (reason) say(`\n**本季意图**\u3000${reason}`);
 
     const adm = admit(s, SEAT, picks, cands, G, ROSTER);
+    if (meta.length && meta[meta.length - 1].turn === turn + 1) {
+      Object.assign(meta[meta.length - 1], { admitted: adm.admitted.length,
+        spent: adm.spent, ap: s.factions[SEAT].ap, illegalRate: adm.illegalRate,
+        candidates: cands.length, winnable });
+    }
     say("");
     say(`挑 ${picks.length} 条，采纳 ${adm.admitted.length} 条，耗 ${adm.spent}/${s.factions[SEAT].ap} 令`
       + `${adm.dropped.length ? `，丢弃 ${adm.dropped.length} 条` : ""}`);
@@ -404,9 +423,53 @@ async function main() {
   say(`**${GRADE_CN[fin.grade]} 档\u3000${GRADE_SCORE[fin.grade]} 分**`
     + `\u3000天下第 ${w.rank.findIndex(([id]) => id === SEAT) + 1 || "—"}/${w.rank.length}`);
   if (halted) say(`\n> ⚠ ${halted}，实录到此为止`);
-  if (calls) {
+  // ── 游戏外元数据 ──────────────────────────────────────────────
+  if (meta.length) {
+    const sum = (k) => meta.reduce((a, m) => a + (m[k] ?? 0), 0);
+    const ms = meta.map((m) => m.ms).sort((a, b) => a - b);
+    const mid = ms[Math.floor(ms.length / 2)] ?? 0;
+    const rungs = {};
+    for (const m of meta) rungs[m.rung ?? "失败"] = (rungs[m.rung ?? "失败"] ?? 0) + 1;
+    const fails = {};
+    for (const m of meta) if (m.failureKind) fails[m.failureKind] = (fails[m.failureKind] ?? 0) + 1;
+    say(`\n---\n`);
+    say(`## 游戏外元数据`);
     say("");
-    say(`模型调用 ${calls} 次，实扣 $${spentUsd.toFixed(4)}`);
+    say(`> 以下与游戏内发生的事无关，是「我们花了多少代价去问模型」的账。`);
+    say("");
+    say(`| | |`);
+    say(`|---|---|`);
+    say(`| 模型 | \`${MODEL}\`（推理档 ${REASONING}） |`);
+    say(`| 提供方 | ${[...new Set(meta.map((m) => m.provider).filter(Boolean))].join("、") || "—"} |`);
+    say(`| 调用次数 | ${calls}（每季一次） |`);
+    say(`| 入参 token | ${fmt(sum("prompt"))}\u3000其中命中缓存 ${fmt(sum("cached"))}（${(sum("cached") / Math.max(1, sum("prompt")) * 100).toFixed(0)}%） |`);
+    say(`| 出参 token | ${fmt(sum("completion"))}\u3000其中推理 ${fmt(sum("reasoning"))} |`);
+    say(`| **实扣** | **$${spentUsd.toFixed(4)}**\u3000单季均 $${(spentUsd / Math.max(1, calls)).toFixed(5)} |`);
+    say(`| 用时 | 合计 ${(sum("ms") / 1000 / 60).toFixed(1)} 分\u3000单季中位 ${(mid / 1000).toFixed(1)}s\u3000最慢 ${(Math.max(...ms) / 1000).toFixed(1)}s |`);
+    say(`| 降级档位 | ${Object.entries(rungs).map(([k, v]) => `${k}×${v}`).join("\u3000")} |`);
+    say(`| 失败 | ${Object.keys(fails).length ? Object.entries(fails).map(([k, v]) => `${k}×${v}`).join("\u3000") : "无"} |`);
+    say(`| 出参预算翻倍 | ${meta.filter((m) => m.maxTokens > 8000).length} 季 |`);
+    say(`| 非法率 | ${(meta.reduce((a, m) => a + (m.illegalRate ?? 0), 0) / Math.max(1, meta.length) * 100).toFixed(1)}% |`);
+    say(`| 令数用率 | ${(meta.reduce((a, m) => a + (m.spent ?? 0), 0) / Math.max(1, meta.reduce((a, m) => a + (m.ap ?? 0), 0)) * 100).toFixed(0)}% |`);
+    say("");
+    say(`<details><summary>逐季元数据 ${meta.length} 行</summary>\n`);
+    say(`| 季 | 用时s | 入参 | 缓存 | 出参 | 推理 | 实扣$ | 档位 | 尝试 | 候选 | 可破 | 挑 | 采纳 | 耗令 |`);
+    say(`|---|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
+    for (const m of meta) {
+      say(`| ${m.turn} | ${(m.ms / 1000).toFixed(1)} | ${fmt(m.prompt)} | ${fmt(m.cached)}`
+        + ` | ${fmt(m.completion)} | ${fmt(m.reasoning)} | ${m.cost != null ? m.cost.toFixed(5) : "—"}`
+        + ` | ${m.rung ?? "失败"} | ${m.attempts} | ${m.candidates ?? "—"} | ${m.winnable ?? "—"}`
+        + ` | ${m.picks} | ${m.admitted} | ${m.spent}/${m.ap ?? "—"} |`);
+    }
+    say(`\n</details>`);
+    fs.writeFileSync(OUT.replace(/\.md$/, "") + "-元数据.json", JSON.stringify({
+      model: MODEL, reasoning: REASONING, seat: SEAT, seed: SEED, seasons: SEASONS,
+      promptVersion: PROMPT_VERSION, packVersion: pack.version,
+      totals: { calls, costUsd: +spentUsd.toFixed(6),
+        prompt: sum("prompt"), cached: sum("cached"),
+        completion: sum("completion"), reasoning: sum("reasoning"), ms: sum("ms") },
+      perSeason: meta,
+    }, null, 1));
   }
   say("");
   say(`> 生成于 ${new Date().toISOString()}\u3000git \`${(() => {
