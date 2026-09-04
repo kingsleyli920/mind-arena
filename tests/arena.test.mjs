@@ -109,7 +109,11 @@ test("输出协议：默认把「只能从候选里选」提到解码层", () =>
   assert.equal(off.strict, true);
   assert.equal(off.schema.additionalProperties, false);
   assert.equal(off.schema.properties.picks.items.enum, undefined);
-  assert.deepEqual(off.schema.required, ["picks", "reason"]);
+  // plan 也必填：它是模型唯一的跨季记忆（观测里全是「此刻的状态」，
+  // 没有一条是「我上季打算干什么」）。设成选填，模型多半就不写了，
+  // 而没有它就执行不了跨十几季的战役
+  assert.deepEqual(off.schema.required, ["picks", "reason", "plan"]);
+  assert.ok(off.schema.properties.plan, "schema 里没有跨季方略字段");
 });
 
 test("输出协议：宽容解析吃得下代码块与散文包裹，解析不出返回 null", () => {

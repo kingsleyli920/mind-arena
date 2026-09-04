@@ -37,6 +37,8 @@ export interface EngineParams {
   garrisonCap: number;
   /** 令数 */
   apBase: number; apCap: number; carryCap: number;
+  /** 令数随郡数增长的指数。0.5 即 sqrt */
+  apExp: number;
   /** 时钟 */
   seasonsPerGame: number; intelValidSeasons: number;
   /** 情报：未探的档位表与已探的误差 */
@@ -104,6 +106,8 @@ export interface EngineParams {
   gearLadder: string[];
   /** 纪元 */
   epochCount: number; epochLimit: number; epochMin: number;
+  /** 统一天下的州数门槛。达到即局终，胜者为该势力 */
+  unifyZhou: number;
   neutralGrowth: Record<number, number>;
 }
 
@@ -202,6 +206,7 @@ export function loadParams(pack: RawPack): EngineParams {
     garrisonCap: g("产出", "守军上限"),
     apBase: g("令数", "基数"),
     apCap: g("令数", "上限"),
+    apExp: g("令数", "版图指数"),
     carryCap: g("令数", "结转上限"),
     seasonsPerGame: g("时钟", "一局季数"),
     intelValidSeasons: g("情报", "有效季数"),
@@ -267,6 +272,7 @@ export function loadParams(pack: RawPack): EngineParams {
     gearLadder: ["none", "ram", "mound"],
     epochCount: g("时钟", "纪元数"),
     epochLimit: g("时钟", "纪元时限"),
+    unifyZhou: g("胜负", "统一州数"),
     epochMin: g("时钟", "纪元最短"),
     neutralGrowth: { 1: 0, 2: g("时钟", "无主自守_纪元二"), 3: g("时钟", "无主自守_纪元三") },
   };

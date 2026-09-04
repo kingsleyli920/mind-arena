@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.0.0";
+export const PROMPT_VERSION = "1.2.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -17,7 +17,13 @@ export function renderSystem(pack: unknown): string {
     "",
     "## 怎么下令",
     "- 只能从 candidates 里按 key 选，不得自造动作、不得改参数。引擎已把可行的选项筛好了。",
-    "- 一季可下多条，总耗令不超过 budget.ap。picks 的顺序即优先级：令数不够时先保前面的。",
+    "- 一季可下多条。budget.ap 是本季的令数，**用不完就作废**——最多只结转",
+    "  budget.carryCap 条。它不是「别超过」的上限，是「这一季必须花掉」的资源：",
+    "  下了 3 令而有 11 令可用，等于白扔八条。picks 的顺序即优先级，令数不够时先保前面的。",
+    "- **刺探与调任不耗令**（候选的 cost 为 0，另有次数上限）。它们是白给的，",
+    "  但正因为白给，它们不能代替花令的事：光靠免费动作填满 picks，",
+    "  令数照样一条没花，这一季实际什么都没推进。先把令花在征伐、集结、内政上，",
+    "  再用免费的次数补刺探与调任。",
     "- 候选逐条合法，但**一起下不一定合法**：同一郡每季至多 2 令，刺探 3 次、任命 5 次。",
     "  越界的会被逐条丢弃，不作废整回合——但那是白费的机会。",
     "",
@@ -38,8 +44,15 @@ export function renderSystem(pack: unknown): string {
     "- 升档是阶梯不是斜坡：第五个散郡值 0 分，凑成半州的那一个郡值一整档。",
     "- 治所失守则全境补给断绝，是全图杠杆最高的一击——对手的治所与自己的都算。",
     "",
+    "## 跨季方略",
+    "- 每次决策都是**独立**的一次问答：你看得见此刻的敌情、候选与上季战报，",
+    "  但看不见自己上季在想什么。`plan` 是你唯一的记忆——你写下它，下一季原样还给你。",
+    "- 没有它，你每季都在从零重想一遍，只能做一季就见效的事；",
+    "  而攻灭一方、控住一州往往要连打十几季。",
+    "- 方向没变就把上季的 plan 原样抄回来，变了就改写。观测里的 `plan` 就是你上季写的。",
+    "",
     "## 输出",
-    '只回 JSON：{"picks": ["候选key", ...], "reason": "一句话意图"}',
+    '只回 JSON：{"picks": ["候选key", ...], "reason": "一句话意图", "plan": "跨季方略"}',
     "",
     "## 规则细则",
     toRulesDigest(pack as never),

@@ -362,6 +362,9 @@ export function PlayClient() {
   // 都从这里读——不留记录就只能看到「这季对手好像没动」
   const [records, setRecords] = useState<ModelTurnRecord[]>([]);
   const [since, setSince] = useState(0);
+  // 各模型席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆。
+  // 没有它，模型每季都在从零重想，只能做一季就见效的事
+  const [plans, setPlans] = useState<Record<string, string>>({});
   const [modelErr, setModelErr] = useState<string | null>(null);
   /**
    * 本局季数。默认取内容包的 16——那是**评测口径**（一局 16 次调用，
@@ -483,7 +486,7 @@ export function PlayClient() {
     }, engine.P);
     clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
-    setRecords([]); setThinking({}); setSince(0);
+    setRecords([]); setThinking({}); setSince(0); setPlans({});
     // 模型派给「除你之外郡数最多的 N 家」。派给最弱的几家没有意义：
     // 一郡小势力十六季里多半只在修城，看不出模型强弱
     setModelOf(Object.fromEntries(
@@ -537,7 +540,9 @@ export function PlayClient() {
     const done = await Promise.all(byModel.map(async (f) => {
       try {
         const { orders: os, record } = await modelDecide(game, f, since,
-          { ...deps, model: modelOf[f], reasoning: { effort } });
+          { ...deps, model: modelOf[f], reasoning: { effort } }, plans[f] ?? null);
+        // 答不上来的那一季不该把记忆抹掉，所以只在给出新方略时更新
+        if (record.plan) setPlans((p) => ({ ...p, [f]: record.plan! }));
         setThinking((t) => ({ ...t,
           [f]: record.failure ? `失败：${record.failure}` : `${os.length} 令` }));
         return { f, os, record };
@@ -604,7 +609,7 @@ export function PlayClient() {
     setPicked([]);
     setSince(r.state.log.length);
     setBusy(false);
-  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort]);
+  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort, plans]);
 
   // ── 疆域绘制 ────────────────────────────────────────────────────
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），

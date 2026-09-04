@@ -40,7 +40,13 @@ export interface Observation {
   /** 时钟。不含 seed */
   clock: { year: number; season: number; turn: number; totalTurns: number; epoch: number };
   /** 本季可用令数与结转 */
-  budget: { ap: number; carried: number; campaignAp: number; normalAp: number };
+  /**
+   * 本季令数。**用不完就作废**，最多结转 carryCap 条——所以它是「必须花掉的资源」，
+   * 不是「别超过的上限」。实测不写明这一条，模型每季只花掉三成：
+   * 它会拿免费的刺探与调任把 picks 填满，令数一条不动
+   */
+  budget: { ap: number; carried: number; carryCap: number;
+            campaignAp: number; normalAp: number };
   /**
    * 国库与军费。金与令数是两条不同的约束：
    * 令数管「一季能做几件事」且几乎不结转，金**可积累**、按郡的贫富分布不均、
@@ -72,6 +78,15 @@ export interface Observation {
   treaties: Array<{ with: FactionId; from: number; until: number }>;
   /** 上季战报：我方全部 + 天下大事 */
   report: { mine: string[]; world: string[] };
+  /**
+   * **我上季写下的跨季方略**。这是对局方唯一的记忆。
+   *
+   * 每次决策本来是无状态的：观测里全是「此刻的状态」，没有一条是
+   * 「我上季打算干什么」——于是每季都在从零重想一遍，
+   * 无法执行跨十几季的战役。而长局要打出统一，恰恰要求连续几十季朝一个方向使劲。
+   * null 表示开局，或上一季没写
+   */
+  plan: string | null;
   /** 本季候选。模型只能从这里选，按 key 引用 */
   candidates: ObsCandidate[];
 }
@@ -87,6 +102,8 @@ export function observe(
     nameOf?: (id: FactionId) => string; rules?: Rules; since?: number;
     /** 天下大事最多留几条 */
     worldCap?: number;
+    /** 上季该席位自己写下的跨季方略。原样回传，是它唯一的记忆 */
+    plan?: string | null;
   } = {},
 ): Observation {
   const nameOf = opts.nameOf ?? ((id: FactionId) => id);
@@ -135,7 +152,7 @@ export function observe(
           .reduce((n, a) => n + a.troops, 0)) * P.goldUpkeepPerTroop),
     },
     budget: {
-      ap: f?.ap ?? 0, carried: f?.carried ?? 0,
+      ap: f?.ap ?? 0, carried: f?.carried ?? 0, carryCap: P.carryCap,
       campaignAp: opts.rules?.campaignAp ?? 2, normalAp: opts.rules?.normalAp ?? 1,
     },
     standing: {
@@ -159,6 +176,7 @@ export function observe(
     treaties: s.treaties
       .filter((t) => t.a === faction || t.b === faction)
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
+    plan: opts?.plan ?? null,
     report: {
       mine: log.filter((e) => e.faction === faction).map((e) => e.text),
       // 天下大事只留最近若干条。三十家势力一季能产出上百条公开事件，

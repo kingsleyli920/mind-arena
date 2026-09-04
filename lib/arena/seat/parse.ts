@@ -13,6 +13,17 @@ export interface Decision {
   picks: string[];
   /** 一句话理由。用于审计，不进引擎 */
   reason?: string;
+  /**
+   * **跨季方略**。模型自己写，下一季原样还给它。
+   *
+   * 这是模型唯一的记忆。每次调用本来是无状态的：观测里有敌情、候选、上季战报，
+   * 但没有一条是「我上季打算干什么」——于是它每季都在从零重想一遍，
+   * 根本无法执行一场跨十几季的战役。而「统一天下」恰恰要求连续几十季朝一个方向使劲。
+   *
+   * 做成模型自己写、而不是回放它上季的 reason：reason 讲的是这一季，
+   * 方略讲的是这一阶段；由它自己决定什么值得记，比我们替它挑更准
+   */
+  plan?: string;
 }
 
 /**
@@ -50,7 +61,7 @@ export function decisionSchemaForKeys(keys: readonly string[], keyEnum = true) {
     schema: {
       type: "object",
       additionalProperties: false,
-      required: ["picks", "reason"],
+      required: ["picks", "reason", "plan"],
       properties: {
         picks: {
           type: "array",
@@ -59,6 +70,12 @@ export function decisionSchemaForKeys(keys: readonly string[], keyEnum = true) {
           description: "本季要下的令，按候选 key 逐字引用；顺序即优先级，令数不足时先保前面的",
         },
         reason: { type: "string", description: "一句话说明本季的意图" },
+        plan: {
+          type: "string",
+          description: "跨季方略：这一阶段要达成什么、下几季朝哪个方向使劲。"
+            + "下一季会把这句话原样还给你——这是你唯一的记忆，"
+            + "没有它你每季都在从零重想。方向变了就改写它，没变就原样抄回来",
+        },
       },
     },
   };

@@ -21,7 +21,7 @@ import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf } from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
@@ -41,6 +41,8 @@ const OUT = arg("out", "");
 // 套件不复制这里的对局循环，只做编排与汇总——复制一份迟早与这里分家
 const JSON_OUT = arg("json", "");
 const SEATS = (arg("seats", "caocao,yuanshao,liubiao,liuzhang,yuanshu,lubu")).split(",");
+/** --seasons=<季数>：本局多长。不给则用内容包的 16（评测口径） */
+const SEASONS = Number(arg("seasons", "0")) || 0;
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -130,8 +132,11 @@ async function playGame(gi) {
   // 席位轮换：同一 seed 下每个被测席位都轮过一遍位置，消掉席位固有优劣
   const rot = gi % SEATS.length;
   const under = SEATS[(0 + rot) % SEATS.length];       // 本局由 agent 驾驶的席位
-  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO,
+                             ...(SEASONS ? { seasons: SEASONS } : {}) }, P);
   let since = 0;
+  // 被测席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆
+  let plan = null;
   const turns = [];
 
   while (!s.finished) {
@@ -140,7 +145,9 @@ async function playGame(gi) {
     for (const f of Object.keys(s.factions)) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       if (f === under && MODEL_DEPS) {
-        const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS);
+        const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS, plan);
+        // 只在模型给出新方略时更新。答不上来的那一季不该把记忆抹掉
+        if (record.plan) plan = record.plan;
         orders.push(...os);
         // 实扣逐次累加，供预算闸门判断。取不到就不加——宁可闸门失灵报得少，
         // 也不要拿一个估算值去冒充实扣
@@ -156,6 +163,7 @@ async function playGame(gi) {
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
           dropped: record.admission.dropped.map((d) => d.reason),
           usage: record.usage, failure: record.failure, reason: record.reason,
+          plan: record.plan,
           structured: record.structured, rung: record.rung,
           failureKind: record.failureKind,
           maxTokens: record.maxTokens, finishReason: record.finishReason,
@@ -212,6 +220,10 @@ async function playGame(gi) {
     result: {
       game: gi, seed, seat: under, seatName: nameOf(under),
       grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
+      // 长局看的是疆域与统一，不是档位——档位是给 16 季评测用的量尺
+      zhou: standingOf(s, GEO, under).controlledZhou,
+      unified: s.winner === under, winner: s.winner ?? null,
+      seasons: s.seasonsPerGame,
       commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,
       start: f.startCommanderies, eliminated: f.eliminated,
       illegalRate: turns.reduce((a, t) => a + t.illegalRate, 0) / Math.max(1, turns.length),

@@ -783,6 +783,31 @@ export function resolve(
         + `无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%` });
     }
   }
+  // ── 局终：统一即胜，季数上限只是兜底 ──────────────────────────────
+  //
+  // 玩游戏的胜负判据就是「谁先统一谁赢」，不是档位。档位（丁丙乙甲…）
+  // 是给模型评测用的量尺——曹操开局一郡、袁绍十三郡，直接比疆域没意义，
+  // 所以改成比「相对开局涨了多少」。两套判据服务两个目的，不能混。
+  //
+  // 统一不要求打完 105 个郡：塞外的鲜卑、乌桓、南匈奴据的是名存实亡的边郡，
+  // 为了一纸「全图染色」去扫荡漠北，是把胜利变成苦役。
+  // 判据取「十三州控其十一」——中原已定，剩下的是羁縻之地。
+  // 另有一条：若只剩一家，自然也是统一
+  {
+    const st = standingOf;
+    let champ: FactionId | null = null;
+    const live = Object.values(s.factions).filter((f) => !f.eliminated && !f.retired);
+    for (const f of live) {
+      if (st(s, geo, f.id).controlledZhou >= P.unifyZhou) { champ = f.id; break; }
+    }
+    if (!champ && live.length === 1) champ = live[0].id;
+    if (champ) {
+      s.winner = champ;
+      s.finished = true;
+      log(s, { kind: "unified", faction: champ,
+               text: `天下一统（控 ${standingOf(s, geo, champ).controlledZhou} 州）` });
+    }
+  }
   if (s.turn >= s.seasonsPerGame) s.finished = true;
 
   return { state: s, rejected };

@@ -31,6 +31,8 @@ export interface ModelTurnRecord {
   candidates: number;
   picks: string[];
   reason?: string;
+  /** 模型本季写下的跨季方略。下一季原样回传给它 —— 这是它唯一的记忆 */
+  plan?: string;
   admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate">;
   usage: { prompt: number; completion: number; cached: number; reasoning: number;
            /** 提供方回报的真实扣费（美元）。价目表重算会少算，见 client.ts */
@@ -114,12 +116,14 @@ export interface ModelSeatDeps {
 
 export async function modelDecide(
   s: GameState, faction: FactionId, since: number, deps: ModelSeatDeps,
+  /** 该席位上季写下的跨季方略。不给则本季无记忆 */
+  plan: string | null = null,
 ): Promise<{ orders: Order[]; record: ModelTurnRecord }> {
   const rules = deps.rules ?? DEFAULT_RULES;
   const cands = listActions(s, faction, deps.g, deps.P, rules, deps.roster,
     deps.nameOf, deps.geo);
   const o = observe(s, faction, deps.g, deps.P, deps.roster, deps.geo,
-    { nameOf: deps.nameOf, rules, since });
+    { nameOf: deps.nameOf, rules, since, plan });
   const user = renderUser(o);
 
   const base: ModelTurnRecord = {
@@ -170,7 +174,7 @@ export async function modelDecide(
     return {
       orders: a.orders,
       record: {
-        ...base, ...meta(res), picks: dec.picks, reason: dec.reason,
+        ...base, ...meta(res), picks: dec.picks, reason: dec.reason, plan: dec.plan,
         admission: { admitted: a.admitted, dropped: a.dropped, spent: a.spent,
                      illegalRate: a.illegalRate },
       },

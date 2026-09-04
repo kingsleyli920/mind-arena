@@ -113,6 +113,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     epoch: 1,
     epochStart: 0,
     seasonsPerGame: opts.seasons ?? P.seasonsPerGame,
+    winner: null,
     commanderies,
     factions,
     armies: [],
@@ -173,7 +174,13 @@ export function refreshAp(state: GameState, P: EngineParams): GameState {
   const factions = { ...state.factions };
   for (const [id, f] of Object.entries(factions)) {
     const n = count.get(id) ?? 0;
-    const base = Math.min(P.apBase + Math.floor(Math.sqrt(n)), P.apCap);
+    // 令数随疆域增长的形状。指数 0.5 即原来的 sqrt——
+    // 28 郡只比 13 郡多两条令，于是大国守不住新占的边界，
+    // 打下一座丢一座，长局停在均衡点上，永远没人能统一。
+    // 那条刹车是为「压住滚雪球、让评测测得出模型强弱」装的，对 16 季是对的；
+    // 但作为游戏，没有胜利条件的盘不成其为游戏。指数与上限因此都做成可调，
+    // 具体取值由实测定（要「统一确实打得出来」），不是拍脑袋
+    const base = Math.min(P.apBase + Math.floor(n ** P.apExp), P.apCap);
     factions[id] = { ...f, ap: base + Math.min(P.carryCap, f.carried), carried: 0, freeUsed: {} };
   }
   const commanderies = { ...state.commanderies };
