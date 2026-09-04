@@ -207,7 +207,7 @@ export type Action =
   | { type: "govern"; at: CommanderyId; policy: "farm" | "levy" | "wall" | "soothe" | "forge" }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
-  | { type: "passage"; to: FactionId; through: CommanderyId }
+  | { type: "passage"; to: FactionId }
   | { type: "scout"; at: CommanderyId }
   | { type: "withdraw"; army: string }
   /** 改阵。阵型是郡的属性，这是唯一能改它的令 */

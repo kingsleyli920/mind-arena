@@ -604,6 +604,63 @@ export function listActions(
     }
   }
 
+  // ── 借道：与盟友互开边境，只在**真能接回断供之郡**时列出 ────────────
+  //
+  // 规则摘要里三处许了借道，引擎的校验也一直通着，唯独这里从不生成候选——
+  // 实跑 48 季 s.passages 恒为空，模型与玩家都点不到。一条永远没人下的令，
+  // 等于摘要在骗人；而它恰好是「看得见断供却无法可施」的那把钥匙。
+  //
+  // 只在有实效时给：算一遍「互开之后补给能不能接回来」，接不回就不占候选位。
+  // 候选表是稀缺资源（totalCap 60），一条没用的令挤掉的是一条有用的
+  if (ap >= rules.normalAp && fs_.capital && s.commanderies[fs_.capital]?.owner === f) {
+    // 现在断供的己方郡。只走己方territory 的连通分量，与 resolve 的 supplyReach 同一套
+    const cutNow = new Set<CommanderyId>();
+    {
+      const ok = new Set([fs_.capital]);
+      const st = [fs_.capital];
+      while (st.length) {
+        const u = st.pop()!;
+        for (const e of g.adj.get(u) ?? []) {
+          if (ok.has(e.to) || s.commanderies[e.to]?.owner !== f) continue;
+          ok.add(e.to); st.push(e.to);
+        }
+      }
+      for (const c of mine) if (!ok.has(c.id)) cutNow.add(c.id);
+    }
+    const allies = s.treaties
+      .filter((t) => t.from <= s.turn && t.until > s.turn && (t.a === f || t.b === f))
+      .map((t) => (t.a === f ? t.b : t.a))
+      .filter((id) => !s.passages.some((p) => p.grantee === f && p.grantor === id));
+    for (const ally of [...new Set(allies)].sort().slice(0, rules.perTypeCap)) {
+      // 互开之后可通行的集合：己方 + 盟友沿共同边界的郡
+      const allyBorder = new Set(Object.values(s.commanderies)
+        .filter((c) => c.owner === ally
+          && (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner === f))
+        .map((c) => c.id));
+      if (!allyBorder.size) continue;
+      const reach = new Set([fs_.capital]);
+      const stack = [fs_.capital];
+      while (stack.length) {
+        const u = stack.pop()!;
+        for (const e of g.adj.get(u) ?? []) {
+          if (reach.has(e.to)) continue;
+          const c2 = s.commanderies[e.to];
+          if (!c2 || (c2.owner !== f && !allyBorder.has(e.to))) continue;
+          reach.add(e.to); stack.push(e.to);
+        }
+      }
+      const rescued = mine.filter((c) => cutNow.has(c.id) && reach.has(c.id));
+      if (!rescued.length) continue;
+      out.push({
+        key: `passage:${ally}`,
+        action: { type: "passage", to: ally },
+        cost: rules.normalAp,
+        label: `与${nameOf(ally)}互开边境（双方沿共同边界开放补给线；`
+             + `接回我方断供之郡 ${rescued.length} 个：${rescued.map((c) => c.id).join("、")}）`,
+      });
+    }
+  }
+
   // ── 招降：破城后两季内可招被俘之将 ────────────────────────────────
   //
   // 不设时限则俘虏名单只增不减，候选逐季膨胀（违背 R13）；
@@ -885,7 +942,6 @@ export function validate(
       if (!s.factions[a.to]) return "未知势力";
       return null;
     case "passage":
-      if (!own(a.through)) return "非己方郡国";
       if (!s.treaties.some((t) => t.until > s.turn &&
           ((t.a === o.faction && t.b === a.to) || (t.b === o.faction && t.a === a.to)))) {
         return "双方非同盟，不可借道";

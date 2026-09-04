@@ -395,7 +395,30 @@ export function resolve(
         }
       }
     } else if (a.type === "passage") {
-      s.passages.push({ grantor: o.faction, grantee: a.to, through: [a.through], from: s.turn + 1 });
+      // **互开边境**，不是单向授予。
+      //
+      // 原本是「我开放我的某个郡给盟友的补给线过」——授予方一分好处没有，
+      // 于是理性的对局方永远不会下这条令；实跑 48 季 s.passages 恒为空，
+      // 而规则摘要里三处许了它。一条永远没人下的令，等于摘要在骗人。
+      //
+      // 改成沿共同边界双向开放：一条令，两边的补给线都能借道对方的边郡。
+      // 盟约本来就是双方自愿的，互开边境不需要额外同意；
+      // 而「盟约若不落到补给上就只是空话」正是这条动作的立项理由
+      const border = (x: FactionId, y: FactionId) => Object.values(s.commanderies)
+        .filter((c) => c.owner === x
+          && (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner === y))
+        .map((c) => c.id);
+      const mineSide = border(o.faction, a.to);
+      const theirSide = border(a.to, o.faction);
+      if (mineSide.length && theirSide.length) {
+        s.passages.push({ grantor: o.faction, grantee: a.to,
+                          through: mineSide, from: s.turn + 1 });
+        s.passages.push({ grantor: a.to, grantee: o.faction,
+                          through: theirSide, from: s.turn + 1 });
+        log(s, { kind: "passage", faction: o.faction,
+                 text: `与 ${a.to} 互开边境：我开 ${mineSide.length} 郡、`
+                     + `对方开 ${theirSide.length} 郡，下季起补给线可互相借道` });
+      }
     } else if (a.type === "retire") {
       const f = s.factions[o.faction];
       f.retired = true;
