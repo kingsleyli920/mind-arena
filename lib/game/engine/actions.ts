@@ -453,6 +453,16 @@ export function listActions(
         return { at: c.id, sources };
       })
       .filter((x) => x.sources.length >= 2 && canOrder(x.at))
+      // 排序按「己方邻郡最多」。试过改成**前线优先**——理由看着很硬：
+      // 己方邻郡最多的地方按定义是腹地，而仗在边境打；实测机器人集结 387 次、
+      // 均 3396 人，征伐里只有 2.9% 动用了待命军团，军团空等 2891 个席位季。
+      // 改完使用率升到 5.1%，但前线郡的己方邻居少、集结规模掉到 2485 人，
+      // 空等反而涨到 5103 季；更要命的是**三个画像的均分一起涨、非苟活极差
+      // 从 38.0 塌到 4.7**——策略选择几乎不再影响结果。
+      //
+      // 这是第二次栽在同一件事上（第一次是机器人的外交判据）：
+      // **改在候选生成层的东西对所有画像一视同仁，只会抹平差异、不会制造差异**，
+      // 而差异正是评测要测的。机器人要变强，得改在**各画像不同**的权重上
       .sort((a, b) => b.sources.length - a.sources.length || a.at.localeCompare(b.at))
       .slice(0, Math.min(6, rules.perTypeCap));
     for (const { at, sources } of cands) {
