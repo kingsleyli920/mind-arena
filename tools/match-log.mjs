@@ -67,6 +67,8 @@ const AGENT = MODEL ? "model" : arg("agent", "bot:balanced");
 const REASONING = arg("reasoning", "low");
 const OUT = arg("out", `实录-${SEED}.md`);
 const BUDGET = Number(arg("budget", "0")) || 0;
+/** --full：候选全文、引擎逐项算式、全场原始日志。默认开——实录本来就是要细 */
+const FULL = !has("brief");
 
 // ── 抽签：席位不手动指定 ────────────────────────────────────────────
 //
@@ -234,6 +236,18 @@ async function main() {
     say(`候选 ${cands.length} 条：`
       + [...byType].sort().map(([k, v]) => `${({ campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结", govern: "内政", array: "改阵", submit: "劝降", suade: "招降", appoint: "调任", scout: "刺探", ally: "外交", passage: "借道", retire: "归隐" })[k] ?? k} ${v}`).join("\u3000")
       + `\u3000｜其中预告可破城的 **${winnable}** 条`);
+    if (FULL) {
+      // 候选全文。只报类型计数等于把「它面前摆的是什么」抹掉了——
+      // 而模型的每一条令都只能从这里选，这就是它的全部选项
+      say("");
+      say(`<details><summary>候选全文 ${cands.length} 条</summary>\n`);
+      for (const c of cands) {
+        say(`- \`${c.key}\`（耗 ${c.cost} 令）${c.label}`
+          + (c.forecast ? `\n  - 预告：${c.forecast.text}` : "")
+          + (c.field ? `\n  - 野战：${c.field.text}（${c.field.verdict}）` : ""));
+      }
+      say(`\n</details>`);
+    }
 
     // ── 决策 ──
     say("");
@@ -283,7 +297,11 @@ async function main() {
 
     // ── 结算 ──
     const mark = s.log.length;
-    const r = resolve(s, adm.orders, G, P, ROSTER, GEO);
+    const trace = { faction: SEAT, lines: [] };
+    const snapBefore = new Map(Object.values(s.commanderies)
+      .filter((c) => c.owner === SEAT || (before.mine.some((m) => m.id === c.id)))
+      .map((c) => [c.id, { ...c }]));
+    const r = resolve(s, adm.orders, G, P, ROSTER, GEO, DEFAULT_RULES, trace);
     const fresh = visibleLog(r.state, SEAT, mark);
     say("");
     say(`### 本季结算`);
@@ -293,6 +311,39 @@ async function main() {
     for (const e of mineLog) {
       say(`- ${cn(e.text)}`
         + (e.attribution ? `\u3000\`${Object.entries(e.attribution).map(([k, v]) => `${k} ${v}`).join("\u3000")}\`` : ""));
+    }
+    if (FULL && trace.lines.length) {
+      say("");
+      say(`<details><summary>引擎逐项算式 ${trace.lines.length} 条</summary>\n`);
+      say("```");
+      for (const l of trace.lines) say(l);
+      say("```");
+      say(`\n</details>`);
+    }
+    // 逐郡 before → after：哪一格变了、变了多少。这是「到底发生了什么」
+    // 最直接的答案，不依赖任何一方的复述
+    const after0 = Object.values(r.state.commanderies).filter((c) => c.owner === SEAT);
+    const diffs = [];
+    const F = [["garrison", "兵"], ["yieldTier", "产"], ["moraleTier", "心"],
+      ["defense", "防"], ["gear", "械"], ["formation", "阵"], ["owner", "属"]];
+    for (const c of after0) {
+      const b = snapBefore.get(c.id);
+      if (!b) { diffs.push(`+ **${c.id}** 新入我手（原属 ${nameOf(snapBefore.get(c.id)?.owner ?? "无主")}）`); continue; }
+      const ch = F.map(([k, cn2]) => (b[k] !== c[k]
+        ? `${cn2} ${b[k]}→${c[k]}${typeof b[k] === "number" ? `（${sign(c[k] - b[k])}）` : ""}` : null))
+        .filter(Boolean);
+      if (ch.length) diffs.push(`· ${c.id}\u3000${ch.join("\u3000")}`);
+    }
+    for (const id of snapBefore.keys()) {
+      if (!after0.some((c) => c.id === id)) {
+        diffs.push(`− **${id}** 已失（现属 ${nameOf(r.state.commanderies[id]?.owner ?? "无主")}）`);
+      }
+    }
+    if (diffs.length) {
+      say("");
+      say(`**逐郡变化**`);
+      say("");
+      for (const d of diffs) say(d);
     }
     const worldLog = fresh.filter((e) => e.faction !== SEAT);
     if (worldLog.length) {

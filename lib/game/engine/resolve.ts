@@ -172,12 +172,33 @@ export interface ResolveResult {
   rejected: Array<{ order: Order; reason: string }>;
 }
 
+/**
+ * 诊断通道：开了才逐项吐算式，正常对局一行都不写。
+ *
+ * 不把这些塞进 GameState.log：日志要落存档、要进观测、要在界面上滚，
+ * 而这里的东西是给人逐季核对用的——一季能有上百行。
+ * 传一个数组进来收，谁要谁自己收
+ */
+export interface Trace {
+  /** 只追这一方；不给则全场都追（很长） */
+  faction?: FactionId;
+  lines: string[];
+}
+
 export function resolve(
   prev: GameState, orders: readonly Order[], g: Graph, P: EngineParams,
   roster: Roster | null, geo: Geography,
   rules: Rules = DEFAULT_RULES,
+  trace?: Trace,
 ): ResolveResult {
   const s = clone(prev);
+  const fmt0 = (n: number) => Math.round(n).toLocaleString("en-US");
+  /** 写一行诊断。tr(faction) 判是否该追这一方 */
+  const tr = (f: FactionId | null, line: string) => {
+    if (!trace) return;
+    if (trace.faction && f && f !== trace.faction) return;
+    trace.lines.push(line);
+  };
   const rejected: Array<{ order: Order; reason: string }> = [];
 
   // 规范化排序：此后一切都与提交顺序无关
@@ -561,6 +582,19 @@ export function resolve(
                                          tgt.defense, army.gear, terrain, atGate,
                                          (atk?.breachBonus ?? 0) + persist + formEdge,
                                          def?.holdBonus ?? 0);
+    tr(army.faction, `  【攻城】${army.home} → ${army.target}`
+      + `\n    我方：${fmt0(army.troops)} 人 × 兵种 ${unitName(P, army.unit)}`
+      + ` × 主将加成 ${power.toFixed(3)} = 有效战力 ${fmt0(attack)}`
+      + `\n    守方：${fmt0(tgt.garrison)} 人 × 兵种守备 ${unitGuard(P, tgt.unit).toFixed(2)}`
+      + ` = ${fmt0(tgt.garrison * unitGuard(P, tgt.unit))}`
+      + `\u3000城防 ${tgt.defense}\u3000地形 ${P.terrainName[terrain] ?? terrain}`
+      + `（守备加成 ${((P.terrainDefense[terrain] ?? 0) * 100).toFixed(0)}%）`
+      + `\n    缺口 ${breach} ＝ 兵力比阶梯 + 器械 ${army.gear}`
+      + ` + 主将 ${atk?.breachBonus ?? 0} + 围城累加 ${persist} + 阵型 ${formEdge}`
+      + `\n    可防守 ${hold} ＝ 基数 ${P.holdBase} + 城防/${P.defensePerHold}`
+      + ` + 守军规模档 + 守将 ${def?.holdBonus ?? 0}`
+      + `\n    判据：缺口 ${breach} ${breach > hold ? ">" : "≤"} 可防守 ${hold}`
+      + ` → ${breach > hold ? "**破城**" : army.siegeSeasons === 0 ? "首攻未克，转入围困" : "围困继续"}`);
     const who = {
       主将: atk?.note ?? "无主将", 守将: def?.note ?? "无守将", 围城季: army.siegeSeasons,
       我军: `${unitName(P, army.unit)}×${power.toFixed(2)}`,
@@ -651,6 +685,8 @@ export function resolve(
       log(s, { kind: "capital-lost", faction: f.id,
                text: `治所${f.capital ? ` ${f.capital}` : ""}已失，全境政令不通，本季无产出` });
     }
+    tr(f.id, `  【产出】治所 ${f.capital ?? "（已失）"}，`
+      + `辖 ${Object.values(s.commanderies).filter((c) => c.owner === f.id).length} 郡`);
     for (const c of Object.values(s.commanderies)) {
       if (c.owner !== f.id) continue;
       if (!reach.has(c.id)) {
@@ -669,6 +705,10 @@ export function resolve(
         if (!capLost) {
           log(s, { kind: "supply-cut", faction: f.id, text: `${c.id} 补给断绝，本季无产出` });
         }
+        tr(f.id, `    ${c.id}：补给断绝`
+          + `${capLost ? "（治所已失，全境皆断）"
+              : `（自治所 ${f.capital} 沿己方与借道盟友之郡走不到）`}`
+          + ` → 产出归零，以此为后方的军团下季溃散`);
         continue;
       }
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
@@ -687,7 +727,14 @@ export function resolve(
       // 而产出档本身就是 log10(户数)（实测相关 0.95），已把户口编码进去了
       // 先记下每个郡的产金，稍后按产出档降序逐郡递减后再求和——
       // 线性求和是纯粹的滚雪球放大器，见内容包 constants.金.为何递减
-      if (P.goldOn) goldRows.push(c.yieldTier * P.goldPerTier * factor * (gov?.yieldMul ?? 1));
+      if (P.goldOn) {
+        const row = c.yieldTier * P.goldPerTier * factor * (gov?.yieldMul ?? 1);
+        goldRows.push(row);
+        tr(f.id, `    ${c.id}：产出档 ${c.yieldTier} × ${P.goldPerTier}`
+          + ` × 民心系数 ${factor.toFixed(2)}`
+          + `${gov?.yieldMul && gov.yieldMul !== 1 ? ` × 太守 ${gov.yieldMul.toFixed(2)}` : ""}`
+          + ` = ${row.toFixed(0)} 金\u3000守军 ${fmt0(c.garrison)}`);
+      }
       if (gov?.moraleGain) c.moraleTier = Math.min(5, c.moraleTier + gov.moraleGain);
     }
 
@@ -705,14 +752,27 @@ export function resolve(
     // 基础收入 + 逐郡递减。基础那一笔是给小势力的地板：没有它，
     // 一郡开局的席位会被经济层直接判死——不是缺钱，而是穷则候选表里的
     // 内政项被门禁筛光、只剩打仗
-    const income = !P.goldOn ? 0 : P.goldBase + goldRows.sort((a, b) => b - a)
+    const sorted = goldRows.slice().sort((a, b) => b - a);
+    const income = !P.goldOn ? 0 : P.goldBase + sorted
       .reduce((n, v, i) => n + v * P.goldDecay ** i, 0);
+    if (P.goldOn && sorted.length) {
+      tr(f.id, `  【收入】基础 ${P.goldBase} 金 + 逐郡递减（×${P.goldDecay}^名次）：`
+        + sorted.slice(0, 8).map((v, i) => `第${i + 1} ${v.toFixed(0)}→${(v * P.goldDecay ** i).toFixed(0)}`).join("　")
+        + `${sorted.length > 8 ? `\u3000…另 ${sorted.length - 8} 郡合计 ${sorted.slice(8).reduce((n, v, i) => n + v * P.goldDecay ** (i + 8), 0).toFixed(0)}` : ""}`
+        + `\n    合计入 ${income.toFixed(0)} 金`);
+    }
 
     const myArmies = s.armies.filter((x) => x.faction === f.id);
     const myLands = Object.values(s.commanderies).filter((c) => c.owner === f.id);
     const troops = myArmies.reduce((n, a) => n + a.troops, 0)
                  + myLands.reduce((n, c) => n + c.garrison, 0);
     const upkeep = P.goldOn ? Math.round(troops * P.goldUpkeepPerTroop) : 0;
+    if (P.goldOn) {
+      tr(f.id, `  【军费】守军 ${fmt0(myLands.reduce((n, c) => n + c.garrison, 0))}`
+        + ` + 军团 ${fmt0(myArmies.reduce((n, a) => n + a.troops, 0))}`
+        + ` = ${fmt0(troops)} 人 × ${P.goldUpkeepPerTroop} = ${upkeep} 金`
+        + `\u3000国库 ${Math.round(f.gold)} → ${Math.round(Math.min(P.goldCap, f.gold + Math.round(income)) - upkeep)}`);
+    }
     f.gold = Math.min(P.goldCap, f.gold + Math.round(income));
     if (upkeep > 0) {
       if (f.gold >= upkeep) {
