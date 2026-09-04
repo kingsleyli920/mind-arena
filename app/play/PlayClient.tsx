@@ -16,6 +16,8 @@ import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officer
 import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
 import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
+import { modelDecide, type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
+import { ProxyLlmClient } from "@/lib/arena/llm/proxy-client.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
@@ -75,6 +77,30 @@ function titleOf(
     case "retire": return "归隐";
     default: return "";
   }
+}
+
+/** OpenRouter 模型列表的一行。价格是「每 token 美元」的字符串 */
+type ModelRow = {
+  id: string; name: string; contextLength: number;
+  promptPrice: string; completionPrice: string; structuredOutput: boolean;
+};
+
+/**
+ * 默认模型选一个**免费**的。
+ *
+ * 这不是省钱，是为了「打开就能试」：付费模型在账户余额为负时一律 402，
+ * 而新来的人第一次点「让对手用大模型」如果直接撞上一条报错，
+ * 他不会知道该去充值还是该改配置。免费模型有速率限制、也不算强，
+ * 但它能让整条路先跑通，强弱是下一步的事
+ */
+const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+
+/** 一次调用的花费（美元）。价格是每 token 的字符串，缓存命中部分仍按入参计价 */
+function costOf(r: ModelTurnRecord, price: Map<string, ModelRow>): number {
+  const m = price.get(r.model);
+  if (!m || !r.usage) return 0;
+  return r.usage.prompt * Number(m.promptPrice || 0)
+       + r.usage.completion * Number(m.completionPrice || 0);
 }
 
 /** 兵力档的中文 */
@@ -278,6 +304,8 @@ interface Engine {
   colorOf: Map<string, string>; nameOf: Map<string, string>;
   lore: Map<string, { courtesyName?: string; situation?: string }>;
   data: Parameters<typeof createGame>[0];
+  /** 内容包原文。模型席位的 system 提示词由它渲染（renderSystem） */
+  pack: unknown;
   /** 画点用的经纬度。SetupData 里的 commanderies 只声明 id/name */
   points: MapPoint[];
 }
@@ -309,6 +337,25 @@ export function PlayClient() {
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showPrimer, setShowPrimer] = useState(false);
+
+  // ── 模型执子 ──────────────────────────────────────────────────
+  // 席位 → 模型 id。不在表里的势力仍由机器人执子。
+  // 三十一家全用模型是不现实的：一季就是三十一次调用，等一分钟看一季
+  const [modelOf, setModelOf] = useState<Record<string, string>>({});
+  const [models, setModels] = useState<ModelRow[]>([]);
+  const [modelPick, setModelPick] = useState(DEFAULT_MODEL);
+  const [modelSeats, setModelSeats] = useState(0);
+  const [thinking, setThinking] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  // 逐次调用的记录。花了多少钱、哪一席没答上来、降到了哪一档，
+  // 都从这里读——不留记录就只能看到「这季对手好像没动」
+  const [records, setRecords] = useState<ModelTurnRecord[]>([]);
+  const [since, setSince] = useState(0);
+  const [modelErr, setModelErr] = useState<string | null>(null);
+  // 推理档必须是**显式**选择。不控这一项，各家默认给的测试时算力相差几十倍，
+  // 比的就不是策略能力；而在对局界面里它还直接决定一季要等多久。
+  // 默认「低」：一季等一分钟以内，且评测跑用的也是这一档，两边可比
+  const [effort, setEffort] = useState<"low" | "medium" | "high">("low");
 
   /**
    * 把日志文本里的势力 id 换成中文名。
@@ -362,7 +409,7 @@ export function PlayClient() {
         for (let i = 0; i < bin.length; i += 1) idx[i] = bin.charCodeAt(i);
         setTerr({ meta: t.meta, idx, order: t.order });
         setEngine({
-          P, G, roster, geo,
+          P, G, roster, geo, pack: b.pack,
           colorOf: new Map(b.scenario.factions.map((f) => [f.id, f.color ?? "#7a7266"])),
           nameOf: new Map(b.scenario.factions.map((f) => [f.id, f.name])),
           lore: new Map(b.scenario.factions.map((f) =>
@@ -396,6 +443,20 @@ export function PlayClient() {
     });
   }, [engine, game, seat, picked]);
 
+  // 模型列表按需拉。开局页一进来就拉等于替所有人付一次外部请求，
+  // 而绝大多数人不会开这个面板
+  const loadModels = useCallback(() => {
+    if (models.length) return;
+    fetch("/api/openrouter/models")
+      .then((r) => r.json())
+      .then((d: { data?: ModelRow[]; error?: string }) => {
+        setModels(d.data ?? []);
+        if (d.error) setModelErr(d.error);
+        else if (!d.data?.length) setModelErr("模型列表为空 —— 多半是没配 OPENROUTER_API_KEY");
+      })
+      .catch((e: Error) => setModelErr(`取模型列表失败：${e.message}`));
+  }, [models.length]);
+
   const start = useCallback((factionId: string) => {
     if (!engine) return;
     const s = createGame(engine.data, {
@@ -404,11 +465,21 @@ export function PlayClient() {
     }, engine.P);
     clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
+    setRecords([]); setThinking({}); setSince(0);
+    // 模型派给「除你之外郡数最多的 N 家」。派给最弱的几家没有意义：
+    // 一郡小势力十六季里多半只在修城，看不出模型强弱
+    setModelOf(Object.fromEntries(
+      Object.values(s.factions)
+        .filter((f) => f.id !== factionId && !f.eliminated)
+        .sort((a, b) => b.startCommanderies - a.startCommanderies)
+        .slice(0, modelSeats)
+        .map((f) => [f.id, modelPick]),
+    ));
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
     setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
-  }, [engine]);
+  }, [engine, modelSeats, modelPick]);
 
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
@@ -426,14 +497,50 @@ export function PlayClient() {
   }, [engine, game, seat, picked, candidates]);
   const spent = adm?.spent ?? 0;
 
-  const submit = useCallback(() => {
-    if (!engine || !game || !seat) return;
+  const submit = useCallback(async () => {
+    if (!engine || !game || !seat || busy) return;
+    setBusy(true);
     const orders: Order[] = admit(game, seat, picked, candidates,
       engine.G, engine.roster).orders;
 
     const ids = Object.keys(game.factions).sort();
+    const alive = (f: string) => !game.factions[f].eliminated && !game.factions[f].retired;
+    const byModel = ids.filter((f) => f !== seat && alive(f) && modelOf[f]);
+
+    // 模型席位并发请求。逐个串行会让一季等上几分钟——
+    // 五席并发时的墙钟时间等于最慢的那一席，而不是五席之和
+    const deps = {
+      client: new ProxyLlmClient(),
+      pack: engine.pack, g: engine.G, P: engine.P,
+      roster: engine.roster, geo: engine.geo,
+      nameOf: (id: string) => engine.nameOf.get(id) ?? id,
+    };
+    setThinking(Object.fromEntries(byModel.map((f) => [f, "思考中"])));
+    const done = await Promise.all(byModel.map(async (f) => {
+      try {
+        const { orders: os, record } = await modelDecide(game, f, since,
+          { ...deps, model: modelOf[f], reasoning: { effort } });
+        setThinking((t) => ({ ...t,
+          [f]: record.failure ? `失败：${record.failure}` : `${os.length} 令` }));
+        return { f, os, record };
+      } catch (e) {
+        // 抛到这里的是代理层的错（没配密钥、网络断了）。
+        // 这一席退回机器人，但**必须说出来**：静默退回会让人以为模型在下棋，
+        // 而实际上他看到的是机器人的手笔
+        setThinking((t) => ({ ...t, [f]: `失败：${(e as Error).message}` }));
+        return { f, os: null, record: null };
+      }
+    }));
+    for (const d of done) {
+      if (d.record) setRecords((r) => [...r, d.record!]);
+      if (d.os && d.os.length) orders.push(...d.os);
+    }
+    // 模型没给出任何令的席位也算「本季不下令」，与评测口径一致——
+    // 不替它跑一遍机器人。替它兜底会把模型的失误洗掉，那就测不出东西了
+    const modeled = new Set(byModel);
+
     for (const [i, f] of ids.entries()) {
-      if (f === seat) continue;
+      if (f === seat || modeled.has(f) || !alive(f)) continue;
       orders.push(...decide(game, f, engine.G, PROFILE_KEYS[i % PROFILE_KEYS.length],
         undefined, engine.roster, engine.P, engine.geo));
     }
@@ -477,7 +584,9 @@ export function PlayClient() {
     });
     setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));
     setPicked([]);
-  }, [engine, game, seat, candidates, picked, cnText]);
+    setSince(r.state.log.length);
+    setBusy(false);
+  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort]);
 
   // ── 疆域绘制 ────────────────────────────────────────────────────
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），
@@ -582,6 +691,51 @@ export function PlayClient() {
         <details className="primer-fold">
           <summary>怎么玩<i>没玩过先看这个</i></summary>
           <Primer P={engine.P} />
+        </details>
+
+        {/* 让对手由大模型执子。默认关（0 家）——一季就是 N 次调用，
+            要等，也要花钱；这件事必须是显式选择，不能默认替人开销 */}
+        <details className="primer-fold model-fold"
+          onToggle={(e) => { if ((e.currentTarget as HTMLDetailsElement).open) loadModels(); }}>
+          <summary>让对手由大模型执子<i>{modelSeats ? `${modelSeats} 家` : "默认关"}</i></summary>
+          <div className="model-setup">
+            <p>选中的模型会替<b>除你之外郡数最多的 N 家</b>执子，其余仍由机器人。
+              它读到的与你读到的是同一份观测（同样的迷雾、同样的候选），
+              下的令也走同一道准入——所以它的胜负是可比的。</p>
+            <label>
+              <span>模型</span>
+              <select value={modelPick} onChange={(e) => setModelPick(e.target.value)}>
+                <option value={DEFAULT_MODEL}>{DEFAULT_MODEL}（免费，可先跑通）</option>
+                {models.filter((m) => m.id !== DEFAULT_MODEL).map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}{m.structuredOutput ? "" : "（无结构化输出）"}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>由模型执子的家数</span>
+              <select value={modelSeats} onChange={(e) => setModelSeats(Number(e.target.value))}>
+                {[0, 1, 2, 3, 5].map((n) => (
+                  <option key={n} value={n}>{n === 0 ? "不用模型（全机器人）" : `最强的 ${n} 家`}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>推理档</span>
+              <select value={effort}
+                onChange={(e) => setEffort(e.target.value as "low" | "medium" | "high")}>
+                <option value="low">低（一季等得起，与评测跑同档）</option>
+                <option value="medium">中</option>
+                <option value="high">高（更强，但一季可能等几分钟）</option>
+              </select>
+            </label>
+            {modelSeats > 0 && (
+              <p className="warn-note">一季要等这 {modelSeats} 家里最慢的那一个答完。
+                付费模型按 token 计价，局内会实时报累计花费。</p>
+            )}
+            {modelErr && <p className="warn-note">{modelErr}</p>}
+          </div>
         </details>
         {resume && (() => {
           // 显式给「继续 / 重开」，不自动恢复：自动恢复会让「我想重开一局」
@@ -836,6 +990,38 @@ export function PlayClient() {
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
           aria-expanded={showPrimer}>规则</button>
       </header>
+
+      {/* 模型执子状态条。三件事必须常驻：谁在由模型执子、这一季它答成什么样、
+          到现在花了多少。看不到这些，就分不清「对手按兵不动」和「模型没答上来」 */}
+      {Object.keys(modelOf).length > 0 && (
+        <div className="model-bar">
+          <b>模型执子</b>
+          {Object.entries(modelOf).map(([f, m]) => {
+            const st = thinking[f];
+            const bad = st?.startsWith("失败");
+            return (
+              <span key={f} className={bad ? "seatbad" : busy && st === "思考中" ? "seatwait" : undefined}
+                style={{ "--c": engine.colorOf.get(f) } as React.CSSProperties}
+                title={`${m}${st ? `｜${st}` : ""}`}>
+                {engine.nameOf.get(f) ?? f}
+                {st && <i>{st.length > 26 ? `${st.slice(0, 26)}…` : st}</i>}
+              </span>
+            );
+          })}
+          {(() => {
+            const price = new Map(models.map((m) => [m.id, m]));
+            const spentUsd = records.reduce((a, r) => a + costOf(r, price), 0);
+            const failed = records.filter((r) => r.failure).length;
+            return (
+              <em>
+                {records.length} 次调用
+                {spentUsd > 0 && `｜累计 $${spentUsd.toFixed(4)}`}
+                {failed > 0 && `｜失败 ${failed}`}
+              </em>
+            );
+          })()}
+        </div>
+      )}
 
       {showPrimer && (
         <div className="primer-sheet" role="dialog" aria-label="规则速览">
@@ -1293,9 +1479,11 @@ export function PlayClient() {
                 ))}
                 {!candidates.length && <p className="play-note">本季无可行之事。</p>}
               </div>
-              <button className="go" onClick={submit} disabled={!picked.length}>
-                封令结算 · {picked.length} 条 · 耗 {spent}/{me.ap} 令
-                {picked.length > 0 && spent < me.ap
+              <button className="go" onClick={submit} disabled={!picked.length || busy}>
+                {busy
+                  ? <>模型思考中 · {Object.values(thinking).filter((x) => x === "思考中").length} 席未答</>
+                  : <>封令结算 · {picked.length} 条 · 耗 {spent}/{me.ap} 令</>}
+                {!busy && picked.length > 0 && spent < me.ap
                   && <i>尚余 {me.ap - spent} 令，只结转 {engine.P.carryCap}</i>}
               </button>
             </>

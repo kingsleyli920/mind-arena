@@ -417,6 +417,97 @@ console.log(`保留 ${edges.length} 条边，平均度 ${(edges.length * 2 / com
   if (isolated.length) console.log(`  零度郡：${isolated.map((c) => c.name).join(" ")}`);
 }
 
+const idOf = new Map(commanderies.map((c) => [c.name, c.id]));
+const idOf0 = (n) => idOf.get(n) ?? n;
+
+// ── 史实修正表 ──────────────────────────────────────────────────────
+//
+// 几何判不了汉代的郡界。水系是 0.02° 的简化折线、走的还是今河道，
+// Delaunay 在点稀疏处会连出穿两个郡的长边，420km 的一刀切又会砍掉
+// 益州、南中、交州那种郡治本就相距很远的真邻接。
+//
+// 所以这里保留一张**显式的**修正表：每条带史料判据，生成后套用。
+// 不把它藏进阈值微调里——调阈值会连带改动别处几十条边，而且改完没人知道
+// 为什么是这个数；一张写着判据的表，是可以被逐条推翻的。
+//
+// 这一批的来由：一次分维审校发现**益州与荆州、交州零连接**——入蜀只能走
+// 司隶与凉州，刘表永远打不到刘璋，三峡这条三国最要紧的走廊根本不存在。
+// 同时查出三条穿郡的假边、两处河套缺边、四条把长江黄河标成平地的边。
+const FIX_DROP = [
+  ["五原郡", "代郡", "中隔雁门、定襄两郡，郡治相距五百余公里；Delaunay 在河套一带点稀疏时连出的伪邻接"],
+  ["东海郡", "东莱郡", "中隔琅邪国与北海国，且须跨海；两郡治不接壤"],
+  ["河南尹", "上党郡", "中隔河内郡；上党出太行入河内，再由河内至河南尹，非直接邻接"],
+];
+const FIX_ADD = [
+  ["巴郡", "南郡", "gate", ["长江"],
+   "三峡。巴郡江州东出即鱼复、江关，出峡入南郡秭归、夷陵。汉末入蜀出蜀的主道，" +
+   "刘备入蜀、夷陵之战皆由此；郡治相距逾 420km 而被长度阈值砍掉",
+   ["jiang-guan", "yiling"]],
+  ["朔方郡", "五原郡", "plain", [],
+   "河套。朔方临戎与五原九原同在北河南岸，东西相接，不需渡大河；" +
+   "简化折线取今河道，误判为跨河无渡"],
+  ["五原郡", "云中郡", "plain", [], "河套。九原东接云中，同上"],
+  ["越巂郡", "犍为属国", "river", ["金沙江"],
+   "越巂邛都北接犍为属国朱提，郡治仅相距 155km，中隔泸水（金沙江）"],
+  ["越巂郡", "益州郡", "mountain", ["金沙江"], "南中。越巂南接益州郡滇池，隔泸水相望"],
+  ["益州郡", "牂牁郡", "mountain", [], "南中。益州郡东接牂牁，郡治相距 459km 而被长度阈值砍掉"],
+  ["越巂郡", "永昌郡", "mountain", [],
+   "南中。永昌八城含云南、邪龙、楪榆，与越巂遂久、姑复接壤；同被长度阈值砍掉"],
+];
+// 地形订正：这几条穿的是长江与黄河，却因为「河从城边流过不算阻隔」那条
+// 35km 护栏被判成平地。护栏本身有道理（汉水绕南郑、长江绕江陵），
+// 错在它对「河即郡界、郡治就压在河边」这一类失效。
+// 后果不是标注难看：river 是 marchCost 1.8、防御 +0.35，plain 是 1.0、0——
+// 标成平地等于把长江黄河的天险清零
+const FIX_TERRAIN = [
+  ["广陵郡", "吴郡", "river", ["长江"], "长江口。广陵江都南渡即吴郡，京口一线为大江天险"],
+  ["广陵郡", "丹阳郡", "river", ["长江"], "长江。广陵南渡至丹阳，即孙吴所恃之江防"],
+  ["魏郡", "东郡", "river", ["黄河"], "黄河白马津。邺至濮阳须渡河，官渡之役前争白马即此"],
+  ["乐安国", "勃海郡", "river", ["黄河"], "黄河下游。乐安临济与勃海南皮分处河之两岸"],
+];
+
+const COST_OF = { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 };
+const same = (e, a, b) => (e.from === a && e.to === b) || (e.from === b && e.to === a);
+const fixes = { dropped: 0, added: 0, retimed: 0, missed: [] };
+
+for (const [an, bn, basis] of FIX_DROP) {
+  const a = idOf0(an), b = idOf0(bn);
+  const i = edges.findIndex((e) => same(e, a, b));
+  if (i < 0) { fixes.missed.push(`删 ${an}–${bn}：本就不存在`); continue; }
+  edges.splice(i, 1); fixes.dropped += 1;
+  console.log(`  − ${an}–${bn}  ${basis}`);
+}
+for (const [an, bn, terrain, crossings, basis, hold = []] of FIX_ADD) {
+  const a = idOf0(an), b = idOf0(bn);
+  if (edges.some((e) => same(e, a, b))) { fixes.missed.push(`补 ${an}–${bn}：已存在`); continue; }
+  const A = commanderies.find((c) => c.id === a), B = commanderies.find((c) => c.id === b);
+  const km = Math.round(dist(A, B));
+  // 关津挂载在这之前就跑完了，新补的边得自己挂——不挂则江关、夷陵永远悬空，
+  // 而三峡这条边正是它们唯一的用武之地
+  const hung = hold.map((nid) => nodes.find((n) => n.id === nid))
+    .filter(Boolean)
+    .map((n) => ({ id: n.id, name: n.name, kind: n.kind, offset: 0 }));
+  edges.push({ from: a, to: b, km, terrain, cost: +((km / 100) * COST_OF[terrain]).toFixed(2),
+               maxElev: 0, crossings, nodes: hung, fix: basis });
+  fixes.added += 1;
+  console.log(`  + ${an}–${bn} ${km}km ${terrain}  ${basis}`);
+}
+for (const [an, bn, terrain, crossings, basis] of FIX_TERRAIN) {
+  const e = edges.find((x) => same(x, idOf0(an), idOf0(bn)));
+  if (!e) { fixes.missed.push(`改 ${an}–${bn}：无此边`); continue; }
+  e.terrain = terrain;
+  e.cost = +((e.km / 100) * COST_OF[terrain]).toFixed(2);
+  e.crossings = crossings;
+  e.fix = basis;
+  fixes.retimed += 1;
+  console.log(`  ~ ${an}–${bn} → ${terrain}  ${basis}`);
+}
+console.log(`【史实修正】删 ${fixes.dropped} 补 ${fixes.added} 改地形 ${fixes.retimed}`);
+// 修正表落空说明生成器的行为变了 —— 那正是要知道的事，不能沉默
+if (fixes.missed.length) {
+  console.log(`  ⚠ 落空 ${fixes.missed.length} 条：${fixes.missed.join("；")}`);
+}
+
 // ── 史实要道验收 ────────────────────────────────────────────────────
 console.log("\n【史实要道验收】");
 // 配对按史实校正过：剑门在广汉郡北而非蜀郡门口，濡须口在九江与丹阳之间
@@ -432,8 +523,22 @@ const CHECKS = [
   ["官渡",     "陈留郡", "颍川郡"],
   ["壶关",     "上党郡", "魏郡"],
   ["湖口",     "庐江郡", "豫章郡"],
+  // 三峡是后补的。首版清单里没有它，于是「益州与荆州零连接」在图里躺了几个月
+  // 没人发现——刘表打不到刘璋，刘璋的东面无懈可击。
+  // 验收清单漏掉的东西，就是永远不会被发现的东西
+  ["江关",     "巴郡",   "南郡"],
 ];
-const idOf = new Map(commanderies.map((c) => [c.name, c.id]));
+
+/**
+ * 必须存在的走廊。关津挂没挂上可以将就（△），**边不存在则直接失败**：
+ * 这一条断了，整个州就成了孤岛，而孤岛在自对局里不会报错、只会静静地
+ * 让某个席位既打不出去也打不进来
+ */
+const REQUIRED = [
+  ["巴郡", "南郡", "益州东出荆州的唯一通道"],
+  ["汉中郡", "广汉郡", "益州北面的门户"],
+  ["九江郡", "丹阳郡", "江淮之间的渡江要道"],
+];
 let pass = 0;
 for (const [gateName, fromName, toName] of CHECKS) {
   const f = idOf.get(fromName), t = idOf.get(toName);
@@ -445,6 +550,15 @@ for (const [gateName, fromName, toName] of CHECKS) {
   if (has) pass += 1;
 }
 console.log(`  ${pass}/${CHECKS.length} 条要道的关津正确挂载`);
+
+let broken = 0;
+for (const [fromName, toName, why] of REQUIRED) {
+  const f = idOf.get(fromName), t = idOf.get(toName);
+  if (!edges.some((x) => (x.from === f && x.to === t) || (x.from === t && x.to === f))) {
+    console.log(`  ✗✗ 必需走廊缺失：${fromName}–${toName}（${why}）`);
+    broken += 1;
+  }
+}
 
 // 未被任何边挂载的关津 —— 它们在玩法上没有意义
 const attached = new Set(edges.flatMap((e) => e.nodes.map((n) => n.id)));
@@ -467,5 +581,9 @@ const out = {
   },
   edges: edges.sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to)),
 };
+if (broken) {
+  console.error(`\n必需走廊缺失 ${broken} 条 —— 不落盘。修生成器或补进史实修正表。`);
+  process.exit(1);
+}
 fs.writeFileSync(`${D}/adjacency.json`, JSON.stringify(out, null, 1));
 console.log(`\n→ ${D}/adjacency.json  ${edges.length} 条边`);

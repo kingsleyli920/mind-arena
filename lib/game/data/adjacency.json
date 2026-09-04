@@ -3,7 +3,7 @@
   "note": "郡国通行图。Delaunay 取候选边，沿边采样地形网格定档，与水系求交判跨河，关津按垂距挂载。",
   "generatedFrom": "tools/build-adjacency.mjs",
   "commanderies": 105,
-  "edges": 227,
+  "edges": 231,
   "maxEdgeKm": 420,
   "costUnit": "1 = 100km 平原",
   "terrainCost": {
@@ -129,16 +129,6 @@
    "terrain": "plain",
    "cost": 0.68,
    "maxElev": 38,
-   "crossings": [],
-   "nodes": []
-  },
-  {
-   "from": "东海郡",
-   "to": "东莱郡",
-   "km": 388,
-   "terrain": "plain",
-   "cost": 3.88,
-   "maxElev": 220,
    "crossings": [],
    "nodes": []
   },
@@ -373,13 +363,14 @@
   },
   {
    "from": "五原郡",
-   "to": "代郡",
-   "km": 393,
-   "terrain": "hill",
-   "cost": 5.31,
-   "maxElev": 1518,
+   "to": "云中郡",
+   "km": 149,
+   "terrain": "plain",
+   "cost": 1.49,
+   "maxElev": 0,
    "crossings": [],
-   "nodes": []
+   "nodes": [],
+   "fix": "河套。九原东接云中，同上"
   },
   {
    "from": "交趾郡",
@@ -502,11 +493,14 @@
    "from": "勃海郡",
    "to": "乐安国",
    "km": 145,
-   "terrain": "plain",
-   "cost": 1.45,
+   "terrain": "river",
+   "cost": 2.61,
    "maxElev": 15,
-   "crossings": [],
-   "nodes": []
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [],
+   "fix": "黄河下游。乐安临济与勃海南皮分处河之两岸"
   },
   {
    "from": "勃海郡",
@@ -864,6 +858,32 @@
   },
   {
    "from": "巴郡",
+   "to": "南郡",
+   "km": 553,
+   "terrain": "gate",
+   "cost": 14.38,
+   "maxElev": 0,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "jiang-guan",
+     "name": "江关",
+     "kind": "gate",
+     "offset": 0
+    },
+    {
+     "id": "yiling",
+     "name": "夷陵",
+     "kind": "battlefield",
+     "offset": 0
+    }
+   ],
+   "fix": "三峡。巴郡江州东出即鱼复、江关，出峡入南郡秭归、夷陵。汉末入蜀出蜀的主道，刘备入蜀、夷陵之战皆由此；郡治相距逾 420km 而被长度阈值砍掉"
+  },
+  {
+   "from": "巴郡",
    "to": "广汉郡",
    "km": 271,
    "terrain": "hill",
@@ -1107,11 +1127,14 @@
    "from": "广陵郡",
    "to": "丹阳郡",
    "km": 173,
-   "terrain": "plain",
-   "cost": 1.73,
+   "terrain": "river",
+   "cost": 3.11,
    "maxElev": 44,
-   "crossings": [],
-   "nodes": []
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [],
+   "fix": "长江。广陵南渡至丹阳，即孙吴所恃之江防"
   },
   {
    "from": "广陵郡",
@@ -1127,11 +1150,14 @@
    "from": "广陵郡",
    "to": "吴郡",
    "km": 165,
-   "terrain": "plain",
-   "cost": 1.65,
+   "terrain": "river",
+   "cost": 2.97,
    "maxElev": 17,
-   "crossings": [],
-   "nodes": []
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [],
+   "fix": "长江口。广陵江都南渡即吴郡，京口一线为大江天险"
   },
   {
    "from": "庐江郡",
@@ -1276,6 +1302,17 @@
    "crossings": [],
    "nodes": [],
    "via": "同州连通（交州）"
+  },
+  {
+   "from": "朔方郡",
+   "to": "五原郡",
+   "km": 263,
+   "terrain": "plain",
+   "cost": 2.63,
+   "maxElev": 0,
+   "crossings": [],
+   "nodes": [],
+   "fix": "河套。朔方临戎与五原九原同在北河南岸，东西相接，不需渡大河；简化折线取今河道，误判为跨河无渡"
   },
   {
    "from": "桂阳郡",
@@ -1818,35 +1855,6 @@
   },
   {
    "from": "河南尹",
-   "to": "上党郡",
-   "km": 157,
-   "terrain": "gate",
-   "cost": 4.07,
-   "maxElev": 1006,
-   "crossings": [],
-   "nodes": [
-    {
-     "id": "meng-jin",
-     "name": "孟津",
-     "kind": "ford",
-     "offset": 5.7
-    },
-    {
-     "id": "tianjing-guan",
-     "name": "天井关",
-     "kind": "gate",
-     "offset": 13.6
-    },
-    {
-     "id": "xiaoping-jin",
-     "name": "小平津",
-     "kind": "ford",
-     "offset": 14.1
-    }
-   ]
-  },
-  {
-   "from": "河南尹",
    "to": "南阳郡",
    "km": 192,
    "terrain": "gate",
@@ -2254,6 +2262,17 @@
   },
   {
    "from": "益州郡",
+   "to": "牂牁郡",
+   "km": 448,
+   "terrain": "mountain",
+   "cost": 9.41,
+   "maxElev": 0,
+   "crossings": [],
+   "nodes": [],
+   "fix": "南中。益州郡东接牂牁，郡治相距 459km 而被长度阈值砍掉"
+  },
+  {
+   "from": "益州郡",
    "to": "犍为属国",
    "km": 315,
    "terrain": "mountain",
@@ -2344,6 +2363,43 @@
    "maxElev": 1685,
    "crossings": [],
    "nodes": []
+  },
+  {
+   "from": "越巂郡",
+   "to": "永昌郡",
+   "km": 430,
+   "terrain": "mountain",
+   "cost": 9.03,
+   "maxElev": 0,
+   "crossings": [],
+   "nodes": [],
+   "fix": "南中。永昌八城含云南、邪龙、楪榆，与越巂遂久、姑复接壤；同被长度阈值砍掉"
+  },
+  {
+   "from": "越巂郡",
+   "to": "犍为属国",
+   "km": 153,
+   "terrain": "river",
+   "cost": 2.75,
+   "maxElev": 0,
+   "crossings": [
+    "金沙江"
+   ],
+   "nodes": [],
+   "fix": "越巂邛都北接犍为属国朱提，郡治仅相距 155km，中隔泸水（金沙江）"
+  },
+  {
+   "from": "越巂郡",
+   "to": "益州郡",
+   "km": 357,
+   "terrain": "mountain",
+   "cost": 7.5,
+   "maxElev": 0,
+   "crossings": [
+    "金沙江"
+   ],
+   "nodes": [],
+   "fix": "南中。越巂南接益州郡滇池，隔泸水相望"
   },
   {
    "from": "越巂郡",
@@ -2757,10 +2813,12 @@
    "from": "魏郡",
    "to": "东郡",
    "km": 80,
-   "terrain": "plain",
-   "cost": 0.8,
+   "terrain": "river",
+   "cost": 1.44,
    "maxElev": 64,
-   "crossings": [],
+   "crossings": [
+    "黄河"
+   ],
    "nodes": [
     {
      "id": "baima-jin",
@@ -2768,7 +2826,8 @@
      "kind": "ford",
      "offset": 43.9
     }
-   ]
+   ],
+   "fix": "黄河白马津。邺至濮阳须渡河，官渡之役前争白马即此"
   },
   {
    "from": "魏郡",

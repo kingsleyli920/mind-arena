@@ -142,9 +142,20 @@ export class OpenRouterClient implements LlmClient {
         const completion = json.usage?.completion_tokens ?? 0;
         const reasoning = json.usage?.completion_tokens_details?.reasoning_tokens ?? 0;
 
-        // 内容为空而出参顶到上限 = 推理把预算吃光了。这是我们的配置问题，
-        // 不是模型答不上来，两者在评测里含义完全不同。翻倍再给一次机会
-        if (!content.trim() && (finishReason === "length" || completion >= budget * 0.95)
+        // 出参被推理吃光了。这是我们的配置问题，不是模型答不上来，
+        // 两者在评测里含义完全不同。翻倍再给一次机会。
+        //
+        // **finish_reason 为 length 本身就是决定性的**——那是我们把它砍断了。
+        // 此前这里还要求 content 为空，于是漏掉了一半的情形：
+        // 重推理模型常常先吐几百 token 的自言自语才开始写 JSON，被砍断时
+        // content 非空但没有决策，落到解析失败那条路上，记成「模型答不上来」。
+        // 实测 nemotron-3-ultra 打真实观测：8000 出参里 7244 是 reasoning，
+        // finish=length，content 是一段没写完的英文分析——按旧条件不翻倍，
+        // 直接被判成模型不会玩。
+        //
+        // 「无 finish_reason 但出参逼近上限」这条启发式仍要求 content 为空，
+        // 否则一次正常收尾的长回答会被误判成饥饿
+        if ((finishReason === "length" || (!content.trim() && completion >= budget * 0.95))
             && starved < 2 && budget < MAX_MAX_TOKENS) {
           starved += 1;
           last = { kind: "starved", status: 200,
