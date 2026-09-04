@@ -87,9 +87,31 @@ export interface StartStanding {
  * 逼近「得分完全由开局决定」的红线。评测要测的是模型把局面推进了多少，
  * 不是它被发到了什么牌。
  */
+/**
+ * 本局的纪元时限。
+ *
+ * 包里的「纪元时限 6」是配着 16 季局定的（3 纪元 × 6 季 ≈ 18 ≥ 16）。
+ * 长局若照搬，三个纪元十八季就走完，此后四十几季全泡在末纪元里，
+ * 「早取无主之地的时间价值」这条设计意图也就没了。按局长等分。
+ */
+export function epochLimitFor(
+  s: { seasonsPerGame: number }, P: { epochCount: number; epochLimit: number },
+): number {
+  return Math.max(P.epochLimit, Math.ceil(s.seasonsPerGame / P.epochCount));
+}
+
 export function gradeOf(st: Standing, start: StartStanding): Grade {
   const zhouGain = st.controlledZhou - start.controlledZhou;
   const seatGain = st.zhouSeats - start.zhouSeats;
+  // 甲以上两档判**绝对**疆域，不判增量。
+  //
+  // 增量判据在短局里是对的：四年里多拿一两个州就是本事，且它中和了开局强弱。
+  // 但它到甲档就封顶了——六十季的长局里控了八个州，判据照样只给甲，
+  // 于是后半局的每一次胜利都不再有回报，长局等于没有目标。
+  // 十三州过半即霸，十一州即王：这两条与开局无关，谁做到都算数
+  if (st.controlledZhou >= 11) return "wang";
+  if (st.controlledZhou >= 7) return "ba";
+  if (zhouGain >= 4) return "chao";
   if (zhouGain >= 2 || (zhouGain >= 1 && seatGain >= 2)) return "jia";
   if (zhouGain >= 1 || seatGain >= 1) return "yi";
   // 「不低于开局」在第一季就自动成立，等于白送保底档。必须是「高于」，
@@ -98,9 +120,11 @@ export function gradeOf(st: Standing, start: StartStanding): Grade {
   return "ding";
 }
 
-export const GRADE_RANK: Record<Grade, number> = { ding: 0, bing: 1, yi: 2, jia: 3 };
+export const GRADE_RANK: Record<Grade, number> =
+  { ding: 0, bing: 1, yi: 2, jia: 3, chao: 4, ba: 5, wang: 6 };
 /** 档位的中文名。jia/yi/bing/ding 是固定的音写，不是可调数值，故不入内容包 */
-export const GRADE_CN: Record<Grade, string> = { jia: "甲", yi: "乙", bing: "丙", ding: "丁" };
+export const GRADE_CN: Record<Grade, string> =
+  { jia: "甲", yi: "乙", bing: "丙", ding: "丁", chao: "超", ba: "霸", wang: "王" };
 
 /**
  * 反事实定档：此刻若取下 target，本势力能到哪一档。

@@ -363,6 +363,12 @@ export function PlayClient() {
   const [records, setRecords] = useState<ModelTurnRecord[]>([]);
   const [since, setSince] = useState(0);
   const [modelErr, setModelErr] = useState<string | null>(null);
+  /**
+   * 本局季数。默认取内容包的 16——那是**评测口径**（一局 16 次调用，
+   * 48 局才付得起）。作为游戏它偏短：十六季刚把内政理顺就结束了，
+   * 而史上 194 到三分天下用了二十六年。长局才够得着超/霸/王三档
+   */
+  const [seasons, setSeasons] = useState<number | null>(null);
   // 推理档必须是**显式**选择。不控这一项，各家默认给的测试时算力相差几十倍，
   // 比的就不是策略能力；而在对局界面里它还直接决定一季要等多久。
   // 默认「低」：一季等一分钟以内，且评测跑用的也是这一档，两边可比
@@ -473,6 +479,7 @@ export function PlayClient() {
     const s = createGame(engine.data, {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
       roster: engine.roster, geo: engine.geo,
+      seasons: seasons ?? engine.P.seasonsPerGame,
     }, engine.P);
     clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
@@ -490,7 +497,7 @@ export function PlayClient() {
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
     setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
-  }, [engine, modelSeats, modelPick]);
+  }, [engine, modelSeats, modelPick, seasons]);
 
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
@@ -704,6 +711,32 @@ export function PlayClient() {
           <Primer P={engine.P} />
         </details>
 
+        {/* 局长。默认 16 季是评测口径，作为游戏偏短 */}
+        <details className="primer-fold model-fold">
+          <summary>这一局打多久<i>{seasons ?? engine.P.seasonsPerGame} 季</i></summary>
+          <div className="model-setup">
+            <p>默认 <b>{engine.P.seasonsPerGame} 季（四年）</b>是<b>评测口径</b>——
+              一局十六次模型调用，四十八局才付得起，而定档按相对开局的增量判，
+              四年里多拿一两个州是合理量级。</p>
+            <p>作为游戏它偏短：刚把内政理顺、器械造好，局就结束了；
+              史上从 194 到三分天下用了二十六年。长局才够得着
+              <b>超 / 霸 / 王</b>三档——增量判据到甲就封顶，
+              六十季里控了八个州判据照样只给甲，后半局每一次胜利都不再有回报。</p>
+            <label>
+              <span>局长</span>
+              <select value={seasons ?? engine.P.seasonsPerGame}
+                onChange={(e) => setSeasons(Number(e.target.value))}>
+                <option value={16}>16 季 · 四年（评测口径，一局约十分钟）</option>
+                <option value={32}>32 季 · 八年</option>
+                <option value={64}>64 季 · 十六年（够打出霸业）</option>
+                <option value={104}>104 季 · 廿六年（至三分天下）</option>
+              </select>
+            </label>
+            <p className="warn-note">纪元时限按局长等分，所以长局的三个纪元也会拉长
+              ——「早取无主之地」的时间价值不会因为局长而失效。</p>
+          </div>
+        </details>
+
         {/* 让对手由大模型执子。默认关（0 家）——一季就是 N 次调用，
             要等，也要花钱；这件事必须是显式选择，不能默认替人开销 */}
         <details className="primer-fold model-fold"
@@ -759,7 +792,7 @@ export function PlayClient() {
               <div>
                 <b>上次那局还没打完</b>
                 <span>{engine.nameOf.get(resume.seat) ?? resume.seat}
-                  {"\u3000"}第 {resume.game.turn + 1}/{engine.P.seasonsPerGame} 季
+                  {"\u3000"}第 {resume.game.turn + 1}/{resume.game.seasonsPerGame ?? engine.P.seasonsPerGame} 季
                   {"\u3000"}{owned} 郡（开局 {f?.startCommanderies ?? "?"}）
                   {"\u3000"}{GRADE_CN[f?.bestGrade ?? "ding"]} 档</span>
               </div>
@@ -992,7 +1025,7 @@ export function PlayClient() {
   return (
     <main className="play">
       <header className="play-head play-bar">
-        <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}第 {game.turn + 1}/16 季{"\u3000"}
+        <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}第 {game.turn + 1}/{game.seasonsPerGame} 季{"\u3000"}
           纪元 {game.epoch}</span>
         <span className="who" style={{ "--c": engine.colorOf.get(seat) } as React.CSSProperties}>
           {engine.nameOf.get(seat)}
@@ -1333,7 +1366,7 @@ export function PlayClient() {
                 {!me.eliminated && <u>天下第 {rank.at}/{rank.of}</u>}</h2>
               {me.eliminated && (
                 <p className="over-lead">尽失疆土，止于 {game.year} 年 · {SEASON_CN[game.season]}
-                  （第 {game.turn}/{engine.P.seasonsPerGame} 季）。
+                  （第 {game.turn}/{game.seasonsPerGame} 季）。
                   档位仍按本局曾达到过的最高档记——打下来过的，不因后来失守而作废。</p>
               )}
               {/* 只报一个档位等于不报。玩家要知道的是「我把局面推进了多少」，

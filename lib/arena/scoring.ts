@@ -5,7 +5,8 @@
 // 自对局验收与评测报告会各按各的算，谁也不知道哪个对。
 import type { Grade } from "../game/engine/types.ts";
 
-export const GRADE_SCORE: Record<Grade, number> = { jia: 300, yi: 200, bing: 100, ding: 0 };
+export const GRADE_SCORE: Record<Grade, number> =
+  { ding: 0, bing: 100, yi: 200, jia: 300, chao: 400, ba: 500, wang: 600 };
 
 /** 从内容包核对：包里的名额分与这张表必须一致 */
 export function checkScoringAgainstPack(pack: unknown): string[] {

@@ -17,7 +17,7 @@ import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unit
 import type { EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
-import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, type Geography } from "./victory.ts";
+import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
   Army, GameState, Order, Grade, CommanderyId, FactionId, GameEvent, OfficerId,
@@ -773,7 +773,9 @@ export function resolve(
     // 纪元会在开局当季跳段，三段纪元几季走完等于没有
     const reached = s.turn - s.epochStart >= P.epochMin
       && Object.values(s.factions).some((f) => GRADE_RANK[f.bestGrade] >= GRADE_RANK[target]);
-    if (s.turn - s.epochStart >= P.epochLimit || reached) {
+    // 纪元时限按**本局**季数缩放：包里的 6 季是配着 16 季局定的，
+    // 64 季的长局若还用 6，三个纪元十八季就走完，后面四十六季全在末纪元
+    if (s.turn - s.epochStart >= epochLimitFor(s, P) || reached) {
       s.epoch += 1;
       s.epochStart = s.turn;
       log(s, { kind: "epoch", text: `入第 ${s.epoch} 纪元`
@@ -781,7 +783,7 @@ export function resolve(
         + `无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%` });
     }
   }
-  if (s.turn >= P.seasonsPerGame) s.finished = true;
+  if (s.turn >= s.seasonsPerGame) s.finished = true;
 
   return { state: s, rejected };
 }

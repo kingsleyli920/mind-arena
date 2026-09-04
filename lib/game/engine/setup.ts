@@ -27,6 +27,11 @@ export interface SetupOptions {
   year?: number;
   /** 只保留这些势力为可操作席位；其余转为规则驱动。不传则全部保留 */
   playable?: string[];
+  /**
+   * 本局季数。不传则用内容包里的默认值（16，评测口径）。
+   * 对局界面给玩家选长局；纪元时限随之缩放，见 epochLimitFor
+   */
+  seasons?: number;
 }
 
 /**
@@ -107,6 +112,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     turn: 0,
     epoch: 1,
     epochStart: 0,
+    seasonsPerGame: opts.seasons ?? P.seasonsPerGame,
     commanderies,
     factions,
     armies: [],

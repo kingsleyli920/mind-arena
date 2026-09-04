@@ -9,7 +9,12 @@ export type FactionId = string;
 export type OfficerId = string;
 
 export type Control = "firm" | "contested" | "nominal";
-export type Grade = "jia" | "yi" | "bing" | "ding";
+/**
+ * 档位。丁→甲判**相对开局的增量**（中和开局强弱，短局与评测用这一段）；
+ * 超→王判**绝对疆域**（长局才够得着，与开局无关）。
+ * 增量判据到甲就封顶，长局后半段每一次胜利都不再有回报——所以要接上面三档
+ */
+export type Grade = "ding" | "bing" | "yi" | "jia" | "chao" | "ba" | "wang";
 /** 三阵。鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞 */
 export type Formation = "scale" | "wings" | "square";
 
@@ -150,6 +155,14 @@ export interface GameState {
   epoch: number;
   /** 本纪元自第几季起。纪元推进是双触发，不写死在固定季号上 */
   epochStart: number;
+  /**
+   * **本局**季数。写在状态上而不是只读 EngineParams，是因为评测与对局
+   * 要的长度根本不同：评测要短而固定（一局 16 季 = 16 次调用，48 局才付得起，
+   * 且定档按增量判，四年里多拿一两个州是合理量级）；而作为游戏，
+   * 十六季刚把内政理顺就结束了——史上 194 到三分天下用了二十六年。
+   * 两件事共用一个常数，必然有一边被将就
+   */
+  seasonsPerGame: number;
   commanderies: Record<CommanderyId, CommanderyState>;
   factions: Record<FactionId, FactionState>;
   armies: Army[];

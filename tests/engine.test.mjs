@@ -209,9 +209,20 @@ test("规则即数据：改内容包必须改变引擎行为", () => {
   const noTroops = { ...P, strengthRatio: { skirmish: 0, main: 0, allout: 0 }, musterTake: 0 };
   assert.equal(wins(play(noTroops)), 0, "兵源归零后仍有破城 —— 引擎没读 strengthRatio/musterTake");
 
-  // 局长由包决定
+  // 局长由包决定，但在**开局时**定下：它现在是每局的属性（GameState.seasonsPerGame），
+  // 因为评测要短而固定（16 季 = 16 次调用，48 局才付得起）而对局要长
+  //（十六季刚把内政理顺就结束了），两者共用一个常数必然有一边被将就
   const short = { ...P, seasonsPerGame: 3 };
-  assert.equal(play(short, 10).turn, 3, "改 seasonsPerGame 后局长未跟随");
+  let s3 = createGame(DATA, { seed: "param-probe", roster: ROSTER, geo: GEO }, short);
+  for (let t = 0; t < 10 && !s3.finished; t += 1) {
+    s3 = refreshAp(
+      resolve(s3, sampleOrders(s3, Object.keys(s3.factions)), G, short, ROSTER, GEO).state,
+      short);
+  }
+  assert.equal(s3.turn, 3, "开局时的包未决定局长");
+  // 且单局可以覆盖包里的默认值——这是对局界面选长局的接口
+  const s5 = createGame(DATA, { seed: "t-001", roster: ROSTER, geo: GEO, seasons: 40 }, P);
+  assert.equal(s5.seasonsPerGame, 40, "opts.seasons 未覆盖包里的默认局长");
 
   // 内政效果由包决定。修城的价钱是 goldPerWall × wallGain，改大 wallGain
   // 也就改大了价钱——这条验的是「效果跟随参数」，不是国库，先把钱给足

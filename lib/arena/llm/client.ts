@@ -21,6 +21,20 @@ export type Rung = "schema" | "schema-notemp" | "schema-any" | "text";
 const LADDER: Rung[] = ["schema", "schema-notemp", "schema-any", "text"];
 
 /**
+ * 每个模型学到的最高可用档位，按客户端实例记忆。
+ *
+ * 阶梯原本每次调用都从头试。实测 qwen3.7-flash 打一整局：
+ * `档位：schema-any 16`——十六次决策全都降到第三档，也就是每次都要
+ * 先被 schema 拒一次、再被 schema-notemp 拒一次，一个决策发三个请求。
+ * 一局白发 32 个请求，48 局就是一千五百多个；时间三倍，钱也三倍。
+ *
+ * 记住之后从该档起步。**只记不忘**：档位只会因为再次被拒而下降，
+ * 不会自己升回去——升回去等于把刚学到的东西每次都再交一遍学费。
+ * 记忆按实例而非全局：评测里每个对局方一个客户端，互不串味
+ */
+const learned = new Map<string, number>();
+
+/**
  * 出参预算的默认值。
  *
  * 原值 2000 会把推理模型饿死：实测 openai/gpt-5-nano 打真实观测时
@@ -152,7 +166,7 @@ export class OpenRouterClient implements LlmClient {
     let costAccum = 0;
     const maxAttempts = this.opts.maxAttempts ?? 6;
     // 没给 schema 就直接从 text 档起步，不必把上面三档白试一遍
-    let rungIdx = req.schema ? 0 : LADDER.length - 1;
+    let rungIdx = req.schema ? (learned.get(req.model) ?? 0) : LADDER.length - 1;
     let budget = req.maxTokens ?? DEFAULT_MAX_TOKENS;
     let attempts = 0;
     let starved = 0;
@@ -225,6 +239,8 @@ export class OpenRouterClient implements LlmClient {
       // 此前 404 直接把结构化输出整个丢掉，而实测只要去掉 temperature 就能过
       if (last.kind === "degradable" && rungIdx < LADDER.length - 1) {
         rungIdx += 1;
+        // 学到了就记住：下次直接从这一档起步，不再把前面那几档重交一遍学费
+        learned.set(req.model, rungIdx);
         continue;
       }
       if (last.kind !== "retryable" && last.kind !== "infra") break;
