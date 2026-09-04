@@ -11,6 +11,7 @@
 //    过滤法在字段增长时必然漏。
 import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
+import { supplyReach } from "./resolve.ts";
 import { unitName, FORMATION_CN } from "./combat.ts";
 import { retinueAt, isFiller } from "./officers.ts";
 import type { Roster } from "./officers.ts";
@@ -70,6 +71,15 @@ export interface Observation {
     /** 能随军的驻将（至多 retinueCap 人）。兵力上限 = 人数 × 每将统兵 */
     officers: string[];
     besiegedBy: FactionId | null;
+    /**
+     * 本郡是否**补给断绝**。断供则本季产出归零，且以此郡为后方的军团粮尽溃散。
+     *
+     * 这一项此前完全不在观测里，而它决定的事很大：一份实录里，袁术五郡断了四郡，
+     * 模型在断供的汝南集结了 2033 人，当季就「后路断绝，粮尽溃散」——
+     * 它的本季意图还写着「下季自汝南出兵取豫州」。
+     * 规则摘要里讲了补给，观测里却看不见谁断了，等于让它蒙着眼睛按规则走
+     */
+    supplyCut: boolean;
   }>;
   /** 我在外的军团 */
   armies: Array<{ id: string; at: string; target: string | null; troops: number;
@@ -111,6 +121,9 @@ export function observe(
   const st = standingOf(s, geo, faction);
   const cands = listActions(s, faction, g, P, opts.rules, roster, nameOf, geo);
   const log = visibleLog(s, faction, opts.since ?? 0);
+  // 补给连通分量：从治所出发，沿己方与借道盟友的郡国算。
+  // 治所失守则整幅皆断——那是全图杠杆最高的一击
+  const reach = supplyReach(s, g, faction);
 
   const mine = Object.values(s.commanderies)
     .filter((c) => c.owner === faction)
@@ -133,6 +146,7 @@ export function observe(
             .slice(0, P.retinueCap).map((o) => o.name)
         : [],
       besiegedBy: s.armies.find((x) => x.target === c.id)?.faction ?? null,
+      supplyCut: !reach.has(c.id),
     }));
 
   return {

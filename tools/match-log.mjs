@@ -21,9 +21,8 @@ import { decide, PROFILES } from "../lib/game/engine/bot.ts";
 import { buildRoster, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
-import { resolve } from "../lib/game/engine/resolve.ts";
+import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildGeography, standingOf, GRADE_CN } from "../lib/game/engine/victory.ts";
-import { observe } from "../lib/game/engine/observe.ts";
 import { visibleLog } from "../lib/game/engine/intel.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
@@ -134,7 +133,7 @@ async function main() {
     for (const id of drawn) {
       const st = standingOf(probe, GEO, id);
       const f = probe.factions[id];
-      say(`- **${nameOf(id)}**　${f.startCommanderies} 郡 · ${st.controlledZhou} 州 · 州治 ${st.zhouSeats}　治 ${f.capital ?? "无"}`);
+      say(`- **${nameOf(id)}**\u3000${f.startCommanderies} 郡 · ${st.controlledZhou} 州 · 州治 ${st.zhouSeats}\u3000治 ${f.capital ?? "无"}`);
       if (LORE[id]) say(`  > ${LORE[id]}`);
     }
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -157,19 +156,19 @@ async function main() {
   const f0 = s.factions[SEAT];
   const st0 = standingOf(s, GEO, SEAT);
 
-  say(`# 对局实录　${nameOf(SEAT)}`);
+  say(`# 对局实录\u3000${nameOf(SEAT)}`);
   say("");
   say(`| | |`);
   say(`|---|---|`);
   say(`| 对局方 | ${MODEL ? `模型 \`${MODEL}\`（推理档 ${REASONING}）` : AGENT} |`);
-  say(`| 席位 | **${nameOf(SEAT)}**${drawn.length ? `　（${drawn.length > 1 ? "三选一" : "随机抽签"}，候选 ${drawn.map(nameOf).join("、")}）` : "　（手动指定）"} |`);
+  say(`| 席位 | **${nameOf(SEAT)}**${drawn.length ? `\u3000（${drawn.length > 1 ? "三选一" : "随机抽签"}，候选 ${drawn.map(nameOf).join("、")}）` : "\u3000（手动指定）"} |`);
   say(`| 局长 | ${SEASONS} 季（${Math.round(SEASONS / 4)} 年） |`);
   say(`| 随机种子 | \`${SEED}\` |`);
-  say(`| 开局 | ${f0.startCommanderies} 郡 · ${st0.controlledZhou} 州 · 州治 ${st0.zhouSeats}　治 ${f0.capital ?? "无"} |`);
+  say(`| 开局 | ${f0.startCommanderies} 郡 · ${st0.controlledZhou} 州 · 州治 ${st0.zhouSeats}\u3000治 ${f0.capital ?? "无"} |`);
   say(`| 胜负 | 先控 ${P.unifyZhou} 州者一统天下；打满则按相对开局的增量定档 |`);
-  say(`| 提示词 | v${PROMPT_VERSION}　内容包 v${pack.version} |`);
+  say(`| 提示词 | v${PROMPT_VERSION}\u3000内容包 v${pack.version} |`);
   say("");
-  if (LORE[SEAT]) say(`> **本年局势**　${LORE[SEAT]}`);
+  if (LORE[SEAT]) say(`> **本年局势**\u3000${LORE[SEAT]}`);
   say("");
 
   let since = 0, plan = null, spentUsd = 0, calls = 0, halted = null;
@@ -189,27 +188,38 @@ async function main() {
     const winnable = cands.filter((c) => c.forecast?.verdict === "破城").length;
 
     say(`\n---\n`);
-    say(`## 第 ${turn + 1}/${SEASONS} 季　${s.year} 年 · ${SEASON_CN[s.season]}　纪元 ${s.epoch}`);
+    say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}`);
     say("");
     // ── 我方家底 ──
     say(`### 我方`);
     say("");
     const dn = before.n - prev.n, dt = before.troops - prev.troops, dg = before.gold - prev.gold;
-    say(`**${nameOf(SEAT)}**　${before.n} 郡（${sign(dn)}）　控 ${before.zhou} 州　州治 ${before.seats}`
-      + `　兵 ${fmt(before.troops)}（${sign(dt)}）　国库 ${fmt(before.gold)} 金（${sign(dg)}）`
-      + `　令 ${s.factions[SEAT].ap}　现档 ${GRADE_CN[before.grade]}`);
+    say(`**${nameOf(SEAT)}**\u3000${before.n} 郡（${sign(dn)}）\u3000控 ${before.zhou} 州\u3000州治 ${before.seats}`
+      + `\u3000兵 ${fmt(before.troops)}（${sign(dt)}）\u3000国库 ${fmt(before.gold)} 金（${sign(dg)}）`
+      + `\u3000令 ${s.factions[SEAT].ap}\u3000现档 ${GRADE_CN[before.grade]}`);
     say("");
     if (before.mine.length) {
-      say(`| 郡国 | 兵 | 产 | 心 | 防 | 阵 | 械 | 驻将 |`);
-      say(`|---|---|---|---|---|---|---|---|`);
+      // 断供单列一栏：产出归零、以此为后方的军团粮尽溃散，
+      // 而它在逐郡数字里看不出来。一份实录里袁术五郡断了四郡、
+      // 刚集结的两千人当季溃散，正是从这一栏缺失开始的
+      const reach = supplyReach(s, G, SEAT);
+      const cut = before.mine.filter((c) => !reach.has(c.id)).length;
+      say(`| 郡国 | 兵 | 产 | 心 | 防 | 阵 | 械 | 供 | 驻将 |`);
+      say(`|---|---|---|---|---|---|---|---|---|`);
       for (const c of before.mine.slice(0, 20)) {
         const offs = ROSTER ? stationedAt(s, ROSTER, c.id).filter((o) => !isFiller(o)).map((o) => o.name) : [];
         say(`| ${c.id} | ${fmt(c.garrison)} | ${c.yieldTier} | ${c.moraleTier} | ${c.defense}`
           + ` | ${c.formation === "scale" ? "鱼鳞" : c.formation === "wings" ? "鹤翼" : "方圆"}`
           + ` | ${c.gear === "none" ? "—" : c.gear === "ram" ? "冲车" : "土山"}`
+          + ` | ${reach.has(c.id) ? "通" : "**断**"}`
           + ` | ${offs.length ? offs.slice(0, 4).join("、") : "—"} |`);
       }
-      if (before.mine.length > 20) say(`| …另 ${before.mine.length - 20} 郡 | | | | | | | |`);
+      if (before.mine.length > 20) say(`| …另 ${before.mine.length - 20} 郡 | | | | | | | | |`);
+      if (cut) {
+        say("");
+        say(`> ⚠ **${cut} 郡补给断绝**：本季产出归零，以其为后方的军团粮尽溃散。`
+          + `补给自治所 ${s.factions[SEAT].capital ?? "（已失）"} 起算。`);
+      }
       say("");
     }
     for (const a of s.armies.filter((a) => a.faction === SEAT)) {
@@ -222,8 +232,8 @@ async function main() {
     say(`### 摆在面前的选择`);
     say("");
     say(`候选 ${cands.length} 条：`
-      + [...byType].sort().map(([k, v]) => `${({ campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结", govern: "内政", array: "改阵", submit: "劝降", suade: "招降", appoint: "调任", scout: "刺探", ally: "外交", passage: "借道", retire: "归隐" })[k] ?? k} ${v}`).join("　")
-      + `　｜其中预告可破城的 **${winnable}** 条`);
+      + [...byType].sort().map(([k, v]) => `${({ campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结", govern: "内政", array: "改阵", submit: "劝降", suade: "招降", appoint: "调任", scout: "刺探", ally: "外交", passage: "借道", retire: "归隐" })[k] ?? k} ${v}`).join("\u3000")
+      + `\u3000｜其中预告可破城的 **${winnable}** 条`);
 
     // ── 决策 ──
     say("");
@@ -238,11 +248,11 @@ async function main() {
       if (rec.plan) plan = rec.plan;
       if (typeof rec.usage?.cost === "number") spentUsd += rec.usage.cost;
       calls += 1;
-      say(`\`${MODEL}\`　用时 ${(rec.elapsedMs / 1000).toFixed(1)}s`
-        + `　入 ${fmt(rec.usage?.prompt ?? 0)} tok（缓存 ${fmt(rec.usage?.cached ?? 0)}）`
-        + `　出 ${fmt(rec.usage?.completion ?? 0)}（推理 ${fmt(rec.usage?.reasoning ?? 0)}）`
-        + `　档位 ${rec.rung ?? "—"}　尝试 ${rec.attempts}`
-        + `${rec.usage?.cost != null ? `　$${rec.usage.cost.toFixed(4)}` : ""}`);
+      say(`\`${MODEL}\`\u3000用时 ${(rec.elapsedMs / 1000).toFixed(1)}s`
+        + `\u3000入 ${fmt(rec.usage?.prompt ?? 0)} tok（缓存 ${fmt(rec.usage?.cached ?? 0)}）`
+        + `\u3000出 ${fmt(rec.usage?.completion ?? 0)}（推理 ${fmt(rec.usage?.reasoning ?? 0)}）`
+        + `\u3000档位 ${rec.rung ?? "—"}\u3000尝试 ${rec.attempts}`
+        + `${rec.usage?.cost != null ? `\u3000$${rec.usage.cost.toFixed(4)}` : ""}`);
       if (rec.failure) say(`\n> ⚠ **本季无回应**（${rec.failureKind}）：${rec.failure}`);
     } else {
       const variant = AGENT.split(":")[1] ?? "balanced";
@@ -252,10 +262,10 @@ async function main() {
       picks = orders.map((o) => cands.find((c) =>
         JSON.stringify(c.action) === JSON.stringify(o.action))?.key).filter(Boolean);
       reason = `机器人画像 ${variant}`;
-      say(`机器人 \`${AGENT}\`　用时 ${Date.now() - t0}ms`);
+      say(`机器人 \`${AGENT}\`\u3000用时 ${Date.now() - t0}ms`);
     }
-    if (plan) say(`\n**跨季方略**　${plan}`);
-    if (reason) say(`\n**本季意图**　${reason}`);
+    if (plan) say(`\n**跨季方略**\u3000${plan}`);
+    if (reason) say(`\n**本季意图**\u3000${reason}`);
 
     const adm = admit(s, SEAT, picks, cands, G, ROSTER);
     say("");
@@ -268,7 +278,7 @@ async function main() {
     for (const d of adm.dropped) {
       const why = ({ "unknown-key": "候选表里没有这个 key", duplicate: "重复选取",
         "over-budget": "令数不够", rejected: "引擎校验不过" })[d.reason] ?? d.reason;
-      say(`${i++}. ✗ ${labelOf(d.key)}　—— ${why}${d.detail ? `（${d.detail}）` : ""}`);
+      say(`${i++}. ✗ ${labelOf(d.key)}\u3000—— ${why}${d.detail ? `（${d.detail}）` : ""}`);
     }
 
     // ── 结算 ──
@@ -282,7 +292,7 @@ async function main() {
     if (!mineLog.length) say(`（我方无事）`);
     for (const e of mineLog) {
       say(`- ${cn(e.text)}`
-        + (e.attribution ? `　\`${Object.entries(e.attribution).map(([k, v]) => `${k} ${v}`).join("　")}\`` : ""));
+        + (e.attribution ? `\u3000\`${Object.entries(e.attribution).map(([k, v]) => `${k} ${v}`).join("\u3000")}\`` : ""));
     }
     const worldLog = fresh.filter((e) => e.faction !== SEAT);
     if (worldLog.length) {
@@ -309,12 +319,12 @@ async function main() {
       const was = w0.cnt.get(id) ?? 0;
       const d = n - was;
       return `${idx + 1}. ${id === SEAT ? `**${nameOf(id)}**` : nameOf(id)} ${n}${d ? `（${sign(d)}）` : ""}`;
-    }).join("　"));
+    }).join("\u3000"));
     say("");
-    say(`存活 ${w1.live} 家　无主 ${w1.neutral} 郡`
-      + `　｜我方近 ${recent.length} 季净 ${sign(trend)} 郡`
-      + `　${trend > 0 ? "扩张中" : trend < 0 ? "**收缩中**" : "僵持"}`
-      + `　｜距升档：${after.zhou > before.zhou || after.n > before.n ? "本季有进展" : "无变化"}`);
+    say(`存活 ${w1.live} 家\u3000无主 ${w1.neutral} 郡`
+      + `\u3000｜我方近 ${recent.length} 季净 ${sign(trend)} 郡`
+      + `\u3000${trend > 0 ? "扩张中" : trend < 0 ? "**收缩中**" : "僵持"}`
+      + `\u3000｜距升档：${after.zhou > before.zhou || after.n > before.n ? "本季有进展" : "无变化"}`);
 
     since = r.state.log.length;
     prev = after;
@@ -340,15 +350,15 @@ async function main() {
   say(`| 兵力 | — | ${fmt(fin.troops)} |`);
   say(`| 夺自他方 | 0 | ${s.factions[SEAT].conquests} 郡 |`);
   say("");
-  say(`**${GRADE_CN[fin.grade]} 档　${GRADE_SCORE[fin.grade]} 分**`
-    + `　天下第 ${w.rank.findIndex(([id]) => id === SEAT) + 1 || "—"}/${w.rank.length}`);
+  say(`**${GRADE_CN[fin.grade]} 档\u3000${GRADE_SCORE[fin.grade]} 分**`
+    + `\u3000天下第 ${w.rank.findIndex(([id]) => id === SEAT) + 1 || "—"}/${w.rank.length}`);
   if (halted) say(`\n> ⚠ ${halted}，实录到此为止`);
   if (calls) {
     say("");
     say(`模型调用 ${calls} 次，实扣 $${spentUsd.toFixed(4)}`);
   }
   say("");
-  say(`> 生成于 ${new Date().toISOString()}　git \`${(() => {
+  say(`> 生成于 ${new Date().toISOString()}\u3000git \`${(() => {
     try { return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim(); } catch { return "?"; }
   })()}\``);
 

@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.2.0";
+export const PROMPT_VERSION = "1.3.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -35,6 +35,12 @@ export function renderSystem(pack: unknown): string {
     "- forecast 只答「打不打得赢」。**打赢了值什么**写在标签末尾：目标所属州、",
     "  「再取 N 即控」、「·州治」、「·敌治所」、「取下即升某档」。",
     "  这两件事经常不指向同一个目标——最好打的那个未必是让你升档的那个。",
+    "",
+    "## 补给",
+    "- 每季末从治所出发，沿己方郡国（与有借道条款的盟友郡国）算连通。",
+    "  接不上的郡 `supplyCut: true`：**本季产出归零**，且以它为后方的军团**粮尽溃散**。",
+    "- 所以在断供之郡集结、募兵、修城都是白花——先把中间那一段接回来，或换个基地。",
+    "- 治所失守则全境断绝，是全图杠杆最高的一击。对手的治所与自己的都算。",
     "",
     "## 怎么算赢",
     "- 档位按**相对开局的增量**判，不是绝对疆域。守成不得分。",
