@@ -53,6 +53,8 @@ const REASONING = arg("reasoning", "low");
 const BUDGET = Number(arg("budget", "0")) || 0;
 const OUT = arg("out", `混战-${SEED}.md`);
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
+/** --provider=A,B：钉住提供方。不钉的话同一模型会在提供方之间跳，单次用时差过 45 倍 */
+const PROVIDER = arg("provider", "");
 
 // 抽签池与 match-log 同一份：塞外诸部据的是名存实亡的边郡，抽到等于废签
 const POOL = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu",
@@ -85,7 +87,8 @@ if (!process.env.OPENROUTER_API_KEY) {
 }
 const client = new OpenRouterClient(process.env.OPENROUTER_API_KEY, { title: "melee" });
 const depsBase = { client, pack, g: G, P, roster: ROSTER, geo: GEO, nameOf,
-  reasoning: { effort: REASONING } };
+  reasoning: { effort: REASONING },
+  ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}) };
 
 const lines = [];
 const say = (t = "") => { lines.push(t); console.log(t); };
