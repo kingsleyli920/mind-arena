@@ -94,6 +94,7 @@ export interface EngineParams {
   fieldStallLoss: number; fieldDefeatLoss: number;
   /** 集结：每个来源郡抽调的守军比例 */
   musterTake: number;
+
   /** 开局在野可招募比例，由 seed 抽定 */
   wildRecruitRatio: number;
   /** 兵种表：攻防系数、地形系数、克制关系 */
