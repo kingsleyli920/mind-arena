@@ -70,6 +70,16 @@ export interface ChatRequest {
    * 且无论选哪种，reasoning token 都记进结果
    */
   reasoning?: { effort: "low" | "medium" | "high" } | { max_tokens: number };
+  /**
+   * 钉住提供方。OpenRouter 默认按可用性路由，同一个模型 id 会在不同提供方
+   * 之间跳——一份 24 季的实录里跳了 **7 家**（Parasail / Cloudflare / Fireworks /
+   * Together / Venice / NextBit / Morph）。后果有三：
+   *   一、量化精度与上下文实现各家不同，「同一个模型」其实不是同一个东西；
+   *   二、单季用时中位 11.2s 而最慢 511.2s，差 45 倍，慢的那次还超时断流；
+   *   三、前缀缓存几乎不命中（197k 入参里只命中 4k，2%）——缓存是按提供方存的。
+   * 评测要可比就得钉住；对局图省事可以不钉
+   */
+  provider?: { order: string[]; allow_fallbacks?: boolean };
 }
 
 export interface ChatResult {
@@ -186,7 +196,19 @@ export class OpenRouterClient implements LlmClient {
       }
 
       if (res.ok) {
-        const json = await res.json() as RawResponse;
+        // 读 body 也会失败，而且失败得很难看：慢提供方常在响应中途断流，
+        // 抛的是原始的 `The operation was aborted due to timeout`。
+        // 此前这一行没有任何保护——异常直接穿出 chat()，不带分级、不重试，
+        // 于是被记成 harness（一份实录里真的出现过：尝试 0、用时 0.0s、
+        // 那一季一条令都没下）。发出去的请求钱照付，却连一次重试都没有。
+        // 归 infra 并重试：这与「fetch 阶段超时」是同一件事，只是断在后半程
+        const json = await res.json().catch((e: unknown) => e as Error) as RawResponse | Error;
+        if (json instanceof Error) {
+          last = { kind: "infra", status: res.status,
+                   message: `读取响应失败：${json.message}` };
+          await sleep(backoffMs(attempts));
+          continue;
+        }
         const choice = json.choices?.[0];
         const content = choice?.message?.content ?? "";
         const finishReason = choice?.finish_reason ?? null;
@@ -268,11 +290,17 @@ export class OpenRouterClient implements LlmClient {
     // require_parameters 一撞就是 404 —— 实测 4 个端点被筛成 0
     if (rung === "schema") body.temperature = req.temperature ?? 0.3;
     if (req.reasoning) body.reasoning = req.reasoning;
+    if (req.provider) {
+      // 与下面 require_parameters 那一项合并：两者都写在 provider 下
+      body.provider = { ...req.provider, allow_fallbacks: req.provider.allow_fallbacks ?? false };
+    }
     if (rung !== "text" && req.schema) {
       body.response_format = { type: "json_schema", json_schema: req.schema };
       // 宁可 404 也不要静默忽略：某些端点会当没看见 response_format。
       // 但 404 之后要降档重试，不能就此把结构化输出丢掉
-      if (rung !== "schema-any") body.provider = { require_parameters: true };
+      if (rung !== "schema-any") {
+        body.provider = { ...(body.provider as object ?? {}), require_parameters: true };
+      }
     }
     return fetch(ENDPOINT, {
       method: "POST",

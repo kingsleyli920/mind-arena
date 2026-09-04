@@ -69,6 +69,8 @@ const OUT = arg("out", `实录-${SEED}.md`);
 const BUDGET = Number(arg("budget", "0")) || 0;
 /** --full：候选全文、引擎逐项算式、全场原始日志。默认开——实录本来就是要细 */
 const FULL = !has("brief");
+/** --provider=Parasail,Fireworks：钉住提供方。同一模型跳提供方会让结果不可比 */
+const PROVIDER = arg("provider", "");
 
 // ── 抽签：席位不手动指定 ────────────────────────────────────────────
 //
@@ -152,7 +154,8 @@ async function main() {
     process.exit(2);
   }
   const deps = client && { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
-    nameOf, reasoning: { effort: REASONING } };
+    nameOf, reasoning: { effort: REASONING },
+    ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}) };
 
   let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
   const f0 = s.factions[SEAT];
@@ -439,7 +442,7 @@ async function main() {
     say("");
     say(`| | |`);
     say(`|---|---|`);
-    say(`| 模型 | \`${MODEL}\`（推理档 ${REASONING}） |`);
+    say(`| 模型 | \`${MODEL}\`（推理档 ${REASONING}${PROVIDER ? `，钉住提供方 ${PROVIDER}` : "，提供方未钉住"}） |`);
     say(`| 提供方 | ${[...new Set(meta.map((m) => m.provider).filter(Boolean))].join("、") || "—"} |`);
     say(`| 调用次数 | ${calls}（每季一次） |`);
     say(`| 入参 token | ${fmt(sum("prompt"))}\u3000其中命中缓存 ${fmt(sum("cached"))}（${(sum("cached") / Math.max(1, sum("prompt")) * 100).toFixed(0)}%） |`);

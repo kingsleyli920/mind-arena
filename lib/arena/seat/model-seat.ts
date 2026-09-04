@@ -112,6 +112,8 @@ export interface ModelSeatDeps {
   keyEnum?: boolean;
   /** 推理档位。不给则各模型用自己的默认值，见 ChatRequest.reasoning */
   reasoning?: { effort: "low" | "medium" | "high" } | { max_tokens: number };
+  /** 钉住提供方。评测要可比就得钉——同一个模型 id 会在提供方之间跳，见 client.ts */
+  provider?: { order: string[]; allow_fallbacks?: boolean };
 }
 
 export async function modelDecide(
@@ -142,6 +144,7 @@ export async function modelDecide(
       user,
       schema: decisionSchema(cands, deps.keyEnum ?? true),
       reasoning: deps.reasoning,
+      provider: deps.provider,
     });
     // 「没让它说完」与「它答不上来」必须分开记。前者是 harness 的配置问题
     // ——推理模型把出参预算全花在 reasoning 上，content 返回空串——
