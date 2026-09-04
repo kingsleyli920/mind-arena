@@ -14,6 +14,7 @@
 // 它走的是与模型完全相同的那条路（picks → admit → orders），
 // 同 seed 同对手，因此可直接比。
 import fs from "node:fs";
+import { execSync } from "node:child_process";
 import { buildGraph, listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, pick as botPick, PROFILES } from "../lib/game/engine/bot.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
@@ -27,6 +28,7 @@ import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
+import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
@@ -145,7 +147,11 @@ async function playGame(gi) {
         if (typeof record.usage?.cost === "number") spent += record.usage.cost;
         mine = {
           turn: s.turn, seat: f, obsTokens: record.obsTokens,
-          candidates: record.candidates, picks: record.picks.length,
+          candidates: record.candidates,
+          // 落 picks **原文**而不只是条数。只记条数则事后无从复查
+          // 「模型当时到底选了什么」——一份不能被复查的排行榜，
+          // 两周后连自己都没法确认它是不是真的
+          picks: record.picks, pickCount: record.picks.length,
           admitted: record.admission.admitted.length, spent: record.admission.spent,
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
           dropped: record.admission.dropped.map((d) => d.reason),
@@ -153,7 +159,11 @@ async function playGame(gi) {
           structured: record.structured, rung: record.rung,
           failureKind: record.failureKind,
           maxTokens: record.maxTokens, finishReason: record.finishReason,
-          elapsedMs: record.elapsedMs,
+          elapsedMs: record.elapsedMs, attempts: record.attempts,
+          // OpenRouter 会静默改路由：同一个 model id 换到别的提供方，
+          // 量化精度与上下文都可能不同，而 model 字段照旧。留这两项才回查得了
+          servedModel: record.model, provider: record.provider,
+          generationId: record.generationId,
         };
       } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
@@ -167,7 +177,7 @@ async function playGame(gi) {
         orders.push(...a.orders);
         mine = {
           turn: s.turn, seat: f, obsTokens: estTokens(JSON.stringify(o)),
-          candidates: cands.length, picks: dec.picks.length,
+          candidates: cands.length, picks: dec.picks, pickCount: dec.picks.length,
           admitted: a.admitted.length, spent: a.spent, ap: s.factions[f].ap,
           illegalRate: a.illegalRate,
           dropped: a.dropped.map((d) => d.reason),
@@ -248,13 +258,49 @@ for (const r of results) {
   );
 }
 const usage = records.filter((r) => r.usage);
+const failures = records.filter((r) => r.failure);
+
+// 失败拆分必须**先于** token 统计，且不受 usage.length 约束。
+// 此前整段被 `if (usage.length)` 包着——若每一季都走 catch 失败（网络断、
+// 密钥无效），usage 为空，于是失败拆分一个字都不打，报告只剩「均分 0.0」。
+// 一个全程没发出请求的跑，看上去和一个真打了 768 季只是打得很烂的跑一模一样
+if (failures.length) {
+  const by = { credits: [], auth: [], infra: [], budget: [], harness: [], model: [] };
+  for (const r of failures) (by[r.failureKind ?? "model"] ??= []).push(r);
+  if (by.credits.length) {
+    console.log(`\n✗ 账户额度耗尽 ${by.credits.length} 季——本次结果不可用，与模型能力无关`);
+  }
+  if (by.auth.length) {
+    console.log(`\n✗ 密钥无效或该模型不对本 key 开放 ${by.auth.length} 季`
+      + `——本次结果不可用，与模型能力无关`);
+  }
+  console.log(`失败拆分（共 ${failures.length}/${records.length} 席·季）：`
+    + `额度 ${by.credits.length}\u3000鉴权 ${by.auth.length}`
+    + `\u3000基础设施（超时/网络/5xx）${by.infra.length}`
+    + `\u3000harness（出参预算）${by.budget.length}`
+    + `\u3000harness（自身异常）${by.harness.length}`
+    + `\u3000模型（答不上来）${by.model.length}`);
+  for (const k of Object.keys(by)) {
+    if (by[k].length) console.log(`  ${k} 样例：${by[k][0].failure}`);
+  }
+  // 只有最后一栏算模型的分。占比过半时这一行的名次没有意义
+  const notModel = failures.length - by.model.length;
+  if (notModel > records.length * 0.2) {
+    console.log(`  ⚠ ${(notModel / records.length * 100).toFixed(0)}% 的席·季`
+      + `败在模型能力之外，**本次名次不可信**`);
+  }
+}
+
 if (usage.length) {
   const sum = (k) => usage.reduce((a, r) => a + (r.usage[k] ?? 0), 0);
   const cacheRate = sum("prompt") ? sum("cached") / sum("prompt") : 0;
   console.log(`\ntoken：入 ${sum("prompt")}（命中缓存 ${sum("cached")}，`
     + `${(cacheRate * 100).toFixed(0)}%）`
-    + `\u3000出 ${sum("completion")}（其中推理 ${sum("reasoning")}，`
-    + `${sum("completion") ? (sum("reasoning") / sum("completion") * 100).toFixed(0) : 0}%）`
+    // 不报「推理占出参的百分比」：有的提供方 completion_tokens 含 reasoning，
+    // 有的不含，同一个比值在两家的含义相反，实测出现过 108% 这种数。
+    // 报每次调用的绝对量，跨模型直接可比
+    + `\u3000出 ${sum("completion")}\u3000推理 ${sum("reasoning")}`
+    + `（每次 ${Math.round(sum("reasoning") / usage.length)} tok）`
     + `\u3000调用 ${usage.length} 次`
     + `\u3000失败 ${records.filter((r) => r.failure).length} 次`);
   // 降到哪一档必须报出来：不同档位下模型受的约束不同（有无解码层强制、
@@ -267,28 +313,9 @@ if (usage.length) {
   // 混进「失败」计数等于把自己的 bug 算到模型头上
   // 推理占比高说明这个模型在花大量测试时算力。跨模型比分前要看这个，
   // 否则比的是各家默认给多少算力，不是策略能力。--reasoning=low|medium|high 可统一
-  if (sum("reasoning") > sum("completion") * 0.5 && !REASONING) {
-    console.log(`注：出参有 ${(sum("reasoning") / sum("completion") * 100).toFixed(0)}% 是推理，`
-      + `每次调用 ${Math.round(sum("completion") / usage.length)} tok。`
+  if (sum("reasoning") > 0 && !REASONING) {
+    console.log(`注：每次调用烧 ${Math.round(sum("reasoning") / usage.length)} tok 推理，`
       + `未指定 --reasoning，该模型用的是自家默认档位`);
-  }
-  // 失败必须三分栏。混成一个计数就会出现「kimi 55 季答不上来」这种结论，
-  // 而实测其中 54 季是 180s 超时——按提供方的快慢排名，与策略能力无关
-  const by = { credits: [], infra: [], budget: [], model: [] };
-  for (const r of records) if (r.failure) (by[r.failureKind ?? "model"] ??= []).push(r);
-  if (by.infra.length || by.budget.length || by.model.length) {
-    if (by.credits.length) {
-      console.log(`✗ 账户额度耗尽 ${by.credits.length} 季——本次结果不可用，与模型能力无关`);
-    }
-    console.log(`失败拆分：基础设施（超时/网络）${by.infra.length} 季`
-      + `\u3000harness（出参预算）${by.budget.length} 季`
-      + `\u3000模型（答不上来/解析不出）${by.model.length} 季`);
-    for (const k of ["credits", "infra", "budget", "model"]) {
-      if (by[k].length) console.log(`  ${k} 样例：${by[k][0].failure}`);
-    }
-    if (by.infra.length) {
-      console.log("  ⚠ 基础设施失败不该计进模型的分。若占比高，加大 --timeout 或降并发再跑");
-    }
   }
   const grown = records.filter((r) => r.maxTokens > 8000);
   if (grown.length) {
@@ -312,6 +339,26 @@ if (JSON_OUT) {
     // 否则「48 局的排名」可能其实只有 11 局
     played: results.length, spentUsd: +spent.toFixed(4), halted,
     keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null,
+    // 这一跑是在什么条件下跑的。缺了这些，两周后这份结果与新结果之间
+    // 的差是「模型变了」还是「我们改了提示词/内容包/引擎」就分不清——
+    // 而这个仓库的提示词、内容包、引擎每周都在动
+    stamp: {
+      promptVersion: PROMPT_VERSION,
+      packVersion: pack?.version ?? null,
+      packScenario: pack?.scenario ?? null,
+      git: (() => {
+        try {
+          return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+        } catch { return null; }
+      })(),
+      dirty: (() => {
+        try {
+          return execSync("git status --porcelain", { encoding: "utf8" }).trim().length > 0;
+        } catch { return null; }
+      })(),
+      // 时间戳用 ISO，别用本地格式——跨机器读同一份结果时要能排序
+      at: new Date().toISOString(),
+    },
     results, records,
   }));
 }

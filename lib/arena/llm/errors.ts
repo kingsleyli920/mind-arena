@@ -9,14 +9,22 @@ export type FailureKind =
   | "degradable"   // 400 / 404 / 422 —— 本档请求参数不被端点接受，降一档重试
   | "starved"      // HTTP 200 但内容为空、出参顶到上限 —— 推理把预算吃光了
   | "budget"       // 402 —— 余额或额度耗尽，整跑停下
-  | "fatal";       // 401 / 403 / 其它 —— 配置问题，停下
+  | "auth"         // 401 / 403 —— 密钥无效，或这个模型不对本 key 开放。
+                   //   **本行不可用，但不该杀整批**：403 常是单模型的数据策略问题，
+                   //   按「额度耗尽」中止全部，是拿一个假归因换掉另一个假归因
+  | "fatal";       // 其它 —— 说不清，停下
 
 export interface Failure { kind: FailureKind; status: number; message: string }
 
 export function classify(status: number, body: string): Failure {
   const message = body.slice(0, 400);
   if (status === 402) return { kind: "budget", status, message };
-  if ([429, 408, 502, 503, 504].includes(status)) return { kind: "retryable", status, message };
+  if (status === 401 || status === 403) return { kind: "auth", status, message };
+  // 5xx 一律当上游抖动重试。此前只列了 502/503/504，于是 500 与 Cloudflare 的
+  // 52x/529 掉进 fatal，再被记成「模型答不上来」——那是提供方挂了，不是模型不会玩
+  if (status === 429 || status === 408 || status >= 500) {
+    return { kind: "retryable", status, message };
+  }
   if ([400, 404, 422].includes(status)) return { kind: "degradable", status, message };
   return { kind: "fatal", status, message };
 }

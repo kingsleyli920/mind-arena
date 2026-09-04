@@ -59,6 +59,9 @@ async function priceTable() {
 const progress = new Map();
 /** 一旦有人撞上额度耗尽，剩下的都不必再跑 */
 let creditsOut = false;
+/** --budget=<美元>：整批的实扣上限，按花钱的对局方均摊后透传给子进程 */
+const BUDGET = Number(arg("budget", "0")) || 0;
+const payingCount = Math.max(1, AGENTS.filter((a) => a.startsWith("model:")).length);
 
 function runOne(spec) {
   const [kind, ...rest] = spec.split(":");
@@ -70,6 +73,9 @@ function runOne(spec) {
   else args.push(`--agent=${spec}`);
   if (REASONING && kind === "model") args.push(`--reasoning=${REASONING}`);
   if (KEYENUM && kind === "model") args.push(`--keyenum=${KEYENUM}`);
+  // 预算按**花钱的对局方**均摊。bot 与 stub 不发请求，把额度分给它们
+  // 等于白扔——此前这个闸门根本没被透传，加了等于没加
+  if (BUDGET && kind === "model") args.push(`--budget=${(BUDGET / payingCount).toFixed(4)}`);
 
   return new Promise((resolve) => {
     const t0 = Date.now();
@@ -148,6 +154,8 @@ function summarize(run, px) {
   const infraFail = recs.filter((r) => r.failure && fk(r) === "infra").length;
   const starved = recs.filter((r) => r.failure && fk(r) === "budget").length;
   const modelFail = recs.filter((r) => r.failure && fk(r) === "model").length;
+  const authFail = recs.filter((r) => r.failure && fk(r) === "auth").length;
+  const harnessFail = recs.filter((r) => r.failure && fk(r) === "harness").length;
 
   // 成本以**提供方回报的实际扣费**为准，价目表重算只作兜底。
   //
@@ -184,7 +192,13 @@ function summarize(run, px) {
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
     outTok: sum("completion"), reasonTok: sum("reasoning"),
-    rungs, creditsFail, infraFail, starved, modelFail, cost, costSource,
+    rungs, creditsFail, authFail, infraFail, starved, harnessFail, modelFail,
+    cost, costSource,
+    // 预算停手时实际跑了几局。与请求的局数不同就必须看得见
+    played: run.played ?? rs.length, halted: run.halted ?? null,
+    // 逐局分数按局号存下来，配对检验要用。各对局方跑的是同一批
+    //(seed, 席位)，所以同局号可直接相减
+    byGame: Object.fromEntries(rs.map((x) => [x.game, x.score])),
     reasoning: run.reasoning, keyEnum: run.keyEnum,
     elapsed: run.elapsed,
   };
@@ -213,6 +227,40 @@ if (Number(GAMES) < MIN_GAMES_FOR_POWER) {
 console.log("");
 
 const px = await priceTable();
+
+// 跑前预估花费。此前唯一的跑前检查是局数警告，钱一分不报——
+// 于是「跑一批要花多少」只能在跑完看账单，而余额有限时那已经晚了。
+// 实测口径：一局 16 次调用，入参约 96k tok（缓存命中约 5%）、出参约 8k tok
+//（含推理）；提供方自报的实扣约为 /models 价目表的 2 倍，故乘 2 留余量
+{
+  const PER_GAME_IN = 96_000, PER_GAME_OUT = 8_000, MARKUP = 2;
+  const est = [];
+  for (const a of AGENTS) {
+    if (!a.startsWith("model:")) continue;
+    const id = a.slice(6);
+    const p = px.get(id);
+    if (!p) { est.push([id, null]); continue; }
+    const per = (PER_GAME_IN * Number(p.prompt) + PER_GAME_OUT * Number(p.completion)) * MARKUP;
+    est.push([id, per * Number(GAMES)]);
+  }
+  if (est.length) {
+    const known = est.filter(([, v]) => v != null);
+    const total = known.reduce((a, [, v]) => a + v, 0);
+    console.log("跑前预估（按价目表 ×2，实扣以提供方自报为准）：");
+    for (const [id, v] of est) {
+      console.log(`  ${id.padEnd(42)}${v == null ? "价目表里没有这个 id —— 花费无从预估"
+        : `$${v.toFixed(2)}`}`);
+    }
+    console.log(`  合计约 $${total.toFixed(2)}`
+      + `${BUDGET ? `\u3000预算上限 $${BUDGET.toFixed(2)}`
+                  + `（每个花钱的对局方 $${(BUDGET / payingCount).toFixed(2)}）`
+                : "\u3000⚠ 未设 --budget，跑砸了没有闸门"}`);
+    if (BUDGET && total > BUDGET) {
+      console.log(`  ⚠ 预估已超预算，部分对局方会在跑满 ${GAMES} 局前停手`);
+    }
+    console.log("");
+  }
+}
 // 心跳：每 60 秒报一次各对局方跑到哪。没有它，一个慢的提供方在外面看
 // 与「挂死了」没有区别，而这两种情况的处置完全不同
 const beat = setInterval(() => {
@@ -228,7 +276,44 @@ clearInterval(beat);
 const rows = runs.filter((r) => !r.failed).map((r) => summarize(r, px));
 rows.sort((a, b) => b.score - a.score || b.growth - a.growth);
 
+/**
+ * 与基线的**配对差**及 95% 区间。
+ *
+ * 此前这一列印的是 `r.score / bot.score - 1` 的百分比。两个毛病：
+ *   一、四档计分（甲300/乙200/丙100/丁0）的零点是任意的，比值的大小随整体
+ *       平移而变——全体加 100 分，「领先 12%」就变成「领先 7%」，
+ *       而两者描述的是同一件事；
+ *   二、只有点估计。实测榜首那个「领先 12%」对应配对差 +16.7 ± 19.6，
+ *       区间盖过 0——名次看着有序，其实分不开。一张没有区间的排行榜，
+ *       读者必然把噪声当成差距。
+ *
+ * 各对局方跑的是同一批 (seed, 席位)，所以按局号相减就是配对差，
+ * 比独立两样本的区间窄得多。判别局数（配对差非 0 的局数）也一并报：
+ * 48 局里若有 33 局打平，那个区间是靠 15 局撑起来的，读者该知道。
+ */
+function pairedVs(r, base) {
+  if (!base || r.spec === base.spec) return r.spec === base?.spec ? "基线" : "—";
+  const games = Object.keys(r.byGame ?? {}).filter((g) => g in (base.byGame ?? {}));
+  if (games.length < 2) return "—";
+  const d = games.map((g) => r.byGame[g] - base.byGame[g]);
+  const n = d.length;
+  const mean = d.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(d.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, n - 1));
+  const ci = 1.96 * sd / Math.sqrt(n);
+  const sig = Math.abs(mean) > ci ? "" : "?";
+  return `${mean >= 0 ? "+" : ""}${mean.toFixed(0)}±${ci.toFixed(0)}${sig}`;
+}
+
 const bot = rows.find((r) => r.spec === BASELINE);
+// 鉴权失败只废这一行，不废整批。403 常是「这个模型不对本 key 开放」，
+// 按额度耗尽中止全部，是拿一个假归因换掉另一个假归因
+const unusable = new Set(rows.filter((r) =>
+  (r.authFail ?? 0) + (r.creditsFail ?? 0) > (r.calls + (r.authFail ?? 0)) * 0.5)
+  .map((r) => r.spec));
+if (unusable.size) {
+  console.log(`\n⚠ 以下对局方过半席·季败在模型能力之外（鉴权/额度），`
+    + `其行标 ✗，不参与名次：\n  ${[...unusable].join("、")}`);
+}
 if (creditsOut) {
   console.log(`\n${"═".repeat(96)}`);
   console.log("✗ 账户额度耗尽，整跑中止。**下面的名次不可用**——");
@@ -238,17 +323,17 @@ console.log(`\n${"═".repeat(96)}`);
 console.log(`排行榜（同 seed、同对手、席位轮换）`
   + `${Number(GAMES) < MIN_GAMES_FOR_POWER
       ? `\u3000⚠ ${GAMES} 局分辨力不足，名次不可当结论` : ""}\n`);
-console.log("对局方".padEnd(40) + "均分".padStart(7) + "对基线".padStart(8)
+console.log("对局方".padEnd(40) + "均分".padStart(7) + "对基线±95%".padStart(12)
   + "疆域倍数".padStart(9) + "出局".padStart(6) + "非法率".padStart(7)
   + "令数用率".padStart(9) + "成本".padStart(9));
 for (const r of rows) {
-  const vs = bot && bot.score > 0 ? `${(r.score / bot.score * 100 - 100).toFixed(0)}%` : "—";
+  const vs = pairedVs(r, bot);
   console.log(
     r.spec.slice(0, 38).padEnd(40)
     + r.score.toFixed(1).padStart(7)
-    + (r.spec === bot?.spec ? "基线" : vs).padStart(8)
+    + (r.spec === bot?.spec ? "基线" : vs).padStart(12)
     + r.growth.toFixed(2).padStart(9)
-    + `${r.elim}/${r.games}`.padStart(6)
+    + `${r.elim}/${r.played ?? r.games}`.padStart(6)
     + `${(r.illegal * 100).toFixed(1)}%`.padStart(7)
     + `${(r.apUse * 100).toFixed(0)}%`.padStart(9)
     + (r.cost == null ? "—" : `$${r.cost.toFixed(3)}${r.costSource === "估算" ? "≈" : ""}`).padStart(10));
@@ -267,15 +352,18 @@ for (const r of rows.filter((x) => x.calls)) {
     + `\u3000${r.reasoning ? `档 ${r.reasoning}` : "默认档"}`);
 }
 
-const anyIssue = rows.some((r) => r.creditsFail || r.infraFail || r.starved || r.modelFail);
+const anyIssue = rows.some((r) => r.creditsFail || r.authFail || r.infraFail
+  || r.starved || r.harnessFail || r.modelFail);
 if (anyIssue) {
   console.log(`\n失败拆分（只有最后一栏算模型的分）`);
-  for (const r of rows.filter((x) => x.infraFail || x.starved || x.modelFail)) {
+  for (const r of rows.filter((x) => x.infraFail || x.starved || x.modelFail
+    || x.authFail || x.harnessFail || x.creditsFail)) {
     console.log(`  ${r.spec.slice(0, 38).padEnd(40)}`
-      + `额度${String(r.creditsFail).padStart(4)} 季`
-      + `\u3000基础设施${String(r.infraFail).padStart(3)} 季`
-      + `\u3000harness（出参预算）${String(r.starved).padStart(3)} 季`
-      + `\u3000模型${String(r.modelFail).padStart(3)} 季`);
+      + `额度${String(r.creditsFail).padStart(4)}`
+      + `\u3000鉴权${String(r.authFail).padStart(4)}`
+      + `\u3000基础设施${String(r.infraFail).padStart(4)}`
+      + `\u3000harness${String(r.starved + r.harnessFail).padStart(4)}`
+      + `\u3000模型${String(r.modelFail).padStart(4)} 季`);
   }
   for (const r of rows.filter((x) => x.creditsFail > 0)) {
     console.log(`  ✗ ${r.spec} 有 ${r.creditsFail} 季因账户额度耗尽而未发出请求，此行不可用`);

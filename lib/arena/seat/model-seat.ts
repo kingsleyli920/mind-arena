@@ -10,7 +10,7 @@ import type { EngineParams } from "../../game/engine/params.ts";
 import type { Geography } from "../../game/engine/victory.ts";
 import type { FactionId, GameState, Order } from "../../game/engine/types.ts";
 import type { LlmClient, Rung } from "../llm/client.ts";
-import type { Failure } from "../llm/errors.ts";
+import type { Failure, FailureKind } from "../llm/errors.ts";
 import { admit, type Admission } from "./admit.ts";
 import { decisionSchema, parseDecision } from "./parse.ts";
 import { renderSystem, renderUser, PROMPT_VERSION } from "./prompt.ts";
@@ -47,6 +47,9 @@ export interface ModelTurnRecord {
   finishReason: string | null;
   attempts: number;
   elapsedMs: number;
+  /** 实际服务的提供方与 generation id。OpenRouter 静默改路由时，只有这两项能看出来 */
+  provider?: string | null;
+  generationId?: string | null;
   /** 失败时记下原因，orders 为空 */
   failure?: string;
   /**
@@ -61,8 +64,36 @@ export interface ModelTurnRecord {
    * 「国产模型全线 4–35 分、机器人 148 分」的排行榜，真相是账户没钱了，
    * 每个模型 768 季里有 688–765 季根本没发出请求。
    */
-  failureKind?: "credits" | "infra" | "budget" | "model";
+  failureKind?: FailureBucket;
 }
+
+/**
+ * 失败归到哪一栏。只有 model 那一栏算模型的分。
+ *
+ * 写成**穷举表**而不是三元链：三元链的末项是 `: "model"`，
+ * 于是每新增一种失败都默默落进「模型答不上来」。这个洞已经咬过三次——
+ * 超时（kimi 96 季里 54 季）、额度耗尽（一份全线 4–35 分的假榜）、
+ * 以及 401：实跑验证过，无效密钥会让榜上打出「模型失败 32 季、0 分」，
+ * 一个请求都没被授权，报告却说这个模型不会玩。
+ * 现在少写一项就编译不过。
+ */
+export type FailureBucket =
+  | "credits"   // 账户余额耗尽 —— 与模型能力无关，整跑作废
+  | "auth"      // 密钥无效或该模型不对本 key 开放 —— **这一行**不可用，不杀整批
+  | "infra"     // 超时 / 网络 / 提供方 5xx
+  | "budget"    // 出参预算被推理吃光 —— harness 的配置问题
+  | "harness"   // 我们自己抛的异常 —— 也是 harness 的问题，别赖给模型
+  | "model";    // 答不上来 / 解析不出 —— 只有这一类算模型的分
+
+const BUCKET: Record<FailureKind, FailureBucket> = {
+  budget: "credits",
+  auth: "auth",
+  infra: "infra",
+  retryable: "infra",
+  starved: "budget",
+  degradable: "model",   // 四档都降完仍不被接受，只能算它答不上来
+  fatal: "harness",      // 说不清的一律先算我们自己的
+};
 
 export interface ModelSeatDeps {
   client: LlmClient;
@@ -145,20 +176,21 @@ export async function modelDecide(
       },
     };
   } catch (e) {
-    // 客户端把最后一次失败的分级挂在错误上。超时与网络错归 infra——
-    // 记成模型的失败等于按提供方的快慢排名，而那与策略能力无关
     const f = (e as { failure?: Failure }).failure;
-    const kind = f?.kind === "budget" ? "credits"
-      : f?.kind === "infra" || f?.kind === "retryable" ? "infra"
-      : f?.kind === "starved" ? "budget" : "model";
+    // 没带分级的异常记 harness，不记 model。这里同时兜着 admit/parse 自己抛的错
+    //（它们在同一个 try 里）——把 harness 自己的 bug 算成「模型答不上来」，
+    // 是这套管线出过两次的那类事故
+    const kind: FailureBucket = f ? BUCKET[f.kind] : "harness";
     return { orders: [], record: { ...base, failureKind: kind, failure: (e as Error).message } };
   }
 }
 
 const meta = (r: { model: string; usage: ModelTurnRecord["usage"]; structured: boolean;
                    rung: Rung; maxTokens: number; finishReason: string | null;
-                   attempts: number; elapsedMs: number }) => ({
+                   attempts: number; elapsedMs: number;
+                   provider?: string | null; generationId?: string | null }) => ({
   model: r.model, usage: r.usage, structured: r.structured,
   rung: r.rung, maxTokens: r.maxTokens, finishReason: r.finishReason,
   attempts: r.attempts, elapsedMs: r.elapsedMs,
+  provider: r.provider ?? null, generationId: r.generationId ?? null,
 });

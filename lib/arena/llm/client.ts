@@ -93,6 +93,15 @@ export interface ChatResult {
   finishReason: string | null;
   attempts: number;
   elapsedMs: number;
+  /**
+   * 实际服务的提供方，与 OpenRouter 的 generation id。
+   *
+   * 同一个模型 id 可能被路由到不同提供方，量化精度、上下文长度、
+   * 速率限制都不同，而响应里的 model 字段照旧是你请求的那个 id——
+   * 只看它看不出换了底座。留下这两项，事后才能回查这一列分数是谁跑出来的
+   */
+  provider: string | null;
+  generationId: string | null;
 }
 
 export interface LlmClient {
@@ -109,6 +118,10 @@ interface RawChoice {
 }
 interface RawResponse {
   model?: string;
+  /** OpenRouter 的 generation id，可回查 /api/v1/generation */
+  id?: string;
+  /** 实际服务的提供方。OpenRouter 会静默改路由，只看 model 字段看不出来 */
+  provider?: string;
   choices?: RawChoice[];
   usage?: {
     prompt_tokens?: number;
@@ -202,6 +215,7 @@ export class OpenRouterClient implements LlmClient {
           } : null,
           structured: rung !== "text",
           rung, maxTokens: budget, finishReason,
+          provider: json.provider ?? null, generationId: json.id ?? null,
           attempts, elapsedMs: Date.now() - started,
         };
       }
