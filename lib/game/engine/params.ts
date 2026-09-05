@@ -98,6 +98,7 @@ export interface EngineParams {
   /** 围城：持续制 */
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
+  siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
   siegeDefenseErosion: number;
   /** 野战：援军进入被围郡时与围城军交战 */
   fieldRout: number; fieldPush: number; fieldStall: number;
@@ -274,11 +275,14 @@ export function loadParams(pack: RawPack): EngineParams {
     betrayMoralePenalty: g("外交", "背盟_民心罚"),
     betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),
+    siegeMinTroops: g("围城", "撤围_兵力下限"),
     siegeBreachPerSeason: g("围城", "每季加缺口"),
     siegeAttackerLoss: g("围城", "攻方每季损耗"),
     siegeDefenderLoss: g("围城", "守方每季损耗"),
     siegeWithdrawKeep: g("围城", "撤围残兵"),
     siegeDefenseErosion: g("围城", "每季削城防"),
+    siegeGarrisonFloor: g("围城", "守军地板"),
+    siegeDefenseFloor: g("围城", "城防地板"),
     fieldRout: g("野战", "溃退比"),
     fieldPush: g("野战", "后撤比"),
     fieldStall: g("野战", "相持比"),

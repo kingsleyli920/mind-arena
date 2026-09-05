@@ -288,6 +288,16 @@ export interface Candidate {
     breachLo: number; breachHi: number; holdLo: number; holdHi: number;
     verdict: "破城" | "不破" | "未知"; fog: "own" | "scouted" | "tier";
   };
+  /**
+   * 续围前瞻：照此耗法还要几季破得了（null = 上限内破不了）。
+   *
+   * forecast 只答「不撤的话**本季**会怎样」，而「撤还是围下去」是跨季决策。
+   * 撤围候选此前既无 forecast 也无 gain——整份候选表里唯一两样都没有的进攻类候选——
+   * 于是 bot 只能抠标签正则拿「已围 N 季、余 M 人」，按经过了多久打分，
+   * 从不问围城是不是快赢了。实测 61 次撤围里 20 次撤的是本季必破的城，
+   * 而向前推 162 支围城军有 109 支（67%）在上限内可破
+   */
+  project?: { seasons: number | null };
   /** 第三方围城军的观测兵力（已分档）。救援候选用 */
   siegeBy?: { faction: FactionId; troopsLo: number; troopsHi: number; seasons: number };
   /**

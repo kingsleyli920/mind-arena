@@ -328,10 +328,14 @@ export function observe(
       }).slice(-24),
       // 天下大事只留最近若干条。三十家势力一季能产出上百条公开事件，
       // 全铺出来会把观测预算吃掉一半，而模型真正需要的是最近的动向。
-      // 砍这里而不砍候选：砍候选等于用观测预算去交换动作空间
+      // 砍这里而不砍候选：砍候选等于用观测预算去交换动作空间。
+      //
+      // 从 14 收到 10：续围前瞻进候选之后，刘璋末季顶到 10126/10000。
+      // 那批新增的是决策内容（撤还是围下去，从此有数可判），按本段开头
+      // 立的规矩，该让的是战报不是候选
       world: log.filter((e) => e.faction !== faction)
         .map((e) => `${e.faction ? `${nameOf(e.faction)}：` : ""}${e.text}`)
-        .slice(-(opts.worldCap ?? 14)),
+        .slice(-(opts.worldCap ?? 10)),
     },
     candidates: cands.map((c) => ({
       key: c.key, cost: c.cost, label: c.label,

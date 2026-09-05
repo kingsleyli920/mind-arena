@@ -61,13 +61,26 @@ function lift(s: GameState, army: { id: string }): void {
   s.armies = s.armies.filter((x) => x.id !== army.id);
 }
 
-/** 残兵退回。本方已失该郡则就近择一己方郡，都没有则就地散去 */
+/**
+ * 残兵退回。本方已失该郡、或该郡正被围，则另择一己方郡；都没有则就地散去。
+ *
+ * **不许退进正被围的城**，这是包里早就写下的规则的另一半：
+ * 「围城期间城中不得补兵，否则守军逐季回血，缺口累加被抵消，围困永远推不动进度」。
+ * 阶段八把产出那条路堵住了，却漏了这条——而实测漏的这条才是大头：
+ * 被围郡·季 116 例里 **73 例（63%）守军不降反升**，最高 8.5 倍
+ * （代郡 1299→11036），且**一例募兵都没有**，全是退兵灌进来的。
+ * 围城结算每季扣守军 25%，六成以上的时候却是涨的，围城时钟因此从来没走过。
+ *
+ * 退不进老巢时的落点按 id 取第一个己方郡——这是个任意但确定的选择，
+ * 「最近的己方可达郡」这个概念引擎里还不存在（军团的 home 一经设定永不更新）。
+ */
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
   if (troops <= 0) return;
+  const besieged = (id: CommanderyId) => s.armies.some((x) => x.target === id && x.faction !== army.faction);
   const home = s.commanderies[army.home];
-  if (home?.owner === army.faction) { home.garrison += troops; return; }
+  if (home?.owner === army.faction && !besieged(home.id)) { home.garrison += troops; return; }
   const fallback = Object.values(s.commanderies)
-    .filter((c) => c.owner === army.faction)
+    .filter((c) => c.owner === army.faction && !besieged(c.id))
     .sort((a, b) => cmp(a.id, b.id))[0];
   if (fallback) fallback.garrison += troops;
 }
@@ -576,9 +589,24 @@ export function resolve(
         // 击退围城军后接手围城
         beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit);
       } else if (won) {
-        // 解自家之围：残部入城为戍
-        tgt.garrison += won;
-        log(s, { kind: "relief", faction: o.faction, text: `${a.target} 解围，${won} 人入城` });
+        // 解自家之围：残部入城为戍——但只在**围真的解了**的时候。
+        //
+        // 野战只打城下最大的那一支，城下若还有别家围城军，围并没有解。
+        // 此前不问这一条，于是「解围，7642 人入城」与「强攻某郡未克，转为围困」
+        // 会同季并存：一座仍在被围的城平白得到七千援兵，而围城结算每季才扣它 25%。
+        // 实测围仍在的被围郡·季里 41% 守军不降反升，最高 16 倍（京兆尹 374→6012），
+        // 这是围城时钟从来没走过的原因之一——包里那条「围城期间城中不得补兵，
+        // 否则守军逐季回血、缺口累加被抵消」只堵住了产出，没堵住入援
+        const stillBesieged = s.armies.some((x) => x.target === a.target && x.faction !== tgt.owner);
+        if (stillBesieged) {
+          // 围未解则残部退回起兵郡，不入城
+          returnHome(s, { faction: o.faction, home: a.from }, won);
+          log(s, { kind: "relief", faction: o.faction,
+                   text: `${a.target} 城下破 ${foe.faction} 一军，然围未解，${won} 人退回 ${a.from}` });
+        } else {
+          tgt.garrison += won;
+          log(s, { kind: "relief", faction: o.faction, text: `${a.target} 解围，${won} 人入城` });
+        }
       }
       continue;
     }
@@ -706,10 +734,11 @@ export function resolve(
     // 攻方成本骤降，一郡势力必被磨死——实测曹操出局率因此从 0% 跳到 37%。
     const assault = army.siegeSeasons === 0;
     army.troops = Math.round(army.troops * (1 - (assault ? P.failLossRatio : P.siegeAttackerLoss)));
-    tgt.garrison = Math.max(200, Math.round(tgt.garrison * (1 - P.siegeDefenderLoss)));
-    tgt.defense = Math.max(10, tgt.defense - P.siegeDefenseErosion);   // 掘壕破坏
+    tgt.garrison = Math.max(P.siegeGarrisonFloor,
+                            Math.round(tgt.garrison * (1 - P.siegeDefenderLoss)));
+    tgt.defense = Math.max(P.siegeDefenseFloor, tgt.defense - P.siegeDefenseErosion);
     army.siegeSeasons += 1;
-    if (army.siegeSeasons >= P.siegeMaxSeasons || army.troops < 500) {
+    if (army.siegeSeasons >= P.siegeMaxSeasons || army.troops < P.siegeMinTroops) {
       const kept = Math.round(army.troops * P.siegeWithdrawKeep);
       lift(s, army);
       returnHome(s, army, kept);

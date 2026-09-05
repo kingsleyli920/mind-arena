@@ -8,7 +8,8 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller, governorOf,
   type OfficerRef, type Roster }
   from "./officers.ts";
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
-import { forecastCampaign, forecastField, forecastReinforce } from "./forecast.ts";
+import { forecastCampaign, forecastField, forecastReinforce, projectSiege }
+  from "./forecast.ts";
 import { formationEdge, FORMATION_CN } from "./combat.ts";
 import { suadeChance } from "./officers.ts";
 
@@ -333,8 +334,11 @@ export function listActions(
         && t.from <= s.turn && t.until > s.turn)
         ? `｜⚠此举背盟：全境民心 −${P.betrayMoralePenalty}，${P.betrayBanSeasons} 季不得缔盟` : "";
       const ongoing = s.armies.find((x) => x.target === tid);
+      // 自家在围时不再单写「我军已围 N 季」：增兵候选的预告文案本身就以
+      // 「续围：…（已围 N 季）」开头，两处说同一个数，而候选表的 token
+      // 是按席·季结算的（刘璋末季一度 10186/10000，超的正好是这类重复）
       const siegeNote = !ongoing ? ""
-        : ongoing.faction === f ? `｜我军已围 ${ongoing.siegeSeasons} 季（本令为增兵）`
+        : ongoing.faction === f ? `（本令为增兵）`
         : `｜${nameOf(ongoing.faction)} 正围此城，${troopBand(ongoing.troops, P)}（本令先野战）`;
       // 城下有第三方围城军时，这一令结算的是**野战**而不是攻城。
       // 此前标签里写着「本令先野战」，而结构化的 forecast 仍是缺口对可防守——
@@ -468,12 +472,28 @@ export function listActions(
   if (ap >= rules.normalAp) {
     for (const army of s.armies.filter((x) => x.faction === f && x.target)
       .sort((a, b) => cmp(a.id, b.id)).slice(0, 4)) {
+      // 撤围是整份候选表里唯一「既无 forecast 又无 gain」的进攻类候选，
+      // 于是它是关于**经过了多久**的令，而不是关于这场围城的令。补齐三样：
+      //   forecast 本季这一击会怎样　project 还要几季破得了　gain 这座城值什么
+      const wpj = projectSiege(s, f, army, g, P, roster);
+      const wgn = geo && army.target ? gainOf(s, geo, f, army.target) : undefined;
       out.push({
         key: `withdraw:${army.id}`,
         action: { type: "withdraw", army: army.id },
         cost: rules.normalAp,
+        // 不带 forecast：本季那一击的预告在同一份观测的 armies[].siege 里，
+        // 每支围城军都有一份，逐条重复要在每个席·季上再付一次钱。
+        // 撤围这条令关心的是**跨季**的那个数，那是 project
+        // 只留 seasons：散文在 label 里已经有一份，结构化字段再存一遍
+        // 等于把同一句话在观测 JSON 里写两次
+        project: wpj ? { seasons: wpj.seasons } : undefined,
+        gain: wgn,
         label: `自${army.target}撤围（已围 ${army.siegeSeasons} 季，余 ${army.troops} 人，`
-             + `撤回可保 ${Math.round(army.troops * P.siegeWithdrawKeep)}）`,
+             + `撤回可保 ${Math.round(army.troops * P.siegeWithdrawKeep)}）`
+             // 只写前瞻，不重复 gainNote：同一目标的增兵候选标签上已经写过「这座城值什么」，
+             // 而候选表的 token 是按席·季结算的——实测把两样都写上会顶破 10000 的闸门
+             // （3/309 席·季超出，最大 10252）。gain 仍以结构化字段交给打分函数
+             + `${wpj ? `｜不撤：${wpj.text}` : ""}`,
       });
     }
   }

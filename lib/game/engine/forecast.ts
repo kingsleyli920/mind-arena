@@ -86,10 +86,11 @@ export function forecastSiege(
   return {
     breachLo: lo.breach, breachHi: hi.breach,
     holdLo: lo.hold, holdHi: hi.hold, verdict, fog: "own",
+    // 不重复「满 N 季自动撤围」：那是个常数，已在规则摘要里（一局只发一次），
+    // 逐条重复要在每个席·季上付一次钱。「累加 +N 缺口」同理由「已围 N 季」推得出来。
+    // 实测这两句去掉之后刘璋的观测峰值从 10242 压回闸门以内
     text: `续围：缺口 ${lo.breach === hi.breach ? lo.breach : `${lo.breach}–${hi.breach}`}`
-        + ` 对可防守 ${lo.hold}→${verdict}`
-        + `（已围 ${army.siegeSeasons} 季，累加 +${persist} 缺口；`
-        + `满 ${P.siegeMaxSeasons} 季自动撤围）`,
+        + ` 对可防守 ${lo.hold}→${verdict}（已围 ${army.siegeSeasons} 季）`,
   };
 }
 
@@ -100,6 +101,76 @@ export function forecastSiege(
  * （resolve.ts 的 `mine.troops += troops`）就是这么并的，所以判词与结算对得上。
  * 已围季数沿用既有军团的：缺口的逐季累加算在它头上，不因增兵而重置。
  */
+/**
+ * 续围前瞻：照此耗法，**还要几季**才破得了这座城。
+ *
+ * 这是「撤还是围下去」唯一需要的那个数，而它此前不存在——forecastSiege 只算
+ * 本季那一击（注释自己写着「不撤的话本季就会这样」），撤围候选连 forecast 都不设，
+ * 于是 bot 只能回去抠标签的正则「已围 N 季，余 M 人」，按「季数×2 + 残兵少加 4」打分，
+ * **从不问围城是不是快赢了**。实测 61 次撤围里 20 次撤的是本季必破的城；
+ * 而把递推向前推，162 支围城军里 109 支（67%）在上限内可破。
+ *
+ * **不写闭式。** 闭式推得出来（守军未触地板时比值是纯几何
+ * ρ=(1−攻方每季损耗)/(1−守方每季损耗)=1.173），但那是同一条规则的第二份实现，
+ * 正是 combat.ts 抽出 breachCount 时要根除的东西；而且它在三处不收敛
+ * （战力比够不到最低阶梯时一切加成被清零、守军触到地板后 ρ 翻成 0.88、
+ * 守方每季一条募兵令即 ρ_eff=0.994），每一处都得单独写判据。
+ * 上限只有 siegeMaxSeasons 季，直接照 resolve 的递推迭代同样是 O(3)，
+ * 且逐字调用同一个 breachCount，不可能与结算说两套话。
+ *
+ * 取战力浮动的下界（与 forecastSiege 的判词同口径）：报「保守估计还要几季」，
+ * 真实浮动只会更早破，不会更晚。
+ */
+export function projectSiege(
+  s: GameState, viewer: FactionId, army: Army,
+  g: Graph, P: EngineParams, roster: Roster | null,
+): { seasons: number | null; text: string } | null {
+  const tgt0 = army.target ? s.commanderies[army.target] : null;
+  const src = s.commanderies[army.home];
+  if (!tgt0 || !src || army.faction !== viewer) return null;
+
+  const edge = (g.adj.get(army.home) ?? []).find((e) => e.to === army.target);
+  const terrain = edge?.terrain ?? "plain";
+  const corps = roster
+    ? army.retinue.map((id) => roster.byId.get(id)).filter((o) => !!o)
+    : [];
+  const atk = roster ? attackRetinue(corps, P, terrain) : null;
+  const def = roster ? defendRetinue(retinueAt(s, roster, army.target!, P), P) : null;
+  const power = unitPower(P, army.unit, terrain, tgt0.unit);
+  const formEdge = formationEdge(P, src.formation, tgt0.formation);
+  const atGate = terrain === "gate";
+  const mul = power * (atk?.attackMul ?? 1);
+  const guard = unitGuard(P, tgt0.unit);
+  const holdBonus = def?.holdBonus ?? 0;
+
+  // 逐季推进，每一步都与 resolve 的围城结算同序：先判这一击，再折损，再进季，再判撤围
+  let troops = army.troops;
+  let garrison = tgt0.garrison;
+  let defense = tgt0.defense;
+  let ss = army.siegeSeasons;
+  for (let n = 0; ; n += 1) {
+    const bonus = (atk?.breachBonus ?? 0) + ss * P.siegeBreachPerSeason + formEdge;
+    const r = breachCount(P, troops * (1 - P.jitter) * mul, garrison * guard,
+                          defense, army.gear, terrain, atGate, bonus, holdBonus);
+    if (r.breach > r.hold) {
+      return { seasons: n,
+               text: n === 0 ? "本季即破" : `照此耗法还要 ${n} 季可破` };
+    }
+    // 首季是强攻，此后转围困——两档折损不同，外推必须跟着分
+    troops = Math.round(troops * (1 - (ss === 0 ? P.failLossRatio : P.siegeAttackerLoss)));
+    garrison = Math.max(P.siegeGarrisonFloor,
+                        Math.round(garrison * (1 - P.siegeDefenderLoss)));
+    defense = Math.max(P.siegeDefenseFloor, defense - P.siegeDefenseErosion);
+    ss += 1;
+    if (ss >= P.siegeMaxSeasons || troops < P.siegeMinTroops) {
+      return { seasons: null,
+               text: ss >= P.siegeMaxSeasons
+                 ? `围到满 ${P.siegeMaxSeasons} 季也破不了`
+                 : `再围 ${n + 1} 季残兵不足 ${P.siegeMinTroops}，围不下去` };
+    }
+  }
+}
+
 export function forecastReinforce(
   s: GameState, viewer: FactionId, target: CommanderyId, add: number,
   g: Graph, P: EngineParams, roster: Roster | null,

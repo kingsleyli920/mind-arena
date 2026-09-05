@@ -78,6 +78,9 @@ while (!s.finished) {
       // 模型会囤：实测一局末季袁绍 210 支，armies 段单独 10800 tok，整份观测约 24k，
       // 是闸门的 2.4 倍。闸门测不到的正是模型独有的行为，所以要显式盯条数
       armies: o.armies.length,
+      // 超支时要知道钱花在哪一段——只报「峰值 10242」定位不到任何东西
+      sec: Object.fromEntries(Object.entries(o)
+        .map(([k, v]) => [k, estTokens(JSON.stringify(v))])),
       armyTok: estTokens(JSON.stringify(o.armies)),
     });
   }
@@ -113,6 +116,15 @@ console.log(`\n军团条数 峰值 ${Math.max(...rows.map((r) => r.armies))}`
   + `\u3000该段 tok 峰值 ${Math.max(...rows.map((r) => r.armyTok))}`
   + (fat.length ? `\u3000✗ ${fat.length} 席·季超过 ${ARMY_CAP} 条` : `\u3000✓ 均 ≤ ${ARMY_CAP} 条`));
 const cands = rows.map((r) => r.cands);
+{
+  // 超支时要知道钱花在哪一段——只报「峰值 10242」定位不到任何东西
+  const over = rows.filter((r) => r.total > LIMIT).sort((a, b) => b.total - a.total)[0];
+  if (over) {
+    console.log(`\n超支最多的一席·季：${over.seat} 第 ${over.turn} 季　${over.total} tok`);
+    for (const [k, v] of Object.entries(over.sec).sort((a, b) => b[1] - a[1]).slice(0, 8))
+      console.log(`    ${k.padEnd(14)} ${String(v).padStart(6)} tok`);
+  }
+}
 console.log(`\n候选条目数 max/min = ${Math.max(...cands)}/${Math.min(...cands)}`
   + ` = ${(Math.max(...cands) / Math.max(1, Math.min(...cands))).toFixed(2)}`);
 console.log(over.length
