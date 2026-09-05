@@ -131,6 +131,7 @@ export function orderSites(a: Action): CommanderyId[] {
   return a.type === "campaign" ? [a.from]
     : a.type === "muster" ? [...a.from]
     : a.type === "govern" || a.type === "array" ? [a.at]
+    : a.type === "relocate" ? [a.to]
     : [];
 }
 
@@ -557,6 +558,41 @@ export function listActions(
         // why 留着——它是引擎的优先级判断（「临敌且城防薄」），别处推不出来
         label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}（${why}）`,
       });
+    }
+  }
+
+  // ── 迁治：只在**治所已失或断供**时列出 ──────────────────────────
+  //
+  // 治所没事的时候迁治几乎总是坏主意（当季与下季全境断供），列出来只是噪声；
+  // 而治所一失，它是唯一的活路——此前引擎里根本没有这条路，
+  // 实测 11~15% 的势力·季卡在「零产出 + 军团季季溃散」里出不来，张鲁待了 39 季。
+  // 候选按「与其余郡连得最广」排：迁过去之后接得回来的郡最多
+  if (ap >= rules.campaignAp) {
+    const cap = fs_.capital;
+    const capLost = !cap || s.commanderies[cap]?.owner !== f;
+    // 只判失守。「治所还在但断供」不成立——补给是从治所出发算的连通分量，
+    // 治所自己按定义永远在里面
+    if (capLost && mine.length) {
+      const reach = (id: CommanderyId) => {
+        const seen = new Set([id]); const q = [id];
+        for (let i = 0; i < q.length; i += 1)
+          for (const e of g.adj.get(q[i]) ?? [])
+            if (!seen.has(e.to) && s.commanderies[e.to]?.owner === f) { seen.add(e.to); q.push(e.to); }
+        return seen.size;
+      };
+      for (const c of mine.filter((x) => canOrder(x.id) && x.id !== cap)
+        .map((x) => ({ c: x, n: reach(x.id) }))
+        .sort((a, b) => b.n - a.n || a.c.id.localeCompare(b.c.id))
+        .slice(0, Math.min(4, rules.perTypeCap))) {
+        out.push({
+          key: `relocate:${c.c.id}`,
+          action: { type: "relocate", to: c.c.id },
+          cost: rules.campaignAp,
+          label: `迁治于${c.c.id}（下季生效；迁后可连回 ${c.n} 郡`
+               + `｜产${c.c.yieldTier} 防${c.c.defense}）`
+               + "｜**治所已失，全境政令不通**",
+        });
+      }
     }
   }
 
@@ -1005,6 +1041,12 @@ export function validate(
       if (!cap || cap.by !== o.faction) return "此人不在我方俘中";
       return null;
     }
+    case "relocate": {
+      if (!own(a.to)) return "非己方郡国";
+      if (!quota(a.to)) return "该郡本季令数已满";
+      if (s.factions[o.faction]?.capital === a.to) return "本已是治所";
+      return null;
+    }
     case "array": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
@@ -1029,7 +1071,7 @@ export function validate(
 /** 规范化排序：使裁决顺序与提交顺序无关（MERS R6） */
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
-    ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, passage: 3, ally: 4,
+    ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, relocate: 2, passage: 3, ally: 4,
        submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)

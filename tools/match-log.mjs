@@ -220,7 +220,7 @@ async function main() {
 
     say(`\n---\n`);
     say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}/${P.epochCount}`
-      + `（至多再 ${Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart))} 季推进；无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%${s.epoch < P.epochCount ? `，推进后 ${Math.round((P.neutralGrowth[s.epoch + 1] ?? 0) * 100)}%` : ""}）`);
+      + `（至多再 ${Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart))} 季推进；无主郡国城防每季 +${P.neutralWall[s.epoch] ?? 0}，至多 ${P.neutralWallCap}${s.epoch < P.epochCount ? `，推进后每季 +${P.neutralWall[s.epoch + 1] ?? 0}` : ""}）`);
     say("");
     // ── 我方家底 ──
     say(`### 我方`);

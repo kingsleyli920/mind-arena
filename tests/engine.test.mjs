@@ -1025,7 +1025,7 @@ test("态势简报：把州级进度摆给模型看，且只列够得着的州",
 
 // ── 纪元 ────────────────────────────────────────────────────────────
 // 首版里 epoch 只是按季号算出来的数字，不改变任何规则。
-test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
+test("纪元：双触发推进，且无主郡国随之筑壁渐坚", () => {
   // 逾时触发：谁也不动，本纪元满时限即推进
   let idle = fresh();
   for (let t = 0; t < P.epochLimit; t += 1) {
@@ -1050,17 +1050,21 @@ test("纪元：双触发推进，且无主郡国随之自守渐坚", () => {
   bing.factions.yuanshao.bestGrade = "bing";
   assert.equal(resolve(bing, [], G, P, ROSTER, GEO).state.epoch, 1, "丙档不该触发纪元推进");
 
-  // 无主郡国在一纪元不长兵，二纪元起自增
-  const neutral = Object.values(fresh().commanderies).find((c) => !c.owner);
-  const at1 = resolve(fresh(), [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
-  assert.equal(at1, neutral.garrison, "一纪元无主郡不该长兵");
-  const e2 = fresh(); e2.epoch = 2;
-  const at2 = resolve(e2, [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
-  assert.ok(at2 > neutral.garrison,
-    `二纪元无主郡未自守：${neutral.garrison} → ${at2}`);
-  const e3 = fresh(); e3.epoch = 3;
-  const at3 = resolve(e3, [], G, P, ROSTER, GEO).state.commanderies[neutral.id].garrison;
-  assert.ok(at3 > at2, "三纪元自守未强于二纪元");
+  // 无主郡国在一纪元不筑壁，二纪元起筑，三纪元更快
+  const wallAfter = (epoch) => {
+    const t = fresh(); t.epoch = epoch;
+    const n = Object.values(t.commanderies).find((c) => !c.owner && c.defense < P.neutralWallCap);
+    const before = n.defense;
+    return resolve(t, [], G, P, ROSTER, GEO).state.commanderies[n.id].defense - before;
+  };
+  assert.equal(wallAfter(1), 0, "一纪元无主郡不该筑壁");
+  assert.ok(wallAfter(2) > 0, "二纪元无主郡未筑壁");
+  assert.ok(wallAfter(3) > wallAfter(2), "三纪元筑壁未快于二纪元");
+  // 守军一个不涨——没人占的地方没有兵役
+  const t3 = fresh(); t3.epoch = 3;
+  const n3 = Object.values(t3.commanderies).find((c) => !c.owner);
+  assert.equal(resolve(t3, [], G, P, ROSTER, GEO).state.commanderies[n3.id].garrison,
+    n3.garrison, "无主郡的守军涨了 —— 没人占的地方不该征兵");
 });
 
 // ── 迷雾 ────────────────────────────────────────────────────────────
@@ -1482,9 +1486,9 @@ test("目的：观测里的纪元要能据以决策 —— 序号本身不含信
   const c = o.clock;
   assert.equal(c.epoch, 1);
   assert.equal(c.epochOf, P.epochCount, "不知道一共几个纪元，序号 1 说明不了进度");
-  assert.equal(c.neutralGrowth, 0, "纪元一无主郡国不自增");
-  assert.ok(c.nextNeutralGrowth > 0,
-    "看不见下一纪元的增速，「换纪元之前把无主地捡了」就无从判断");
+  assert.equal(c.neutralWall, 0, "纪元一无主郡国不筑壁");
+  assert.ok(c.nextNeutralWall > 0,
+    "看不见下一纪元的筑壁速度，「换纪元之前把无主地捡了」就无从判断");
   assert.ok(c.epochEndsBy > 0 && c.epochEndsBy <= P.epochLimit,
     `本纪元剩余季数 ${c.epochEndsBy} 不在合理范围`);
 
@@ -1495,15 +1499,15 @@ test("目的：观测里的纪元要能据以决策 —— 序号本身不含信
   const s2 = structuredClone(s);
   s2.epoch = 2;
   const o2 = observe(s2, "yuanshao", G, P, ROSTER, GEO);
-  assert.equal(o2.clock.neutralGrowth, Math.round((P.neutralGrowth[2] ?? 0) * 100),
-    "纪元二报的增速与 params 里的不是同一个数");
+  assert.equal(o2.clock.neutralWall, P.neutralWall[2] ?? 0,
+    "纪元二报的筑壁速度与 params 里的不是同一个数");
   assert.equal(o2.clock.epochOf, P.epochCount);
 
   // 末纪元不发 nextNeutralGrowth：那是默认值不发的同一条口径
   const s3 = structuredClone(s);
   s3.epoch = P.epochCount;
-  assert.equal(observe(s3, "yuanshao", G, P, ROSTER, GEO).clock.nextNeutralGrowth, undefined,
-    "末纪元还在发「下一纪元增速」，白花 token");
+  assert.equal(observe(s3, "yuanshao", G, P, ROSTER, GEO).clock.nextNeutralWall, undefined,
+    "末纪元还在发「下一纪元筑壁速度」，白花 token");
 });
 
 test("调任候选要写明会不会换掉太守 —— 收入按太守政治打系数", () => {
@@ -1755,31 +1759,6 @@ test("待命军团会归队 —— 否则它是状态里的一处泄漏", () => 
   assert.ok(!still || still.target, "围城军被当成待命军团收走了");
 });
 
-test("无主郡的自增要封顶 —— 复利跑飞就成了永远拿不到的钉子", () => {
-  let s = fresh();
-  const n0 = Object.values(s.commanderies).find((c) => !c.owner && c.garrison > 0);
-  assert.ok(n0, "剧本里没有无主郡");
-  const start = n0.startGarrison;
-  assert.equal(start, n0.garrison, "开局守军没被记下来，封顶就没有基准");
-
-  // 推到有自增的纪元，再跑很多季
-  s.epoch = P.epochCount;
-  assert.ok((P.neutralGrowth[s.epoch] ?? 0) > 0, "末纪元没有自增，测不出");
-  for (let i = 0; i < 60; i += 1) s = refreshAp(resolve(s, [], G, P, ROSTER, GEO).state, P);
-
-  const now = s.commanderies[n0.id];
-  assert.ok(!now.owner, "这个郡被谁拿走了，测不出封顶");
-  const ceil = Math.min(P.garrisonCap, Math.round(start * P.neutralGrowthCap));
-  assert.ok(now.garrison <= ceil,
-    `跑飞了：开局 ${start} → 六十季后 ${now.garrison}，上限应是 ${ceil}`);
-  // 也不能封得太死——六十季之后该顶到上限
-  assert.ok(now.garrison >= ceil * 0.99, `没长到上限：${now.garrison} / ${ceil}`);
-
-  // 势力自己的郡不受这条约束（它们靠募兵长，不是无主自增）
-  const mine = Object.values(s.commanderies).find((c) => c.owner);
-  assert.ok(mine, "找不到有主郡");
-});
-
 test("录像的阵型下标必须与引擎同源 —— 手抄一次就静默错一半", () => {
   // 此前 replay.ts 里手写的是 ["scale","crane","square"]，而引擎是 "wings"。
   // indexOf 返回 −1、被 Math.max(0,…) 兜成 0，于是每一个鹤翼郡都显示成鱼鳞，
@@ -1865,15 +1844,70 @@ test("出征超编的兵要退回起兵郡 —— 不能凭空蒸发", () => {
     `超编的兵没退回去：正好够上限时守军 ${base}，超编 8000 时 ${over}，差 ${over - base}`);
 });
 
-test("无主郡的自增不能有不动点 —— 守军 ≤3 的郡此前永远长不起来", () => {
+test("治所失守之后要有活路 —— 迁治", () => {
+  let s = fresh();
+  const me = "yuanshao";
+  const cap = s.factions[me].capital;
+  assert.ok(cap, "袁绍没有治所");
+  const mine = Object.values(s.commanderies).filter((c) => c.owner === me && c.id !== cap);
+  assert.ok(mine.length, "袁绍只有一个郡，测不出");
+
+  // 治所还在时不该出现迁治候选——那时候迁治几乎总是坏主意，列出来只是噪声
+  assert.ok(!listActions(s, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .some((c) => c.key.startsWith("relocate:")), "治所没事却列出了迁治");
+
+  // 把治所判给别人
+  s.commanderies[cap].owner = "caocao";
+  const cands = listActions(s, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith("relocate:"));
+  assert.ok(cands.length, "治所已失却没有迁治候选 —— 那就是没有活路");
+  assert.match(cands[0].label, /治所已失/);
+
+  // 下季生效：当季仍按旧治所算，所以「全境政令不通」照旧
+  const to = cands[0].key.split(":")[1];
+  const r1 = resolve(s, [{ faction: me, action: { type: "relocate", to } }], G, P, ROSTER, GEO);
+  assert.ok(r1.state.log.some((e) => e.kind === "capital-lost" && e.faction === me),
+    "迁治当季就免了断供 —— 那治所失守这一击就不痛了");
+  assert.equal(r1.state.factions[me].capital, to, "结算末尾应当已经生效");
+
+  // 生效之后不再断供
+  const r2 = resolve(refreshAp(r1.state, P), [], G, P, ROSTER, GEO);
+  assert.ok(!r2.state.log.slice(r1.state.log.length)
+    .some((e) => e.kind === "capital-lost" && e.faction === me),
+    "迁治生效了却还在报治所已失");
+
+  // 迁到别人的郡不合法
+  const foe = Object.values(s.commanderies).find((c) => c.owner && c.owner !== me);
+  assert.ok(validate(s, { faction: me, action: { type: "relocate", to: foe.id } },
+    G, P, DEFAULT_RULES), "迁治到他方郡国居然合法");
+
+  // 下令当季新治所又丢了 → 迁治作废，不能凭空得到一个别人的治所
+  let t = fresh();
+  t.commanderies[t.factions[me].capital].owner = "caocao";
+  const t2 = Object.values(t.commanderies).find((c) => c.owner === me);
+  t.factions[me].pendingCapital = t2.id;
+  t.commanderies[t2.id].owner = "caocao";
+  const r3 = resolve(t, [], G, P, ROSTER, GEO).state;
+  assert.notEqual(r3.factions[me].capital, t2.id, "迁到一个已经不属于自己的郡");
+});
+
+test("无主郡只筑壁不征兵 —— 没人占的地方没有兵役", () => {
   let s = fresh();
   s.epoch = P.epochCount;
-  const n0 = Object.values(s.commanderies).find((c) => !c.owner);
-  assert.ok(n0, "没有无主郡");
-  // round(3 × 1.15) = 3：整数取整让小数字卡死
-  s.commanderies[n0.id].garrison = 3;
-  s.commanderies[n0.id].startGarrison = 3;
-  const r = resolve(s, [], G, P, ROSTER, GEO).state;
-  assert.ok(r.commanderies[n0.id].garrison > 3,
-    `守军 3 的无主郡一季之后还是 ${r.commanderies[n0.id].garrison} —— 卡在不动点上`);
+  assert.ok((P.neutralWall[s.epoch] ?? 0) > 0, "末纪元不筑壁，测不出");
+  const n0 = Object.values(s.commanderies).find((c) => !c.owner && c.defense < P.neutralWallCap);
+  assert.ok(n0, "没有可测的无主郡");
+  const g0 = n0.garrison, d0 = n0.defense;
+
+  for (let i = 0; i < 40; i += 1) s = refreshAp(resolve(s, [], G, P, ROSTER, GEO).state, P);
+  const now = s.commanderies[n0.id];
+  assert.ok(!now.owner, "这个郡被拿走了，测不出");
+
+  // **守军一个不涨**。此前是每季 +15% 复利，84 季 14 万倍，
+  // 于是 13 个无主郡有 10 个长到满档、从第 20 季起一个都没易过手
+  assert.equal(now.garrison, g0, `守军从 ${g0} 涨到了 ${now.garrison} —— 没人占的地方不该征兵`);
+  // 城防要涨，但封顶
+  assert.ok(now.defense > d0, "城防一点没涨，那「早取有时间价值」就没了");
+  assert.ok(now.defense <= P.neutralWallCap, `城防 ${now.defense} 超过上限 ${P.neutralWallCap}`);
+  assert.equal(now.defense, P.neutralWallCap, "四十季之后该顶到上限");
 });

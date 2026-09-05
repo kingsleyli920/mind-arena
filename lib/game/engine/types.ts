@@ -58,6 +58,9 @@ export interface FactionState {
   capital: CommanderyId | null;
   /** 本季可用令数，季初重算 */
   ap: number;
+  /** 已下令、下季生效的新治所。迁治是唯一带延迟的令 */
+  pendingCapital: CommanderyId | null;
+
   /** 结转，上限 2 */
   carried: number;
   /**
@@ -242,6 +245,14 @@ export type Action =
   | { type: "withdraw"; army: string }
   /** 改阵。阵型是郡的属性，这是唯一能改它的令 */
   | { type: "array"; at: CommanderyId; to: Formation }
+  /**
+   * 迁治。下季生效。
+   *
+   * 治所失守是全图杠杆最高的一击（全境政令不通、产出归零、军团尽数溃散），
+   * 而此前没有任何一条令能补救——capital 只会被置为 null，从无重新指派的路径。
+   * 实测两局 104 季里 11~15% 的势力·季处在这个不可逆状态，张鲁待了 39 季
+   */
+  | { type: "relocate"; to: CommanderyId }
   /** 招降俘虏。成败由确定性随机定，失败则该人永久离场 */
   | { type: "suade"; officer: OfficerId }
   /**

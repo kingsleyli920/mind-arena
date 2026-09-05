@@ -119,11 +119,10 @@ export interface EngineParams {
   gearLadder: string[];
   /** 纪元 */
   epochCount: number; epochLimit: number; epochMin: number;
-  /** 无主郡守军自增的封顶倍数（相对开局值）。见包里「为何要封顶」 */
-  neutralGrowthCap: number;
+  /** 无主郡每季自筑城防（按纪元）与其上限。见包里「为何改成筑壁」 */
+  neutralWall: Record<number, number>; neutralWallCap: number;
   /** 统一天下的州数门槛。达到即局终，胜者为该势力 */
   unifyZhou: number;
-  neutralGrowth: Record<number, number>;
 }
 
 interface RawPack {
@@ -298,7 +297,7 @@ export function loadParams(pack: RawPack): EngineParams {
     epochLimit: g("时钟", "纪元时限"),
     unifyZhou: g("胜负", "统一州数"),
     epochMin: g("时钟", "纪元最短"),
-    neutralGrowthCap: g("时钟", "无主自守_上限倍数"),
-    neutralGrowth: { 1: 0, 2: g("时钟", "无主自守_纪元二"), 3: g("时钟", "无主自守_纪元三") },
+    neutralWall: { 1: 0, 2: g("时钟", "无主筑壁_纪元二"), 3: g("时钟", "无主筑壁_纪元三") },
+    neutralWallCap: g("时钟", "无主筑壁_上限"),
   };
 }

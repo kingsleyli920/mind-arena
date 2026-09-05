@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.6.0";
+export const PROMPT_VERSION = "1.7.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -45,10 +45,11 @@ export function renderSystem(pack: unknown): string {
     "- 治所失守则全境断绝，是全图杠杆最高的一击。对手的治所与自己的都算。",
     "",
     "## 纪元：无主之地会越来越贵",
-    "- 无主郡国的守军**每季自增**，增速逐纪元上升（clock.neutralGrowth，百分点）。",
-    "  今天两千人的空郡，隔一个纪元就不是两千人了——这是抢占时机的全部时间价值所在。",
+    "- 无主郡国**每季自筑城防**（clock.neutralWall，点），逐纪元加快——豪强筑坞自保。",
+    "  城防每 30 点给守方 +1 可防守，所以晚取要多啃一到两级。守军**不增**：",
+    "  没人占的地方没有兵役，所以拖着不取只会让城更硬，不会让人更多。",
     "- `clock.epochEndsBy` 是本纪元**至多**还剩几季（还可能因有人升档而提前推进），",
-    "  `nextNeutralGrowth` 是推进后的增速。要捡的无主地，在换纪元之前捡。",
+    "  `nextNeutralWall` 是推进后的筑壁速度。要捡的无主地，在换纪元之前捡。",
     "",
     "## 势孤时怎么打",
     "开局一两郡的席位，出局率是十三郡席位的十几倍。四条都是从规则里算出来的，",

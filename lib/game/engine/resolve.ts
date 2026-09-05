@@ -310,6 +310,12 @@ export function resolve(
                    attribution: { 成功率: Math.round(p * 100), 掷点: Math.round(r * 100) } });
         }
       }
+    } else if (a.type === "relocate") {
+      // **下季生效**：迁治当季仍按旧治所算补给，所以治所失守依然很痛，
+      // 只是不再是死刑。生效在下面推进时钟那一段
+      s.factions[o.faction].pendingCapital = a.to;
+      log(s, { kind: "relocate", faction: o.faction,
+               text: `迁治于 ${a.to}，下季生效` });
     } else if (a.type === "array") {
       const was = s.commanderies[a.at].formation;
       s.commanderies[a.at].formation = a.to;
@@ -718,25 +724,19 @@ export function resolve(
   }
 
   // ── 阶段八：补给与产出 ────────────────────────────────────────────
-  // 无主郡国随纪元推进而豪强坐大，自守渐坚。这给「早取无主之地」一个时间
-  // 价值——若无主地永远同价，抢占时机就不成其为决策，模型大可无限期地
-  // 先把内政做满再扩张
-  const growth = P.neutralGrowth[s.epoch] ?? 0;
-  if (growth > 0) {
+  // 无主郡国随纪元推进而**豪强筑壁**，自守渐坚。这给「早取无主之地」一个时间
+  // 价值——若无主地永远同价，抢占时机就不成其为决策。
+  //
+  // 涨的是**城防**不是守军：没人占的地方不该有兵役与预备役，征兵要有郡府去征。
+  // 此前是守军每季 +8%/+15%，复利跑飞——84 季是 14 万倍，实测一局里 13 个
+  // 无主郡有 10 个长到满档（4.4~6 万），从第 20 季起一个都没易过手，
+  // 而河南尹、颍川、梁国、鲁国正卡在中原正中央把地图切成两半。
+  // 城防进的是可防守（每 30 点 +1），涨得慢且有上限，晚取只多啃一两级
+  const wall = P.neutralWall[s.epoch] ?? 0;
+  if (wall > 0) {
     for (const c of Object.values(s.commanderies)) {
       if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
-      // **封顶在开局值的若干倍**。没有这条时 15%/季 复利会跑飞：
-      // 84 季是 14 万倍，最后被势力郡的守军上限 60000 兜住——实测 13 个
-      // 无主郡里 10 个长到满档，从第 20 季起一个都没易过手，其中河南尹、
-      // 颍川、梁国、鲁国还卡在中原正中央把地图切成两半。
-      // 「早取有时间价值」不等于「过了二十季永远拿不到」
-      const ceil = Math.min(P.garrisonCap,
-        Math.round((c.startGarrison || c.garrison) * P.neutralGrowthCap));
-      // 至少 +1：round(3 × 1.15) = 3 是不动点，守军 ≤3 的无主郡永远长不起来。
-      // 实测张掖/酒泉/敦煌被抽干后 87 季一直停在第 1 档，而它们四周全是无主郡、
-      // 不在任何势力的 frontier 里，于是既长不大也没人去拿
-      c.garrison = Math.min(
-        Math.max(c.garrison + 1, Math.round(c.garrison * (1 + growth))), ceil);
+      c.defense = Math.min(P.neutralWallCap, c.defense + wall);
     }
   }
 
@@ -946,6 +946,17 @@ export function resolve(
     if (GRADE_RANK[grade] > GRADE_RANK[f.bestGrade]) f.bestGrade = grade;
   }
 
+  // 迁治生效。放在结算之后、时钟推进之前——本季的补给、产出、溃散
+  // 全部按旧治所算完了，新治所从下一季起才起作用
+  for (const f of Object.values(s.factions)) {
+    if (!f.pendingCapital) continue;
+    const to = f.pendingCapital;
+    f.pendingCapital = null;
+    if (s.commanderies[to]?.owner !== f.id) continue;   // 这一季又丢了，迁治作废
+    f.capital = to;
+    log(s, { kind: "relocate", faction: f.id, text: `治所已迁至 ${to}` });
+  }
+
   // 令数结转（MERS R9）。此前 FactionState.carried 全项目没有任何写入方，
   // 余令直接蒸发——而规则摘要里明写着「结转 ≤2」，等于在骗模型。
   // refreshAp 会读它并在下季清零
@@ -978,7 +989,7 @@ export function resolve(
       s.epochStart = s.turn;
       log(s, { kind: "epoch", text: `入第 ${s.epoch} 纪元`
         + `（${reached ? `已有势力达${GRADE_CN[target]}档` : "本纪元逾时"}）：`
-        + `无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%` });
+        + `无主郡国每季自筑城防 +${P.neutralWall[s.epoch] ?? 0}` });
     }
   }
   // ── 局终：统一即胜，季数上限只是兜底 ──────────────────────────────

@@ -55,10 +55,10 @@ export interface Observation {
      * 所以只保证「至多还有这么多季」，不保证走满
      */
     epoch: number; epochOf: number; epochEndsBy: number;
-    /** 本纪元无主郡国守军每季自增（百分点）。纪元一为 0 */
-    neutralGrowth: number;
-    /** 下一纪元的自增率（百分点）。**末纪元不发** */
-    nextNeutralGrowth?: number;
+    /** 本纪元无主郡国每季自筑城防（点）。纪元一为 0。守军不增——没人占的地方没有兵役 */
+    neutralWall: number;
+    /** 下一纪元的筑壁速度。**末纪元不发** */
+    nextNeutralWall?: number;
   };
   /** 本季可用令数与结转 */
   /**
@@ -216,9 +216,9 @@ export function observe(
       totalTurns: s.seasonsPerGame,
       epoch: s.epoch, epochOf: P.epochCount,
       epochEndsBy: Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart)),
-      neutralGrowth: Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100),
+      neutralWall: P.neutralWall[s.epoch] ?? 0,
       ...(s.epoch < P.epochCount
-        ? { nextNeutralGrowth: Math.round((P.neutralGrowth[s.epoch + 1] ?? 0) * 100) }
+        ? { nextNeutralWall: P.neutralWall[s.epoch + 1] ?? 0 }
         : {}),
     },
     treasury: {

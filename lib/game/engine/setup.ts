@@ -90,7 +90,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       id: f.id,
       capital,
       ap: 0,
-      carried: 0, wasted: 0,
+      carried: 0, wasted: 0, pendingCapital: null,
       freeUsed: {},
       retired: false,
       startCommanderies: mine.length,
