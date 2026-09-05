@@ -371,13 +371,18 @@ function drawOverlay(fi){
     const top=[...e.facs].sort((a,b)=>b[1]-a[1])[0][0];
     parts.push('<path class="march" stroke="'+D.facColor[top]+'" d="M'+x1+' '+y1+'L'+x2+' '+y2+'"/>');
   }
+  // 徽标不直接画，先收集——它要与势力名一起参与去重叠。
+  // **变量名不能叫 marks**：模块顶层已经有一个 marks 是时间轴的锚点数组，
+  // 撞上之后这里会往那个数组里塞标签对象，两边同时坏掉且不报错
+  const labels=[];
   for(const [at,e] of byAt){
     const [x,y]=D.xy[at];
     const top=[...e.facs].sort((a,b)=>b[1]-a[1])[0][0];
     const txt='▲'+kilo(e.troops)+(e.n>1?' ×'+e.n:'');
-    parts.push('<text class="army armybg" x="'+x+'" y="'+(y-16)+'" text-anchor="middle">'+txt+'</text>');
-    parts.push('<text class="army" x="'+x+'" y="'+(y-16)+'" text-anchor="middle" fill="'
-      +(MAJOR.has(top)?D.facColor[top]:"#5C564B")+'">'+txt+'</text>');
+    // 字宽实算。按 length×11 估会把「▲5.1k ×2」算窄三成，去重叠就漏
+    let aw=0; for(const ch of txt) aw += /[▲×]/.test(ch) ? 20 : 12;
+    labels.push({ kind:"army", x, y:y-16, y0:y-16, w:aw, txt,
+                  fill:(MAJOR.has(top)?D.facColor[top]:"#5C564B") });
   }
 
   // ── 势力名标在**疆域重心**上 ──────────────────────────
@@ -385,8 +390,7 @@ function drawOverlay(fi){
   // 此前标在各家治所上，而曹操（济阴）、吕布（山阳）、袁绍（魏郡）的治所
   // 本来就挨在一起，三个名字必然叠成一团；靠边的（乌桓、鲜卑）还会被画布裁掉。
   // 重心把标签推到各自地块的中间，天然散开。
-  // 再加两道：**收进画布**、**竖直方向去重叠**（按重心 y 排序，压上就往下推）
-  const anchors=[];
+  // 再加两道：**收进画布**、**竖直方向去重叠**（与军团徽标一起，见下）
   for(const [k,st] of Object.entries(f.fac)){
     const fi2=+k;
     if(!MAJOR.has(fi2) || !st || st[8]) continue;
@@ -397,40 +401,26 @@ function drawOverlay(fi){
     // 按 length×0.62 估会把「吕布（张邈、陈宫）」算窄一半，去重叠就形同虚设
     const nm=D.facName[fi2];
     let w=0; for(const ch of nm) w += /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/.test(ch) ? 26 : 13;
-    anchors.push({ fi:fi2, x:Math.min(1815-w/2-14, Math.max(w/2+14, sx/n)),
-                   y:Math.min(1455, Math.max(34, sy/n)), w, txt:esc(D.facName[fi2]) });
+    labels.push({ kind:"fac", fill:D.facColor[fi2],
+                 x:Math.min(1815-w/2-14, Math.max(w/2+14, sx/n)),
+                 y:Math.min(1455, Math.max(34, sy/n)), y0:sy/n, w, txt:esc(D.facName[fi2]) });
   }
-  // 去重叠要**多轮**：一轮按序推，推下去的那个可能又压住下一个。
-  // 四轮之后 194 年春（所有势力都还在、最挤的一帧）实测撞不出来
-  anchors.sort((a,b)=>a.y-b.y);
-  for(let pass=0;pass<4;pass++){
-    let moved=false;
-    for(let i=1;i<anchors.length;i++) for(let j=0;j<i;j++){
-      const a=anchors[j], b=anchors[i];
-      if(Math.abs(a.x-b.x) < (a.w+b.w)/2 && Math.abs(b.y-a.y) < 40){
-        b.y = a.y+40; moved=true;
-      }
+  // 先按锚点画出去，**画完再量**——见下面的 deoverlap()。
+  // 估字宽这条路走不通：试过 length×0.62、按中日韩字符实算，
+  // 每一版都还剩两到四处碰撞，因为字体的实际步进、描边宽度、
+  // 甚至同一个字在不同字重下的宽度都不是能算准的。SVG 有 getBBox()，
+  // 直接量真实包围盒就没有估的问题
+  for(const m of labels){
+    const y=Math.min(1455, Math.max(34, m.y)).toFixed(1), x=m.x.toFixed(1);
+    if(m.kind==="army"){
+      parts.push('<text class="army armybg" data-y0="'+m.y0.toFixed(1)+'" x="'+x+'" y="'+y+'" text-anchor="middle">'+m.txt+'</text>');
+      parts.push('<text class="army" data-y0="'+m.y0.toFixed(1)+'" x="'+x+'" y="'+y+'" text-anchor="middle" fill="'+m.fill+'">'+m.txt+'</text>');
+    } else {
+      parts.push('<text class="facname" x="'+x+'" y="'+y+'" text-anchor="middle" fill="'+m.fill+'">'+m.txt+'</text>');
     }
-    anchors.sort((a,b)=>a.y-b.y);
-    if(!moved) break;
-  }
-  for(const a of anchors) a.y=Math.min(1455, Math.max(34, a.y));
-  for(const a of anchors){
-    parts.push('<text class="facname" x="'+a.x.toFixed(1)+'" y="'+a.y.toFixed(1)
-      +'" text-anchor="middle" fill="'+D.facColor[a.fi]+'">'+a.txt+'</text>');
-  }
-
-  // 地名**只标本季易主的那几个**。
-  //
-  // 此前把本方全部郡都标上，实测袁绍十一郡挤在河北，钜鹿国压常山国、
-  // 常山国压安平国，29 个标签撞出 6 处重叠。而「这是哪个郡」点一下就有
-  // （每个郡都带 <title>，热区 17px），易主才是非标不可的那一类
-  if(prev) for(let i=0;i<f.own.length;i++){
-    if(f.own[i]===prev.own[i]) continue;
-    const [x,y]=D.xy[i];
-    parts.push('<text class="lab" x="'+x+'" y="'+(y+26)+'" text-anchor="middle">'+D.name[i]+'</text>');
   }
   ov.innerHTML=parts.join("");
+  deoverlap();
 
   // 图例：这一帧的主要势力，按郡数降序。没有它，颜色说明不了任何事
   $("legend").innerHTML=[...cnt].filter(([k])=>MAJOR.has(k)).sort((a,b)=>b[1]-a[1])
@@ -438,6 +428,72 @@ function drawOverlay(fi){
       +'<b'+(HILITE.has(k)?' style="text-decoration:underline"':'')+'>'+esc(D.facName[k])+'</b>'
       +'<em>'+v+' 郡</em></span>').join("")
     + '<span class="minor"><i></i><em>其余 '+([...cnt].length-[...cnt].filter(([k])=>MAJOR.has(k)).length)+' 家小势力</em></span>';
+}
+/**
+ * 画完再量的去重叠。
+ *
+ * 估字宽那条路试过三版（length×0.62、按中日韩字符实算、再按字体步进调），
+ * 每一版都还剩两到四处碰撞：字体的实际步进、描边宽度、标点的全半角
+ * 都不是算得准的。SVG 的 getBBox() 给的是**真实包围盒**，量出来就没有估的问题。
+ *
+ * 只在竖直方向推。军团徽标锚在具体的郡上，漂太远就指错地方，给 ±46 的上限
+ *（超了就改推压在它上面的那一个）；势力名标的是一片地的重心，本来没有精确锚点。
+ */
+function deoverlap(){
+  const items=[];
+  for(const el of ov.querySelectorAll(".facname,.army")){
+    if(el.classList.contains("armybg")) continue;
+    const bb=el.getBBox();
+    const army=el.classList.contains("army");
+    // **存真实包围盒，不存「中心 + 高度」。** y 属性是**基线**不是中心，
+    // 而基线在盒子里的位置随字号变：势力名实测盒高 54、徽标只有 15，
+    // 拿基线当中心去比，两者的误差差出二十多个单位——各帧稳定漏判两三处
+    items.push({ el, bg: army ? el.previousElementSibling : null, army,
+                 y:+el.getAttribute("y"), dy:0,
+                 l:bb.x, r:bb.x+bb.width, t:bb.y, b:bb.y+bb.height,
+                 y0: army ? +el.dataset.y0 : null });
+  }
+  if(items.length<2) return;
+  const hits=(a,b)=>a.l < b.r+2 && b.l < a.r+2
+                 && a.t+a.dy < b.b+b.dy+4 && b.t+b.dy < a.b+a.dy+4;
+
+  // 分两步。第一步只在徽标之间推（它们锚在具体的郡上，±46 的漂移上限）；
+  // 第二步固定徽标，只挪势力名——势力名标的是一片地的重心，没有精确锚点。
+  const army=items.filter((x)=>x.army), fac=items.filter((x)=>!x.army);
+  army.sort((a,b)=>a.t-b.t);
+  for(let pass=0;pass<6;pass++){
+    let moved=false;
+    for(let i=1;i<army.length;i++) for(let j=0;j<i;j++){
+      const a=army[j], b=army[i];
+      if(!hits(a,b)) continue;
+      const want=(a.b+a.dy+4)-b.t;                  // 把 b 推到 a 下面
+      if(Math.abs(want)<=46){ b.dy=want; moved=true; }
+    }
+    army.sort((a,b)=>(a.t+a.dy)-(b.t+b.dy));
+    if(!moved) break;
+  }
+  // 势力名向外扫描找最近的空位。「跳到刚好让开」在上下各有障碍时会来回弹
+  const placed=[...army];
+  for(const f of fac){
+    let best=0;
+    for(let d=0;d<=260;d+=6){
+      const cand = d===0 ? [0] : [-d, d];
+      let ok=false;
+      for(const dy of cand){
+        if(f.y+dy<34||f.y+dy>1455) continue;
+        f.dy=dy;
+        if(!placed.some((o)=>hits(f,o))){ best=dy; ok=true; break; }
+      }
+      if(ok) break;
+    }
+    f.dy=best;
+    placed.push(f);
+  }
+  for(const it of items){
+    const y=Math.min(1455, Math.max(34, it.y+it.dy)).toFixed(1);
+    it.el.setAttribute("y", y);
+    if(it.bg) it.bg.setAttribute("y", y);
+  }
 }
 function kilo(n){ return n>=10000 ? (n/1000).toFixed(0)+"k" : n>=1000 ? (n/1000).toFixed(1)+"k" : String(n); }
 

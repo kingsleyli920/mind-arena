@@ -1,0 +1,262 @@
+- main [ref=f4e2]:
+  - generic [ref=f4e4]:
+    - generic [ref=f4e185]: 194 年 · 春 第 1/16 季 纪元 1
+    - generic [ref=f4e186]: 袁绍
+    - generic [ref=f4e187]:
+      - text: 令数 8/8 国库 600 金
+      - generic [ref=f4e188]: （军费 1196）
+      - text: 现档 丁
+    - button "规则" [ref=f4e189] [cursor=pointer]
+  - generic [ref=f4e190]:
+    - generic [ref=f4e191]:
+      - generic [ref=f4e192]:
+        - img "汉末地形" [ref=f4e193]
+        - img:
+          - button "河南尹" [ref=f4e195] [cursor=pointer]
+          - button "河内郡" [ref=f4e201] [cursor=pointer]
+          - button "河东郡" [ref=f4e207] [cursor=pointer]
+          - button "弘农郡" [ref=f4e213] [cursor=pointer]
+          - button "京兆尹" [ref=f4e219] [cursor=pointer]
+          - button "左冯翊" [ref=f4e226] [cursor=pointer]
+          - button "右扶风" [ref=f4e232] [cursor=pointer]
+          - button "颍川郡" [ref=f4e238] [cursor=pointer]
+          - button "汝南郡" [ref=f4e244] [cursor=pointer]
+          - button "梁国" [ref=f4e250] [cursor=pointer]
+          - button "沛国" [ref=f4e256] [cursor=pointer]
+          - button "陈国" [ref=f4e263] [cursor=pointer]
+          - button "鲁国" [ref=f4e269] [cursor=pointer]
+          - button "魏郡（我方）" [ref=f4e275] [cursor=pointer]
+          - button "钜鹿郡（我方）" [ref=f4e282] [cursor=pointer]
+          - button "常山国（我方）" [ref=f4e288] [cursor=pointer]
+          - button "中山国（我方）" [ref=f4e294] [cursor=pointer]
+          - button "安平国（我方）" [ref=f4e300] [cursor=pointer]
+          - button "河闲国（我方）" [ref=f4e306] [cursor=pointer]
+          - button "清河国（我方）" [ref=f4e312] [cursor=pointer]
+          - button "赵国（我方）" [ref=f4e318] [cursor=pointer]
+          - button "勃海郡（我方）" [ref=f4e324] [cursor=pointer]
+          - button "陈留郡" [ref=f4e330] [cursor=pointer]
+          - button "东郡" [ref=f4e336] [cursor=pointer]
+          - button "东平国" [ref=f4e342] [cursor=pointer]
+          - button "任城国" [ref=f4e348] [cursor=pointer]
+          - button "泰山郡" [ref=f4e354] [cursor=pointer]
+          - button "济北国" [ref=f4e360] [cursor=pointer]
+          - button "山阳郡" [ref=f4e366] [cursor=pointer]
+          - button "济阴郡" [ref=f4e373] [cursor=pointer]
+          - button "东海郡" [ref=f4e379] [cursor=pointer]
+          - button "琅邪国" [ref=f4e386] [cursor=pointer]
+          - button "彭城国" [ref=f4e392] [cursor=pointer]
+          - button "广陵郡" [ref=f4e398] [cursor=pointer]
+          - button "下邳国" [ref=f4e404] [cursor=pointer]
+          - button "济南国（我方）" [ref=f4e410] [cursor=pointer]
+          - button "平原郡（我方）" [ref=f4e416] [cursor=pointer]
+          - button "乐安国（我方）" [ref=f4e422] [cursor=pointer]
+          - button "北海国" [ref=f4e428] [cursor=pointer]
+          - button "东莱郡" [ref=f4e434] [cursor=pointer]
+          - button "齐国（我方）" [ref=f4e440] [cursor=pointer]
+          - button "南阳郡" [ref=f4e447] [cursor=pointer]
+          - button "南郡" [ref=f4e453] [cursor=pointer]
+          - button "江夏郡" [ref=f4e460] [cursor=pointer]
+          - button "零陵郡" [ref=f4e466] [cursor=pointer]
+          - button "桂阳郡" [ref=f4e472] [cursor=pointer]
+          - button "武陵郡" [ref=f4e478] [cursor=pointer]
+          - button "长沙郡" [ref=f4e484] [cursor=pointer]
+          - button "九江郡" [ref=f4e490] [cursor=pointer]
+          - button "丹阳郡" [ref=f4e497] [cursor=pointer]
+          - button "庐江郡" [ref=f4e503] [cursor=pointer]
+          - button "会稽郡" [ref=f4e509] [cursor=pointer]
+          - button "吴郡" [ref=f4e515] [cursor=pointer]
+          - button "豫章郡" [ref=f4e521] [cursor=pointer]
+          - button "汉中郡" [ref=f4e527] [cursor=pointer]
+          - button "巴郡" [ref=f4e533] [cursor=pointer]
+          - button "广汉郡" [ref=f4e539] [cursor=pointer]
+          - button "蜀郡" [ref=f4e545] [cursor=pointer]
+          - button "犍为郡" [ref=f4e552] [cursor=pointer]
+          - button "牂牁郡" [ref=f4e558] [cursor=pointer]
+          - button "越巂郡" [ref=f4e564] [cursor=pointer]
+          - button "益州郡" [ref=f4e570] [cursor=pointer]
+          - button "永昌郡" [ref=f4e576] [cursor=pointer]
+          - button "广汉属国" [ref=f4e582] [cursor=pointer]
+          - button "蜀郡属国" [ref=f4e588] [cursor=pointer]
+          - button "犍为属国" [ref=f4e594] [cursor=pointer]
+          - button "陇西郡" [ref=f4e600] [cursor=pointer]
+          - button "汉阳郡" [ref=f4e606] [cursor=pointer]
+          - button "武都郡" [ref=f4e613] [cursor=pointer]
+          - button "金城郡" [ref=f4e619] [cursor=pointer]
+          - button "安定郡" [ref=f4e625] [cursor=pointer]
+          - button "北地郡" [ref=f4e631] [cursor=pointer]
+          - button "武威郡" [ref=f4e637] [cursor=pointer]
+          - button "张掖郡" [ref=f4e643] [cursor=pointer]
+          - button "酒泉郡" [ref=f4e649] [cursor=pointer]
+          - button "敦煌郡" [ref=f4e655] [cursor=pointer]
+          - button "张掖属国" [ref=f4e661] [cursor=pointer]
+          - button "张掖居延属国" [ref=f4e667] [cursor=pointer]
+          - button "上党郡" [ref=f4e673] [cursor=pointer]
+          - button "太原郡" [ref=f4e679] [cursor=pointer]
+          - button "上郡" [ref=f4e686] [cursor=pointer]
+          - button "西河郡" [ref=f4e692] [cursor=pointer]
+          - button "五原郡" [ref=f4e698] [cursor=pointer]
+          - button "云中郡" [ref=f4e704] [cursor=pointer]
+          - button "定襄郡" [ref=f4e710] [cursor=pointer]
+          - button "雁门郡" [ref=f4e716] [cursor=pointer]
+          - button "朔方郡" [ref=f4e722] [cursor=pointer]
+          - button "涿郡" [ref=f4e728] [cursor=pointer]
+          - button "广阳郡" [ref=f4e734] [cursor=pointer]
+          - button "代郡" [ref=f4e741] [cursor=pointer]
+          - button "上谷郡" [ref=f4e747] [cursor=pointer]
+          - button "渔阳郡" [ref=f4e753] [cursor=pointer]
+          - button "右北平郡" [ref=f4e759] [cursor=pointer]
+          - button "辽西郡" [ref=f4e765] [cursor=pointer]
+          - button "辽东郡" [ref=f4e771] [cursor=pointer]
+          - button "玄菟郡" [ref=f4e777] [cursor=pointer]
+          - button "乐浪郡" [ref=f4e783] [cursor=pointer]
+          - button "辽东属国" [ref=f4e789] [cursor=pointer]
+          - button "南海郡" [ref=f4e795] [cursor=pointer]
+          - button "苍梧郡" [ref=f4e801] [cursor=pointer]
+          - button "郁林郡" [ref=f4e808] [cursor=pointer]
+          - button "合浦郡" [ref=f4e814] [cursor=pointer]
+          - button "交趾郡" [ref=f4e820] [cursor=pointer]
+          - button "九真郡" [ref=f4e826] [cursor=pointer]
+          - button "日南郡" [ref=f4e832] [cursor=pointer]
+          - generic: 魏郡
+          - generic: 齐国
+          - generic: 平原郡
+          - generic: 钜鹿郡
+          - generic: 中山国
+          - generic: 河闲国
+          - generic: 济南国
+          - generic: 乐安国
+          - generic: 赵国
+          - generic: 京兆尹
+          - generic: 沛国
+          - generic: 山阳郡
+          - generic: 东海郡
+          - generic: 南郡
+          - generic: 九江郡
+          - generic: 蜀郡
+          - generic: 汉阳郡
+          - generic: 太原郡
+          - generic: 广阳郡
+          - generic: 苍梧郡
+          - generic: 河南尹
+          - generic: 河内郡
+          - generic: 颍川郡
+          - generic: 汝南郡
+          - generic: 陈留郡
+          - generic: 南阳郡
+          - generic: 零陵郡
+          - generic: 长沙郡
+          - generic: 吴郡
+          - generic: 豫章郡
+          - generic: 巴郡
+          - generic: 永昌郡
+          - generic: 河东郡
+          - generic: 梁国
+          - generic: 陈国
+          - generic: 鲁国
+          - generic: 东郡
+          - generic: 东平国
+          - generic: 彭城国
+          - generic: 广陵郡
+          - generic: 下邳国
+          - generic: 东莱郡
+          - generic: 桂阳郡
+          - generic: 丹阳郡
+          - generic: 庐江郡
+          - generic: 会稽郡
+          - generic: 广汉郡
+          - generic: 犍为郡
+          - generic: 越巂郡
+          - generic: 渔阳郡
+          - generic: 辽东郡
+          - generic: 乐浪郡
+          - generic: 南海郡
+          - generic: 郁林郡
+          - generic: 交趾郡
+          - generic: 弘农郡
+          - generic: 琅邪国
+          - generic: 江夏郡
+          - generic: 武陵郡
+          - generic: 汉中郡
+          - generic: 牂牁郡
+          - generic: 益州郡
+          - generic: 广汉属国
+          - generic: 犍为属国
+          - generic: 陇西郡
+          - generic: 武都郡
+          - generic: 金城郡
+          - generic: 安定郡
+          - generic: 北地郡
+          - generic: 武威郡
+          - generic: 张掖郡
+          - generic: 酒泉郡
+          - generic: 敦煌郡
+          - generic: 张掖居延属国
+          - generic: 上党郡
+          - generic: 上郡
+          - generic: 西河郡
+          - generic: 五原郡
+          - generic: 云中郡
+          - generic: 定襄郡
+          - generic: 雁门郡
+          - generic: 朔方郡
+          - generic: 代郡
+          - generic: 上谷郡
+          - generic: 右北平郡
+          - generic: 辽西郡
+          - generic: 玄菟郡
+          - generic: 合浦郡
+          - generic: 九真郡
+          - generic: 日南郡
+      - generic [aria-hidden]:
+        - generic: 大漢輿地圖
+        - generic: 每方折地百里
+        - generic: 郡國山川縣邑名
+        - generic: 興平元年
+      - generic [aria-hidden]:
+        - img:
+          - generic:
+            - generic: 漢
+            - generic: 末
+            - generic: 沙
+            - generic: 盤
+      - generic [ref=f4e838]:
+        - button "＋" [ref=f4e839] [cursor=pointer]
+        - button "全图" [ref=f4e840] [cursor=pointer]
+        - button "－" [ref=f4e841] [cursor=pointer]
+    - complementary [ref=f4e842]:
+      - generic [ref=f4e843]:
+        - generic [ref=f4e844]: 丁 档
+        - generic [ref=f4e845]: 13 郡（开局 13）
+        - generic [ref=f4e846]: 2 州·州治 2
+        - emphasis [ref=f4e847]: 郡数高于开局且至少一郡夺自他方 → 丙
+      - group [ref=f4e848]:
+        - generic "逐州进度" [ref=f4e849] [cursor=pointer]
+      - group [ref=f4e850]:
+        - generic "我的郡国13" [ref=f4e851] [cursor=pointer]
+      - generic [ref=f4e852]:
+        - group [ref=f4e853]:
+          - generic "征伐 23 只看打得下的" [ref=f4e854] [cursor=pointer]:
+            - text: 征伐
+            - generic [ref=f4e855]: "23"
+            - button "只看打得下的" [ref=f4e856]
+        - group [ref=f4e857]:
+          - generic "集结 6" [ref=f4e858] [cursor=pointer]:
+            - text: 集结
+            - generic [ref=f4e859]: "6"
+        - group [ref=f4e860]:
+          - generic "内政 12" [ref=f4e861] [cursor=pointer]:
+            - text: 内政
+            - generic [ref=f4e862]: "12"
+        - group [ref=f4e863]:
+          - generic "调任 8" [ref=f4e864] [cursor=pointer]:
+            - text: 调任
+            - generic [ref=f4e865]: "8"
+        - group [ref=f4e866]:
+          - generic "刺探 6" [ref=f4e867] [cursor=pointer]:
+            - text: 刺探
+            - generic [ref=f4e868]: "6"
+        - group [ref=f4e869]:
+          - generic "外交 5" [ref=f4e870] [cursor=pointer]:
+            - text: 外交
+            - generic [ref=f4e871]: "5"
+      - button "封令结算 · 0 条 · 耗 0/8 令" [disabled] [ref=f4e872]
