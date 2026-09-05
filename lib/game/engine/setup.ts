@@ -4,7 +4,7 @@
 // 数值改动只该发生在数据文件与内容包里。
 import type { EngineParams } from "./params.ts";
 import { rollRecruitPool, type Roster } from "./officers.ts";
-import { standingOf, type Geography } from "./victory.ts";
+import { standingOf, zhouEquiv, type Geography } from "./victory.ts";
 import type { GameState, CommanderyState, FactionState, Formation, Grade }
   from "./types.ts";
 
@@ -94,7 +94,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       freeUsed: {},
       retired: false,
       startCommanderies: mine.length,
-      startZhou: 0,
+      startZhou: 0, startZhouEquiv: 0,
       startSeats: 0,
       conquests: 0,
       allyBanUntil: 0,
@@ -133,6 +133,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     const st = standingOf(state, opts.geo, f.id);
     f.startZhou = st.controlledZhou;
     f.startSeats = st.zhouSeats;
+    f.startZhouEquiv = zhouEquiv(state, opts.geo, f.id);
   }
 
   // 初始驻地：籍贯郡属本势力则驻籍贯，否则回治所。

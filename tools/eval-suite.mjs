@@ -21,7 +21,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { GRADE_CN } from "../lib/game/engine/victory.ts";
-import { GRADE_SCORE } from "../lib/arena/scoring.ts";
+import { GRADE_SCORE, contScore } from "../lib/arena/scoring.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
@@ -209,6 +209,13 @@ function summarize(run, px) {
     // 64 季自对局里目的流 44% 的局最终被灭却仍按历史最高档记分。
     // 「越到后期越强」这个问题，只有这一列答得了
     finalScore: avg(rs.map((r) => GRADE_SCORE[r.finalGrade ?? r.grade])),
+    // **连续名次**：把定档那道台阶摊成斜坡（州进度 + 州治，都取相对开局的增量）。
+    // 六组机器人对比 × 三个局长 = 18 格实测：四档那把尺子在 48 局下
+    // **一格都没打到显著**，平局中位 28/48；连续这把信噪比中位从 0.151
+    // 升到 0.193、平局降到 8/48、四格显著。逐格看 12 格更灵敏 6 格更钝，
+    // 赢的时候赢得多（最高 9.3 倍），输的时候输得少（最低 0.47 倍）
+    contScore: rs.some((r) => r.zhouEquiv !== undefined)
+      ? avg(rs.filter((r) => r.zhouEquiv !== undefined).map(contScore)) : null,
     grades,
     elim: rs.filter((r) => r.eliminated).length,
     growth: avg(rs.map((r) => (r.start ? r.commanderies / r.start : 0))),
@@ -358,7 +365,7 @@ console.log(`排行榜（同 seed、同对手、席位轮换、每局 ${SEASONS 
 // 均分（历史最高档）与终局分并列。两者背离得越大，
 // 「中途辉煌、终局崩掉」的局越多——而长局里这正是要看的东西
 console.log("对局方".padEnd(40) + "均分".padStart(7) + "终局分".padStart(8)
-  + "对基线±95%".padStart(12)
+  + "州进度".padStart(8) + "对基线±95%".padStart(12)
   + "疆域倍数".padStart(9) + "出局".padStart(6) + "非法率".padStart(7)
   + "令数用率".padStart(9) + "成本".padStart(9));
 for (const r of rows) {
@@ -367,6 +374,8 @@ for (const r of rows) {
     r.spec.slice(0, 38).padEnd(40)
     + r.score.toFixed(1).padStart(7)
     + (r.finalScore == null ? "—" : r.finalScore.toFixed(1)).padStart(8)
+    + (r.contScore == null ? "—"
+        : `${r.contScore >= 0 ? "+" : ""}${r.contScore.toFixed(0)}`).padStart(8)
     + (r.spec === bot?.spec ? "基线" : vs).padStart(12)
     + r.growth.toFixed(2).padStart(9)
     + `${r.elim}/${r.played ?? r.games}`.padStart(6)

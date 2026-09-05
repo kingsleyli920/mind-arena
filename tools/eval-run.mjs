@@ -21,7 +21,8 @@ import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, gradeOf } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, gradeOf, zhouEquiv }
+  from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
@@ -258,6 +259,9 @@ async function playGame(gi) {
       // 细分名次要用：档位太粗，同档的两个结局会被记成平手
       seats: standingOf(s, GEO, under).zhouSeats,
       startZhou: f.startZhou, startSeats: f.startSeats,
+      // 连续州进度：定档那道台阶的斜坡版，配对比较用。见 lib/arena/scoring.ts
+      zhouEquiv: +zhouEquiv(s, GEO, under).toFixed(4),
+      startZhouEquiv: +(f.startZhouEquiv ?? 0).toFixed(4),
       unified: s.winner === under, winner: s.winner ?? null,
       seasons: s.seasonsPerGame,
       commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,

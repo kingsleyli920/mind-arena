@@ -46,6 +46,32 @@ export function fineScore(r: {
   return GRADE_SCORE[r.grade] + 100 * frac;
 }
 
+/**
+ * **连续名次**：把定档那道台阶摊成斜坡，用来做配对比较。
+ *
+ * 与上面的 fineScore 不是一回事。fineScore 是字典序压位，只在同档时破平局，
+ * 连续项被压到 1/13、1/169 的量级，几乎不带信息——实测平局从 2/12 消到 0/12，
+ * 但信噪比只从 1.24 走到 1.25，等于没用。
+ *
+ * 这一个换了做法：不在档位上加小数，而是**直接量定档判据的连续版**。
+ * 州进度（zhouEquiv：每州按「我方郡数 ÷ 过半所需」计、封顶 1）加上州治，
+ * 都取相对开局的增量，再乘 100 对齐档位的百步尺。
+ *
+ * 州治的权重取 0.5：定档里「多控 1 州」与「多据 1 州治」同为乙，
+ * 而「多控 1 州 + 多据 2 州治」与「多控 2 州」同为甲——即一个州治约合半个州。
+ *
+ * **它到底有没有把噪声压下去，要用机器人对局实测**，不能想当然。
+ * 见 docs/EVAL.md：好看不等于有用，fineScore 就是前车之鉴
+ */
+export function contScore(r: {
+  zhouEquiv: number; startZhouEquiv?: number;
+  seats?: number; startSeats?: number;
+}): number {
+  const dz = r.zhouEquiv - (r.startZhouEquiv ?? 0);
+  const ds = (r.seats ?? 0) - (r.startSeats ?? 0);
+  return 100 * (dz + 0.5 * ds);
+}
+
 /** 从内容包核对：包里的名额分与这张表必须一致 */
 export function checkScoringAgainstPack(pack: unknown): string[] {
   const errs: string[] = [];

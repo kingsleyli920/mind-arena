@@ -73,6 +73,11 @@ export interface FactionState {
   /** 开局态势。胜负判据用相对开局的增量，不用绝对位置 */
   startCommanderies: number;
   startZhou: number;
+  /**
+   * 开局的**连续州进度**（zhouEquiv）。定档用的是整数州数，
+   * 这一项只给细分名次用——见 lib/arena/scoring.ts 的 contScore
+   */
+  startZhouEquiv: number;
   startSeats: number;
   /** 本局夺自他方（非无主）的郡国数。丙档要求「必须进攻才能拿」 */
   conquests: number;

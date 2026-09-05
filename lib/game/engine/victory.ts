@@ -74,6 +74,35 @@ export function standingOf(s: GameState, geo: Geography, f: FactionId): Standing
   };
 }
 
+/**
+ * **连续的州进度**：每个州按「我方郡数 ÷ 过半所需」计，封顶 1，全图求和。
+ *
+ * 定档看的是控了几个州，而「控住」本身是一道台阶——过半那一郡值一整档，
+ * 前面几郡一分不值。于是每局的配对差只能取 0 或 ±100，噪声天然压过信号，
+ * 48 局的下限正是被这道台阶逼出来的。
+ *
+ * 这个量把台阶摊成斜坡，且**长在定档判据自己的轴上**：
+ * 一个郡值多少取决于它在哪个州（徐州五郡，过半要三，一郡值 1/3；
+ * 益州十二郡，过半要七，一郡值 1/7），控住之后再多拿一分不值——
+ * 与「第五个散郡值 0 分，凑成半州的那一个郡值一整档」是同一条规则的连续版。
+ *
+ * 拿郡数增量当细分做不到这一点：目的流拿分更高而占郡更少（−0.4 郡），
+ * 因为它挑的是值钱的郡不是多的郡。郡数不是目标函数，州才是。
+ */
+export function zhouEquiv(
+  s: { commanderies: Record<CommanderyId, { owner: FactionId | null }> },
+  geo: Geography, f: FactionId,
+): number {
+  let sum = 0;
+  for (const members of geo.zhouMembers.values()) {
+    const half = Math.floor(members.length / 2) + 1;
+    let mine = 0;
+    for (const id of members) if (s.commanderies[id]?.owner === f) mine += 1;
+    sum += Math.min(1, mine / half);
+  }
+  return sum;
+}
+
 export interface StartStanding {
   commanderies: number; controlledZhou: number; zhouSeats: number;
 }
