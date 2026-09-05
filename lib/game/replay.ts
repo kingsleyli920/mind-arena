@@ -16,6 +16,7 @@
 // 3. **数组一律与 territory-grid.json 的 order 同序**（= commanderies.json 的
 //    id 顺序，已核对逐位相同）。播放器画图时一趟循环、零次名字查表。
 import { tierOf } from "./engine/intel.ts";
+import { FORMATION_CN } from "./engine/combat.ts";
 import { supplyReach } from "./engine/resolve.ts";
 import { governorOf } from "./engine/officers.ts";
 import { standingOf, gradeOf, GRADE_RANK, type Geography } from "./engine/victory.ts";
@@ -24,7 +25,10 @@ import type { Roster } from "./engine/officers.ts";
 import type { EngineParams } from "./engine/params.ts";
 import type { FactionId, GameState, Order } from "./engine/types.ts";
 
-export const REPLAY_VERSION = "1.0.0";
+export const REPLAY_VERSION = "1.1.0";
+
+/** 阵型 id 的顺序。**唯一来源是引擎的 FORMATION_CN**，帧里的 fm 是这个数组的下标 */
+export const FORM_IDS = Object.keys(FORMATION_CN);
 
 /** 一帧 = 一季**结算前**的局面 + 这一季下了什么 + 结算出了什么 */
 export interface Frame {
@@ -114,7 +118,8 @@ export function buildIndex(
   commanderies: Array<{ id: string; name: string; zhou: string;
                         longitude: number; latitude: number }>,
   factions: Array<{ id: string; name: string; color?: string }>,
-  formations: string[],
+  /** 忽略：阵型顺序由 FORM_IDS 定，留着只为不改调用方 */
+  _formations: string[],
   edges: ReadonlyArray<{ from: string; to: string }> = [],
 ): { dict: ReplayDict; ci: Map<string, number>; fi: Map<string, number> } {
   const ci = new Map(commanderies.map((c, i) => [c.id, i]));
@@ -134,7 +139,7 @@ export function buildIndex(
       fac: factions.map((f) => f.id),
       facName: factions.map((f) => f.name),
       facColor: factions.map((f) => f.color ?? "#8a8378"),
-      formation: formations,
+      formation: FORM_IDS,
       adj: (() => {
         const a: number[][] = commanderies.map(() => []);
         for (const e of edges) {
@@ -177,7 +182,10 @@ export function captureFrame(
   const fm = new Array<number>(n).fill(0);
   const gov = new Array<number>(n).fill(0);
 
-  const FORMS = ["scale", "crane", "square"];
+  // **从引擎导出，不手抄**。此前这里写的是 ["scale","crane","square"]，
+  // 而引擎里是 "wings" 不是 "crane"——indexOf 返回 −1、被 Math.max(0,…) 兜成 0，
+  // 于是回放里每一个鹤翼郡都显示成鱼鳞，而且不报错
+  const FORMS = FORM_IDS;
   for (const c of Object.values(s.commanderies)) {
     const i = ci.get(c.id);
     if (i === undefined) continue;                 // 剧本里有而地图上没有的，跳过而不是塞进 -1

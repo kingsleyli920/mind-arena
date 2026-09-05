@@ -238,6 +238,20 @@ function gainNote(gn: NonNullable<Candidate["gain"]>): string {
        + (gn.upgrade ? `｜取下即升${GRADE_CN[gn.upgrade]}档` : "");
 }
 
+/**
+ * 起兵郡的待命军团：取**兵力最多**的那支。
+ *
+ * 三处（候选标签、赴援、结算）必须用同一条口径，否则标签写的兵力与实际
+ * 出征的不是一回事——这个文件已经为「候选与结算分家」栽过一次
+ *（386 条赴援候选有 18 条算错、倍数 0.45）。
+ * `.find()` 取的是 push 序第一支＝最老、被军费磨得最小的那支，是最坏选择
+ */
+function readyAt(s: GameState, f: FactionId, at: CommanderyId) {
+  return s.armies
+    .filter((x) => x.faction === f && x.at === at && !x.target)
+    .sort((x, y) => y.troops - x.troops || x.id.localeCompare(y.id))[0];
+}
+
 export function listActions(
   s: GameState, f: FactionId, g: Graph, P: EngineParams, rules: Rules = DEFAULT_RULES,
   roster: Roster | null = null,
@@ -287,7 +301,7 @@ export function listActions(
       const march = roster ? attackRetinue(corps, P, e.terrain).members : [];
       const lead = march[0] ?? null;
       const cap = roster ? troopCap(corps, P) : Infinity;
-      const ready = s.armies.find((x) => x.faction === f && x.at === e.from && !x.target);
+      const ready = readyAt(s, f, e.from);
       const src0 = s.commanderies[e.from];
       // 兵种对位与器械的效果已经折进 forecast 的缺口数里，标签只标一次名目。
       // 用散文再复述一遍等于花两份 token 说同一件事
@@ -395,7 +409,7 @@ export function listActions(
         //（标签写「可出 2425 人」，引擎实际只派 1084，倍数 0.45）。
         // 高报是更危险的方向：模型读到「可解围」下令，派出去的不到一半，
         // 判词与结果直接反号
-        const rReady = s.armies.find((x) => x.faction === f && x.at === src.id && !x.target);
+        const rReady = readyAt(s, f, src.id);
         const cap = roster ? troopCap(corps, P) : Infinity;
         const send = Math.min(rReady ? rReady.troops
                                      : Math.floor(src.garrison * P.strengthRatio.allout), cap);

@@ -441,14 +441,29 @@ export function resolve(
       const take = Math.floor(c.garrison * P.musterTake);
       c.garrison -= take; troops += take;
     }
-    s.armies.push({
-      id: `${o.faction}:${s.turn}:${a.at}`,
-      faction: o.faction, commander: a.commander, retinue: a.commander ? [a.commander] : [],
-      troops,
-      at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
-      unit: s.commanderies[a.at].unit,
-      siegeSeasons: 0, idleSeasons: 0, home: a.at,
-    });
+    // **同郡至多一支待命军团**：有就并进去，没有才新建。
+    //
+    // 此前每条集结令无条件 push，于是同一个腹地郡逐季叠出三四十支独立军团
+    //（实测一局末季上党郡 39 支、东郡 38 支、勃海郡 31 支）。而下面取待命军团
+    // 用的是 `.find()`——数组第一支，也就是**最老、被军费磨得最小**的那支。
+    // 结果：勃海郡守军 13278，本来能出 9000 人破城；郡里多一支 4 人的残军，
+    // 同一条候选就变成「出 4 人→不破」，13278 人一个都调不出去。
+    // 合并之后这个劫持不可能发生，末季军团数从 265 降到「势力×郡」的量级
+    const merge = s.armies.find((x) => x.faction === o.faction && x.at === a.at && !x.target);
+    if (merge) {
+      merge.troops += troops;
+      merge.idleSeasons = 0;
+      if (!merge.commander && a.commander) { merge.commander = a.commander; merge.retinue = [a.commander]; }
+    } else {
+      s.armies.push({
+        id: `${o.faction}:${s.turn}:${a.at}`,
+        faction: o.faction, commander: a.commander, retinue: a.commander ? [a.commander] : [],
+        troops,
+        at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
+        unit: s.commanderies[a.at].unit,
+        siegeSeasons: 0, idleSeasons: 0, home: a.at,
+      });
+    }
     s.commanderies[a.at].gear = "none";
     log(s, { kind: "muster", faction: o.faction, text: `于 ${a.at} 集结 ${troops} 人待命` });
   }
@@ -479,7 +494,12 @@ export function resolve(
       const a = o.action as Extract<Order["action"], { type: "campaign" }>;
       const src = s.commanderies[a.from];
       // 起兵郡若有待命军团，整建制出征；否则按兵力档从郡守军抽调
-      const ready = s.armies.find((x) => x.faction === o.faction && x.at === a.from && !x.target);
+      // 取**兵力最多**的那支，不是数组第一支。`.find()` 返回的是 push 序的第一个，
+      // 也就是最老、被军费磨得最小的那支——那是最坏选择而不是随机选择。
+      // 合并之后同郡只剩一支，这一行是保险；候选侧 actions.ts 必须用同一条口径
+      const ready = s.armies
+        .filter((x) => x.faction === o.faction && x.at === a.from && !x.target)
+        .sort((x, y) => y.troops - x.troops || x.id.localeCompare(y.id))[0];
       // 兵力上限在**结算里**也要卡。此前它只写在候选标签上，
       // 于是绕过候选表直接下令就能无视上限——那样的上限等于没有
       const terrain = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target)?.terrain ?? "plain";

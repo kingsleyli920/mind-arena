@@ -9,13 +9,13 @@ import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "../lib/game/engine/intel.ts";
 import { retinueAt, stationedAt, isFiller, attackRetinue, suadeChance }
   from "../lib/game/engine/officers.ts";
-import { fieldOutcome, formationEdge } from "../lib/game/engine/combat.ts";
+import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
 import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
-import { buildIndex, captureFrame, attachOutcome } from "../lib/game/replay.ts";
+import { buildIndex, captureFrame, attachOutcome, FORM_IDS } from "../lib/game/replay.ts";
 import { tierOf } from "../lib/game/engine/intel.ts";
 import { governorOf } from "../lib/game/engine/officers.ts";
 
@@ -1778,4 +1778,65 @@ test("无主郡的自增要封顶 —— 复利跑飞就成了永远拿不到的
   // 势力自己的郡不受这条约束（它们靠募兵长，不是无主自增）
   const mine = Object.values(s.commanderies).find((c) => c.owner);
   assert.ok(mine, "找不到有主郡");
+});
+
+test("录像的阵型下标必须与引擎同源 —— 手抄一次就静默错一半", () => {
+  // 此前 replay.ts 里手写的是 ["scale","crane","square"]，而引擎是 "wings"。
+  // indexOf 返回 −1、被 Math.max(0,…) 兜成 0，于是每一个鹤翼郡都显示成鱼鳞，
+  // 不报错、不崩、只是一直错
+  assert.deepEqual(FORM_IDS, Object.keys(FORMATION_CN));
+  const s = fresh();
+  const f = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []);
+  let checked = 0;
+  for (const c of Object.values(s.commanderies)) {
+    const i = REPLAY_IDX.ci.get(c.id);
+    if (i === undefined) continue;
+    assert.equal(FORM_IDS[f.fm[i]], c.formation, `${c.id} 的阵型对不上`);
+    checked += 1;
+  }
+  assert.equal(checked, 105);
+  // 三种阵型都要出现过，否则这条测试可能只是碰巧全对
+  assert.equal(new Set(Object.values(s.commanderies).map((c) => c.formation)).size, 3);
+});
+
+test("同郡至多一支待命军团，且出征取兵力最多的那支", () => {
+  let s = fresh();
+  const me = "yuanshao";
+  const at = Object.values(s.commanderies).find((c) => c.owner === me && c.garrison > 4000);
+  assert.ok(at, "找不到袁绍的驻兵郡");
+
+  // 连下两条集结令到同一个郡：应当并成一支，不是两支
+  const src = (G.adj.get(at.id) ?? []).map((e) => e.to)
+    .filter((id) => s.commanderies[id]?.owner === me).slice(0, 1);
+  assert.ok(src.length, "这个郡没有己方邻郡，测不出集结");
+  const order = { faction: me, action: { type: "muster", at: at.id, from: [at.id, ...src],
+                                         commander: null, deadline: 1 } };
+  s = resolve(s, [order], G, P, ROSTER, GEO).state;
+  const after1 = s.armies.filter((a) => a.faction === me && a.at === at.id && !a.target);
+  assert.equal(after1.length, 1, "第一条集结没生成军团");
+  const t1 = after1[0].troops;
+  s = refreshAp(s, P);
+  s = resolve(s, [order], G, P, ROSTER, GEO).state;
+  const after2 = s.armies.filter((a) => a.faction === me && a.at === at.id && !a.target);
+  assert.equal(after2.length, 1,
+    `同郡叠出 ${after2.length} 支待命军团 —— 此前一局末季上党郡叠到 39 支`);
+  assert.ok(after2[0].troops > t1, "第二条集结的兵没并进去");
+
+  // **一支残军不许劫持整个郡的出征兵力**
+  let u = fresh();
+  const from = Object.values(u.commanderies).find((c) => c.owner === me && c.garrison > 8000);
+  const foe = (G.adj.get(from.id) ?? []).map((e) => e.to)
+    .find((id) => u.commanderies[id]?.owner && u.commanderies[id].owner !== me);
+  assert.ok(foe, "这个郡不临敌，测不出");
+  // 手塞一支大的和一支小的（模拟合并前的历史数据）
+  for (const [n, t] of [["big", 9000], ["tiny", 7]]) {
+    u.armies.push({ id: `x:${n}`, faction: me, commander: null, retinue: [], troops: t,
+      at: from.id, target: null, posture: "main", gear: "none", unit: from.unit,
+      siegeSeasons: 0, idleSeasons: 0, home: from.id });
+  }
+  const cands = listActions(u, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith(`campaign:${from.id}>${foe}`));
+  assert.ok(cands.length, "没有从这个郡打过去的候选");
+  assert.match(cands[0].label, /9,?000|8,?\d{3}/,
+    `候选标签取到了小的那支：${cands[0].label}`);
 });
