@@ -15,6 +15,9 @@ import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
+import { buildIndex, captureFrame, attachOutcome } from "../lib/game/replay.ts";
+import { tierOf } from "../lib/game/engine/intel.ts";
+import { governorOf } from "../lib/game/engine/officers.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const DATA = {
@@ -1564,4 +1567,106 @@ test("作废的令数要回传 —— 模型每季从零问答，不知道上季
   spent.factions.yuanshao.wasted = 0;
   assert.equal(observe(spent, "yuanshao", G, P, ROSTER, GEO).budget.wastedLastSeason, undefined,
     "没作废还发这一项，白花 token");
+});
+
+// ── 录像 ────────────────────────────────────────────────────────────
+// 播放器跑不了引擎，所以帧里但凡有一个派生量算错，页面上就是**静默画错**。
+// 这几条钉的都是「画错了看不出来」的那些字段。
+const REPLAY_IDX = buildIndex(
+  read("commanderies.json"),
+  DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
+  ["scale", "crane", "square"],
+);
+
+test("录像：郡序必须与 territory-grid 的 order 逐位相同", () => {
+  // 这是唯一一处「疆域整体错位而且看不出来」的入口。播放器按下标查格子，
+  // 一旦两边的顺序分家，画出来仍是一张像模像样的地图，只是每个郡都属于别人
+  const grid = JSON.parse(fs.readFileSync("public/game/territory-grid.json", "utf8"));
+  assert.deepEqual(REPLAY_IDX.dict.com, grid.order,
+    "commanderies.json 的 id 序与 territory-grid 的 order 分家了");
+  assert.equal(REPLAY_IDX.dict.xy.length, grid.order.length);
+});
+
+test("录像：采帧是纯读的 —— 它若改了状态，R33 逐位重放就废了", () => {
+  const s = fresh();
+  const before = JSON.stringify(s);
+  captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []);
+  assert.equal(JSON.stringify(s), before, "captureFrame 改了 GameState");
+});
+
+test("录像：派生量与引擎算的是同一个数，不是另抄一份", () => {
+  const s = fresh();
+  const f = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []);
+  const ci = REPLAY_IDX.ci, fi = REPLAY_IDX.fi;
+
+  // 守军存**档位**，且必须是 tierOf 算的那一档 —— 与模型看到的迷雾同一把尺。
+  // 自己另写一个分档公式（比如照抄 types.ts 里那句失效的「13 档 1.4」注释），
+  // 播放器上显示的兵力档就与模型当时看到的对不上
+  let checked = 0;
+  for (const c of Object.values(s.commanderies)) {
+    const i = ci.get(c.id);
+    if (i === undefined) continue;
+    assert.equal(f.gt[i], tierOf(c.garrison, P), `${c.id} 的守军档与 tierOf 不一致`);
+    assert.equal(f.own[i], c.owner ? fi.get(c.owner) : -1, `${c.id} 的归属不对`);
+    assert.equal(f.gov[i], governorOf(s, ROSTER, c.id, P)?.politics ?? 0);
+    checked += 1;
+  }
+  assert.equal(checked, 105, `只核了 ${checked} 个郡`);
+
+  // 断供：逐势力用 supplyReach 独立重算一遍，两边必须逐郡吻合
+  const cut = new Set(f.cut);
+  for (const [id] of Object.entries(s.factions)) {
+    const reach = supplyReach(s, G, id);
+    for (const c of Object.values(s.commanderies)) {
+      if (c.owner !== id) continue;
+      const i = ci.get(c.id);
+      if (i === undefined) continue;
+      assert.equal(cut.has(i), !reach.has(c.id), `${c.id} 的断供与 supplyReach 不符`);
+    }
+  }
+
+  // 无主用 −1 而不是 null：播放器按 `f < 0` 判空，null 在数组里还多三个字节
+  const nobody = Object.values(s.commanderies).find((c) => !c.owner);
+  assert.ok(nobody, "剧本里没有无主郡，测不出");
+  assert.equal(f.own[ci.get(nobody.id)], -1);
+});
+
+test("录像：驻地只记变化，且第一帧要给全量 —— 否则播放器开局无将可显", () => {
+  const s = fresh();
+  const first = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []);
+  assert.equal(first.moves.length, Object.keys(s.stations).length,
+    "第一帧（无 prevStations）应给出全部驻地");
+
+  // 同一状态、把上一帧的驻地传回去，就该一条都不记
+  const same = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, [],
+    { prevStations: { ...s.stations } });
+  assert.equal(same.moves.length, 0, "驻地没变却记了变化，等于把人名逐帧抄一遍");
+
+  // 动一个人，只该记这一条
+  const [oid, at] = Object.entries(s.stations)[0];
+  const moved = structuredClone(s);
+  const other = Object.values(s.commanderies).find((c) => c.id !== at);
+  moved.stations[oid] = other.id;
+  const one = captureFrame(moved, REPLAY_IDX, G, P, ROSTER, GEO, [],
+    { prevStations: { ...s.stations } });
+  assert.deepEqual(one.moves, [[oid, REPLAY_IDX.ci.get(other.id)]]);
+});
+
+test("录像：日志折掉流水账，但不许折掉破城", () => {
+  const frame = { ev: [] };
+  attachOutcome(frame, [
+    { kind: "treasury", faction: "caocao", text: "国库" },
+    { kind: "govern", faction: "caocao", text: "内政" },
+    { kind: "scout", faction: "caocao", text: "刺探" },
+    { kind: "siege-win", faction: "caocao", text: "破城" },
+    { kind: "capital-lost", faction: "lubu", text: "治所失守" },
+    { kind: "supply-cut", faction: "lubu", text: "断供" },
+  ], REPLAY_IDX.fi);
+  const kinds = frame.ev.map((e) => e[0]);
+  assert.ok(!kinds.includes("treasury") && !kinds.includes("govern") && !kinds.includes("scout"),
+    "流水账没折掉 —— 48 季实测这几类占了大半，铺出来会盖掉真正重要的那一两条");
+  assert.ok(kinds.includes("siege-win") && kinds.includes("capital-lost"),
+    "把破城或治所失守折掉了 —— 那是这局唯一要看的东西");
+  assert.ok(kinds.includes("supply-cut"), "断供是决定性的，不能折");
+  assert.equal(frame.ev[0][1], REPLAY_IDX.fi.get("caocao"), "势力下标不对");
 });
