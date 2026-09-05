@@ -99,3 +99,28 @@ test("包：写给模型的数必须与引擎实际用的一致", () => {
   assert.ok(pack.constants.时钟.纪元时限说明?.includes("epochLimitFor"),
     "纪元时限没写明它随局长缩放 —— 长局里这个数是错的");
 });
+
+// ── 势力配色 ─────────────────────────────────────────────────────────────
+// 同属「两处说的话必须一致」这一类：配色的约束原先只写在注释里，
+// 于是三十一家挤成一团也没有任何东西报错——用户在图上认出吕布和
+// 李傕郭汜是同一种颜色，我才发现有 32 对势力 ΔE<18。判据挪进测试。
+test("势力配色：任意两家可分，接壤的更要分得开", async () => {
+  const { audit } = await import("../tools/check-palette.mjs");
+  const sc = JSON.parse(fs.readFileSync("lib/game/data/scenario-194.json", "utf8"));
+  const r = audit(Object.fromEntries(sc.factions.map((f) => [f.id, f.color])));
+  assert.deepEqual(r.bad, [], `配色不达标：\n  ${r.bad.join("\n  ")}`);
+});
+
+// 渲染端不许再做「提纯」。历史上 PlayClient 与 replay 页各有一份 vivid()，
+// 在渲染时统一拔高饱和度来救土色系配色。那是给数据层的毛病打渲染层的补丁：
+// 提纯只能拉开已有的间距，造不出本来没有的间距，而且它不幂等——
+// 连调两次会把饱和度推到上限，把刚排开的颜色重新挤到一起。
+test("渲染端不得二次提纯势力色", () => {
+  // 注释里可以提它（讲清为什么去掉了），代码里不行——先剥注释再查
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
+  for (const f of ["app/play/PlayClient.tsx", "tools/build-replay-page.mjs"]) {
+    const src = strip(fs.readFileSync(f, "utf8"));
+    assert.equal(/vivid\s*\(/.test(src), false,
+      `${f} 又出现了 vivid()：势力色应直接取 scenario 里的最终显示色`);
+  }
+});

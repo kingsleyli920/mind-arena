@@ -199,36 +199,16 @@ type MapPoint = {
   households?: number | null; population?: number | null;
 };
 
-/**
- * 势力色提纯。剧本给的三十一种颜色都是土色系（配合墨底地图取的），
- * 彼此难分，需要拉开。
+/** 剧本给的就是最终显示色，直接拆成 RGB。
  *
- * 提纯幅度是配着底图定的：底图改成纸底后平均明度从 0.61 升到 0.81，
- * 而疆域是正片叠底，输出正比于底图亮度——同样的系数在新底图上会过冲成
- * 糖果色。故从 s×2.2 收到 s×1.5，亮度上限相应抬高。
- */
-function vivid(hex: string): [number, number, number] {
+ * 这里曾有个 vivid() 做「提纯」：原配色是配墨底地图取的土色系，三十一家彼此难分，
+ * 于是在渲染时统一拔高饱和度。那是在给数据层的毛病打渲染层的补丁，而且补不动——
+ * 提纯只能拉开已有的间距，造不出本来就没有的间距，改完仍有 32 对势力 ΔE<18。
+ * 现在配色在 tools/build-scenario-194.mjs 里就按「最大化最小色差」排好了，
+ * 再提纯反而会把饱和度重新推到上限、把刚拉开的颜色又挤到一起。 */
+function hexRGB(hex: string): [number, number, number] {
   const n = parseInt(hex.replace("#", ""), 16);
-  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
-  let h = 0;
-  if (d) {
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-    else if (max === g) h = ((b - r) / d + 2) / 6;
-    else h = ((r - g) / d + 4) / 6;
-  }
-  let l = (max + min) / 2;
-  let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-  s = Math.min(1, s * 1.5 + 0.10);
-  l = Math.min(0.74, Math.max(0.46, l));
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
-  const m = l - c / 2;
-  const seg = Math.floor(h * 6) % 6;
-  const [rr, gg, bb] = [
-    [c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x],
-  ][seg];
-  return [Math.round((rr + m) * 255), Math.round((gg + m) * 255), Math.round((bb + m) * 255)];
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 /**
@@ -649,7 +629,7 @@ export function PlayClient() {
     ctx.clearRect(0, 0, cv.width, cv.height);
 
     const rgb = new Map<string, [number, number, number]>();
-    for (const [id, hex] of engine.colorOf) rgb.set(id, vivid(hex));
+    for (const [id, hex] of engine.colorOf) rgb.set(id, hexRGB(hex));
 
     // 每格的归属势力
     const own = new Array<string | null>(cols * rows).fill(null);

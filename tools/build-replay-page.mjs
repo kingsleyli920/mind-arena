@@ -235,22 +235,11 @@ const bin = atob(GRID.grid);
 const CELL = new Uint8Array(bin.length);
 for (let i = 0; i < bin.length; i++) CELL[i] = bin.charCodeAt(i);
 
-/** 提纯势力色。原色是配水墨底图取的土色系，直接用则三十一家彼此难分。
- *  与 app/play/PlayClient.tsx 的 vivid() 同一套系数 */
-function vivid(hex){
-  const n = parseInt(hex.replace("#",""),16);
-  const r=((n>>16)&255)/255, g=((n>>8)&255)/255, b=(n&255)/255;
-  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
-  let h=0;
-  if(d){ if(mx===r) h=((g-b)/d+(g<b?6:0))/6; else if(mx===g) h=((b-r)/d+2)/6; else h=((r-g)/d+4)/6; }
-  let l=(mx+mn)/2, s=d===0?0:d/(1-Math.abs(2*l-1));
-  s=Math.min(1,s*1.5+0.10); l=Math.min(0.74,Math.max(0.46,l));
-  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs(((h*6)%2)-1)), m=l-c/2;
-  const seg=Math.floor(h*6)%6;
-  const t=[[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][seg];
-  return [Math.round((t[0]+m)*255),Math.round((t[1]+m)*255),Math.round((t[2]+m)*255)];
-}
-const RGB = D.facColor.map(vivid);
+/** 剧本给的就是最终显示色（见 tools/build-scenario-194.mjs 的配色注释），直接拆 RGB。
+ *  这里原先有个 vivid() 跟 PlayClient 共用一套提纯系数，已一并去掉。 */
+const hexRGB=(hex)=>{const n=parseInt(hex.replace("#",""),16);
+  return [(n>>16)&255,(n>>8)&255,n&255];};
+const RGB = D.facColor.map(hexRGB);
 
 /** 逐通道方框模糊。**不用 ctx.filter**：Safari 桌面到 17.6 不支持、18 起默认关闭，
  *  那边会看到棱角分明的沃罗诺伊格子 */
@@ -281,11 +270,30 @@ const own = new Int16Array(COLS * ROWS);
 function majorsOf(fi){
   const cnt=new Map();
   for(const o of F[fi].own) if(o>=0) cnt.set(o,(cnt.get(o)||0)+1);
-  const set=new Set([...cnt].filter(([,v])=>v>=3).map(([k])=>k));
+  const set=new Set([...cnt].filter(([k])=>MAJOR_ONCE.has(k)).map(([k])=>k));
   for(const k of HILITE) if(cnt.get(k)) set.add(k);
   return { set, cnt };
 }
-const MINOR=[185,178,162];
+/**
+ * 「算不算主要势力」要**逐势力一次定死**，不能逐帧重判。
+ *
+ * 逐帧判的后果：张鲁在 1~4 郡之间来回，过 3 郡就上紫色、掉到 2 郡就变回淡土色，
+ * 在地图上看就是「紫色没了、又出来、又没了」——用户据此以为势力复活了。
+ * 改成：**只要它在这一局里曾经到过门槛，整局都用自己的颜色。**
+ * 颜色是身份，不是当前规模；规模已经由面积和图例上的郡数表达了
+ */
+const MAJOR_ONCE=(()=>{
+  const peak=new Map();
+  for(const f of F){ const c=new Map();
+    for(const o of f.own) if(o>=0) c.set(o,(c.get(o)||0)+1);
+    for(const [k,v] of c) peak.set(k, Math.max(peak.get(k)||0, v)); }
+  return new Set([...peak].filter(([,v])=>v>=3).map(([k])=>k));
+})();
+// 浓淡只表示份量，不表示身份：每家都用自己的颜色。
+// 这里曾把「峰值不到 3 郡」的十几家一律涂成同一个淡土色 [185,178,162]，
+// 那是给旧配色打的补丁——三十一家土色系本就难分，索性并档保住大势力的辨识度。
+// 代价是十四家共用一色，曹操开局一郡也会被涂成通用土色。配色在数据层排开之后
+// 这条既无必要又正好制造了「不同势力同色」，去掉。
 
 function drawMap(fi){
   const O = F[fi].own;
@@ -297,10 +305,10 @@ function drawMap(fi){
     if (f < 0){ d[o+3]=0; continue; }              // −1 = 无主，透明
     // 主要势力用自己的浓色，其余统一淡土色。
     // 此前一律 52/255，三十一家土色系全糊在一起，截图上根本分不出敌我
-    const maj=MAJOR.has(f);
-    const c = maj ? (RGB[f]||[122,114,102]) : MINOR;
+    const c = RGB[f] || [122,114,102];
     d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2];
-    d[o+3] = HILITE.has(f) ? 168 : maj ? 138 : 60;
+    // 小势力反而要更实一点才看得见：地盘小，淡下去就没了
+    d[o+3] = HILITE.has(f) ? 178 : MAJOR.has(f) ? 148 : 132;
   }
   blur(d,COLS,ROWS,1); blur(d,COLS,ROWS,1);
   pctx.putImageData(img,0,0);
@@ -382,7 +390,7 @@ function drawOverlay(fi){
     // 字宽实算。按 length×11 估会把「▲5.1k ×2」算窄三成，去重叠就漏
     let aw=0; for(const ch of txt) aw += /[▲×]/.test(ch) ? 20 : 12;
     labels.push({ kind:"army", x, y:y-16, y0:y-16, w:aw, txt,
-                  fill:(MAJOR.has(top)?D.facColor[top]:"#5C564B") });
+                  fill:D.facColor[top] });
   }
 
   // ── 势力名标在**疆域重心**上 ──────────────────────────
@@ -449,12 +457,12 @@ function drawOverlay(fi){
   ov.innerHTML=parts.join("");
   deoverlap();
 
-  // 图例：这一帧的主要势力，按郡数降序。没有它，颜色说明不了任何事
-  $("legend").innerHTML=[...cnt].filter(([k])=>MAJOR.has(k)).sort((a,b)=>b[1]-a[1])
+  // 图例：这一帧在场的每一家，按郡数降序。没有它，颜色说明不了任何事。
+  // 原先只列「主要势力」、其余折叠成一句「其余 N 家小势力」，那正好把十几家的身份一起抹掉
+  $("legend").innerHTML=[...cnt].sort((a,b)=>b[1]-a[1]||a[0]-b[0])
     .map(([k,v])=>'<span><i style="background:'+D.facColor[k]+'"></i>'
       +'<b'+(HILITE.has(k)?' style="text-decoration:underline"':'')+'>'+esc(D.facName[k])+'</b>'
-      +'<em>'+v+' 郡</em></span>').join("")
-    + '<span class="minor"><i></i><em>其余 '+([...cnt].length-[...cnt].filter(([k])=>MAJOR.has(k)).length)+' 家小势力</em></span>';
+      +'<em>'+v+' 郡</em></span>').join("");
 }
 /**
  * 画完再量的去重叠。
