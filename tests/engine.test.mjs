@@ -1840,3 +1840,40 @@ test("同郡至多一支待命军团，且出征取兵力最多的那支", () =>
   assert.match(cands[0].label, /9,?000|8,?\d{3}/,
     `候选标签取到了小的那支：${cands[0].label}`);
 });
+
+test("出征超编的兵要退回起兵郡 —— 不能凭空蒸发", () => {
+  // 对照法：同一局面跑两次，军团一次正好等于出征上限、一次超编 8000。
+  // 起兵郡守军的差应当正好是 8000——一季就破城时军团会消失，
+  // 直接找「在外军团」是找不到的
+  const me = "yuanshao";
+  const run = (extra) => {
+    const s = fresh();
+    const from = Object.values(s.commanderies).find((c) => c.owner === me);
+    const foe = (G.adj.get(from.id) ?? []).map((e) => e.to)
+      .find((id) => s.commanderies[id]?.owner && s.commanderies[id].owner !== me);
+    assert.ok(foe, "找不到临敌郡");
+    const cap = P.retinueCap * P.troopsPerOfficer;
+    s.armies.push({ id: "x:a", faction: me, commander: null, retinue: [], troops: cap + extra,
+      at: from.id, target: null, posture: "main", gear: "none", unit: from.unit,
+      siegeSeasons: 0, idleSeasons: 0, home: from.id });
+    const r = resolve(s, [{ faction: me, action: { type: "campaign", from: from.id,
+      target: foe, strength: "allout", commander: null, siegeGear: "none" } }], G, P, ROSTER, GEO);
+    return r.state.commanderies[from.id].garrison;
+  };
+  const base = run(0), over = run(8000);
+  assert.equal(over - base, 8000,
+    `超编的兵没退回去：正好够上限时守军 ${base}，超编 8000 时 ${over}，差 ${over - base}`);
+});
+
+test("无主郡的自增不能有不动点 —— 守军 ≤3 的郡此前永远长不起来", () => {
+  let s = fresh();
+  s.epoch = P.epochCount;
+  const n0 = Object.values(s.commanderies).find((c) => !c.owner);
+  assert.ok(n0, "没有无主郡");
+  // round(3 × 1.15) = 3：整数取整让小数字卡死
+  s.commanderies[n0.id].garrison = 3;
+  s.commanderies[n0.id].startGarrison = 3;
+  const r = resolve(s, [], G, P, ROSTER, GEO).state;
+  assert.ok(r.commanderies[n0.id].garrison > 3,
+    `守军 3 的无主郡一季之后还是 ${r.commanderies[n0.id].garrison} —— 卡在不动点上`);
+});

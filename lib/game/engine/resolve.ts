@@ -539,9 +539,16 @@ export function resolve(
     // 不是把全郡武将都拉走——首版没截，一支四千人的偏师能带走袁绍全部
     // 二十三员将，治所当场空城
 
-    // 出兵：要么带走待命军团，要么从郡守军抽调
+    // 出兵：要么带走待命军团，要么从郡守军抽调。
+    //
+    // **超编的那部分要退回去，不能凭空消失。** troops = min(ready.troops, cap)，
+    // 而 cap = 随军将数 × 每将统兵（单将郡只有 9000）。此前整支军团被
+    // filter 掉、却只带走 cap 那么多，超出部分就没了——实测刘璋末季
+    // 有 12,700 和 11,138 两支军团，一次出征最多蒸发三千人
     if (ready) {
+      const left = ready.troops - troops;
       s.armies = s.armies.filter((x) => x.id !== ready.id);
+      if (left > 0) src.garrison += left;
     } else {
       src.garrison -= troops;
     }
@@ -725,7 +732,11 @@ export function resolve(
       // 「早取有时间价值」不等于「过了二十季永远拿不到」
       const ceil = Math.min(P.garrisonCap,
         Math.round((c.startGarrison || c.garrison) * P.neutralGrowthCap));
-      c.garrison = Math.min(Math.round(c.garrison * (1 + growth)), ceil);
+      // 至少 +1：round(3 × 1.15) = 3 是不动点，守军 ≤3 的无主郡永远长不起来。
+      // 实测张掖/酒泉/敦煌被抽干后 87 季一直停在第 1 档，而它们四周全是无主郡、
+      // 不在任何势力的 frontier 里，于是既长不大也没人去拿
+      c.garrison = Math.min(
+        Math.max(c.garrison + 1, Math.round(c.garrison * (1 + growth))), ceil);
     }
   }
 
