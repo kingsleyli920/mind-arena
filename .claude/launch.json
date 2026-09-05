@@ -10,6 +10,18 @@
       ],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "replay-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--directory",
+        "/private/tmp/claude-501/-Users-kingsley-projects-mind-arena/4b36ddea-9dda-4576-9434-0619c8631613/scratchpad"
+      ],
+      "port": 4173
     }
   ]
 }

@@ -29,6 +29,8 @@ import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
 import { roll } from "../lib/game/engine/rng.ts";
+import { buildIndex, captureFrame, attachOutcome, REPLAY_VERSION }
+  from "../lib/game/replay.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
@@ -56,6 +58,9 @@ const OUT = arg("out", `混战-${SEED}.md`);
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 /** --provider=A,B：钉住提供方。不钉的话同一模型会在提供方之间跳，单次用时差过 45 倍 */
 const PROVIDER = arg("provider", "");
+/** --replay=<路径>：同时落一份逐季录像，供网页播放器回看。
+ *  混战正是最该被看见的那种局——多个模型同场，而散文记不下同时发生的六件事 */
+const REPLAY = arg("replay", "");
 
 // 抽签池与 match-log 同一份：塞外诸部据的是名存实亡的边郡，抽到等于废签
 const POOL = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu",
@@ -118,6 +123,15 @@ say(`| 局长 | ${SEASONS} 季\u3000种子 \`${SEED}\`\u3000推理档 ${REASONIN
 say(`| 胜负 | 先控 ${P.unifyZhou} 州者一统天下 |`);
 say(`| 提示词 | v${PROMPT_VERSION}\u3000内容包 v${pack.version} |`);
 
+// 录像索引。郡序取 commanderies.json 原序（= territory-grid 的 order）
+const IDX = REPLAY ? buildIndex(
+  DATA.commanderies,
+  DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
+  ["scale", "crane", "square"],
+) : null;
+const frames = [];
+let prevStations = {}, prevCaptured = [];
+
 while (!s.finished) {
   const turn = s.turn;
   say(`\n---\n`);
@@ -175,7 +189,20 @@ while (!s.finished) {
   }
 
   const mark = s.log.length;
+  // 帧描述「这一季开始时的局面 + 这一季下的令」，故在结算前采。
+  // 混战有多个模型席位，seat 那一块只能给一席——这里给**第一席**，
+  // 其余各家的意图仍在 Markdown 实录里逐季写着
+  const first = [...seatOf.keys()][0];
+  const firstRec = done.find((d) => d.f === first)?.out.record;
+  const frame = IDX ? captureFrame(s, IDX, G, P, ROSTER, GEO, orders, {
+    seat: first, picks: firstRec?.picks ?? [],
+    dropped: (firstRec?.admission?.dropped ?? []).map((d) => [d.key, d.reason]),
+    reason: firstRec?.reason ?? null, plan: plans.get(first) ?? null,
+    prevStations, prevCaptured,
+  }) : null;
+  if (IDX) { prevStations = { ...s.stations }; prevCaptured = [...(s.capturedOfficers ?? [])]; }
   const r = resolve(s, orders, G, P, ROSTER, GEO);
+  if (frame) { attachOutcome(frame, r.state.log.slice(mark), IDX.fi); frames.push(frame); }
   const fresh = r.state.log.slice(mark);
   say(`### 本季天下`);
   say("");
@@ -261,6 +288,20 @@ say(`> git \`${(() => {
   try { return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim(); } catch { return "?"; }
 })()}\`\u3000${new Date().toISOString()}`);
 
+if (REPLAY && IDX) {
+  fs.writeFileSync(REPLAY, JSON.stringify({
+    version: REPLAY_VERSION,
+    meta: { seed: SEED, seasons: SEASONS,
+            seat: [...seatOf.keys()][0], seatName: nameOf([...seatOf.keys()][0]),
+            seats: Object.fromEntries(seatOf),
+            agent: "melee", reasoning: REASONING,
+            packVersion: pack.version, promptVersion: PROMPT_VERSION,
+            winner: s.winner ?? null, finished: s.finished },
+    dict: IDX.dict, frames,
+  }));
+  console.error(`→ ${REPLAY}\u3000${frames.length} 帧\u3000`
+    + `${(fs.statSync(REPLAY).size / 1024).toFixed(0)} KB`);
+}
 fs.writeFileSync(OUT, lines.join("\n") + "\n");
 fs.writeFileSync(OUT.replace(/\.md$/, "") + "-元数据.json", JSON.stringify({
   seed: SEED, seasons: SEASONS, seats: Object.fromEntries(seatOf),
