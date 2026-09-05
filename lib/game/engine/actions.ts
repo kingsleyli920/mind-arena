@@ -20,6 +20,7 @@ import type { EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order, Formation,
 } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 export interface Graph {
   /** 郡 → 邻接郡及其通行代价与地形 */
@@ -250,7 +251,7 @@ function gainNote(gn: NonNullable<Candidate["gain"]>): string {
 function readyAt(s: GameState, f: FactionId, at: CommanderyId) {
   return s.armies
     .filter((x) => x.faction === f && x.at === at && !x.target)
-    .sort((x, y) => y.troops - x.troops || x.id.localeCompare(y.id))[0];
+    .sort((x, y) => y.troops - x.troops || cmp(x.id, y.id))[0];
 }
 
 export function listActions(
@@ -266,7 +267,7 @@ export function listActions(
   if (!fs_ || fs_.eliminated || fs_.retired || s.finished) return [];
   const out: Candidate[] = [];
   const ap = remainingAp(s, f);
-  const mine = ownedBy(s, f).sort((a, b) => a.id.localeCompare(b.id));
+  const mine = ownedBy(s, f).sort((a, b) => cmp(a.id, b.id));
   const canOrder = (id: CommanderyId) =>
     (s.commanderies[id]?.ordersThisSeason ?? 0) < rules.perCommanderyOrders;
 
@@ -301,7 +302,7 @@ export function listActions(
       // 简报与候选表在对模型说两套话，这不是这套评测想测的维度
       .filter((x) => canOrder(x.e.from)
         && (x.ratio > 0.35 || (geo ? gainOf(s, geo, f, x.tid)?.upgrade != null : false)))
-      .sort((a, b) => b.ratio - a.ratio || a.tid.localeCompare(b.tid))
+      .sort((a, b) => b.ratio - a.ratio || cmp(a.tid, b.tid))
       .slice(0, rules.perTypeCap);
 
     for (const { tid, e, seen } of targets) {
@@ -401,7 +402,7 @@ export function listActions(
   if (ap >= rules.campaignAp) {
     const besieged = s.armies.filter((x) => x.target && s.commanderies[x.target]?.owner === f
                                             && x.faction !== f);
-    for (const foe of besieged.sort((a, b) => a.target!.localeCompare(b.target!))) {
+    for (const foe of besieged.sort((a, b) => cmp(a.target!, b.target!))) {
       // 出击（背城一战）必须给：只有一个郡的势力无邻郡可派援，
       // 若连出城迎战都不许，被围即等于必亡——曹操 194 年正是在濮阳突火而出的
       const sortie = s.commanderies[foe.target!];
@@ -455,7 +456,7 @@ export function listActions(
   // ── 撤围：围而不下时主动收兵，保住残部 ──────────────────────────────
   if (ap >= rules.normalAp) {
     for (const army of s.armies.filter((x) => x.faction === f && x.target)
-      .sort((a, b) => a.id.localeCompare(b.id)).slice(0, 4)) {
+      .sort((a, b) => cmp(a.id, b.id)).slice(0, 4)) {
       out.push({
         key: `withdraw:${army.id}`,
         action: { type: "withdraw", army: army.id },
@@ -503,7 +504,7 @@ export function listActions(
       // 这是第二次栽在同一件事上（第一次是机器人的外交判据）：
       // **改在候选生成层的东西对所有画像一视同仁，只会抹平差异、不会制造差异**，
       // 而差异正是评测要测的。机器人要变强，得改在**各画像不同**的权重上
-      .sort((a, b) => b.sources.length - a.sources.length || a.at.localeCompare(b.at))
+      .sort((a, b) => b.sources.length - a.sources.length || cmp(a.at, b.at))
       .slice(0, Math.min(6, rules.perTypeCap));
     for (const { at, sources } of cands) {
       const take = sources.slice(0, 3);
@@ -547,7 +548,7 @@ export function listActions(
       }
       return null;
     }).filter((x) => !!x)
-      .sort((a, b) => a.c.id.localeCompare(b.c.id)).slice(0, rules.perTypeCap);
+      .sort((a, b) => cmp(a.c.id, b.c.id)).slice(0, rules.perTypeCap);
     for (const { c, policy, why, price } of picks) {
       out.push({
         key: `govern:${c.id}:${policy}`,
@@ -582,7 +583,7 @@ export function listActions(
       };
       for (const c of mine.filter((x) => canOrder(x.id) && x.id !== cap)
         .map((x) => ({ c: x, n: reach(x.id) }))
-        .sort((a, b) => b.n - a.n || a.c.id.localeCompare(b.c.id))
+        .sort((a, b) => b.n - a.n || cmp(a.c.id, b.c.id))
         .slice(0, Math.min(4, rules.perTypeCap))) {
         out.push({
           key: `relocate:${c.c.id}`,
@@ -657,7 +658,7 @@ export function listActions(
         && v.n <= P.submitMaxCommanderies
         && mineCount >= v.n * P.submitRatio
         && s.turn >= (submitBanUntil(s, id) ?? 0))
-      .sort((a, b) => a[1].n - b[1].n || a[0].localeCompare(b[0]))
+      .sort((a, b) => a[1].n - b[1].n || cmp(a[0], b[0]))
       .slice(0, rules.perTypeCap);
     for (const [id, v] of cands2) {
       const pct = Math.round(submitChance(P, mineCount, v.n, v.morale / v.n) * 100);
@@ -740,7 +741,7 @@ export function listActions(
       .filter((x) => x.by === f)
       .map((x) => ({ x, o: roster.byId.get(x.officer) }))
       .filter((e) => !!e.o)
-      .sort((a, b) => statSum(b.o!) - statSum(a.o!) || a.x.officer.localeCompare(b.x.officer))
+      .sort((a, b) => statSum(b.o!) - statSum(a.o!) || cmp(a.x.officer, b.x.officer))
       .slice(0, rules.perTypeCap);
     for (const { x, o } of pool) {
       const home = o!.home && mine_.has(o!.home);
@@ -789,7 +790,7 @@ export function listActions(
         return { c, want, tf, at: threat.t.id };
       })
       .filter((x) => !!x)
-      .sort((a, b) => b.c.garrison - a.c.garrison || a.c.id.localeCompare(b.c.id))
+      .sort((a, b) => b.c.garrison - a.c.garrison || cmp(a.c.id, b.c.id))
       .slice(0, rules.perTypeCap);
     for (const { c, want, tf, at } of fixes) {
       out.push({
@@ -829,7 +830,7 @@ export function listActions(
           return { c, front, fit, have,
                    weight: c.yieldTier * 10 + (front ? 25 : 0) + (P.retinueCap - have) * 20 };
         })
-        .sort((a, b) => b.weight - a.weight || a.c.id.localeCompare(b.c.id))
+        .sort((a, b) => b.weight - a.weight || cmp(a.c.id, b.c.id))
         .slice(0, 4);
 
       // 首个空缺给最合适的两人（那里才是真正的人选取舍），
@@ -847,7 +848,7 @@ export function listActions(
           // 南阳→长沙→桂阳→江夏→零陵→京兆→南海→京兆→长沙…
           // 有了这条，反向那一步下季就不再是候选，震荡自然消失
           return stationedAt(s, roster, at).length > have;
-        }).sort((x, y) => fit(y) - fit(x) || x.id.localeCompare(y.id));
+        }).sort((x, y) => fit(y) - fit(x) || cmp(x.id, y.id));
         const best = vi === 0 ? ranked.slice(0, 2)
           : ranked.filter((o) => !shown.has(o.id)).slice(0, 2);
         for (const o of best) {
@@ -922,7 +923,7 @@ export function listActions(
   // 分桶按 key 前缀而非 action.type：救援与普通征伐同属 campaign，
   // 若按 type 分桶，"relief:" 排在 "campaign:" 之后，会被整批截掉——
   // 实测 530 条救援候选无一被采纳，被围的势力等于没有反制手段。
-  out.sort((a, b) => a.key.localeCompare(b.key));
+  out.sort((a, b) => cmp(a.key, b.key));
   const buckets = new Map<string, Candidate[]>();
   for (const c of out) {
     const cls = c.key.split(":")[0];
@@ -942,7 +943,7 @@ export function listActions(
     }
     if (!any) break;
   }
-  return picked.sort((a, b) => a.key.localeCompare(b.key));
+  return picked.sort((a, b) => cmp(a.key, b.key));
 }
 
 /** 校验一条命令是否合法。返回 null 表示合法，否则给出拒绝理由 */
@@ -1075,6 +1076,6 @@ export function canonicalOrder(orders: readonly Order[]): Order[] {
        submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
-    || x.faction.localeCompare(y.faction)
-    || JSON.stringify(x.action).localeCompare(JSON.stringify(y.action)));
+    || cmp(x.faction, y.faction)
+    || cmp(JSON.stringify(x.action), JSON.stringify(y.action)));
 }

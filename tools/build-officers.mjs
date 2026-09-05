@@ -47,6 +47,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { cmp } from "../lib/game/engine/cmp.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const COMMANDERIES = path.join(ROOT, "lib/game/data/commanderies.json");
@@ -972,7 +973,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-officers.sort((a, b) => a.prominence - b.prominence || a.id.localeCompare(b.id));
+officers.sort((a, b) => a.prominence - b.prominence || cmp(a.id, b.id));
 
 const out = {
   meta: {

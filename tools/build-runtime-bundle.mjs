@@ -5,6 +5,7 @@
 // 一堆本局用不到的东西（生卒年考订、renown 依据、锚点对照表）。
 // 这里只留引擎真正读取的字段。
 import fs from "node:fs";
+import { cmp } from "../lib/game/engine/cmp.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 
@@ -24,7 +25,7 @@ const officers = read("officers.json")
     politics: o.politics, charisma: o.charisma,
     aptitudes: o.aptitudes ?? [],
   }))
-  .sort((a, b) => a.id.localeCompare(b.id));
+  .sort((a, b) => cmp(a.id, b.id));
 
 const bundle = {
   _note: "浏览器端引擎的最小数据包，由 tools/build-runtime-bundle.mjs 生成，勿手改。"

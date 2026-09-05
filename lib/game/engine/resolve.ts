@@ -23,6 +23,7 @@ import type {
   Army, GameState, Order, Grade, CommanderyId, FactionId, GameEvent, OfficerId,
   Posture, SiegeGear,
 } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
 
@@ -67,7 +68,7 @@ function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId
   if (home?.owner === army.faction) { home.garrison += troops; return; }
   const fallback = Object.values(s.commanderies)
     .filter((c) => c.owner === army.faction)
-    .sort((a, b) => a.id.localeCompare(b.id))[0];
+    .sort((a, b) => cmp(a.id, b.id))[0];
   if (fallback) fallback.garrison += troops;
 }
 
@@ -374,7 +375,7 @@ export function resolve(
   }
 
   // 三类回执各合并成一行。kind 分开，界面与观测都可按类挑
-  for (const [f, r] of [...receipts].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [f, r] of [...receipts].sort((a, b) => cmp(a[0], b[0]))) {
     if (r.scout.length) log(s, { kind: "scout", faction: f, text: `刺探回报：${r.scout.join("、")}` });
     if (r.govern.length) log(s, { kind: "govern", faction: f, text: `内政：${r.govern.join("、")}` });
     if (r.appoint.length) log(s, { kind: "appoint", faction: f, text: `任命：${r.appoint.join("、")}` });
@@ -505,7 +506,7 @@ export function resolve(
       // 合并之后同郡只剩一支，这一行是保险；候选侧 actions.ts 必须用同一条口径
       const ready = s.armies
         .filter((x) => x.faction === o.faction && x.at === a.from && !x.target)
-        .sort((x, y) => y.troops - x.troops || x.id.localeCompare(y.id))[0];
+        .sort((x, y) => y.troops - x.troops || cmp(x.id, y.id))[0];
       // 兵力上限在**结算里**也要卡。此前它只写在候选标签上，
       // 于是绕过候选表直接下令就能无视上限——那样的上限等于没有
       const terrain = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target)?.terrain ?? "plain";
@@ -518,8 +519,8 @@ export function resolve(
       const troops = Math.min(want, cap);
       return { o, a, troops, ready, corps, terrain, seq: i };
     })
-    .sort((x, y) => y.troops - x.troops || x.o.faction.localeCompare(y.o.faction)
-                 || x.a.target.localeCompare(y.a.target));
+    .sort((x, y) => y.troops - x.troops || cmp(x.o.faction, y.o.faction)
+                 || cmp(x.a.target, y.a.target));
 
   for (const [i, c] of campaigns.entries()) {
     const { o, a, troops, ready, corps, terrain } = c;
@@ -566,7 +567,7 @@ export function resolve(
     if (besiegers.length) {
       // 野战：先解决城下的敌军，城墙的事之后再说
       const foe = [...besiegers].sort((x, y) => y.troops - x.troops
-        || x.faction.localeCompare(y.faction))[0];
+        || cmp(x.faction, y.faction))[0];
       const won = fieldBattle(s, P, roster, {
         atkFaction: o.faction, atkTroops: troops, atkCorps: corps,
         foe, at: a.target, terrain, seq: i, from: a.from, atkUnit: src.unit,
@@ -610,7 +611,7 @@ export function resolve(
   // 每季一结。围而不下则双方耗兵，但缺口逐季累加——
   // 这才让「围点打援」「围魏救赵」成为真选项，而不是攻城一击定胜负。
   const sieges = s.armies.filter((x) => x.target)
-    .sort((x, y) => x.faction.localeCompare(y.faction) || x.target!.localeCompare(y.target!));
+    .sort((x, y) => cmp(x.faction, y.faction) || cmp(x.target!, y.target!));
   for (const [i, army] of sieges.entries()) {
     const tgt = s.commanderies[army.target!];
     if (!tgt || tgt.owner === army.faction) { lift(s, army); continue; }

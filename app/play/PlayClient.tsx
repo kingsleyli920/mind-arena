@@ -29,6 +29,7 @@ import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
   from "@/lib/game/engine/victory.ts";
 import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
+import { cmp } from "@/lib/game/engine/cmp";
 
 const BASE = "/game/map/play-base.webp";
 // 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
@@ -963,7 +964,7 @@ export function PlayClient() {
     .map((f) => ({ id: f.id,
       n: Object.values(game.commanderies).filter((c) => c.owner === f.id).length }))
     .filter((x) => x.n > 0)
-    .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
+    .sort((a, b) => b.n - a.n || cmp(a.id, b.id));
   const rank = { at: Math.max(1, byLand.findIndex((x) => x.id === seat) + 1),
                  of: byLand.length };
 
@@ -997,7 +998,7 @@ export function PlayClient() {
         : "";
       return { c, officers, note, warn: !!besieger || cut };
     })
-    .sort((a, b) => Number(b.warn) - Number(a.warn) || a.c.id.localeCompare(b.c.id));
+    .sort((a, b) => Number(b.warn) - Number(a.warn) || cmp(a.c.id, b.c.id));
   // 与选中的城相关的候选：起点、目标、施政地、集结地、刺探对象都算
   const touches = (c: Candidate, id: string) => {
     const a = c.action as Record<string, unknown>;
@@ -1028,7 +1029,7 @@ export function PlayClient() {
                        - (UPRANK[b.gain?.upgrade ?? ""] ?? 9)
                       || (b.forecast ? b.forecast.breachLo - b.forecast.holdHi : 0)
                        - (a.forecast ? a.forecast.breachLo - a.forecast.holdHi : 0)
-                      || a.key.localeCompare(b.key));
+                      || cmp(a.key, b.key));
   }
 
   return (

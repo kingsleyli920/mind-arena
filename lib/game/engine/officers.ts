@@ -24,6 +24,7 @@
 import { roll } from "./rng.ts";
 import type { EngineParams } from "./params.ts";
 import type { CommanderyId, FactionId, GameState, OfficerId } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 export interface OfficerRef {
   id: OfficerId;
@@ -67,7 +68,7 @@ export function buildRoster(
   const byFaction = new Map<FactionId, OfficerRef[]>();
   const byHome = new Map<CommanderyId, OfficerRef[]>();
 
-  for (const o of [...officers].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const o of [...officers].sort((a, b) => cmp(a.id, b.id))) {
     if (!ok.has(o.id)) continue;
     const five = [o.leadership, o.might, o.intellect, o.politics, o.charisma];
     if (five.some((v) => typeof v !== "number")) continue;
@@ -97,7 +98,7 @@ export function buildRoster(
  */
 export function rollRecruitPool(r: Roster, seed: string, ratio: number): OfficerId[] {
   const wild = [...r.byId.values()].filter((o) => !o.faction && o.home)
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => cmp(a.id, b.id));
   return wild
     .filter((o, i) => roll({ seed, year: 0, season: 0, faction: "-", event: "recruit", seq: i }) < ratio)
     .map((o) => o.id);
@@ -140,7 +141,7 @@ export function stationedAt(s: GameState, r: Roster, id: CommanderyId): OfficerR
     const o = r.byId.get(oid);
     if (o) out.push(o);
   }
-  return out.sort((a, b) => a.id.localeCompare(b.id));
+  return out.sort((a, b) => cmp(a.id, b.id));
 }
 
 /**
@@ -196,7 +197,7 @@ export function recruitable(s: GameState, r: Roster, f: FactionId): OfficerRef[]
       if (!busy.has(o.id) && !s.capturedOfficers.includes(o.id)) out.push(o);
     }
   }
-  return out.sort((a, b) => a.id.localeCompare(b.id));
+  return out.sort((a, b) => cmp(a.id, b.id));
 }
 
 // ── 五维折算成战斗与内政系数 ────────────────────────────────────────
@@ -269,7 +270,7 @@ export function attackRetinue(
   officers: readonly OfficerRef[], P: EngineParams, terrain: string,
 ): OfficerEffect & { lead: OfficerRef | null; members: OfficerRef[] } {
   const ranked = [...officers]
-    .sort((a, b) => attackScore(b, terrain) - attackScore(a, terrain) || a.id.localeCompare(b.id))
+    .sort((a, b) => attackScore(b, terrain) - attackScore(a, terrain) || cmp(a.id, b.id))
     .slice(0, P.retinueCap);
   if (!ranked.length) return { ...none("主将"), lead: null, members: [] };
   const head = attackEffect(ranked[0], P, terrain);
@@ -295,7 +296,7 @@ export function defendRetinue(
   officers: readonly OfficerRef[], P: EngineParams,
 ): OfficerEffect & { lead: OfficerRef | null; members: OfficerRef[] } {
   const ranked = [...officers]
-    .sort((a, b) => defendScore(b) - defendScore(a) || a.id.localeCompare(b.id))
+    .sort((a, b) => defendScore(b) - defendScore(a) || cmp(a.id, b.id))
     .slice(0, P.retinueCap);
   if (!ranked.length) return { ...none("守将"), lead: null, members: [] };
   const head = defendEffect(ranked[0], P);
@@ -336,5 +337,5 @@ export function governorOf(
   s: GameState, r: Roster, id: CommanderyId, P: EngineParams,
 ): OfficerRef | null {
   const list = retinueAt(s, r, id, P);
-  return list.slice().sort((a, b) => b.politics - a.politics || a.id.localeCompare(b.id))[0] ?? null;
+  return list.slice().sort((a, b) => b.politics - a.politics || cmp(a.id, b.id))[0] ?? null;
 }

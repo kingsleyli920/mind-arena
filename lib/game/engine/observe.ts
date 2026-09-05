@@ -19,6 +19,7 @@ import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
 import { briefFor, standingOf, epochLimitFor, GRADE_CN, type Geography } from "./victory.ts";
 import type { Candidate, FactionId, GameState } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 export const OBSERVATION_VERSION = "1.3.0";
 
@@ -170,7 +171,7 @@ export function observe(
 
   const mine = Object.values(s.commanderies)
     .filter((c) => c.owner === faction)
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => cmp(a.id, b.id))
     .map((c) => ({
       id: c.id,
       zhou: geo.zhouOf.get(c.id) ?? "",

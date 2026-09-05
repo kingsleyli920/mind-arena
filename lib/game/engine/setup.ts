@@ -5,6 +5,7 @@
 import type { EngineParams } from "./params.ts";
 import { rollRecruitPool, type Roster } from "./officers.ts";
 import { standingOf, zhouEquiv, type Geography } from "./victory.ts";
+import { cmp } from "./cmp.ts";
 import type { GameState, CommanderyState, FactionState, Formation, Grade }
   from "./types.ts";
 
@@ -149,7 +150,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       const lord = opts.roster.byId.get(f.id);
       if (lord && lord.faction === f.id && f.capital) state.stations[lord.id] = f.capital;
       for (const o of (opts.roster.byFaction.get(f.id) ?? [])
-        .slice().sort((a, b) => a.id.localeCompare(b.id))) {
+        .slice().sort((a, b) => cmp(a.id, b.id))) {
         if (state.stations[o.id]) continue;
         // **只按籍贯落位**：籍贯郡在己方治下才驻，否则转入待命，靠调任投放。
         //

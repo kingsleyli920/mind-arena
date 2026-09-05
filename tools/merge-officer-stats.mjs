@@ -6,6 +6,7 @@
 //   2. 分布形状：五维是否呈长尾，有无"全能超人"
 //   3. 跨批分布：描述性输出，构成会混淆均值，标尺以锚点断言为准
 import fs from "node:fs";
+import { cmp } from "../lib/game/engine/cmp.ts";
 
 const D = "lib/game/data";
 const read = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
@@ -156,6 +157,6 @@ console.log(`\n【常识校验】可疑 ${odd.length} 条${odd.length ? "：" : 
 odd.slice(0, 8).forEach((x) => console.log(`  ${x}`));
 
 // ── 落盘 ────────────────────────────────────────────────────────────
-all.sort((a, b) => (a.renown ?? 9) - (b.renown ?? 9) || a.id.localeCompare(b.id));
+all.sort((a, b) => (a.renown ?? 9) - (b.renown ?? 9) || cmp(a.id, b.id));
 fs.writeFileSync(`${D}/officers.json`, JSON.stringify(all, null, 1));
 console.log(`\n→ ${D}/officers.json  ${all.length} 人`);

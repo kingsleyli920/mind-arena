@@ -10,6 +10,7 @@
 //   4. 把关隘/渡口/港口挂到它所扼守的边上
 //   5. 剪除穿海、穿高原、过长的伪邻接
 import fs from "node:fs";
+import { cmp } from "../lib/game/engine/cmp.ts";
 
 const D = "lib/game/data";
 const read = (f) => JSON.parse(fs.readFileSync(`${D}/${f}`, "utf8"));
@@ -586,7 +587,7 @@ const out = {
     costUnit: "1 = 100km 平原",
     terrainCost: { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 },
   },
-  edges: edges.sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to)),
+  edges: edges.sort((a, b) => cmp(a.from, b.from) || cmp(a.to, b.to)),
 };
 if (broken) {
   console.error(`\n必需走廊缺失 ${broken} 条 —— 不落盘。修生成器或补进史实修正表。`);

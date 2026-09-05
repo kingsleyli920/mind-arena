@@ -10,6 +10,7 @@ import type { EngineParams } from "./params.ts";
 import type { Roster } from "./officers.ts";
 import type { Geography } from "./victory.ts";
 import type { FactionId, GameState, Order } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist" | "purpose";
 
@@ -266,7 +267,7 @@ function decideInner(
   })
     .filter((x) => x.score > -1e8)
     // 同分时按 key 排序，保证确定性
-    .sort((a, b) => b.score - a.score || a.c.key.localeCompare(b.c.key));
+    .sort((a, b) => b.score - a.score || cmp(a.c.key, b.c.key));
 
   // 按令数预算贪心取，免费动作不占预算但受 freeUses 限制
   const orders: Order[] = [];

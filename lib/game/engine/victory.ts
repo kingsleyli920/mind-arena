@@ -9,6 +9,7 @@
 //
 // 此处按内容包重新实现。全部阈值来自包，判定所需的州与州治来自数据层。
 import type { CommanderyId, FactionId, GameState, Grade } from "./types.ts";
+import { cmp } from "./cmp.ts";
 
 export interface Geography {
   /** 郡 → 州 */
@@ -25,7 +26,7 @@ export function buildGeography(
 ): Geography {
   const zhouOf = new Map<CommanderyId, string>();
   const zhouMembers = new Map<string, CommanderyId[]>();
-  for (const c of [...commanderies].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const c of [...commanderies].sort((a, b) => cmp(a.id, b.id))) {
     zhouOf.set(c.id, c.zhou);
     if (!zhouMembers.has(c.zhou)) zhouMembers.set(c.zhou, []);
     zhouMembers.get(c.zhou)!.push(c.id);
@@ -57,12 +58,12 @@ export function standingOf(s: GameState, geo: Geography, f: FactionId): Standing
     if (z) ownedInZhou.set(z, (ownedInZhou.get(z) ?? 0) + 1);
   }
   const zhouNames: string[] = [];
-  for (const [z, n] of [...ownedInZhou].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [z, n] of [...ownedInZhou].sort((a, b) => cmp(a[0], b[0]))) {
     const total = geo.zhouMembers.get(z)?.length ?? 0;
     if (total > 0 && n * 2 > total) zhouNames.push(z);
   }
   let zhouSeats = 0;
-  for (const [, seat] of [...geo.zhouSeat].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [, seat] of [...geo.zhouSeat].sort((a, b) => cmp(a[0], b[0]))) {
     if (s.commanderies[seat]?.owner === f) zhouSeats += 1;
   }
   return {
@@ -245,7 +246,7 @@ export function briefFor(
     }
   }
   const rows: string[] = [];
-  for (const [z, members] of [...geo.zhouMembers].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [z, members] of [...geo.zhouMembers].sort((a, b) => cmp(a[0], b[0]))) {
     let mine = 0, vacant = 0;
     const others = new Map<FactionId, number>();
     for (const id of members) {

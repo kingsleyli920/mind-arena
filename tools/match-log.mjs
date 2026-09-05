@@ -33,6 +33,7 @@ import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
 import { roll } from "../lib/game/engine/rng.ts";
+import { cmp } from "../lib/game/engine/cmp.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
@@ -135,7 +136,7 @@ function world(s) {
   for (const c of Object.values(s.commanderies)) {
     if (c.owner) cnt.set(c.owner, (cnt.get(c.owner) ?? 0) + 1);
   }
-  const rank = [...cnt].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const rank = [...cnt].sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]));
   const live = Object.values(s.factions).filter((f) => !f.eliminated && !f.retired).length;
   const neutral = Object.values(s.commanderies).filter((c) => !c.owner).length;
   return { rank, live, neutral, cnt };
