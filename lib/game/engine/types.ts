@@ -135,6 +135,12 @@ export interface Army {
   unit: string;
   /** 已围季数，满上限自动撤围 */
   siegeSeasons: number;
+  /**
+   * 待命（无目标）已满几季。集结出来的军团此前永远不会自己解散，
+   * 而军费不继每季削掉它一部分兵——一支千人军团被削成四个人还挂在图上、
+   * 还继续吃军费。实测一局 104 季军团数 0 → 266 只增不减。见包里「为何要归队」
+   */
+  idleSeasons: number;
   /** 撤围或溃退时退回的郡 */
   home: CommanderyId;
 }

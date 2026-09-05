@@ -83,6 +83,8 @@ export interface EngineParams {
   goldDecay: number;
   /** 逐郡递减的地板：第 n 个郡至少按原值的这个比例计。见包里「为何要地板」 */
   goldDecayFloor: number;
+  /** 待命军团归队：满几季 / 兵力跌破多少 */
+  armyIdleLimit: number; armyMinTroops: number;
   goldBase: number;
   goldUpkeepPerTroop: number;
   goldPerLevyTroop: number;
@@ -259,6 +261,8 @@ export function loadParams(pack: RawPack): EngineParams {
     goldPerTier: g("产出", "金_每产出档"),
     goldDecay: g("金", "收入_逐郡递减"),
     goldDecayFloor: g("金", "收入_递减地板"),
+    armyIdleLimit: g("军团", "待命归队_季数"),
+    armyMinTroops: g("军团", "待命归队_兵力下限"),
     goldBase: g("金", "基础收入"),
     goldUpkeepPerTroop: g("金", "军费_每兵每季"),
     goldPerLevyTroop: g("金", "募兵_每兵"),

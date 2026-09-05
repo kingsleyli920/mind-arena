@@ -107,7 +107,7 @@ function beginSiege(
     id: `${faction}:${s.turn}:${from}>${target}`,
     faction, commander: a.commander ?? ids[0] ?? null, retinue: ids, troops,
     at: target, target, posture: a.strength, gear, unit,
-    siegeSeasons: 0, home: from,
+    siegeSeasons: 0, idleSeasons: 0, home: from,
   });
 }
 
@@ -447,7 +447,7 @@ export function resolve(
       troops,
       at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
       unit: s.commanderies[a.at].unit,
-      siegeSeasons: 0, home: a.at,
+      siegeSeasons: 0, idleSeasons: 0, home: a.at,
     });
     s.commanderies[a.at].gear = "none";
     log(s, { kind: "muster", faction: o.faction, text: `于 ${a.at} 集结 ${troops} 人待命` });
@@ -853,6 +853,29 @@ export function resolve(
           text: `治所已失，${who}无所归，粮尽溃散` }
       : { kind: "supply-cut-scatter", faction: army.faction,
           text: `${who}后路断绝，粮尽溃散` });
+  }
+
+  // ── 待命军团归队 ───────────────────────────────────────────────
+  //
+  // 集结出来的军团（无进攻目标）此前永远不会自己解散：只有从该郡出兵时
+  // 才会把它带走。而军费不继每季按缺口削掉它一部分兵，于是一支千人军团
+  // 被削成四个人还挂在图上、**还继续吃军费**。实测一局 104 季军团总数
+  // 0 → 55 → 105 → 207 → 266 只增不减，末季 265 支待命、合计 16.3 万兵、
+  // 每季军费 1954 金，而一个大势力的全部收入才 2117 金。这是泄漏不是打法。
+  //
+  // 两条判据：站满 armyIdleLimit 季没动，或兵力跌破 armyMinTroops
+  //（低于这个数它什么也打不动）。归队走与撤围同一条 returnHome
+  for (const army of [...s.armies]) {
+    if (army.target) { army.idleSeasons = 0; continue; }
+    army.idleSeasons = (army.idleSeasons ?? 0) + 1;
+    const stale = army.idleSeasons >= P.armyIdleLimit;
+    const thin = army.troops < P.armyMinTroops;
+    if (!stale && !thin) continue;
+    s.armies = s.armies.filter((x) => x.id !== army.id);
+    returnHome(s, army, army.troops);
+    log(s, { kind: "muster-return", faction: army.faction,
+             text: `${army.at} 待命之师${thin ? "兵微" : `逾 ${army.idleSeasons} 季未动`}`
+                 + `，${army.troops} 人归 ${army.home} 戍` });
   }
 
   // 出窗的俘虏出列。剔除的判据写在这一处，别处只问「在不在册」——

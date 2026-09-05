@@ -1708,3 +1708,49 @@ test("录像：日志折掉流水账，但不许折掉破城", () => {
   attachOutcome(f3, [{ kind: "siege-win", faction: "caocao", text: "破城" }], REPLAY_IDX.fi);
   assert.equal(f3.ev.length, 1, "没有外交却发了计数行");
 });
+
+test("待命军团会归队 —— 否则它是状态里的一处泄漏", () => {
+  let s = fresh();
+  const home = Object.values(s.commanderies).find((c) => c.owner === "yuanshao" && c.garrison > 2000);
+  assert.ok(home, "找不到袁绍的驻兵郡");
+  const before = home.garrison;
+
+  // 手造一支待命军团（无进攻目标），兵力足、刚集结
+  s.armies.push({ id: "t:idle", faction: "yuanshao", commander: null, retinue: [],
+    troops: 3000, at: home.id, target: null, posture: "main", gear: "none",
+    unit: home.unit, siegeSeasons: 0, idleSeasons: 0, home: home.id });
+  s.commanderies[home.id].garrison -= 3000;
+
+  // 站满 armyIdleLimit 季就归队。之前每一季都不该动它
+  for (let i = 0; i < P.armyIdleLimit - 1; i += 1) {
+    s = refreshAp(resolve(s, [], G, P, ROSTER, GEO).state, P);
+    assert.ok(s.armies.some((a) => a.id === "t:idle"),
+      `第 ${i + 1} 季就把待命军团收了 —— 门槛是 ${P.armyIdleLimit} 季`);
+  }
+  s = refreshAp(resolve(s, [], G, P, ROSTER, GEO).state, P);
+  assert.ok(!s.armies.some((a) => a.id === "t:idle"), "站满季数仍没归队");
+  assert.ok(s.log.some((e) => e.kind === "muster-return"), "归队没有记进战报——那就是静默扣兵");
+  // 兵要退回去，不是蒸发
+  assert.ok(s.commanderies[home.id].garrison >= before - 200,
+    `兵没退回去：${before} → ${s.commanderies[home.id].garrison}`);
+
+  // 兵力跌破下限的当季就该收——它什么也打不动了
+  let t = fresh();
+  const h2 = Object.values(t.commanderies).find((c) => c.owner === "liubiao");
+  t.armies.push({ id: "t:thin", faction: "liubiao", commander: null, retinue: [],
+    troops: P.armyMinTroops - 1, at: h2.id, target: null, posture: "main", gear: "none",
+    unit: h2.unit, siegeSeasons: 0, idleSeasons: 0, home: h2.id });
+  t = resolve(t, [], G, P, ROSTER, GEO).state;
+  assert.ok(!t.armies.some((a) => a.id === "t:thin"),
+    `兵力 ${P.armyMinTroops - 1} < 下限 ${P.armyMinTroops}，本季就该归队`);
+
+  // **围城军不算待命**：它在敌境，归队会把围城凭空解掉
+  let u = fresh();
+  const foe = Object.values(u.commanderies).find((c) => c.owner && c.owner !== "yuanshao");
+  u.armies.push({ id: "t:siege", faction: "yuanshao", commander: null, retinue: [],
+    troops: 100, at: foe.id, target: foe.id, posture: "main", gear: "none",
+    unit: "infantry", siegeSeasons: 0, idleSeasons: 0, home: home.id });
+  u = resolve(u, [], G, P, ROSTER, GEO).state;
+  const still = u.armies.find((a) => a.id === "t:siege");
+  assert.ok(!still || still.target, "围城军被当成待命军团收走了");
+});
