@@ -1669,4 +1669,25 @@ test("录像：日志折掉流水账，但不许折掉破城", () => {
     "把破城或治所失守折掉了 —— 那是这局唯一要看的东西");
   assert.ok(kinds.includes("supply-cut"), "断供是决定性的，不能折");
   assert.equal(frame.ev[0][1], REPLAY_IDX.fi.get("caocao"), "势力下标不对");
+
+  // 外交与集结折成一行计数：三十家每季互相缔盟绝盟，逐条铺会把破城埋掉
+  const f2 = { ev: [] };
+  attachOutcome(f2, [
+    { kind: "ally", faction: "caocao", text: "缔盟" },
+    { kind: "ally", faction: "lubu", text: "缔盟" },
+    { kind: "ally-break", faction: "lubu", text: "绝盟" },
+    { kind: "muster", faction: "caocao", text: "集结" },
+    { kind: "siege-win", faction: "caocao", text: "破城" },
+  ], REPLAY_IDX.fi);
+  assert.equal(f2.ev.length, 2, `外交没折成一行：${JSON.stringify(f2.ev)}`);
+  assert.equal(f2.ev[0][0], "siege-win", "破城应当留在最前，不被折进计数");
+  assert.equal(f2.ev[1][0], "fold");
+  assert.match(f2.ev[1][2], /2 起结盟/);
+  assert.match(f2.ev[1][2], /1 起绝盟/);
+  assert.match(f2.ev[1][2], /1 处集结/);
+
+  // 一条都没有时不发那一行
+  const f3 = { ev: [] };
+  attachOutcome(f3, [{ kind: "siege-win", faction: "caocao", text: "破城" }], REPLAY_IDX.fi);
+  assert.equal(f3.ev.length, 1, "没有外交却发了计数行");
 });

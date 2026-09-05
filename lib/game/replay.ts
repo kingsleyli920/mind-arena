@@ -244,10 +244,35 @@ export function captureFrame(
  */
 const NOISE = new Set(["treasury", "govern", "scout", "appoint", "array"]);
 
+/**
+ * 外交与集结**折成一行计数**，不逐条铺。
+ *
+ * 实测 48 季一局留下 2444 条事件，其中 ally 623 + ally-break 492 + muster 314
+ * 占了 58%——三十家机器人每季互相缔盟绝盟，而这份录像是用来看
+ * 「这一局发生了什么」的。逐条铺出来每季 51 行，真正的破城（全局 84 条）
+ * 会被埋在里面，正好打掉「录像要比表格好读」这件事的目标。
+ * 界面那边（app/play/PlayClient.tsx）早就在这么折了。
+ */
+const FOLD: Array<[string, string]> = [
+  ["ally", "起结盟"], ["ally-break", "起绝盟"], ["muster", "处集结"],
+];
+
 export function attachOutcome(frame: Frame, fresh: readonly {
   kind: string; faction?: string; text: string;
 }[], fi: Map<string, number>): void {
-  frame.ev = fresh
-    .filter((e) => !NOISE.has(e.kind))
-    .map((e) => [e.kind, e.faction ? (fi.get(e.faction) ?? -1) : -1, e.text]);
+  const folded = new Map<string, number>();
+  const kept: Frame["ev"] = [];
+  for (const e of fresh) {
+    if (NOISE.has(e.kind)) continue;
+    if (FOLD.some(([k]) => k === e.kind)) {
+      folded.set(e.kind, (folded.get(e.kind) ?? 0) + 1);
+      continue;
+    }
+    kept.push([e.kind, e.faction ? (fi.get(e.faction) ?? -1) : -1, e.text]);
+  }
+  const parts = FOLD
+    .filter(([k]) => folded.get(k))
+    .map(([k, cn]) => `${folded.get(k)} ${cn}`);
+  if (parts.length) kept.push(["fold", -1, `本季天下另有 ${parts.join("、")}`]);
+  frame.ev = kept;
 }

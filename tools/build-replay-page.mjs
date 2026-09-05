@@ -104,6 +104,17 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 .side h2{margin:26px 0 8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;
   text-transform:uppercase;color:var(--faint);font-weight:500}
 .side h2:first-child{margin-top:0}
+.vs{margin-bottom:6px}
+.vs .row{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px solid var(--soft)}
+.vs .row:last-child{border-bottom:none}
+.vs .sw{width:9px;height:9px;flex:none;border-radius:1px;transform:translateY(-1px)}
+.vs .who{flex:1;min-width:0}
+.vs .who b{display:block;font-size:13px;font-weight:600}
+.vs .who span{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs .stat{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.vs .stat em{font-style:normal;color:var(--muted);font-size:11px}
+.vs .dead{opacity:.45}
 .mine{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:12.5px;margin-bottom:4px}
 .mine dt{color:var(--muted)}
 .mine dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
@@ -156,6 +167,8 @@ ul.ev li.me{border-left-color:var(--indigo)}
   </div>
 
   <aside class="side">
+    <h2 id="vsTitle" hidden>对阵</h2>
+    <div class="vs" id="vs" hidden></div>
     <h2 id="mineTitle"></h2>
     <dl class="mine" id="mine"></dl>
     <h2>天下</h2>
@@ -179,6 +192,12 @@ const D = R.dict, F = R.frames, N = F.length;
 const SEASON = ${JSON.stringify(seasonCn)};
 const GRADE = ${JSON.stringify(gradeCn)};
 const ME = D.fac.indexOf(R.meta.seat);
+// 混战有多个模型席位。只高亮一席就看不出对抗——地图上每一家都要描粗，
+// 侧栏顶上直接摆一张对阵表：谁执哪一家、现在几郡几州、什么档
+const SEATS = R.meta.seats || {};
+const PLAYERS = Object.entries(SEATS).map(([f, m]) => ({ i: D.fac.indexOf(f), model: m }))
+  .filter((p) => p.i >= 0);
+const HILITE = new Set(PLAYERS.length ? PLAYERS.map((p) => p.i) : [ME]);
 const COLS = GRID.meta.cols, ROWS = GRID.meta.rows, NONE = GRID.meta.none;
 const S = 1815 / COLS;
 
@@ -237,7 +256,7 @@ function drawMap(fi){
     const c=RGB[f]||[122,114,102];
     d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2];
     // 疆域是注记不是主角，地形墨色要透得出来
-    d[o+3] = f===ME ? 108 : 56;
+    d[o+3] = HILITE.has(f) ? 108 : 52;
   }
   blur(d,COLS,ROWS,1); blur(d,COLS,ROWS,1);
   pctx.putImageData(img,0,0);
@@ -254,8 +273,8 @@ function drawMap(fi){
     if(f<0) continue;
     const right = c+1<COLS ? own[i+1] : -1;
     const down  = r+1<ROWS ? own[i+COLS] : -1;
-    const mine = f===ME;
-    ctx.strokeStyle = mine ? "rgba(118,44,34,.82)" : "rgba(52,45,37,.36)";
+    const mine = HILITE.has(f);
+    ctx.strokeStyle = mine ? "rgba(118,44,34,.82)" : "rgba(52,45,37,.34)";
     ctx.lineWidth = mine ? 2.4 : 1.2;
     if(right!==f) segline((c+1)*S, r*S, (c+1)*S, (r+1)*S, i, wob);
     if(down!==f)  segline(c*S, (r+1)*S, (c+1)*S, (r+1)*S, i+0.5, wob);
@@ -278,7 +297,7 @@ function drawOverlay(fi){
   }
   for(let i=0;i<f.own.length;i++){
     const [x,y]=D.xy[i];
-    const mine=f.own[i]===ME;
+    const mine=HILITE.has(f.own[i]);
     parts.push('<circle class="dot'+(mine?" mine":"")+'" cx="'+x+'" cy="'+y+'" r="'+(mine?7:5)+'"/>');
   }
   // 军团：同一郡上叠多支时按序号做确定性角度偏移，否则互相盖住
@@ -295,7 +314,7 @@ function drawOverlay(fi){
   // 地名只标本方的与本季易主的——105 个全标会糊成一片
   for(let i=0;i<f.own.length;i++){
     const flipped = prev && f.own[i]!==prev.own[i];
-    if(f.own[i]!==ME && !flipped) continue;
+    if(!HILITE.has(f.own[i]) && !flipped) continue;
     const [x,y]=D.xy[i];
     parts.push('<text class="lab" x="'+x+'" y="'+(y+30)+'" text-anchor="middle">'+D.name[i]+'</text>');
   }
@@ -314,6 +333,25 @@ function paint(fi){
   $("scrub").value=fi;
   $("fill").style.width = (fi/(N-1)*100)+"%";
   $("knob").style.left = (fi/(N-1)*100)+"%";
+
+  // 对阵：混战才显示。按郡数排，死掉的压暗
+  if(PLAYERS.length>1){
+    $("vsTitle").hidden=false; $("vs").hidden=false;
+    const cnt0=new Map();
+    for(const o of f.own) if(o>=0) cnt0.set(o,(cnt0.get(o)||0)+1);
+    const pc0=new Map();
+    if(prev) for(const o of prev.own) if(o>=0) pc0.set(o,(pc0.get(o)||0)+1);
+    $("vs").innerHTML=PLAYERS.slice().sort((a,b)=>(cnt0.get(b.i)||0)-(cnt0.get(a.i)||0))
+      .map(p=>{
+        const st=f.fac[p.i], n=cnt0.get(p.i)||0, d=n-(pc0.get(p.i)||0);
+        const dead=st&&st[8];
+        return '<div class="row'+(dead?" dead":"")+'">'
+          +'<span class="sw" style="background:'+D.facColor[p.i]+'"></span>'
+          +'<span class="who"><b>'+esc(D.facName[p.i])+'</b><span>'+esc(p.model.split("/").pop())+'</span></span>'
+          +'<span class="stat">'+n+' <em>郡</em>'+(d?' '+(d>0?"+":"")+d:"")
+          +'<br>'+(st?st[6]+' <em>州</em>\u3000'+GRADE[st[4]]+' <em>档</em>':'—')+'</span></div>';
+      }).join("");
+  }
 
   // 我方
   const me=f.fac[ME];
