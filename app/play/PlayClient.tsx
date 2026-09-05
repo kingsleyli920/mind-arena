@@ -35,6 +35,28 @@ const BASE = "/game/map/play-base.webp";
 // 越拉越糊——而底图本来就有 7260 的细节可用
 const BASE_2X = "/game/map/play-base@2x.webp";
 const HD_AT = 1.8;
+/**
+ * 汉字纪年。图题是竖排，阿拉伯数字在里面会一位一行地摞下来。
+ *
+ * 194 是兴平元年；195 兴平二年；196 起改元建安，建安元年至二十五年（220）。
+ * 再往后本剧本够不着，兜底写成汉字数字
+ */
+const HAN_NUM = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+function hanNum(n: number): string {
+  if (n <= 10) return n === 10 ? "十" : HAN_NUM[n];
+  if (n < 20) return `十${HAN_NUM[n - 10]}`;
+  const t = Math.floor(n / 10), o = n % 10;
+  return `${HAN_NUM[t]}十${o ? HAN_NUM[o] : ""}`;
+}
+function eraName(year: number): string {
+  if (year <= 193) return "初平四年";
+  if (year <= 195) return year === 194 ? "興平元年" : "興平二年";
+  const n = year - 195;                      // 196 = 建安元年
+  // 建安止于二十五年（220）。再往后本剧本够不着，退回数字——
+  // 竖排里靠 text-combine-upright 把三位数合成一格，不会一位一行地摞下来
+  return n <= 25 ? `建安${n === 1 ? "元" : hanNum(n)}年` : `${year} 年`;
+}
+
 const SEASON_CN = ["", "春", "夏", "秋", "冬"];
 /**
  * 面板顺序按「有多急」写死，不按 key 的字母序。
@@ -1032,7 +1054,10 @@ export function PlayClient() {
   return (
     <main className="play">
       <header className="play-head play-bar">
-        <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}第 {game.turn + 1}/{game.seasonsPerGame} 季{"\u3000"}
+        {/* 局终之后 turn 已经推到 seasonsPerGame，再加一就成了「第 17/16 季」——
+            而同一屏的终局块自己写着「16 季年表」，两个数字互相打架。夹住上限 */}
+        <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}
+          第 {Math.min(game.turn + 1, game.seasonsPerGame)}/{game.seasonsPerGame} 季{"\u3000"}
           纪元 {game.epoch}</span>
         <span className="who" style={{ "--c": engine.colorOf.get(seat) } as React.CSSProperties}>
           {engine.nameOf.get(seat)}
@@ -1232,7 +1257,10 @@ export function PlayClient() {
             <b>大漢輿地圖</b>
             <span>每方折地百里</span>
             <span>郡國山川縣邑名</span>
-            <span>{game.year === 194 ? "興平元年" : `${game.year} 年`}</span>
+            {/* 竖排图题里三位阿拉伯数字会被拆成一列四行的「1 9 5 年」，
+                把「大漢輿地圖／每方折地百里」那套古图调子直接打断。
+                改用汉字纪年，与旁边三行同一种字 */}
+            <span>{eraName(game.year)}</span>
           </div>
 
           {/* 压角章。考据上压角章在左下与引首章成对角，但左下已被郡国详情占用，

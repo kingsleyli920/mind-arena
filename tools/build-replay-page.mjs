@@ -37,7 +37,8 @@ const gradeCn = ["丁", "丙", "乙", "甲", "超", "霸", "王"];
 const m = replay.meta;
 const name = TITLE || `${m.seatName ?? m.seat} · ${m.seed}`;
 
-const page = `<title>${esc(name)}\u3000战局回放</title>
+const page = `<meta charset="utf-8">
+<title>${esc(name)}\u3000战局回放</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -67,12 +68,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 /* 地图 */
 .stage{position:relative;padding:20px 0 0 24px;min-width:0}
 .mapbox{position:relative;width:100%;aspect-ratio:1815/1485;background:var(--sunk);
-  border:1px solid var(--rule);overflow:hidden}
+  border:1px solid var(--rule);overflow:hidden;
+  /* 进度条是主控件，不能被地图挤出首屏——留出页首、图例、时间轴的高度 */
+  max-height:calc(100vh - 216px);margin-inline:auto}
 .mapbox img,.mapbox canvas,.mapbox svg{position:absolute;inset:0;width:100%;height:100%}
 .mapbox img{object-fit:cover}
 .mapbox svg{overflow:visible}
 .hit{fill:transparent;cursor:pointer}
-.hit:hover ~ .dot{opacity:1}
+.hit:focus-visible{outline:2px solid var(--indigo);outline-offset:0}
 .dot{fill:none;stroke:#2B2622;stroke-width:3;opacity:.5;pointer-events:none}
 .sel{fill:none;stroke:var(--indigo);stroke-width:7;opacity:.95;pointer-events:none}
 .dot.mine{stroke:var(--seal);stroke-width:5;opacity:.95}
@@ -345,9 +348,6 @@ function drawOverlay(fi){
     const mine=HILITE.has(f.own[i]);
     if(i===SEL) parts.push('<circle class="sel" cx="'+x+'" cy="'+y+'" r="20"/>');
     parts.push('<circle class="dot'+(mine?" mine":"")+'" cx="'+x+'" cy="'+y+'" r="'+(mine?7:5)+'"/>');
-    // 热区比可见的点大得多——105 个郡挤在一张图上，5px 的点点不中
-    parts.push('<circle class="hit" data-i="'+i+'" cx="'+x+'" cy="'+y+'" r="17"><title>'
-      +D.name[i]+'</title></circle>');
   }
 
   // ── 军团：**按郡聚合成一个徽标**，不逐支画 ──────────────────
@@ -401,9 +401,16 @@ function drawOverlay(fi){
     // 按 length×0.62 估会把「吕布（张邈、陈宫）」算窄一半，去重叠就形同虚设
     const nm=D.facName[fi2];
     let w=0; for(const ch of nm) w += /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/.test(ch) ? 26 : 13;
+    // 记下自家郡的纵向跨度：去重叠时不许把名字推出这个范围，
+    // 否则小势力的名字会飘到别人地盘上（实测 298 个样本里 4 个飘出去了）
+    let lo=1e9, hi=-1e9;
+    for(let i=0;i<f.own.length;i++) if(f.own[i]===fi2){
+      lo=Math.min(lo,D.xy[i][1]); hi=Math.max(hi,D.xy[i][1]);
+    }
     labels.push({ kind:"fac", fill:D.facColor[fi2],
                  x:Math.min(1815-w/2-14, Math.max(w/2+14, sx/n)),
-                 y:Math.min(1455, Math.max(34, sy/n)), y0:sy/n, w, txt:esc(D.facName[fi2]) });
+                 y:Math.min(1455, Math.max(34, sy/n)), y0:sy/n, w, txt:esc(D.facName[fi2]),
+                 lo:lo-52, hi:hi+52 });
   }
   // 先按锚点画出去，**画完再量**——见下面的 deoverlap()。
   // 估字宽这条路走不通：试过 length×0.62、按中日韩字符实算，
@@ -416,8 +423,16 @@ function drawOverlay(fi){
       parts.push('<text class="army armybg" data-y0="'+m.y0.toFixed(1)+'" x="'+x+'" y="'+y+'" text-anchor="middle">'+m.txt+'</text>');
       parts.push('<text class="army" data-y0="'+m.y0.toFixed(1)+'" x="'+x+'" y="'+y+'" text-anchor="middle" fill="'+m.fill+'">'+m.txt+'</text>');
     } else {
-      parts.push('<text class="facname" x="'+x+'" y="'+y+'" text-anchor="middle" fill="'+m.fill+'">'+m.txt+'</text>');
+      parts.push('<text class="facname" data-lo="'+(m.lo??-1e9).toFixed(0)+'" data-hi="'
+        +(m.hi??1e9).toFixed(0)+'" x="'+x+'" y="'+y+'" text-anchor="middle" fill="'+m.fill+'">'+m.txt+'</text>');
     }
+  }
+  // 热区**最后画**，否则被后画的地名、徽标、势力名盖住——SVG 没有 z-index，
+  // 谁后画谁在上。实测每帧有 12~19 个郡点不开或点开的是隔壁郡
+  for(let i=0;i<f.own.length;i++){
+    const [x,y]=D.xy[i];
+    parts.push('<circle class="hit" data-i="'+i+'" cx="'+x+'" cy="'+y+'" r="17"'
+      +' tabindex="0" role="button" aria-label="'+D.name[i]+'"><title>'+D.name[i]+'</title></circle>');
   }
   ov.innerHTML=parts.join("");
   deoverlap();
@@ -449,6 +464,7 @@ function deoverlap(){
     // 而基线在盒子里的位置随字号变：势力名实测盒高 54、徽标只有 15，
     // 拿基线当中心去比，两者的误差差出二十多个单位——各帧稳定漏判两三处
     items.push({ el, bg: army ? el.previousElementSibling : null, army,
+                 lo:+(el.dataset.lo ?? -1e9), hi:+(el.dataset.hi ?? 1e9),
                  y:+el.getAttribute("y"), dy:0,
                  l:bb.x, r:bb.x+bb.width, t:bb.y, b:bb.y+bb.height,
                  y0: army ? +el.dataset.y0 : null });
@@ -476,13 +492,22 @@ function deoverlap(){
   const placed=[...army];
   for(const f of fac){
     let best=0;
-    for(let d=0;d<=260;d+=6){
-      const cand = d===0 ? [0] : [-d, d];
-      let ok=false;
-      for(const dy of cand){
-        if(f.y+dy<34||f.y+dy>1455) continue;
-        f.dy=dy;
-        if(!placed.some((o)=>hits(f,o))){ best=dy; ok=true; break; }
+    // 分三档放宽：先只在自家郡的纵向跨度内找（各留 52 的余量），
+    // 找不到再放到 ±110，还找不到才不限。
+    //
+    // 两头都要顾：给到 ±260 且不限范围时，小势力的名字会被推出自己的地盘
+    // 标到别人头上（实测 298 个样本里 4 个）；而只许在 ±52 内找，
+    // 挤的时候又解不开（32 帧剩 3 处碰撞）。分档之后两个都归零
+    let ok=false;
+    for(const slack of [52, 110, 1e9]){
+      for(let d=0;d<=160 && !ok;d+=6){
+        const cand = d===0 ? [0] : [-d, d];
+        for(const dy of cand){
+          const y=f.y+dy;
+          if(y<34||y>1455||y<f.lo-(slack-52)||y>f.hi+(slack-52)) continue;
+          f.dy=dy;
+          if(!placed.some((o)=>hits(f,o))){ best=dy; ok=true; break; }
+        }
       }
       if(ok) break;
     }
@@ -569,11 +594,17 @@ function paint(fi){
   for(const e of f.ev){
     if(BG.has(e[0]) && !HILITE.has(e[1])) bg.push(e); else shown.push(e);
   }
-  if(bg.length) shown.push(["fold",-1,"本季他方另有 "+bg.length+" 处断供 / 治所失守 / 军费不继"]);
-  $("ev").innerHTML = shown.length
-    ? shown.slice(0,30).map(e=>'<li class="'+(HOT.has(e[0])?"hot":"")+(HILITE.has(e[1])?" me":"")+'">'
-        +esc(cn(e[2]))+'</li>').join("") + (shown.length>30?'<li class="empty">…另有 '+(shown.length-30)+' 条</li>':"")
-    : '<li class="empty">本季无事</li>';
+  // **先按要紧程度排，再截。** 此前是原序硬截 30 行，而破城、被俘这些
+  // 排在日志后半段——实测前十六季一条战况都看不到，「这一季谁打了谁」答不上来。
+  // 折叠那一行也曾被一起截掉，现在单独留在最后
+  const rank=(e)=>HOT.has(e[0])?0:HILITE.has(e[1])?1:2;
+  shown.sort((a,b)=>rank(a)-rank(b));
+  const CAP=26, head=shown.slice(0,CAP), rest=shown.length-head.length;
+  $("ev").innerHTML = (shown.length
+    ? head.map(e=>'<li class="'+(HOT.has(e[0])?"hot":"")+(HILITE.has(e[1])?" me":"")+'">'
+        +esc(cn(e[2]))+'</li>').join("") + (rest>0?'<li class="empty">…另有 '+rest+' 条</li>':"")
+    : '<li class="empty">本季无事</li>')
+    + (bg.length?'<li class="empty">本季他方另有 '+bg.length+' 处断供 / 治所失守 / 军费不继</li>':"");
 
   // 命令与想法：**每个模型席位各一段**。混战两家对打，只显示一边读不出对抗
   // f.seat 是旧格式（只录一席）。已经录好的那些不必重跑，兼容一下
@@ -592,8 +623,14 @@ function paint(fi){
     if(st.dropped && st.dropped.length)
       h += '<div class="ordlist">'+st.dropped.map(d=>'<span class="x">✗ '+esc(d[0])+'</span>\u3000'
         +esc(WHY[d[1]]||d[1])).join("<br>")+'</div>';
-    if(st.reason) h+='<div class="say"><b>本季意图</b>'+esc(cn(st.reason))+'</div>';
-    if(st.plan) h+='<div class="say"><b>跨季方略</b>'+esc(cn(st.plan))+'</div>';
+    // 覆亡之后不再显示意图与方略。此前曹操第 15 季就没了，
+    // 命令栏还在逐字重复它第 14 季写的方略，一直重复到第 32 季
+    const dead = f.fac[st.faction] && f.fac[st.faction][8];
+    if(dead) h+='<div class="say"><b>已覆亡</b>本季无决策</div>';
+    else {
+      if(st.reason) h+='<div class="say"><b>本季意图</b>'+esc(cn(st.reason))+'</div>';
+      if(st.plan) h+='<div class="say"><b>跨季方略</b>'+esc(cn(st.plan))+'</div>';
+    }
     return h+'</div>';
   }).join("");
   $("detail").innerHTML="";
@@ -659,6 +696,8 @@ scrub.addEventListener("input",()=>paint(+scrub.value));
 let timer=null;
 $("play").addEventListener("click",()=>{
   if(timer){ clearInterval(timer); timer=null; $("play").textContent="▶ 播放"; return; }
+  // 停在末季再按播放：从头放，而不是闪一下就弹回来
+  if(+scrub.value>=N-1) paint(0);
   $("play").textContent="❚❚ 暂停";
   timer=setInterval(()=>{
     const v=+scrub.value;
