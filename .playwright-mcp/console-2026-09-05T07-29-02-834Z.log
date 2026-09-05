@@ -1,0 +1,12 @@
+[      95ms] ReferenceError: SEL is not defined
+    at drawOverlay (http://localhost:4173/_check_replay.html:299:12)
+    at paint (http://localhost:4173/_check_replay.html:369:16)
+    at http://localhost:4173/_check_replay.html:513:1
+[    4581ms] ReferenceError: SEL is not defined
+    at drawOverlay (http://localhost:4173/_check_replay.html:299:12)
+    at paint (http://localhost:4173/_check_replay.html:369:16)
+    at HTMLInputElement.<anonymous> (http://localhost:4173/_check_replay.html:496:36)
+    at eval (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:2:63)
+    at eval (eval at evaluate (:311:30), <anonymous>:4:50)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)

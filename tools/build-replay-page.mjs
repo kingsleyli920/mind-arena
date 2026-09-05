@@ -78,7 +78,17 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 .dot.mine{stroke:var(--seal);stroke-width:5;opacity:.95}
 .lab{font-family:var(--sans);font-size:19px;fill:#22201C;paint-order:stroke;
   stroke:rgba(245,244,238,.85);stroke-width:5;stroke-linejoin:round}
-.army{font-family:var(--mono);font-size:17px;font-weight:600}
+.army{font-family:var(--mono);font-size:20px;font-weight:600}
+.armybg{stroke:rgba(247,246,240,.92);stroke-width:5}
+.march{stroke-width:4;opacity:.55;stroke-dasharray:14 9;fill:none}
+.facname{font-family:var(--sans);font-size:26px;font-weight:600;paint-order:stroke;
+  stroke:rgba(246,245,239,.9);stroke-width:6;stroke-linejoin:round;letter-spacing:.04em}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 0 0;font-size:12.5px}
+.legend span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i{width:12px;height:12px;border-radius:2px;flex:none;border:1px solid rgba(0,0,0,.18)}
+.legend b{font-weight:600}
+.legend em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.legend .minor i{background:#B9B2A2}
 .flip{fill:none;stroke:var(--seal);stroke-width:6;opacity:.9}
 
 /* 头 */
@@ -162,6 +172,7 @@ ul.ev li.me{border-left-color:var(--indigo)}
       <canvas id="cv" width="1815" height="1485"></canvas>
       <svg id="ov" viewBox="0 0 1815 1485" aria-label="战局地图"></svg>
     </div>
+    <div class="legend" id="legend"></div>
     <div class="time">
       <button id="play" type="button">▶ 播放</button>
       <div class="track">
@@ -254,17 +265,32 @@ const pctx = pad.getContext("2d");
 const img = pctx.createImageData(COLS, ROWS);
 const own = new Int16Array(COLS * ROWS);
 
+/** 这一帧算「主要势力」的那几家：≥3 郡，外加全部模型席位。
+ *  三十一家一起上色只会糊成一片——《三国志》那种地图看得清，
+ *  正是因为它只给几个大势力上重色，其余一概淡处理 */
+function majorsOf(fi){
+  const cnt=new Map();
+  for(const o of F[fi].own) if(o>=0) cnt.set(o,(cnt.get(o)||0)+1);
+  const set=new Set([...cnt].filter(([,v])=>v>=3).map(([k])=>k));
+  for(const k of HILITE) if(cnt.get(k)) set.add(k);
+  return { set, cnt };
+}
+const MINOR=[185,178,162];
+
 function drawMap(fi){
   const O = F[fi].own;
+  const { set: MAJOR } = majorsOf(fi);
   for (let i=0;i<CELL.length;i++){ const k=CELL[i]; own[i] = k===NONE ? -1 : O[k]; }
   const d = img.data;
   for (let i=0;i<own.length;i++){
     const o=i*4, f=own[i];
     if (f < 0){ d[o+3]=0; continue; }              // −1 = 无主，透明
-    const c=RGB[f]||[122,114,102];
+    // 主要势力用自己的浓色，其余统一淡土色。
+    // 此前一律 52/255，三十一家土色系全糊在一起，截图上根本分不出敌我
+    const maj=MAJOR.has(f);
+    const c = maj ? (RGB[f]||[122,114,102]) : MINOR;
     d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2];
-    // 疆域是注记不是主角，地形墨色要透得出来
-    d[o+3] = HILITE.has(f) ? 108 : 52;
+    d[o+3] = HILITE.has(f) ? 168 : maj ? 138 : 60;
   }
   blur(d,COLS,ROWS,1); blur(d,COLS,ROWS,1);
   pctx.putImageData(img,0,0);
@@ -282,8 +308,8 @@ function drawMap(fi){
     const right = c+1<COLS ? own[i+1] : -1;
     const down  = r+1<ROWS ? own[i+COLS] : -1;
     const mine = HILITE.has(f);
-    ctx.strokeStyle = mine ? "rgba(118,44,34,.82)" : "rgba(52,45,37,.34)";
-    ctx.lineWidth = mine ? 2.4 : 1.2;
+    ctx.strokeStyle = mine ? "rgba(112,38,28,.88)" : MAJOR.has(f) ? "rgba(46,40,33,.5)" : "rgba(52,45,37,.26)";
+    ctx.lineWidth = mine ? 2.8 : MAJOR.has(f) ? 1.5 : 1;
     if(right!==f) segline((c+1)*S, r*S, (c+1)*S, (r+1)*S, i, wob);
     if(down!==f)  segline(c*S, (r+1)*S, (c+1)*S, (r+1)*S, i+0.5, wob);
   }
@@ -294,11 +320,15 @@ function segline(x1,y1,x2,y2,k,wob){
   ctx.stroke();
 }
 
+/** 当前点开的郡，−1 为没点 */
+let SEL=-1;
 const ov = document.getElementById("ov");
 function drawOverlay(fi){
   const f=F[fi], prev = fi>0 ? F[fi-1] : null;
+  const { set: MAJOR, cnt } = majorsOf(fi);
   const parts=[];
-  // 本季易主的郡：画一圈朱砂，这是一眼要看到的东西
+
+  // 本季易主的郡：一圈朱砂，这是一眼要看到的东西
   if(prev) for(let i=0;i<f.own.length;i++) if(f.own[i]!==prev.own[i]){
     const [x,y]=D.xy[i];
     parts.push('<circle class="flip" cx="'+x+'" cy="'+y+'" r="26"/>');
@@ -312,28 +342,68 @@ function drawOverlay(fi){
     parts.push('<circle class="hit" data-i="'+i+'" cx="'+x+'" cy="'+y+'" r="17"><title>'
       +D.name[i]+'</title></circle>');
   }
-  // 军团：同一郡上叠多支时按序号做确定性角度偏移，否则互相盖住
-  const at=new Map();
+
+  // ── 军团：**按郡聚合成一个徽标**，不逐支画 ──────────────────
+  //
+  // 逐支画会堆成一坨：实测一局末季 154 支军团只落在 8 个地方，
+  // 单点最多 30 支。此前那段按角度偏移的写法半径固定 22，
+  // 第 2 支之后全落在同一个圈上，二十支叠出来就是一团糊字。
+  // 一个点就给一个数：合计兵力 + 支数；同点多家则按兵力最多的那家上色
+  const byAt=new Map();
   for(const a of f.armies){
     if(a[2]<0) continue;
-    const n=at.get(a[2])||0; at.set(a[2],n+1);
-    const [x,y]=D.xy[a[2]];
-    const ang=(n*2.399), rr=n?22:0;
-    parts.push('<text class="army" x="'+(x+Math.cos(ang)*rr)+'" y="'+(y-14+Math.sin(ang)*rr)
-      +'" text-anchor="middle" fill="'+D.facColor[a[0]]+'" stroke="rgba(245,244,238,.9)" stroke-width="4" paint-order="stroke">▲'
-      + (a[1]>=1000 ? Math.round(a[1]/100)/10+"k" : a[1]) + '</text>');
+    const e=byAt.get(a[2]) || { n:0, troops:0, facs:new Map(), targets:new Set() };
+    e.n++; e.troops+=a[1];
+    e.facs.set(a[0], (e.facs.get(a[0])||0)+a[1]);
+    if(a[3]>=0) e.targets.add(a[3]);
+    byAt.set(a[2], e);
   }
-  // 地名只标本方的与本季易主的——105 个全标会糊成一片
-  for(let i=0;i<f.own.length;i++){
-    const flipped = prev && f.own[i]!==prev.own[i];
-    if(!HILITE.has(f.own[i]) && !flipped) continue;
+  // 行军/围城线先画，压在徽标底下
+  for(const [at,e] of byAt) for(const t of e.targets){
+    const [x1,y1]=D.xy[at], [x2,y2]=D.xy[t];
+    const top=[...e.facs].sort((a,b)=>b[1]-a[1])[0][0];
+    parts.push('<path class="march" stroke="'+D.facColor[top]+'" d="M'+x1+' '+y1+'L'+x2+' '+y2+'"/>');
+  }
+  for(const [at,e] of byAt){
+    const [x,y]=D.xy[at];
+    const top=[...e.facs].sort((a,b)=>b[1]-a[1])[0][0];
+    const txt='▲'+kilo(e.troops)+(e.n>1?' ×'+e.n:'');
+    parts.push('<text class="army armybg" x="'+x+'" y="'+(y-16)+'" text-anchor="middle">'+txt+'</text>');
+    parts.push('<text class="army" x="'+x+'" y="'+(y-16)+'" text-anchor="middle" fill="'
+      +(MAJOR.has(top)?D.facColor[top]:"#5C564B")+'">'+txt+'</text>');
+  }
+
+  // ── 势力名标在各家治所上 ──────────────────────────────
+  // 「谁在哪」是看一局最先要回答的问题，而地名回答不了它
+  for(const [k,st] of Object.entries(f.fac)){
+    const fi2=+k;
+    if(!MAJOR.has(fi2) || !st || st[8] || st[0]<0) continue;
+    const [x,y]=D.xy[st[0]];
+    parts.push('<text class="facname" x="'+x+'" y="'+(y+44)+'" text-anchor="middle" fill="'
+      +D.facColor[fi2]+'">'+esc(D.facName[fi2])+'</text>');
+  }
+
+  // 地名**只标本季易主的那几个**。
+  //
+  // 此前把本方全部郡都标上，实测袁绍十一郡挤在河北，钜鹿国压常山国、
+  // 常山国压安平国，29 个标签撞出 6 处重叠。而「这是哪个郡」点一下就有
+  // （每个郡都带 <title>，热区 17px），易主才是非标不可的那一类
+  if(prev) for(let i=0;i<f.own.length;i++){
+    if(f.own[i]===prev.own[i]) continue;
     const [x,y]=D.xy[i];
-    parts.push('<text class="lab" x="'+x+'" y="'+(y+30)+'" text-anchor="middle">'+D.name[i]+'</text>');
+    parts.push('<text class="lab" x="'+x+'" y="'+(y+26)+'" text-anchor="middle">'+D.name[i]+'</text>');
   }
   ov.innerHTML=parts.join("");
-}
 
-let SEL=-1;
+  // 图例：这一帧的主要势力，按郡数降序。没有它，颜色说明不了任何事
+  $("legend").innerHTML=[...cnt].filter(([k])=>MAJOR.has(k)).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>'<span><i style="background:'+D.facColor[k]+'"></i>'
+      +'<b'+(HILITE.has(k)?' style="text-decoration:underline"':'')+'>'+esc(D.facName[k])+'</b>'
+      +'<em>'+v+' 郡</em></span>').join("")
+    + '<span class="minor"><i></i><em>其余 '+([...cnt].length-[...cnt].filter(([k])=>MAJOR.has(k)).length)+' 家小势力</em></span>';
+}
+function kilo(n){ return n>=10000 ? (n/1000).toFixed(0)+"k" : n>=1000 ? (n/1000).toFixed(1)+"k" : String(n); }
+
 const $=(id)=>document.getElementById(id);
 const num=(n)=>n.toLocaleString("en-US");
 
@@ -392,11 +462,22 @@ function paint(fi){
       +'<span class="d '+(d>0?"up":d<0?"dn":"")+'">'+(d?(d>0?"+":"")+d:"")+'</span></div>';
   }).join("");
 
-  // 结算
-  const ev=f.ev;
-  $("ev").innerHTML = ev.length
-    ? ev.slice(0,40).map(e=>'<li class="'+(HOT.has(e[0])?"hot":"")+(e[1]===ME?" me":"")+'">'
-        +esc(e[2])+'</li>').join("") + (ev.length>40?'<li class="empty">…另有 '+(ev.length-40)+' 条</li>':"")
+  // 结算。**别家的断供与军费不继折成一行**——那是背景噪声：
+  // 一局里断供 224 条、军费不继 73 条，全铺出来每季二十行，
+  // 而真正要看的破城、被俘、治所失守会被埋在里面。本方的一条不折
+  // capital-lost 是**每季重复的状态提示**不是事件：实测同一批势力
+  // 连着三十季每季各报一条「治所已失，全境政令不通」，一季 4~6 条。
+  // 本方那条是决定性的（袁绍卡在十一郡就是因为魏郡丢了），别家的是背景
+  const BG=new Set(["supply-cut","supply-cut-scatter","unpaid",
+                    "capital-lost","capital-lost-scatter"]);
+  const shown=[], bg=[];
+  for(const e of f.ev){
+    if(BG.has(e[0]) && !HILITE.has(e[1])) bg.push(e); else shown.push(e);
+  }
+  if(bg.length) shown.push(["fold",-1,"本季他方另有 "+bg.length+" 处断供 / 治所失守 / 军费不继"]);
+  $("ev").innerHTML = shown.length
+    ? shown.slice(0,30).map(e=>'<li class="'+(HOT.has(e[0])?"hot":"")+(HILITE.has(e[1])?" me":"")+'">'
+        +esc(cn(e[2]))+'</li>').join("") + (shown.length>30?'<li class="empty">…另有 '+(shown.length-30)+' 条</li>':"")
     : '<li class="empty">本季无事</li>';
 
   // 命令
@@ -411,8 +492,8 @@ function paint(fi){
   $("ord").innerHTML=html;
 
   let say="";
-  if(seat&&seat.reason) say+='<div class="say"><b>本季意图</b>'+esc(seat.reason)+'</div>';
-  if(seat&&seat.plan) say+='<div class="say"><b>跨季方略</b>'+esc(seat.plan)+'</div>';
+  if(seat&&seat.reason) say+='<div class="say"><b>本季意图</b>'+esc(cn(seat.reason))+'</div>';
+  if(seat&&seat.plan) say+='<div class="say"><b>跨季方略</b>'+esc(cn(seat.plan))+'</div>';
   $("detail").innerHTML=say;
   paintDetail(fi);
 }
@@ -448,6 +529,12 @@ ov.addEventListener("click",(e)=>{
 });
 function row(k,v){ return "<dt>"+k+"</dt><dd>"+v+"</dd>"; }
 function esc(s){ return String(s).replace(/[&<>]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+/** 引擎日志里有些地方留着原始势力 id（「原属 yuanshao」），换成中文名。
+ *  tools/match-log.mjs 早有同一个 cn()，播放器这边没抄 */
+const ID2NAME = new Map(D.fac.map((id,i)=>[id, D.facName[i]]));
+// 这一行**在外层模板字符串里**：写 \\b 会被吃成退格符，页面拿到的就不是单词边界了
+const RE_ID = new RegExp("\\\\b(" + D.fac.filter(x=>/^[a-z][a-z0-9_]*$/.test(x)).join("|") + ")\\\\b","g");
+function cn(t){ return String(t).replace(RE_ID,(m)=>ID2NAME.get(m)||m); }
 const HOT=new Set(["siege-win","capital-lost","eliminated","unify","submit","epoch"]);
 const TYPE={campaign:"征伐",govern:"治",appoint:"调任",scout:"探",muster:"集结",array:"阵",
   ally:"盟",submit:"劝降",suade:"招降",passage:"借道",withdraw:"撤围",relief:"赴援",retire:"归隐"};
