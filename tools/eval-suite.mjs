@@ -21,6 +21,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { GRADE_CN } from "../lib/game/engine/victory.ts";
+import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
@@ -203,6 +204,11 @@ function summarize(run, px) {
   return {
     spec: run.spec, model: run.model, games: rs.length,
     score: avg(rs.map((r) => r.score)),
+    // **终局分**：局终实际站在哪一档，与历史最高档（score）并列报。
+    // 两者背离得越大，说明「中途辉煌、终局崩掉」的局越多——
+    // 64 季自对局里目的流 44% 的局最终被灭却仍按历史最高档记分。
+    // 「越到后期越强」这个问题，只有这一列答得了
+    finalScore: avg(rs.map((r) => GRADE_SCORE[r.finalGrade ?? r.grade])),
     grades,
     elim: rs.filter((r) => r.eliminated).length,
     growth: avg(rs.map((r) => (r.start ? r.commanderies / r.start : 0))),
@@ -349,7 +355,10 @@ console.log(`\n${"═".repeat(96)}`);
 console.log(`排行榜（同 seed、同对手、席位轮换、每局 ${SEASONS || "16（包默认）"} 季）`
   + `${Number(GAMES) < MIN_GAMES_FOR_POWER
       ? `\u3000⚠ ${GAMES} 局分辨力不足，名次不可当结论` : ""}\n`);
-console.log("对局方".padEnd(40) + "均分".padStart(7) + "对基线±95%".padStart(12)
+// 均分（历史最高档）与终局分并列。两者背离得越大，
+// 「中途辉煌、终局崩掉」的局越多——而长局里这正是要看的东西
+console.log("对局方".padEnd(40) + "均分".padStart(7) + "终局分".padStart(8)
+  + "对基线±95%".padStart(12)
   + "疆域倍数".padStart(9) + "出局".padStart(6) + "非法率".padStart(7)
   + "令数用率".padStart(9) + "成本".padStart(9));
 for (const r of rows) {
@@ -357,6 +366,7 @@ for (const r of rows) {
   console.log(
     r.spec.slice(0, 38).padEnd(40)
     + r.score.toFixed(1).padStart(7)
+    + (r.finalScore == null ? "—" : r.finalScore.toFixed(1)).padStart(8)
     + (r.spec === bot?.spec ? "基线" : vs).padStart(12)
     + r.growth.toFixed(2).padStart(9)
     + `${r.elim}/${r.played ?? r.games}`.padStart(6)

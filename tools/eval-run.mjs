@@ -21,7 +21,7 @@ import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, gradeOf } from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
@@ -239,6 +239,20 @@ async function playGame(gi) {
     result: {
       game: gi, seed, seat: under, seatName: nameOf(under),
       grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
+      // **终局档**：局终这一刻实际站在哪一档，与 bestGrade 分开报。
+      //
+      // bestGrade 是**历史最高档的棘轮**（resolve.ts 只往上不往下）。
+      // 16 季评测里那是对的——问的是「四年里你做到了什么」。
+      // 但它测不出「后期」：64 季的自对局里目的流有 44% 的局最终被灭，
+      // 却照样按中途摸到过的最高档记分，于是均分随局长一路上涨
+      //（158.3 → 164.6 → 172.9）而疆域倍数一路下跌（1.37 → 1.29，
+      // 进攻流 0.92 → 0.41）。涨的不是本事，是掷骰次数。
+      //
+      // 「模型是不是越到后期越强」这个问题，只有终局档答得了
+      finalGrade: gradeOf(standingOf(s, GEO, under), {
+        commanderies: f.startCommanderies, controlledZhou: f.startZhou,
+        zhouSeats: f.startSeats,
+      }),
       // 长局看的是疆域与统一，不是档位——档位是给 16 季评测用的量尺
       zhou: standingOf(s, GEO, under).controlledZhou,
       // 细分名次要用：档位太粗，同档的两个结局会被记成平手
