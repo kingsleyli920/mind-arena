@@ -93,6 +93,22 @@ export function forecastSiege(
   };
 }
 
+/**
+ * 增兵续围的预告：把这一批兵并进城下那支军团之后，**本季**会怎样。
+ *
+ * 与 forecastSiege 同一套算式，只把兵力换成合并后的数——引擎的增兵分支
+ * （resolve.ts 的 `mine.troops += troops`）就是这么并的，所以判词与结算对得上。
+ * 已围季数沿用既有军团的：缺口的逐季累加算在它头上，不因增兵而重置。
+ */
+export function forecastReinforce(
+  s: GameState, viewer: FactionId, target: CommanderyId, add: number,
+  g: Graph, P: EngineParams, roster: Roster | null,
+): SiegeForecast | null {
+  const mine = s.armies.find((x) => x.target === target && x.faction === viewer);
+  if (!mine) return null;
+  return forecastSiege(s, viewer, { ...mine, troops: mine.troops + add }, g, P, roster);
+}
+
 export function forecastCampaign(
   s: GameState, viewer: FactionId, a: Extract<Action, { type: "campaign" }>,
   g: Graph, P: EngineParams, roster: Roster | null, troops: number,
@@ -100,7 +116,15 @@ export function forecastCampaign(
   const tgt = s.commanderies[a.target];
   const src = s.commanderies[a.from];
   if (!tgt || !src) return null;
-  if (s.armies.some((x) => x.target === a.target)) return null;   // 城下有兵，另一套判定
+  // 城下有**别家**围城军时这一令结算的是野战，走 forecastField，不是这里。
+  //
+  // 这行原先不分敌我，于是自家围城军也把预告打成 null——而候选侧
+  // 明明已经分好了（actions.ts 的 siegeNote：自家写「本令为增兵」、
+  // 别家写「本令先野战」）。后果是增兵续围候选一条预告都拿不到，
+  // 而 bot 对无 forecast 的征伐直接判 −1e9：实测 136 条候选、0 条带预告、
+  // **0 条被采纳**，对照组「第三方围城的征伐候选」166 条则 166 条全带野战预告。
+  // 增兵的正确预告不是这个函数，是「并入之后这场围城会怎样」——见 forecastReinforce
+  if (s.armies.some((x) => x.target === a.target && x.faction !== viewer)) return null;
 
   const edge = (g.adj.get(a.from) ?? []).find((e) => e.to === a.target);
   const terrain = edge?.terrain ?? "plain";

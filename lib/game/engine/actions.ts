@@ -8,7 +8,7 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller, governorOf,
   type OfficerRef, type Roster }
   from "./officers.ts";
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
-import { forecastCampaign, forecastField } from "./forecast.ts";
+import { forecastCampaign, forecastField, forecastReinforce } from "./forecast.ts";
 import { formationEdge, FORMATION_CN } from "./combat.ts";
 import { suadeChance } from "./officers.ts";
 
@@ -366,10 +366,21 @@ export function listActions(
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
-        const fc = forecastCampaign(s, f, {
-          type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
-          strength, siegeGear: src0.gear,
-        }, g, P, roster, send);
+        // 三条岔路，判词必须与本令实际结算的那一套对上：
+        //   城下有别家围城军 → 结算野战 → forecastField
+        //   城下有自家围城军 → 结算增兵续围 → forecastReinforce（并入后这场围会怎样）
+        //   城下无人           → 结算新起围城 → forecastCampaign
+        // 中间那条此前是**空的**：forecastCampaign 里「城下有兵」那行不分敌我，
+        // 自家围城军也把预告打成 null，而 bot 对无 forecast 的征伐直接 −1e9。
+        // 实测 136 条增兵候选、0 条带预告、0 条被采纳——标签写着「本令为增兵」
+        // 承诺了一个决策，打分层却保证它永不被选中
+        const mySiege = ongoing && ongoing.faction === f ? ongoing : null;
+        const fc = mySiege
+          ? forecastReinforce(s, f, tid, send, g, P, roster)
+          : forecastCampaign(s, f, {
+              type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
+              strength, siegeGear: src0.gear,
+            }, g, P, roster, send);
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
           action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,

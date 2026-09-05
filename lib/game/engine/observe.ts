@@ -128,6 +128,18 @@ export interface Observation {
                   siege?: { breachLo: number; breachHi: number; hold: number;
                             verdict: string; text: string };
                 }>;
+  /**
+   * 没有逐条列出的那些待命军团，聚合成一行。
+   *
+   * armies[] 原先**没有任何上限**——同一个函数里 report.mine 有 .slice(-24)、
+   * world 有 .slice(-14)，只有它没有。机器人集结完就用掉、峰值个位数，于是闸门
+   * 长期是假绿灯；模型会囤，实测一局末季袁绍 210 支、armies 段单独 10800 tok、
+   * 整份观测约 24k = 闸门 10000 的 2.4 倍。
+   *
+   * 围城军一支不省——它们每支都挂着续围预告，是这一段里唯一带跨季决策的东西；
+   * 省的是待命军团，它们除了「在哪、多少人」以外没有别的可决策内容
+   */
+  armiesRest?: { count: number; troops: number; at: string[] };
   /** 现行盟约 */
   treaties: Array<{ with: FactionId; from: number; until: number }>;
   /** 上季战报：我方全部 + 天下大事 */
@@ -149,6 +161,47 @@ export interface Observation {
  * 装配某席位的观测。纯读函数，在 resolve 之前调用，不进 RNG 序列——
  * 因此不影响 R6（裁决顺序无关）与 R33（逐位重放）。
  */
+/**
+ * 我在外的军团。围城军一支不省，待命军团封顶后聚合。
+ *
+ * 上限取 24，与同文件 report.mine 的 .slice(-24) 同档——那是这份观测里
+ * 已经验证过能容下的条数。围城军不占这个额度：它们每支都挂着续围预告，
+ * 是这一段里唯一带跨季决策的东西，省掉等于把决策本身藏起来。
+ * 待命军团则只有「在哪、多少人」可决策，聚合不丢判断依据。
+ *
+ * 排序用 cmp 而不是 localeCompare：这份观测进模型提示词，
+ * 顺序随宿主地区变就等于同一局在不同机器上问了不同的问题。
+ */
+const IDLE_CAP = 24;
+
+function armiesOf(
+  s: GameState, faction: FactionId, g: Graph, P: EngineParams, roster: Roster | null,
+) {
+  const mine = s.armies.filter((a) => a.faction === faction);
+  const sieging = mine.filter((a) => a.target)
+    .sort((a, b) => b.troops - a.troops || cmp(a.id, b.id));
+  const idle = mine.filter((a) => !a.target)
+    .sort((a, b) => b.troops - a.troops || cmp(a.id, b.id));
+  const shown = [...sieging, ...idle.slice(0, IDLE_CAP)];
+  const rest = idle.slice(IDLE_CAP);
+  return {
+    armies: shown.map((a) => {
+      const fc = a.target ? forecastSiege(s, faction, a, g, P, roster) : null;
+      return {
+        id: a.id, at: a.at, target: a.target, troops: a.troops,
+        seasons: a.siegeSeasons, unit: unitName(P, a.unit), gear: a.gear,
+        ...(fc ? { siege: { breachLo: fc.breachLo, breachHi: fc.breachHi,
+                            hold: fc.holdLo, verdict: fc.verdict, text: fc.text } } : {}),
+      };
+    }),
+    ...(rest.length ? { armiesRest: {
+      count: rest.length,
+      troops: rest.reduce((n, a) => n + a.troops, 0),
+      at: [...new Set(rest.map((a) => a.at))].sort(cmp),
+    } } : {}),
+  };
+}
+
 export function observe(
   s: GameState, faction: FactionId, g: Graph, P: EngineParams,
   roster: Roster | null, geo: Geography,
@@ -250,15 +303,7 @@ export function observe(
     },
     brief: briefFor(s, geo, faction, g.adj, nameOf),
     mine,
-    armies: s.armies.filter((a) => a.faction === faction).map((a) => {
-      const fc = a.target ? forecastSiege(s, faction, a, g, P, roster) : null;
-      return {
-        id: a.id, at: a.at, target: a.target, troops: a.troops,
-        seasons: a.siegeSeasons, unit: unitName(P, a.unit), gear: a.gear,
-        ...(fc ? { siege: { breachLo: fc.breachLo, breachHi: fc.breachHi,
-                            hold: fc.holdLo, verdict: fc.verdict, text: fc.text } } : {}),
-      };
-    }),
+    ...armiesOf(s, faction, g, P, roster),
     treaties: s.treaties
       .filter((t) => t.a === faction || t.b === faction)
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
