@@ -71,7 +71,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 .mapbox img,.mapbox canvas,.mapbox svg{position:absolute;inset:0;width:100%;height:100%}
 .mapbox img{object-fit:cover}
 .mapbox svg{overflow:visible}
-.dot{fill:none;stroke:#2B2622;stroke-width:3;opacity:.5}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover ~ .dot{opacity:1}
+.dot{fill:none;stroke:#2B2622;stroke-width:3;opacity:.5;pointer-events:none}
+.sel{fill:none;stroke:var(--indigo);stroke-width:7;opacity:.95;pointer-events:none}
 .dot.mine{stroke:var(--seal);stroke-width:5;opacity:.95}
 .lab{font-family:var(--sans);font-size:19px;fill:#22201C;paint-order:stroke;
   stroke:rgba(245,244,238,.85);stroke-width:5;stroke-linejoin:round}
@@ -136,7 +139,11 @@ ul.ev li.me{border-left-color:var(--indigo)}
 .say b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);font-weight:500;margin-bottom:3px}
 .empty{color:var(--faint);font-size:12.5px}
 .pick{background:var(--sunk);border:1px solid var(--rule);padding:11px 13px;font-size:12.5px;margin-top:6px}
-.pick h3{margin:0 0 6px;font-size:13.5px;font-weight:600}
+.pick h3{margin:0 0 6px;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:8px}
+.pick h3 em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.pick .cut{color:var(--seal);font-weight:600}
+.pick button{float:right;font-family:var(--mono);font-size:11px;background:none;border:none;
+  color:var(--muted);cursor:pointer;padding:0}
 .pick dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:0;font-size:12px}
 .pick dt{color:var(--muted)} .pick dd{margin:0;font-family:var(--mono);text-align:right}
 :focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
@@ -167,6 +174,7 @@ ul.ev li.me{border-left-color:var(--indigo)}
   </div>
 
   <aside class="side">
+    <div id="detailBox"></div>
     <h2 id="vsTitle" hidden>对阵</h2>
     <div class="vs" id="vs" hidden></div>
     <h2 id="mineTitle"></h2>
@@ -298,7 +306,11 @@ function drawOverlay(fi){
   for(let i=0;i<f.own.length;i++){
     const [x,y]=D.xy[i];
     const mine=HILITE.has(f.own[i]);
+    if(i===SEL) parts.push('<circle class="sel" cx="'+x+'" cy="'+y+'" r="20"/>');
     parts.push('<circle class="dot'+(mine?" mine":"")+'" cx="'+x+'" cy="'+y+'" r="'+(mine?7:5)+'"/>');
+    // 热区比可见的点大得多——105 个郡挤在一张图上，5px 的点点不中
+    parts.push('<circle class="hit" data-i="'+i+'" cx="'+x+'" cy="'+y+'" r="17"><title>'
+      +D.name[i]+'</title></circle>');
   }
   // 军团：同一郡上叠多支时按序号做确定性角度偏移，否则互相盖住
   const at=new Map();
@@ -321,6 +333,7 @@ function drawOverlay(fi){
   ov.innerHTML=parts.join("");
 }
 
+let SEL=-1;
 const $=(id)=>document.getElementById(id);
 const num=(n)=>n.toLocaleString("en-US");
 
@@ -401,7 +414,38 @@ function paint(fi){
   if(seat&&seat.reason) say+='<div class="say"><b>本季意图</b>'+esc(seat.reason)+'</div>';
   if(seat&&seat.plan) say+='<div class="say"><b>跨季方略</b>'+esc(seat.plan)+'</div>';
   $("detail").innerHTML=say;
+  paintDetail(fi);
 }
+
+const FORM_CN=["鱼鳞","鹤翼","方圆"];
+function paintDetail(fi){
+  if(SEL<0){ $("detailBox").innerHTML=""; return; }
+  const f=F[fi], prev=fi>0?F[fi-1]:null, i=SEL;
+  const o=f.own[i], cut=f.cut.includes(i);
+  const d=(k)=>prev ? f[k][i]-prev[k][i] : 0;
+  const dd=(k)=>{ const v=d(k); return v ? ' <em>'+(v>0?"+":"")+v+'</em>' : ''; };
+  const flipped = prev && prev.own[i]!==o;
+  $("detailBox").innerHTML='<div class="pick">'
+    +'<button type="button" id="closeDetail">✕</button>'
+    +'<h3>'+esc(D.name[i])+' <em>'+esc(D.zhou[i])+'</em></h3>'
+    +'<dl>'
+    +'<dt>归属</dt><dd>'+(o<0?"无主":esc(D.facName[o]))+(flipped?' <em>本季易主</em>':'')+'</dd>'
+    +'<dt>守军档</dt><dd>'+f.gt[i]+' / 9'+dd("gt")+'</dd>'
+    +'<dt>城防</dt><dd>'+f.def[i]+dd("def")+'</dd>'
+    +'<dt>产出档 / 民心档</dt><dd>'+f.yld[i]+' / '+f.mor[i]+'</dd>'
+    +'<dt>阵型</dt><dd>'+(FORM_CN[f.fm[i]]||"—")+'</dd>'
+    +'<dt>太守政治</dt><dd>'+(f.gov[i]||"—")+'</dd>'
+    +'<dt>补给</dt><dd'+(cut?' class="cut"':'')+'>'+(cut?"断绝":"通")+'</dd>'
+    +'</dl></div>';
+  $("closeDetail").onclick=()=>{ SEL=-1; paint(+$("scrub").value); };
+}
+ov.addEventListener("click",(e)=>{
+  const t=e.target.closest(".hit");
+  if(!t) return;
+  const i=+t.dataset.i;
+  SEL = (SEL===i) ? -1 : i;
+  paint(+$("scrub").value);
+});
 function row(k,v){ return "<dt>"+k+"</dt><dd>"+v+"</dd>"; }
 function esc(s){ return String(s).replace(/[&<>]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
 const HOT=new Set(["siege-win","capital-lost","eliminated","unify","submit","epoch"]);

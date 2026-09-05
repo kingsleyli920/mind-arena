@@ -1,0 +1,224 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "目的流 48 季" [level=1] [ref=e5]
+      - generic [ref=e6]: 194 年 · 春
+      - generic [ref=e7]: 第 1/48 季 纪元 1
+    - img "战局地图" [ref=e10]:
+      - generic "河南尹" [ref=e11] [cursor=pointer]
+      - generic "河内郡" [ref=e12] [cursor=pointer]
+      - generic "河东郡" [ref=e13] [cursor=pointer]
+      - generic "弘农郡" [ref=e14] [cursor=pointer]
+      - generic "京兆尹" [ref=e15] [cursor=pointer]
+      - generic "左冯翊" [ref=e16] [cursor=pointer]
+      - generic "右扶风" [ref=e17] [cursor=pointer]
+      - generic "颍川郡" [ref=e18] [cursor=pointer]
+      - generic "汝南郡" [ref=e19] [cursor=pointer]
+      - generic "梁国" [ref=e20] [cursor=pointer]
+      - generic "沛国" [ref=e21] [cursor=pointer]
+      - generic "陈国" [ref=e22] [cursor=pointer]
+      - generic "鲁国" [ref=e23] [cursor=pointer]
+      - generic "魏郡" [ref=e24] [cursor=pointer]
+      - generic "钜鹿郡" [ref=e25] [cursor=pointer]
+      - generic "常山国" [ref=e26] [cursor=pointer]
+      - generic "中山国" [ref=e27] [cursor=pointer]
+      - generic "安平国" [ref=e28] [cursor=pointer]
+      - generic "河闲国" [ref=e29] [cursor=pointer]
+      - generic "清河国" [ref=e30] [cursor=pointer]
+      - generic "赵国" [ref=e31] [cursor=pointer]
+      - generic "勃海郡" [ref=e32] [cursor=pointer]
+      - generic "陈留郡" [ref=e33] [cursor=pointer]
+      - generic "东郡" [ref=e34] [cursor=pointer]
+      - generic "东平国" [ref=e35] [cursor=pointer]
+      - generic "任城国" [ref=e36] [cursor=pointer]
+      - generic "泰山郡" [ref=e37] [cursor=pointer]
+      - generic "济北国" [ref=e38] [cursor=pointer]
+      - generic "山阳郡" [ref=e39] [cursor=pointer]
+      - generic "济阴郡" [ref=e40] [cursor=pointer]
+      - generic "东海郡" [ref=e41] [cursor=pointer]
+      - generic "琅邪国" [ref=e42] [cursor=pointer]
+      - generic "彭城国" [ref=e43] [cursor=pointer]
+      - generic "广陵郡" [ref=e44] [cursor=pointer]
+      - generic "下邳国" [ref=e45] [cursor=pointer]
+      - generic "济南国" [ref=e46] [cursor=pointer]
+      - generic "平原郡" [ref=e47] [cursor=pointer]
+      - generic "乐安国" [ref=e48] [cursor=pointer]
+      - generic "北海国" [ref=e49] [cursor=pointer]
+      - generic "东莱郡" [ref=e50] [cursor=pointer]
+      - generic "齐国" [ref=e51] [cursor=pointer]
+      - generic "南阳郡" [ref=e52] [cursor=pointer]
+      - generic "南郡" [ref=e53] [cursor=pointer]
+      - generic "江夏郡" [ref=e54] [cursor=pointer]
+      - generic "零陵郡" [ref=e55] [cursor=pointer]
+      - generic "桂阳郡" [ref=e56] [cursor=pointer]
+      - generic "武陵郡" [ref=e57] [cursor=pointer]
+      - generic "长沙郡" [ref=e58] [cursor=pointer]
+      - generic "九江郡" [ref=e59] [cursor=pointer]
+      - generic "丹阳郡" [ref=e60] [cursor=pointer]
+      - generic "庐江郡" [ref=e61] [cursor=pointer]
+      - generic "会稽郡" [ref=e62] [cursor=pointer]
+      - generic "吴郡" [ref=e63] [cursor=pointer]
+      - generic "豫章郡" [ref=e64] [cursor=pointer]
+      - generic "汉中郡" [ref=e65] [cursor=pointer]
+      - generic "巴郡" [ref=e66] [cursor=pointer]
+      - generic "广汉郡" [ref=e67] [cursor=pointer]
+      - generic "蜀郡" [ref=e68] [cursor=pointer]
+      - generic "犍为郡" [ref=e69] [cursor=pointer]
+      - generic "牂牁郡" [ref=e70] [cursor=pointer]
+      - generic "越巂郡" [ref=e71] [cursor=pointer]
+      - generic "益州郡" [ref=e72] [cursor=pointer]
+      - generic "永昌郡" [ref=e73] [cursor=pointer]
+      - generic "广汉属国" [ref=e74] [cursor=pointer]
+      - generic "蜀郡属国" [ref=e75] [cursor=pointer]
+      - generic "犍为属国" [ref=e76] [cursor=pointer]
+      - generic "陇西郡" [ref=e77] [cursor=pointer]
+      - generic "汉阳郡" [ref=e78] [cursor=pointer]
+      - generic "武都郡" [ref=e79] [cursor=pointer]
+      - generic "金城郡" [ref=e80] [cursor=pointer]
+      - generic "安定郡" [ref=e81] [cursor=pointer]
+      - generic "北地郡" [ref=e82] [cursor=pointer]
+      - generic "武威郡" [ref=e83] [cursor=pointer]
+      - generic "张掖郡" [ref=e84] [cursor=pointer]
+      - generic "酒泉郡" [ref=e85] [cursor=pointer]
+      - generic "敦煌郡" [ref=e86] [cursor=pointer]
+      - generic "张掖属国" [ref=e87] [cursor=pointer]
+      - generic "张掖居延属国" [ref=e88] [cursor=pointer]
+      - generic "上党郡" [ref=e89] [cursor=pointer]
+      - generic "太原郡" [ref=e90] [cursor=pointer]
+      - generic "上郡" [ref=e91] [cursor=pointer]
+      - generic "西河郡" [ref=e92] [cursor=pointer]
+      - generic "五原郡" [ref=e93] [cursor=pointer]
+      - generic "云中郡" [ref=e94] [cursor=pointer]
+      - generic "定襄郡" [ref=e95] [cursor=pointer]
+      - generic "雁门郡" [ref=e96] [cursor=pointer]
+      - generic "朔方郡" [ref=e97] [cursor=pointer]
+      - generic "涿郡" [ref=e98] [cursor=pointer]
+      - generic "广阳郡" [ref=e99] [cursor=pointer]
+      - generic "代郡" [ref=e100] [cursor=pointer]
+      - generic "上谷郡" [ref=e101] [cursor=pointer]
+      - generic "渔阳郡" [ref=e102] [cursor=pointer]
+      - generic "右北平郡" [ref=e103] [cursor=pointer]
+      - generic "辽西郡" [ref=e104] [cursor=pointer]
+      - generic "辽东郡" [ref=e105] [cursor=pointer]
+      - generic "玄菟郡" [ref=e106] [cursor=pointer]
+      - generic "乐浪郡" [ref=e107] [cursor=pointer]
+      - generic "辽东属国" [ref=e108] [cursor=pointer]
+      - generic "南海郡" [ref=e109] [cursor=pointer]
+      - generic "苍梧郡" [ref=e110] [cursor=pointer]
+      - generic "郁林郡" [ref=e111] [cursor=pointer]
+      - generic "合浦郡" [ref=e112] [cursor=pointer]
+      - generic "交趾郡" [ref=e113] [cursor=pointer]
+      - generic "九真郡" [ref=e114] [cursor=pointer]
+      - generic "日南郡" [ref=e115] [cursor=pointer]
+      - generic [ref=e116]: 会稽郡
+    - generic [ref=e117]:
+      - button "▶ 播放" [ref=e118] [cursor=pointer]
+      - generic [ref=e119]:
+        - generic "第 18 季" [ref=e121]
+        - slider "第几季" [ref=e123] [cursor=pointer]: "0"
+      - generic [ref=e124]: 1 / 48
+  - complementary [ref=e125]:
+    - heading "王朗" [level=2] [ref=e126]
+    - generic [ref=e127]:
+      - term [ref=e128]: 郡数
+      - definition [ref=e129]: "1"
+      - term [ref=e130]: 控州 / 州治
+      - definition [ref=e131]: 0 / 0
+      - term [ref=e132]: 历史最高档 / 终局档
+      - definition [ref=e133]: 丁 / 丁
+      - term [ref=e134]: 国库
+      - definition [ref=e135]: 600 金
+      - term [ref=e136]: 本季令数
+      - definition [ref=e137]: "6"
+      - term [ref=e138]: 补给断绝
+      - definition [ref=e139]: 0 郡
+    - heading "天下" [level=2] [ref=e140]
+    - generic [ref=e141]:
+      - generic [ref=e142]:
+        - generic [ref=e144]: 袁绍
+        - generic [ref=e145]: "13"
+        - generic [ref=e146]: "+13"
+      - generic [ref=e147]:
+        - generic [ref=e149]: 刘璋
+        - generic [ref=e150]: "9"
+        - generic [ref=e151]: "+9"
+      - generic [ref=e152]:
+        - generic [ref=e154]: 李傕、郭汜
+        - generic [ref=e155]: "8"
+        - generic [ref=e156]: "+8"
+      - generic [ref=e157]:
+        - generic [ref=e159]: 刘表
+        - generic [ref=e160]: "7"
+        - generic [ref=e161]: "+7"
+      - generic [ref=e162]:
+        - generic [ref=e164]: 刘备
+        - generic [ref=e165]: "6"
+        - generic [ref=e166]: "+6"
+      - generic [ref=e167]:
+        - generic [ref=e169]: 吕布（张邈、陈宫）
+        - generic [ref=e170]: "6"
+        - generic [ref=e171]: "+6"
+      - generic [ref=e172]:
+        - generic [ref=e174]: 鲜卑诸部
+        - generic [ref=e175]: "5"
+        - generic [ref=e176]: "+5"
+      - generic [ref=e177]:
+        - generic [ref=e179]: 公孙瓒
+        - generic [ref=e180]: "5"
+        - generic [ref=e181]: "+5"
+      - generic [ref=e182]:
+        - generic [ref=e184]: 公孙度
+        - generic [ref=e185]: "4"
+        - generic [ref=e186]: "+4"
+      - generic [ref=e187]:
+        - generic [ref=e189]: 士燮
+        - generic [ref=e190]: "4"
+        - generic [ref=e191]: "+4"
+    - heading "本季结算" [level=2] [ref=e192]
+    - list [ref=e193]:
+      - listitem [ref=e194]: 与 lijue 缔盟 8 季（下季生效）
+      - listitem [ref=e195]: 与 xiongnu 缔盟 8 季（下季生效）
+      - listitem [ref=e196]: 与 zhangji 缔盟 8 季（下季生效）
+      - listitem [ref=e197]: 与 zhangyan 缔盟 8 季（下季生效）
+      - listitem [ref=e198]: 与 liuchong 缔盟 8 季（下季生效）
+      - listitem [ref=e199]: 与 lubu 缔盟 8 季（下季生效）
+      - listitem [ref=e200]: 与 wuhuan 缔盟 8 季（下季生效）
+      - listitem [ref=e201]: 与 xianbei 缔盟 8 季（下季生效）
+      - listitem [ref=e202]: 与 yuanshao 缔盟 8 季（下季生效）
+      - listitem [ref=e203]: 与 lijue 缔盟 8 季（下季生效）
+      - listitem [ref=e204]: 与 qianghu 缔盟 8 季（下季生效）
+      - listitem [ref=e205]: 与 songjian 缔盟 8 季（下季生效）
+      - listitem [ref=e206]: 与 gongsundu 缔盟 8 季（下季生效）
+      - listitem [ref=e207]: 与 liubei 缔盟 8 季（下季生效）
+      - listitem [ref=e208]: 与 yuanshao 缔盟 8 季（下季生效）
+      - listitem [ref=e209]: 与 caocao 缔盟 8 季（下季生效）
+      - listitem [ref=e210]: 与 liubei 缔盟 8 季（下季生效）
+      - listitem [ref=e211]: 与 lubu 缔盟 8 季（下季生效）
+      - listitem [ref=e212]: 与 yuanshu 缔盟 8 季（下季生效）
+      - listitem [ref=e213]: 与 liubei 缔盟 8 季（下季生效）
+      - listitem [ref=e214]: 与 wanglang 缔盟 8 季（下季生效）
+      - listitem [ref=e215]: 与 yanbaihu 缔盟 8 季（下季生效）
+      - listitem [ref=e216]: 与 yuanshu 缔盟 8 季（下季生效）
+      - listitem [ref=e217]: 与 liubiao 缔盟 8 季（下季生效）
+      - listitem [ref=e218]: 与 mateng 缔盟 8 季（下季生效）
+      - listitem [ref=e219]: 与 nanzhongyi 缔盟 8 季（下季生效）
+      - listitem [ref=e220]: 与 qianghu 缔盟 8 季（下季生效）
+      - listitem [ref=e221]: 与 songjian 缔盟 8 季（下季生效）
+      - listitem [ref=e222]: 与 liubiao 缔盟 8 季（下季生效）
+      - listitem [ref=e223]: 与 yuanshu 缔盟 8 季（下季生效）
+      - listitem [ref=e224]: 与 lijue 缔盟 8 季（下季生效）
+      - listitem [ref=e225]: 与 liuzhang 缔盟 8 季（下季生效）
+      - listitem [ref=e226]: 与 qianghu 缔盟 8 季（下季生效）
+      - listitem [ref=e227]: 与 songjian 缔盟 8 季（下季生效）
+      - listitem [ref=e228]: 与 liuzhang 缔盟 8 季（下季生效）
+      - listitem [ref=e229]: 与 hansui 缔盟 8 季（下季生效）
+      - listitem [ref=e230]: 与 lijue 缔盟 8 季（下季生效）
+      - listitem [ref=e231]: 与 liuzhang 缔盟 8 季（下季生效）
+      - listitem [ref=e232]: 与 liubiao 缔盟 8 季（下季生效）
+      - listitem [ref=e233]: 与 hansui 缔盟 8 季（下季生效）
+      - listitem [ref=e234]: …另有 53 条
+    - heading "本季命令 321 条（我方 5）" [level=2] [ref=e235]
+    - generic [ref=e236]: · 治 会稽郡· 盟· 盟· 探 丹阳郡· 探 吴郡
+    - generic [ref=e238]:
+      - generic [ref=e239]: 本季意图
+      - text: 机器人画像 purpose
