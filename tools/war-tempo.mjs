@@ -1,0 +1,158 @@
+/**
+ * 战争节奏的尺子。
+ *
+ * 由来：用户问「一个回合一个季度是不是太长了，出兵时间没法拆分」。量下来发现
+ * 真正的毛病不是季度太长，是**出兵根本不占时间**——campaign 把军团瞬移到目标郡、
+ * 当季就打；而唯一该占时间的围城形同虚设：451 次破城里 445 次是首攻即克，
+ * 围城超过一季的破城一次都没有。
+ *
+ * 这把尺子量的就是那条时间轴：从集结、出征、首攻，到续围或撤围，各占几季、
+ * 军团在每一段掉多少兵、掉在谁手里。改动行军与围城规则前后各跑一遍，
+ * 「预期的实测变化」才是可证伪的。
+ *
+ *   node tools/war-tempo.mjs                    默认 6 局 × 40 季纯机器人
+ *   node tools/war-tempo.mjs --games=12 --seasons=64
+ *   node tools/war-tempo.mjs --json=out.json    另存原始样本，便于前后对比
+ */
+import fs from "node:fs";
+import { buildGraph, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { decide } from "../lib/game/engine/bot.ts";
+import { buildRoster } from "../lib/game/engine/officers.ts";
+import { loadParams } from "../lib/game/engine/params.ts";
+import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
+import { resolve } from "../lib/game/engine/resolve.ts";
+import { buildGeography } from "../lib/game/engine/victory.ts";
+
+const arg = (k, d) => {
+  const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
+  return hit ? hit.slice(k.length + 3) : d;
+};
+const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
+const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+const DATA = {
+  commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
+  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"),
+};
+const G = buildGraph(read("adjacency.json"));
+const P = loadParams(pack);
+const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
+  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
+const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+const BOTS = ["turtle", "balanced", "aggressive", "opportunist"];
+
+const GAMES = Number(arg("games", "6"));
+const SEASONS = Number(arg("seasons", "40"));
+
+/** 每支军团一条履历：出生、每季兵力、结局。按 id 跨季追踪 */
+const lives = new Map();
+const breachAfter = [];   // 破城时「已围了几季」
+const endReason = {};     // 军团结局计数
+let campaigns = 0, musters = 0;
+let firstFail = 0, longSiege = 0;
+
+for (let gi = 0; gi < GAMES; gi += 1) {
+  let s = createGame(DATA, { seed: `tempo-${gi}`, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+  const seen = new Map();
+  while (!s.finished) {
+    const orders = [];
+    for (const [i, f] of Object.keys(s.factions).sort().entries()) {
+      if (s.factions[f].eliminated || s.factions[f].retired) continue;
+      orders.push(...decide(s, f, G, BOTS[i % 4], DEFAULT_RULES, ROSTER, P, GEO));
+    }
+    for (const o of orders) {
+      if (o.action?.type === "muster") musters += 1;
+      if (o.action?.type === "campaign") campaigns += 1;
+    }
+    // 结算前：记下每支军团此刻的兵力与围城季数，结算后才能算出这一季掉了多少
+    const before = new Map(s.armies.map((a) => [a.id, { ...a }]));
+    for (const a of s.armies) {
+      if (!seen.has(a.id)) seen.set(a.id, { id: `${gi}:${a.id}`, born: s.turn, troops: [] });
+      seen.get(a.id).troops.push(a.troops);
+    }
+    const mark = s.log.length;
+    const r = resolve(s, orders, G, P, ROSTER, GEO, DEFAULT_RULES);
+
+    for (const e of r.state.log.slice(mark)) {
+      if (e.kind === "siege-win") {
+        const m = (e.text ?? "").match(/取 (\S+?)（/);
+        const key = `${e.faction}|${m ? m[1] : ""}`;
+        const army = [...before.values()].find((a) => `${a.faction}|${a.target}` === key);
+        breachAfter.push(army ? army.siegeSeasons : 0);
+      }
+      for (const [k, tag] of [["siege-lift", "撤围"], ["siege-abort", "溃散"],
+                              ["muster-return", "归队"], ["supply-cut-scatter", "断粮溃散"],
+                              ["siege-win", "破城"]]) {
+        if (e.kind === k) endReason[tag] = (endReason[tag] ?? 0) + 1;
+      }
+    }
+    // 首攻那一击发生在结算内部：季初它还是待命军团，季末要么破了城不存在了、
+    // 要么已经 siegeSeasons=1。所以「首攻」这一段季初季末都看不到，得在这里数
+    for (const a of r.state.armies) {
+      if (!a.target) continue;
+      if (a.siegeSeasons === 1) firstFail += 1;        // 首攻未克，转入围困
+      else if (a.siegeSeasons >= 2) longSiege += 1;    // 围过两季以上
+    }
+    // 军团这一季的兵力变化，按「在不在围城」分开记
+    const after = new Map(r.state.armies.map((a) => [a.id, a]));
+    for (const [id, b] of before) {
+      const a = after.get(id);
+      if (!a) continue;
+      const rec = seen.get(id);
+      if (!rec) continue;
+      (rec.legs ??= []).push({ from: b.troops, to: a.troops,
+                               siegeSeasons: b.siegeSeasons, besieging: !!b.target });
+    }
+    s = r.state.finished ? r.state : refreshAp(r.state, P);
+  }
+  for (const [, v] of seen) lives.set(v.id, v);
+}
+
+const q = (a, p) => { const x = [...a].sort((m, n) => m - n); return x.length ? x[Math.min(x.length - 1, Math.floor(x.length * p))] : NaN; };
+const pct = (n, d) => (d ? `${(n / d * 100).toFixed(0)}%` : "—");
+const line = (t) => console.log(t);
+
+line(`\n══ 战争节奏　${GAMES} 局 × ${SEASONS} 季　纯机器人 ══\n`);
+line(`下令　集结 ${musters}　出征 ${campaigns}`);
+
+line(`\n── 破城要几季 ──`);
+const hist = {};
+for (const v of breachAfter) hist[v] = (hist[v] ?? 0) + 1;
+line(`  破城 ${breachAfter.length} 次，破城时已围季数 ${JSON.stringify(hist)}`);
+line(`  首攻即克 ${pct(breachAfter.filter((v) => v === 0).length, breachAfter.length)}`
+   + `　中位 ${q(breachAfter, 0.5)}　九分位 ${q(breachAfter, 0.9)}`);
+// 这三个数才是「围城活没活过来」的判据：
+// 首攻未克之后还站在城下的有多少、其中撑到第二季以上的有多少
+line(`  首攻未克转入围困 ${firstFail} 次　（占出征 ${pct(firstFail, campaigns)}）`);
+line(`  围过两季以上　　 ${longSiege} 次　（占转入围困 ${pct(longSiege, firstFail)}）`);
+
+line(`\n── 军团结局 ──`);
+for (const [k, v] of Object.entries(endReason).sort((a, b) => b[1] - a[1])) line(`  ${k.padEnd(10)} ${v}`);
+
+line(`\n── 一季掉多少兵 ──`);
+const legs = [...lives.values()].flatMap((v) => v.legs ?? []);
+const loss = (l) => (l.from > 0 ? 1 - l.to / l.from : 0);
+for (const [tag, sel] of [
+  ["续围（围城季 ≥1）", (l) => l.besieging && l.siegeSeasons >= 1],
+  ["待命（未出征）", (l) => !l.besieging],
+]) {
+  const g = legs.filter(sel);
+  if (!g.length) { line(`  ${tag.padEnd(20)} 无样本`); continue; }
+  line(`  ${tag.padEnd(20)} 样本 ${String(g.length).padStart(5)}`
+     + `　季损中位 ${(q(g.map(loss), 0.5) * 100).toFixed(0)}%`
+     + `　九分位 ${(q(g.map(loss), 0.9) * 100).toFixed(0)}%`
+     + `　起始兵力中位 ${q(g.map((l) => l.from), 0.5)}`);
+}
+
+line(`\n── 军团活多久 ──`);
+const spans = [...lives.values()].map((v) => v.troops.length);
+line(`  军团 ${lives.size} 支，在图上存续季数：中位 ${q(spans, 0.5)}　九分位 ${q(spans, 0.9)}　最长 ${Math.max(0, ...spans)}`);
+const peak = [...lives.values()].map((v) => Math.max(...v.troops));
+const last = [...lives.values()].map((v) => v.troops[v.troops.length - 1]);
+line(`  峰值兵力中位 ${q(peak, 0.5)}　终值兵力中位 ${q(last, 0.5)}`);
+line(`  从峰值掉到 500 以下的军团：${pct(last.filter((v) => v < 500).length, last.length)}\n`);
+
+const out = arg("json", "");
+if (out) {
+  fs.writeFileSync(out, JSON.stringify({ GAMES, SEASONS, breachAfter, endReason, legs, spans, peak, last }, null, 1));
+  console.log(`→ ${out}`);
+}
