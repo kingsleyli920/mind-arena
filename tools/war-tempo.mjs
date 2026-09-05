@@ -13,6 +13,15 @@
  *   node tools/war-tempo.mjs                    默认 6 局 × 40 季纯机器人
  *   node tools/war-tempo.mjs --games=12 --seasons=64
  *   node tools/war-tempo.mjs --json=out.json    另存原始样本，便于前后对比
+ *   node tools/war-tempo.mjs --no-withdraw      对照：引擎不动，只拿掉机器人的撤围令
+ *
+ * --no-withdraw 这个对照是必须先跑的。围城活不过第二季，八成八是**机器人自己撤的**
+ * （首攻已过、进入新一季的 162 支围城军里，143 支被自家撤围令收掉，撞兵微下限的
+ * 只有 1 支，进入该季时兵力中位 1716、无一支低于 500）。撤围的打分是
+ * 「权重 + 已围季数×2 + (余兵<3000 ? 4 : 0)」，从不问围城是不是快赢了——
+ * 因为 forecastSiege 只算本季那一击。
+ * 所以基线里的「首攻即克 99%」讲的是机器人的策略，不是引擎的性质。任何引擎改动
+ * 都要先和这个对照差分，否则测出来的差异归不到因上去。
  */
 import fs from "node:fs";
 import { buildGraph, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
@@ -42,6 +51,7 @@ const BOTS = ["turtle", "balanced", "aggressive", "opportunist"];
 
 const GAMES = Number(arg("games", "6"));
 const SEASONS = Number(arg("seasons", "40"));
+const NO_WITHDRAW = process.argv.includes("--no-withdraw");
 
 /** 每支军团一条履历：出生、每季兵力、结局。按 id 跨季追踪 */
 const lives = new Map();
@@ -54,11 +64,12 @@ for (let gi = 0; gi < GAMES; gi += 1) {
   let s = createGame(DATA, { seed: `tempo-${gi}`, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
   const seen = new Map();
   while (!s.finished) {
-    const orders = [];
+    let orders = [];
     for (const [i, f] of Object.keys(s.factions).sort().entries()) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       orders.push(...decide(s, f, G, BOTS[i % 4], DEFAULT_RULES, ROSTER, P, GEO));
     }
+    if (NO_WITHDRAW) orders = orders.filter((o) => o.action?.type !== "withdraw");
     for (const o of orders) {
       if (o.action?.type === "muster") musters += 1;
       if (o.action?.type === "campaign") campaigns += 1;
@@ -79,8 +90,12 @@ for (let gi = 0; gi < GAMES; gi += 1) {
         const army = [...before.values()].find((a) => `${a.faction}|${a.target}` === key);
         breachAfter.push(army ? army.siegeSeasons : 0);
       }
+      // capital-lost-scatter 一定要在这张表里：实测它是**最大**的一项（对照跑里 252 次，
+      // 比断粮溃散 193 和撤围 143 都多）。第一版漏了它，于是「军团都去哪了」这张表
+      // 少了最大的一格，我据此说过好几句错话
       for (const [k, tag] of [["siege-lift", "撤围"], ["siege-abort", "溃散"],
                               ["muster-return", "归队"], ["supply-cut-scatter", "断粮溃散"],
+                              ["capital-lost-scatter", "治所失守溃散"],
                               ["siege-win", "破城"]]) {
         if (e.kind === k) endReason[tag] = (endReason[tag] ?? 0) + 1;
       }
@@ -111,7 +126,7 @@ const q = (a, p) => { const x = [...a].sort((m, n) => m - n); return x.length ? 
 const pct = (n, d) => (d ? `${(n / d * 100).toFixed(0)}%` : "—");
 const line = (t) => console.log(t);
 
-line(`\n══ 战争节奏　${GAMES} 局 × ${SEASONS} 季　纯机器人 ══\n`);
+line(`\n══ 战争节奏　${GAMES} 局 × ${SEASONS} 季　纯机器人${NO_WITHDRAW ? "　【对照：拿掉撤围令】" : ""} ══\n`);
 line(`下令　集结 ${musters}　出征 ${campaigns}`);
 
 line(`\n── 破城要几季 ──`);
