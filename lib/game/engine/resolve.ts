@@ -784,8 +784,11 @@ export function resolve(
     // 一郡开局的席位会被经济层直接判死——不是缺钱，而是穷则候选表里的
     // 内政项被门禁筛光、只剩打仗
     const sorted = goldRows.slice().sort((a, b) => b - a);
-    const income = !P.goldOn ? 0 : P.goldBase + sorted
-      .reduce((n, v, i) => n + v * P.goldDecay ** i, 0);
+    // 递减**带地板**：第 n 个郡至少按原值的 goldDecayFloor 计。
+    // 纯几何会收敛——0.85^n 求和到第二十个郡就封顶，76 郡与 20 郡的收入
+    // 几乎一样，于是大帝国必然破产（见包里「为何要地板」的实测）
+    const w = (i: number) => Math.max(P.goldDecay ** i, P.goldDecayFloor);
+    const income = !P.goldOn ? 0 : P.goldBase + sorted.reduce((n, v, i) => n + v * w(i), 0);
     if (P.goldOn && sorted.length) {
       tr(f.id, `  【收入】基础 ${P.goldBase} 金 + 逐郡递减（×${P.goldDecay}^名次）：`
         + sorted.slice(0, 8).map((v, i) => `第${i + 1} ${v.toFixed(0)}→${(v * P.goldDecay ** i).toFixed(0)}`).join("　")
