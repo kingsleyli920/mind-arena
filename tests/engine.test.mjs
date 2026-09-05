@@ -1461,3 +1461,33 @@ test("赴援：围在落地前被解掉，兵马必须退回而不是凭空消�
   assert.ok(r.log.some((e) => e.kind === "campaign-void"),
     `未记「未及出战」：${r.log.map((e) => e.kind).join(",")}`);
 });
+
+test("目的：观测里的纪元要能据以决策 —— 序号本身不含信息", () => {
+  const s = fresh();
+  const o = observe(s, "yuanshao", G, P, ROSTER, GEO);
+  const c = o.clock;
+  assert.equal(c.epoch, 1);
+  assert.equal(c.epochOf, P.epochCount, "不知道一共几个纪元，序号 1 说明不了进度");
+  assert.equal(c.neutralGrowth, 0, "纪元一无主郡国不自增");
+  assert.ok(c.nextNeutralGrowth > 0,
+    "看不见下一纪元的增速，「换纪元之前把无主地捡了」就无从判断");
+  assert.ok(c.epochEndsBy > 0 && c.epochEndsBy <= P.epochLimit,
+    `本纪元剩余季数 ${c.epochEndsBy} 不在合理范围`);
+
+  // 观测报的增速必须是**结算真正会用的**那一个，不是抄来的常数。
+  // 把无主郡国的守军跑一季，看涨幅对不对得上
+  const neutral = Object.values(s.commanderies).find((x) => !x.owner && x.garrison > 100);
+  assert.ok(neutral, "剧本里没有无主郡国，测不出");
+  const s2 = structuredClone(s);
+  s2.epoch = 2;
+  const o2 = observe(s2, "yuanshao", G, P, ROSTER, GEO);
+  assert.equal(o2.clock.neutralGrowth, Math.round((P.neutralGrowth[2] ?? 0) * 100),
+    "纪元二报的增速与 params 里的不是同一个数");
+  assert.equal(o2.clock.epochOf, P.epochCount);
+
+  // 末纪元不发 nextNeutralGrowth：那是默认值不发的同一条口径
+  const s3 = structuredClone(s);
+  s3.epoch = P.epochCount;
+  assert.equal(observe(s3, "yuanshao", G, P, ROSTER, GEO).clock.nextNeutralGrowth, undefined,
+    "末纪元还在发「下一纪元增速」，白花 token");
+});

@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.3.0";
+export const PROMPT_VERSION = "1.4.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -41,6 +41,12 @@ export function renderSystem(pack: unknown): string {
     "  接不上的郡 `supplyCut: true`：**本季产出归零**，且以它为后方的军团**粮尽溃散**。",
     "- 所以在断供之郡集结、募兵、修城都是白花——先把中间那一段接回来，或换个基地。",
     "- 治所失守则全境断绝，是全图杠杆最高的一击。对手的治所与自己的都算。",
+    "",
+    "## 纪元：无主之地会越来越贵",
+    "- 无主郡国的守军**每季自增**，增速逐纪元上升（clock.neutralGrowth，百分点）。",
+    "  今天两千人的空郡，隔一个纪元就不是两千人了——这是抢占时机的全部时间价值所在。",
+    "- `clock.epochEndsBy` 是本纪元**至多**还剩几季（还可能因有人升档而提前推进），",
+    "  `nextNeutralGrowth` 是推进后的增速。要捡的无主地，在换纪元之前捡。",
     "",
     "## 怎么算赢",
     "- 档位按**相对开局的增量**判，不是绝对疆域。守成不得分。",

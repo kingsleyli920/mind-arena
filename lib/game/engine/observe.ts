@@ -17,10 +17,10 @@ import { unitName, FORMATION_CN } from "./combat.ts";
 import { retinueAt, isFiller, defendRetinue } from "./officers.ts";
 import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
-import { briefFor, standingOf, GRADE_CN, type Geography } from "./victory.ts";
+import { briefFor, standingOf, epochLimitFor, GRADE_CN, type Geography } from "./victory.ts";
 import type { Candidate, FactionId, GameState } from "./types.ts";
 
-export const OBSERVATION_VERSION = "1.1.0";
+export const OBSERVATION_VERSION = "1.2.0";
 
 export interface ObsCandidate {
   key: string;
@@ -40,7 +40,26 @@ export interface Observation {
   /** 我是谁 */
   seat: { faction: FactionId; name: string; capital: string | null };
   /** 时钟。不含 seed */
-  clock: { year: number; season: number; turn: number; totalTurns: number; epoch: number };
+  clock: {
+    year: number; season: number; turn: number; totalTurns: number;
+    /**
+     * 纪元。此前只发一个光秃秃的序号，而序号本身不含任何可据以决策的信息。
+     *
+     * 纪元推进唯一的实际后果是**无主郡国守军每季自增**（纪元一 0%、
+     * 二 8%、三 15%），这条正是「早取无主之地」的全部时间价值所在——
+     * 无主地若永远同价，抢占时机就不成其为决策，先把内政做满再扩张永远不亏。
+     * 机制在包里写着、结算里跑着，模型却看不见，于是它按「无主地不会变贵」
+     * 在思考。这与补给断绝是同一类漏：规则摘要里讲了，观测里查不到。
+     *
+     * endsBy 是**上界**——纪元还有达标提前触发（有势力升到本纪元目标档），
+     * 所以只保证「至多还有这么多季」，不保证走满
+     */
+    epoch: number; epochOf: number; epochEndsBy: number;
+    /** 本纪元无主郡国守军每季自增（百分点）。纪元一为 0 */
+    neutralGrowth: number;
+    /** 下一纪元的自增率（百分点）。**末纪元不发** */
+    nextNeutralGrowth?: number;
+  };
   /** 本季可用令数与结转 */
   /**
    * 本季令数。**用不完就作废**，最多结转 carryCap 条——所以它是「必须花掉的资源」，
@@ -185,7 +204,13 @@ export function observe(
       // 本局季数，不是内容包里的默认值。局长做成每局属性之后这里没跟着改，
       // 于是打 104 季的局也告诉模型「共 16 季」——它按四年的时间尺度做决策，
       // 而实际有二十六年。一份 24 季实录里模型看到的 totalTurns 就是 16
-      totalTurns: s.seasonsPerGame, epoch: s.epoch,
+      totalTurns: s.seasonsPerGame,
+      epoch: s.epoch, epochOf: P.epochCount,
+      epochEndsBy: Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart)),
+      neutralGrowth: Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100),
+      ...(s.epoch < P.epochCount
+        ? { nextNeutralGrowth: Math.round((P.neutralGrowth[s.epoch + 1] ?? 0) * 100) }
+        : {}),
     },
     treasury: {
       gold: Math.round(f?.gold ?? 0),
