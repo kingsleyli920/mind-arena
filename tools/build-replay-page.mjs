@@ -419,6 +419,8 @@ function paint(fi){
 
   // 对阵：混战才显示。按郡数排，死掉的压暗
   if(PLAYERS.length>1){
+    // 档位写成「历史最高/终局」两个。只写终局，曹操这种「中途摸到乙档、
+    // 最后一郡不剩」的会显示成丁，与终局表对不上；只写历史最高则看不出崩盘
     $("vsTitle").hidden=false; $("vs").hidden=false;
     const cnt0=new Map();
     for(const o of f.own) if(o>=0) cnt0.set(o,(cnt0.get(o)||0)+1);
@@ -432,7 +434,7 @@ function paint(fi){
           +'<span class="sw" style="background:'+D.facColor[p.i]+'"></span>'
           +'<span class="who"><b>'+esc(D.facName[p.i])+'</b><span>'+esc(p.model.split("/").pop())+'</span></span>'
           +'<span class="stat">'+n+' <em>郡</em>'+(d?' '+(d>0?"+":"")+d:"")
-          +'<br>'+(st?st[6]+' <em>州</em>\u3000'+GRADE[st[4]]+' <em>档</em>':'—')+'</span></div>';
+          +'<br>'+(st?st[6]+' <em>州</em>\u3000'+GRADE[st[3]]+'/'+GRADE[st[4]]+' <em>档</em>':'—')+'</span></div>';
       }).join("");
   }
 
