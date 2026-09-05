@@ -698,7 +698,14 @@ export function resolve(
   if (growth > 0) {
     for (const c of Object.values(s.commanderies)) {
       if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
-      c.garrison = Math.min(Math.round(c.garrison * (1 + growth)), P.garrisonCap);
+      // **封顶在开局值的若干倍**。没有这条时 15%/季 复利会跑飞：
+      // 84 季是 14 万倍，最后被势力郡的守军上限 60000 兜住——实测 13 个
+      // 无主郡里 10 个长到满档，从第 20 季起一个都没易过手，其中河南尹、
+      // 颍川、梁国、鲁国还卡在中原正中央把地图切成两半。
+      // 「早取有时间价值」不等于「过了二十季永远拿不到」
+      const ceil = Math.min(P.garrisonCap,
+        Math.round((c.startGarrison || c.garrison) * P.neutralGrowthCap));
+      c.garrison = Math.min(Math.round(c.garrison * (1 + growth)), ceil);
     }
   }
 

@@ -1754,3 +1754,28 @@ test("待命军团会归队 —— 否则它是状态里的一处泄漏", () => 
   const still = u.armies.find((a) => a.id === "t:siege");
   assert.ok(!still || still.target, "围城军被当成待命军团收走了");
 });
+
+test("无主郡的自增要封顶 —— 复利跑飞就成了永远拿不到的钉子", () => {
+  let s = fresh();
+  const n0 = Object.values(s.commanderies).find((c) => !c.owner && c.garrison > 0);
+  assert.ok(n0, "剧本里没有无主郡");
+  const start = n0.startGarrison;
+  assert.equal(start, n0.garrison, "开局守军没被记下来，封顶就没有基准");
+
+  // 推到有自增的纪元，再跑很多季
+  s.epoch = P.epochCount;
+  assert.ok((P.neutralGrowth[s.epoch] ?? 0) > 0, "末纪元没有自增，测不出");
+  for (let i = 0; i < 60; i += 1) s = refreshAp(resolve(s, [], G, P, ROSTER, GEO).state, P);
+
+  const now = s.commanderies[n0.id];
+  assert.ok(!now.owner, "这个郡被谁拿走了，测不出封顶");
+  const ceil = Math.min(P.garrisonCap, Math.round(start * P.neutralGrowthCap));
+  assert.ok(now.garrison <= ceil,
+    `跑飞了：开局 ${start} → 六十季后 ${now.garrison}，上限应是 ${ceil}`);
+  // 也不能封得太死——六十季之后该顶到上限
+  assert.ok(now.garrison >= ceil * 0.99, `没长到上限：${now.garrison} / ${ceil}`);
+
+  // 势力自己的郡不受这条约束（它们靠募兵长，不是无主自增）
+  const mine = Object.values(s.commanderies).find((c) => c.owner);
+  assert.ok(mine, "找不到有主郡");
+});

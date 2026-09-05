@@ -23,6 +23,12 @@ export interface CommanderyState {
   owner: FactionId | null;
   /** 戍兵实数。观测时压成 13 档等比 1.4 */
   garrison: number;
+  /**
+   * 开局守军。只用来给**无主郡的自增**封顶——15%/季 复利没有上限时
+   * 会跑飞：84 季是 14 万倍，实测 13 个无主郡里 10 个长到满档，
+   * 从第 20 季起一个都没易过手。见包里「为何要封顶」
+   */
+  startGarrison: number;
   yieldTier: number;      // 1–10
   moraleTier: number;     // 1–5
   defense: number;        // 0–100

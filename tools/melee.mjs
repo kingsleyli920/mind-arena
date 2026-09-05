@@ -128,6 +128,7 @@ const IDX = REPLAY ? buildIndex(
   DATA.commanderies,
   DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
   ["scale", "crane", "square"],
+  read("adjacency.json").edges,
 ) : null;
 const frames = [];
 let prevStations = {}, prevCaptured = [];

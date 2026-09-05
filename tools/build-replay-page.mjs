@@ -394,9 +394,23 @@ function drawOverlay(fi){
   for(const [k,st] of Object.entries(f.fac)){
     const fi2=+k;
     if(!MAJOR.has(fi2) || !st || st[8]) continue;
-    let sx=0, sy=0, n=0;
-    for(let i=0;i<f.own.length;i++) if(f.own[i]===fi2){ sx+=D.xy[i][0]; sy+=D.xy[i][1]; n++; }
-    if(!n) continue;
+    // 标在**最大连通块**的重心上，不是全部疆域的重心。
+    // 张鲁一块在汉中、一块在云中，全域重心落在中间的无人区，看着像标错了地方。
+    // 飞地多的时候更明显——而这一局飞地本来就不少
+    const mine=[]; for(let i=0;i<f.own.length;i++) if(f.own[i]===fi2) mine.push(i);
+    if(!mine.length) continue;
+    const set=new Set(mine); let best=[];
+    const seen=new Set();
+    for(const start of mine){
+      if(seen.has(start)) continue;
+      const comp=[start]; seen.add(start);
+      for(let q=0;q<comp.length;q++)
+        for(const nb of (D.adj?.[comp[q]]||[]))
+          if(set.has(nb)&&!seen.has(nb)){ seen.add(nb); comp.push(nb); }
+      if(comp.length>best.length) best=comp;
+    }
+    let sx=0, sy=0, n=best.length;
+    for(const i of best){ sx+=D.xy[i][0]; sy+=D.xy[i][1]; }
     // 字宽实算：26px 下一个汉字约占 26px，拉丁与标点约占一半。
     // 按 length×0.62 估会把「吕布（张邈、陈宫）」算窄一半，去重叠就形同虚设
     const nm=D.facName[fi2];
@@ -404,9 +418,7 @@ function drawOverlay(fi){
     // 记下自家郡的纵向跨度：去重叠时不许把名字推出这个范围，
     // 否则小势力的名字会飘到别人地盘上（实测 298 个样本里 4 个飘出去了）
     let lo=1e9, hi=-1e9;
-    for(let i=0;i<f.own.length;i++) if(f.own[i]===fi2){
-      lo=Math.min(lo,D.xy[i][1]); hi=Math.max(hi,D.xy[i][1]);
-    }
+    for(const i of best){ lo=Math.min(lo,D.xy[i][1]); hi=Math.max(hi,D.xy[i][1]); }
     labels.push({ kind:"fac", fill:D.facColor[fi2],
                  x:Math.min(1815-w/2-14, Math.max(w/2+14, sx/n)),
                  y:Math.min(1455, Math.max(34, sy/n)), y0:sy/n, w, txt:esc(D.facName[fi2]),

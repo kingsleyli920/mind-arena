@@ -86,6 +86,12 @@ export interface ReplayDict {
   xy: Array<[number, number]>;
   /** 势力 id / 名 / 色，下标即帧里的势力下标 */
   fac: string[]; facName: string[]; facColor: string[];
+  /**
+   * 邻接表（郡下标 → 邻郡下标）。播放器用它求**最大连通块**：
+   * 势力名标在全部疆域的重心上会出事——张鲁一块在汉中、一块在云中，
+   * 重心落在中间的无人区，看着像标错了地方。飞地多的时候更明显
+   */
+  adj: number[][];
   /** 阵型 id，下标即帧里的 fm */
   formation: string[];
 }
@@ -109,6 +115,7 @@ export function buildIndex(
                         longitude: number; latitude: number }>,
   factions: Array<{ id: string; name: string; color?: string }>,
   formations: string[],
+  edges: ReadonlyArray<{ from: string; to: string }> = [],
 ): { dict: ReplayDict; ci: Map<string, number>; fi: Map<string, number> } {
   const ci = new Map(commanderies.map((c, i) => [c.id, i]));
   const fi = new Map(factions.map((f, i) => [f.id, i]));
@@ -128,6 +135,15 @@ export function buildIndex(
       facName: factions.map((f) => f.name),
       facColor: factions.map((f) => f.color ?? "#8a8378"),
       formation: formations,
+      adj: (() => {
+        const a: number[][] = commanderies.map(() => []);
+        for (const e of edges) {
+          const i = ci.get(e.from), j = ci.get(e.to);
+          if (i === undefined || j === undefined) continue;
+          a[i].push(j); a[j].push(i);
+        }
+        return a;
+      })(),
     },
   };
 }

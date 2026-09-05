@@ -56,7 +56,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     commanderies[c.id] = {
       id: c.id,
       owner: c.factionId && !PLACEHOLDER_FACTIONS.has(c.factionId) ? c.factionId : null,
-      garrison: c.garrison,
+      garrison: c.garrison, startGarrison: c.garrison,
       yieldTier: c.yieldTier,
       moraleTier: c.moraleTier,
       defense: c.defense,
