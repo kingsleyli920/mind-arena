@@ -332,3 +332,23 @@ test("候选标签一律不露内部 id：势力名、武将名、方针名都�
       `标签里没有武将的名字：${c.label}`);
   }
 });
+
+test("准入：被提供方转码搞坏的 key 要复原，但幻觉不许洗白", () => {
+  // 症状：中文按 UTF-8 编码后又被按 Latin-1 解了一遍，
+  // 「济阴郡」变成「æµ\u008eé\u0098´é\u0083¡」。一份 48 局的排行榜里
+  // qwen3-30b 有 2806 次 unknown-key 全是这个，非法率被记成 50.9%——
+  // 而它其实每一条都选对了。基础设施的失败算成模型的分，这个仓库栽过三次
+  const s = fresh();
+  const cs = listActions(s, "caocao", G, P, DEFAULT_RULES, ROSTER);
+  const good = cs.find((c) => /[\u4e00-\u9fff]/.test(c.key));
+  assert.ok(good, "候选里没有带中文的 key，这条测试测不到东西");
+  const mangle = (t) => Buffer.from(t, "utf8").toString("latin1");
+
+  const a = admit(s, "caocao", [mangle(good.key), mangle("campaign:虚构郡>某郡:main")],
+    cs, G, ROSTER);
+  assert.deepEqual(a.admitted, [good.key], "转码坏掉的 key 没有被复原");
+  assert.equal(a.mojibake, 1, "复原计数不对 —— 报告要靠它把编码问题与模型的过分开");
+  // 复原只在「复原后恰好命中候选」时才认，所以编造的 key 复原之后仍然不在表里
+  assert.equal(a.dropped.length, 1);
+  assert.equal(a.dropped[0].reason, "unknown-key", "幻觉被复原逻辑洗白了");
+});

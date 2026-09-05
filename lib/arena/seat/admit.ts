@@ -13,9 +13,30 @@ import type { Candidate, FactionId, GameState, Order } from "../../game/engine/t
 
 export type DropReason =
   | "unknown-key"      // 候选表里没有这个 key
+  | "mojibake"         // key 是被转码搞坏的，已复原（不计模型的过）
   | "duplicate"        // 同一 key 选了两次
   | "over-budget"      // 令数不够
   | "rejected";        // 引擎校验不过（郡令数满、免费次数用尽等）
+
+/**
+ * 把被转码搞坏的 key 复原。
+ *
+ * 症状：中文按 UTF-8 编码后又被按 Latin-1 解了一遍，
+ * 「济阴郡」变成「æµ\x8eé\x98´é\x83¡」。这是路由层或提供方的编码问题，
+ * 与模型能力无关——把它记成「候选表里没有这个 key」，就是又一次
+ * 把基础设施的失败算到模型头上。
+ *
+ * 只在**复原后恰好命中候选**时才返回，所以复原不会把真正的幻觉洗白：
+ * 模型编造的 key 复原之后仍然不在表里。
+ */
+function repairMojibake(key: string, byKey: Map<string, Candidate>): string | null {
+  // 全是 ASCII 就不可能是这种乱码
+  if (!/[\u0080-\u00ff]/.test(key)) return null;
+  try {
+    const fixed = Buffer.from(key, "latin1").toString("utf8");
+    return byKey.has(fixed) ? fixed : null;
+  } catch { return null; }
+}
 
 export interface Admission {
   /** 采纳的命令 */
@@ -26,8 +47,11 @@ export interface Admission {
   dropped: Array<{ key: string; reason: DropReason; detail?: string }>;
   /** 花掉的令数 */
   spent: number;
-  /** 非法率 = 丢弃数 / 提交数。0 表示这一季的输出全部合法 */
+  /** 非法率 = 丢弃数 / 提交数。0 表示这一季的输出全部合法。
+   *  被转码搞坏又复原的不计入——那不是模型的过 */
   illegalRate: number;
+  /** 本季有几条 key 是转码坏了、已复原的。非零说明提供方的编码有问题 */
+  mojibake: number;
   /**
    * 采纳完这些命令之后的状态。界面用它判「下一条还能不能选」——
    * 只看令数是不够的：免费动作有次数上限，同一郡每季至多 2 令，
@@ -51,9 +75,20 @@ export function admit(
   // 与 resolve 的做法一致，无需另建配额账本
   const probe: GameState = JSON.parse(JSON.stringify(s));
   let spent = 0;
+  let mojibake = 0;
   const budget = s.factions[faction]?.ap ?? 0;
 
-  for (const key of picks) {
+  for (const raw of picks) {
+    // **转码复原**。某些提供方会把中文按 UTF-8 编码后再按 Latin-1 解一遍，
+    // 于是「济阴郡」变成「æµ\x8eé\x98´é\x83¡」。实测一份 48 局的排行榜里
+    // qwen3-30b 有 2806 次 unknown-key 全是这个，非法率被记成 50.9%——
+    // 而它其实每一条都选对了。这是路由层的编码问题，算到模型头上就是
+    // 「基础设施的失败算成模型的分」，这个仓库为它栽过三次。
+    //
+    // 只在**复原后恰好命中候选**时才认，所以不会把真正的幻觉洗白
+    const fixed = byKey.has(raw) ? raw : repairMojibake(raw, byKey);
+    const key = fixed ?? raw;
+    if (fixed && fixed !== raw) mojibake += 1;
     const c = byKey.get(key);
     if (!c) { dropped.push({ key, reason: "unknown-key" }); continue; }
     if (seen.has(key)) { dropped.push({ key, reason: "duplicate" }); continue; }
@@ -78,7 +113,7 @@ export function admit(
     spent += c.cost;
   }
   return {
-    orders, admitted, dropped, spent, state: probe,
+    orders, admitted, dropped, spent, state: probe, mojibake,
     illegalRate: picks.length ? dropped.length / picks.length : 0,
   };
 }

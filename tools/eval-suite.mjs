@@ -158,6 +158,9 @@ function summarize(run, px) {
   const starved = recs.filter((r) => r.failure && fk(r) === "budget").length;
   const modelFail = recs.filter((r) => r.failure && fk(r) === "model").length;
   const authFail = recs.filter((r) => r.failure && fk(r) === "auth").length;
+  // 转码坏掉又复原的条数。非零说明提供方的编码有问题——
+  // 修之前它会以 unknown-key 的形式记进非法率，把基础设施的问题算成模型的分
+  const mojibake = recs.reduce((a, r) => a + (r.mojibake ?? 0), 0);
   const harnessFail = recs.filter((r) => r.failure && fk(r) === "harness").length;
 
   // 成本以**提供方回报的实际扣费**为准，价目表重算只作兜底。
@@ -195,7 +198,7 @@ function summarize(run, px) {
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
     outTok: sum("completion"), reasonTok: sum("reasoning"),
-    rungs, creditsFail, authFail, infraFail, starved, harnessFail, modelFail,
+    rungs, creditsFail, authFail, infraFail, starved, harnessFail, modelFail, mojibake,
     cost, costSource,
     // 预算停手时实际跑了几局。与请求的局数不同就必须看得见
     played: run.played ?? rs.length, halted: run.halted ?? null,
@@ -387,6 +390,10 @@ for (const r of rows) {
 }
 
 const spend = rows.reduce((a, r) => a + (r.cost ?? 0), 0);
+for (const r of rows.filter((x) => x.mojibake > 0)) {
+  console.log(`⚠ ${r.spec}\u3000${r.mojibake} 条 key 被提供方的编码搞坏（已复原）`
+    + `\u3000——这是路由层的问题，不计模型的非法率`);
+}
 console.log(`\n合计花费 $${spend.toFixed(3)}\u3000`
   + `总调用 ${rows.reduce((a, r) => a + r.calls, 0)} 次\u3000`
   + `耗时 ${(Math.max(0, ...rows.map((r) => r.elapsed ?? 0)) / 1000).toFixed(0)}s（并发 ${CONCURRENCY}）`);

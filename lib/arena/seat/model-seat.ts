@@ -33,7 +33,7 @@ export interface ModelTurnRecord {
   reason?: string;
   /** 模型本季写下的跨季方略。下一季原样回传给它 —— 这是它唯一的记忆 */
   plan?: string;
-  admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate">;
+  admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate" | "mojibake">;
   usage: { prompt: number; completion: number; cached: number; reasoning: number;
            /** 提供方回报的真实扣费（美元）。价目表重算会少算，见 client.ts */
            cost: number | null } | null;
@@ -131,7 +131,7 @@ export async function modelDecide(
   const base: ModelTurnRecord = {
     turn: s.turn, seat: faction, model: deps.model, promptVersion: PROMPT_VERSION,
     obsChars: user.length, obsTokens: estTokens(user), candidates: cands.length,
-    picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0 },
+    picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0, mojibake: 0 },
     usage: null, structured: false, rung: null, maxTokens: 0,
     finishReason: null, attempts: 0, elapsedMs: 0,
   };
@@ -179,6 +179,7 @@ export async function modelDecide(
       record: {
         ...base, ...meta(res), picks: dec.picks, reason: dec.reason, plan: dec.plan,
         admission: { admitted: a.admitted, dropped: a.dropped, spent: a.spent,
+                     mojibake: a.mojibake,
                      illegalRate: a.illegalRate },
       },
     };

@@ -179,6 +179,7 @@ async function playGame(gi) {
           picks: record.picks, pickCount: record.picks.length,
           admitted: record.admission.admitted.length, spent: record.admission.spent,
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
+          mojibake: record.admission.mojibake ?? 0,
           dropped: record.admission.dropped.map((d) => d.reason),
           usage: record.usage, failure: record.failure, reason: record.reason,
           plan: record.plan,
