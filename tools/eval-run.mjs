@@ -248,7 +248,13 @@ async function playGame(gi) {
       seasons: s.seasonsPerGame,
       commanderies: Object.values(s.commanderies).filter((c) => c.owner === under).length,
       start: f.startCommanderies, eliminated: f.eliminated,
-      illegalRate: turns.reduce((a, t) => a + t.illegalRate, 0) / Math.max(1, turns.length),
+      // **按令数汇总，不是逐季求平均。** 逐季平均把「提 2 条丢 1 条」的短季
+      // 与「提 15 条丢 1 条」的满季等权，而短季恰恰是被打残、快出局的那些季——
+      // 于是越惨的局越把非法率往下拽。同一批数据两种口径实测差 22%
+      //（qwen3-235b：逐季平均 8.6%，按令数汇总 11.0%）。
+      // 这一列是用来判「模型有没有在乱下令」的，分母只能是它下的令
+      illegalRate: turns.reduce((a, t) => a + t.dropped.length, 0)
+                   / Math.max(1, turns.reduce((a, t) => a + t.pickCount, 0)),
       obsPeak: Math.max(...turns.map((t) => t.obsTokens)),
       apUse: turns.reduce((a, t) => a + t.spent, 0)
              / Math.max(1, turns.reduce((a, t) => a + t.ap, 0)),
@@ -357,7 +363,8 @@ if (usage.length) {
   }
 }
 console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`
-  + `\u3000非法率 ${(avg(results.map((r) => r.illegalRate)) * 100).toFixed(1)}%`
+  + `\u3000非法率 ${(records.reduce((a, r) => a + (r.dropped?.length ?? 0), 0)
+     / Math.max(1, records.reduce((a, r) => a + (r.pickCount ?? 0), 0)) * 100).toFixed(1)}%`
   + `\u3000观测峰值 ${Math.max(...results.map((r) => r.obsPeak))} tok`
   + `\u3000令数用率 ${(avg(results.map((r) => r.apUse)) * 100).toFixed(0)}%`);
 

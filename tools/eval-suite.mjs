@@ -198,8 +198,14 @@ function summarize(run, px) {
     grades,
     elim: rs.filter((r) => r.eliminated).length,
     growth: avg(rs.map((r) => (r.start ? r.commanderies / r.start : 0))),
-    illegal: avg(rs.map((r) => r.illegalRate)),
-    apUse: avg(rs.map((r) => r.apUse)),
+    // 这两列**按令数汇总**，不是逐局求平均。逐局平均把打了 2 季就被灭的局
+    // 与打满 16 季的局等权，而短局的决策量只有满局的八分之一——
+    // 实测同一批数据两种口径差 22%（qwen3-235b：逐局平均 8.6%，汇总 11.0%），
+    // 且偏差方向固定：越惨的局越把非法率往下拽，正好美化了最该被看见的那些局
+    illegal: recs.reduce((a, r) => a + (r.dropped?.length ?? 0), 0)
+             / Math.max(1, recs.reduce((a, r) => a + (r.pickCount ?? 0), 0)),
+    apUse: recs.reduce((a, r) => a + (r.spent ?? 0), 0)
+           / Math.max(1, recs.reduce((a, r) => a + (r.ap ?? 0), 0)),
     obsPeak: Math.max(0, ...rs.map((r) => r.obsPeak)),
     calls: usage.length,
     promptTok: sum("prompt"), cachedTok: sum("cached"),
