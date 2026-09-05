@@ -5,8 +5,9 @@
 //
 // 三条是这个文件存在的理由，缺一条排行榜就不成立：
 //
-// 1. **必须有机器人基线。** 模型拿「均分 200」说明不了任何事，除非知道
-//    同席同 seed 下 bot:balanced 拿多少。基线不花钱，永远先跑。
+// 1. **必须有机器人基线，且必须是最强的那个机器人。** 模型拿「均分 200」
+//    说明不了任何事，除非知道同席同 seed 下机器人拿多少。基线不花钱，永远先跑。
+//    基线默认 bot:purpose——它是五个画像里最强的一个，见下面 BASELINE 处的实测。
 // 2. **必须报降级档位与推理占比。** 落在不同档位的模型受的约束不同
 //    （有无解码层强制、有无 temperature），推理档位不同则测试时算力差几十倍。
 //    并列在榜上，读者才知道这一列分数是在什么条件下拿的。
@@ -14,7 +15,7 @@
 //    吃光是我们的配置问题，混进「失败」计数就是把自己的 bug 算到模型头上。
 //
 // 用法：
-//   npm run eval:suite -- --agents=bot:balanced,bot:purpose,model:openai/gpt-5-nano
+//   npm run eval:suite -- --agents=bot:purpose,bot:balanced,model:openai/gpt-5-nano
 //   npm run eval:suite -- --agents=… --games=6 --reasoning=low --out=/tmp/suite
 import fs from "node:fs";
 import path from "node:path";
@@ -25,15 +26,20 @@ const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
   return hit ? hit.slice(k.length + 3) : d;
 };
-const AGENTS = arg("agents", "bot:balanced").split(",").filter(Boolean);
+const AGENTS = arg("agents", "bot:purpose").split(",").filter(Boolean);
 const GAMES = arg("games", "6");
 const REASONING = arg("reasoning", "");
 const KEYENUM = arg("keyenum", "");
 const OUT_DIR = arg("out", "");
 const CONCURRENCY = Number(arg("jobs", "3"));
 // 基线必须是**指定的**那一个，不能是「碰巧排最高的那个 bot」——
-// 后者会让每个对局方都显示成「不如基线」，而基线本身在换人
-const BASELINE = arg("baseline", "bot:balanced");
+// 后者会让每个对局方都显示成「不如基线」，而基线本身在换人。
+//
+// 默认取目的流而非均衡流：**基线取弱了，模型的分就是虚的**。
+// 五个画像同 seed 48 局：目的流 158.3、均衡流 154.2、投机流 147.9、
+// 进攻流 137.5、苟活流 0.0；配对 A/B 里目的流对均衡流是 +11.4±4.2。
+// 拿均衡流当基线，等于让每个模型白得四分
+const BASELINE = arg("baseline", "bot:purpose");
 // 单个对局方的墙钟上限（分钟，0 为不限）。超时只判这一个失败，其余照常收尾——
 // 此前一个卡住的提供方会把整跑无限期挂住，跑了半小时的其他模型一个字都拿不到。
 // 实测同一批 6 局里，最快的对局方 391s，最慢的两个 29 分钟仍未结束
