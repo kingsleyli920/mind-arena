@@ -25,6 +25,8 @@ import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildGeography, standingOf, epochLimitFor, GRADE_CN }
   from "../lib/game/engine/victory.ts";
 import { visibleLog } from "../lib/game/engine/intel.ts";
+import { buildIndex, captureFrame, attachOutcome, REPLAY_VERSION }
+  from "../lib/game/replay.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
@@ -72,6 +74,13 @@ const BUDGET = Number(arg("budget", "0")) || 0;
 const FULL = !has("brief");
 /** --provider=Parasail,Fireworks：钉住提供方。同一模型跳提供方会让结果不可比 */
 const PROVIDER = arg("provider", "");
+/** --replay=<路径>：同时落一份逐季录像 JSON，供网页播放器逐季回看。
+ *  实录（Markdown）是给人读的散文，录像是给播放器读的结构化局面——
+ *  引擎每季算出来的东西此前只有前一个出口 */
+const REPLAY = arg("replay", "");
+/** 其余势力的机器人画像。与 eval-run 同一份轮换口径 */
+const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
+const SEATS_ROT = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
 
 // ── 抽签：席位不手动指定 ────────────────────────────────────────────
 //
@@ -184,6 +193,17 @@ async function main() {
   const meta = [];
   let prev = snapshot(s, SEAT);
   const gained = [];   // 逐季净增，用来说趋势
+
+  // 录像索引。郡序取 commanderies.json 原序（= territory-grid 的 order），
+  // 不能用 Object.keys(s.commanderies)——后者是插入序，一旦分家疆域整体错位
+  const IDX = REPLAY ? buildIndex(
+    DATA.commanderies,
+    DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
+    ["scale", "crane", "square"],
+  ) : null;
+  const frames = [];
+  let prevStations = {};
+  let prevCaptured = [];
 
   while (!s.finished) {
     const turn = s.turn;
@@ -325,8 +345,46 @@ async function main() {
     const snapBefore = new Map(Object.values(s.commanderies)
       .filter((c) => c.owner === SEAT || (before.mine.some((m) => m.id === c.id)))
       .map((c) => [c.id, { ...c }]));
-    const r = resolve(s, adm.orders, G, P, ROSTER, GEO, DEFAULT_RULES, trace);
+    // 录像帧描述的是「这一季开始时的局面 + 这一季下的令」，所以在结算**前**采；
+    // 日志要结算后才有，结算完再补进这一帧
+    // ── 其余三十家：确定性机器人 ──────────────────────────────────
+    //
+    // 此前**整个文件没有这一段**：resolve 只收到被观察席位的命令，
+    // 其余三十家从头到尾一动不动。48 季实测零郡易主、全场命令 100% 出自本席——
+    // 于是这份「详细实录」记录的是一个人对着冻结的棋盘自弈，
+    // 而它正是用来看「模型到底怎么打」的那份材料。
+    //
+    // eval-run 与 melee 都有这一段，只有这里漏了。画像轮换与 eval-run 同口径，
+    // 但**跳过被观察席位**——那一席的命令已经在 adm.orders 里
+    const worldOrders = [];
+    {
+      const ids = Object.keys(s.factions).sort();
+      for (const [i, f] of ids.entries()) {
+        if (f === SEAT || s.factions[f].eliminated || s.factions[f].retired) continue;
+        const si = SEATS_ROT.indexOf(f);
+        worldOrders.push(...decide(s, f, G,
+          si >= 0 ? BOT_PROFILES[si % BOT_PROFILES.length] : BOT_PROFILES[i % BOT_PROFILES.length],
+          DEFAULT_RULES, ROSTER, P, GEO));
+      }
+    }
+    const allOrders = [...adm.orders, ...worldOrders];
+
+    const frame = IDX ? captureFrame(s, IDX, G, P, ROSTER, GEO, allOrders, {
+      seat: SEAT, picks, dropped: adm.dropped.map((d) => [d.key, d.reason]),
+      reason: reason || null, plan,
+      prevStations, prevCaptured,
+    }) : null;
+    if (IDX) {
+      prevStations = { ...s.stations };
+      prevCaptured = [...(s.capturedOfficers ?? [])];
+    }
+    const r = resolve(s, allOrders, G, P, ROSTER, GEO, DEFAULT_RULES, trace);
     const fresh = visibleLog(r.state, SEAT, mark);
+    if (frame) {
+      // 全场日志（不只我方可见的那一份）——播放器是上帝视角，不受迷雾限制
+      attachOutcome(frame, r.state.log.slice(mark), IDX.fi);
+      frames.push(frame);
+    }
     say("");
     say(`### 本季结算`);
     say("");
@@ -483,6 +541,34 @@ async function main() {
 
   fs.writeFileSync(OUT, lines.join("\n") + "\n");
   console.error(`\n→ ${OUT}`);
+
+  if (REPLAY && IDX) {
+    fs.writeFileSync(REPLAY, JSON.stringify({
+      version: REPLAY_VERSION,
+      meta: { seed: SEED, seasons: SEASONS, seat: SEAT, seatName: nameOf(SEAT),
+              agent: MODEL || AGENT, reasoning: MODEL ? REASONING : null,
+              packVersion: pack.version, promptVersion: PROMPT_VERSION,
+              winner: s.winner ?? null, finished: s.finished },
+      dict: IDX.dict, frames,
+    }));
+    const kb = (fs.statSync(REPLAY).size / 1024).toFixed(0);
+    console.error(`→ ${REPLAY}\u3000${frames.length} 帧\u3000${kb} KB`);
+
+    // 天下一动不动的哨兵。此前整个文件不给其余三十家下令，
+    // 48 季实测零郡易主、命令 100% 出自本席——而这份实录正是用来看
+    // 「模型到底怎么打」的材料，等于让它对着冻结的棋盘自弈。
+    // 静默失效的东西要有人吼一声，不然下次还是查不出来
+    if (frames.length > 4) {
+      const a = frames[0].own, z = frames[frames.length - 1].own;
+      const flips = a.reduce((n, v, i) => n + (v !== z[i] ? 1 : 0), 0);
+      const actors = new Set(frames.flatMap((f) => f.orders.map((o) => o[0]))).size;
+      if (flips === 0 || actors < 2) {
+        console.error(`\n⚠ 天下没动：${frames.length} 季里易主 ${flips} 郡、`
+          + `下过令的势力只有 ${actors} 家。其余势力多半没被驱动——`
+          + `这份实录记的是对着冻结棋盘的自弈，不能用。`);
+      }
+    }
+  }
 }
 
 await main();
