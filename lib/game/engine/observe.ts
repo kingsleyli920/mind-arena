@@ -20,7 +20,7 @@ import type { EngineParams } from "./params.ts";
 import { briefFor, standingOf, epochLimitFor, GRADE_CN, type Geography } from "./victory.ts";
 import type { Candidate, FactionId, GameState } from "./types.ts";
 
-export const OBSERVATION_VERSION = "1.2.0";
+export const OBSERVATION_VERSION = "1.3.0";
 
 export interface ObsCandidate {
   key: string;
@@ -67,7 +67,16 @@ export interface Observation {
    * 它会拿免费的刺探与调任把 picks 填满，令数一条不动
    */
   budget: { ap: number; carried: number; carryCap: number;
-            campaignAp: number; normalAp: number };
+            campaignAp: number; normalAp: number;
+            /**
+             * 上季**作废**了几条令。**为零时不发**。
+             *
+             * 每次决策都是独立问答，模型不知道自己上季有没有把令花完——
+             * 实测它们的用率是 67%~92%，而机器人 93%，每席·季平均扔 2.2~3.0 条。
+             * 一整局白扔一千五百条以上，等于拿四分之三的行动经济去打满负荷的对手。
+             * 这一项是把那个缺口直接摆到它眼前
+             */
+            wastedLastSeason?: number };
   /**
    * 国库与军费。金与令数是两条不同的约束：
    * 令数管「一季能做几件事」且几乎不结转，金**可积累**、按郡的贫富分布不均、
@@ -223,6 +232,7 @@ export function observe(
     },
     budget: {
       ap: f?.ap ?? 0, carried: f?.carried ?? 0, carryCap: P.carryCap,
+      ...(f?.wasted ? { wastedLastSeason: f.wasted } : {}),
       campaignAp: opts.rules?.campaignAp ?? 2, normalAp: opts.rules?.normalAp ?? 1,
     },
     standing: {

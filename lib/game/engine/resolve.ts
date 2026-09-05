@@ -886,6 +886,9 @@ export function resolve(
   // 余令直接蒸发——而规则摘要里明写着「结转 ≤2」，等于在骗模型。
   // refreshAp 会读它并在下季清零
   for (const f of Object.values(s.factions)) {
+    // 作废的是**超出结转上限**的那部分余令。记下来回传给模型——
+    // 它每季都是从零问答，不知道自己上季扔了几条
+    f.wasted = Math.max(0, f.ap - P.carryCap);
     f.carried = Math.max(0, Math.min(P.carryCap, f.ap));
   }
 

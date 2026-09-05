@@ -1542,3 +1542,26 @@ test("候选标签不重抄观测里已有的郡情 —— 一季十条内政等
     assert.match(c.label, /（[^）]*）$/, `内政候选没写「为什么是这一项」：${c.label}`);
   }
 });
+
+test("作废的令数要回传 —— 模型每季从零问答，不知道上季扔了几条", () => {
+  let s = fresh();
+  // 一条命令都不下：整季的令全剩下，超出结转上限的部分作废
+  const before = s.factions.yuanshao.ap;
+  assert.ok(before > P.carryCap, "袁绍开局令数不足以测出作废");
+  const settled = resolve(s, [], G, P, ROSTER, GEO).state;
+  assert.equal(settled.factions.yuanshao.carried, P.carryCap, "结转应顶到上限");
+  assert.equal(settled.factions.yuanshao.wasted, before - P.carryCap,
+    "作废量应是「余令 − 结转上限」");
+  // refreshAp 把结转折进下季的 ap 并清零，但 wasted 要活到模型看见为止
+  s = refreshAp(settled, P);
+  assert.equal(s.factions.yuanshao.wasted, before - P.carryCap,
+    "refreshAp 把作废量抹掉了 —— 那模型永远看不到它");
+  const o = observe(s, "yuanshao", G, P, ROSTER, GEO);
+  assert.equal(o.budget.wastedLastSeason, before - P.carryCap);
+
+  // 为零时不发：那是默认值，逐季写一遍纯属浪费
+  const spent = structuredClone(s);
+  spent.factions.yuanshao.wasted = 0;
+  assert.equal(observe(spent, "yuanshao", G, P, ROSTER, GEO).budget.wastedLastSeason, undefined,
+    "没作废还发这一项，白花 token");
+});
