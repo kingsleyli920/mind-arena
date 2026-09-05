@@ -280,9 +280,26 @@ export function listActions(
         const seen = observedGarrison(s, f, tid, P);
         // 这个比值只用来给候选排序（先列打得动的），不进 label——
         // 它与引擎判胜负用的量不是一回事，写进 label 会误导
-        return { tid, e, seen, ratio: seen.value > 0 ? src.garrison / seen.value : 99 };
+        // 分子要算上**待命军团**：出征时它整建制上，而这里只看郡守军，
+        // 于是一个「守军已被集结抽干、但军团就在城里」的郡被判成打不动。
+        // 同一函数下面的 want 早就在用 ready.troops，两处口径必须一致
+        const ready = readyAt(s, f, e.from);
+        const force = src.garrison + (ready?.troops ?? 0);
+        return { tid, e, seen, ratio: seen.value > 0 ? force / seen.value : 99 };
       })
-      .filter((x) => canOrder(x.e.from) && x.ratio > 0.35)   // 兵力比过低的不列
+      // 兵力比过低的不列——但**要升档的目标不许滤掉**。
+      //
+      // 这条过滤本意是「别用无效选项浪费注意力」，可它是单季快照：
+      // 引擎里同一目标的增兵会无上限并入既有围城军（resolve 的围城累加），
+      // 被围郡每季掉 25% 守军、攻方每季白得 +1 缺口——围三季是包里
+      // 明写的「啃得动高城防之郡的办法」。ratio 0.1 的目标未必真打不动。
+      //
+      // 而它滤掉的恰恰是最值钱的那些：实测一局里简报每季报
+      // 「豫州 共 6 郡，我 3，无主 3｜再取 1 郡即控制」，候选表里却没有梁国，
+      // 模型于是把令花在反复刺探上（86 条），确认一件它改不了的事。
+      // 简报与候选表在对模型说两套话，这不是这套评测想测的维度
+      .filter((x) => canOrder(x.e.from)
+        && (x.ratio > 0.35 || (geo ? gainOf(s, geo, f, x.tid)?.upgrade != null : false)))
       .sort((a, b) => b.ratio - a.ratio || a.tid.localeCompare(b.tid))
       .slice(0, rules.perTypeCap);
 

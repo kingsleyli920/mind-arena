@@ -73,6 +73,12 @@ while (!s.finished) {
       cands: o.candidates.length,
       candTok: estTokens(JSON.stringify(o.candidates)),
       reportTok: estTokens(JSON.stringify(o.report)),
+      // 军团条数单独盯着。observe 的 armies 段无上限无聚合，而**这个闸门只跑机器人**——
+      // 机器人集结完就用掉、不囤，条数峰值只有个位数，于是闸门长期是假绿灯。
+      // 模型会囤：实测一局末季袁绍 210 支，armies 段单独 10800 tok，整份观测约 24k，
+      // 是闸门的 2.4 倍。闸门测不到的正是模型独有的行为，所以要显式盯条数
+      armies: o.armies.length,
+      armyTok: estTokens(JSON.stringify(o.armies)),
     });
   }
   since = s.log.length;
@@ -101,10 +107,15 @@ for (const [seat, rs] of Object.entries(bySeat)) {
   );
 }
 const over = rows.filter((r) => r.total > LIMIT);
+const ARMY_CAP = 20;
+const fat = rows.filter((r) => r.armies > ARMY_CAP);
+console.log(`\n军团条数 峰值 ${Math.max(...rows.map((r) => r.armies))}`
+  + `\u3000该段 tok 峰值 ${Math.max(...rows.map((r) => r.armyTok))}`
+  + (fat.length ? `\u3000✗ ${fat.length} 席·季超过 ${ARMY_CAP} 条` : `\u3000✓ 均 ≤ ${ARMY_CAP} 条`));
 const cands = rows.map((r) => r.cands);
 console.log(`\n候选条目数 max/min = ${Math.max(...cands)}/${Math.min(...cands)}`
   + ` = ${(Math.max(...cands) / Math.max(1, Math.min(...cands))).toFixed(2)}`);
 console.log(over.length
   ? `✗ ${over.length}/${rows.length} 席·季超出 ${LIMIT} tok，最大 ${Math.max(...over.map((r) => r.total))}`
   : `✓ ${rows.length} 席·季全部 ≤ ${LIMIT} tok`);
-process.exit(over.length ? 1 : 0);
+process.exit(over.length || fat.length ? 1 : 0);
