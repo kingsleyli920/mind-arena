@@ -67,9 +67,28 @@ test("包：界面读的运行时包必须与内容包同源", () => {
   // 一进浏览器却是「载入失败：内容包缺少 constants.阵型.克制加缺口」——
   // 引擎读新包，界面读的是几个月前打的旧包。
   // 凡是同一份数据存在第二份副本的，都要有一条测试把两份钉在一起
+  //
+  // 这条判据原先只钉了 pack 一份。包里其实还整份带着 scenario、commanderyState、
+  // adjacency 等等，而「同一份数据存第二份副本」的毛病一视同仁——重排势力配色之后
+  // 引擎和复盘页都换了新色，对局页却仍画着旧色，就是因为它读的是包里那份陈的 scenario。
   const runtime = JSON.parse(fs.readFileSync("public/game/runtime-194.json", "utf8"));
-  assert.deepEqual(runtime.pack, pack,
-    "public/game/runtime-194.json 里的内容包已过期 —— 跑 node tools/build-runtime-bundle.mjs");
+  const stale = "已过期 —— 跑 node tools/build-runtime-bundle.mjs";
+  assert.deepEqual(runtime.pack, pack, `运行时包里的内容包${stale}`);
+  for (const [key, file] of [
+    ["scenario", "scenario-194.json"],
+    ["commanderyState", "commandery-state.json"],
+    ["adjacency", "adjacency.json"],
+    ["troopTypes", "troop-types.json"],
+    ["provinceSeats", "province-seats-194.json"],
+  ]) {
+    assert.deepEqual(runtime[key], JSON.parse(fs.readFileSync(`lib/game/data/${file}`, "utf8")),
+      `运行时包里的 ${file} ${stale}`);
+  }
+  // commanderies 与 officers 是**裁过的**（全量 officers.json 有 1MB，玩家不该为看一局先下它），
+  // 整份比不了，只钉住条数与主键
+  assert.equal(runtime.commanderies.length,
+    JSON.parse(fs.readFileSync("lib/game/data/commanderies.json", "utf8")).length,
+    `运行时包里的郡国数${stale}`);
 });
 
 test("包：写给模型的数必须与引擎实际用的一致", () => {
