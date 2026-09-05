@@ -380,14 +380,44 @@ function drawOverlay(fi){
       +(MAJOR.has(top)?D.facColor[top]:"#5C564B")+'">'+txt+'</text>');
   }
 
-  // ── 势力名标在各家治所上 ──────────────────────────────
-  // 「谁在哪」是看一局最先要回答的问题，而地名回答不了它
+  // ── 势力名标在**疆域重心**上 ──────────────────────────
+  //
+  // 此前标在各家治所上，而曹操（济阴）、吕布（山阳）、袁绍（魏郡）的治所
+  // 本来就挨在一起，三个名字必然叠成一团；靠边的（乌桓、鲜卑）还会被画布裁掉。
+  // 重心把标签推到各自地块的中间，天然散开。
+  // 再加两道：**收进画布**、**竖直方向去重叠**（按重心 y 排序，压上就往下推）
+  const anchors=[];
   for(const [k,st] of Object.entries(f.fac)){
     const fi2=+k;
-    if(!MAJOR.has(fi2) || !st || st[8] || st[0]<0) continue;
-    const [x,y]=D.xy[st[0]];
-    parts.push('<text class="facname" x="'+x+'" y="'+(y+44)+'" text-anchor="middle" fill="'
-      +D.facColor[fi2]+'">'+esc(D.facName[fi2])+'</text>');
+    if(!MAJOR.has(fi2) || !st || st[8]) continue;
+    let sx=0, sy=0, n=0;
+    for(let i=0;i<f.own.length;i++) if(f.own[i]===fi2){ sx+=D.xy[i][0]; sy+=D.xy[i][1]; n++; }
+    if(!n) continue;
+    // 字宽实算：26px 下一个汉字约占 26px，拉丁与标点约占一半。
+    // 按 length×0.62 估会把「吕布（张邈、陈宫）」算窄一半，去重叠就形同虚设
+    const nm=D.facName[fi2];
+    let w=0; for(const ch of nm) w += /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/.test(ch) ? 26 : 13;
+    anchors.push({ fi:fi2, x:Math.min(1815-w/2-14, Math.max(w/2+14, sx/n)),
+                   y:Math.min(1455, Math.max(34, sy/n)), w, txt:esc(D.facName[fi2]) });
+  }
+  // 去重叠要**多轮**：一轮按序推，推下去的那个可能又压住下一个。
+  // 四轮之后 194 年春（所有势力都还在、最挤的一帧）实测撞不出来
+  anchors.sort((a,b)=>a.y-b.y);
+  for(let pass=0;pass<4;pass++){
+    let moved=false;
+    for(let i=1;i<anchors.length;i++) for(let j=0;j<i;j++){
+      const a=anchors[j], b=anchors[i];
+      if(Math.abs(a.x-b.x) < (a.w+b.w)/2 && Math.abs(b.y-a.y) < 40){
+        b.y = a.y+40; moved=true;
+      }
+    }
+    anchors.sort((a,b)=>a.y-b.y);
+    if(!moved) break;
+  }
+  for(const a of anchors) a.y=Math.min(1455, Math.max(34, a.y));
+  for(const a of anchors){
+    parts.push('<text class="facname" x="'+a.x.toFixed(1)+'" y="'+a.y.toFixed(1)
+      +'" text-anchor="middle" fill="'+D.facColor[a.fi]+'">'+a.txt+'</text>');
   }
 
   // 地名**只标本季易主的那几个**。
