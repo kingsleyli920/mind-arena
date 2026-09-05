@@ -4,7 +4,7 @@
 // 若让模型自由填参，仅征伐一项就是 目标 × 主将 × 兵力档 × 器械档，
 // 袁绍十三郡下轻易过万种组合——模型选不过来，校验也挡不住乱填。
 // 预筛之后每类动作 5–15 条，全部加起来落在 O(10²)，这才是可枚举。
-import { recruitable, retinueAt, stationedAt, troopCap, isFiller,
+import { recruitable, retinueAt, stationedAt, troopCap, isFiller, governorOf,
   type OfficerRef, type Roster }
   from "./officers.ts";
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
@@ -791,12 +791,21 @@ export function listActions(
             post: { at: c.id, officer: o.id, have, front,
                     leadership: o.leadership, might: o.might,
                     politics: o.politics, charisma: o.charisma,
-                    from: s.stations[o.id] ?? null },
+                    from: s.stations[o.id] ?? null,
+                    govPolitics: governorOf(s, roster, c.id, P)?.politics ?? null },
             label: `调 ${o.name} 驻 ${c.id}（${front ? "临敌" : "后方"}，现 ${have} 将；`
                  + `统${o.leadership} 武${o.might} 政${o.politics} 魅${o.charisma}`
                  + `${o.aptitudes.length ? " " + o.aptitudes.join("/") : ""}）`
                  + `${s.stations[o.id] && s.stations[o.id] !== c.id ? `｜自 ${s.stations[o.id]}` : ""}`
-                 + `${o.faction === f ? "" : "｜在野征辟"}`,
+                 + `${o.faction === f ? "" : "｜在野征辟"}`
+                 // 太守是「驻此郡者中政治最高者」派生的，收入按太守政治打系数。
+                 // 候选此前只写这个人的政治，不写**现任太守**的——于是
+                 // 「调他来会不会换掉太守、换了收入变多少」在观测里无从判断。
+                 // 只在真会换人时写这一段：不换就不发，那是最常见的情形
+                 + `${(() => {
+                     const gp = governorOf(s, roster, c.id, P)?.politics ?? null;
+                     return gp !== null && o.politics > gp ? `｜太守政 ${gp}→${o.politics}` : "";
+                   })()}`,
           });
         }
       }

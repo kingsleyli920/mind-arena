@@ -1502,3 +1502,25 @@ test("目的：观测里的纪元要能据以决策 —— 序号本身不含信
   assert.equal(observe(s3, "yuanshao", G, P, ROSTER, GEO).clock.nextNeutralGrowth, undefined,
     "末纪元还在发「下一纪元增速」，白花 token");
 });
+
+test("调任候选要写明会不会换掉太守 —— 收入按太守政治打系数", () => {
+  const s = fresh();
+  const cands = listActions(s, "liubiao", G, P, undefined, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith("appoint:"));
+  assert.ok(cands.length > 0, "刘表无调任候选，测不出");
+
+  for (const c of cands) {
+    const gp = c.post?.govPolitics ?? null;
+    const better = gp !== null && c.post.politics > gp;
+    assert.equal(/｜太守政 \d+→\d+/.test(c.label), better,
+      `「会不会换太守」与标签不一致：${c.label}`);
+    // 换太守的那一段必须报**现任**的政治，不是随手一个数
+    if (better) {
+      const m = /｜太守政 (\d+)→(\d+)/.exec(c.label);
+      assert.equal(Number(m[1]), gp, "标签里的现任太守政治与 governorOf 算的不是一个数");
+      assert.equal(Number(m[2]), c.post.politics);
+    }
+  }
+  // 不换太守时不发这一段——那是最常见的情形，逐条写一遍纯属浪费
+  assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
+});

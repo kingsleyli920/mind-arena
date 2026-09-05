@@ -303,5 +303,11 @@ export interface Candidate {
     leadership: number; might: number; politics: number; charisma: number;
     /** 自何处调来；在野征辟为 null */
     from: CommanderyId | null;
+    /**
+     * **现任太守**的政治。太守由「驻此郡者中政治最高者」派生，
+     * 收入按它打系数——不给这个数，「调他来会不会换掉太守」就无从判断。
+     * 郡中无人则为 null
+     */
+    govPolitics: number | null;
   };
 }
