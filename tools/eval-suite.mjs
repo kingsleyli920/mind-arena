@@ -29,6 +29,8 @@ const arg = (k, d) => {
 const AGENTS = arg("agents", "bot:purpose").split(",").filter(Boolean);
 const GAMES = arg("games", "6");
 const REASONING = arg("reasoning", "");
+/** 每局季数。0 = 用内容包的默认值（16） */
+const SEASONS = Number(arg("seasons", "0")) || 0;
 const KEYENUM = arg("keyenum", "");
 const OUT_DIR = arg("out", "");
 const CONCURRENCY = Number(arg("jobs", "3"));
@@ -77,6 +79,12 @@ function runOne(spec) {
   const jsonOut = path.join(tmp, `${spec.replace(/[/:]/g, "_")}.json`);
   const args = ["--env-file-if-exists=.env.local", "--experimental-strip-types",
     "tools/eval-run.mjs", `--games=${GAMES}`, `--json=${jsonOut}`];
+  // 局长必须透传。此前这里不转发 --seasons，于是
+  // `npm run eval:suite -- --seasons=64` 会**静默按 16 季跑**，
+  // 而报告上一个字都看不出来——一次 720 局的长局梯度实验因此只能绕开套件、
+  // 自己拼汇总。子进程参数是这个文件与 eval-run 之间唯一的接口，
+  // 加一个参数就要在这里加一行，漏了就是静默失效
+  if (SEASONS) args.push(`--seasons=${SEASONS}`);
   if (kind === "model") { args.push("--agent=model", `--model=${variant}`); }
   else args.push(`--agent=${spec}`);
   if (REASONING && kind === "model") args.push(`--reasoning=${REASONING}`);
@@ -338,7 +346,7 @@ if (creditsOut) {
   console.log("  失败的席·季根本没发出请求，那不是模型答不上来。充值后重跑。\n");
 }
 console.log(`\n${"═".repeat(96)}`);
-console.log(`排行榜（同 seed、同对手、席位轮换）`
+console.log(`排行榜（同 seed、同对手、席位轮换、每局 ${SEASONS || "16（包默认）"} 季）`
   + `${Number(GAMES) < MIN_GAMES_FOR_POWER
       ? `\u3000⚠ ${GAMES} 局分辨力不足，名次不可当结论` : ""}\n`);
 console.log("对局方".padEnd(40) + "均分".padStart(7) + "对基线±95%".padStart(12)
