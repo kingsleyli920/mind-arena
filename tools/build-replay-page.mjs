@@ -685,8 +685,12 @@ const WHY={"unknown-key":"候选表里没有","duplicate":"重复","over-budget"
 const marks=[];
 for(let i=1;i<N;i++){
   const a=F[i-1].own, b=F[i].own;
-  let ch=0; for(let k=0;k<b.length;k++) if(a[k]!==b[k] && (a[k]===ME||b[k]===ME)) ch++;
-  if(ch) marks.push('<div class="mark" style="left:'+(i/(N-1)*100)+'%" title="第 '+(i+1)+' 季"></div>');
+  // 盯的是**全部模型席位**的疆域变动，不是第一席。
+  // 混战里第一席可能早早出局——104 季那局曹操第 4 季就没了，
+  // 只盯它整条时间轴上只剩两个锚点，等于没有
+  let ch=0; for(let k=0;k<b.length;k++)
+    if(a[k]!==b[k] && (HILITE.has(a[k])||HILITE.has(b[k]))) ch++;
+  if(ch) marks.push('<div class="mark" style="left:'+(i/(N-1)*100)+'%" title="第 '+(i+1)+' 季 · '+ch+' 郡易主"></div>');
 }
 $("marks").innerHTML=marks.join("");
 
