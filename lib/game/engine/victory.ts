@@ -195,11 +195,10 @@ export function briefFor(
     + `控制 ${st.controlledZhou} 州（开局 ${fs_.startZhou}）${st.zhouNames.length ? `：${st.zhouNames.join("、")}` : ""}，`
     + `据州治 ${st.zhouSeats} 个（开局 ${fs_.startSeats}），夺自他方 ${st.conquests} 郡`,
   );
-  lines.push(
-    `【档位】现为${GRADE_CN[fs_.bestGrade]}档。升档要相对开局有增量：`
-    + `多控 1 州或多据 1 州治 → 乙；多控 2 州 → 甲；`
-    + `郡数高于开局且至少一郡夺自他方 → 丙`,
-  );
+  // 只报**现档**。升档条件那三句是逐季不变的常量，规则摘要里
+  // 「怎么算赢」一节已经逐字写过一遍——每季再发一遍，16 季白花八百多 tok，
+  // 而观测峰值只剩三百 tok 余量
+  lines.push(`【档位】现为${GRADE_CN[fs_.bestGrade]}档`);
 
   // 逐州列出差多少，这是「往哪打」的直接依据。
   // 只列够得着的州——把交州、并州这类隔着半个天下的地方也铺出来，
@@ -227,7 +226,12 @@ export function briefFor(
       else others.set(o, (others.get(o) ?? 0) + 1);
     }
     if (adj && !reachable.has(z)) continue;                   // 够不着的州不列
-    if (mine === 0 && vacant === 0) continue;
+    // 此前还有一条「我 0 郡且无空地就不列」。它恰好把**够得着、但整州都在
+    // 他方手里**的州全部滤掉了——而那正是最值钱的扩张方向：
+    // 一个五郡全归吕布的徐州，模型在简报里一个字都看不到，
+    // 「再取 N 郡即控制」这句唯一说明「要打多少」的话也就没有了。
+    // 够不着的仍然不列（reachable 那条还在），列的都是打得着的
+    if (!adj && mine === 0 && vacant === 0) continue;
     const need = Math.floor(members.length / 2) + 1 - mine;
     const seat = geo.zhouSeat.get(z);
     const seatWho = seat ? s.commanderies[seat]?.owner ?? "无主" : "?";
