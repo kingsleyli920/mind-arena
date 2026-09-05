@@ -1524,3 +1524,21 @@ test("调任候选要写明会不会换掉太守 —— 收入按太守政治打
   // 不换太守时不发这一段——那是最常见的情形，逐条写一遍纯属浪费
   assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
 });
+
+test("候选标签不重抄观测里已有的郡情 —— 一季十条内政等于抄十遍", () => {
+  const s = fresh();
+  const o = observe(s, "liubiao", G, P, ROSTER, GEO);
+  const gov = o.candidates.filter((c) => c.key.startsWith("govern:"));
+  assert.ok(gov.length >= 3, "内政候选太少，测不出");
+  const mine = new Map(o.mine.map((m) => [m.id, m]));
+  for (const c of gov) {
+    const id = c.key.split(":")[1];
+    const m = mine.get(id);
+    assert.ok(m, `内政候选指向 ${id}，而它不在 mine[] 里`);
+    // 这五项 mine[] 里逐郡都有，标签里再写一遍就是同一份信息付两次钱
+    assert.ok(!/产\d/.test(c.label) && !/心\d/.test(c.label) && !/防\d/.test(c.label),
+      `内政候选又抄了一遍郡情：${c.label}`);
+    // 但引擎的优先级判断必须留着——那是别处推不出来的
+    assert.match(c.label, /（[^）]*）$/, `内政候选没写「为什么是这一项」：${c.label}`);
+  }
+});

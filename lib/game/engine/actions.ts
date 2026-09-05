@@ -521,9 +521,10 @@ export function listActions(
         key: `govern:${c.id}:${policy}`,
         action: { type: "govern", at: c.id, policy: policy as never },
         cost: rules.normalAp,
-        label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}`
-             + `（${why}；产${c.yieldTier} 心${c.moraleTier} 防${c.defense}`
-             + ` ${unitName(P, c.unit)}·${GEAR_CN[c.gear]}）`,
+        // 产/心/防/兵种/械**不重复写**：这五项 observe 的 mine[] 里逐郡都有，
+        // 而内政候选一季能有十条，等于把同一份郡情抄十遍。
+        // why 留着——它是引擎的优先级判断（「临敌且城防薄」），别处推不出来
+        label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}（${why}）`,
       });
     }
   }
