@@ -1,0 +1,1175 @@
+- generic [ref=f3e2]:
+  - banner [ref=f3e3]:
+    - generic [ref=f3e4]: Mind Arena · 兴平元年（194）战略层 · MERS v0.1
+    - heading "四个模型与五个机器人， 同一批 48 局" [level=1] [ref=f3e5]: 四个模型与五个机器人，同一批 48 局
+    - paragraph [ref=f3e6]: 同一批 seed、同一批对手、六个席位轮换。模型只做选择题——引擎先把合法候选算出来， 模型按 key 挑，从不自己填参数。下面每一个数都能从产物文件里重算出来。
+    - generic [ref=f3e7]:
+      - generic [ref=f3e8]:
+        - term [ref=f3e9]: 对局
+        - definition [ref=f3e10]: 460 局
+      - generic [ref=f3e11]:
+        - term [ref=f3e12]: 模型调用
+        - definition [ref=f3e13]: 3 105 次
+      - generic [ref=f3e14]:
+        - term [ref=f3e15]: 决策记录
+        - definition [ref=f3e16]: 3 109 席·季
+      - generic [ref=f3e17]:
+        - term [ref=f3e18]: 实扣
+        - definition [ref=f3e19]: $5.40
+      - generic [ref=f3e20]:
+        - term [ref=f3e21]: 机器人成本
+        - definition [ref=f3e22]: $0.00
+      - generic [ref=f3e23]:
+        - term [ref=f3e24]: 统一结局
+        - definition [ref=f3e25]: 0 次
+  - generic [ref=f3e26]:
+    - generic [ref=f3e27]: 一眼看完
+    - paragraph [ref=f3e28]: 模型在该赢的地方赢了很多，在弱势力上输了回去； 平均下来的「没差别」是一次抵消，不是一个结论。
+    - generic [ref=f3e29]:
+      - generic [ref=f3e30]:
+        - generic [ref=f3e31]: +114分
+        - heading "给它十三个郡，它就赢" [level=3] [ref=f3e32]
+        - paragraph [ref=f3e33]:
+          - text: 袁绍席（开局 13 郡），四个模型
+          - strong [ref=f3e34]: 全部显著赢过最强的机器人
+          - text: ， 最多高出 114 分。刘表席（7 郡）三个模型显著赢。
+        - link "→ 逐席位拆开" [ref=f3e35] [cursor=pointer]:
+          - /url: "#seats"
+      - generic [ref=f3e36]:
+        - generic [ref=f3e37]: −100分
+        - heading "给它一个郡，它比机器人死得快" [level=3] [ref=f3e38]
+        - paragraph [ref=f3e39]:
+          - text: 曹操席（开局 1 郡）qwen3-30b 落后 100 分，8 局全灭； 袁术席（2 郡）hy3 落后 120 分。
+          - strong [ref=f3e40]: 开局越弱，机器人越稳。
+        - link "→ 逐席位拆开" [ref=f3e41] [cursor=pointer]:
+          - /url: "#seats"
+      - generic [ref=f3e42]:
+        - generic [ref=f3e43]: 1 908条令
+        - heading "它每季扔掉两三条令" [level=3] [ref=f3e44]
+        - paragraph [ref=f3e45]:
+          - text: 令数用率：模型 67%~92%，机器人 93%。一局白扔一千五到一千九百条。
+          - strong [ref=f3e46]: 这不是判断力的差距，是吞吐的差距
+          - text: ——拿四分之三的行动经济去打满负荷的对手。
+        - link "→ 打法形状" [ref=f3e47] [cursor=pointer]:
+          - /url: "#shape"
+      - generic [ref=f3e48]:
+        - generic [ref=f3e49]: 6州 · 超档
+        - heading "给足时间，它真能滚起来" [level=3] [ref=f3e50]
+        - paragraph [ref=f3e51]:
+          - text: 两家模型同场 32 季，glm 的袁绍从 13 郡打到
+          - strong [ref=f3e52]: 40 郡 6 州
+          - text: ，摸到超档。 规则机器人跑了 720 局最高只到 3 州 25 郡，超档零次。
+        - link "→ 两家同场" [ref=f3e53] [cursor=pointer]:
+          - /url: "#melee"
+      - generic [ref=f3e54]:
+        - generic [ref=f3e55]: −69分
+        - heading "尺子测的是「曾经」，不是「最后」" [level=3] [ref=f3e56]
+        - paragraph [ref=f3e57]:
+          - text: 档位取的是
+          - strong [ref=f3e58]: 历史最高档
+          - text: ，只往上不往下。64 季自对局里 27/48 局 终局低于历史最高档，平均掉 69 分。
+          - strong [ref=f3e59]: 「越到后期越强」这个问题，旧尺子答不了。
+        - link "→ 局变长会怎样" [ref=f3e60] [cursor=pointer]:
+          - /url: "#long"
+      - generic [ref=f3e61]:
+        - generic [ref=f3e62]: 49倍
+        - heading "路由层的差异比模型之间还大" [level=3] [ref=f3e63]
+        - paragraph [ref=f3e64]:
+          - text: 同一个 model id，一次评测被路由到
+          - strong [ref=f3e65]: 14 家
+          - text: 提供方：出参量差 49 倍、 延时差 136 倍。而一整批 50.9% 的「非法率」，实际是其中
+          - strong [ref=f3e66]: 一家
+          - text: 的编码 bug。
+        - link "→ 路由层" [ref=f3e67] [cursor=pointer]:
+          - /url: "#route"
+  - generic [ref=f3e68]:
+    - generic [ref=f3e69]: 一 · 总榜
+    - heading "没有一个模型显著赢过最强的机器人" [level=2] [ref=f3e70]
+    - generic [ref=f3e71]:
+      - paragraph [ref=f3e72]: 这是最要紧的一句话。四个模型里最好的两个确实排在机器人前面， 但 48 局的配对区间盖住了零——差距不出噪声。
+      - paragraph [ref=f3e73]:
+        - text: 基线取的是 bot:purpose（目的流），不是原来的均衡流。 五个机器人画像同场：目的流 158.3、均衡流 154.2、投机流 147.9、进攻流 137.5、苟活流 0.0。
+        - strong [ref=f3e74]: 基线取弱了，模型的分就是虚的
+        - text: ——原先用均衡流当基线，等于白送每个模型四分。
+    - table [ref=f3e76]:
+      - rowgroup [ref=f3e77]:
+        - row [ref=f3e78]:
+          - columnheader "对局方" [ref=f3e79]
+          - columnheader "局数" [ref=f3e80]
+          - columnheader "均分" [ref=f3e81]
+          - columnheader [ref=f3e82]
+          - columnheader "对目的流 ±95%" [ref=f3e83]
+          - columnheader "疆域倍数" [ref=f3e84]
+          - columnheader "出局" [ref=f3e85]
+          - columnheader "非法率" [ref=f3e86]
+          - columnheader "令数用率" [ref=f3e87]
+          - columnheader "实扣" [ref=f3e88]
+      - rowgroup [ref=f3e89]:
+        - row [ref=f3e90]:
+          - cell "z-ai/glm-5.3-flash" [ref=f3e91]
+          - cell "43" [ref=f3e94]
+          - cell "174.4" [ref=f3e95]
+          - cell [ref=f3e96]
+          - cell "+16±28" [ref=f3e99]
+          - cell "1.46" [ref=f3e106]
+          - cell "5/43" [ref=f3e107]
+          - cell "3.6%" [ref=f3e108]
+          - cell "72%" [ref=f3e109]
+          - cell "$1.546" [ref=f3e110]
+        - row [ref=f3e111]:
+          - cell "tencent/hy3" [ref=f3e112]
+          - cell "33" [ref=f3e115]
+          - cell "172.7" [ref=f3e116]
+          - cell [ref=f3e117]
+          - cell "+12±35" [ref=f3e120]
+          - cell "1.27" [ref=f3e127]
+          - cell "10/33" [ref=f3e128]
+          - cell "2.5%" [ref=f3e129]
+          - cell "92%" [ref=f3e130]
+          - cell "$1.639" [ref=f3e131]
+        - row [ref=f3e132]:
+          - cell [ref=f3e133]:
+            - generic [ref=f3e134]: bot:purpose 目的流
+            - text: 基线
+          - cell "48" [ref=f3e136]
+          - cell "158.3" [ref=f3e137]
+          - cell [ref=f3e138]
+          - cell "—" [ref=f3e141]
+          - cell "1.37" [ref=f3e142]
+          - cell "5/48" [ref=f3e143]
+          - cell "0.0%" [ref=f3e144]
+          - cell "93%" [ref=f3e145]
+          - cell "—" [ref=f3e146]
+        - row [ref=f3e147]:
+          - cell "bot:balanced 均衡流" [ref=f3e148]
+          - cell "48" [ref=f3e151]
+          - cell "154.2" [ref=f3e152]
+          - cell [ref=f3e153]
+          - cell "−4±21" [ref=f3e156]
+          - cell "1.56" [ref=f3e163]
+          - cell "5/48" [ref=f3e164]
+          - cell "0.0%" [ref=f3e165]
+          - cell "95%" [ref=f3e166]
+          - cell "—" [ref=f3e167]
+        - row [ref=f3e168]:
+          - cell "bot:opportunist 投机流" [ref=f3e169]
+          - cell "48" [ref=f3e172]
+          - cell "147.9" [ref=f3e173]
+          - cell [ref=f3e174]
+          - cell "−10±17" [ref=f3e177]
+          - cell "1.43" [ref=f3e184]
+          - cell "4/48" [ref=f3e185]
+          - cell "0.0%" [ref=f3e186]
+          - cell "94%" [ref=f3e187]
+          - cell "—" [ref=f3e188]
+        - row [ref=f3e189]:
+          - cell "qwen/qwen3-235b-a22b" [ref=f3e190]
+          - cell "48" [ref=f3e193]
+          - cell "143.8" [ref=f3e194]
+          - cell [ref=f3e195]
+          - cell "−15±27" [ref=f3e198]
+          - cell "0.91" [ref=f3e205]
+          - cell "20/48" [ref=f3e206]
+          - cell "11.0%" [ref=f3e207]
+          - cell "74%" [ref=f3e208]
+          - cell "$0.892" [ref=f3e209]
+        - row [ref=f3e210]:
+          - cell "bot:aggressive 进攻流" [ref=f3e211]
+          - cell "48" [ref=f3e214]
+          - cell "137.5" [ref=f3e215]
+          - cell [ref=f3e216]
+          - cell "−21±23" [ref=f3e219]
+          - cell "0.92" [ref=f3e226]
+          - cell "18/48" [ref=f3e227]
+          - cell "0.0%" [ref=f3e228]
+          - cell "92%" [ref=f3e229]
+          - cell "—" [ref=f3e230]
+        - row [ref=f3e231]:
+          - cell "qwen/qwen3-30b-a3b" [ref=f3e232]
+          - cell "48" [ref=f3e235]
+          - cell "120.8" [ref=f3e236]
+          - cell [ref=f3e237]
+          - cell "−38±25" [ref=f3e240]
+          - cell "1.15" [ref=f3e247]
+          - cell "14/48" [ref=f3e248]
+          - cell "7.1%" [ref=f3e249]
+          - cell "67%" [ref=f3e250]
+          - cell "$0.667" [ref=f3e251]
+        - row [ref=f3e252]:
+          - cell "bot:turtle 苟活流" [ref=f3e253]
+          - cell "48" [ref=f3e256]
+          - cell "0.0" [ref=f3e257]
+          - cell [ref=f3e258]
+          - cell "−158±19" [ref=f3e260]
+          - cell "0.96" [ref=f3e267]
+          - cell "0/48" [ref=f3e268]
+          - cell "0.0%" [ref=f3e269]
+          - cell "83%" [ref=f3e270]
+          - cell "—" [ref=f3e271]
+      - caption [ref=f3e272]:
+        - text: 配对差按
+        - strong [ref=f3e273]: 双方都打过的同一局号
+        - text: 相减，不是均分相减——glm 与 hy3 因预算封顶只跑了 43 局和 33 局。 带 灰字 的表示 95% 区间盖住了零。分数是
+        - strong [ref=f3e274]: 相对开局的增量
+        - text: ： 丁 0 / 丙 100 / 乙 200 / 甲 300，守成不得分。苟活流拿 0 分是验收项而不是缺陷——它证明「存续本身不得分」这条真的成立。
+    - generic [ref=f3e275]:
+      - heading "为什么 48 局还不够" [level=4] [ref=f3e276]
+      - paragraph [ref=f3e277]:
+        - text: 每局的配对差只能取 0 或 ±100（档位是四级台阶），噪声天然很大。要把 ±28 压到能分辨 ±16 的差距， 局数还得往上翻两三倍。当前这份榜能确定的只有两件事：
+        - strong [ref=f3e278]: qwen3-30b 显著落后
+        - text: ， 以及
+        - strong [ref=f3e279]: 苟活流真的拿不到分
+        - text: 。其余名次都在噪声里。
+  - generic [ref=f3e280]:
+    - generic [ref=f3e281]: 二 · 按席位拆开
+    - heading "开局越强，模型赢得越多；开局越弱，机器人越稳" [level=2] [ref=f3e282]
+    - generic [ref=f3e283]:
+      - paragraph [ref=f3e284]: 总榜的「没差别」是一次抵消。把同样的配对差按席位拆开， 结构立刻出来了——而且四个模型的方向完全一致。
+      - paragraph [ref=f3e285]:
+        - text: 袁绍开局十三郡，四个模型
+        - strong [ref=f3e286]: 全部显著赢过基线
+        - text: ，最多的高出 114 分； 刘表开局七郡，三个模型显著赢。反过来，曹操一郡、袁术两郡这两个最难的席位上， 机器人赢，有的赢得还很多。
+    - table [ref=f3e288]:
+      - rowgroup [ref=f3e289]:
+        - row [ref=f3e290]:
+          - columnheader "席位" [ref=f3e291]
+          - columnheader "开局" [ref=f3e292]
+          - columnheader "glm-5.3-flash" [ref=f3e293]
+          - columnheader "tencent/hy3" [ref=f3e294]
+          - columnheader "qwen3-235b" [ref=f3e295]
+          - columnheader "qwen3-30b" [ref=f3e296]
+      - rowgroup [ref=f3e297]:
+        - row [ref=f3e298]:
+          - cell "袁绍" [ref=f3e299]
+          - cell "13 郡" [ref=f3e300]
+          - cell "+114±67" [ref=f3e301]
+          - cell "+100±51" [ref=f3e302]
+          - cell "+100±37" [ref=f3e303]
+          - cell "+63±36" [ref=f3e304]
+        - row [ref=f3e305]:
+          - cell "刘表" [ref=f3e306]
+          - cell "7 郡" [ref=f3e307]
+          - cell "+57±40" [ref=f3e308]
+          - cell "+50±44" [ref=f3e309]
+          - cell "+50±37" [ref=f3e310]
+          - cell "−13±58" [ref=f3e311]
+        - row [ref=f3e312]:
+          - cell "刘璋" [ref=f3e313]
+          - cell "9 郡" [ref=f3e314]
+          - cell "±0" [ref=f3e315]
+          - cell "±0" [ref=f3e316]
+          - cell "±0" [ref=f3e317]
+          - cell "−38±36" [ref=f3e318]
+        - row [ref=f3e319]:
+          - cell "吕布" [ref=f3e320]
+          - cell "6 郡" [ref=f3e321]
+          - cell "−43±94" [ref=f3e322]
+          - cell "+20±144" [ref=f3e323]
+          - cell "−100±52" [ref=f3e324]
+          - cell "−88±58" [ref=f3e325]
+        - row [ref=f3e326]:
+          - cell "袁术" [ref=f3e327]
+          - cell "2 郡" [ref=f3e328]
+          - cell "−29±56" [ref=f3e329]
+          - cell "−120±73" [ref=f3e330]
+          - cell "−75±61" [ref=f3e331]
+          - cell "−50±64" [ref=f3e332]
+        - row [ref=f3e333]:
+          - cell "曹操" [ref=f3e334]
+          - cell "1 郡" [ref=f3e335]
+          - cell "±0" [ref=f3e336]
+          - cell "±0" [ref=f3e337]
+          - cell "−63±52" [ref=f3e338]
+          - cell "−100±37" [ref=f3e339]
+      - caption [ref=f3e340]: 对 bot:purpose 的配对差，每格 n = 5~8 局。灰字表示区间盖住零。 席位按开局郡数排序，从上到下由强到弱——方向性一目了然。
+    - paragraph [ref=f3e341]:
+      - text: 还有一处天花板的差别：模型单局能打出上榜机器人打不出的局面。 glm 最好的一局（第 7 局，袁绍）从 2 州打到
+      - strong [ref=f3e342]: 4 州、32 郡
+      - text: ， 而榜上前两名的目的流与均衡流跑满 96 局，峰值只有
+      - strong [ref=f3e343]: 2 州、19～20 郡
+      - text: （五个画像里唯一够到 3 州 25 郡的是进攻流，代价是 18/48 的出局率）。 档位到甲就封顶（16 季局够不着超/霸/王三档），所以这个差别在分数上看不见，只在疆域倍数那一列露一点头。
+    - generic [ref=f3e344]:
+      - heading "顺带记一处场景问题" [level=4] [ref=f3e345]
+      - paragraph [ref=f3e346]:
+        - text: 刘璋那一行三个 ±0 不是巧合：76 局里 56 局（74%）刘璋恰好拿 200 分。 益州开局九郡、四面山险，谁来打都是多据一个州治然后停住。 这个席位对打法几乎不敏感，等于每局白扔六分之一的样本。曹操更极端——
+        - strong [ref=f3e347]: 78 局里一次都没控住过任何一个州
+        - text: 。
+  - generic [ref=f3e348]:
+    - generic [ref=f3e349]: 三 · 局变长会怎样
+    - heading "均分在涨，地盘在缩，涨的是掷骰次数" [level=2] [ref=f3e350]
+    - paragraph [ref=f3e352]:
+      - text: 「16 季太短，会规划的一方来不及滚起来」——这个怀疑值得测。 用规则机器人验了一遍：五个画像 × 16/32/64 季 × 48 局 =
+      - strong [ref=f3e353]: 720 局
+      - text: ， 零成本、113 秒跑完，独立重跑逐局零差异。
+    - table [ref=f3e355]:
+      - rowgroup [ref=f3e356]:
+        - row [ref=f3e357]:
+          - columnheader "局长" [ref=f3e358]
+          - columnheader "目的流均分" [ref=f3e359]
+          - columnheader "目的流 疆域倍数" [ref=f3e360]: 目的流疆域倍数
+          - columnheader "进攻流 疆域倍数" [ref=f3e361]: 进攻流疆域倍数
+          - columnheader "出局率（五家）" [ref=f3e362]
+          - columnheader "统一" [ref=f3e363]
+          - columnheader "最高档" [ref=f3e364]
+      - rowgroup [ref=f3e365]:
+        - row [ref=f3e366]:
+          - cell "16 季" [ref=f3e367]
+          - cell "158.3" [ref=f3e368]
+          - cell "1.37" [ref=f3e369]
+          - cell "0.92" [ref=f3e370]
+          - cell "0~38%" [ref=f3e371]
+          - cell "0/240" [ref=f3e372]
+          - cell "甲" [ref=f3e373]
+        - row [ref=f3e374]:
+          - cell "32 季" [ref=f3e375]
+          - cell "164.6" [ref=f3e376]
+          - cell "1.37" [ref=f3e377]
+          - cell "0.74" [ref=f3e378]
+          - cell "6~48%" [ref=f3e379]
+          - cell "0/240" [ref=f3e380]
+          - cell "甲" [ref=f3e381]
+        - row [ref=f3e382]:
+          - cell "64 季" [ref=f3e383]
+          - cell "172.9" [ref=f3e384]
+          - cell "1.29" [ref=f3e385]
+          - cell "0.41" [ref=f3e386]
+          - cell "21~67%" [ref=f3e387]
+          - cell "0/240" [ref=f3e388]
+          - cell "甲" [ref=f3e389]
+      - caption [ref=f3e390]:
+        - text: 两列必须一起看：
+        - strong [ref=f3e391]: 均分在涨，地盘在缩。
+        - text: 720 局零统一、零超档、零霸档——最大州增量 3（超档要 4）、最大绝对控州 3（霸档要 7）。 内容包里「长局才够得着超/霸/王」这句设想，在规则机器人这一层完全没有兑现。
+    - paragraph [ref=f3e392]:
+      - text: 分为什么会涨？因为档位取的是 bestGrade——
+      - strong [ref=f3e393]: 历史最高档的棘轮，只往上不往下
+      - text: 。局越长，摸到乙/甲的机会越多， 摸到之后再被灭也不退分。64 季下目的流有 44% 的局最终被灭，却照样按中途摸到过的最高档记分。
+      - strong [ref=f3e394]: 那不是「后期滚起来了」，那是掷骰次数变多了。
+    - heading "于是加了「终局分」这一列，尺子换了个方向" [level=3] [ref=f3e395]
+    - table [ref=f3e397]:
+      - rowgroup [ref=f3e398]:
+        - row [ref=f3e399]:
+          - columnheader [ref=f3e400]
+          - columnheader "均分（历史最高）" [ref=f3e401]
+          - columnheader "终局分" [ref=f3e402]
+          - columnheader "掉档局数" [ref=f3e403]
+          - columnheader "平均掉分" [ref=f3e404]
+      - rowgroup [ref=f3e405]:
+        - row [ref=f3e406]:
+          - cell "16 季 目的流" [ref=f3e407]
+          - cell "158.3" [ref=f3e408]
+          - cell "114.6" [ref=f3e409]
+          - cell "19/48" [ref=f3e410]
+          - cell "−44" [ref=f3e411]
+        - row [ref=f3e412]:
+          - cell "16 季 进攻流" [ref=f3e413]
+          - cell "137.5" [ref=f3e414]
+          - cell "75.0" [ref=f3e415]
+          - cell "24/48" [ref=f3e416]
+          - cell "−63" [ref=f3e417]
+        - row [ref=f3e418]:
+          - cell "64 季 目的流" [ref=f3e419]
+          - cell "172.9" [ref=f3e420]
+          - cell "104.2" [ref=f3e421]
+          - cell "27/48" [ref=f3e422]
+          - cell "−69" [ref=f3e423]
+        - row [ref=f3e424]:
+          - cell "64 季 进攻流" [ref=f3e425]
+          - cell "147.9" [ref=f3e426]
+          - cell "33.3" [ref=f3e427]
+          - cell "36/48" [ref=f3e428]
+          - cell "−115" [ref=f3e429]
+      - caption [ref=f3e430]: 历史最高档随局长上涨，终局分随局长下跌——两条线是反的。
+    - table [ref=f3e432]:
+      - rowgroup [ref=f3e433]:
+        - row [ref=f3e434]:
+          - columnheader "进攻流对目的流的配对差" [ref=f3e435]
+          - columnheader "历史最高档" [ref=f3e436]
+          - columnheader "终局档" [ref=f3e437]
+      - rowgroup [ref=f3e438]:
+        - row [ref=f3e439]:
+          - cell "16 季" [ref=f3e440]
+          - cell "−20.8±22.6 不显著" [ref=f3e441]
+          - cell [ref=f3e442]:
+            - text: −39.6±36.8
+            - strong [ref=f3e443]: 显著
+        - row [ref=f3e444]:
+          - cell "64 季" [ref=f3e445]
+          - cell "−25.0±27.1 不显著" [ref=f3e446]
+          - cell [ref=f3e447]:
+            - text: −70.8±36.4
+            - strong [ref=f3e448]: 显著
+      - caption [ref=f3e449]:
+        - strong [ref=f3e450]: 棘轮那把尺子分不开的两种打法，终局分分得开，而且局越长分得越开。
+        - text: 「曾经摸到过甲档」这种记分方式天然把「守不住」从账上抹掉，而守不住恰恰是长局里最贵的错误。
+    - generic [ref=f3e451]:
+      - heading "这个实验能证明什么、不能证明什么" [level=4] [ref=f3e452]
+      - paragraph [ref=f3e453]:
+        - text: 它
+        - strong [ref=f3e454]: 证伪不了
+        - text: 「模型越到后期越强」——它只说明
+        - strong [ref=f3e455]: 规则机器人
+        - text: 在 64 季里 也没有更长远的东西可展开：策略差没被放大（目的流对均衡流 +4.2 → +6.2 → +10.4， 方向单调但三段的区间都盖过零；同 seed 差中差 +6.25±14.8 也不显著）， 唯一被局长放大的是死亡率（差中差五家全部显著，+20.8pp 到 +39.6pp）。
+      - paragraph [ref=f3e456]: 模型那一半还没测。而现在有了终局分这把尺子，才测得了。
+  - generic [ref=f3e457]:
+    - generic [ref=f3e458]: 四 · 两家同场
+    - heading "32 季里出现了第一个超档" [level=2] [ref=f3e459]
+    - paragraph [ref=f3e461]:
+      - text: 排行榜那一套是「一局只有一个模型席位，其余三十家全是确定性机器人」—— 这样每个模型面对的对手逐字节相同，分数才可比。代价是模型之间从不照面。
+      - strong [ref=f3e462]: 混战是另一件事
+      - text: ：两家各执三席同场厮杀，好看、直观，但 A 的成绩既取决于自己也取决于 B 那天的发挥，
+      - strong [ref=f3e463]: 不能当排行榜用
+      - text: 。
+    - table [ref=f3e465]:
+      - rowgroup [ref=f3e466]:
+        - row [ref=f3e467]:
+          - columnheader "席位" [ref=f3e468]
+          - columnheader "模型" [ref=f3e469]
+          - columnheader "开局" [ref=f3e470]
+          - columnheader "终局" [ref=f3e471]
+          - columnheader "控州" [ref=f3e472]
+          - columnheader "历史最高 / 终局档" [ref=f3e473]
+          - columnheader "分" [ref=f3e474]
+          - columnheader "实扣" [ref=f3e475]
+      - rowgroup [ref=f3e476]:
+        - row [ref=f3e477]:
+          - cell "袁绍" [ref=f3e478]
+          - cell "glm-5.3-flash" [ref=f3e479]
+          - cell "13 郡" [ref=f3e480]
+          - cell [ref=f3e481]:
+            - strong [ref=f3e482]: 40 郡
+          - cell [ref=f3e483]:
+            - strong [ref=f3e484]: 6 州
+          - cell [ref=f3e485]:
+            - strong [ref=f3e486]: 超 / 超
+          - cell "400" [ref=f3e487]
+          - cell "$0.076" [ref=f3e488]
+        - row [ref=f3e489]:
+          - cell "刘表" [ref=f3e490]
+          - cell "glm-5.3-flash" [ref=f3e491]
+          - cell "7 郡" [ref=f3e492]
+          - cell "11 郡" [ref=f3e493]
+          - cell "1 州" [ref=f3e494]
+          - cell "甲 / 丙" [ref=f3e495]
+          - cell "300" [ref=f3e496]
+          - cell "$0.078" [ref=f3e497]
+        - row [ref=f3e498]:
+          - cell "刘璋" [ref=f3e499]
+          - cell "tencent/hy3" [ref=f3e500]
+          - cell "9 郡" [ref=f3e501]
+          - cell "16 郡" [ref=f3e502]
+          - cell "1 州" [ref=f3e503]
+          - cell "乙 / 乙" [ref=f3e504]
+          - cell "200" [ref=f3e505]
+          - cell "$0.119" [ref=f3e506]
+        - row [ref=f3e507]:
+          - cell "曹操" [ref=f3e508]
+          - cell "glm-5.3-flash" [ref=f3e509]
+          - cell "1 郡" [ref=f3e510]
+          - cell "0 郡" [ref=f3e511]
+          - cell "—" [ref=f3e512]
+          - cell "乙 / 丁" [ref=f3e513]
+          - cell "200" [ref=f3e514]
+          - cell "$0.026" [ref=f3e515]
+        - row [ref=f3e516]:
+          - cell "袁术" [ref=f3e517]
+          - cell "tencent/hy3" [ref=f3e518]
+          - cell "2 郡" [ref=f3e519]
+          - cell "0 郡" [ref=f3e520]
+          - cell "—" [ref=f3e521]
+          - cell "丙 / 丁" [ref=f3e522]
+          - cell "100" [ref=f3e523]
+          - cell "$0.053" [ref=f3e524]
+        - row [ref=f3e525]:
+          - cell "吕布" [ref=f3e526]
+          - cell "tencent/hy3" [ref=f3e527]
+          - cell "6 郡" [ref=f3e528]
+          - cell "0 郡" [ref=f3e529]
+          - cell "—" [ref=f3e530]
+          - cell "丁 / 丁" [ref=f3e531]
+          - cell "0" [ref=f3e532]
+          - cell "$0.034" [ref=f3e533]
+      - caption [ref=f3e534]:
+        - text: 32 季打满，无人一统。合计 $0.386、137 次调用。 这一局里 glm 三席合计 900 分、hy3 三席 300 分——
+        - strong [ref=f3e535]: 但这是一局，不是名次
+        - text: 。
+    - paragraph [ref=f3e536]:
+      - strong [ref=f3e537]: 袁绍那一席打到 6 州 40 郡，摸到超档（州增量 ≥4）。
+      - text: 这是这个项目里第一次：规则机器人跑了 720 局（五画像 × 16/32/64 季）， 最高只到 3 州 25 郡，超档零次；四个模型的 48 局排行榜里，州增量也从没超过 2。 给足时间和一个强开局，模型确实能滚起来——而机器人不能。
+    - link "▶ 打开这一局的回放 逐季拖动看疆域怎么变，点任意郡看兵/产/心/防/阵/太守/补给， 右栏是本季命令、被丢的令、模型写下的意图与跨季方略。时间轴上的朱砂标记是本方疆域变动的那几季。" [ref=f3e538] [cursor=pointer]:
+      - /url: https://claude.ai/code/artifact/12b6ea57-fed3-4294-a256-09ff835fe0e5
+      - generic [ref=f3e539]: ▶ 打开这一局的回放
+      - text: 逐季拖动看疆域怎么变，点任意郡看兵/产/心/防/阵/太守/补给， 右栏是本季命令、被丢的令、模型写下的意图与跨季方略。时间轴上的朱砂标记是本方疆域变动的那几季。
+    - generic [ref=f3e540]:
+      - heading "一处旁证" [level=4] [ref=f3e541]
+      - paragraph [ref=f3e542]:
+        - text: 曹操那一席第 15 季的方略写着「再捡豫州无主郡（
+        - strong [ref=f3e543]: 守军每季 +15%，宜早
+        - text: "）」—— 它在用这一轮才补进观测的纪元信息做决策。那一项此前只有一个光秃秃的 epoch: 1，增速与剩余季数都看不见（见第十节）。"
+  - generic [ref=f3e544]:
+    - generic [ref=f3e545]: 五 · 逐个模型
+    - heading "四种打法，四种死法" [level=2] [ref=f3e546]
+    - paragraph [ref=f3e547]: 下面每张卡里的动作占比、方略复用率、原话，都是从 records（每席·季一条）里跑脚本统计的， 原话照抄未改。
+    - generic [ref=f3e548]:
+      - article [ref=f3e549]:
+        - generic [ref=f3e550]: 174.443 局 · 676 席·季
+        - heading "z-ai/glm-5.3-flash" [level=3] [ref=f3e551]
+        - generic [ref=f3e552]:
+          - generic [ref=f3e553]: 甲 10
+          - generic [ref=f3e554]: 乙 17
+          - generic [ref=f3e555]: 丙 11
+          - generic [ref=f3e556]: 丁 5
+        - generic [ref=f3e557]: 出局 5 · 最高 4 州 32 郡 · 甲档率 23%
+        - generic [ref=f3e558]:
+          - term [ref=f3e559]: 动作构成
+          - definition [ref=f3e560]: 治 31 · 探 24 · 调任 14 · 征伐 11 · 招降 8
+          - term [ref=f3e561]: 每季出手 / 令数用率
+          - definition [ref=f3e562]: 8.09 · 72%
+          - term [ref=f3e563]: 非法率
+          - definition [ref=f3e564]: 3.6%
+          - term [ref=f3e565]: 方略中位长度 / 相邻季照抄
+          - definition [ref=f3e566]: 133 字 · 2.2%
+          - term [ref=f3e567]: 出参 / 次（推理占比）
+          - definition [ref=f3e568]: 1 056 tok（74%）
+        - list [ref=f3e569]:
+          - listitem [ref=f3e570]:
+            - strong [ref=f3e571]: 方略几乎每季重写
+            - text: ，相邻季完全相同只有 14/633。写的不是套话——会带具体数字：「金紧（1772，军费 1194），暂不开新战线」。
+          - listitem [ref=f3e572]:
+            - strong [ref=f3e573]: 会认输止损。
+            - text: 第 8 局刘表丢了治所南郡后，第 13–16 季连续四季一令未下、只用免费刺探；第 5 局吕布第 13 季直接归隐。
+          - listitem [ref=f3e574]:
+            - text: 吕布席是它的坟场：7 局里 5 局丁档 0 分。109 条记录里
+            - strong [ref=f3e575]: 75 条（69%）
+            - text: 写着「断供」——开局丢掉治所东郡后就再没打回来。
+          - listitem [ref=f3e576]: 刺探有 40.6% 是重复探同一个郡；令数用率只有 72%，676 席·季里 471 季没花完。
+        - blockquote [ref=f3e577]:
+          - generic [ref=f3e578]: 第 1 局 · 第 14 季 · 袁绍 · reason
+          - text: 山阳必破即据兖州治，辽西倾国赌幽州过半——两处若成即升甲档；余令补防务与集结，为兖州再取三郡续力。
+        - blockquote [ref=f3e579]:
+          - generic [ref=f3e580]: 第 11 局 · 第 12 季 · 吕布 · reason
+          - text: 治所东郡已陷于袁术，全境断供且四邻皆袁术之地——绝盟是唯一出路；断供季不出兵不集结以免溃散，先行安民稳住两郡，下季绝盟生效后倾国攻东郡复治所。
+      - article [ref=f3e581]:
+        - generic [ref=f3e582]: 172.733 局 · 451 席·季
+        - heading "tencent/hy3" [level=3] [ref=f3e583]
+        - generic [ref=f3e584]:
+          - generic [ref=f3e585]: 甲 7
+          - generic [ref=f3e586]: 乙 16
+          - generic [ref=f3e587]: 丙 4
+          - generic [ref=f3e588]: 丁 6
+        - generic [ref=f3e589]: 出局 10 · 最高 3 州 27 郡 · 甲档率 21%
+        - generic [ref=f3e590]:
+          - term [ref=f3e591]: 动作构成
+          - definition [ref=f3e592]: 治 31 · 探 24 · 调任 14 · 征伐 13 · 招降 5
+          - term [ref=f3e593]: 每季出手 / 令数用率
+          - definition [ref=f3e594]:
+            - text: 8.99 ·
+            - strong [ref=f3e595]: 92%
+          - term [ref=f3e596]: 非法率
+          - definition [ref=f3e597]: 2.5%
+          - term [ref=f3e598]: 方略中位长度 / 相邻季照抄
+          - definition [ref=f3e599]: 83 字 · 0.2%
+          - term [ref=f3e600]: 出参 / 次（推理占比）
+          - definition [ref=f3e601]: 3 915 tok（94%）
+        - list [ref=f3e602]:
+          - listitem [ref=f3e603]:
+            - strong [ref=f3e604]: 令一滴不剩。
+            - text: 78%（352/451）的席·季把令花光，唯一跟得上机器人的模型。连补给断绝、内政结算无效的孤郡也照样募兵修城，理由自己写着「白花但耗令」。
+          - listitem [ref=f3e605]: 成绩几乎被席位锁死：刘表 6 局全甲、场场满分；曹操 6 局全被灭；10 次被灭有 9 次落在曹操/袁术这两个一两郡开局的席位上。
+          - listitem [ref=f3e606]: 越打越守：征伐占比从前四季 14.5% 降到末四季 10.8%，内政从 27.2% 升到 34.7%，130 个席·季一条征伐都不下。
+          - listitem [ref=f3e607]: 方略每季重写，但目标延续（「控凉州」连写七季）——它复用的是意图，不是句子。
+        - blockquote [ref=f3e608]:
+          - generic [ref=f3e609]: 第 1 局 · 第 15 季 · 袁绍 · plan
+          - text: 本季增兵破济阴（兖州达 4 郡），改阵反克助破；招降窗末曹纯夏侯渊赌名将；调麹义赴平原、袁绍归魏郡治所；补修城募兵农政。下季取山阳或任城控兖州（多 1 州仍甲），并州司隶两季难夺，超档无望，稳甲保底。
+        - blockquote [ref=f3e610]:
+          - generic [ref=f3e611]: 第 4 局 · 第 6 季 · 袁术 · reason
+          - text: 断供孤郡募兵虽白花，耗令免全废，蓄力待补给恢复
+      - article [ref=f3e612]:
+        - generic [ref=f3e613]: 143.848 局 · 641 席·季
+        - heading "qwen/qwen3-235b-a22b-2507" [level=3] [ref=f3e614]
+        - generic [ref=f3e615]:
+          - generic [ref=f3e616]: 甲 8
+          - generic [ref=f3e617]: 乙 19
+          - generic [ref=f3e618]: 丙 7
+          - generic [ref=f3e619]: 丁 14
+        - generic [ref=f3e620]: 出局 20 · 最高 3 州 25 郡 · 疆域倍数 0.91
+        - generic [ref=f3e621]:
+          - term [ref=f3e622]: 动作构成
+          - definition [ref=f3e623]: 探 24 · 调任 23 · 治 18 · 征伐 15 · 集结 6
+          - term [ref=f3e624]: 每季出手 / 令数用率
+          - definition [ref=f3e625]: 8.70 · 74%
+          - term [ref=f3e626]: 非法率
+          - definition [ref=f3e627]:
+            - strong [ref=f3e628]: 11.0%
+            - text: （其中 72% 是超预算）
+          - term [ref=f3e629]: 方略中位长度 / 相邻季照抄
+          - definition [ref=f3e630]: 125 字 · 55.8%
+          - term [ref=f3e631]: 出参 / 次（推理占比）
+          - definition [ref=f3e632]: 261 tok（0%）
+        - list [ref=f3e633]:
+          - listitem [ref=f3e634]:
+            - strong [ref=f3e635]: 出局 20/48，是四个模型里最惨的。
+            - text: 疆域倍数 0.91——平均下来它把开局的地打没了。
+          - listitem [ref=f3e636]: 极度偏好梭哈：854 次征伐里 662 次选倾国（77.5%），39.3% 的席·季同时开两路以上。
+          - listitem [ref=f3e637]:
+            - text: 它
+            - strong [ref=f3e638]: 看见了预告说打不下还照打
+            - text: ：21 个席·季在 reason 里明写「预测不破」，理由是「争取升乙档的必要一搏」。
+          - listitem [ref=f3e639]:
+            - text: 违规几乎全是把令报超了：616 条被丢的里 441 条 over-budget。分层看，得 300 分的局令数用率 0.867、非法率 0.126；得 0 分的局用率只有 0.524——
+            - strong [ref=f3e640]: 打不动的席位是没令可花，不是不敢花
+            - text: 。
+        - blockquote [ref=f3e641]:
+          - generic [ref=f3e642]: 第 37 局 · 第 3 季 · 曹操 · reason
+          - text: 东平国已探明守军约 3727，我倾国出兵 1119 仍缺口 0，未破因兵力不足，需后续募兵补强；安民稳东郡民心；三刺探为夺回济阴郡及经略河北铺路
+        - blockquote [ref=f3e643]:
+          - generic [ref=f3e644]: 第 25 局 · 第 15 季 · 曹操 · reason
+          - text: 倾国出击山阳郡虽当前预测不破，但为夺取州治、争取升乙档的必要一搏
+      - article [ref=f3e645]:
+        - generic [ref=f3e646]: 120.848 局 · 644 席·季
+        - heading "qwen/qwen3-30b-a3b-instruct" [level=3] [ref=f3e647]
+        - generic [ref=f3e648]:
+          - generic [ref=f3e649]: 甲 3
+          - generic [ref=f3e650]: 乙 19
+          - generic [ref=f3e651]: 丙 11
+          - generic [ref=f3e652]: 丁 15
+        - generic [ref=f3e653]: 出局 14 · 最高 3 州 26 郡 · 唯一显著落后基线的模型
+        - generic [ref=f3e654]:
+          - term [ref=f3e655]: 动作构成
+          - definition [ref=f3e656]: 调任 30 · 探 24 · 治 22 · 征伐 15 · 阵 5
+          - term [ref=f3e657]: 每季出手 / 令数用率
+          - definition [ref=f3e658]: 7.91 · 67%
+          - term [ref=f3e659]: 非法率
+          - definition [ref=f3e660]: 7.1%
+          - term [ref=f3e661]: 方略中位长度 / 相邻季照抄
+          - definition [ref=f3e662]:
+            - text: 79 字 ·
+            - strong [ref=f3e663]: 91.8%
+          - term [ref=f3e664]: 出参 / 次（推理占比）
+          - definition [ref=f3e665]: 279 tok（0%）
+        - list [ref=f3e666]:
+          - listitem [ref=f3e667]:
+            - strong [ref=f3e668]: 方略是摆设。
+            - text: 644 条记录条条有 plan，但 48 局里 25 局的 plan 十六季一字未改。第 6 局 plan 通篇写「夺下泰山郡」，第 11 季实际在打河内郡，plan 从头到尾没动。
+          - listitem [ref=f3e669]:
+            - strong [ref=f3e670]: 曹操席 8 局全灭，均分 25。
+            - text: 8 局第一季用的是同一套开局（曹仁驻济阴 + 刺探山阳东郡 + 倾国攻山阳），老巢一空，7 局在第 3 季就没了。
+          - listitem [ref=f3e671]: 唯一偏保守出兵的一方：759 次征伐里只有 28% 选倾国，其余全走主力——征伐占比不低，低的是每一刀的力度。
+          - listitem [ref=f3e672]: 爱刷重复令：58 个席·季出现重复，第 46 局第 13 季刘璋把同一条调任刷了 10 遍，16 条令丢掉 13 条。全局白扔 1908 令。
+        - blockquote [ref=f3e673]:
+          - generic [ref=f3e674]: 第 24 局 · 第 3 季 · 吕布 · reason
+          - text: 先刺探东郡、平原郡、彭城国以获取敌军真实数值与阵型，再通过多次调任曹性、孙观于东平国，强化该郡兵力与出征上限，为下季征伐彭城国或东郡做准备。
+        - blockquote [ref=f3e675]:
+          - generic [ref=f3e676]: 第 6 局 · 第 11 季 · 吕布 · reason（该季实际只花了 3/8 令）
+          - text: 优先攻取河内郡以破敌防线，同时安民稳后方、调将强守军，刺探关键敌情以解迷雾；
+          - strong [ref=f3e677]: 确保令数用尽
+          - text: 并推进核心战略。
+  - generic [ref=f3e678]:
+    - generic [ref=f3e679]: 六 · 打法形状
+    - heading "机器人是执行机，模型是规划者" [level=2] [ref=f3e680]
+    - paragraph [ref=f3e682]: 抛开谁强谁弱，两类对局方的行为形状差得很清楚，而且差在三个可量的地方。
+    - table [ref=f3e684]:
+      - rowgroup [ref=f3e685]:
+        - row [ref=f3e686]:
+          - columnheader "对局方" [ref=f3e687]
+          - columnheader "每季出手" [ref=f3e688]
+          - columnheader "征伐" [ref=f3e689]
+          - columnheader "治" [ref=f3e690]
+          - columnheader "调任" [ref=f3e691]
+          - columnheader "探" [ref=f3e692]
+          - columnheader "集结" [ref=f3e693]
+          - columnheader "阵" [ref=f3e694]
+          - columnheader "招降" [ref=f3e695]
+          - columnheader "盟" [ref=f3e696]
+          - columnheader "每季动作种数" [ref=f3e697]
+      - rowgroup [ref=f3e698]:
+        - row [ref=f3e699]:
+          - cell "glm-5.3-flash" [ref=f3e700]
+          - cell "8.1" [ref=f3e703]
+          - cell "11.0%" [ref=f3e704]
+          - cell "31.2%" [ref=f3e705]
+          - cell "14.3%" [ref=f3e706]
+          - cell "24.1%" [ref=f3e707]
+          - cell "5.8%" [ref=f3e708]
+          - cell "4.0%" [ref=f3e709]
+          - cell "8.0%" [ref=f3e710]
+          - cell "1.1%" [ref=f3e711]
+          - cell "4.31" [ref=f3e712]
+        - row [ref=f3e713]:
+          - cell "tencent/hy3" [ref=f3e714]
+          - cell "9.0" [ref=f3e717]
+          - cell "13.4%" [ref=f3e718]
+          - cell "31.5%" [ref=f3e719]
+          - cell "13.9%" [ref=f3e720]
+          - cell "23.7%" [ref=f3e721]
+          - cell "3.8%" [ref=f3e722]
+          - cell "3.8%" [ref=f3e723]
+          - cell "5.2%" [ref=f3e724]
+          - cell "3.8%" [ref=f3e725]
+          - cell "4.36" [ref=f3e726]
+        - row [ref=f3e727]:
+          - cell "qwen3-235b" [ref=f3e728]
+          - cell "8.7" [ref=f3e731]
+          - cell "15.3%" [ref=f3e732]
+          - cell "17.9%" [ref=f3e733]
+          - cell "23.4%" [ref=f3e734]
+          - cell "24.3%" [ref=f3e735]
+          - cell "6.1%" [ref=f3e736]
+          - cell "5.6%" [ref=f3e737]
+          - cell "5.7%" [ref=f3e738]
+          - cell "1.4%" [ref=f3e739]
+          - cell "4.43" [ref=f3e740]
+        - row [ref=f3e741]:
+          - cell "qwen3-30b" [ref=f3e742]
+          - cell "7.9" [ref=f3e745]
+          - cell "14.9%" [ref=f3e746]
+          - cell "21.9%" [ref=f3e747]
+          - cell "30.2%" [ref=f3e748]
+          - cell "24.4%" [ref=f3e749]
+          - cell "3.1%" [ref=f3e750]
+          - cell "5.1%" [ref=f3e751]
+          - cell "0.1%" [ref=f3e752]
+          - cell "0.2%" [ref=f3e753]
+          - cell "4.29" [ref=f3e754]
+        - row [ref=f3e755]:
+          - cell "bot:purpose" [ref=f3e756]
+          - cell "8.9" [ref=f3e759]
+          - cell "10.2%" [ref=f3e760]
+          - cell "18.7%" [ref=f3e761]
+          - cell [ref=f3e762]:
+            - strong [ref=f3e763]: 40.0%
+          - cell "25.4%" [ref=f3e764]
+          - cell "0.7%" [ref=f3e765]
+          - cell "0.0%" [ref=f3e766]
+          - cell "0.6%" [ref=f3e767]
+          - cell "2.9%" [ref=f3e768]
+          - cell "3.22" [ref=f3e769]
+        - row [ref=f3e770]:
+          - cell "bot:balanced" [ref=f3e771]
+          - cell "9.5" [ref=f3e774]
+          - cell "7.6%" [ref=f3e775]
+          - cell "17.9%" [ref=f3e776]
+          - cell [ref=f3e777]:
+            - strong [ref=f3e778]: 44.9%
+          - cell "25.0%" [ref=f3e779]
+          - cell "0.5%" [ref=f3e780]
+          - cell "0.0%" [ref=f3e781]
+          - cell "0.4%" [ref=f3e782]
+          - cell "2.4%" [ref=f3e783]
+          - cell "3.17" [ref=f3e784]
+        - row [ref=f3e785]:
+          - cell "bot:aggressive" [ref=f3e786]
+          - cell "8.5" [ref=f3e789]
+          - cell "18.6%" [ref=f3e790]
+          - cell "4.8%" [ref=f3e791]
+          - cell "34.7%" [ref=f3e792]
+          - cell "27.8%" [ref=f3e793]
+          - cell "7.1%" [ref=f3e794]
+          - cell "0.0%" [ref=f3e795]
+          - cell "0.7%" [ref=f3e796]
+          - cell "5.3%" [ref=f3e797]
+          - cell "3.15" [ref=f3e798]
+      - caption [ref=f3e799]: 分母是该方提出的全部 picks（含事后被判掉的）。劝降、借道、归隐三类八方全部 ≤0.2%，基本是死格子。
+    - heading "一 · 动作词汇的宽度" [level=3] [ref=f3e800]
+    - paragraph [ref=f3e801]:
+      - text: 机器人每季只在
+      - strong [ref=f3e802]: 探、调任、治、征伐
+      - text: 这四个词里打转，
+      - strong [ref=f3e803]: 阵一次都不摆
+      - text: （三个画像加起来只出过 5 条），招降近乎不用。 四个模型每季用到 4.1~4.4 种动作，阵稳定占 4~6% 的出手，招降在 glm / hy3 / 235b 手里是 5~8% 的常规牌。 阵型与招降这两套机制，机器人根本不碰。
+    - heading "二 · 令花到哪里" [level=3] [ref=f3e804]
+    - paragraph [ref=f3e805]:
+      - text: 机器人把
+      - strong [ref=f3e806]: 33%~52% 的令压在调任上
+      - text: ——本质上是一台人事调度器， 而且越到后期调任占比越高（均衡流前四季 36.1%，之后升到 48.3%）。 模型的重心散在内政（glm 39%、hy3 38%）和征伐（235b 37%、30b 36%）上，调任只占 9%~27%，且随局势推进递减。
+    - heading "三 · 预算的执行度" [level=3] [ref=f3e807]
+    - paragraph [ref=f3e808]:
+      - text: 机器人每季按满额规划，令数用率 92%~95%、非法率 0。 模型里只有 hy3 跟得上（92%）；glm 72%、235b 74%、30b 67%——
+      - strong [ref=f3e809]: 每局有四分之一到三分之一的令被留在桌上
+      - text: 。 不是不想动，是每季提的条数本来就不够填满预算，还要再被重复、超预算、不合法判掉一部分。
+    - generic [ref=f3e810]:
+      - heading "这一节里哪些是估算" [level=4] [ref=f3e811]
+      - paragraph [ref=f3e812]:
+        - text: 「令花到哪里」需要知道每条调任收不收令（首次就任免费，调动在任者收 1 令）， 而记录里只有每季的总 spent。做法是取零丢弃的记录， 用残差反推各方的「调任平均收费率」，再乘以采纳条数。 总量校验落在 ±0.6% 内，但
+        - strong [ref=f3e813]: 调任那一列是拟合出来的，不构成对成本模型的独立检验
+        - text: 。 「探不吃令」则是实测的：在没有任何调任的干净记录里残差恒为 0。
+  - generic [ref=f3e814]:
+    - generic [ref=f3e815]: 七 · 路由层
+    - heading "「同一个模型」不是同一个东西" [level=2] [ref=f3e816]
+    - paragraph [ref=f3e818]: 这一跑没有钉住提供方。事后按 generation id 回查， 同一个 model id 在一次评测里被路由到了十几家不同的推理服务——而它们的行为差得离谱。
+    - heading "glm-5.3-flash：一次评测，14 家提供方" [level=3] [ref=f3e819]
+    - table [ref=f3e821]:
+      - rowgroup [ref=f3e822]:
+        - row [ref=f3e823]:
+          - columnheader "提供方" [ref=f3e824]
+          - columnheader "席·季" [ref=f3e825]
+          - columnheader "丢弃率" [ref=f3e826]
+          - columnheader "出参 / 次" [ref=f3e827]
+          - columnheader "中位耗时" [ref=f3e828]
+      - rowgroup [ref=f3e829]:
+        - row [ref=f3e830]:
+          - cell "Parasail" [ref=f3e831]
+          - cell "432" [ref=f3e832]
+          - cell "3.6%" [ref=f3e833]
+          - cell "999" [ref=f3e834]
+          - cell "12.5s" [ref=f3e835]
+        - row [ref=f3e836]:
+          - cell "Together" [ref=f3e837]
+          - cell "151" [ref=f3e838]
+          - cell "3.8%" [ref=f3e839]
+          - cell "1 035" [ref=f3e840]
+          - cell "15.6s" [ref=f3e841]
+        - row [ref=f3e842]:
+          - cell "Reka" [ref=f3e843]
+          - cell "22" [ref=f3e844]
+          - cell "1.1%" [ref=f3e845]
+          - cell "836" [ref=f3e846]
+          - cell "22.3s" [ref=f3e847]
+        - row [ref=f3e848]:
+          - cell "Fireworks" [ref=f3e849]
+          - cell "7" [ref=f3e850]
+          - cell "15.5%" [ref=f3e851]
+          - cell "849" [ref=f3e852]
+          - cell "52.0s" [ref=f3e853]
+        - row [ref=f3e854]:
+          - cell "Morph" [ref=f3e855]
+          - cell "3" [ref=f3e856]
+          - cell "0.0%" [ref=f3e857]
+          - cell "268" [ref=f3e858]
+          - cell "4.7s" [ref=f3e859]
+        - row [ref=f3e860]:
+          - cell "Venice" [ref=f3e861]
+          - cell "3" [ref=f3e862]
+          - cell "9.7%" [ref=f3e863]
+          - cell "8 591" [ref=f3e864]
+          - cell "443.5s" [ref=f3e865]
+        - row [ref=f3e866]:
+          - cell "Phala" [ref=f3e867]
+          - cell "1" [ref=f3e868]
+          - cell "0.0%" [ref=f3e869]
+          - cell "13 214" [ref=f3e870]
+          - cell "640.6s" [ref=f3e871]
+      - caption [ref=f3e872]:
+        - text: 只列了差异最大的 7 家（另有 Modal、Cloudflare、Friendli、Makora、DeepInfra、CoreWeave、Wafer 各 1~17 席·季）。 同一个 model id，出参量差
+        - strong [ref=f3e873]: 49 倍
+        - text: 、延时差
+        - strong [ref=f3e874]: 136 倍
+        - text: 、丢弃率差
+        - strong [ref=f3e875]: 14 倍
+        - text: 。
+    - heading "qwen3-30b：编码损坏完全出自其中一家" [level=3] [ref=f3e876]
+    - table [ref=f3e878]:
+      - rowgroup [ref=f3e879]:
+        - row [ref=f3e880]:
+          - columnheader "提供方" [ref=f3e881]
+          - columnheader "席·季" [ref=f3e882]
+          - columnheader "被搞坏的 key" [ref=f3e883]
+          - columnheader "丢弃率（复原后）" [ref=f3e884]
+          - columnheader "出参 / 次" [ref=f3e885]
+      - rowgroup [ref=f3e886]:
+        - row [ref=f3e887]:
+          - cell "SiliconFlow" [ref=f3e888]
+          - cell "238" [ref=f3e889]
+          - cell "0" [ref=f3e890]
+          - cell "3.9%" [ref=f3e891]
+          - cell "216" [ref=f3e892]
+        - row [ref=f3e893]:
+          - cell "Nebius" [ref=f3e894]
+          - cell "213" [ref=f3e895]
+          - cell "0" [ref=f3e896]
+          - cell "5.5%" [ref=f3e897]
+          - cell "229" [ref=f3e898]
+        - row [ref=f3e899]:
+          - cell [ref=f3e900]:
+            - strong [ref=f3e901]: StreamLake
+          - cell "193" [ref=f3e902]
+          - cell [ref=f3e903]:
+            - strong [ref=f3e904]: "775"
+          - cell [ref=f3e905]:
+            - strong [ref=f3e906]: 13.3%
+          - cell "412" [ref=f3e907]
+      - caption [ref=f3e908]:
+        - text: 775 条被转码搞坏的 key
+        - strong [ref=f3e909]: 全部
+        - text: 出自 StreamLake，另外两家一条都没有。 而且即便把编码复原之后，StreamLake 那一路的丢弃率仍是另外两家的两三倍。
+    - generic [ref=f3e910]:
+      - heading "要改的事" [level=4] [ref=f3e911]
+      - paragraph [ref=f3e912]:
+        - text: 评测套件已经支持 --provider 钉住提供方，这一跑没用。 不钉，一份榜里就同时混着 Morph 的 268 tok 和 Phala 的 13 214 tok——
+        - strong [ref=f3e913]: 那是两个不同的被测对象，却记在同一行上
+        - text: 。下一跑必须钉。
+  - generic [ref=f3e914]:
+    - generic [ref=f3e915]: 八 · 一次故障复盘
+    - heading "修好编码之后，它的分反而掉了" [level=2] [ref=f3e916]
+    - paragraph [ref=f3e918]: 第一份榜上 qwen3-30b 的非法率是 50.9%。查下去，2 806 次 unknown-key 全长这样：
+    - generic [ref=f3e919]: "'appoint:æµŽé˜´éƒ¡:caoren' ← 应该是 'appoint:济阴郡:caoren'"
+    - paragraph [ref=f3e920]:
+      - text: 中文按 UTF-8 编码后又被按 Latin-1 解了一遍。
+      - strong [ref=f3e921]: 它每一条其实都选对了。
+      - text: 准入层现在会复原（Buffer.from(key,"latin1").toString("utf8")）， 但
+      - strong [ref=f3e922]: 只在复原后恰好命中候选时才认
+      - text: ——编造的 key 复原之后仍然不在表里，幻觉洗不白。 用旧数据离线验过：2 805 条坏 key 全部复原成合法 UTF-8，其中 86% 直接含剧本里真实存在的郡名， 余下的是 campaign:济阴郡>东郡:allout 这种一段里带两个郡名的，也都是对的。
+    - generic [ref=f3e923]:
+      - generic [ref=f3e924]:
+        - heading "修复前 · 48 局" [level=4] [ref=f3e925]
+        - generic [ref=f3e926]:
+          - term [ref=f3e927]: 非法率
+          - definition [ref=f3e928]: 50.9%
+          - term [ref=f3e929]: 令数用率
+          - definition [ref=f3e930]: 31%
+          - term [ref=f3e931]: 均分
+          - definition [ref=f3e932]: "135.4"
+          - term [ref=f3e933]: 出局
+          - definition [ref=f3e934]: 6/48
+          - term [ref=f3e935]: 档位构成
+          - definition [ref=f3e936]: 乙23 丙16 丁8 甲1
+      - generic [ref=f3e937]: →
+      - generic [ref=f3e938]:
+        - heading "修复后 · 同 48 局" [level=4] [ref=f3e939]
+        - generic [ref=f3e940]:
+          - term [ref=f3e941]: 非法率
+          - definition [ref=f3e942]: 5.4%
+          - term [ref=f3e943]: 令数用率
+          - definition [ref=f3e944]: 62%
+          - term [ref=f3e945]: 均分
+          - definition [ref=f3e946]: "120.8"
+          - term [ref=f3e947]: 出局
+          - definition [ref=f3e948]: 14/48
+          - term [ref=f3e949]: 档位构成
+          - definition [ref=f3e950]: 乙19 丁15 丙11 甲3
+    - paragraph [ref=f3e951]:
+      - text: 复原生效了，但分掉了 15 分、出局翻了一倍还多。原因不难懂： 一半的令被丢掉时它被迫少做事；令真的执行之后，它的决策把自己打死了。
+      - strong [ref=f3e952]: 那个 bug 一直在替它兜底。
+      - text: 甲档从 1 涨到 3、丁档从 8 涨到 15——赢得更大也输得更惨，是同一件事的另一面。
+    - paragraph [ref=f3e953]:
+      - text: 所以修掉一个基础设施缺陷之后分下降，不等于修错了。要分开看两件事：
+      - strong [ref=f3e954]: 它的令是不是合法
+      - text: （修对了：50.9% → 5.4%），和
+      - strong [ref=f3e955]: 它的令好不好
+      - text: （本来就不好，只是此前看不到）。
+    - generic [ref=f3e956]:
+      - heading "这不是一次干净的 A/B" [level=4] [ref=f3e957]
+      - paragraph [ref=f3e958]:
+        - text: 两跑的复原数是 775 条和 2 805 条——提供方的编码损坏是
+        - strong [ref=f3e959]: 间歇
+        - text: 的，两跑之间路由换了。 只有非法率那一列是确定的。基线 bot:balanced 在两跑之间逐局分数
+        - strong [ref=f3e960]: 逐位一致
+        - text: ， 所以其余对局方的数字可以合并进同一张榜。
+  - generic [ref=f3e961]:
+    - generic [ref=f3e962]: 九 · 游戏外
+    - heading "token 与钱" [level=2] [ref=f3e963]
+    - paragraph [ref=f3e964]: 成本一律取提供方自报的实扣（usage.cost），不是按价目表估的。 余额变动与逐次累加对得上：$0.666 对 $0.667。
+    - table [ref=f3e966]:
+      - rowgroup [ref=f3e967]:
+        - row [ref=f3e968]:
+          - columnheader "模型" [ref=f3e969]
+          - columnheader "调用" [ref=f3e970]
+          - columnheader "入参 tok" [ref=f3e971]
+          - columnheader "缓存命中" [ref=f3e972]
+          - columnheader "出参 tok" [ref=f3e973]
+          - columnheader "推理占出参" [ref=f3e974]
+          - columnheader "实扣" [ref=f3e975]
+          - columnheader "每局" [ref=f3e976]
+          - columnheader "每席·季" [ref=f3e977]
+          - columnheader "中位延时" [ref=f3e978]
+          - columnheader "提供方" [ref=f3e979]
+      - rowgroup [ref=f3e980]:
+        - row [ref=f3e981]:
+          - cell "z-ai/glm-5.3-flash" [ref=f3e982]
+          - cell "672" [ref=f3e983]
+          - cell "7 409 985" [ref=f3e984]
+          - cell "7%" [ref=f3e985]
+          - cell "714 137" [ref=f3e986]
+          - cell "74%" [ref=f3e987]
+          - cell "$1.546" [ref=f3e988]
+          - cell "$0.036" [ref=f3e989]
+          - cell "$0.0023" [ref=f3e990]
+          - cell "13.9s" [ref=f3e991]
+          - cell "14" [ref=f3e992]
+        - row [ref=f3e993]:
+          - cell "tencent/hy3" [ref=f3e994]
+          - cell "451" [ref=f3e995]
+          - cell "5 162 281" [ref=f3e996]
+          - cell "44%" [ref=f3e997]
+          - cell "1 765 449" [ref=f3e998]
+          - cell "94%" [ref=f3e999]
+          - cell "$1.639" [ref=f3e1000]
+          - cell "$0.050" [ref=f3e1001]
+          - cell "$0.0036" [ref=f3e1002]
+          - cell "30.7s" [ref=f3e1003]
+          - cell "4" [ref=f3e1004]
+        - row [ref=f3e1005]:
+          - cell "qwen/qwen3-235b-a22b" [ref=f3e1006]
+          - cell "641" [ref=f3e1007]
+          - cell "7 495 689" [ref=f3e1008]
+          - cell "36%" [ref=f3e1009]
+          - cell "167 112" [ref=f3e1010]
+          - cell "0%" [ref=f3e1011]
+          - cell "$0.892" [ref=f3e1012]
+          - cell "$0.019" [ref=f3e1013]
+          - cell "$0.0014" [ref=f3e1014]
+          - cell "9.5s" [ref=f3e1015]
+          - cell "9" [ref=f3e1016]
+        - row [ref=f3e1017]:
+          - cell "qwen/qwen3-30b-a3b" [ref=f3e1018]
+          - cell "644" [ref=f3e1019]
+          - cell "7 690 165" [ref=f3e1020]
+          - cell "45%" [ref=f3e1021]
+          - cell "179 826" [ref=f3e1022]
+          - cell "0%" [ref=f3e1023]
+          - cell "$0.667" [ref=f3e1024]
+          - cell "$0.014" [ref=f3e1025]
+          - cell "$0.0010" [ref=f3e1026]
+          - cell "8.3s" [ref=f3e1027]
+          - cell "3" [ref=f3e1028]
+        - row [ref=f3e1029]:
+          - cell "五个机器人 × 48 局" [ref=f3e1030]
+          - cell "—" [ref=f3e1031]
+          - cell "—" [ref=f3e1032]
+          - cell "—" [ref=f3e1033]
+          - cell "—" [ref=f3e1034]
+          - cell "—" [ref=f3e1035]
+          - cell "$0.000" [ref=f3e1036]
+          - cell "—" [ref=f3e1037]
+          - cell "—" [ref=f3e1038]
+          - cell "0.5s" [ref=f3e1039]
+          - cell "—" [ref=f3e1040]
+      - caption [ref=f3e1041]:
+        - text: 另加编码损坏那一跑的 qwen3-30b $0.653，两轮评测合计
+        - strong [ref=f3e1042]: $5.397
+        - text: 。 推理档统一钉在 low——不钉，比的就是各家默认给多少算力，不是策略能力。 hy3 有 94% 的出参烧在推理上，所以它单次贵、慢，但令数用率也是模型里最高的。
+    - heading "调用是真的发生过" [level=3] [ref=f3e1043]
+    - paragraph [ref=f3e1044]: 每条决策记录都存了 generationId。抽查回查 OpenRouter：
+    - generic [ref=f3e1045]: gen-1788573401-NL1nroWpcZv9USeRN2N0 qwen/qwen3-30b-a3b-instruct-2507 Nebius 入 8047 出 138 $0.0009344 2026-09-05T01:56:41Z gen-1788569118-IvHX6KninuEudA9FXI65 z-ai/glm-5.3-flash-20260826 Reka 入 10720 出 457 $0.0019713 2026-09-05T00:45:18Z gen-1788567651-eAeph2CeXUSvhZ7D3Mkj tencent/hy3-20260706 Novita 入 9585 出 5243 $0.0036963 2026-09-05T00:20:51Z
+  - generic [ref=f3e1046]:
+    - generic [ref=f3e1047]: 十 · 这份报告自己查出来的问题
+    - heading "闸门本身也会撒谎" [level=2] [ref=f3e1048]
+    - paragraph [ref=f3e1049]: 做这份报告时，每份统计都配了一个独立重算的复核。四份复核指向同一处—— 是评测流水线的 bug，不是模型的问题。
+    - heading "非法率算的是逐季平均，不是按令数汇总" [level=3] [ref=f3e1050]
+    - paragraph [ref=f3e1051]:
+      - text: 排行榜上「非法率」与「令数用率」两列一直是
+      - strong [ref=f3e1052]: 宏平均
+      - text: ：先算每季的率，再取算术平均。 于是一个「提 2 条丢 1 条」的短季，和一个「提 15 条丢 1 条」的满季，被当成一样重。 而短季恰恰是被打残、快出局的那些季——
+      - strong [ref=f3e1053]: 越惨的局越把非法率往下拽，正好美化了最该被看见的那些局
+      - text: 。
+    - table [ref=f3e1055]:
+      - rowgroup [ref=f3e1056]:
+        - row [ref=f3e1057]:
+          - columnheader "模型" [ref=f3e1058]
+          - columnheader "旧口径（逐季平均）" [ref=f3e1059]
+          - columnheader "正确口径（按令数汇总）" [ref=f3e1060]
+          - columnheader "低报" [ref=f3e1061]
+      - rowgroup [ref=f3e1062]:
+        - row [ref=f3e1063]:
+          - cell "qwen3-235b" [ref=f3e1064]
+          - cell "8.6%" [ref=f3e1065]
+          - cell "11.0%" [ref=f3e1066]
+          - cell "22%" [ref=f3e1067]
+        - row [ref=f3e1068]:
+          - cell "qwen3-30b（修复后）" [ref=f3e1069]
+          - cell "5.4%" [ref=f3e1070]
+          - cell "7.1%" [ref=f3e1071]
+          - cell "24%" [ref=f3e1072]
+        - row [ref=f3e1073]:
+          - cell "tencent/hy3" [ref=f3e1074]
+          - cell "2.2%" [ref=f3e1075]
+          - cell "2.5%" [ref=f3e1076]
+          - cell "12%" [ref=f3e1077]
+        - row [ref=f3e1078]:
+          - cell "z-ai/glm-5.3-flash" [ref=f3e1079]
+          - cell "3.7%" [ref=f3e1080]
+          - cell "3.6%" [ref=f3e1081]
+          - cell "—" [ref=f3e1082]
+      - caption [ref=f3e1083]:
+        - text: 本报告总榜用的是
+        - strong [ref=f3e1084]: 右边那一列
+        - text: 。代码两处都已改成汇总口径，机器人重跑逐位一致，分数不受影响。
+    - heading "实录里其余三十家从来没动过" [level=3] [ref=f3e1085]
+    - paragraph [ref=f3e1086]:
+      - text: 生成「详细实录」的那个工具（tools/match-log.mjs） 只把
+      - strong [ref=f3e1087]: 被观察席位
+      - text: 的命令交给结算，其余三十家从头到尾一动不动。 48 季实测：
+      - strong [ref=f3e1088]: 易主 0 郡、下过令的势力 1 家、命令 125 条
+      - text: 。 修好之后是易主 45 郡、30 家下令、6539 条命令。 排行榜与混战都是对的，只有实录这一个工具漏了——而它正是用来看「模型到底怎么打」的材料。 现在录完会检查一次，零郡易主就吼一声。
+    - heading "其余四处" [level=3] [ref=f3e1089]
+    - list [ref=f3e1090]:
+      - listitem [ref=f3e1091]:
+        - strong [ref=f3e1092]: 套件把 --seasons 吞掉了。
+        - text: npm run eval:suite -- --seasons=64 此前会按 16 季跑， 而报告上一个字都看不出来。一次 720 局的长局实验因此只能绕开套件、自己拼汇总。已修。
+      - listitem [ref=f3e1093]:
+        - strong [ref=f3e1094]: 观测预算闸门被越过一次。
+        - text: 闸门要求每席·季 ≤10 000 tok，实跑里 glm 有 1/676 席·季到了 10 139、hy3 有 1/451 到了 10 059。 闸门测的是合成的最坏情形，比真实分布略松。这一轮把内政候选里重复抄的郡情删掉之后峰值降了 168 tok，已覆盖这个余量。
+      - listitem [ref=f3e1095]:
+        - strong [ref=f3e1096]: 两个模型的局数不是 48。
+        - text: glm 43 局、hy3 33 局，都是实扣撞上 $1.50 的预算闸门提前停的。 榜上的配对差只按双方共有的局号相减，所以那一列可比；
+        - strong [ref=f3e1097]: 但均分那一列的分母不同，不能直接横比
+        - text: 。
+      - listitem [ref=f3e1098]:
+        - strong [ref=f3e1099]: 结果里同一个字段有两套口径。
+        - text: results[].apUse 是局内汇总比， results[].illegalRate 却是局内逐季平均。同一个文件里两种聚合层级并存，后来者极易踩。
+  - generic [ref=f3e1100]:
+    - generic [ref=f3e1101]: 十一 · 怎么读这份榜
+    - heading "方法与可复现" [level=2] [ref=f3e1102]
+    - heading "模型看到什么" [level=3] [ref=f3e1103]
+    - paragraph [ref=f3e1104]:
+      - text: 纯数据，没有截图、没有地图图片。每季给模型一份 JSON：自家逐郡的兵/产/心/防/阵/械/补给/驻将、 在外军团、盟约、上季战报、态势简报（逐州还差几郡即控制）、上季自己写下的方略， 以及
+      - strong [ref=f3e1105]: 引擎预先算好的合法候选表
+      - text: "。模型只回 {picks, reason, plan}—— 按 key 挑，从不自己填参数。观测里绝不含 seed（拿到 seed 就能反算情报偏差，迷雾作废）。"
+    - heading "为什么可比" [level=3] [ref=f3e1106]
+    - list [ref=f3e1107]:
+      - listitem [ref=f3e1108]: 同一批 48 个 seed，同一批机器人对手，六个席位按局号轮换——每个对局方在每个席位上各打 8 局。
+      - listitem [ref=f3e1109]:
+        - text: 机器人走与模型
+        - strong [ref=f3e1110]: 完全相同
+        - text: 的那条路：picks → 准入层 → 命令。否则非法率与令数用率两列对基线是空的。
+      - listitem [ref=f3e1111]: 推理档统一钉 low；降级档位（严格 schema / schema-any）并列在榜上，因为受的约束不同。
+      - listitem [ref=f3e1112]: 同 seed + 同命令 → 逐位重放。基线在两轮之间逐局分数完全一致，就是靠这条验的。
+    - heading "失败要分开记" [level=3] [ref=f3e1113]
+    - paragraph [ref=f3e1114]:
+      - text: 额度耗尽、鉴权失败、基础设施故障、出参预算被推理吃光、harness 自己的 bug—— 这五类都不算模型的分，单独一栏。这一轮四个模型合计：基础设施 4 席·季（全在 glm）， 模型自身失败 1 席·季（235b 一次解析不出决策），其余为 0。
+      - strong [ref=f3e1115]: 这个仓库为「把基础设施的失败算到模型头上」栽过四次
+      - text: ：超时、额度耗尽、鉴权， 以及这次的编码损坏。
+    - heading "重跑" [level=3] [ref=f3e1116]
+    - generic [ref=f3e1117]: npm run eval:suite -- \ --agents=bot:purpose,bot:balanced,model:z-ai/glm-5.3-flash,model:tencent/hy3 \ --games=48 --reasoning=low --budget=6 --jobs=5 --provider=<钉住的提供方>
+  - generic [ref=f3e1118]:
+    - generic [ref=f3e1119]: 十二 · 结论
+    - heading "六条" [level=2] [ref=f3e1120]
+    - list [ref=f3e1121]:
+      - listitem [ref=f3e1122]:
+        - strong [ref=f3e1123]: 模型会用大盘子，机器人会守小摊子。
+        - text: 开局十三郡的袁绍席，四个模型全部显著赢过最强机器人（+63 到 +114）； 开局一两郡的曹操、袁术席，机器人赢。总榜上这两头互相抵消，看起来「没差别」。
+      - listitem [ref=f3e1124]:
+        - strong [ref=f3e1125]: 机器人不是稻草人。
+        - text: 改强它的四次尝试全部实测更差（付费调任降权、集结前线优先、州进度阶跃改斜坡各两三档）， 这个贪心评分器在自己这一类里已经到局部最优。要更强得换一类做法——带跨季计划的那种。
+      - listitem [ref=f3e1126]:
+        - strong [ref=f3e1127]: 路由层比模型差异更大。
+        - text: 同一个 model id 在一次评测里出参量差 49 倍、延时差 136 倍； 一整批 50.9% 的「非法率」实际是一家提供方的编码 bug。下一跑必须钉住提供方。
+      - listitem [ref=f3e1128]:
+        - strong [ref=f3e1129]: 48 局不够。
+        - text: 档位是四级台阶，每局的配对差只能取 0 或 ±100，噪声天然很大。 现在能确定的只有「qwen3-30b 显著落后」和「苟活流拿不到分」两件事。
+      - listitem [ref=f3e1130]:
+        - strong [ref=f3e1131]: 给足时间和一个强开局，模型确实会滚起来。
+        - text: 32 季的同场混战里 glm 的袁绍打到 6 州 40 郡、摸到超档—— 而规则机器人 720 局零超档、最高 3 州。这是一局不是名次， 但它把「机器人在长局里不会滚雪球」这条与模型区分开了。
+      - listitem [ref=f3e1132]:
+        - strong [ref=f3e1133]: 「越到后期越强」这个问题，旧尺子答不了。
+        - text: 档位取的是历史最高档的棘轮，把「守不住」从账上抹掉了—— 64 季自对局里 27/48 局终局低于历史最高档、平均掉 69 分。 换成终局分之后，棘轮分不开的两种打法立刻显著分开，而且局越长分得越开。 下一步是把模型放进长局，用这把新尺子量一遍。
+  - contentinfo [ref=f3e1134]:
+    - paragraph [ref=f3e1135]:
+      - text: 数据出自
+      - code [ref=f3e1136]: tools/eval-suite.mjs
+      - text: 的产物（
+      - code [ref=f3e1137]: summary.json
+      - text: 与每个对局方的
+      - code [ref=f3e1138]: results
+      - text: /
+      - code [ref=f3e1139]: records
+      - text: ），两轮评测跑于 2026-09-04 ~ 09-05。 报告中每个数字均可从产物文件重算；本页所有统计都经过一次独立重算复核， 复核发现的口径缺陷已列在第八节并修入代码。
+    - paragraph [ref=f3e1140]:
+      - text: 引擎
+      - code [ref=f3e1141]: MERS v0.1
+      - text: · 剧本
+      - code [ref=f3e1142]: 兴平元年（194）
+      - text: · 105 郡国 · 每局 16 季 · 提示词
+      - code [ref=f3e1143]: v1.4.0
+      - text: · 观测
+      - code [ref=f3e1144]: v1.2.0
