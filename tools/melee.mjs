@@ -192,12 +192,13 @@ while (!s.finished) {
   // 帧描述「这一季开始时的局面 + 这一季下的令」，故在结算前采。
   // 混战有多个模型席位，seat 那一块只能给一席——这里给**第一席**，
   // 其余各家的意图仍在 Markdown 实录里逐季写着
-  const first = [...seatOf.keys()][0];
-  const firstRec = done.find((d) => d.f === first)?.out.record;
+  // **每个模型席位都录**。混战是两家对打，只录一席就读不出对抗
   const frame = IDX ? captureFrame(s, IDX, G, P, ROSTER, GEO, orders, {
-    seat: first, picks: firstRec?.picks ?? [],
-    dropped: (firstRec?.admission?.dropped ?? []).map((d) => [d.key, d.reason]),
-    reason: firstRec?.reason ?? null, plan: plans.get(first) ?? null,
+    seats: done.map(({ f, out }) => ({
+      faction: f, picks: out.record.picks ?? [],
+      dropped: (out.record.admission?.dropped ?? []).map((d) => [d.key, d.reason]),
+      reason: out.record.reason ?? null, plan: plans.get(f) ?? null,
+    })),
     prevStations, prevCaptured,
   }) : null;
   if (IDX) { prevStations = { ...s.stations }; prevCaptured = [...(s.capturedOfficers ?? [])]; }

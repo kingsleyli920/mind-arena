@@ -370,8 +370,9 @@ async function main() {
     const allOrders = [...adm.orders, ...worldOrders];
 
     const frame = IDX ? captureFrame(s, IDX, G, P, ROSTER, GEO, allOrders, {
-      seat: SEAT, picks, dropped: adm.dropped.map((d) => [d.key, d.reason]),
-      reason: reason || null, plan,
+      seats: [{ faction: SEAT, picks,
+                dropped: adm.dropped.map((d) => [d.key, d.reason]),
+                reason: reason || null, plan }],
       prevStations, prevCaptured,
     }) : null;
     if (IDX) {

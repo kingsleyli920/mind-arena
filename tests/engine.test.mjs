@@ -1631,6 +1631,23 @@ test("录像：派生量与引擎算的是同一个数，不是另抄一份", ()
   assert.equal(f.own[ci.get(nobody.id)], -1);
 });
 
+test("录像：多个模型席位的决策各录一份 —— 只录一席读不出对抗", () => {
+  const s = fresh();
+  const one = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, [],
+    { seats: [{ faction: "caocao", picks: ["scout:东郡"], reason: "探路", plan: "取兖州" }] });
+  assert.equal(one.seats.length, 1);
+  assert.equal(one.seats[0].faction, REPLAY_IDX.fi.get("caocao"));
+  assert.equal(one.seats[0].reason, "探路");
+
+  const two = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, [], {
+    seats: [{ faction: "caocao", reason: "求和" }, { faction: "liubiao", reason: "围城" }],
+  });
+  assert.equal(two.seats.length, 2, "第二席被丢了 —— 两家对打就只剩一边的说法");
+  assert.deepEqual(two.seats.map((x) => x.reason), ["求和", "围城"]);
+  // 没有模型席位（纯机器人局）就不发这一项
+  assert.equal(captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []).seats, undefined);
+});
+
 test("录像：驻地只记变化，且第一帧要给全量 —— 否则播放器开局无将可显", () => {
   const s = fresh();
   const first = captureFrame(s, REPLAY_IDX, G, P, ROSTER, GEO, []);

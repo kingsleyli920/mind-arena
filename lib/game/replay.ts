@@ -58,14 +58,23 @@ export interface Frame {
   moves: Array<[string, number]>;
   /** 本季新增的被俘武将 id */
   captured: string[];
-  /** 被观察席位这一季的决策原文。只给一席——六席全量实测每季 43KB */
-  seat?: {
+  /**
+   * 各**模型席位**这一季的决策原文。
+   *
+   * 此前只录一席。单人局无所谓，但混战是两家对打——只看得到一边，
+   * 「谁在算计谁」就无从谈起：实测一局里曹操写着「先与刘表缔盟求其退兵」，
+   * 而刘表那一席同一季写的是继续围城，两条并排才读得出对抗。
+   *
+   * 只录模型席位，不录三十家机器人：候选全文六席全量实测每季 43KB，
+   * 而决策原文（reason + plan + picks）六席也只有每季约 3KB
+   */
+  seats?: Array<{
     faction: number;
     picks: string[];
     dropped: Array<[string, string]>;
     reason: string | null;
     plan: string | null;
-  };
+  }>;
 }
 
 export interface ReplayDict {
@@ -134,9 +143,10 @@ export function captureFrame(
   s: GameState, idx: { ci: Map<string, number>; fi: Map<string, number> },
   g: Graph, P: EngineParams, roster: Roster | null, geo: Geography,
   orders: readonly Order[],
-  opts: { seat?: FactionId; picks?: string[];
-          dropped?: Array<[string, string]>; reason?: string | null;
-          plan?: string | null;
+  opts: { /** 各模型席位的决策原文，按下令顺序 */
+          seats?: Array<{ faction: FactionId; picks?: string[];
+                          dropped?: Array<[string, string]>;
+                          reason?: string | null; plan?: string | null }>;
           /** 上一帧的驻地表，用来只记变化 */
           prevStations?: Record<string, string>;
           prevCaptured?: readonly string[] } = {},
@@ -225,10 +235,10 @@ export function captureFrame(
               site ? (ci.get(site) ?? -1) : -1] as [number, string, number];
     }),
     moves, captured,
-    ...(opts.seat
-      ? { seat: { faction: fi.get(opts.seat) ?? -1, picks: opts.picks ?? [],
-                  dropped: opts.dropped ?? [], reason: opts.reason ?? null,
-                  plan: opts.plan ?? null } }
+    ...(opts.seats?.length
+      ? { seats: opts.seats.map((x) => ({
+            faction: fi.get(x.faction) ?? -1, picks: x.picks ?? [],
+            dropped: x.dropped ?? [], reason: x.reason ?? null, plan: x.plan ?? null })) }
       : {}),
   };
 }

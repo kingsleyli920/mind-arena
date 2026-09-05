@@ -143,7 +143,14 @@ ul.ev{margin:0;padding:0;list-style:none;font-size:12.5px;line-height:1.55}
 ul.ev li{padding:4px 0 4px 11px;border-left:2px solid var(--soft);margin-bottom:3px;color:var(--ink2)}
 ul.ev li.hot{border-left-color:var(--seal);color:var(--ink)}
 ul.ev li.me{border-left-color:var(--indigo)}
-.ord{font-size:12px;font-family:var(--mono);color:var(--ink2);line-height:1.7}
+.ord{font-size:12px;color:var(--ink2)}
+.seatblk{padding:10px 0 12px;border-bottom:1px solid var(--soft)}
+.seatblk:last-child{border-bottom:none}
+.seatblk h4{margin:0 0 5px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.seatblk h4 i{width:9px;height:9px;border-radius:2px;flex:none}
+.seatblk h4 em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.seatblk h4 span{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.ordlist{font-family:var(--mono);line-height:1.65}
 .ord .x{color:var(--faint);text-decoration:line-through}
 .say{font-size:12.5px;color:var(--ink2);border-left:2px solid var(--indigo);padding:7px 0 7px 12px;margin:6px 0 0}
 .say b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);font-weight:500;margin-bottom:3px}
@@ -482,21 +489,28 @@ function paint(fi){
         +esc(cn(e[2]))+'</li>').join("") + (shown.length>30?'<li class="empty">…另有 '+(shown.length-30)+' 条</li>':"")
     : '<li class="empty">本季无事</li>';
 
-  // 命令
-  const mineOrd=f.orders.filter(o=>o[0]===ME);
-  $("ordTitle").textContent = "本季命令\u3000"+f.orders.length+" 条（我方 "+mineOrd.length+"）";
-  const seat=f.seat;
-  let html = mineOrd.length
-    ? mineOrd.map(o=>'· '+TYPE[o[1]]+(o[2]>=0?" "+D.name[o[2]]:"")).join("<br>")
-    : '<span class="empty">我方本季未下令</span>';
-  if(seat && seat.dropped.length)
-    html += '<br>'+seat.dropped.map(d=>'<span class="x">✗ '+esc(d[0])+'</span>\u3000'+esc(WHY[d[1]]||d[1])).join("<br>");
-  $("ord").innerHTML=html;
-
-  let say="";
-  if(seat&&seat.reason) say+='<div class="say"><b>本季意图</b>'+esc(cn(seat.reason))+'</div>';
-  if(seat&&seat.plan) say+='<div class="say"><b>跨季方略</b>'+esc(cn(seat.plan))+'</div>';
-  $("detail").innerHTML=say;
+  // 命令与想法：**每个模型席位各一段**。混战两家对打，只显示一边读不出对抗
+  // f.seat 是旧格式（只录一席）。已经录好的那些不必重跑，兼容一下
+  const seats = f.seats || (f.seat ? [f.seat] : []);
+  $("ordTitle").textContent = "本季命令与想法\u3000全场 "+f.orders.length+" 条";
+  const blocks = seats.length ? seats : [{ faction: ME, picks: [], dropped: [], reason: null, plan: null }];
+  $("ord").innerHTML = blocks.map((st)=>{
+    const ord=f.orders.filter(o=>o[0]===st.faction);
+    let h='<div class="seatblk"><h4><i style="background:'+(D.facColor[st.faction]||"#888")+'"></i>'
+      +esc(D.facName[st.faction]||"—")
+      +(SEATS[D.fac[st.faction]] ? '<em>'+esc(SEATS[D.fac[st.faction]].split("/").pop())+'</em>' : '')
+      +'<span>'+ord.length+' 条</span></h4>';
+    h += ord.length
+      ? '<div class="ordlist">'+ord.map(o=>'· '+TYPE[o[1]]+(o[2]>=0?" "+D.name[o[2]]:"")).join("<br>")+'</div>'
+      : '<div class="ordlist empty">本季未下令</div>';
+    if(st.dropped && st.dropped.length)
+      h += '<div class="ordlist">'+st.dropped.map(d=>'<span class="x">✗ '+esc(d[0])+'</span>\u3000'
+        +esc(WHY[d[1]]||d[1])).join("<br>")+'</div>';
+    if(st.reason) h+='<div class="say"><b>本季意图</b>'+esc(cn(st.reason))+'</div>';
+    if(st.plan) h+='<div class="say"><b>跨季方略</b>'+esc(cn(st.plan))+'</div>';
+    return h+'</div>';
+  }).join("");
+  $("detail").innerHTML="";
   paintDetail(fi);
 }
 
