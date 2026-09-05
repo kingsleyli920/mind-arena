@@ -22,7 +22,8 @@ import { buildRoster, stationedAt, isFiller } from "../lib/game/engine/officers.
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, GRADE_CN } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, epochLimitFor, GRADE_CN }
+  from "../lib/game/engine/victory.ts";
 import { visibleLog } from "../lib/game/engine/intel.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
@@ -197,7 +198,8 @@ async function main() {
     const winnable = cands.filter((c) => c.forecast?.verdict === "破城").length;
 
     say(`\n---\n`);
-    say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}`);
+    say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}/${P.epochCount}`
+      + `（至多再 ${Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart))} 季推进；无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%${s.epoch < P.epochCount ? `，推进后 ${Math.round((P.neutralGrowth[s.epoch + 1] ?? 0) * 100)}%` : ""}）`);
     say("");
     // ── 我方家底 ──
     say(`### 我方`);

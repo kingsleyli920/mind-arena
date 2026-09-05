@@ -22,7 +22,8 @@ import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, GRADE_CN } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, epochLimitFor, GRADE_CN }
+  from "../lib/game/engine/victory.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
@@ -120,7 +121,8 @@ say(`| 提示词 | v${PROMPT_VERSION}\u3000内容包 v${pack.version} |`);
 while (!s.finished) {
   const turn = s.turn;
   say(`\n---\n`);
-  say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}`);
+  say(`## 第 ${turn + 1}/${SEASONS} 季\u3000${s.year} 年 · ${SEASON_CN[s.season]}\u3000纪元 ${s.epoch}/${P.epochCount}`
+    + `（至多再 ${Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart))} 季推进；无主郡国守军每季自增 ${Math.round((P.neutralGrowth[s.epoch] ?? 0) * 100)}%${s.epoch < P.epochCount ? `，推进后 ${Math.round((P.neutralGrowth[s.epoch + 1] ?? 0) * 100)}%` : ""}）`);
   say("");
 
   // 模型席位并发请求：串行会让一局等成几小时
