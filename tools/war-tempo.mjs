@@ -151,6 +151,31 @@ const last = [...lives.values()].map((v) => v.troops[v.troops.length - 1]);
 line(`  峰值兵力中位 ${q(peak, 0.5)}　终值兵力中位 ${q(last, 0.5)}`);
 line(`  从峰值掉到 500 以下的军团：${pct(last.filter((v) => v < 500).length, last.length)}\n`);
 
+// ── 行军这一半 ────────────────────────────────────────────────────────
+// 出兵现在不占时间，但要给它定价就得先知道「一步有多远」。
+// adjacency.json 早就备好了：cost 是地形加权距离，meta.costUnit 写明
+// 「1 = 100km 平原」，meta.terrainCost 给了各地形系数
+// （plain 1 · hill 1.35 · river 1.8 · mountain 2.1 · gate 2.6）。
+// 别另造一套系数——关隘在已有数据里是 2.6，仅次于山地，凭直觉多半会猜低。
+const adjacency = read("adjacency.json");
+const DAY_PER_COST = 100 / 12.5;   // 汉军常态行军日三十里≈12.5km，一个 cost 单位=100km 平原
+const SEASON_DAYS = 90;
+const marched = adjacency.edges.map((e) => ({ ...e, days: e.cost * DAY_PER_COST }));
+line(`── 一步有多远（按 adjacency 的 cost，日三十里）──`);
+line(`  邻郡边 ${marched.length} 条　行军日：中位 ${q(marched.map((e) => e.days), 0.5).toFixed(0)}`
+   + `　九分位 ${q(marched.map((e) => e.days), 0.9).toFixed(0)}`
+   + `　最长 ${Math.max(...marched.map((e) => e.days)).toFixed(0)}　（一季 ${SEASON_DAYS} 日）`);
+for (const t of ["plain", "hill", "river", "mountain", "gate"]) {
+  const g = marched.filter((e) => e.terrain === t).map((e) => e.days);
+  if (!g.length) continue;
+  line(`  ${t.padEnd(9)} 边 ${String(g.length).padStart(3)}`
+     + `　中位 ${q(g, 0.5).toFixed(0).padStart(3)} 日`
+     + `　九分位 ${q(g, 0.9).toFixed(0).padStart(3)}`
+     + `　最长 ${Math.max(...g).toFixed(0).padStart(3)}`);
+}
+line(`  走不满一季（>${SEASON_DAYS} 日）的边：${marched.filter((e) => e.days > SEASON_DAYS).length} 条`);
+line("");
+
 const out = arg("json", "");
 if (out) {
   fs.writeFileSync(out, JSON.stringify({ GAMES, SEASONS, breachAfter, endReason, legs, spans, peak, last }, null, 1));
