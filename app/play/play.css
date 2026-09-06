@@ -50,16 +50,21 @@
 }
 .seat-grid button {
   width: 100%; text-align: start; cursor: pointer;
-  display: grid; gap: 0.28rem; padding: 0.75rem 0.85rem;
+  display: grid; gap: 0.28rem 0.7rem; padding: 0.75rem 0.85rem;
+  /* 城印占左边一列，跨到局势那一行 */
+  grid-template-columns: 3.1rem 1fr;
+  grid-template-areas: "sigil name" "sigil stat" "lore lore";
   background: #fbf8f1; color: inherit; font: inherit;
   border: 1px solid var(--rule); border-inline-start: 4px solid var(--c);
   border-radius: 3px; transition: background 0.15s, transform 0.15s;
 }
 .seat-grid button:hover { background: #fff; transform: translateY(-1px); }
-.seat-grid b { font-size: 1.02rem; display: flex; align-items: baseline; gap: 0.4rem; }
+.seat-grid .sigil { grid-area: sigil; width: 3.1rem; height: 3.1rem; align-self: center; }
+.seat-grid b { grid-area: name; font-size: 1.02rem; display: flex; align-items: baseline; gap: 0.4rem; }
 .seat-grid b i { font-size: 0.74rem; font-style: normal; font-weight: 400; color: var(--ink-soft); }
-.seat-grid span { font-size: 0.78rem; color: var(--ink-soft); }
+.seat-grid span { grid-area: stat; font-size: 0.78rem; color: var(--ink-soft); }
 .seat-grid em {
+  grid-area: lore;
   font-size: 0.75rem; line-height: 1.75; color: var(--ink-soft); font-style: normal;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   border-top: 1px solid var(--rule); padding-top: 0.35rem; margin-top: 0.1rem;

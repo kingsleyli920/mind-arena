@@ -503,6 +503,37 @@ function TileLayer({ view, screenW }: {
   return <div className="tiles">{out}</div>;
 }
 
+/**
+ * 势力的城印。选席页与地图共用同一批画、同一套遮罩——
+ * mask 的 id 是文档级的，所以只要页面上有那份 defs，哪儿都能引
+ */
+function SeatSigil({ color, id, kind }: { color: string; id: string; kind: string }) {
+  const v = variantOf(id, kind);
+  return (
+    <svg className="sigil" viewBox="0 0 1 1" aria-hidden>
+      <rect x="0" y="0" width="1" height="1" fill={color} mask={`url(#wash-${kind}-${v})`} />
+      <image href={`${GLYPH}/${kind}-${v}-ink.png`} x="0" y="0" width="1" height="1" />
+    </svg>
+  );
+}
+
+/** 可上色面的遮罩。地图与选席页共用一份，故单独成一个组件挂在页面上 */
+function WashDefs() {
+  return (
+    <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
+      <defs>
+        {WASHED.flatMap((kind) =>
+          Array.from({ length: GLYPH_N[kind] ?? 1 }, (_, v) => (
+            <mask key={`${kind}-${v}`} id={`wash-${kind}-${v}`} maskContentUnits="objectBoundingBox">
+              <image href={`${GLYPH}/${kind}-${v}-wash.png`} x="0" y="0" width="1" height="1"
+                preserveAspectRatio="none" />
+            </mask>
+          )))}
+      </defs>
+    </svg>
+  );
+}
+
 /** 席位轮转出机器人画像。确定：同一局同一势力恒为同一画像 */
 const PROFILE_KEYS = Object.keys(PROFILES) as Profile[];
 
@@ -1021,10 +1052,15 @@ export function PlayClient() {
             </div>
           );
         })()}
+        <WashDefs />
         <ul className="seat-grid">
           {seats.map(({ f, n, st }) => (
             <li key={f.id}>
               <button onClick={() => start(f.id)} style={{ "--c": engine.colorOf.get(f.id) } as React.CSSProperties}>
+                {/* 城印：与图上是同一幅画、同一套色。选席页此前是一张纯表格，
+                    与那张舆图之间没有任何视觉关系——点进去才知道自己接的是什么 */}
+                <SeatSigil color={engine.colorOf.get(f.id) ?? "#7a7266"} id={f.id}
+                  kind={st.zhouSeats > 0 ? "city-seat" : n >= 4 ? "city-large" : "city-small"} />
                 <b>{engine.nameOf.get(f.id)}
                   {engine.lore.get(f.id)?.courtesyName && (
                     <i>字{engine.lore.get(f.id)!.courtesyName}</i>
@@ -1370,6 +1406,8 @@ export function PlayClient() {
         </div>
       )}
       <div className="play-body">
+        {/* 遮罩定义挂在这儿，地图与图例都引它 */}
+        <WashDefs />
         <section
           ref={wrapRef}
           className={`map-wrap${dragging || !smooth ? " dragging" : ""}`}
@@ -1433,16 +1471,6 @@ export function PlayClient() {
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
             <defs>
-              {/* 可上色面的 mask。maskContentUnits=objectBoundingBox 让同一份
-                  mask 贴到任意位置任意大小的矩形上——否则一百零五座城要一百零五份 */}
-              {WASHED.flatMap((kind) =>
-                Array.from({ length: GLYPH_N[kind] ?? 1 }, (_, v) => (
-                  <mask key={`${kind}-${v}`} id={`wash-${kind}-${v}`}
-                    maskContentUnits="objectBoundingBox">
-                    <image href={`${GLYPH}/${kind}-${v}-wash.png`} x="0" y="0" width="1" height="1"
-                      preserveAspectRatio="none" />
-                  </mask>
-                )))}
               <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
                 markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
