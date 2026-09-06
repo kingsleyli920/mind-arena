@@ -497,6 +497,10 @@
   background: var(--seal); color: #fbf8f1; border: none; border-radius: 3px;
 }
 .play-bar .ap .upkeep { font-style: normal; color: var(--ink-soft); font-size: 0.72rem; }
+/* 名器：州牧号与朝廷所在。朱笔是名分的颜色，与令数、国库同排但不抢它们的视线 */
+.play-bar .ap .titles { font-style: normal; font-size: 0.72rem; color: var(--seal, #9a3b32);
+  border: 1px solid currentColor; border-radius: 2px; padding: 0 0.25em; }
+.play-bar .ap .titles.dim { color: var(--ink-soft); }
 
 /* ── 模型执子 ── */
 .model-setup { display: grid; gap: 0.7rem; padding: 0.2rem 0 0.4rem; }

@@ -1049,7 +1049,16 @@ export function PlayClient() {
         <span className="ap">令数 {me.ap - spent}/{me.ap}
           {engine.P.goldOn && <>{"\u3000"}国库 {Math.round(me.gold)} 金
             {upkeep > 0 && <i className="upkeep">（军费 {upkeep}）</i>}</>}
-          {"\u3000"}现档 {GRADE_CN[me.bestGrade]}</span>
+          {"\u3000"}现档 {GRADE_CN[me.bestGrade]}
+          {/* 名器：朝廷在谁手里、自己有几个州牧号。这两件事改变的是「无主之郡
+              归谁」，与令数、国库同属「这一季能做什么」那一类，故常驻状态栏 */}
+          {me.governorships.length > 0 && <>{"\u3000"}
+            <i className="titles">{me.governorships.join("·")}牧</i></>}
+          {game.commanderies[engine.P.courtSeat]?.owner === seat
+            ? <>{"\u3000"}<i className="titles">挟天子</i></>
+            : <>{"\u3000"}<i className="titles dim">朝廷在 {
+                engine.nameOf.get(game.commanderies[engine.P.courtSeat]?.owner ?? "") ?? "无主"
+              }</i></>}</span>
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
           aria-expanded={showPrimer}>规则</button>
       </header>
