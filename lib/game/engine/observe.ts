@@ -14,6 +14,8 @@ import { visibleLog } from "./intel.ts";
 import { forecastSiege } from "./forecast.ts";
 import { supplyReach } from "./resolve.ts";
 import { unitName, FORMATION_CN } from "./combat.ts";
+import { provCapOf } from "./params.ts";
+import { BUILD_CN } from "./actions.ts";
 import { retinueAt, isFiller, defendRetinue } from "./officers.ts";
 import type { Roster } from "./officers.ts";
 import type { EngineParams } from "./params.ts";
@@ -113,10 +115,16 @@ export interface Observation {
      * 规则摘要里讲了补给，观测里却看不见谁断了，等于让它蒙着眼睛按规则走
      */
     supplyCut: boolean;
+    /** 存粮（季）。满仓时不发 */
+    provisions?: number;
+    /** 已建成的建筑。无则不发 */
+    built?: string[];
   }>;
   /** 我在外的军团 */
   armies: Array<{ id: string; at: string; target: string | null; troops: number;
                   seasons: number; unit: string; gear: string;
+                  /** 还要走几季才到城下。已抵达则不发 */
+                  marching?: number;
                   /**
                    * 正在围城时的**续围预告**：不撤则本季就会这样。
                    *
@@ -190,6 +198,8 @@ function armiesOf(
       return {
         id: a.id, at: a.at, target: a.target, troops: a.troops,
         seasons: a.siegeSeasons, unit: unitName(P, a.unit), gear: a.gear,
+        // 在途：还要走几季才到得了城下。0 不发
+        ...(a.marchLeft > 0 ? { marching: a.marchLeft } : {}),
         ...(fc ? { siege: { breachLo: fc.breachLo, breachHi: fc.breachHi,
                             hold: fc.holdLo, verdict: fc.verdict, text: fc.text } } : {}),
       };
@@ -235,6 +245,10 @@ export function observe(
       unit: unitName(P, c.unit),
       ...(c.gear === "none" ? {} : { gear: c.gear }),
       formation: FORMATION_CN[c.formation],
+      // 默认值不发：存粮满仓、无建筑是常态，逐郡写一遍是白花 token。
+      // 存粮只在**不满**时发——那才是要决策的时候（该不该屯粮）
+      ...(c.provisions < provCapOf(c, P) ? { provisions: c.provisions } : {}),
+      ...(c.buildings.length ? { built: c.buildings.map((b) => BUILD_CN[b]) } : {}),
       // 驻将：只报实际能随军的那几人（retinueCap），外加总数。
       // 全列出来会把观测撑爆——刘表十三郡各驻数人时峰值一度只剩 94 tok 余量，
       // 而多出来的名字对决策没有用：超过上限的人不随军也不加成

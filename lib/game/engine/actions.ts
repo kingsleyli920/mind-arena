@@ -467,6 +467,12 @@ export function listActions(
         const marchNote = mSeasons === 0 ? ""
           : `｜${P.terrainName[e.terrain] ?? e.terrain}道远，行军 ${mSeasons} 季方至`
             + `${src0.gear !== "none" ? "（带械行迟）" : ""}`;
+        // 目标郡的物产：铁官只能建在有铁之郡，别处建不得——所以「该抢哪个郡」
+        // 因此有了地理上的答案。这条挂在记分函数那根管子上（赔付是一个郡），
+        // 而这个仓库量过：挂在记分函数上的信息 +17.2±5.7，挂在产出档/城防/民心上
+        // 的是 −6.4±5.9。物产是常量，不随迷雾变，写出来不算开天眼
+        const resNote = tgt.resources.length
+          ? `｜有${tgt.resources.map((r) => RESOURCE_CN[r]).join("、")}` : "";
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
@@ -505,7 +511,7 @@ export function listActions(
                + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
-               + `${marchNote}${unitNote}${armyNote}${siegeNote}`
+               + `${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }

@@ -379,3 +379,12 @@ export function marchSeasons(cost: number, withGear: boolean, P: EngineParams): 
   if (days <= P.marchAssaultWindow) return 0;
   return Math.ceil((days - P.marchAssaultWindow) / P.marchSeasonDays);
 }
+
+/**
+ * 一郡的存粮上限：底数由产出档定，仓廪再加 granarySeasons 季。
+ * 无主郡没有建筑，走的也是同一个函数——口径要一致，不能一处带建筑一处不带。
+ */
+export function provCapOf(c: { yieldTier: number; buildings: readonly string[] }, P: EngineParams): number {
+  return provisionsCap(c.yieldTier, P)
+    + (c.buildings.includes("granary") ? P.granarySeasons : 0);
+}

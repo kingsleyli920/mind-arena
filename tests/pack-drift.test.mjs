@@ -144,3 +144,18 @@ test("渲染端不得二次提纯势力色", () => {
       `${f} 又出现了 vivid()：势力色应直接取 scenario 里的最终显示色`);
   }
 });
+
+// 散文里写死的**个数**是最容易漂的一类：加一档方针、加一种建筑，
+// 而 summary 里那句「五个方针互斥」没人记得改。实测栽过一次（屯粮）
+test("包：动作说明里写的档数，必须与实际档数一致", () => {
+  const CN = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  for (const a of pack.actions) {
+    const tiers = a.params?.find((p) => p.tiers)?.tiers;
+    if (!tiers) continue;
+    // 「**后**四种须有物产」说的是后四种，不是总数——限定词要排掉
+    const m = /(?<![后前另])(?<!其中)([零一二三四五六七八九十]+)\s*(个|种|档)(?!以)/.exec(a.summary ?? "");
+    if (!m) continue;
+    assert.equal(m[1], CN[tiers.length],
+      `${a.id} 的说明写着「${m[0]}」，而实际有 ${tiers.length} 档`);
+  }
+});

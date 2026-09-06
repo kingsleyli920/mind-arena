@@ -14,7 +14,7 @@ import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, t
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
-import { marchSeasons, provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provCapOf, provisionsCap, type EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
@@ -75,14 +75,6 @@ function lift(s: GameState, army: { id: string }): void {
  * 退不进老巢时的落点按 id 取第一个己方郡——这是个任意但确定的选择，
  * 「最近的己方可达郡」这个概念引擎里还不存在（军团的 home 一经设定永不更新）。
  */
-/**
- * 一郡的存粮上限：底数由产出档定，仓廪再加 granarySeasons 季。
- * 无主郡没有建筑，走的也是同一个函数——口径要一致，不能一处带建筑一处不带。
- */
-function provCapOf(c: CommanderyState, P: EngineParams): number {
-  return provisionsCap(c.yieldTier, P)
-    + (c.buildings.includes("granary") ? P.granarySeasons : 0);
-}
 
 /**
  * 一郡每季回补几季存粮。屯田不只惠及本郡，**相邻己方郡**也一起回补——

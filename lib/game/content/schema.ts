@@ -202,7 +202,7 @@ const COMMENTARY_KEYS = new Set([
  * 它把「满价把曹操的出局率从 42% 推到 57%」写进了模型读的规则摘要，
  * 既泄漏席位名（毁掉前缀缓存），也是在教模型怎么想。
  */
-const COMMENTARY_KEY_RE = /说明|依据|理由|为何|意图|意义|教训|代价|注$/;
+const COMMENTARY_KEY_RE = /说明|依据|理由|为何|意图|意义|教训|代价|出处|注$/;
 const COMMENTARY_RE = /实测|自对局|首版|此前|原先|等于没有|白送|装饰|评测|设计|踩过|漂移/;
 
 function isCommentary(key: string, value: unknown): boolean {
