@@ -1132,11 +1132,11 @@ test("纪元：双触发推进，且无主郡国随之筑壁渐坚", () => {
   assert.equal(wallAfter(1), 0, "一纪元无主郡不该筑壁");
   assert.ok(wallAfter(2) > 0, "二纪元无主郡未筑壁");
   assert.ok(wallAfter(3) > wallAfter(2), "三纪元筑壁未快于二纪元");
-  // 守军一个不涨——没人占的地方没有兵役
+  // 守军不涨，反而渐散——城墙是本地豪强维持的，而戍卒没人发饷会走
   const t3 = fresh(); t3.epoch = 3;
   const n3 = Object.values(t3.commanderies).find((c) => !c.owner);
-  assert.equal(resolve(t3, [], G, P, ROSTER, GEO).state.commanderies[n3.id].garrison,
-    n3.garrison, "无主郡的守军涨了 —— 没人占的地方不该征兵");
+  const g3 = resolve(t3, [], G, P, ROSTER, GEO).state.commanderies[n3.id].garrison;
+  assert.ok(g3 <= n3.garrison, `无主郡的守军涨了：${n3.garrison} → ${g3}`);
 });
 
 // ── 迷雾 ────────────────────────────────────────────────────────────
@@ -1988,9 +1988,14 @@ test("无主郡只筑壁不征兵 —— 没人占的地方没有兵役", () => 
   const now = s.commanderies[n0.id];
   assert.ok(!now.owner, "这个郡被拿走了，测不出");
 
-  // **守军一个不涨**。此前是每季 +15% 复利，84 季 14 万倍，
-  // 于是 13 个无主郡有 10 个长到满档、从第 20 季起一个都没易过手
-  assert.equal(now.garrison, g0, `守军从 ${g0} 涨到了 ${now.garrison} —— 没人占的地方不该征兵`);
+  // **守军不涨，反而渐散**。此前是每季 +15% 复利，84 季 14 万倍，
+  // 于是 13 个无主郡有 10 个长到满档、从第 20 季起一个都没易过手。
+  // 改成不增之后又发现另一半没做：守军原地不动，于是**开局的守军数就决定了
+  // 这个郡这一局会不会被人碰**——实测活到终局的无主郡清一色是开局守军就大的。
+  // 城墙是本地豪强维持的（坞壁），职业戍卒没人发饷会走，所以逐季散
+  assert.ok(now.garrison < g0, `守军没散：${g0} → ${now.garrison}`);
+  assert.ok(now.garrison >= Math.round(g0 * P.neutralDecayFloor) - 1,
+    `散过头了：${g0} → ${now.garrison}，下限该是开局的 ${P.neutralDecayFloor}`);
   // 城防要涨，但封顶
   assert.ok(now.defense > d0, "城防一点没涨，那「早取有时间价值」就没了");
   assert.ok(now.defense <= P.neutralWallCap, `城防 ${now.defense} 超过上限 ${P.neutralWallCap}`);
@@ -2089,4 +2094,76 @@ test("围城：被围之城不得募兵——一条令就能把围城时钟按�
   const cs = listActions(cur, defender, G, P, undefined, ROSTER, undefined, GEO);
   assert.ok(!cs.some((c) => c.key === `govern:${edge.to}:levy`),
     "候选里还列着被围之城的募兵");
+});
+
+test("围城：合围——四面都是我的地，不必再问带了多少人", () => {
+  // 只看兵力比是错的，而且错得很具体：首攻失手折 35%，于是一支本来与守军相当的
+  // 部队打完就掉到 0.65 倍，围不住了，守方一兵不损、存粮不减，僵在那儿。
+  // 实测进入新一季的围城军里 33% 卡在这一条，是所有去向里最大的一项。
+  // 史实上封锁靠的是控制道路而不是跟守军拼人数
+  const s = fresh();
+  const me = "yuanshao";
+  // 找一个郡：它的邻郡半数以上已属袁绍
+  let tid = null;
+  for (const c of Object.values(s.commanderies)) {
+    if (c.owner === me) continue;
+    const nbs = (G.adj.get(c.id) ?? []).map((e) => s.commanderies[e.to]).filter(Boolean);
+    if (nbs.length >= 2 && nbs.filter((n) => n.owner === me).length * 2 > nbs.length) {
+      tid = c.id; break;
+    }
+  }
+  if (!tid) {
+    // 开局没有现成的合围样本就手造一个：把某郡的邻郡都划给袁绍
+    const c = Object.values(s.commanderies).find((x) => x.owner && x.owner !== me
+      && (G.adj.get(x.id) ?? []).length >= 2);
+    for (const e of G.adj.get(c.id) ?? []) s.commanderies[e.to].owner = me;
+    tid = c.id;
+  }
+  const from = (G.adj.get(tid) ?? []).map((e) => s.commanderies[e.to])
+    .find((n) => n.owner === me);
+  // 兵力**远不足**守军的一半：只靠合围
+  s.commanderies[tid].garrison = 40000;
+  s.commanderies[tid].defense = 100;
+  from.garrison = 3000;
+  const prov0 = s.commanderies[tid].provisions;
+
+  const cur = resolve(s, [{ faction: me, action: { type: "campaign",
+    target: tid, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+  const army = cur.armies.find((a) => a.target === tid);
+  assert.ok(army, "军团没站到城下");
+  assert.ok(army.troops < cur.commanderies[tid].garrison * P.siegeGripRatio,
+    `兵力 ${army.troops} 已达守军的 ${P.siegeGripRatio} 倍，测的就不是合围了`);
+  assert.equal(cur.commanderies[tid].provisions, prov0 - 1,
+    "四面都是我的地，却没断得了它的粮 —— 合围没生效");
+});
+
+test("孤悬：四邻皆属一家，不必出兵，粮尽即归附", () => {
+  // 一郡的四邻全属同一家而它不属那一家，就已经是海中孤岛：出不去、进不来、援不至。
+  // 此前只有「派兵去围」一条路，而围城要 2 令、要够兵力围得住、还要熬过守方的存粮
+  // ——于是机器人宁可去打别处，孤岛一直挂在图上：实测 6 局 40 季里这样的郡·季 66 个
+  const s = fresh();
+  const me = "yuanshao";
+  const victim = Object.values(s.commanderies)
+    .find((c) => c.owner && c.owner !== me && (G.adj.get(c.id) ?? []).length >= 2);
+  for (const e of G.adj.get(victim.id) ?? []) s.commanderies[e.to].owner = me;
+  const prov0 = s.commanderies[victim.id].provisions;
+  const loser = victim.owner;
+
+  let cur = s;
+  for (let i = 0; i < prov0 + 1; i += 1) {
+    cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
+    if (cur.commanderies[victim.id].owner === me) break;
+  }
+  assert.equal(cur.commanderies[victim.id].owner, me,
+    `四邻皆属 ${me}，围了 ${prov0 + 1} 季仍不归附`);
+  assert.ok(cur.log.some((e) => e.kind === "isolated-submit"), "没有举郡归附的记载");
+  assert.notEqual(loser, me, "样本选错了");
+
+  // **不是立刻归附**：立刻等于奖励「围而不打」，把四邻占全就白得一个郡
+  const t = fresh();
+  for (const e of G.adj.get(victim.id) ?? []) t.commanderies[e.to].owner = me;
+  const one = resolve(t, [], G, P, ROSTER, GEO).state;
+  assert.notEqual(one.commanderies[victim.id].owner, me, "第一季就白送了");
+  assert.equal(one.commanderies[victim.id].provisions, prov0 - 1, "孤悬却没扣粮");
 });

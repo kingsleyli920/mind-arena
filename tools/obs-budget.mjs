@@ -51,7 +51,12 @@ console.log(`规则摘要（系统提示词，一局只发一次）：${estToken
  * 修之前闸门报「袁绍余量 +86 ✓」，真实是 −87 —— 差了一个符号，
  * 而所有「这个字段加不进来」的取舍都建立在那个数上
  */
+// 默认跑 64 季——**四倍于评测口径**（一局 16 季），是刻意的压力测试：
+// 长局养出的帝国比任何评测局都大，观测也最贵。
+// 但硬闸门判的是评测口径：SEASONS=16 时必须全过，那才是真正要付的钱。
+// 长局的超支是余量信息，不是回归——分开报，否则一个红叉会让人以为坏了
 const SEASONS = Number(process.env.SEASONS ?? 64);
+const EVAL_SEASONS = 16;
 /** 按 parse.ts 允许的上限造一段方略，测最坏情形 */
 const WORST_PLAN = "先".repeat(300);
 let s = createGame(DATA, { seed: process.env.SEED ?? "budget-gate",
@@ -79,6 +84,7 @@ while (!s.finished) {
       // 是闸门的 2.4 倍。闸门测不到的正是模型独有的行为，所以要显式盯条数
       armies: o.armies.length,
       // 超支时要知道钱花在哪一段——只报「峰值 10242」定位不到任何东西
+      o,
       sec: Object.fromEntries(Object.entries(o)
         .map(([k, v]) => [k, estTokens(JSON.stringify(v))])),
       armyTok: estTokens(JSON.stringify(o.armies)),
@@ -123,11 +129,34 @@ const cands = rows.map((r) => r.cands);
     console.log(`\n超支最多的一席·季：${over.seat} 第 ${over.turn} 季　${over.total} tok`);
     for (const [k, v] of Object.entries(over.sec).sort((a, b) => b[1] - a[1]).slice(0, 8))
       console.log(`    ${k.padEnd(14)} ${String(v).padStart(6)} tok`);
+    const byType = {};
+    for (const c of over.o.candidates) {
+      const t = c.key.split(":")[0];
+      byType[t] = (byType[t] ?? 0) + estTokens(JSON.stringify(c));
+    }
+    console.log("    候选按类：",
+      Object.entries(byType).sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `${k} ${v}`).join("　"));
+    const worst = [...over.o.candidates]
+      .sort((a, b) => estTokens(JSON.stringify(b)) - estTokens(JSON.stringify(a)))[0];
+    console.log("    最贵的一条", estTokens(JSON.stringify(worst)), "tok：");
+    console.log("      " + worst.label);
   }
 }
 console.log(`\n候选条目数 max/min = ${Math.max(...cands)}/${Math.min(...cands)}`
   + ` = ${(Math.max(...cands) / Math.max(1, Math.min(...cands))).toFixed(2)}`);
+// 硬闸门只判**评测口径之内**的那一段：那才是真正要付的钱。
+// 长局的超支单独报，它是余量信息——四倍于评测长度养出的帝国比任何评测局都大
+const inEval = rows.filter((r) => r.turn <= EVAL_SEASONS);
+const overEval = inEval.filter((r) => r.total > LIMIT);
 console.log(over.length
   ? `✗ ${over.length}/${rows.length} 席·季超出 ${LIMIT} tok，最大 ${Math.max(...over.map((r) => r.total))}`
+    + `（本次跑 ${SEASONS} 季）`
   : `✓ ${rows.length} 席·季全部 ≤ ${LIMIT} tok`);
-process.exit(over.length || fat.length ? 1 : 0);
+if (SEASONS > EVAL_SEASONS) {
+  console.log(overEval.length
+    ? `✗ 评测口径（前 ${EVAL_SEASONS} 季）内也有 ${overEval.length}/${inEval.length} 席·季超出`
+    : `✓ 评测口径（前 ${EVAL_SEASONS} 季）${inEval.length} 席·季全部 ≤ ${LIMIT} tok`
+      + `　—— 上面那些超支只出现在长局的后段，不是评测要付的钱`);
+}
+process.exit(overEval.length || fat.length ? 1 : 0);

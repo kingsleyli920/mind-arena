@@ -107,17 +107,31 @@ const atWalls = (a: Army): boolean => !!a.target && a.marchLeft <= 0;
  * 比的是**裸守军**，不含地形守备加成——守方的地利用在打，不该再用来抗饿。
  */
 function besiegedBy(s: GameState, id: CommanderyId, byOthersThan: FactionId | null,
-                    P: EngineParams): boolean {
+                    P: EngineParams, g?: Graph): boolean {
   const c = s.commanderies[id];
   if (!c) return false;
   let force = 0;
+  const who = new Map<FactionId, number>();
   for (const a of s.armies) {
     if (a.target !== id || !atWalls(a)) continue;   // 还在路上的不算围
     if (byOthersThan !== null && a.faction === byOthersThan) continue;
     force += a.troops;
+    who.set(a.faction, (who.get(a.faction) ?? 0) + a.troops);
   }
   if (force === 0) return false;
-  return force >= c.garrison * P.siegeGripRatio;
+  if (force >= c.garrison * P.siegeGripRatio) return true;
+  // 合围：兵力不够，但这座城的邻郡半数以上已在围城方手中——四面都是他的地，
+  // 城里出不来、外面进不去，不必再问他带了多少人。
+  // 只看兵力比是错的：首攻失手折 35%，于是本来与守军相当的部队打完就掉到 0.65 倍，
+  // 围不住了，守方一兵不损、存粮不减，僵在那儿。实测 33% 的围城军卡在这一条
+  if (!g || !P.siegeEncircle) return false;
+  const nbs = (g.adj.get(id) ?? []).map((e) => s.commanderies[e.to]).filter((x) => !!x);
+  if (!nbs.length) return false;
+  for (const [f] of who) {
+    const held = nbs.filter((n) => n.owner === f).length;
+    if (held * 2 > nbs.length) return true;
+  }
+  return false;
 }
 
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
@@ -748,13 +762,15 @@ export function resolve(
   // ── 阶段七：围城结算 ──────────────────────────────────────────────
   // 每季一结。围而不下则双方耗兵，但缺口逐季累加——
   // 这才让「围点打援」「围魏救赵」成为真选项，而不是攻城一击定胜负。
+  /** 本季已扣过存粮的郡。围城与孤悬共用，免得同一座城一季扣两次 */
+  const starvedThisSeason = new Set<CommanderyId>();
   const sieges = s.armies.filter(atWalls)
     // 排序键补上 id：有了在途之后「同一势力两支军团指向同一郡」成为可能
     //（一支已在城下、一支还在路上），(faction,target) 不再是全序，
     // 退化成数组顺序就是 R6 失守
     .sort((x, y) => cmp(x.faction, y.faction) || cmp(x.target!, y.target!) || cmp(x.id, y.id));
   /** 本季已扣过存粮的郡。围城结算是逐军团跑的，而存粮是每城每季一份 */
-  const starved = new Set<CommanderyId>();
+  const starved = starvedThisSeason;
   for (const [i, army] of sieges.entries()) {
     const tgt = s.commanderies[army.target!];
     if (!tgt || tgt.owner === army.faction) { lift(s, army); continue; }
@@ -867,7 +883,7 @@ export function resolve(
     // 还要**围得住**才扣：兵力不足守军的 0.8 倍就围不断粮道，城照常吃饭。
     // 不加这一条的话，「一支六百人的偏师饿死两万守军的大郡」仍然成立——
     // 那正是这条规则最不想鼓励的顿兵封锁
-    const grip = besiegedBy(s, tgt.id, tgt.owner, P);
+    const grip = besiegedBy(s, tgt.id, tgt.owner, P, g);
     if (grip && !starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= 1; }
     if (grip && tgt.provisions <= 0) {
       const loser = tgt.owner;
@@ -899,6 +915,53 @@ export function resolve(
     }
   }
 
+  // ── 孤悬归附（传檄而定）──────────────────────────────────────────
+  //
+  // 一郡的**四邻全属同一家**而它不属那一家，则它已是海中孤岛：出不去、进不来、
+  // 援不至。此前只有「派兵去围」一条路，而围城要花 2 令、要够兵力围得住、
+  // 还要熬过守方的存粮——于是机器人宁可去打别处，孤岛就一直挂在图上：
+  // 实测 6 局 40 季里这样的郡·季有 66 个，**会稽郡曾经孤悬了整整 18 季**。
+  //
+  // 不必出兵，存粮逐季自耗，粮尽即举郡归附。不是立刻归附——那等于奖励
+  // 「围而不打」，把四邻占全就白得一个郡；走存粮这只钟，富郡耐得久、瘠郡先降，
+  // 与围城同一套刻度，而且期间被围方可以夺回任一邻郡来解围
+  if (P.isolatedSubmit) {
+    const fallen: Array<[CommanderyId, FactionId]> = [];
+    for (const c of Object.values(s.commanderies)) {
+      const nbs = (g.adj.get(c.id) ?? []).map((e) => s.commanderies[e.to]).filter((x) => !!x);
+      if (nbs.length === 0) continue;
+      const lord = nbs[0].owner;
+      if (!lord || lord === c.owner) continue;
+      if (!nbs.every((n) => n.owner === lord)) continue;
+      // 已经在被围城结算扣过粮的，本季不再扣第二次
+      if (starvedThisSeason.has(c.id)) continue;
+      c.provisions -= 1;
+      if (c.provisions > 0) {
+        log(s, { kind: "isolated", faction: lord,
+                 text: `${c.id} 四邻皆我所有，孤悬无援，城中存粮尚可支 ${c.provisions} 季` });
+        continue;
+      }
+      fallen.push([c.id, lord]);
+    }
+    // 本季已因孤悬扣过粮的，下面无主郡那个循环不能再 +1 补回去——
+    // 一扣一补净零，孤悬这条就等于没写（实测会稽郡照样挂了十季）
+    for (const c of Object.values(s.commanderies)) {
+      const nbs = (g.adj.get(c.id) ?? []).map((e) => s.commanderies[e.to]).filter((x) => !!x);
+      const lord = nbs[0]?.owner;
+      if (lord && lord !== c.owner && nbs.every((n) => n.owner === lord)) starvedThisSeason.add(c.id);
+    }
+    for (const [id, lord] of fallen) {
+      const c = s.commanderies[id];
+      const loser = c.owner;
+      if (loser) s.factions[lord].conquests += 1;
+      c.owner = lord;
+      c.provisions = provCapOf(c, P);
+      c.moraleTier = Math.max(1, c.moraleTier - 1);
+      log(s, { kind: "isolated-submit", faction: lord,
+               text: `${id} 孤悬粮尽，${loser ? `${loser} ` : ""}举郡归附` });
+    }
+  }
+
   // ── 阶段八：补给与产出 ────────────────────────────────────────────
   // 无主郡国随纪元推进而**豪强筑壁**，自守渐坚。这给「早取无主之地」一个时间
   // 价值——若无主地永远同价，抢占时机就不成其为决策。
@@ -910,12 +973,20 @@ export function resolve(
   // 城防进的是可防守（每 30 点 +1），涨得慢且有上限，晚取只多啃一两级
   const wall = P.neutralWall[s.epoch] ?? 0;
   for (const c of Object.values(s.commanderies)) {
-    if (c.owner || besiegedBy(s, c.id, null, P)) continue;
+    if (c.owner || besiegedBy(s, c.id, null, P, g)) continue;
     if (wall > 0) c.defense = Math.min(P.neutralWallCap, c.defense + wall);
+    // 城墙逐季涨，守军逐季散——这是「没人占的地方不该有兵役」的另一半：
+    // 城墙是本地豪强维持的（坞壁），而职业戍卒没人发饷会走。
+    // 不散的话，开局的守军数就决定了这个郡这一局会不会被人碰，中间几十季什么都没发生
+    c.garrison = Math.max(Math.round(c.startGarrison * P.neutralDecayFloor),
+                          Math.round(c.garrison * (1 - P.neutralDecay)));
     // 无主郡的存粮也要回补。第八阶段只遍历各势力自己的郡，无主郡走不到那里——
     // 而无主郡正是最常被打的目标，不补的话被围过一次就永远空仓，
-    // 下一次来人当季就开城。实测漏了这条时「围到粮尽开城」20 次**全部**发生在第 1 季
-    c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
+    // 下一次来人当季就开城。实测漏了这条时「围到粮尽开城」20 次**全部**发生在第 1 季。
+    // 但本季已被围或已孤悬的不补：一扣一补净零，那两条规则就都等于没写
+    if (!starvedThisSeason.has(c.id)) {
+      c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
+    }
   }
 
   for (const f of Object.values(s.factions)) {
@@ -967,14 +1038,17 @@ export function resolve(
       }
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
-      if (besiegedBy(s, c.id, f.id, P)) {
+      if (besiegedBy(s, c.id, f.id, P, g)) {
         log(s, { kind: "besieged", faction: f.id,
                  text: `${c.id} 被围，本季无产出（存粮尚可支 ${c.provisions} 季）` });
         continue;
       }
       // 围解则存粮逐季回补。不补的话一座被围过的城就永远是空仓，
-      // 下一次被围当场即降——那不是「守方有钟」，是「被围过一次就废了」
-      c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
+      // 下一次被围当场即降——那不是「守方有钟」，是「被围过一次就废了」。
+      // 本季已被围或已孤悬的不补，否则一扣一补净零
+      if (!starvedThisSeason.has(c.id)) {
+        c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
+      }
       const gov = roster ? governEffect(governorOf(s, roster, c.id, P), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
       c.garrison = Math.min(

@@ -99,7 +99,8 @@ export interface EngineParams {
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
-  siegeGripRatio: number;
+  siegeGripRatio: number; siegeEncircle: boolean;
+  isolatedSubmit: boolean;
   /** 行军。见内容包 constants.行军 */
   marchDayPerCost: number; marchSeasonDays: number;
   marchAssaultWindow: number; marchGearMul: number;
@@ -136,6 +137,7 @@ export interface EngineParams {
   epochCount: number; epochLimit: number; epochMin: number;
   /** 无主郡每季自筑城防（按纪元）与其上限。见包里「为何改成筑壁」 */
   neutralWall: Record<number, number>; neutralWallCap: number;
+  neutralDecay: number; neutralDecayFloor: number;
   /** 统一天下的州数门槛。达到即局终，胜者为该势力 */
   unifyZhou: number;
 }
@@ -291,6 +293,9 @@ export function loadParams(pack: RawPack): EngineParams {
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
     siegeGripRatio: g("围城", "有效围困比"),
+    // 布尔值不走 num()——那个函数是给数值用的，会把 true 判成缺数据
+    siegeEncircle: C["围城"]?.["合围_邻郡过半"] === true,
+    isolatedSubmit: C["孤悬"]?.["四邻皆属一家"] === true,
     marchDayPerCost: g("行军", "日每单位"),
     marchSeasonDays: g("行军", "一季日数"),
     marchAssaultWindow: g("行军", "攻城窗口日"),
@@ -347,6 +352,8 @@ export function loadParams(pack: RawPack): EngineParams {
     epochMin: g("时钟", "纪元最短"),
     neutralWall: { 1: 0, 2: g("时钟", "无主筑壁_纪元二"), 3: g("时钟", "无主筑壁_纪元三") },
     neutralWallCap: g("时钟", "无主筑壁_上限"),
+    neutralDecay: g("时钟", "无主散兵_每季"),
+    neutralDecayFloor: g("时钟", "无主散兵_下限比"),
   };
 }
 

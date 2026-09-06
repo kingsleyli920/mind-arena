@@ -444,7 +444,8 @@ export function listActions(
       // 机器人按攻城的判断去打野战，实测 57% 的野战在战力比 <0.8 时发起。
       // 判词与结算必须对得上，光在散文里提一句不算
       const foeSiege = ongoing && ongoing.faction !== f ? ongoing : null;
-      const armyNote = ready ? `｜${e.from} 有待命军团 ${ready.troops} 人，本令整建制出征` : "";
+      // 起兵郡在标签开头已写过，兵力在「出 N 人」里也写过，不再重复
+      const armyNote = ready ? "｜整建制调用待命军团" : "";
       // 五维已折进 forecast，这里只报是谁、几人——人数决定兵力上限，
       // 那是玩家/模型唯一能据以判断「该不该先调将过来」的东西
       // 只报主将与人数：人数定兵力上限，主将定五维加成，副将是谁不影响判断。
@@ -454,8 +455,12 @@ export function listActions(
       const leadNote = named.length
         ? `，${named[0].name}${named.length > 1 ? `等 ${named.length} 将` : ""}领`
         : "，仅郡守（无名将）";
-      // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带
-      for (const strength of ["main", "allout"] as const) {
+      // 兵力档给两个（主力/倾国），器械按是否有关隘决定是否值得带。
+      // **但起兵郡有待命军团时只给一条**：那时 want = ready.troops，与档位无关，
+      // 两条候选除了「主力/倾国」四个字完全一样，而 posture 全仓从来没被读过。
+      // 实测这种重复占主力/倾国成对的 9%，40 季全势力白花 166,089 tok
+      const strengths = ready ? (["allout"] as const) : (["main", "allout"] as const);
+      for (const strength of strengths) {
         // 出兵后本郡余兵必须写进 label。只写「我方戍兵 6576」而不写
         // 「倾国后城中仅余 1315」，模型看不见自己正在把老巢掏空——
         // 实测投机流曹操因此 10/10 全灭
@@ -470,14 +475,16 @@ export function listActions(
         // 但器械那一项会改结果——「带械攻城更易，却可能错过本季这一击」正是取舍所在
         const mSeasons = marchSeasons(e.cost, src0.gear !== "none", P);
         const marchNote = mSeasons === 0 ? ""
-          : `｜${P.terrainName[e.terrain] ?? e.terrain}道远，行军 ${mSeasons} 季方至`
-            + `${src0.gear !== "none" ? "（带械行迟）" : ""}`;
+          : `｜道远，行军 ${mSeasons} 季${src0.gear !== "none" ? "（带械行迟）" : ""}`;
         // 目标郡的物产：铁官只能建在有铁之郡，别处建不得——所以「该抢哪个郡」
         // 因此有了地理上的答案。这条挂在记分函数那根管子上（赔付是一个郡），
         // 而这个仓库量过：挂在记分函数上的信息 +17.2±5.7，挂在产出档/城防/民心上
         // 的是 −6.4±5.9。物产是常量，不随迷雾变，写出来不算开天眼
-        const resNote = tgt.resources.length
-          ? `｜有${tgt.resources.map((r) => RESOURCE_CN[r]).join("、")}` : "";
+        // 只报**稀缺**的三种。可垦之地占全图 55/105，出现得越普遍信息量越低，
+        // 而候选表的 token 是按席·季结算的——把它也写上实测顶破 10000 的闸门
+        const scarce = tgt.resources.filter((r) => r !== "tuntian");
+        const resNote = scarce.length
+          ? `｜有${scarce.map((r) => RESOURCE_CN[r]).join("、")}` : "";
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
