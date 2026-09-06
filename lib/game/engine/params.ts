@@ -100,6 +100,9 @@ export interface EngineParams {
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
   siegeGripRatio: number;
+  /** 行军。见内容包 constants.行军 */
+  marchDayPerCost: number; marchSeasonDays: number;
+  marchAssaultWindow: number; marchGearMul: number;
   /** 粮：一律以「季」计，不是第二种货币。见内容包 constants.粮 */
   provBase: number; provPerTier: number; provCap: number;
   provStockSeasons: number; provStockGold: number; armySupplyCap: number;
@@ -288,6 +291,10 @@ export function loadParams(pack: RawPack): EngineParams {
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
     siegeGripRatio: g("围城", "有效围困比"),
+    marchDayPerCost: g("行军", "日每单位"),
+    marchSeasonDays: g("行军", "一季日数"),
+    marchAssaultWindow: g("行军", "攻城窗口日"),
+    marchGearMul: g("行军", "带械行军系数"),
     provBase: g("粮", "郡存粮_基数"),
     provPerTier: g("粮", "郡存粮_每产出档"),
     provCap: g("粮", "郡存粮_上限"),
@@ -352,4 +359,23 @@ export function loadParams(pack: RawPack): EngineParams {
  */
 export function provisionsCap(yieldTier: number, P: EngineParams): number {
   return Math.min(P.provCap, P.provBase + Math.floor(yieldTier * P.provPerTier));
+}
+
+/**
+ * 行军要走几季才动得了手。
+ *
+ * 返回 0 表示当季抵达并首攻；1 表示当季只到城下扎营、首攻推到下季；以此类推。
+ *
+ * 判据是「这一击本季落不落得下」，不是「走了几里」——用户问过一个回合一季
+ * 是不是太长，量下来 232 条邻郡边只有一条走不满一季，行军天然是季度以下的量。
+ * 把回合切到月是 3 倍模型调用换一堆无事可决的回合；真正缺的是这个二值判断，
+ * 而它一季就装得下。
+ *
+ * 带器械再乘 marchGearMul：辎重重则行迟。这把「带械攻城更易」与
+ * 「可能错过本季这一击」摆成一个取舍。
+ */
+export function marchSeasons(cost: number, withGear: boolean, P: EngineParams): number {
+  const days = cost * P.marchDayPerCost * (withGear ? P.marchGearMul : 1);
+  if (days <= P.marchAssaultWindow) return 0;
+  return Math.ceil((days - P.marchAssaultWindow) / P.marchSeasonDays);
 }

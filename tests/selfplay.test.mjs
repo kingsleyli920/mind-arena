@@ -33,7 +33,16 @@ const SCORE = GRADE_SCORE;   // 唯一来源，不再另存副本
 
 function play(seed, rot) {
   let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
-  const prof = (f) => { const i = SEATS.indexOf(f); return i >= 0 ? PROFILES[(i + rot) % 4] : "balanced"; };
+  // **全部势力**都轮换画像，不只 SEATS 那六家。
+  //
+  // 此前非 SEATS 的一律 balanced，于是每局三十一家里只有六家进画像统计——
+  // 五分之四的样本白扔。而「均衡流优于进攻流」这条断言的量化步长是
+  // 100/(24×1.5)≈2.7 分，真实差距约 15 分，在 n=36 下时不时会翻车：
+  // 实测同一份引擎，24 局报 0.0、48 局报 4.1、72 局报 11.2。
+  // 改成全势力计分后，同样 24 局、同样耗时，均衡 92.2 对进攻 77.2，
+  // 24 局与 48 局逐位相同 —— 样本从 36 涨到 186，信号才站得住。
+  const ids = Object.keys(s.factions);
+  const prof = (f) => PROFILES[(ids.indexOf(f) + rot) % 4];
   let flips = 0;
   while (!s.finished) {
     const orders = [];
@@ -115,7 +124,7 @@ test("曹操一郡开局不必然出局", () => {
 // 这两条编码的是设计意图：既不该纯守成，也不该无脑猛攻。
 test("画像排序：均衡流优于苟活流与进攻流", () => {
   const by = Object.fromEntries(PROFILES.map((p) => {
-    const rows = RUNS.flatMap((r) => SEATS
+    const rows = RUNS.flatMap((r) => Object.keys(r.s.factions)
       .filter((seat) => r.prof(seat) === p)
       .map((seat) => SCORE[r.s.factions[seat].bestGrade]));
     return [p, rows.length ? rows.reduce((a, b) => a + b, 0) / rows.length : 0];

@@ -14,7 +14,7 @@ import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, t
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
-import { provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provisionsCap, type EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
@@ -101,6 +101,9 @@ function provGainOf(s: GameState, c: CommanderyState, g: Graph, P: EngineParams)
   return n;
 }
 
+/** 已经站到城下的围城军（在途的不算）。凡是「城下有没有兵」的判据都走这个 */
+const atWalls = (a: Army): boolean => !!a.target && a.marchLeft <= 0;
+
 /**
  * 这座城本季是不是被**有效围困**。
  *
@@ -117,7 +120,7 @@ function besiegedBy(s: GameState, id: CommanderyId, byOthersThan: FactionId | nu
   if (!c) return false;
   let force = 0;
   for (const a of s.armies) {
-    if (a.target !== id) continue;
+    if (a.target !== id || !atWalls(a)) continue;   // 还在路上的不算围
     if (byOthersThan !== null && a.faction === byOthersThan) continue;
     force += a.troops;
   }
@@ -127,7 +130,8 @@ function besiegedBy(s: GameState, id: CommanderyId, byOthersThan: FactionId | nu
 
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
   if (troops <= 0) return;
-  const besieged = (id: CommanderyId) => s.armies.some((x) => x.target === id && x.faction !== army.faction);
+  const besieged = (id: CommanderyId) =>
+    s.armies.some((x) => x.target === id && atWalls(x) && x.faction !== army.faction);
   const home = s.commanderies[army.home];
   if (home?.owner === army.faction && !besieged(home.id)) { home.garrison += troops; return; }
   const fallback = Object.values(s.commanderies)
@@ -164,15 +168,21 @@ function betray(
 function beginSiege(
   s: GameState, faction: FactionId, from: CommanderyId, target: CommanderyId,
   troops: number, a: { commander: OfficerId | null; strength: Posture },
-  retinue: readonly OfficerRef[], gear: SiegeGear, unit: string, P: EngineParams,
+  retinue: readonly OfficerRef[], gear: SiegeGear, unit: string,
+  g: Graph, P: EngineParams,
 ): void {
   // 龙套不进 retinue：它是「这个郡没人」的占位，不该被记成随军出征的实体
   const ids = retinue.filter((o) => !isFiller(o)).map((o) => o.id);
+  // 行军：不到攻城窗口就当季抵达并首攻，超过则先在路上走几季。
+  // 带器械行迟——这把「带械攻城更易」与「可能错过本季这一击」摆成一个取舍
+  const edge = (g.adj.get(from) ?? []).find((e) => e.to === target);
+  const left = marchSeasons(edge?.cost ?? 1, gear !== "none", P);
   s.armies.push({
     id: `${faction}:${s.turn}:${from}>${target}`,
     faction, commander: a.commander ?? ids[0] ?? null, retinue: ids, troops,
-    at: target, target, posture: a.strength, gear, unit,
-    siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: from,
+    // 在途时人还在起兵郡，抵达那一季才挪到城下
+    at: left > 0 ? from : target, target, posture: a.strength, gear, unit,
+    marchLeft: left, siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: from,
   });
 }
 
@@ -551,7 +561,7 @@ export function resolve(
         troops,
         at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
         unit: s.commanderies[a.at].unit,
-        siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: a.at,
+        marchLeft: 0, siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: a.at,
       });
     }
     s.commanderies[a.at].gear = "none";
@@ -654,7 +664,9 @@ export function resolve(
       src.gear = (P.gearLadder[Math.max(0, i - 1)] ?? "none") as SiegeGear;
     } else src.gear = "none";
 
-    const besiegers = s.armies.filter((x) => x.target === a.target && x.faction !== o.faction);
+    // 在途的敌军不触发野战——那会变成「解围」打一支还在路上的军队
+    const besiegers = s.armies.filter((x) => x.target === a.target && atWalls(x)
+                                            && x.faction !== o.faction);
     if (besiegers.length) {
       // 野战：先解决城下的敌军，城墙的事之后再说
       const foe = [...besiegers].sort((x, y) => y.troops - x.troops
@@ -665,7 +677,7 @@ export function resolve(
       });
       if (won && tgt.owner !== o.faction) {
         // 击退围城军后接手围城
-        beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit, P);
+        beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit, g, P);
       } else if (won) {
         // 解自家之围：残部入城为戍——但只在**围真的解了**的时候。
         //
@@ -675,7 +687,8 @@ export function resolve(
         // 实测围仍在的被围郡·季里 41% 守军不降反升，最高 16 倍（京兆尹 374→6012），
         // 这是围城时钟从来没走过的原因之一——包里那条「围城期间城中不得补兵，
         // 否则守军逐季回血、缺口累加被抵消」只堵住了产出，没堵住入援
-        const stillBesieged = s.armies.some((x) => x.target === a.target && x.faction !== tgt.owner);
+        const stillBesieged = s.armies.some((x) => x.target === a.target && atWalls(x)
+                                                   && x.faction !== tgt.owner);
         if (stillBesieged) {
           // 围未解则残部退回起兵郡，不入城
           returnHome(s, { faction: o.faction, home: a.from }, won);
@@ -710,14 +723,17 @@ export function resolve(
                text: `增兵 ${a.target} 城下，共 ${mine.troops} 人` });
       continue;
     }
-    beginSiege(s, o.faction, a.from, a.target, troops, a, corps, gear, src.unit, P);
+    beginSiege(s, o.faction, a.from, a.target, troops, a, corps, gear, src.unit, g, P);
   }
 
   // ── 阶段七：围城结算 ──────────────────────────────────────────────
   // 每季一结。围而不下则双方耗兵，但缺口逐季累加——
   // 这才让「围点打援」「围魏救赵」成为真选项，而不是攻城一击定胜负。
-  const sieges = s.armies.filter((x) => x.target)
-    .sort((x, y) => cmp(x.faction, y.faction) || cmp(x.target!, y.target!));
+  const sieges = s.armies.filter(atWalls)
+    // 排序键补上 id：有了在途之后「同一势力两支军团指向同一郡」成为可能
+    //（一支已在城下、一支还在路上），(faction,target) 不再是全序，
+    // 退化成数组顺序就是 R6 失守
+    .sort((x, y) => cmp(x.faction, y.faction) || cmp(x.target!, y.target!) || cmp(x.id, y.id));
   /** 本季已扣过存粮的郡。围城结算是逐军团跑的，而存粮是每城每季一份 */
   const starved = new Set<CommanderyId>();
   for (const [i, army] of sieges.entries()) {
@@ -1082,6 +1098,25 @@ export function resolve(
           text: `治所已失，${who}粮尽溃散` }
       : { kind: "supply-cut-scatter", faction: army.faction,
           text: `${who}后路断绝，粮尽溃散` });
+  }
+
+  // ── 行军 ──────────────────────────────────────────────────────────
+  // 在途的军团往前走一季。位置很讲究，两头都栽过。放在围城结算**之前**：本季新起的军团
+  // marchLeft 1→0，当季就被同一季的 sieges 快照收进去打，行军耗时完全没生效，
+  // 而所有测试照样绿。放在产出结算**之前**：季末刚到城下的军团把这一季的
+  // 敌郡产出也冻住了，可它这一季还在路上。
+  // 所以放在阶段八之后：这一季走完，抵达从**下一季**起才算数
+  for (const army of s.armies) {
+    if (!army.target || army.marchLeft <= 0) continue;
+    army.marchLeft -= 1;
+    if (army.marchLeft <= 0) {
+      army.at = army.target;
+      log(s, { kind: "march-arrive", faction: army.faction,
+               text: `${army.troops} 人抵 ${army.target} 城下，下季可攻` });
+    } else {
+      log(s, { kind: "march", faction: army.faction,
+               text: `${army.home} 之师向 ${army.target} 行军，尚需 ${army.marchLeft} 季` });
+    }
   }
 
   // ── 待命军团归队 ───────────────────────────────────────────────

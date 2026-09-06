@@ -13,7 +13,7 @@ import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/co
 import { observe } from "../lib/game/engine/observe.ts";
 import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams, provisionsCap } from "../lib/game/engine/params.ts";
+import { loadParams, marchSeasons, provisionsCap } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildIndex, captureFrame, attachOutcome, FORM_IDS } from "../lib/game/replay.ts";
 import { tierOf } from "../lib/game/engine/intel.ts";
@@ -26,7 +26,8 @@ const DATA = {
   commanderies: read("commanderies.json"),
   troopTypes: read("troop-types.json"), resources: read("resources.json"),
 };
-const G = buildGraph(read("adjacency.json"));
+const adjacency = read("adjacency.json");
+const G = buildGraph(adjacency);
 // 引擎参数唯一来源是内容包，测试也走同一条路径
 const PACK = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
 const P = loadParams(PACK);
@@ -1496,7 +1497,12 @@ test("野战：预告的判词与结算的判词同源", () => {
 
 test("标签：候选报的主将与人数，必须是真出征的那几个", () => {
   const t = fresh();
-  const from = Object.values(t.commanderies).find((c) => c.owner === "yuanshao");
+  // 从**确实列得出征伐候选**的郡取样本。候选总额只有 totalCap 条，
+  // 十三个郡分不到人人有份，硬取「第一个己方郡」测的就成了候选覆盖率
+  const probe = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO)
+    .find((c) => c.action.type === "campaign");
+  assert.ok(probe, "袁绍一条征伐候选都没有，样本选不出来");
+  const from = t.commanderies[probe.action.from];
   // 把远多于上限的武将堆进起兵郡
   const all = (ROSTER.byFaction.get("yuanshao") ?? []).map((o) => o.id);
   for (const oid of all) t.stations[oid] = from.id;
@@ -1989,4 +1995,66 @@ test("无主郡只筑壁不征兵 —— 没人占的地方没有兵役", () => 
   assert.ok(now.defense > d0, "城防一点没涨，那「早取有时间价值」就没了");
   assert.ok(now.defense <= P.neutralWallCap, `城防 ${now.defense} 超过上限 ${P.neutralWallCap}`);
   assert.equal(now.defense, P.neutralWallCap, "四十季之后该顶到上限");
+});
+
+test("行军：远路之师在途，不算在城下", () => {
+  // 出征此前是瞬移：军团一造出来就站在敌城下、当季就打。行军耗时只有在围城
+  // 成了时钟之后才有意义——守方存粮给了援军一个窗口，行军决定援军赶不赶得到。
+  //
+  // 在途最容易出的错是「还在路上的军队就把敌郡产出冻住了」。这条把
+  // 每一处「城下有没有兵」的判据一起钉住
+  const s = fresh();
+  // 找一条**慢路**：行军季数 > 0。不能钉死席位——袁绍在中原，一条慢路都没有；
+  // 实测三十家里十八家如此，而南中夷 100%、刘璋 71%
+  let pick = null;
+  for (const c of Object.values(s.commanderies)) {
+    if (!c.owner) continue;
+    for (const e of G.adj.get(c.id) ?? []) {
+      const t = s.commanderies[e.to];
+      if (!t || t.owner === c.owner) continue;
+      if (marchSeasons(e.cost, false, P) > 0) { pick = { from: c, to: t }; break; }
+    }
+    if (pick) break;
+  }
+  assert.ok(pick, "全图没有一条慢路，样本选不出来 —— 调 constants.行军");
+  const me = pick.from.owner;
+
+  s.commanderies[pick.from.id].garrison = 40000;
+  const prov0 = pick.to.provisions;
+  const r = resolve(s, [{ faction: me, action: { type: "campaign",
+    target: pick.to.id, from: pick.from.id, commander: null,
+    strength: "allout", siegeGear: "none" } }], G, P, ROSTER, GEO).state;
+
+  const army = r.armies.find((a) => a.target === pick.to.id && a.faction === me);
+  assert.ok(army, "军团没造出来");
+  assert.equal(army.siegeSeasons, 0, "在途不该记已围季数");
+  // 出征那一季它在路上：城照常过日子——存粮不减、产出不停
+  assert.equal(r.commanderies[pick.to.id].provisions, prov0, "还在路上就把守方的粮扣了");
+  assert.ok(!r.log.some((e) => e.kind === "besieged" && (e.text ?? "").includes(pick.to.id)),
+    "还在路上就把敌郡的产出冻住了");
+  assert.ok(r.log.some((e) => e.kind === "march" || e.kind === "march-arrive"),
+    "没有行军的记载");
+  assert.equal(r.commanderies[pick.to.id].owner, pick.to.owner, "还在路上就把城打下来了");
+
+  // 下一季才动手
+  const mark = r.log.length;
+  const r2 = resolve(refreshAp(r, P), [], G, P, ROSTER, GEO).state;
+  const fought = r2.log.slice(mark).some((e) =>
+    ["siege-win", "siege-hold", "siege-starve", "siege-abort"].includes(e.kind));
+  assert.ok(fought, "抵达之后一季仍不动手 —— 行军没走完还是压根没接上？");
+});
+
+test("行军：带器械行迟，可能错过本季这一击", () => {
+  // 「带械攻城更易，却可能错过本季这一击」——这是行军耗时给每一家都造出的取舍，
+  // 而慢路那一条只有一半的席位摊得上（实测三十家里十八家一条慢路都没有）
+  const a = adjacency.edges.filter((e) => marchSeasons(e.cost, false, P) === 0
+                                       && marchSeasons(e.cost, true, P) > 0);
+  assert.ok(a.length > 0, "没有一条边会因带械而变慢 —— 带械行迟这条等于没有");
+  const all = adjacency.edges.length;
+  const slowLight = adjacency.edges.filter((e) => marchSeasons(e.cost, false, P) > 0).length;
+  const slowGear = adjacency.edges.filter((e) => marchSeasons(e.cost, true, P) > 0).length;
+  assert.ok(slowGear > slowLight, "带械没让任何一条边变慢");
+  // 两头都要留：全慢则无人敢出兵，全快则这条规则不存在
+  assert.ok(slowLight / all < 0.5, `轻兵就有 ${(slowLight / all * 100).toFixed(0)}% 的边是慢路，太多`);
+  assert.ok(slowGear / all < 0.6, `带械有 ${(slowGear / all * 100).toFixed(0)}% 的边是慢路，太多`);
 });

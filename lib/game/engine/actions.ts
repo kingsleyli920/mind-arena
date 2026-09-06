@@ -17,7 +17,7 @@ const statSum = (o: OfficerRef) =>
   o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
-import { provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provisionsCap, type EngineParams } from "./params.ts";
 import type {
   Action, Building, Candidate, CommanderyId, FactionId, GameState, Order, Formation, Resource,
 } from "./types.ts";
@@ -100,16 +100,49 @@ const ownedBy = (s: GameState, f: FactionId) =>
 /** 己方任一郡的邻接敌郡（含无主），即可攻击面 */
 function frontier(s: GameState, g: Graph, f: FactionId) {
   const out = new Map<CommanderyId, { from: CommanderyId; cost: number; terrain: string; gates: string[] }>();
+  /** 同一目标的**第二条路**：不是最省的，但可能出得动更多兵 */
+  const alt = new Map<CommanderyId, { from: CommanderyId; cost: number; terrain: string; gates: string[] }>();
   for (const c of ownedBy(s, f)) {
     for (const e of g.adj.get(c.id) ?? []) {
       const t = s.commanderies[e.to];
       if (!t || t.owner === f) continue;
-      // 同一目标可能从多郡可达，取代价最低的那条路
+      const cand = { from: c.id, cost: e.cost, terrain: e.terrain, gates: e.gates };
+      // 同一目标可能从多郡可达。取代价最低的那条路——并列时按郡 id，
+      // 不能靠遍历先后：那是确定的，但不是一个**声明出来的**全序
       const prev = out.get(e.to);
-      if (!prev || e.cost < prev.cost) out.set(e.to, { from: c.id, cost: e.cost, terrain: e.terrain, gates: e.gates });
+      if (!prev || e.cost < prev.cost || (e.cost === prev.cost && cmp(c.id, prev.from) < 0)) {
+        if (prev) keepAlt(alt, e.to, prev, s);
+        out.set(e.to, cand);
+      } else {
+        keepAlt(alt, e.to, cand, s);
+      }
     }
   }
-  return out;
+  return { best: out, alt };
+}
+
+/**
+ * 备选路留「出得动兵最多」的那一条，不是第二省的。
+ *
+ * 行军耗时若只走最省的路，它的代价就是按**席位地理**派发的：实测开局三十家
+ * 里十八家一条慢路都没有（曹操、吕布、刘备、公孙瓒都在其中），而南中夷 100%、
+ * 刘璋 71%。那是地理罚分，不是决策。
+ *
+ * 给出第二条路，「从近的弱郡快到，还是从远的强郡慢到」才成为一个真问题——
+ * 实测三十家里有十三家至少有一个目标可从两郡进攻。
+ */
+function keepAlt(
+  alt: Map<CommanderyId, { from: CommanderyId; cost: number; terrain: string; gates: string[] }>,
+  to: CommanderyId,
+  cand: { from: CommanderyId; cost: number; terrain: string; gates: string[] },
+  s: GameState,
+): void {
+  const force = (id: CommanderyId) => s.commanderies[id]?.garrison ?? 0;
+  const prev = alt.get(to);
+  if (!prev || force(cand.from) > force(prev.from)
+      || (force(cand.from) === force(prev.from) && cmp(cand.from, prev.from) < 0)) {
+    alt.set(to, cand);
+  }
 }
 
 const remainingAp = (s: GameState, f: FactionId) => s.factions[f]?.ap ?? 0;
@@ -309,7 +342,20 @@ export function listActions(
   // ── 征伐：按「己方兵力 / 目标守军」降序取前 N 个目标 ────────────────
   // 只给打得动的。把明显打不动的目标塞进候选，等于用无效选项浪费模型的注意力。
   if (ap >= rules.campaignAp) {
-    const targets = [...frontier(s, g, f).entries()]
+    // 每个目标最多两条路：最省的，加一条「出得动兵最多」的备选（若不同）。
+    // 只走最省的话，行军耗时的代价就是按席位地理派发的——实测开局三十家里
+    // 十八家一条慢路都没有，那是罚分不是决策
+    const fr = frontier(s, g, f);
+    const routes: Array<[CommanderyId, { from: CommanderyId; cost: number; terrain: string; gates: string[] }]> = [];
+    for (const [tid, e] of fr.best) {
+      routes.push([tid, e]);
+      const a = fr.alt.get(tid);
+      if (a && a.from !== e.from
+          && marchSeasons(a.cost, false, P) !== marchSeasons(e.cost, false, P)) {
+        routes.push([tid, a]);       // 只在**行军季数真的不同**时才多列一条
+      }
+    }
+    const targets = routes
       // 已有己方围城军的目标：起兵郡**必须**改成那支军团的 home，否则列出的
       // 增兵候选会被 validate 以「增兵须自同一郡」拒收——候选逐条合法是
       // tests 里「按界面贪心勾选，引擎不应拒绝任何一条」钉住的不变量
@@ -415,6 +461,12 @@ export function listActions(
         const send = Math.min(want, cap);
         const left = ready ? s.commanderies[e.from].garrison
           : s.commanderies[e.from].garrison - send;
+        // 行军：这一击本季落不落得下。带械行迟，所以两档兵力共用同一个判断，
+        // 但器械那一项会改结果——「带械攻城更易，却可能错过本季这一击」正是取舍所在
+        const mSeasons = marchSeasons(e.cost, src0.gear !== "none", P);
+        const marchNote = mSeasons === 0 ? ""
+          : `｜${P.terrainName[e.terrain] ?? e.terrain}道远，行军 ${mSeasons} 季方至`
+            + `${src0.gear !== "none" ? "（带械行迟）" : ""}`;
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
@@ -453,7 +505,7 @@ export function listActions(
                + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
-               + `${unitNote}${armyNote}${siegeNote}`
+               + `${marchNote}${unitNote}${armyNote}${siegeNote}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }
@@ -746,7 +798,7 @@ export function listActions(
   // ── 探：免费但有次数上限，只给尚未探明的邻接敌郡 ────────────────────
   if (freeLeft(s, f, "scout", rules) > 0) {
     const known = s.intel[f] ?? {};
-    const unknown = [...frontier(s, g, f).keys()]
+    const unknown = [...frontier(s, g, f).best.keys()]
       .filter((id) => (known[id] ?? -1) < s.turn)
       .sort()
       .slice(0, Math.min(6, rules.perTypeCap));
@@ -1030,7 +1082,7 @@ export function listActions(
   // ── 盟：只对有共同边界或共同敌人的势力给出 ──────────────────────────
   if (ap >= rules.normalAp) {
     const neighbours = new Set<FactionId>();
-    for (const [tid] of frontier(s, g, f)) {
+    for (const [tid] of frontier(s, g, f).best) {
       const o = s.commanderies[tid]?.owner;
       if (o && o !== f) neighbours.add(o);
     }
