@@ -31,11 +31,29 @@ import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
 import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
 import { cmp } from "@/lib/game/engine/cmp";
 
+/**
+ * 瓦片金字塔。tools/slice-map-tiles.mjs 早就切好了四级
+ * （z0 908×743 → z3 7260×5940，512 见方，webp，合计 5MB），
+ * 而对局页此前一直只贴那张 1815 的整图——放大到六倍看的仍是同一张图放大六倍。
+ *
+ * 换成按视野取瓦片：屏上要多少像素就取哪一级，只加载看得见的那十几块。
+ * z3 全级 180 块，实际同屏最多二十来块
+ */
+const TILES = "/game/map/tiles";
+const TILE = 512;
+const LEVELS = [
+  { z: 1, w: 1815, h: 1485 },
+  { z: 2, w: 3630, h: 2970 },
+  { z: 3, w: 7260, h: 5940 },
+];
+/** 放大到几倍换哪一级：屏宽 × 倍数超过该级像素宽就该换下一级 */
+const levelFor = (k: number, screenW: number) =>
+  LEVELS.find((L) => L.w >= screenW * k) ?? LEVELS[LEVELS.length - 1];
+
 const BASE = "/game/map/play-base.webp";
 // 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
 // 越拉越糊——而底图本来就有 7260 的细节可用
-const BASE_2X = "/game/map/play-base@2x.webp";
-const HD_AT = 1.8;
+
 /**
  * 汉字纪年。图题是竖排，阿拉伯数字在里面会一位一行地摞下来。
  *
@@ -281,13 +299,18 @@ const MAP = { w: 1815, h: 1485, west: 94, north: 43, ppd: 55 };
  * 这里按等级画不同的城：州治是重城带旌旗，大郡是双阙，寻常郡是单垣。
  * 无主之城不填色，只留墨廓。
  */
-function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
+function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail }: {
   x: number; y: number; size: number; fill: string | null;
   mine: boolean; seat: boolean; besieged: boolean;
+  /** 近观档：画城郭而不是把同一个小印放大 */
+  detail?: boolean;
 }) {
   const w = size, h = size * 0.78;
   const l = x - w / 2, r = x + w / 2, b = y + h / 2, tp = y - h / 2;
   const notch = w / 7;
+  const paint = fill ?? "rgba(252,249,242,0.9)";
+  const ink = "#2b251e";
+  const lw = size * (mine ? 0.105 : 0.068);
   // 垛口：城头三个凹口
   const crown = [
     `M ${l} ${b}`, `L ${l} ${tp + notch}`,
@@ -297,6 +320,10 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
     `L ${r - notch} ${tp}`, `L ${r - notch} ${tp + notch}`,
     `L ${r} ${tp + notch}`, `L ${r} ${b}`, "Z",
   ].join(" ");
+  /** 庑殿顶：两端起翘的一道檐。汉阙的样子全在这条曲线上 */
+  const roof = (cx: number, cy: number, hw: number, hh: number) =>
+    `M ${cx - hw} ${cy} Q ${cx - hw * 0.46} ${cy - hh * 0.2} ${cx - hw * 0.3} ${cy - hh}`
+    + ` L ${cx + hw * 0.3} ${cy - hh} Q ${cx + hw * 0.46} ${cy - hh * 0.2} ${cx + hw} ${cy} Z`;
   return (
     <g className="city">
       {/* 纸色衬底：城印落在斑驳的地形上，没有衬底就糊成一团 */}
@@ -304,19 +331,50 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
       {besieged && (
         <circle cx={x} cy={y} r={w * 1.15} className="siege-ring" />
       )}
-      <path d={crown} fill={fill ?? "rgba(252,249,242,0.9)"}
-        stroke="#2b251e" strokeWidth={size * (mine ? 0.105 : 0.068)} strokeLinejoin="miter" />
+      <path d={crown} fill={paint} stroke={ink} strokeWidth={lw} strokeLinejoin="miter" />
       {/* 城门 */}
       <path d={`M ${x - notch * 0.8} ${b} L ${x - notch * 0.8} ${y + h * 0.06}
                  A ${notch * 0.8} ${notch * 0.8} 0 0 1 ${x + notch * 0.8} ${y + h * 0.06}
                  L ${x + notch * 0.8} ${b} Z`}
         fill="#332d25" opacity={0.72} />
+      {detail && (
+        <>
+          {/*
+           * 近观档：城不再是一个印，是一座城郭。
+           *
+           * 放大六倍时图元本来就长到两倍大（按 √k 长），把同一个小印摊大只是
+           * 让它更糊；这一档另画——两侧角楼、门上城楼、州治再加一层重檐。
+           * 远景不画这些：整幅可见时一百零五座城各带三层檐，就是一层噪点
+           */}
+          <path d={`M ${l - w * 0.14} ${b} L ${l - w * 0.14} ${y + h * 0.02}
+                    L ${l} ${y + h * 0.02} L ${l} ${b} Z`}
+            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
+          <path d={`M ${r} ${b} L ${r} ${y + h * 0.02}
+                    L ${r + w * 0.14} ${y + h * 0.02} L ${r + w * 0.14} ${b} Z`}
+            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
+          {/* 门楼：一层屋身 + 一道檐 */}
+          <rect x={x - w * 0.22} y={tp - h * 0.3} width={w * 0.44} height={h * 0.34}
+            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
+          <path d={roof(x, tp - h * 0.3, w * 0.42, h * 0.26)}
+            fill={ink} opacity={0.86} />
+          {isSeat && (
+            <>
+              {/* 州治：重檐两层 */}
+              <rect x={x - w * 0.15} y={tp - h * 0.78} width={w * 0.3} height={h * 0.26}
+                fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
+              <path d={roof(x, tp - h * 0.78, w * 0.32, h * 0.24)} fill={ink} opacity={0.86} />
+            </>
+          )}
+        </>
+      )}
       {isSeat && (
         <>
           {/* 州治：城上立旗 */}
-          <line x1={x} y1={tp} x2={x} y2={tp - h * 0.62} stroke="#332d25" strokeWidth={size * 0.06} />
-          <path d={`M ${x} ${tp - h * 0.62} L ${x + w * 0.42} ${tp - h * 0.44}
-                     L ${x} ${tp - h * 0.26} Z`} fill="#8c3b2f" />
+          <line x1={x} y1={detail ? tp - h * 1.02 : tp} x2={x} y2={tp - h * (detail ? 1.6 : 0.62)}
+            stroke="#332d25" strokeWidth={size * 0.06} />
+          <path d={`M ${x} ${tp - h * (detail ? 1.6 : 0.62)}
+                    L ${x + w * 0.42} ${tp - h * (detail ? 1.42 : 0.44)}
+                    L ${x} ${tp - h * (detail ? 1.24 : 0.26)} Z`} fill="#8c3b2f" />
         </>
       )}
     </g>
@@ -503,6 +561,43 @@ const legendArmy = (marching: boolean) => (
   </svg>
 );
 
+/**
+ * 瓦片层。只渲染**看得见**的那几块，且底下永远垫一张整图——
+ * 瓦片是逐块加载的，没有垫底的话缩放瞬间会露出纸色的空洞。
+ *
+ * 位置一律用百分比：舞台本身被 scale(k) 变换，用百分比就不必跟着换算，
+ * 且同一套式子对每一级都成立
+ */
+function TileLayer({ view, screenW }: {
+  view: { k: number; x: number; y: number }; screenW: number;
+}) {
+  const L = levelFor(view.k, screenW);
+  const cols = Math.ceil(L.w / TILE), rows = Math.ceil(L.h / TILE);
+  // 视野在图上的归一化范围。舞台先 translate(%) 再 scale(k)，
+  // 于是图上比例 f 落在屏幕 f·k + x/100 处，可见即 0 ≤ 该值 ≤ 1
+  const fx0 = (-view.x / 100) / view.k, fx1 = (1 - view.x / 100) / view.k;
+  const fy0 = (-view.y / 100) / view.k, fy1 = (1 - view.y / 100) / view.k;
+  const pad = TILE / L.w;                       // 外扩一块，拖动时不至于现补
+  const out: React.ReactElement[] = [];
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      const x0 = (c * TILE) / L.w, x1 = Math.min((c + 1) * TILE, L.w) / L.w;
+      const y0 = (r * TILE) / L.h, y1 = Math.min((r + 1) * TILE, L.h) / L.h;
+      if (x1 < fx0 - pad || x0 > fx1 + pad || y1 < fy0 - pad || y0 > fy1 + pad) continue;
+      out.push(
+        // eslint-disable-next-line @next/next/no-img-element
+        // 文件名是 `${列}-${行}`（见 tools/slice-map-tiles.mjs 的 tx-ty），
+        // 写成行-列会把整幅转置——第一版就是这样，图上出现了几道明暗错位的方块
+        <img key={`${L.z}-${c}-${r}`} src={`${TILES}/z${L.z}/${c}-${r}.webp`} alt=""
+          loading="eager" decoding="async"
+          style={{ position: "absolute", left: `${x0 * 100}%`, top: `${y0 * 100}%`,
+                   width: `${(x1 - x0) * 100}%`, height: `${(y1 - y0) * 100}%` }} />,
+      );
+    }
+  }
+  return <div className="tiles">{out}</div>;
+}
+
 /** 席位轮转出机器人画像。确定：同一局同一势力恒为同一画像 */
 const PROFILE_KEYS = Object.keys(PROFILES) as Profile[];
 
@@ -577,13 +672,25 @@ export function PlayClient() {
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   // 高清底图按需加载：整幅可见时不必先下 671KB
-  const [hdReady, setHdReady] = useState(false);
+  // 舞台在屏上有多宽。取哪一级瓦片全看它——同样放大六倍，
+  // 27 寸屏要的像素是笔记本的两倍，写死一个数就必然有一边糊
+  const wrapRef = useRef<HTMLElement>(null);
+  const [stageW, setStageW] = useState(1200);
   useEffect(() => {
-    if (view.k < HD_AT || hdReady) return;
-    const im = new Image();
-    im.onload = () => setHdReady(true);
-    im.src = BASE_2X;
-  }, [view.k, hdReady]);
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setStageW(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  /**
+   * 这一次视角变化要不要缓动。
+   *
+   * 按加号、点候选把镜头移过去——那是「带我去那儿」，缓动读起来是移过去的。
+   * 滚轮与拖动不行：每一帧都挂 280ms 缓动，手感像在拽橡皮筋
+   */
+  const [smooth, setSmooth] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // cnText 要在 engine 载入前后都可用，用 ref 取当前值而不进依赖数组
   const engineRef = useRef<Engine | null>(null);
@@ -999,6 +1106,7 @@ export function PlayClient() {
                 setSince(resume.game.log.length); setRecords([]); setThinking({});
                 const cap = resume.game.factions[resume.seat]?.capital;
                 const p = cap ? engine.points.find((c) => c.id === cap) : null;
+                setSmooth(true);
                 setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
                 setResume(null);
               }}>继续</button>
@@ -1131,12 +1239,24 @@ export function PlayClient() {
              days: Math.round(e.cost * engine.P.marchDayPerCost) };
   }).filter((r): r is NonNullable<typeof r> => r !== null);
 
+  // ── 出图分级 ─────────────────────────────────────────────────────
+  //
+  // 三档，与瓦片那三级同呼吸：
+  //   0 远观（k<1.6，z1）  一幅舆图：疆域、州名、城印。关津不出，道路极淡
+  //   1 中观（k<3.2，z2）  关与港出（它们答「路通不通」），郡名铺开
+  //   2 近观（k≥3.2，z3）  据点全出并标名，城画成城郭，道路提亮
+  //
+  // 分档的理由不是性能，是**一张图放不下**：一百零五座城各带三层檐、
+  // 六十一处据点各带一个名，整幅可见时就是一层噪点。放大之后地方够了，
+  // 还画同一个小印就是把它糊开
+  const lod = view.k >= 3.2 ? 2 : view.k >= 1.6 ? 1 : 0;
+
   // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
   // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
   // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
   // 就是一层噪点
-  const nodeMarks = engine.nodes
-    .filter((n) => view.k >= 2 || n.kind === "gate" || n.kind === "port")
+  const nodeMarks = (lod === 0 ? [] : engine.nodes)
+    .filter((n) => lod >= 2 || n.kind === "gate" || n.kind === "port")
     .map((n) => ({
       n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
       r: 12 / Math.sqrt(view.k),
@@ -1226,7 +1346,7 @@ export function PlayClient() {
 
   const centerOnId = (id: string) => {
     const p = engine.points.find((c) => c.id === id);
-    if (p) setView(centerOn(p.longitude, p.latitude, 3.2, MAP));
+    if (p) { setSmooth(true); setView(centerOn(p.longitude, p.latitude, 3.2, MAP)); }
   };
   // 家底一览。被围与断供直接决定这一季能不能出兵，排在最前面
   const supplied = supplyReach(game, engine.G, seat);
@@ -1346,8 +1466,10 @@ export function PlayClient() {
       )}
       <div className="play-body">
         <section
-          className="map-wrap"
+          ref={wrapRef}
+          className={`map-wrap${dragging || !smooth ? " dragging" : ""}`}
           onWheel={(e) => {
+            setSmooth(false);
             const box = e.currentTarget.getBoundingClientRect();
             const px = (e.clientX - box.left) / box.width;
             const py = (e.clientY - box.top) / box.height;
@@ -1362,6 +1484,7 @@ export function PlayClient() {
           }}
           onPointerDown={(e) => {
             if (view.k <= 1) return;
+            setSmooth(false);
             // 按下时**不**捕获指针。捕获会把后续事件全截走，城池的 click
             // 永远收不到——地图于是点不动，只能拖
             dragRef.current = { x: e.clientX, y: e.clientY, ox: view.x, oy: view.y };
@@ -1392,10 +1515,12 @@ export function PlayClient() {
         >
           <div className="map-stage"
             style={{ transform: `translate(${view.x}%, ${view.y}%) scale(${view.k})` }}>
-          {/* 本地静态底图，尺寸固定且已压成 webp；套 next/image 只会多一层
-              运行时开销与配置，不换来任何优化 */}
+          {/* 垫底的整图：瓦片逐块加载，没有它，缩放的那一瞬会露出空洞。
+              只需最小的一档——细节由上面的瓦片给，@2x 那张 720KB 现在是白下的。
+              套 next/image 只会多一层运行时开销，不换来任何优化 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={hdReady && view.k >= HD_AT ? BASE_2X : BASE} alt="汉末地形" />
+          <img src={BASE} alt="汉末地形" />
+          <TileLayer view={view} screenW={stageW} />
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
             <defs>
@@ -1407,7 +1532,7 @@ export function PlayClient() {
             {/* 道路：画在州名与城印之下。地形决定行军天数，指到某郡时它那几条提亮，
                 并在路当中标上「山道 47 日」——「道远」这句候选标签的出处 */}
             {roads.map((r) => (
-              <line key={r.key} className={`road${r.hot ? " hot" : ""}`}
+              <line key={r.key} className={`road lod${lod}${r.hot ? " hot" : ""}`}
                 x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
                 stroke={r.st.stroke} strokeDasharray={r.st.dash}
                 strokeWidth={r.st.width * (r.hot ? 2.2 : 1) / Math.sqrt(view.k)} />
@@ -1427,7 +1552,7 @@ export function PlayClient() {
                 {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
                 <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
                 <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} />
-                {view.k >= 2.6 && (
+                {lod >= 2 && (
                   <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
                     textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
                 )}
@@ -1465,7 +1590,7 @@ export function PlayClient() {
                 <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / Math.sqrt(view.k))}
                   fill="transparent" />
                 <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
-                  mine={m.mine} seat={m.isSeat} besieged={m.besieged}
+                  mine={m.mine} seat={m.isSeat} besieged={m.besieged} detail={lod >= 2}
                   fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
               </g>
             ))}
@@ -1487,7 +1612,8 @@ export function PlayClient() {
               const s2 = 26 / Math.sqrt(view.k);
               const col = engine.colorOf.get(t.a.faction) ?? "#7a7266";
               return (
-                <g key={t.a.id} className={`army${t.mine ? " mine" : ""}`}>
+                <g key={t.a.id}
+                  className={`army${t.mine ? " mine" : ""}${t.marching ? " marching" : ""}`}>
                   {t.marching && t.from && t.to && (
                     <line className="march-path" x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y}
                       stroke={col} strokeWidth={2.4 / Math.sqrt(view.k)} />
@@ -1602,9 +1728,9 @@ export function PlayClient() {
           </details>
 
           <div className="zoom">
-            <button onClick={() => setView((v) => zoomAt(v, 1.4))}>＋</button>
-            <button onClick={() => setView({ k: 1, x: 0, y: 0 })}>全图</button>
-            <button onClick={() => setView((v) => zoomAt(v, 1 / 1.4))}>－</button>
+            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1.4)); }}>＋</button>
+            <button onClick={() => { setSmooth(true); setView({ k: 1, x: 0, y: 0 }); }}>全图</button>
+            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4)); }}>－</button>
           </div>
           {/* 关津的悬停详情。它与郡的详情共用一个位置：两者不会同时指到 */}
           {nodeTip && !focus && (
