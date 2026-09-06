@@ -79,6 +79,7 @@ test("包：界面读的运行时包必须与内容包同源", () => {
     ["commanderyState", "commandery-state.json"],
     ["adjacency", "adjacency.json"],
     ["troopTypes", "troop-types.json"],
+    ["resources", "resources.json"],
     ["provinceSeats", "province-seats-194.json"],
   ]) {
     assert.deepEqual(runtime[key], JSON.parse(fs.readFileSync(`lib/game/data/${file}`, "utf8")),

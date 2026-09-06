@@ -186,7 +186,7 @@ type Bundle = {
                                courtesyName?: string; situation?: string }> };
   commanderyState: unknown; commanderies: Array<{ id: string; name: string; zhou: string;
     longitude: number; latitude: number }>;
-  adjacency: unknown; troopTypes: unknown; provinceSeats: unknown;
+  adjacency: unknown; troopTypes: unknown; resources: unknown; provinceSeats: unknown;
   officers: unknown[]; pack: unknown;
 };
 type Territory = {
@@ -444,6 +444,7 @@ export function PlayClient() {
             scenario: b.scenario as never,
             commanderies: b.commanderies,
             troopTypes: b.troopTypes as never,
+            resources: b.resources as never,
           },
         });
         setResume(loadGame(packStamp(P.seasonsPerGame, b.commanderies.length, P.epochCount)));

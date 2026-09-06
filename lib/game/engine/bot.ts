@@ -40,13 +40,13 @@ export const PROFILES: Record<Profile, string> = {
 // 给高了各画像都无脑改阵，策略差异被抹平——极差掉三分之一。
 // 「一条几乎总是对的动作」正是评测最不需要的东西
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { submit: 9, suade: 6, array: 5, govern: 10, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
-  balanced:    { submit: 9, suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
-  aggressive:  { submit: 9, suade: 6, array: 1, govern: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
-  opportunist: { submit: 9, suade: 6, array: 2, govern: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
+  turtle:      { submit: 9, suade: 6, array: 5, govern: 10, build: 8, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
+  balanced:    { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  aggressive:  { submit: 9, suade: 6, array: 1, govern: 2, build: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
+  opportunist: { submit: 9, suade: 6, array: 2, govern: 4, build: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
   // 与均衡流同底，差别全在下面读 gain 的那几行——
   // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
-  purpose:     { submit: 9, suade: 6, array: 3, govern: 6, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  purpose:     { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
 };
 
 /**
@@ -218,6 +218,13 @@ function decideInner(
     // 抽走五成戍兵，而「集结地公开可见，期间被攻破则整体失败」——
     // 在边境集结等于把前线守军抽空、再把集结地公示给对手。
     // 这条规则本身就在惩罚「在边境囤兵」，前线优先是逆着规则走
+    if (c.action.type === "build") {
+      // 特殊建筑加分：它们**别处建不得**，而通用的哪个郡都能建。
+      // 一个有铁之郡把三个位子填满通用建筑，那块铁就永远浪费了——
+      // 而位子只有三个（constants.建筑.每郡上限），先来后到是不可逆的
+      const special = ["ironworks", "saltern", "stud", "farmstead"];
+      if (special.includes(c.action.kind)) score += 4;
+    }
     if (c.action.type === "withdraw") {
       // 此前是 `/已围 (\d+) 季，余 (\d+) 人/` 的正则 + 「季数×2 + 残兵少加 4」。
       // 那既违反本文件自己立的规矩（bot.ts 开头与 types.ts 都明写「不从 label 抠正则」，

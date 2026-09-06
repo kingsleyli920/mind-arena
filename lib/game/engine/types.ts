@@ -18,6 +18,14 @@ export type Grade = "ding" | "bing" | "yi" | "jia" | "chao" | "ba" | "wang";
 /** 三阵。鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞 */
 export type Formation = "scale" | "wings" | "square";
 
+/** 建筑。前四种任何己方郡皆可建，后四种须该郡有相应物产（见 resources.json） */
+export type Building =
+  | "office" | "granary" | "market" | "drill"
+  | "ironworks" | "saltern" | "stud" | "farmstead";
+
+/** 郡国物产。见 lib/game/data/resources.json，每条带史料出处 */
+export type Resource = "iron" | "salt" | "horse" | "tuntian";
+
 export interface CommanderyState {
   id: CommanderyId;
   owner: FactionId | null;
@@ -37,6 +45,23 @@ export interface CommanderyState {
    * 用「季」而不用吨数：与「缺口是小整数一眼可数」同一条理由。
    */
   provisions: number;
+  /**
+   * 已建成的建筑。永久，不可拆除；郡易主则随郡归新主。
+   *
+   * 与内政分工：内政一条令换一次数值，建筑一条令加金换一个长期改变的速率或
+   * 一项解锁。每郡至多 buildCap 座，而可选常有五到七种——不设上限的话建筑就
+   * 不是决策而是待办清单，早晚建满，差别只在先后。
+   */
+  buildings: Building[];
+  /**
+   * 本郡的物产，定它能建哪些特殊建筑。开局即定，终局不变。
+   *
+   * 判据全在 lib/game/data/resources.json，每条带出处与强弱：
+   * 铁取《续汉书·郡国志》县下明文「有铁」（25 郡，逐条可核）；
+   * 盐分池、井、海三源（河东解池为明文，蜀犍井盐为史载，濒海为地理推定）；
+   * 马取边郡六牧师苑（《汉书·百官公卿表》）；屯取通邻郡之道半数以上为平原。
+   */
+  resources: Resource[];
   yieldTier: number;      // 1–10
   moraleTier: number;     // 1–5
   defense: number;        // 0–100
@@ -255,6 +280,7 @@ export type Action =
       deadline: 1 | 2 }
   | { type: "govern"; at: CommanderyId;
       policy: "farm" | "levy" | "wall" | "soothe" | "forge" | "stock" }
+  | { type: "build"; at: CommanderyId; kind: Building }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
   | { type: "passage"; to: FactionId }

@@ -17,6 +17,7 @@ export interface SetupData {
   scenario: { factions: Array<{ id: string; name: string; seat?: string }> };
   commanderies: Array<{ id: string; name: string }>;
   troopTypes: { commanderies: Array<{ id: string; unit: string }> };
+  resources: { commanderies: Array<{ id: string } & Record<string, unknown>> };
 }
 
 export interface SetupOptions {
@@ -51,6 +52,10 @@ const INITIAL_FORMATION: Record<string, Formation> = {
 export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams): GameState {
   const nameToId = new Map(data.commanderies.map((c) => [c.name, c.id]));
   const unitOf = new Map(data.troopTypes.commanderies.map((c) => [c.id, c.unit]));
+  // 物产：resources.json 里每条形如 {id, zhou, iron?, salt?, horse?, tuntian?}，
+  // 值是带 basis/strength 的对象。引擎只要「有没有」，出处留给数据文件与工具
+  const resOf = new Map(data.resources.commanderies.map((c) => [c.id,
+    (["iron", "salt", "horse", "tuntian"] as const).filter((k) => c[k])]));
 
   const commanderies: Record<string, CommanderyState> = {};
   for (const c of data.commanderyState.commanderies) {
@@ -62,6 +67,8 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       // 存粮由产出档定，开局即满。产出档本身是 log10(户数)，
       // 所以「富郡耐围、瘠郡易饥」不必另立数据
       provisions: provisionsCap(c.yieldTier, P),
+      buildings: [],
+      resources: resOf.get(c.id) ?? [],
       moraleTier: c.moraleTier,
       defense: c.defense,
       unit: unitOf.get(c.id) ?? "infantry",

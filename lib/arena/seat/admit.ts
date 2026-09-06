@@ -9,6 +9,7 @@
 // 就说明准入层有 bug（resolve 里有断言）。
 import { validate, orderSites, type Graph, type Rules, DEFAULT_RULES } from "../../game/engine/actions.ts";
 import type { Roster } from "../../game/engine/officers.ts";
+import type { EngineParams } from "../../game/engine/params.ts";
 import type { Candidate, FactionId, GameState, Order } from "../../game/engine/types.ts";
 
 export type DropReason =
@@ -64,6 +65,7 @@ export function admit(
   s: GameState, faction: FactionId, picks: readonly string[],
   candidates: readonly Candidate[], g: Graph,
   roster: Roster | null, rules: Rules = DEFAULT_RULES,
+  P: EngineParams | null = null,
 ): Admission {
   const byKey = new Map(candidates.map((c) => [c.key, c]));
   const orders: Order[] = [];
@@ -97,7 +99,7 @@ export function admit(
       continue;
     }
     const order: Order = { faction, action: c.action };
-    const why = validate(probe, order, g, rules, roster);
+    const why = validate(probe, order, g, rules, roster, P);
     if (why) { dropped.push({ key, reason: "rejected", detail: why }); continue; }
 
     // 推进探针状态：扣令、占郡国配额、记免费次数

@@ -9,7 +9,7 @@
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
-import { canonicalOrder, orderCost, governPrice, GEAR_CN, POLICY_CN, type Graph,
+import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, type Graph,
   type Rules, DEFAULT_RULES, validate, orderSites, submitChance } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
@@ -20,6 +20,7 @@ import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troo
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
 import type { OfficerRef, Roster } from "./officers.ts";
 import type {
+  CommanderyState,
   Army, GameState, Order, Grade, CommanderyId, FactionId, GameEvent, OfficerId,
   Posture, SiegeGear,
 } from "./types.ts";
@@ -74,6 +75,32 @@ function lift(s: GameState, army: { id: string }): void {
  * 退不进老巢时的落点按 id 取第一个己方郡——这是个任意但确定的选择，
  * 「最近的己方可达郡」这个概念引擎里还不存在（军团的 home 一经设定永不更新）。
  */
+/**
+ * 一郡的存粮上限：底数由产出档定，仓廪再加 granarySeasons 季。
+ * 无主郡没有建筑，走的也是同一个函数——口径要一致，不能一处带建筑一处不带。
+ */
+function provCapOf(c: CommanderyState, P: EngineParams): number {
+  return provisionsCap(c.yieldTier, P)
+    + (c.buildings.includes("granary") ? P.granarySeasons : 0);
+}
+
+/**
+ * 一郡每季回补几季存粮。屯田不只惠及本郡，**相邻己方郡**也一起回补——
+ * 八种建筑里唯一带邻接效果的那个。抄的是三国志11 的造币／谷仓：设施自己不产出、
+ * 只放大邻居，于是疆域连成片才吃得到。这正好咬住这个游戏里补给与飞地那两个已有的问题
+ */
+function provGainOf(s: GameState, c: CommanderyState, g: Graph, P: EngineParams): number {
+  let n = 1;
+  if (c.buildings.includes("granary")) n += P.granaryProv;
+  if (c.buildings.includes("farmstead")) return n + P.farmsteadProv;
+  if (!c.owner) return n;
+  for (const e of g.adj.get(c.id) ?? []) {
+    const o = s.commanderies[e.to];
+    if (o?.owner === c.owner && o.buildings.includes("farmstead")) return n + P.farmsteadProv;
+  }
+  return n;
+}
+
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
   if (troops <= 0) return;
   const besieged = (id: CommanderyId) => s.armies.some((x) => x.target === id && x.faction !== army.faction);
@@ -222,7 +249,7 @@ export function resolve(
   // 超额下令会被后面的条目自然拒绝，无需额外配额账本。
   const accepted: Order[] = [];
   for (const o of queue) {
-    const reason = validate(s, o, g, rules, roster);
+    const reason = validate(s, o, g, rules, roster, P);
     if (reason) { rejected.push({ order: o, reason }); continue; }
     const a = o.action;
     // 计费口径只有 actions.ts 的 orderCost 一份。此前这里各写了一遍三元表达式，
@@ -366,7 +393,7 @@ export function resolve(
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
                      c.moraleTier = Math.max(1, c.moraleTier - 1); break;
       case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
-      case "stock":  c.provisions = Math.min(provisionsCap(c.yieldTier, P),
+      case "stock":  c.provisions = Math.min(provCapOf(c, P),
                                              c.provisions + P.provStockSeasons); break;
       case "soothe": c.moraleTier = Math.min(5, c.moraleTier + 1); break;
       // 治械：逐级打造，不可越级。首版里器械是征伐时的自由选项，
@@ -395,6 +422,23 @@ export function resolve(
     if (r.govern.length) log(s, { kind: "govern", faction: f, text: `内政：${r.govern.join("、")}` });
     if (r.appoint.length) log(s, { kind: "appoint", faction: f, text: `任命：${r.appoint.join("、")}` });
     if (r.array.length) log(s, { kind: "array", faction: f, text: `改阵：${r.array.join("、")}` });
+  }
+
+  // ── 兴建 ──────────────────────────────────────────────────────────
+  // 与内政同相：都改「这个郡是什么样的郡」。差别在内政一条令换一次数值，
+  // 兴建一条令加金换一个永久的速率或解锁
+  for (const o of accepted) {
+    const a = o.action;
+    if (a.type !== "build") continue;
+    const c = s.commanderies[a.at];
+    const price = P.goldOn ? P.buildGold[a.kind] : 0;
+    const f = s.factions[o.faction];
+    if (!c || c.buildings.includes(a.kind) || c.buildings.length >= P.buildCap) continue;
+    if (price > (f?.gold ?? 0)) continue;
+    if (f) f.gold -= price;
+    c.buildings.push(a.kind);
+    log(s, { kind: "build", faction: o.faction,
+             text: `${a.at} 建成${BUILD_CN[a.kind]}${price > 0 ? `（−${price} 金）` : ""}` });
   }
 
   // ── 阶段三：外交（变更延迟一季生效）────────────────────────────────
@@ -528,7 +572,10 @@ export function resolve(
       const corps = roster
         ? attackRetinue(retinueAt(s, roster, a.from, P), P, terrain).members
         : [];
-      const cap = roster ? troopCap(corps.length ? corps : retinueAt(s, roster, a.from, P), P)
+      // 马苑：本郡出征的每将统兵 ×1.5。「没将的郡纵有十万戍兵也只出得动一支偏师」
+      // 是这个引擎里一条实打实的瓶颈，马苑松的正是它——有马则辎重载得动、编制撑得大
+      const studMul = s.commanderies[a.from]?.buildings.includes("stud") ? P.studTroopMul : 1;
+      const cap = roster ? Math.round(studMul * troopCap(corps.length ? corps : retinueAt(s, roster, a.from, P), P))
                          : Infinity;
       const want = ready ? ready.troops : Math.floor(src.garrison * P.strengthRatio[a.strength]);
       const troops = Math.min(want, cap);
@@ -574,9 +621,14 @@ export function resolve(
     } else {
       src.garrison -= troops;
     }
-    // 器械随军出征，本郡即刻回到无械状态：它是一次性的投入，不是永久加成
+    // 器械随军出征，本郡即刻回到无械状态：它是一次性的投入，不是永久加成。
+    // 铁官使它只降一级而非清零——「不清零」试过，太强：消融实验里关掉铁官，
+    // 均衡对进攻的分差从 0 回到 +16.6，因为建筑随郡易主，序列攻方白捡别人的常备器械
     const gear = src.gear;
-    src.gear = "none";
+    if (src.buildings.includes("ironworks")) {
+      const i = P.gearLadder.indexOf(src.gear);
+      src.gear = (P.gearLadder[Math.max(0, i - 1)] ?? "none") as SiegeGear;
+    } else src.gear = "none";
 
     const besiegers = s.armies.filter((x) => x.target === a.target && x.faction !== o.faction);
     if (besiegers.length) {
@@ -759,7 +811,7 @@ export function resolve(
       // 城防与民心不因巷战而毁，武将也不算被俘——开城不是城破
       if (loser) s.factions[army.faction].conquests += 1;
       tgt.owner = army.faction;
-      tgt.provisions = provisionsCap(tgt.yieldTier, P);
+      tgt.provisions = provCapOf(tgt, P);
       tgt.moraleTier = Math.max(1, tgt.moraleTier - 1);
       lift(s, army);
       log(s, { kind: "siege-starve", faction: army.faction,
@@ -799,7 +851,7 @@ export function resolve(
     // 无主郡的存粮也要回补。第八阶段只遍历各势力自己的郡，无主郡走不到那里——
     // 而无主郡正是最常被打的目标，不补的话被围过一次就永远空仓，
     // 下一次来人当季就开城。实测漏了这条时「围到粮尽开城」20 次**全部**发生在第 1 季
-    c.provisions = Math.min(provisionsCap(c.yieldTier, P), c.provisions + 1);
+    c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
   }
 
   for (const f of Object.values(s.factions)) {
@@ -820,6 +872,8 @@ export function resolve(
       + `辖 ${Object.values(s.commanderies).filter((c) => c.owner === f.id).length} 郡`);
     for (const c of Object.values(s.commanderies)) {
       if (c.owner !== f.id) continue;
+      /** 断供但有官府：产出减半而非归零 */
+      let cutHalf = false;
       if (!reach.has(c.id)) {
         // 不可达：产出归零，仍属己方，守军仍在（R28）。
         //
@@ -839,8 +893,13 @@ export function resolve(
         tr(f.id, `    ${c.id}：补给断绝`
           + `${capLost ? "（治所已失，全境皆断）"
               : `（自治所 ${f.capital} 沿己方与借道盟友之郡走不到）`}`
-          + ` → 产出归零，以此为后方的军团下季溃散`);
-        continue;
+          + ` → 产出${c.buildings.includes("office") ? "减半（郡府自有储积）" : "归零"}`
+          + `，以此为后方的军团存粮逐季递减`);
+        // 官府使本郡断供时产出减半而非归零：郡府自有储积。
+        // 这条咬的是这个游戏里最强的机制（死于补给的军团比死于战斗的还多），
+        // 又不至于把治所的单点要害抹平——减半仍然疼
+        if (!c.buildings.includes("office")) continue;
+        cutHalf = true;
       }
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
@@ -851,11 +910,16 @@ export function resolve(
       }
       // 围解则存粮逐季回补。不补的话一座被围过的城就永远是空仓，
       // 下一次被围当场即降——那不是「守方有钟」，是「被围过一次就废了」
-      c.provisions = Math.min(provisionsCap(c.yieldTier, P), c.provisions + 1);
+      c.provisions = Math.min(provCapOf(c, P), c.provisions + provGainOf(s, c, g, P));
       const gov = roster ? governEffect(governorOf(s, roster, c.id, P), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
       c.garrison = Math.min(
-        Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor * (gov?.yieldMul ?? 1)),
+        // 校场增戍；屯田是八种里唯一有减项的——军屯拿戍兵去种地，
+        // 《置屯田令》「定国之术，在于强兵足食」，兵与食本就在抢同一批人
+        Math.round(c.garrison + c.yieldTier * P.yieldToGarrison * factor * (gov?.yieldMul ?? 1)
+          * (c.buildings.includes("drill") ? P.drillMul : 1)
+          * (c.buildings.includes("farmstead") ? P.farmsteadDrillMul : 1)
+          * (cutHalf ? P.officeCutYield : 1)),
         P.garrisonCap);
       // 金与兵同源同条件：补给通畅、未被围的郡才产出。
       // 金按**产出档**算而非原始户数——户数跨度 42–528551（一万两千倍），
@@ -863,7 +927,12 @@ export function resolve(
       // 先记下每个郡的产金，稍后按产出档降序逐郡递减后再求和——
       // 线性求和是纯粹的滚雪球放大器，见内容包 constants.金.为何递减
       if (P.goldOn) {
-        const row = c.yieldTier * P.goldPerTier * factor * (gov?.yieldMul ?? 1);
+        // 市：本郡产金 ×1.3。盐场：另加固定额，**不随产出档**——
+        // 若同样按档乘，富郡恒富，而盐场的用处正是让瘠郡也可能值得抢
+        const row = c.yieldTier * P.goldPerTier * factor * (gov?.yieldMul ?? 1)
+          * (c.buildings.includes("market") ? P.marketMul : 1)
+          * (cutHalf ? P.officeCutYield : 1)
+          + (c.buildings.includes("saltern") ? P.salternGold : 0);
         goldRows.push(row);
         tr(f.id, `    ${c.id}：产出档 ${c.yieldTier} × ${P.goldPerTier}`
           + ` × 民心系数 ${factor.toFixed(2)}`
@@ -904,11 +973,20 @@ export function resolve(
     const myLands = Object.values(s.commanderies).filter((c) => c.owner === f.id);
     const troops = myArmies.reduce((n, a) => n + a.troops, 0)
                  + myLands.reduce((n, c) => n + c.garrison, 0);
-    const upkeep = P.goldOn ? Math.round(troops * P.goldUpkeepPerTroop) : 0;
+    // 屯田：本郡守军就地取食，军费减半。这正是屯田在史上的用处——
+    // 《置屯田令》「定国之术，在于强兵足食」，屯田军自己养自己。
+    // 而它对着的是这个引擎里最痛的那处：实测袁绍终局十八万兵、国库归零、
+    // 一季两次「军费不继，某某人逃亡」。
+    // 计费的兵按郡分开算：军团按全额（在外无田可耕），守军看它所在郡有没有屯田
+    const billable = myArmies.reduce((n, a) => n + a.troops, 0)
+      + myLands.reduce((n, c) => n + c.garrison
+          * (c.buildings.includes("farmstead") ? P.farmsteadUpkeepCut : 1), 0);
+    const upkeep = P.goldOn ? Math.round(billable * P.goldUpkeepPerTroop) : 0;
     if (P.goldOn) {
       tr(f.id, `  【军费】守军 ${fmt0(myLands.reduce((n, c) => n + c.garrison, 0))}`
         + ` + 军团 ${fmt0(myArmies.reduce((n, a) => n + a.troops, 0))}`
-        + ` = ${fmt0(troops)} 人 × ${P.goldUpkeepPerTroop} = ${upkeep} 金`
+        + ` = ${fmt0(troops)} 人（屯田折抵后计费 ${fmt0(billable)}）`
+        + ` × ${P.goldUpkeepPerTroop} = ${upkeep} 金`
         + `\u3000国库 ${Math.round(f.gold)} → ${Math.round(Math.min(P.goldCap, f.gold + Math.round(income)) - upkeep)}`);
     }
     f.gold = Math.min(P.goldCap, f.gold + Math.round(income));

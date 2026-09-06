@@ -19,7 +19,7 @@ import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
 import { provisionsCap, type EngineParams } from "./params.ts";
 import type {
-  Action, Candidate, CommanderyId, FactionId, GameState, Order, Formation,
+  Action, Building, Candidate, CommanderyId, FactionId, GameState, Order, Formation, Resource,
 } from "./types.ts";
 import { cmp } from "./cmp.ts";
 
@@ -37,6 +37,35 @@ export interface Rules {
   campaignAp: number;
   normalAp: number;
   perCommanderyOrders: number;
+}
+
+/** 建筑名。与内容包 actions[build].params[kind].tiers 一一对应 */
+export const BUILD_CN: Record<Building, string> = {
+  office: "官府", granary: "仓廪", market: "市", drill: "校场",
+  ironworks: "铁官", saltern: "盐场", stud: "马苑", farmstead: "屯田",
+};
+/** 特殊建筑所需的物产。前四种为空，任何己方郡皆可建 */
+export const BUILD_NEEDS: Partial<Record<Building, Resource>> = {
+  ironworks: "iron", saltern: "salt", stud: "horse", farmstead: "tuntian",
+};
+export const RESOURCE_CN: Record<Resource, string> = {
+  iron: "铁", salt: "盐", horse: "牧苑", tuntian: "可垦之地",
+};
+
+/**
+ * 一郡本季还能不能下令。官府使该郡的令数上限 +officeOrders。
+ *
+ * 这条一定要抽出来：候选生成与 validate 各有一处判据，两处一旦分家，
+ * 就会出现「候选给了但引擎拒收」——那正是 tests 里
+ * 「界面的准入判据与引擎一致：按它贪心勾选，引擎不应拒绝任何一条」要挡的事
+ */
+export function ordersLeft(
+  s: GameState, id: CommanderyId, rules: Rules, P: EngineParams | null,
+): boolean {
+  const c = s.commanderies[id];
+  const cap = rules.perCommanderyOrders
+    + (P && c?.buildings.includes("office") ? P.officeOrders : 0);
+  return (c?.ordersThisSeason ?? 0) < cap;
 }
 
 export const DEFAULT_RULES: Rules = {
@@ -132,7 +161,7 @@ export function submitBanUntil(s: GameState, target: FactionId): number {
 export function orderSites(a: Action): CommanderyId[] {
   return a.type === "campaign" ? [a.from]
     : a.type === "muster" ? [...a.from]
-    : a.type === "govern" || a.type === "array" ? [a.at]
+    : a.type === "govern" || a.type === "array" || a.type === "build" ? [a.at]
     : a.type === "relocate" ? [a.to]
     : [];
 }
@@ -174,7 +203,8 @@ function troopBand(troops: number, P: EngineParams): string {
  * 与 orderCost 同理：价钱一分档，两份副本立刻会算出不同的数。
  */
 export function governPrice(
-  c: { garrison: number; gear: string }, policy: string, P: EngineParams,
+  c: { garrison: number; gear: string; buildings?: readonly Building[] },
+  policy: string, P: EngineParams,
 ): number {
   if (!P.goldOn) return 0;
   if (policy === "levy") {
@@ -185,7 +215,10 @@ export function governPrice(
   if (policy === "forge") {
     const next = P.gearLadder[Math.min(P.gearLadder.indexOf(c.gear) + 1,
                                        P.gearLadder.length - 1)];
-    return P.goldGear[next] ?? 0;
+    // 铁官治械减半。器械现在逐级打造、一出征就清零，于是治械的钱每次都白花一半；
+    // 铁官让本郡成为攻城基地，这是「解锁」不是「加成」
+    const cut = c.buildings?.includes("ironworks") ? P.ironworksForgeCut : 1;
+    return Math.round((P.goldGear[next] ?? 0) * cut);
   }
   return 0;
 }
@@ -271,7 +304,7 @@ export function listActions(
   const ap = remainingAp(s, f);
   const mine = ownedBy(s, f).sort((a, b) => cmp(a.id, b.id));
   const canOrder = (id: CommanderyId) =>
-    (s.commanderies[id]?.ordersThisSeason ?? 0) < rules.perCommanderyOrders;
+    ordersLeft(s, id, rules, P);
 
   // ── 征伐：按「己方兵力 / 目标守军」降序取前 N 个目标 ────────────────
   // 只给打得动的。把明显打不动的目标塞进候选，等于用无效选项浪费模型的注意力。
@@ -321,9 +354,12 @@ export function listActions(
       // 而实际出战的是文聘——告诉对局方的主将和真打的不是同一个人
       const march = roster ? attackRetinue(corps, P, e.terrain).members : [];
       const lead = march[0] ?? null;
-      const cap = roster ? troopCap(corps, P) : Infinity;
       const ready = readyAt(s, f, e.from);
       const src0 = s.commanderies[e.from];
+      // 与 resolve 同口径：马苑使本郡每将统兵 ×1.5。两处分家的话，
+      // 标签写的出兵数与真正出的兵就对不上——那正是 combat.ts 抽出来要根除的漂移
+      const studMul = src0.buildings.includes("stud") ? P.studTroopMul : 1;
+      const cap = roster ? Math.round(studMul * troopCap(corps, P)) : Infinity;
       // 兵种对位与器械的效果已经折进 forecast 的缺口数里，标签只标一次名目。
       // 用散文再复述一遍等于花两份 token 说同一件事
       const unitNote = `｜${unitName(P, src0.unit)}对${unitName(P, tgt.unit)}`
@@ -445,7 +481,9 @@ export function listActions(
         // 高报是更危险的方向：模型读到「可解围」下令，派出去的不到一半，
         // 判词与结果直接反号
         const rReady = readyAt(s, f, src.id);
-        const cap = roster ? troopCap(corps, P) : Infinity;
+        // 与 resolve 同口径：马苑使本郡每将统兵 ×1.5
+        const studMul = src.buildings.includes("stud") ? P.studTroopMul : 1;
+        const cap = roster ? Math.round(studMul * troopCap(corps, P)) : Infinity;
         const send = Math.min(rReady ? rReady.troops
                                      : Math.floor(src.garrison * P.strengthRatio.allout), cap);
         const ff = forecastField(s, f, src.id, foe, send, g, P, roster);
@@ -596,6 +634,65 @@ export function listActions(
         // 而内政候选一季能有十条，等于把同一份郡情抄十遍。
         // why 留着——它是引擎的优先级判断（「临敌且城防薄」），别处推不出来
         label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}（${why}）`,
+      });
+    }
+  }
+
+  // ── 兴建：**按建筑种类去重**，每种只列它最好的一处 ─────────────────
+  //
+  // 不按郡列。按郡列的话十二个郡会吐出十二条候选而其中十条是同一座屯田——
+  // 同一件事列十二遍，却要占掉候选总额（totalCap 60）里的十二格。
+  // 实测那样直接把征伐从二十多条挤到十二条：兴建是长线的，征伐才是决胜的，
+  // 挤掉后者换前者是坏交易。
+  //
+  // 按种类去重之后，候选是「在中山国建铁官／在乐安国建屯田／在邺建官府」——
+  // 三条**互不相同**的选择，常在三到五条之间。
+  if (ap >= rules.normalAp) {
+    const mine = ownedBy(s, f).filter((c) => canOrder(c.id) && c.buildings.length < P.buildCap);
+    const front = (id: CommanderyId) => (g.adj.get(id) ?? [])
+      .some((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== f);
+    /** 每种建筑挑一处最合适的郡。挑法各不相同，理由写进 why */
+    const site = (kind: Building): { c: typeof mine[number]; why: string } | null => {
+      const need = BUILD_NEEDS[kind];
+      const ok = mine.filter((c) => !c.buildings.includes(kind)
+        && (!need || c.resources.includes(need)));
+      if (!ok.length) return null;
+      // 特殊建筑：别处建不得，挑产出档最高的一处（同样一座，富郡回本快）
+      if (need) {
+        const c = [...ok].sort((x, y) => y.yieldTier - x.yieldTier || cmp(x.id, y.id))[0];
+        return { c, why: kind === "farmstead"
+          ? "地可垦，并惠及相邻己方郡" : `此地有${RESOURCE_CN[need]}，别处建不得` };
+      }
+      // 通用建筑：仓廪与校场看前线，官府与市看产出
+      if (kind === "granary" || kind === "drill") {
+        const f0 = ok.filter((c) => front(c.id));
+        const c = (f0.length ? f0 : ok).sort((x, y) => y.yieldTier - x.yieldTier || cmp(x.id, y.id))[0];
+        return { c, why: f0.length ? "临敌之郡" : "" };
+      }
+      const c = [...ok].sort((x, y) => y.yieldTier - x.yieldTier || cmp(x.id, y.id))[0];
+      return { c, why: kind === "office" ? "该郡每季可下的令 +1" : "产出可观，市利更厚" };
+    };
+    const KINDS: Building[] = ["ironworks", "stud", "saltern", "farmstead",
+                               "office", "granary", "market", "drill"];
+    const picks = KINDS.map((kind) => {
+      const hit = site(kind);
+      if (!hit) return null;
+      const price = P.goldOn ? P.buildGold[kind] : 0;
+      if (price > (fs_.gold ?? 0)) return null;      // 付不起就不列
+      return { kind, ...hit, price };
+    // 只留 4 条。候选总额 totalCap 是 60 且**已经打满**——兴建不是往上加，
+    // 是跟征伐、内政抢那 60 格。放 7 条实测把征伐从二十多条挤到 16 条，
+    // 袁绍十三个郡里有几个就再也没有出兵的选项了。兴建是长线的、这季不建下季还能建；
+    // 征伐是决胜的、错过的窗口不再来。KINDS 已按「特殊在前」排好，
+    // 所以砍掉的总是那几种哪个郡都能建的
+    }).filter((x) => !!x).slice(0, Math.min(4, rules.perTypeCap));
+    for (const { c, kind, why, price } of picks) {
+      out.push({
+        key: `build:${c.id}:${kind}`,
+        action: { type: "build", at: c.id, kind },
+        cost: rules.normalAp,
+        label: `${c.id} 兴建${BUILD_CN[kind]}${price > 0 ? `（${price} 金）` : ""}`
+             + `${why ? `（${why}）` : ""}`,
       });
     }
   }
@@ -987,7 +1084,7 @@ export function listActions(
 /** 校验一条命令是否合法。返回 null 表示合法，否则给出拒绝理由 */
 export function validate(
   s: GameState, o: Order, g: Graph, rules: Rules = DEFAULT_RULES,
-  roster: Roster | null = null,
+  roster: Roster | null = null, P: EngineParams | null = null,
 ): string | null {
   const f = s.factions[o.faction];
   if (!f) return "未知势力";
@@ -1004,7 +1101,7 @@ export function validate(
 
   const own = (id: CommanderyId) => s.commanderies[id]?.owner === o.faction;
   const quota = (id: CommanderyId) =>
-    (s.commanderies[id]?.ordersThisSeason ?? 0) < rules.perCommanderyOrders;
+    ordersLeft(s, id, rules, P);
 
   switch (a.type) {
     case "campaign": {
@@ -1041,6 +1138,20 @@ export function validate(
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
       return null;
+    case "build": {
+      if (!own(a.at)) return "非己方郡国";
+      if (!quota(a.at)) return "该郡本季令数已满";
+      const c = s.commanderies[a.at];
+      if (c.buildings.includes(a.kind)) return "该郡已有此建筑";
+      const need = BUILD_NEEDS[a.kind];
+      if (need && !c.resources.includes(need)) return `该郡无${RESOURCE_CN[need]}，建不得${BUILD_CN[a.kind]}`;
+      // 上限与金价要读参数。P 可缺省（界面与部分测试不传），那两项就留给候选生成器把关；
+      // 引擎侧 resolve 一定传 P，所以真正落地的那一次是全的
+      if (!P) return null;
+      if (c.buildings.length >= P.buildCap) return `该郡已建满 ${P.buildCap} 座`;
+      if (P.goldOn && (s.factions[o.faction]?.gold ?? 0) < P.buildGold[a.kind]) return "国库不足";
+      return null;
+    }
     case "appoint": {
       if (!own(a.at)) return "非己方郡国";
       if (!roster) return null;
@@ -1110,8 +1221,8 @@ export function validate(
 /** 规范化排序：使裁决顺序与提交顺序无关（MERS R6） */
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
-    ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, relocate: 2, passage: 3, ally: 4,
-       submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
+    ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, build: 2, relocate: 2, passage: 3,
+       ally: 4, submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || cmp(x.faction, y.faction)

@@ -16,6 +16,7 @@ const DATA = {
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
   troopTypes: read("troop-types.json"),
+  resources: read("resources.json"),
 };
 const G = buildGraph(read("adjacency.json"));
 // 引擎参数唯一来源是内容包，测试也走同一条路径

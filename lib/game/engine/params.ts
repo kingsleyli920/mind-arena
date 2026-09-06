@@ -102,6 +102,13 @@ export interface EngineParams {
   /** 粮：一律以「季」计，不是第二种货币。见内容包 constants.粮 */
   provBase: number; provPerTier: number; provCap: number;
   provStockSeasons: number; provStockGold: number; armySupplyCap: number;
+  /** 建筑。永久生效，每郡至多 buildCap 座；见内容包 constants.建筑 */
+  buildCap: number;
+  buildGold: Record<string, number>;
+  officeOrders: number; granarySeasons: number; marketMul: number; drillMul: number;
+  ironworksForgeCut: number; salternGold: number; studTroopMul: number;
+  farmsteadProv: number; farmsteadDrillMul: number;
+  farmsteadUpkeepCut: number; officeCutYield: number; granaryProv: number;
   siegeDefenseErosion: number;
   /** 野战：援军进入被围郡时与围城军交战 */
   fieldRout: number; fieldPush: number; fieldStall: number;
@@ -285,6 +292,25 @@ export function loadParams(pack: RawPack): EngineParams {
     provStockSeasons: g("粮", "屯粮_加季"),
     provStockGold: g("粮", "屯粮_金"),
     armySupplyCap: g("粮", "军团存粮_上限"),
+    buildCap: g("建筑", "每郡上限"),
+    buildGold: {
+      office: g("建筑", "官府_金"), granary: g("建筑", "仓廪_金"),
+      market: g("建筑", "市_金"), drill: g("建筑", "校场_金"),
+      ironworks: g("建筑", "铁官_金"), saltern: g("建筑", "盐场_金"),
+      stud: g("建筑", "马苑_金"), farmstead: g("建筑", "屯田_金"),
+    },
+    officeOrders: g("建筑", "官府_加令"),
+    granarySeasons: g("建筑", "仓廪_加存粮"),
+    marketMul: g("建筑", "市_产金倍"),
+    drillMul: g("建筑", "校场_增兵倍"),
+    ironworksForgeCut: g("建筑", "铁官_治械折"),
+    salternGold: g("建筑", "盐场_每季产金"),
+    studTroopMul: g("建筑", "马苑_统兵倍"),
+    farmsteadProv: g("建筑", "屯田_邻郡回粮"),
+    farmsteadDrillMul: g("建筑", "屯田_增兵倍"),
+    farmsteadUpkeepCut: g("建筑", "屯田_军费折"),
+    officeCutYield: g("建筑", "官府_断供产出"),
+    granaryProv: g("建筑", "仓廪_回粮"),
     siegeBreachPerSeason: g("围城", "每季加缺口"),
     siegeAttackerLoss: g("围城", "攻方每季损耗"),
     siegeDefenderLoss: g("围城", "守方每季损耗"),

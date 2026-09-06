@@ -72,7 +72,7 @@ const scenario = read("scenario-194.json");
 const nameOf = (id) => scenario.factions.find((f) => f.id === id)?.name ?? id;
 const DATA = {
   commanderyState: read("commandery-state.json"), scenario,
-  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"),
+  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
 };
 
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];

@@ -25,7 +25,7 @@ const DATA = {
   commanderyState: read("commandery-state.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
-  troopTypes: read("troop-types.json"),
+  troopTypes: read("troop-types.json"), resources: read("resources.json"),
 };
 const nameOf = (id) => read("scenario-194.json").factions.find((f) => f.id === id)?.name ?? id;
 

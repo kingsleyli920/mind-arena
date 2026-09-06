@@ -24,7 +24,7 @@ const DATA = {
   commanderyState: read("commandery-state.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
-  troopTypes: read("troop-types.json"),
+  troopTypes: read("troop-types.json"), resources: read("resources.json"),
 };
 const G = buildGraph(read("adjacency.json"));
 // 引擎参数唯一来源是内容包，测试也走同一条路径
@@ -1835,15 +1835,20 @@ test("同郡至多一支待命军团，且出征取兵力最多的那支", () =>
 
   // **一支残军不许劫持整个郡的出征兵力**
   let u = fresh();
-  const from = Object.values(u.commanderies).find((c) => c.owner === me && c.garrison > 8000);
-  const foe = (G.adj.get(from.id) ?? []).map((e) => e.to)
-    .find((id) => u.commanderies[id]?.owner && u.commanderies[id].owner !== me);
-  assert.ok(foe, "这个郡不临敌，测不出");
+  // 从**确实列得出征伐候选**的郡里取样本。候选总额只有 totalCap 条，
+  // 十三个郡分不到人人有份，硬取「第一个守军 >8000 的郡」测的就成了候选覆盖率，
+  // 而这条要验的是「一支残军不许劫持整郡的出征兵力」
+  const base = listActions(u, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.action.type === "campaign"
+                   && u.commanderies[c.action.from].garrison > 8000);
+  assert.ok(base.length, "袁绍一条从大郡出发的征伐候选都没有，样本选不出来");
+  const from = u.commanderies[base[0].action.from];
+  const foe = base[0].action.target;
   // 手塞一支大的和一支小的（模拟合并前的历史数据）
   for (const [n, t] of [["big", 9000], ["tiny", 7]]) {
     u.armies.push({ id: `x:${n}`, faction: me, commander: null, retinue: [], troops: t,
       at: from.id, target: null, posture: "main", gear: "none", unit: from.unit,
-      siegeSeasons: 0, idleSeasons: 0, home: from.id });
+      siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: from.id });
   }
   const cands = listActions(u, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
     .filter((c) => c.key.startsWith(`campaign:${from.id}>${foe}`));

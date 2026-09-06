@@ -38,7 +38,7 @@ const bundle = {
     households: c.households, population: c.population,
   })),
   adjacency: read("adjacency.json"),
-  troopTypes: read("troop-types.json"),
+  troopTypes: read("troop-types.json"), resources: read("resources.json"),
   provinceSeats: read("province-seats-194.json"),
   // 名册与登场判定合成一张表，省掉一次交叉引用
   officers,
