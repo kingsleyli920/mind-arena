@@ -372,6 +372,12 @@ export function listActions(
           ? { from: held.home, cost: back.cost, terrain: back.terrain, gates: back.gates }
           : e] as const;
       })
+      // 改写起兵郡之后要去重：同一目标本可有两条路（最省的与出兵最多的），
+      // 而上面那步把两条都改写成了围城军的 home——于是 (起兵郡, 目标) 完全相同，
+      // 键也相同。候选键是模型选择的地址（R13），重键意味着枚举里有两个一样的
+      // 地址，界面上则是两行逐字相同的候选。实测在「已围一城又有备选路」时触发
+      .filter((x, i, all) =>
+        all.findIndex((y) => y[0] === x[0] && y[1].from === x[1].from) === i)
       .map(([tid, e]) => {
         const src = s.commanderies[e.from];
         // 用观测值而非真值：候选标签是给对局方看的，写真实守军等于开天眼，

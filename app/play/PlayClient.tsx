@@ -23,7 +23,7 @@ import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
-import { loadParams, type EngineParams } from "@/lib/game/engine/params.ts";
+import { loadParams, marchSeasons, type EngineParams } from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
@@ -186,12 +186,21 @@ type Bundle = {
                                courtesyName?: string; situation?: string }> };
   commanderyState: unknown; commanderies: Array<{ id: string; name: string; zhou: string;
     longitude: number; latitude: number }>;
-  adjacency: unknown; troopTypes: unknown; resources: unknown; provinceSeats: unknown;
+  adjacency: { edges: Array<{ from: string; to: string; km: number; terrain: string; cost: number;
+    crossings: string[]; nodes: Array<{ id: string; name: string; kind: string; offset: number }> }> };
+  nodes: MapNode[];
+  troopTypes: unknown; resources: unknown; provinceSeats: unknown;
   officers: unknown[]; pack: unknown;
 };
 type Territory = {
   meta: { west: number; north: number; cellSize: number; cols: number; rows: number; none: number };
   order: string[]; grid: string;
+};
+
+/** 关津港仓：非郡治的战略据点。图上画得出「这条路上卡着什么」全靠它 */
+type MapNode = {
+  id: string; name: string; kind: string;
+  longitude: number; latitude: number; at: string | null;
 };
 
 type MapPoint = {
@@ -314,6 +323,159 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged }: {
   );
 }
 
+const NODE_CN: Record<string, string> = {
+  gate: "关隘", pass: "谷道", ford: "渡口", port: "港口", depot: "粮仓", battlefield: "古战场",
+};
+
+/**
+ * 关津港仓的图元。与城印同一套笔法——画出来，不写字。
+ *
+ * 头一版是「圆圈里写个关字」：城印是画的、关津是写的，两套笔法摆在一张舆图上，
+ * 远看就是一层标签贴纸。这里每一种据点各有形制：
+ *   关隘  双阙夹一门，门上横楣——虎牢、函谷的样子
+ *   谷道  两山夹一线，线是道
+ *   渡口  两岸之间一叶横舟
+ *   港口  舟上张帆
+ *   粮仓  廪屋，尖顶带囷
+ *   战场  折戟，两戈交叉
+ */
+function NodeMark({ x, y, r, kind }: { x: number; y: number; r: number; kind: string }) {
+  const ink = "#2b251e";
+  const wash = kind === "ford" || kind === "port" ? "#5b8098"
+    : kind === "gate" || kind === "pass" ? "#a05043" : "#6f6552";
+  // 图元比城印小一号：关津是**次要注记**，与城印同重的话，整幅就分不出主次了。
+  // 线也比城印细——那是印，这是注
+  const w = r * 1.42, h = r * 1.3;
+  const l = x - w / 2, rt = x + w / 2, b = y + h / 2, t = y - h / 2;
+  const lw = r * 0.13;
+  return (
+    <g className={`node ${kind}`}>
+      {/* 纸色衬底。比城印的淡：它不该在墨底上挖一个白洞 */}
+      <ellipse cx={x} cy={y + h * 0.04} rx={w * 0.66} ry={h * 0.72} className="node-halo" />
+      {kind === "gate" && (
+        <>
+          {/* 关：两墩夹一门洞，上覆一道飞檐。门洞留墨，远看是「过得去的一个口」 */}
+          <path d={`M ${l} ${b} L ${l} ${y - h * 0.12} L ${l + w * 0.3} ${y - h * 0.12}
+                    L ${l + w * 0.3} ${b} Z`} fill={wash} stroke={ink} strokeWidth={lw} />
+          <path d={`M ${rt - w * 0.3} ${b} L ${rt - w * 0.3} ${y - h * 0.12} L ${rt} ${y - h * 0.12}
+                    L ${rt} ${b} Z`} fill={wash} stroke={ink} strokeWidth={lw} />
+          <path d={`M ${x - w * 0.17} ${b} L ${x - w * 0.17} ${y + h * 0.06}
+                    A ${w * 0.17} ${h * 0.18} 0 0 1 ${x + w * 0.17} ${y + h * 0.06}
+                    L ${x + w * 0.17} ${b} Z`} fill={ink} opacity={0.82} />
+          {/* 飞檐：两端微翘 */}
+          <path d={`M ${l - w * 0.16} ${y - h * 0.1} Q ${x} ${t - h * 0.16} ${rt + w * 0.16} ${y - h * 0.1}`}
+            fill="none" stroke={ink} strokeWidth={lw * 1.6} strokeLinecap="round" />
+        </>
+      )}
+      {kind === "pass" && (
+        <>
+          {/* 道：两峰夹一线，线是栈道 */}
+          <path d={`M ${l} ${b} L ${x - w * 0.14} ${t + h * 0.06} L ${x + w * 0.06} ${b} Z`}
+            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+          <path d={`M ${x - w * 0.02} ${b} L ${x + w * 0.2} ${t + h * 0.24} L ${rt} ${b} Z`}
+            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+          <path d={`M ${l + w * 0.1} ${b} Q ${x} ${y + h * 0.1} ${rt - w * 0.1} ${b}`}
+            fill="none" stroke="#fbf8f1" strokeWidth={lw * 1.5} strokeLinecap="round" />
+        </>
+      )}
+      {(kind === "ford" || kind === "port") && (
+        <>
+          {/* 水：一道波纹压在下面，舟浮其上。港张帆，津只系缆 */}
+          <path d={`M ${l - w * 0.1} ${b} Q ${x - w * 0.3} ${b - h * 0.16} ${x} ${b}
+                    Q ${x + w * 0.3} ${b + h * 0.16} ${rt + w * 0.1} ${b}`}
+            fill="none" stroke={wash} strokeWidth={lw * 1.2} strokeLinecap="round" />
+          <path d={`M ${l} ${y + h * 0.16} Q ${x} ${y + h * 0.5} ${rt} ${y + h * 0.16} Z`}
+            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+          {kind === "port" ? (
+            <path d={`M ${x - w * 0.04} ${y + h * 0.14} L ${x - w * 0.04} ${t}
+                      Q ${x + w * 0.34} ${y - h * 0.22} ${x + w * 0.06} ${y + h * 0.1} Z`}
+              fill="#fbf8f1" stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+          ) : (
+            <line x1={x} y1={y + h * 0.14} x2={x} y2={t + h * 0.1}
+              stroke={ink} strokeWidth={lw * 1.1} strokeLinecap="round" />
+          )}
+        </>
+      )}
+      {kind === "depot" && (
+        <>
+          {/* 仓：圆囷，笠顶。方屋会与关墩撞形，圆的才一眼分得开 */}
+          <path d={`M ${l + w * 0.06} ${y - h * 0.06} L ${x} ${t - h * 0.04} L ${rt - w * 0.06} ${y - h * 0.06} Z`}
+            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+          <path d={`M ${l + w * 0.16} ${y - h * 0.06} L ${l + w * 0.16} ${b - h * 0.06}
+                    Q ${x} ${b + h * 0.16} ${rt - w * 0.16} ${b - h * 0.06}
+                    L ${rt - w * 0.16} ${y - h * 0.06} Z`}
+            fill="#fbf8f1" stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
+        </>
+      )}
+      {kind === "battlefield" && (
+        <>
+          {/* 战：两戟交叉，一支的锋已折。头一版画成一竖一斜，远看是个「人」字 */}
+          <line x1={l + w * 0.08} y1={b} x2={rt - w * 0.08} y2={t + h * 0.08}
+            stroke={ink} strokeWidth={lw * 1.5} strokeLinecap="round" />
+          <line x1={rt - w * 0.08} y1={b} x2={l + w * 0.08} y2={t + h * 0.08}
+            stroke={ink} strokeWidth={lw * 1.5} strokeLinecap="round" />
+          {/* 一支的月牙刃 */}
+          <path d={`M ${rt - w * 0.08} ${t + h * 0.08} Q ${rt - w * 0.42} ${t - h * 0.02}
+                    ${rt - w * 0.3} ${t + h * 0.32}`}
+            fill="none" stroke={wash} strokeWidth={lw * 1.6} strokeLinecap="round" />
+          {/* 另一支折了：断口处留一小截 */}
+          <line x1={l + w * 0.08} y1={t + h * 0.08} x2={l + w * 0.24} y2={t + h * 0.02}
+            stroke={wash} strokeWidth={lw * 1.4} strokeLinecap="round" />
+        </>
+      )}
+    </g>
+  );
+}
+
+/**
+ * 军团图元。在途画行营（帐上一面旗），待命画营垒（一列栅栏）。
+ * 两者的处境不同，图元也该不同：一个是「已经动了、还没到」，一个是「在家闲着」。
+ * 颜色取势力色——图上一眼看得出这支兵是谁的
+ */
+function ArmyMark({ x, y, s, color, marching }: {
+  x: number; y: number; s: number; color: string; marching: boolean;
+}) {
+  const ink = "#2b251e";
+  if (marching) {
+    return (
+      <g>
+        {/* 帐：一顶尖帐，帐顶出旗 */}
+        <path d={`M ${x - s * 0.62} ${y + s * 0.4} Q ${x} ${y + s * 0.58} ${x + s * 0.62} ${y + s * 0.4}
+                  L ${x} ${y - s * 0.44} Z`}
+          fill={color} stroke={ink} strokeWidth={s * 0.09} strokeLinejoin="round" />
+        <line x1={x} y1={y - s * 0.44} x2={x} y2={y - s * 0.92}
+          stroke={ink} strokeWidth={s * 0.07} />
+        <path d={`M ${x} ${y - s * 0.92} L ${x + s * 0.44} ${y - s * 0.78}
+                  L ${x} ${y - s * 0.64} Z`} fill={ink} />
+      </g>
+    );
+  }
+  return (
+    <g>
+      {/* 垒：一段栅栏，三根桩 */}
+      <path d={`M ${x - s * 0.6} ${y + s * 0.34} L ${x - s * 0.6} ${y - s * 0.16}
+                L ${x + s * 0.6} ${y - s * 0.16} L ${x + s * 0.6} ${y + s * 0.34} Z`}
+        fill={color} stroke={ink} strokeWidth={s * 0.09} strokeLinejoin="round" />
+      {[-0.34, 0, 0.34].map((d) => (
+        <line key={d} x1={x + s * d} y1={y - s * 0.16} x2={x + s * d} y2={y - s * 0.42}
+          stroke={ink} strokeWidth={s * 0.08} strokeLinecap="round" />
+      ))}
+    </g>
+  );
+}
+
+/** 边的地形怎么画。引擎按 cost 算行军天数，图上要看得出这条路难在哪 */
+const EDGE_STYLE: Record<string, { stroke: string; dash: string; width: number }> = {
+  plain:    { stroke: "#8a7c62", dash: "",       width: 1.5 },
+  hill:     { stroke: "#7d7050", dash: "9 5",    width: 1.5 },
+  mountain: { stroke: "#5d5443", dash: "3 6",    width: 1.7 },
+  river:    { stroke: "#5b7f93", dash: "13 4 3 4", width: 1.7 },
+  gate:     { stroke: "#7a3b32", dash: "",       width: 2.1 },
+};
+const EDGE_CN: Record<string, string> = {
+  plain: "平道", hill: "丘陵", mountain: "山道", river: "水路", gate: "关道",
+};
+
 interface Engine {
   P: EngineParams; G: Graph; roster: Roster; geo: Geography;
   colorOf: Map<string, string>; nameOf: Map<string, string>;
@@ -323,7 +485,23 @@ interface Engine {
   pack: unknown;
   /** 画点用的经纬度。SetupData 里的 commanderies 只声明 id/name */
   points: MapPoint[];
+  /** 关津港仓 61 处 */
+  nodes: MapNode[];
+  /** 边的地形与关津。图上画路要用，引擎那边只认 cost */
+  edges: Bundle["adjacency"]["edges"];
 }
+
+/** 图例里的小图与地图上的是同一段代码画的——另画一份必然与地图分家 */
+const legendGlyph = (kind: string) => (
+  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
+    <NodeMark x={11} y={11} r={8} kind={kind} />
+  </svg>
+);
+const legendArmy = (marching: boolean) => (
+  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
+    <ArmyMark x={11} y={11} s={13} color="#8c3b2f" marching={marching} />
+  </svg>
+);
 
 /** 席位轮转出机器人画像。确定：同一局同一势力恒为同一画像 */
 const PROFILE_KEYS = Object.keys(PROFILES) as Profile[];
@@ -340,6 +518,8 @@ export function PlayClient() {
   // 点城筛选。地图此前是纯装饰：要打南阳，得去右边面板展开征伐、
   // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
   const [pinned, setPinned] = useState<string | null>(null);
+  /** 指着哪个关津。它与郡的 focus 分开：两者常常挨着，共用一个状态会互相抢 */
+  const [nodeTip, setNodeTip] = useState<MapNode | null>(null);
   const [onlyWinnable, setOnlyWinnable] = useState(false);
   // 本季与自己相关的易主。封令之后地图上什么都不动，你不知道刚才发生了什么——
   // 而全图一季平均易主 5.6 处，涉及自己的只有 0.4–1.2 处。
@@ -439,6 +619,8 @@ export function PlayClient() {
           lore: new Map(b.scenario.factions.map((f) =>
             [f.id, { courtesyName: f.courtesyName, situation: f.situation }])),
           points: b.commanderies,
+          nodes: b.nodes ?? [],
+          edges: b.adjacency.edges,
           data: {
             commanderyState: b.commanderyState as never,
             scenario: b.scenario as never,
@@ -929,6 +1111,65 @@ export function PlayClient() {
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
 
+  // ── 道路层：边的地形 ─────────────────────────────────────────────
+  //
+  // 引擎按边的 cost 算行军天数（日三十里），可图上此前一条路都没有：
+  // 「自南阳征河南尹要走一季」这件事，看图的人无从验证，也看不出难在哪。
+  // 232 条边全铺出来会盖住墨底，所以常态极淡，指到某郡时它那几条才提亮
+  const roads = engine.edges.map((e, i) => {
+    const a = xy(e.from), b = xy(e.to);
+    if (!a || !b) return null;
+    const st = EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain;
+    const hub = pinned ?? focus;
+    const hot = hub === e.from || hub === e.to;
+    // 题记压在**离所指之郡六成远**处，不压在中点：中点全挤在枢纽附近，
+    // 一个郡有五条边时五行字叠成一团。从所指那头往外量，它们自然扇开
+    const near = hub === e.from ? a : b, far = hub === e.from ? b : a;
+    return { key: `${e.from}-${e.to}-${i}`, a, b, st, hot, e,
+             tx: near.x + (far.x - near.x) * 0.6, ty: near.y + (far.y - near.y) * 0.6,
+             // 行军天数：cost × 每 cost 多少日。这个数就是候选标签里那句「道远」的来源
+             days: Math.round(e.cost * engine.P.marchDayPerCost) };
+  }).filter((r): r is NonNullable<typeof r> => r !== null);
+
+  // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
+  // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
+  // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
+  // 就是一层噪点
+  const nodeMarks = engine.nodes
+    .filter((n) => view.k >= 2 || n.kind === "gate" || n.kind === "port")
+    .map((n) => ({
+      n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
+      r: 12 / Math.sqrt(view.k),
+    }));
+
+  // ── 军团：在途的也要画 ───────────────────────────────────────────
+  //
+  // 此前只有围城的军团画了旗，在途的一支都没有：出征之后它在图上**隐身**几季，
+  // 然后凭空出现在城下。而行军耗时正是围城那只钟的另一半——援军赶不赶得到，
+  // 看的就是它现在走到哪了。位置按 marchLeft 在起兵郡与目标之间插值
+  const troops = game.armies.map((a) => {
+    const at = xy(a.at);
+    if (!at) return null;
+    const mine = a.faction === seat;
+    if (a.marchLeft > 0 && a.target) {
+      const from = xy(a.home), to = xy(a.target);
+      if (!from || !to) return null;
+      const edge = (engine.G.adj.get(a.home) ?? []).find((e) => e.to === a.target);
+      const total = marchSeasons(edge?.cost ?? 1, a.gear !== "none", engine.P);
+      // 走了几分之几。total 恒 ≥ marchLeft，两者相等即刚出发
+      const t = total > 0 ? (total - a.marchLeft) / total : 1;
+      // 出发那一季也要看得见已经动了，故给个起步量
+      const f = 0.12 + t * 0.76;
+      return { a, mine, marching: true as const,
+               x: from.x + (to.x - from.x) * f, y: from.y + (to.y - from.y) * f,
+               from, to };
+    }
+    if (a.target) return null;             // 城下的由围城旗那一层画
+    return { a, mine, marching: false as const, x: at.x, y: at.y, from: null, to: null };
+  }).filter((t): t is NonNullable<typeof t> => t !== null)
+    // 己方画在上层：自己的兵被别人的旗压住是最不该发生的遮挡
+    .sort((p, q) => Number(p.mine) - Number(q.mine));
+
   // ── 终局要用的三样：年表、名将去向、天下排名 ──────────────────────
   // 一局十六季，只报一个档位等于什么都没留下
   const BIG = new Set(["siege-win", "siege-lift", "siege-abort", "officer-captured",
@@ -1163,6 +1404,35 @@ export function PlayClient() {
                 <path d="M 0 0 L 10 5 L 0 10 z" />
               </marker>
             </defs>
+            {/* 道路：画在州名与城印之下。地形决定行军天数，指到某郡时它那几条提亮，
+                并在路当中标上「山道 47 日」——「道远」这句候选标签的出处 */}
+            {roads.map((r) => (
+              <line key={r.key} className={`road${r.hot ? " hot" : ""}`}
+                x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
+                stroke={r.st.stroke} strokeDasharray={r.st.dash}
+                strokeWidth={r.st.width * (r.hot ? 2.2 : 1) / Math.sqrt(view.k)} />
+            ))}
+            {roads.filter((r) => r.hot).map((r) => (
+              <text key={`d-${r.key}`} className="road-tip"
+                x={r.tx} y={r.ty}
+                textAnchor="middle" fontSize={19 / Math.sqrt(view.k)}>
+                {EDGE_CN[r.e.terrain] ?? r.e.terrain}
+                {r.e.nodes.length ? `·${r.e.nodes[0].name}` : ""} {r.days} 日
+              </text>
+            ))}
+            {/* 关津港仓：一字一印。关隘与港口整幅可见，其余放大后才铺开 */}
+            {nodeMarks.map((m) => (
+              <g key={m.n.id}
+                onMouseEnter={() => setNodeTip(m.n)} onMouseLeave={() => setNodeTip(null)}>
+                {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
+                <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
+                <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} />
+                {view.k >= 2.6 && (
+                  <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
+                    textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
+                )}
+              </g>
+            ))}
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
                 fontSize={62 / Math.sqrt(view.k)}>{m.z}</text>
@@ -1211,9 +1481,30 @@ export function PlayClient() {
                   cx={x} cy={y} r={44 / Math.sqrt(view.k)} />
               );
             })}
+            {/* 军团：在途的画在路上，待命的画在驻地。
+                在途的连一条虚线到目标——「这支兵冲着谁去」是最该一眼看出的事 */}
+            {troops.map((t) => {
+              const s2 = 26 / Math.sqrt(view.k);
+              const col = engine.colorOf.get(t.a.faction) ?? "#7a7266";
+              return (
+                <g key={t.a.id} className={`army${t.mine ? " mine" : ""}`}>
+                  {t.marching && t.from && t.to && (
+                    <line className="march-path" x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y}
+                      stroke={col} strokeWidth={2.4 / Math.sqrt(view.k)} />
+                  )}
+                  <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching} />
+                  <text x={t.x} y={t.y + s2 * 0.98} textAnchor="middle" fontSize={s2 * 0.5}>
+                    {(t.a.troops / 1000).toFixed(1)}千
+                    {t.marching ? `·尚需 ${t.a.marchLeft} 季` : ""}
+                  </text>
+                </g>
+              );
+            })}
             {/* 围城旗：城下有谁、围了几季、多少人。只有一个虚线圈看不出这些，
                 而这三样正是「要不要去救」的全部依据 */}
-            {game.armies.filter((a) => a.target).map((a) => {
+            {/* 在途的不算在城下：它这一季不结算攻城、不扣守方存粮，
+                插一面围城旗在那儿，读图的人会以为城已经被围上了 */}
+            {game.armies.filter((a) => a.target && a.marchLeft <= 0).map((a) => {
               const p = engine.points.find((c) => c.id === a.target);
               if (!p) return null;
               const x = (p.longitude - MAP.west) * MAP.ppd;
@@ -1279,11 +1570,56 @@ export function PlayClient() {
             </svg>
           </div>
 
+          {/* 图例：关津港仓与军团的印记不写出来就是密码。收在一个角标里，
+              点开才占地方——常驻会挤掉地图，而它只在头一两局需要看 */}
+          <details className="legend">
+            <summary>图例</summary>
+            <ul>
+              {/* 图例里的图元与图上是同一段代码画的：另画一份必然与地图分家。
+                  每一对「图 + 名」用 nowrap 裹住，否则名字会被折到图的下一行 */}
+              <li>
+                <span>{legendGlyph("gate")}关隘</span>
+                <span>{legendGlyph("pass")}谷道</span>
+                <em>守 +0.55 · 行军 2.6 倍</em>
+              </li>
+              <li>
+                <span>{legendGlyph("ford")}渡口</span>
+                <span>{legendGlyph("port")}港口</span>
+                <em>守 +0.35 · 行军 1.8 倍</em>
+              </li>
+              <li>
+                <span>{legendGlyph("depot")}粮仓</span>
+                <span>{legendGlyph("battlefield")}古战场</span>
+              </li>
+              <li>
+                <span>{legendArmy(true)}行军中</span>
+                <span>{legendArmy(false)}待命</span>
+                <span><b className="flagg" />城下围城</span>
+              </li>
+              <li><em>细线是道路：实线平道、短划丘陵、点线山道、长短线水路、朱线关道。
+                指到某郡，它那几条会提亮并标出行军日数</em></li>
+            </ul>
+          </details>
+
           <div className="zoom">
             <button onClick={() => setView((v) => zoomAt(v, 1.4))}>＋</button>
             <button onClick={() => setView({ k: 1, x: 0, y: 0 })}>全图</button>
             <button onClick={() => setView((v) => zoomAt(v, 1 / 1.4))}>－</button>
           </div>
+          {/* 关津的悬停详情。它与郡的详情共用一个位置：两者不会同时指到 */}
+          {nodeTip && !focus && (
+            <div className="tip">
+              <b>{nodeTip.name}</b>
+              <span>{NODE_CN[nodeTip.kind] ?? nodeTip.kind}
+                {nodeTip.at ? `\u3000近${nodeTip.at}` : ""}</span>
+              {/* 数值取自内容包的 terrain 表，别在这里另写一份——两份必然漂移 */}
+              <span>{nodeTip.kind === "port" || nodeTip.kind === "ford"
+                ? "水道：守方 +0.35，行军 1.8 倍。无渡口则此路不通。"
+                : nodeTip.kind === "gate" || nodeTip.kind === "pass"
+                  ? "关隘：守方 +0.55，行军 2.6 倍，以寡当众。"
+                  : nodeTip.kind === "depot" ? "屯粮之所。" : "古战场。"}</span>
+            </div>
+          )}
           {focus && game.commanderies[focus] && (
             <div className="tip">
               <b>{focus}</b>

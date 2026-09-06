@@ -38,6 +38,14 @@ const bundle = {
     households: c.households, population: c.population,
   })),
   adjacency: read("adjacency.json"),
+  // 关津港仓：图上画得出「这条路上卡着什么」，靠的是这 61 个据点的经纬度。
+  // 只带画图要用的字段——史料出处、别名、今地对照留在 lib/game/data 的全量文件里，
+  // 那些是给人考订用的，不必让每个浏览器都下一遍
+  nodes: read("strategic-nodes.json").nodes.map((n) => ({
+    id: n.id, name: n.name, kind: n.kind,
+    longitude: n.longitude, latitude: n.latitude,
+    at: n.nearestCommandery ?? null,
+  })),
   troopTypes: read("troop-types.json"), resources: read("resources.json"),
   provinceSeats: read("province-seats-194.json"),
   // 名册与登场判定合成一张表，省掉一次交叉引用

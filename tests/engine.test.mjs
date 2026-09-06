@@ -58,6 +58,46 @@ test("候选可枚举：任一势力都落在 O(10)–O(10²)", () => {
   }
 });
 
+test("候选键不得重复 —— 键是模型选择的地址，重了等于给了两个一样的地址", () => {
+  // 界面上报出来的：React 说「两个 children 用了同一个 key
+  // campaign:安定郡>上郡:allout」。查下来是征伐候选那条「同一目标最多两条路」——
+  // 最省的一条与出兵最多的一条起兵郡不同，而下一步「已有己方围城军则起兵郡
+  // 必须改成那支军团的 home」把两条**都**改写成了同一个郡，于是完全重合。
+  //
+  // 这不只是界面报错：候选键是模型下令的地址（R13），schema 的 enum 里
+  // 出现两个一样的地址，等于白占一份枚举，且候选表里两行逐字相同
+  const s = fresh();
+  const me = "yuanshao";
+  // 触发条件有三件：同一目标有两条起兵郡不同的路、两条路的**行军季数不同**
+  // （季数相同时引擎本就只列一条）、且己方在该目标城下已有围城军
+  let made = null;
+  for (const tgt of Object.values(s.commanderies)) {
+    const nb = (G.adj.get(tgt.id) ?? []);
+    const pair = nb.flatMap((a) => nb.map((b) => [a, b]))
+      .find(([a, b]) => a.to !== b.to
+        && marchSeasons(a.cost, false, P) !== marchSeasons(b.cost, false, P));
+    if (!pair) continue;
+    made = { tgt, src1: pair[0].to, src2: pair[1].to };
+    break;
+  }
+  assert.ok(made, "地图上找不到「同一目标两条路、行军季数不同」的目标");
+  const { tgt, src1, src2 } = made;
+  s.commanderies[src1].owner = me;
+  s.commanderies[src2].owner = me;
+  s.commanderies[tgt.id].owner = "lubu";
+  s.factions[me].ap = 9;
+  s.armies.push({
+    id: `${me}:0:${src1}>${tgt.id}`, faction: me, commander: null, retinue: [],
+    troops: 3000, at: tgt.id, target: tgt.id, posture: "main", gear: "none",
+    unit: "infantry", marchLeft: 0, siegeSeasons: 1, idleSeasons: 0,
+    supply: P.armySupplyCap, home: src1,
+  });
+
+  const keys = listActions(s, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO).map((c) => c.key);
+  const dup = keys.filter((k, i) => keys.indexOf(k) !== i);
+  assert.deepEqual(dup, [], `候选里有重键：${dup.join("、")}`);
+});
+
 test("候选列表对同一状态是稳定的", () => {
   const s = fresh();
   const a = listActions(s, "yuanshao", G, P, undefined, ROSTER).map((c) => c.key);
