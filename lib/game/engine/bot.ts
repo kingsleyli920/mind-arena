@@ -218,6 +218,13 @@ function decideInner(
     // 抽走五成戍兵，而「集结地公开可见，期间被攻破则整体失败」——
     // 在边境集结等于把前线守军抽空、再把集结地公示给对手。
     // 这条规则本身就在惩罚「在边境囤兵」，前线优先是逆着规则走
+    // 共讨：打霸者是联军的正事。只绝盟不给理由的话联军等于没做——
+    // 实测袁绍在 21 郡触发共讨，之后照样长到 34 郡，那八家结了盟却谁也没去打他。
+    // 加权不宜过大：它是一个倾向，不是命令，否则所有画像都会变成同一种打法
+    if (c.action.type === "campaign") {
+      const owner = s.commanderies[c.action.target]?.owner;
+      if (owner && owner !== f && s.factions[owner]?.coalitionAgainst) score += 5;
+    }
     if (c.action.type === "build") {
       // 特殊建筑加分：它们**别处建不得**，而通用的哪个郡都能建。
       // 一个有铁之郡把三个位子填满通用建筑，那块铁就永远浪费了——

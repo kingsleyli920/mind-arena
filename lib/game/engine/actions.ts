@@ -480,6 +480,11 @@ export function listActions(
         // 因此有了地理上的答案。这条挂在记分函数那根管子上（赔付是一个郡），
         // 而这个仓库量过：挂在记分函数上的信息 +17.2±5.7，挂在产出档/城防/民心上
         // 的是 −6.4±5.9。物产是常量，不随迷雾变，写出来不算开天眼
+        // 共讨：目标之主已被天下共讨，打他是联军的正事。
+        // 只绝盟不给理由的话联军等于什么都没做——实测袁绍在 21 郡触发共讨，
+        // 之后照样长到 34 郡，因为那八家结了盟却谁也没去打他
+        const coalition = tgt.owner && s.factions[tgt.owner]?.coalitionAgainst
+          ? "｜**天下共讨之**" : "";
         // 只报**稀缺**的三种。可垦之地占全图 55/105，出现得越普遍信息量越低，
         // 而候选表的 token 是按席·季结算的——把它也写上实测顶破 10000 的闸门
         const scarce = tgt.resources.filter((r) => r !== "tuntian");
@@ -523,7 +528,7 @@ export function listActions(
                + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
-               + `${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
+               + `${coalition}${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }
