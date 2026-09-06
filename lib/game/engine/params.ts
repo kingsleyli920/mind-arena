@@ -99,6 +99,7 @@ export interface EngineParams {
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
+  siegeGripRatio: number;
   /** 粮：一律以「季」计，不是第二种货币。见内容包 constants.粮 */
   provBase: number; provPerTier: number; provCap: number;
   provStockSeasons: number; provStockGold: number; armySupplyCap: number;
@@ -286,6 +287,7 @@ export function loadParams(pack: RawPack): EngineParams {
     betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
+    siegeGripRatio: g("围城", "有效围困比"),
     provBase: g("粮", "郡存粮_基数"),
     provPerTier: g("粮", "郡存粮_每产出档"),
     provCap: g("粮", "郡存粮_上限"),

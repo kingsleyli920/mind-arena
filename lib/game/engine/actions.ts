@@ -310,6 +310,17 @@ export function listActions(
   // 只给打得动的。把明显打不动的目标塞进候选，等于用无效选项浪费模型的注意力。
   if (ap >= rules.campaignAp) {
     const targets = [...frontier(s, g, f).entries()]
+      // 已有己方围城军的目标：起兵郡**必须**改成那支军团的 home，否则列出的
+      // 增兵候选会被 validate 以「增兵须自同一郡」拒收——候选逐条合法是
+      // tests 里「按界面贪心勾选，引擎不应拒绝任何一条」钉住的不变量
+      .map(([tid, e]) => {
+        const held = s.armies.find((x) => x.target === tid && x.faction === f);
+        if (!held || held.home === e.from) return [tid, e] as const;
+        const back = (g.adj.get(held.home) ?? []).find((x) => x.to === tid);
+        return [tid, back
+          ? { from: held.home, cost: back.cost, terrain: back.terrain, gates: back.gates }
+          : e] as const;
+      })
       .map(([tid, e]) => {
         const src = s.commanderies[e.from];
         // 用观测值而非真值：候选标签是给对局方看的，写真实守军等于开天眼，
@@ -1105,6 +1116,17 @@ export function validate(
 
   switch (a.type) {
     case "campaign": {
+      // 增兵须自**当初起兵的那条边**。军团的 home 决定三件事：补给锚点、
+      // 攻城用的地形系数、残兵退回何处；而增兵分支只做 troops += troops，
+      // 不动 home。于是「先从平原近邻派一支象征性部队立寨，下季再从渡河的
+      // 远邻增兵八千」——主力白得平原路的地形系数。实测放行且 home 不变。
+      // 要换方向就得先撤围重来，那本身是一个真决策
+      {
+        const held = s.armies.find((x) => x.target === a.target && x.faction === o.faction);
+        if (held && held.home !== a.from) {
+          return `${a.target} 城下已有我军（自 ${held.home} 起兵），增兵须自同一郡`;
+        }
+      }
       if (!own(a.from)) return "起点非己方所有";
       if (!s.commanderies[a.target]) return "目标郡不存在";
       // 己方郡正被围时可以发兵——那是救援。禁掉这条，「解围」就无从谈起

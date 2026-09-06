@@ -700,32 +700,74 @@ test("围城：首攻未克则留在城下，缺口逐季累加", () => {
 test("围城：两只钟，先响的那只决定围城怎么结束", () => {
   // 从前只有攻方一只钟（满 N 季自动撤围），于是「围困」永远只是「强攻失败的
   // 慢速版」。现在守方也有一只：城中存粮每季 −1，归零则不战自下。
-  // 这条测的是两只钟都真的在走，且先归零的那只决定结局
+  //
+  // 两只钟比的是「强攻打不打得破」与「城里还有没有粮」，**不是**「攻方的上限季数」——
+  // 守军每季掉 25%、攻方缺口每季 +1，所以多数局面是强攻先赢。这条只钉两件事：
+  // 围得住时存粮真的在走；围城最终由三条路之一结束，不会永远悬着
   const s = fresh();
   const { from, edge } = attackPair(s, "yuanshao");
-  s.commanderies[from.id].garrison = 9000;
+  s.commanderies[from.id].garrison = 60000;
   s.commanderies[edge.to].garrison = 12000;
   s.commanderies[edge.to].defense = 100;
   const prov0 = s.commanderies[edge.to].provisions;
-  assert.ok(prov0 >= 2 && prov0 <= P.provCap, `存粮初值 ${prov0} 不在 [2, ${P.provCap}]`);
+  assert.ok(prov0 >= 2 && prov0 <= P.provCap + 2, `存粮初值 ${prov0} 不合理`);
 
   let cur = s;
-  const order = { faction: "yuanshao", action: { type: "campaign",
-    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } };
-  cur = resolve(cur, [order], G, P, ROSTER, GEO).state;
-  assert.equal(cur.commanderies[edge.to].provisions, prov0 - 1, "被围首季存粮未减");
+  cur = resolve(cur, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+  assert.ok(cur.armies.some((a) => a.target === edge.to), "首攻就破了城，测不出围困");
+  assert.equal(cur.commanderies[edge.to].provisions, prov0 - 1, "围得住却没扣粮");
 
   for (let i = 0; i < P.siegeMaxSeasons + 1; i += 1) {
     cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
     if (!cur.armies.some((a) => a.target === edge.to)) break;
   }
-  const ended = cur.log.filter((e) => ["siege-starve", "siege-abort", "siege-win"].includes(e.kind));
-  assert.ok(ended.length, "围了满上限，两只钟一只都没响");
-  assert.equal(cur.armies.filter((a) => a.target === edge.to).length, 0, "围城结束后军团仍在城下");
-  // 存粮 prov0 季 < 攻方上限 siegeMaxSeasons，所以该是守方先粮尽
-  assert.ok(cur.log.some((e) => e.kind === "siege-starve"),
-    `存粮 ${prov0} 季、攻方上限 ${P.siegeMaxSeasons} 季，守方本该先响`);
-  assert.equal(cur.commanderies[edge.to].owner, "yuanshao", "粮尽却没开城");
+  assert.equal(cur.armies.filter((a) => a.target === edge.to).length, 0,
+    "围了满上限还悬着 —— 两只钟一只都没响");
+  assert.ok(cur.log.some((e) => ["siege-win", "siege-starve", "siege-abort"].includes(e.kind)),
+    "围城结束了却没有任何一条了结的记载");
+});
+
+test("围城：粮先尽则不战自下，且开城不是城破", () => {
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 60000;
+  s.commanderies[edge.to].garrison = 12000;
+  s.commanderies[edge.to].defense = 100;
+  s.commanderies[edge.to].provisions = 1;      // 这一季就该见底
+  const morale0 = s.commanderies[edge.to].moraleTier;
+  const cur = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+  assert.ok(cur.log.some((e) => e.kind === "siege-starve"), "粮尽却没开城");
+  assert.equal(cur.commanderies[edge.to].owner, "yuanshao", "开城了却没易主");
+  // 开城不是城破：省掉的是破城那一下的巷战之毁，不是这一季的掘壕。
+  // 围了一季照样削 siegeDefenseErosion 点，但不再另扣破城的 15 点
+  assert.equal(cur.commanderies[edge.to].defense, 100 - P.siegeDefenseErosion,
+    "开城后的城防不对：该只掉掘壕那一份，不该再吃破城的巷战之毁");
+  assert.ok(!cur.log.some((e) => e.kind === "officer-captured"), "开城不该俘将");
+  assert.equal(cur.commanderies[edge.to].moraleTier, Math.max(1, morale0 - 1), "民心该降一档");
+});
+
+test("围城：兵力不够就围不住——城照常吃饭，产出也不停", () => {
+  // 「被围」此前的判据是「有没有敌军指着这座城」，不问兵力：一支六百人的军团
+  // 就能把两万守军的大郡产出锁死，代价只有一次首攻折损。顿兵封锁因此比攻城
+  // 划算得多，而那正是这套规则最不想鼓励的打法
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 3000;      // 派得出的兵远少于守军
+  s.commanderies[edge.to].garrison = 30000;
+  s.commanderies[edge.to].defense = 100;
+  const prov0 = s.commanderies[edge.to].provisions;
+  const cur = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+  assert.ok(cur.armies.some((a) => a.target === edge.to), "军团没站到城下，样本不对");
+  assert.equal(cur.commanderies[edge.to].provisions, prov0,
+    `围不住却扣了粮：${prov0} → ${cur.commanderies[edge.to].provisions}`);
+  assert.ok(!cur.log.some((e) => e.kind === "besieged" && (e.text ?? "").includes(edge.to)),
+    "围不住却报了「被围，本季无产出」——顿兵封锁又白赚了");
 });
 
 test("围城：撤围令可主动收兵，保住的残兵多于续围", () => {

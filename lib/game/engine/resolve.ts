@@ -101,6 +101,30 @@ function provGainOf(s: GameState, c: CommanderyState, g: Graph, P: EngineParams)
   return n;
 }
 
+/**
+ * 这座城本季是不是被**有效围困**。
+ *
+ * 判据不是「有没有敌军指着它」，是围城军兵力够不够。此前不问兵力，
+ * 于是一支六百人的军团就能把两万守军的大郡产出锁死，代价只有一次首攻折损——
+ * 顿兵封锁比攻城划算得多，而那正是这套规则最不想鼓励的打法。
+ *
+ * 比值取野战的相持比 0.8：那是这个引擎里既有的「打不动但缠得住」的刻度。
+ * 比的是**裸守军**，不含地形守备加成——守方的地利用在打，不该再用来抗饿。
+ */
+function besiegedBy(s: GameState, id: CommanderyId, byOthersThan: FactionId | null,
+                    P: EngineParams): boolean {
+  const c = s.commanderies[id];
+  if (!c) return false;
+  let force = 0;
+  for (const a of s.armies) {
+    if (a.target !== id) continue;
+    if (byOthersThan !== null && a.faction === byOthersThan) continue;
+    force += a.troops;
+  }
+  if (force === 0) return false;
+  return force >= c.garrison * P.siegeGripRatio;
+}
+
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
   if (troops <= 0) return;
   const besieged = (id: CommanderyId) => s.armies.some((x) => x.target === id && x.faction !== army.faction);
@@ -803,9 +827,14 @@ export function resolve(
     // 给了援军一个明确的窗口，而此前那个窗口是零。
     // 攻方那一侧的代价照收：每季掉 12% 兵、照付军费、后方可能被断
     // 每城每季只扣一次，不是每支围城军扣一次——同一座城被两家围就一季扣 2、
-    // 被四家围扣 4，存粮 4 的城一季见底；而且结果会依赖有几支军团在场，是 R6 隐患
-    if (!starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= 1; }
-    if (tgt.provisions <= 0) {
+    // 被四家围扣 4，存粮 4 的城一季见底；而且结果会依赖有几支军团在场，是 R6 隐患。
+    //
+    // 还要**围得住**才扣：兵力不足守军的 0.8 倍就围不断粮道，城照常吃饭。
+    // 不加这一条的话，「一支六百人的偏师饿死两万守军的大郡」仍然成立——
+    // 那正是这条规则最不想鼓励的顿兵封锁
+    const grip = besiegedBy(s, tgt.id, tgt.owner, P);
+    if (grip && !starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= 1; }
+    if (grip && tgt.provisions <= 0) {
       const loser = tgt.owner;
       // 粮尽而降，不经攻城判定：守军成建制归降（比强攻破城留得多），
       // 城防与民心不因巷战而毁，武将也不算被俘——开城不是城破
@@ -846,7 +875,7 @@ export function resolve(
   // 城防进的是可防守（每 30 点 +1），涨得慢且有上限，晚取只多啃一两级
   const wall = P.neutralWall[s.epoch] ?? 0;
   for (const c of Object.values(s.commanderies)) {
-    if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
+    if (c.owner || besiegedBy(s, c.id, null, P)) continue;
     if (wall > 0) c.defense = Math.min(P.neutralWallCap, c.defense + wall);
     // 无主郡的存粮也要回补。第八阶段只遍历各势力自己的郡，无主郡走不到那里——
     // 而无主郡正是最常被打的目标，不补的话被围过一次就永远空仓，
@@ -903,7 +932,7 @@ export function resolve(
       }
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
-      if (s.armies.some((x) => x.target === c.id && x.faction !== f.id)) {
+      if (besiegedBy(s, c.id, f.id, P)) {
         log(s, { kind: "besieged", faction: f.id,
                  text: `${c.id} 被围，本季无产出（存粮尚可支 ${c.provisions} 季）` });
         continue;
