@@ -159,3 +159,19 @@ test("包：动作说明里写的档数，必须与实际档数一致", () => {
       `${a.id} 的说明写着「${m[0]}」，而实际有 ${tiers.length} 档`);
   }
 });
+
+// 预告与结算必须对着同一个「关隘」定义。此前 forecast 写 terrain === "gate"、
+// resolve 写 edge.gates.length > 0，在当前数据上恰好完全重合（31 对 31），
+// 所以谁都没发现——而 adjacency 是生成的，重建一次就可能分家，
+// 那时预告会对着器械说谎（atGate 决定器械缺口要不要减半）
+test("关隘：地形标记与关津节点必须一致，否则预告与结算会分家", () => {
+  const adj = JSON.parse(fs.readFileSync("lib/game/data/adjacency.json", "utf8"));
+  const bad = [];
+  for (const e of adj.edges) {
+    const byTerrain = e.terrain === "gate";
+    const byNodes = (e.nodes ?? []).some((n) => n.kind === "gate" || n.kind === "pass");
+    if (byTerrain !== byNodes) bad.push(`${e.from}→${e.to}（地形 ${e.terrain}，关津 ${byNodes}）`);
+  }
+  assert.deepEqual(bad, [],
+    `这些边的地形标记与关津节点对不上：\n  ${bad.join("\n  ")}`);
+});

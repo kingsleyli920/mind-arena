@@ -72,7 +72,11 @@ export function forecastSiege(
   const power = unitPower(P, army.unit, terrain, tgt.unit);
   const persist = army.siegeSeasons * P.siegeBreachPerSeason;
   const formEdge = formationEdge(P, src.formation, tgt.formation);
-  const atGate = terrain === "gate";
+  // 与 resolve 同一个表达式。此前这里写 terrain === "gate" 而结算写
+  // edge.gates.length > 0——两者在当前 adjacency 上恰好完全重合（31 对 31），
+  // 所以是**潜伏**漂移：adjacency 是 tools/build-adjacency.mjs 生成的，
+  // 重建一次就可能分家，那时预告会对着器械说谎（atGate 决定器械缺口要不要减半）
+  const atGate = (edge?.gates.length ?? 0) > 0;
   const bonus = (atk?.breachBonus ?? 0) + persist + formEdge;
   const mul = power * (atk?.attackMul ?? 1);
   const guard = unitGuard(P, tgt.unit);
@@ -139,7 +143,11 @@ export function projectSiege(
   const def = roster ? defendRetinue(retinueAt(s, roster, army.target!, P), P) : null;
   const power = unitPower(P, army.unit, terrain, tgt0.unit);
   const formEdge = formationEdge(P, src.formation, tgt0.formation);
-  const atGate = terrain === "gate";
+  // 与 resolve 同一个表达式。此前这里写 terrain === "gate" 而结算写
+  // edge.gates.length > 0——两者在当前 adjacency 上恰好完全重合（31 对 31），
+  // 所以是**潜伏**漂移：adjacency 是 tools/build-adjacency.mjs 生成的，
+  // 重建一次就可能分家，那时预告会对着器械说谎（atGate 决定器械缺口要不要减半）
+  const atGate = (edge?.gates.length ?? 0) > 0;
   const mul = power * (atk?.attackMul ?? 1);
   const guard = unitGuard(P, tgt0.unit);
   const holdBonus = def?.holdBonus ?? 0;

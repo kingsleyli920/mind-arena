@@ -2059,3 +2059,34 @@ test("行军：带器械行迟，可能错过本季这一击", () => {
   assert.ok(slowLight / all < 0.5, `轻兵就有 ${(slowLight / all * 100).toFixed(0)}% 的边是慢路，太多`);
   assert.ok(slowGear / all < 0.6, `带械有 ${(slowGear / all * 100).toFixed(0)}% 的边是慢路，太多`);
 });
+
+test("围城：被围之城不得募兵——一条令就能把围城时钟按停", () => {
+  // 这条规则包里**早就写着**（「围城期间城中不得补兵，否则守军逐季回血，
+  // 缺口累加被抵消，围困永远推不动进度」），但一直只实现在产出那一路。
+  // 算术很要命：攻守比每季 ×(1−攻方损耗)/(1−守方损耗)=1.1733，
+  // 而一条募兵令是 ×1.18 —— ρ_eff = 0.9944 ≤ 1，时钟当场停摆
+  const rho = (1 - P.siegeAttackerLoss) / (1 - P.siegeDefenderLoss);
+  assert.ok(P.levyMultiplier >= rho,
+    `募兵倍率 ${P.levyMultiplier} 已低于攻守比乘数 ${rho.toFixed(4)}，这条禁令的由头没了`);
+
+  const s = fresh();
+  const { from, edge } = attackPair(s, "yuanshao");
+  s.commanderies[from.id].garrison = 60000;
+  s.commanderies[edge.to].garrison = 12000;
+  s.commanderies[edge.to].defense = 100;
+  const cur = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
+    target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
+    G, P, ROSTER, GEO).state;
+  assert.ok(cur.armies.some((a) => a.target === edge.to), "没围上，测不出");
+
+  const defender = cur.commanderies[edge.to].owner;
+  const levy = { faction: defender, action: { type: "govern", at: edge.to, policy: "levy" } };
+  assert.ok(validate(cur, levy, G, undefined, ROSTER, P), "被围之城仍可募兵");
+  const stock = { faction: defender, action: { type: "govern", at: edge.to, policy: "stock" } };
+  assert.equal(validate(cur, stock, G, undefined, ROSTER, P), null,
+    "被围之城连屯粮都不许，那守方就没有反制了");
+  // 候选里也不能出现——否则「按界面贪心勾选，引擎不应拒绝任何一条」当场破
+  const cs = listActions(cur, defender, G, P, undefined, ROSTER, undefined, GEO);
+  assert.ok(!cs.some((c) => c.key === `govern:${edge.to}:levy`),
+    "候选里还列着被围之城的募兵");
+});

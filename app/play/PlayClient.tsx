@@ -447,7 +447,8 @@ export function PlayClient() {
             resources: b.resources as never,
           },
         });
-        setResume(loadGame(packStamp(P.seasonsPerGame, b.commanderies.length, P.epochCount)));
+        setResume(loadGame(packStamp(P.seasonsPerGame, b.commanderies.length, P.epochCount,
+          (b.pack as { constants?: Record<string, unknown> }).constants)));
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : String(e));
       }
@@ -463,7 +464,8 @@ export function PlayClient() {
     if (game.finished || game.factions[seat]?.eliminated
         || game.factions[seat]?.retired) { clearSave(); return; }
     saveGame({
-      packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount),
+      packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount,
+        (engine.pack as { constants?: Record<string, unknown> }).constants),
       seat, game, picked,
     });
   }, [engine, game, seat, picked]);

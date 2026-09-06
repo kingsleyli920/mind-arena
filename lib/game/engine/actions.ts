@@ -39,6 +39,11 @@ export interface Rules {
   perCommanderyOrders: number;
 }
 
+/** 这座己方郡国此刻是否正被别家围着（在途的不算——它还在路上） */
+export function besiegedNow(s: GameState, id: CommanderyId, mine: FactionId): boolean {
+  return s.armies.some((x) => x.target === id && x.marchLeft <= 0 && x.faction !== mine);
+}
+
 /** 建筑名。与内容包 actions[build].params[kind].tiers 一一对应 */
 export const BUILD_CN: Record<Building, string> = {
   office: "官府", granary: "仓廪", market: "市", drill: "校场",
@@ -671,17 +676,19 @@ export function listActions(
       // 而他死时国库还有上千金。删掉的不是钱，是选项
       // 正被围时屯粮排第一：那一刻它是唯一能推迟开城的令，而守方每郡每季只有 2 条。
       // 攻方选强攻还是围困，守方就得押哪一头——押错则另一头破城
-      const besiegedNow = s.armies.some((x) => x.target === c.id && x.faction !== f);
+      const underSiege = besiegedNow(s, c.id, f);
       const provCap = provisionsCap(c.yieldTier, P);
+      // 被围时募兵与劝农都不合法（见 validate 的 govern 分支），候选也不能列，
+      // 否则「按界面贪心勾选，引擎不应拒绝任何一条」当场破
       const wants: Array<[string, boolean, string]> = [
-        ["stock", besiegedNow && c.provisions < provCap, `被围，存粮仅 ${c.provisions} 季`],
+        ["stock", underSiege && c.provisions < provCap, `被围，存粮仅 ${c.provisions} 季`],
         ["soothe", c.moraleTier <= 2 && c.moraleTier < 5, "民心告急"],
         ["wall", isFront && c.defense < 55, "临敌且城防薄"],
-        ["levy", isFront && c.garrison < 4000, "临敌且兵少"],
+        ["levy", !underSiege && isFront && c.garrison < 4000, "临敌且兵少"],
         ["forge", isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1],
          `器械仅「${GEAR_CN[c.gear]}」`],
         ["stock", isFront && c.provisions < provCap, `临敌，存粮 ${c.provisions}/${provCap} 季`],
-        ["farm", c.yieldTier < 10, "产出可增"],
+        ["farm", !underSiege && c.yieldTier < 10, "产出可增"],
         ["soothe", c.moraleTier < 5, "民心可安"],
         ["wall", c.defense < 100, "城防可修"],
       ];
@@ -1214,10 +1221,26 @@ export function validate(
       }
       return null;
     }
-    case "govern":
+    case "govern": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
+      // 被围之城不得募兵。这条规则包里**早就写着**——「围城期间城中不得补兵，
+      // 否则守军逐季回血，缺口累加被抵消，围困永远推不动进度」——但只实现在
+      // 产出那一路（阶段八），没管募兵令。算一下就知道有多要命：
+      // 攻守比每季 ×(1−0.12)/(1−0.25) = 1.1733，而一条募兵令是 ×1.18，
+      // 于是 ρ_eff = 0.9944 ≤ 1，**一条令就把围城时钟按停**。
+      // 临界值 ln(1.1733)/ln(1.18) = 0.9658，离 1 只差 3.4%——这三个常数
+      // 当初是各自定的，碰巧留下这点余量。
+      // 守方被围时该做的是屯粮（买时间）、修城（抗强攻）、或出城野战求援
+      if (a.policy === "levy" && besiegedNow(s, a.at, o.faction)) {
+        return "此城正被围，城中不得补兵";
+      }
+      // 劝农在被围之城是死令：被围则本季无产出，而劝农提的是产出档
+      if (a.policy === "farm" && besiegedNow(s, a.at, o.faction)) {
+        return "此城正被围，本季无产出，劝农无从施行";
+      }
       return null;
+    }
     case "build": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
