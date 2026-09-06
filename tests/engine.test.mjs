@@ -2032,13 +2032,14 @@ test("行军：远路之师在途，不算在城下", () => {
   assert.equal(r.commanderies[pick.to.id].provisions, prov0, "还在路上就把守方的粮扣了");
   assert.ok(!r.log.some((e) => e.kind === "besieged" && (e.text ?? "").includes(pick.to.id)),
     "还在路上就把敌郡的产出冻住了");
-  assert.ok(r.log.some((e) => e.kind === "march" || e.kind === "march-arrive"),
-    "没有行军的记载");
+  assert.ok(r.log.some((e) => e.kind === "march-out"), "出发那一季没有交代兵已经动了");
   assert.equal(r.commanderies[pick.to.id].owner, pick.to.owner, "还在路上就把城打下来了");
 
   // 下一季才动手
   const mark = r.log.length;
   const r2 = resolve(refreshAp(r, P), [], G, P, ROSTER, GEO).state;
+  assert.ok(r2.log.slice(mark).some((e) => e.kind === "march-arrive" || e.kind === "march"),
+    "下一季没有行军推进的记载");
   const fought = r2.log.slice(mark).some((e) =>
     ["siege-win", "siege-hold", "siege-starve", "siege-abort"].includes(e.kind));
   assert.ok(fought, "抵达之后一季仍不动手 —— 行军没走完还是压根没接上？");

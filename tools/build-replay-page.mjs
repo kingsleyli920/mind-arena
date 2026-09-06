@@ -84,6 +84,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 .army{font-family:var(--mono);font-size:20px;font-weight:600}
 .armybg{stroke:rgba(247,246,240,.92);stroke-width:5}
 .march{stroke-width:4;opacity:.55;stroke-dasharray:14 9;fill:none}
+/* 在途：更细、更疏、更淡——一眼看出这支还在路上 */
+.onroad{stroke-width:2;opacity:.35;stroke-dasharray:4 12;fill:none}
 .facname{font-family:var(--sans);font-size:26px;font-weight:600;paint-order:stroke;
   stroke:rgba(246,245,239,.9);stroke-width:6;stroke-linejoin:round;letter-spacing:.04em}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 0 0;font-size:12.5px}
@@ -367,17 +369,26 @@ function drawOverlay(fi){
   const byAt=new Map();
   for(const a of f.armies){
     if(a[2]<0) continue;
-    const e=byAt.get(a[2]) || { n:0, troops:0, facs:new Map(), targets:new Set() };
+    const e=byAt.get(a[2]) || { n:0, troops:0, facs:new Map(), targets:new Set(), marching:new Set() };
     e.n++; e.troops+=a[1];
     e.facs.set(a[0], (e.facs.get(a[0])||0)+a[1]);
-    if(a[3]>=0) e.targets.add(a[3]);
+    // 在途与已抵达分开画：还在路上的用虚线细箭，围住的用实线。
+    // 不分的话一支刚出发的远征军看起来就像已经围住了城
+    if(a[3]>=0) (a[5]>0 ? e.marching : e.targets).add(a[3]);
     byAt.set(a[2], e);
   }
   // 行军/围城线先画，压在徽标底下
-  for(const [at,e] of byAt) for(const t of e.targets){
-    const [x1,y1]=D.xy[at], [x2,y2]=D.xy[t];
+  for(const [at,e] of byAt){
     const top=[...e.facs].sort((a,b)=>b[1]-a[1])[0][0];
-    parts.push('<path class="march" stroke="'+D.facColor[top]+'" d="M'+x1+' '+y1+'L'+x2+' '+y2+'"/>');
+    const [x1,y1]=D.xy[at];
+    for(const t of e.targets){
+      const [x2,y2]=D.xy[t];
+      parts.push('<path class="march" stroke="'+D.facColor[top]+'" d="M'+x1+' '+y1+'L'+x2+' '+y2+'"/>');
+    }
+    for(const t of e.marching){
+      const [x2,y2]=D.xy[t];
+      parts.push('<path class="onroad" stroke="'+D.facColor[top]+'" d="M'+x1+' '+y1+'L'+x2+' '+y2+'"/>');
+    }
   }
   // 徽标不直接画，先收集——它要与势力名一起参与去重叠。
   // **变量名不能叫 marks**：模块顶层已经有一个 marks 是时间轴的锚点数组，

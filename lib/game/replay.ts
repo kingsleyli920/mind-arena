@@ -25,7 +25,7 @@ import type { Roster } from "./engine/officers.ts";
 import type { EngineParams } from "./engine/params.ts";
 import type { FactionId, GameState, Order } from "./engine/types.ts";
 
-export const REPLAY_VERSION = "1.1.0";
+export const REPLAY_VERSION = "1.2.0";
 
 /** 阵型 id 的顺序。**唯一来源是引擎的 FORMATION_CN**，帧里的 fm 是这个数组的下标 */
 export const FORM_IDS = Object.keys(FORMATION_CN);
@@ -51,7 +51,8 @@ export interface Frame {
   /** 补给断绝的郡（下标）。也是派生的，每季由 supplyReach 现算 */
   cut: number[];
   /** 在外军团：[势力, 兵力, 所在郡, 目标郡（−1 为无）, 已围几季] */
-  armies: Array<[number, number, number, number, number]>;
+  /** [势力, 兵力, 所在郡, 目标郡, 已围季, 在途季] */
+  armies: Array<[number, number, number, number, number, number]>;
   /** 逐势力：[治所郡, 金, 令, 历史最高档, 终局档, 郡数, 控州, 州治, 出局] */
   fac: Record<number, [number, number, number, number, number, number, number, number, number]>;
   /** 本季新增日志：[类型, 势力（−1 为无主/天下）, 文本] */
@@ -245,11 +246,13 @@ export function captureFrame(
   return {
     y: s.year, s: s.season, turn: s.turn, epoch: s.epoch,
     own, gt, def, mor, yld, fm, gov, cut,
+    // 第六位是「还要走几季才到城下」。在途的军团在图上该看得出来还在路上——
+    // 否则播放器会把一支刚出发的远征军画成已经围住了城
     armies: s.armies.map((a) => [
       fi.get(a.faction) ?? -1, a.troops,
       ci.get(a.at) ?? -1, a.target ? (ci.get(a.target) ?? -1) : -1,
-      a.siegeSeasons ?? 0,
-    ] as [number, number, number, number, number]),
+      a.siegeSeasons ?? 0, a.marchLeft ?? 0,
+    ] as [number, number, number, number, number, number]),
     fac,
     ev: [],
     orders: orders.map((o) => {

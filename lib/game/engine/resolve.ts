@@ -176,6 +176,11 @@ function beginSiege(
     at: left > 0 ? from : target, target, posture: a.strength, gear, unit,
     marchLeft: left, siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: from,
   });
+  // 出发要有交代：在途的军团这一季不结算，若不记一笔，下令方看不到兵已经动了
+  if (left > 0) {
+    log(s, { kind: "march-out", faction,
+             text: `${troops} 人自 ${from} 发向 ${target}，道远，${left} 季方至` });
+  }
 }
 
 /**
@@ -289,6 +294,28 @@ export function resolve(
     for (const id of touched) s.commanderies[id].ordersThisSeason += 1;
     accepted.push(o);
   }
+
+  // ── 行军 ──────────────────────────────────────────────────────────
+  // 在途的军团往前走一季。**放在整个结算的最前面**，位置试过三处：
+  //   放在围城结算之前 → 本季新起的军团 marchLeft 1→0，当季就被同一季的 sieges
+  //     快照收进去打，行军耗时完全没生效，而所有测试照样绿
+  //   放在阶段八之后 → 机制对了，但**看不见**：观测与录像的快照都在 resolve 之前取，
+  //     本季出发的军团当季就走完，于是「在途」这个状态一帧都不出现（实测 40 帧全 0）
+  //   放在最前面 → 第 N 季出发、at 留在起兵郡；第 N+1 季开局的快照里是在途，
+  //     该季推进后抵达并开打。延迟仍是一季，而模型和播放器都看得见它在路上
+  for (const army of s.armies) {
+    if (!army.target || army.marchLeft <= 0) continue;
+    army.marchLeft -= 1;
+    if (army.marchLeft <= 0) {
+      army.at = army.target;
+      log(s, { kind: "march-arrive", faction: army.faction,
+               text: `${army.troops} 人抵 ${army.target} 城下，下季可攻` });
+    } else {
+      log(s, { kind: "march", faction: army.faction,
+               text: `${army.home} 之师向 ${army.target} 行军，尚需 ${army.marchLeft} 季` });
+    }
+  }
+
 
   // ── 阶段一：观测与任命（无冲突）────────────────────────────────────
   //
@@ -1090,25 +1117,6 @@ export function resolve(
           text: `治所已失，${who}粮尽溃散` }
       : { kind: "supply-cut-scatter", faction: army.faction,
           text: `${who}后路断绝，粮尽溃散` });
-  }
-
-  // ── 行军 ──────────────────────────────────────────────────────────
-  // 在途的军团往前走一季。位置很讲究，两头都栽过。放在围城结算**之前**：本季新起的军团
-  // marchLeft 1→0，当季就被同一季的 sieges 快照收进去打，行军耗时完全没生效，
-  // 而所有测试照样绿。放在产出结算**之前**：季末刚到城下的军团把这一季的
-  // 敌郡产出也冻住了，可它这一季还在路上。
-  // 所以放在阶段八之后：这一季走完，抵达从**下一季**起才算数
-  for (const army of s.armies) {
-    if (!army.target || army.marchLeft <= 0) continue;
-    army.marchLeft -= 1;
-    if (army.marchLeft <= 0) {
-      army.at = army.target;
-      log(s, { kind: "march-arrive", faction: army.faction,
-               text: `${army.troops} 人抵 ${army.target} 城下，下季可攻` });
-    } else {
-      log(s, { kind: "march", faction: army.faction,
-               text: `${army.home} 之师向 ${army.target} 行军，尚需 ${army.marchLeft} 季` });
-    }
   }
 
   // ── 待命军团归队 ───────────────────────────────────────────────
