@@ -159,6 +159,17 @@ export interface FactionState {
    * 不是逐季重复的惩罚；否则霸者每季都被绝一次盟，那不是取舍是酷刑
    */
   coalitionAgainst: boolean;
+  /**
+   * 手上的州牧之号。朝廷（京兆尹之主）授出，一州一牧。
+   *
+   * 持号者在该州的无主郡上累积归附意向，**即使有多家接壤**——无号则须
+   * 四境唯我一家。这正是「传檄而定」：刘表的荆州牧是初平元年李傕的朝廷授的，
+   * 他凭这个名分才压得住荆襄。
+   *
+   * 名器授出**不可收回**，朝廷易主亦不作废：拿名器换盟友是真的付了代价，
+   * 不是随时能反悔的空头支票。
+   */
+  governorships: string[];
   /** 本局曾达到过的最高档 —— 冲高后回落不扣分 */
   bestGrade: Grade;
   eliminated: boolean;
@@ -311,6 +322,7 @@ export type Action =
   | { type: "govern"; at: CommanderyId;
       policy: "farm" | "levy" | "wall" | "soothe" | "forge" | "stock" }
   | { type: "build"; at: CommanderyId; kind: Building }
+  | { type: "invest"; zhou: string; to: FactionId }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
   | { type: "passage"; to: FactionId }
@@ -371,6 +383,13 @@ export interface Candidate {
    * 而向前推 162 支围城军有 109 支（67%）在上限内可破
    */
   project?: { seasons: number | null };
+  /**
+   * 授官候选：凭这个号能传檄收几郡。
+   *
+   * 与 forecast / gain / project 同理，这是**结构化的**那一份——标签里那句
+   * 「凭此号可传檄收 N 郡」是给人看的，谁也不许从它抠正则（撤围就是这么错过一次的）
+   */
+  sway?: { commanderies: number };
   /** 第三方围城军的观测兵力（已分档）。救援候选用 */
   siegeBy?: { faction: FactionId; troopsLo: number; troopsHi: number; seasons: number };
   /**

@@ -785,6 +785,55 @@ export function listActions(
     }
   }
 
+  // ── 授官：以朝廷之名授某家一州之牧 ────────────────────────────────
+  //
+  // 兴平元年献帝在长安，李傕挟之——司隶校尉随朝廷驻长安，故以京兆尹之主为
+  // 持朝廷者（出处见 province-seats-194.json 的 _note）。
+  //
+  // 这是《宏图策：三国》有而我们没有的那一类里唯一挂在**记分函数**上的：
+  // 档位判控州与郡数的增量，而州牧之号直接改变一个州里的郡怎么归属。
+  // 其余那些（科技树、贸易、财政、制度政策）都是往战力上乘系数，
+  // 而这个仓库量过挂在那根管子上的四次实验全部打平。
+  //
+  // 候选按**这个号真能收几郡**排，不按州里空了几郡：归附意向只在
+  // 「无主郡的邻郡属于持号者」时才累积，所以授交州牧给一个不挨着交州的人，
+  // 名分再好听也是一纸空文。第一版正是这么列的——李傕拿到的四条全是交州
+  if (geo && ap >= rules.normalAp && s.commanderies[P.courtSeat]?.owner === f) {
+    const holderOf = (z: string) =>
+      Object.values(s.factions).find((x) => x.governorships.includes(z))?.id ?? null;
+    // (州, 势力) → 该势力凭这个号能收的无主郡数
+    const yield_ = new Map<string, number>();
+    for (const c of Object.values(s.commanderies)) {
+      if (c.owner) continue;
+      const z = geo.zhouOf.get(c.id);
+      if (!z) continue;
+      const lords = new Set((g.adj.get(c.id) ?? [])
+        .map((e) => s.commanderies[e.to]?.owner).filter((x): x is FactionId => !!x));
+      for (const l of lords) {
+        const k = `${z}\u0000${l}`;
+        yield_.set(k, (yield_.get(k) ?? 0) + 1);
+      }
+    }
+    const rows = [...yield_.entries()]
+      .map(([k, n]) => { const [z, to] = k.split("\u0000"); return { z, to: to as FactionId, n }; })
+      .filter((r) => holderOf(r.z) !== r.to)
+      // 自授优先：把名分送人是要读局势的一步，让它排在后面但仍留在表上
+      .sort((a, b) => (b.to === f ? 1 : 0) - (a.to === f ? 1 : 0)
+                   || b.n - a.n || cmp(a.z, b.z) || cmp(a.to, b.to))
+      .slice(0, 4);   // 与兴建同理：跟征伐抢那 60 格
+    for (const { z, to, n } of rows) {
+      const who = holderOf(z);
+      out.push({
+        key: `invest:${z}:${to}`,
+        action: { type: "invest", zhou: z, to },
+        cost: rules.normalAp,
+        sway: { commanderies: n },
+        label: `以朝廷之名授${to === f ? "己" : nameOf(to)}为${z}牧`
+             + `（凭此号可传檄收 ${n} 郡${who ? `；今牧为 ${nameOf(who)}，改授即撤` : ""}）`,
+      });
+    }
+  }
+
   // ── 迁治：只在**治所已失或断供**时列出 ──────────────────────────
   //
   // 治所没事的时候迁治几乎总是坏主意（当季与下季全境断供），列出来只是噪声；
@@ -1253,6 +1302,16 @@ export function validate(
       }
       return null;
     }
+    case "invest": {
+      // 须持朝廷。兴平元年献帝在长安，司隶校尉随朝廷驻长安，故以京兆尹之主为持朝廷者
+      if (!P) return null;
+      if (s.commanderies[P.courtSeat]?.owner !== o.faction) return "朝廷不在我手，授不得官";
+      if (!s.factions[a.to]) return "未知势力";
+      if (s.factions[a.to].eliminated) return "该势力已出局";
+      const holder = Object.values(s.factions).find((x) => x.governorships.includes(a.zhou));
+      if (holder?.id === a.to) return "此州之牧已是此人";
+      return null;
+    }
     case "build": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
@@ -1337,7 +1396,7 @@ export function validate(
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
     ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, build: 2, relocate: 2, passage: 3,
-       ally: 4, submit: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
+       ally: 4, submit: 4, invest: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || cmp(x.faction, y.faction)

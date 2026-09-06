@@ -508,6 +508,23 @@ export function resolve(
              text: `${a.at} 建成${BUILD_CN[a.kind]}${price > 0 ? `（−${price} 金）` : ""}` });
   }
 
+  // ── 授官：以朝廷之名授某家一州之牧 ────────────────────────────────
+  // 名器授出**不可收回**，朝廷易主亦不作废——拿名器换盟友是真的付了代价，
+  // 不是随时能反悔的空头支票。史实亦然：朝廷授出的州牧，换个人挟天子也不敢轻易夺
+  for (const o of accepted) {
+    const a = o.action;
+    if (a.type !== "invest") continue;
+    if (s.commanderies[P.courtSeat]?.owner !== o.faction) continue;
+    for (const x of Object.values(s.factions)) {
+      x.governorships = x.governorships.filter((z) => z !== a.zhou);   // 一州一牧
+    }
+    const to = s.factions[a.to];
+    if (!to) continue;
+    to.governorships = [...to.governorships, a.zhou].sort(cmp);
+    log(s, { kind: "invest", faction: o.faction,
+             text: `以朝廷之名授 ${a.to} 为 ${a.zhou} 牧` });
+  }
+
   // ── 阶段三：外交（变更延迟一季生效）────────────────────────────────
   for (const o of accepted) {
     const a = o.action;
@@ -943,7 +960,7 @@ export function resolve(
       }
       fallen.push([c.id, lord]);
     }
-    // ── 归附意向：无主郡周围**只有一家**势力 ──────────────────────────
+    // ── 归附意向：无主郡周围**只有一家**势力，或有人持该州之牧号 ────────
     //
     // 孤悬那条判的是「四邻皆属一家」，实测只占无主郡·季的 0.4%。剩下的空城是
     // 另一回事：周围只有一家势力、其余邻郡也是无主。交州的郁林与苍梧就是这样,
@@ -954,8 +971,17 @@ export function resolve(
       if (c.owner) { c.sway = 0; c.swayTo = null; continue; }
       const lords = new Set((g.adj.get(c.id) ?? [])
         .map((e) => s.commanderies[e.to]?.owner).filter((x): x is FactionId => !!x));
-      const sole = lords.size === 1 ? [...lords][0] : null;
-      if (!sole || (P.swaySoleOnly && lords.size !== 1)) { c.sway = 0; c.swayTo = null; continue; }
+      // 州牧之号打破「四境唯我一家」这条限制：持某州牧号者，在该州的无主郡上
+      // 照样累积归附意向，即使有多家接壤。这正是「传檄而定」——刘表的荆州牧
+      // 是初平元年李傕的朝廷授的，他凭这个名分才压得住荆襄。
+      // 它也正好解开颍川那种「四战之地永远无主」的僵局：谁有名分谁收
+      const zhou = geo?.zhouOf.get(c.id);
+      const titled = P.investSway && zhou
+        ? [...lords].filter((x) => s.factions[x]?.governorships.includes(zhou))
+        : [];
+      const sole = titled.length === 1 ? titled[0]
+        : (lords.size === 1 ? [...lords][0] : null);
+      if (!sole) { c.sway = 0; c.swayTo = null; continue; }
       if (c.swayTo !== sole) { c.swayTo = sole; c.sway = 0; }
       c.sway += 1;
       if (c.sway < P.swaySeasons) continue;
@@ -963,7 +989,9 @@ export function resolve(
       c.sway = 0; c.swayTo = null;
       c.provisions = provCapOf(c, P);
       log(s, { kind: "sway-submit", faction: sole,
-               text: `${c.id} 四境唯我一家，${P.swaySeasons} 季无人来争，举郡归附` });
+               text: titled.length === 1 && lords.size > 1
+                 ? `${c.id} 传檄而定：${sole} 持${zhou}牧之号，${P.swaySeasons} 季举郡归附`
+                 : `${c.id} 四境唯我一家，${P.swaySeasons} 季无人来争，举郡归附` });
     }
     // 本季已因孤悬扣过粮的，下面无主郡那个循环不能再 +1 补回去——
     // 一扣一补净零，孤悬这条就等于没写（实测会稽郡照样挂了十季）

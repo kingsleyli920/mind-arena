@@ -14,7 +14,9 @@ export interface SetupData {
     id: string; name: string; factionId: string | null; control: string | null;
     yieldTier: number; garrison: number; moraleTier: number; defense: number;
   }> };
-  scenario: { factions: Array<{ id: string; name: string; seat?: string }> };
+  scenario: { factions: Array<{ id: string; name: string; seat?: string;
+                               /** 朝廷明授的州牧号。自领自立者不记——见剧本生成器的口径注 */
+                               governorship?: string }> };
   commanderies: Array<{ id: string; name: string }>;
   troopTypes: { commanderies: Array<{ id: string; unit: string }> };
   resources: { commanderies: Array<{ id: string } & Record<string, unknown>> };
@@ -111,6 +113,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       conquests: 0,
       allyBanUntil: 0,
       coalitionAgainst: false,
+      governorships: f.governorship ? [f.governorship] : [],
       gold: P.goldOn ? P.goldStart : 0,
       bestGrade: "ding" as Grade,
       eliminated: mine.length === 0,

@@ -92,6 +92,22 @@ export interface Observation {
     conquests: number;
     start: { commanderies: number; zhou: number; seats: number };
   };
+  /**
+   * 朝廷与名器。持朝廷者（据朝廷所在之郡）可花一令授某家一州之牧；
+   * 持某州牧号者在该州的无主郡上累积归附意向，即使有多家接壤。
+   *
+   * 这一项对所有席位都要发：不持朝廷的那些人，也得知道名分在谁手里、
+   * 自己脚下这个州的牧是谁——那决定了周围的空城最后会归谁
+   */
+  court: {
+    at: string;
+    /** 持朝廷者。该郡无主则 null */
+    holder: FactionId | null;
+    /** 是我 */
+    mine: boolean;
+    /** 已授出的州牧，州→势力。未授之州不列 */
+    governors: Record<string, FactionId>;
+  };
   /** 态势简报：各州还差几郡即控制。这是「往哪打才算数」的唯一依据 */
   brief: string;
   /** 我的郡：自家账本，看得真切 */
@@ -314,6 +330,15 @@ export function observe(
         zhou: f?.startZhou ?? 0,
         seats: f?.startSeats ?? 0,
       },
+    },
+    court: {
+      at: P.courtSeat,
+      holder: s.commanderies[P.courtSeat]?.owner ?? null,
+      mine: s.commanderies[P.courtSeat]?.owner === faction,
+      governors: Object.fromEntries(
+        Object.values(s.factions)
+          .flatMap((x) => x.governorships.map((z) => [z, x.id] as const))
+          .sort((a, b) => cmp(a[0], b[0]))),
     },
     brief: briefFor(s, geo, faction, g.adj, nameOf),
     mine,

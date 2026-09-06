@@ -2205,6 +2205,70 @@ test("归附：无主郡周围只有一家势力，久之举郡归附；两家�
   assert.ok(!two.commanderies[n1.id].owner, "四战之地被白送了");
 });
 
+test("名器：授官须持朝廷，一州一牧，持号者可在四战之地传檄而定", () => {
+  // 借自《宏图策：三国》「挟天子以令诸侯」那一路。它值得做的理由与联军相同：
+  // 不往战力上乘系数，而是改变一个州里的郡**怎么归属**——档位判的正是郡数与
+  // 控州的增量。实测终局幸存的十个无主郡里，颍川、梁国、鲁国（豫州三郡）
+  // 与河南尹（司隶）全是四战之地：邻郡分属四五家，四境唯一那条永远不成立，
+  // 于是它们在四十季里一动不动。名分是唯一一条不必先打赢就能收它们的路
+  const s = fresh();
+  const court = P.courtSeat;
+  const holder = s.commanderies[court].owner;
+  assert.ok(holder, "朝廷所在之郡无主，测不出");
+
+  // 找一个四战之地：无主、且邻郡分属两家以上
+  const lordsOf = (t, id) => new Set((G.adj.get(id) ?? [])
+    .map((e) => t.commanderies[e.to]?.owner).filter(Boolean));
+  const spot = Object.values(s.commanderies)
+    .find((c) => !c.owner && lordsOf(s, c.id).size >= 2);
+  assert.ok(spot, "没有四战之地，测不出");
+  const zhou = GEO.zhouOf.get(spot.id);
+  const claimant = [...lordsOf(s, spot.id)][0];
+
+  // 一、不持朝廷者授不得官
+  const notCourt = Object.keys(s.factions).find((f) => f !== holder
+    && !s.factions[f].eliminated);
+  assert.ok(validate(s, { faction: notCourt, action: { type: "invest", zhou, to: notCourt } },
+    G, DEFAULT_RULES, ROSTER, P), "不持朝廷的也授得了官");
+  assert.equal(validate(s, { faction: holder, action: { type: "invest", zhou, to: claimant } },
+    G, DEFAULT_RULES, ROSTER, P), null, "持朝廷者反而授不了");
+
+  // 二、授出之后，持号者在该州的无主郡上照样累积意向——即使有多家接壤
+  let cur = resolve(refreshAp(s, P),
+    [{ faction: holder, action: { type: "invest", zhou, to: claimant } }],
+    G, P, ROSTER, GEO).state;
+  assert.deepEqual(cur.factions[claimant].governorships.includes(zhou), true, "号没授出去");
+  for (let i = 0; i < P.swaySeasons + 1; i += 1) {
+    cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
+    if (cur.commanderies[spot.id].owner) break;
+  }
+  assert.equal(cur.commanderies[spot.id].owner, claimant,
+    `${claimant} 持${zhou}牧之号，${P.swaySeasons + 1} 季仍收不到 ${spot.id}`);
+  assert.ok(cur.log.some((e) => e.kind === "sway-submit" && e.text.includes("传檄而定")),
+    "收是收了，却不是凭名分收的");
+
+  // 三、同一局面下没有名分则收不到 —— 这是对照组，不是重复
+  let bare = refreshAp(fresh(), P);
+  for (let i = 0; i < P.swaySeasons + 2; i += 1) {
+    bare = resolve(refreshAp(bare, P), [], G, P, ROSTER, GEO).state;
+  }
+  assert.ok(!bare.commanderies[spot.id].owner, "没名分也白收了一个四战之地");
+
+  // 四、一州一牧：改授即撤前任
+  const other = [...lordsOf(s, spot.id)][1] ?? notCourt;
+  const after = resolve(refreshAp(cur, P),
+    [{ faction: holder, action: { type: "invest", zhou, to: other } }],
+    G, P, ROSTER, GEO).state;
+  assert.equal(after.factions[claimant].governorships.includes(zhou), false, "前任的号没撤");
+  assert.equal(after.factions[other].governorships.includes(zhou), true, "新任没拿到号");
+
+  // 五、开局的两个号出自剧本，且只记朝廷明授的那两个
+  const titled = Object.values(s.factions)
+    .flatMap((f) => f.governorships.map((z) => `${f.id}:${z}`)).sort();
+  assert.deepEqual(titled, ["liubiao:荆州", "liuzhang:益州"],
+    "开局州牧号对不上剧本 —— 自领自立者不该记");
+});
+
 test("联军：一家独据两成郡国，天下共讨之", () => {
   // 借自《宏图策：三国》——它有「联军」而我们没有。对评测来说它比科技树、贸易
   // 那些都值钱：它不往战力上乘系数，而是改变「记分函数奖励什么」的形状。

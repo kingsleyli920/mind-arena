@@ -42,6 +42,14 @@ const OUT = path.join(ROOT, "lib/game/data/scenario-194.json");
 // tools/check-palette.mjs 的「最大化最小色差」排布，接壤势力额外拉开 1.35 倍。
 // 约束在 Lab 空间：L*∈[48,80]（压得住标注文字）、C*≤72（不刺眼）。改色后须跑该脚本复核。
 // 这些已是最终显示色，渲染端不再二次提纯——见 app/play/PlayClient.tsx。
+//
+// governorship 是**朝廷所授**的州牧号，不是自称的。这条线划得很窄，因为引擎里
+// 持号者能在该州的无主郡上「传檄而定」（见 pack-194.json 的 constants.名器）：
+//   刘表  初平元年诏拜荆州刺史，后为镇南将军、荆州牧——朝廷明授
+//   刘璋  刘焉本为朝廷所授益州牧，本年焉卒，璋继任（朝廷后拜监军使者领益州牧）
+// 其余全部不给：袁绍冀州牧是自领、吕布兖州牧是张邈陈宫奉的、袁术扬州牧是自领、
+// 公孙度平州牧是自立、公孙瓒只是「自专州事」。这正是这套机制要的张力——
+// 天下十三州的名分几乎都空着，而它们在挟天子那一家手里。
 const FACTIONS = [
   { id: "lijue", name: "李傕、郭汜", courtesyName: "稚然（李傕）", seat: "京兆尹",
     color: "#c2213f",
@@ -97,10 +105,10 @@ const FACTIONS = [
   { id: "liuchong", name: "陈王刘宠（国相骆俊）", courtesyName: null, seat: "陈国",
     color: "#4d7d89",
     situation: "藩王拥强弩数千张屯都亭自守，骆俊治国有惠政，四方流民归之，为豫州乱中一隅安土。" },
-  { id: "liubiao", name: "刘表", courtesyName: "景升", seat: "南郡",
+  { id: "liubiao", name: "刘表", courtesyName: "景升", seat: "南郡", governorship: "荆州",
     color: "#17a8a0",
     situation: "以荆州牧治襄阳，南收零桂、北窥南阳，地方数千里带甲十余万，取观望自守之策。" },
-  { id: "liuzhang", name: "刘璋", courtesyName: "季玉", seat: "蜀郡",
+  { id: "liuzhang", name: "刘璋", courtesyName: "季玉", seat: "蜀郡", governorship: "益州",
     color: "#8cc32a",
     situation: "本年父刘焉卒，赵韪、王商等扶立为益州牧；沈弥、娄发、甘宁举兵不克，奔荆州。" },
   { id: "zhanglu", name: "张鲁", courtesyName: "公祺", seat: "汉中郡",
@@ -435,7 +443,8 @@ const scenario = {
       "故本年幽州腹地仍属公孙瓒，鲜于辅一方同样不列为独立势力。" +
       "归属分实控与名义两层：control=nominal 者多为授官、奉正朔或羁縻，无实际军政控制。" +
       "史料缺载或年份本身有争议者标 certainty=disputed，分歧写在 basis 内。" +
-      "郡国名称与建置取《后汉书·郡国志》，与 commanderies.json 严格对齐（105 个）。",
+      "郡国名称与建置取《后汉书·郡国志》，与 commanderies.json 严格对齐（105 个）。" +
+      "governorship 只记朝廷明授的州牧（刘表荆州、刘璋益州），自领自立者不记。",
     source:
       "《三国志》《后汉书》《资治通鉴》卷六十一（皆公有领域）；郡国建置据《续汉书·郡国志》。",
     factionCount: FACTIONS.length,

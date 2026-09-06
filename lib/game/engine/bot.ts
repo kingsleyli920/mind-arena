@@ -40,13 +40,13 @@ export const PROFILES: Record<Profile, string> = {
 // 给高了各画像都无脑改阵，策略差异被抹平——极差掉三分之一。
 // 「一条几乎总是对的动作」正是评测最不需要的东西
 const WEIGHTS: Record<Profile, Record<string, number>> = {
-  turtle:      { submit: 9, suade: 6, array: 5, govern: 10, build: 8, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11 },
-  balanced:    { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
-  aggressive:  { submit: 9, suade: 6, array: 1, govern: 2, build: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0 },
-  opportunist: { submit: 9, suade: 6, array: 2, govern: 4, build: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5 },
+  turtle:      { submit: 9, suade: 6, array: 5, govern: 10, build: 8, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11, invest: 6 },
+  balanced:    { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3, invest: 5 },
+  aggressive:  { submit: 9, suade: 6, array: 1, govern: 2, build: 2, scout: 5, ally: 1, muster: 8, campaign: 12, passage: 1, retire: 0, appoint: 5, withdraw: 0, invest: 3 },
+  opportunist: { submit: 9, suade: 6, array: 2, govern: 4, build: 4, scout: 6, ally: 5, muster: 4, campaign: 9, passage: 2, retire: 0, appoint: 4, withdraw: 5, invest: 5 },
   // 与均衡流同底，差别全在下面读 gain 的那几行——
   // 这样两者同场对打时，分差可归因于「看不看目的」，而不是权重表调得不一样
-  purpose:     { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3 },
+  purpose:     { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3, invest: 5 },
 };
 
 /**
@@ -231,6 +231,19 @@ function decideInner(
       // 而位子只有三个（constants.建筑.每郡上限），先来后到是不可逆的
       const special = ["ironworks", "saltern", "stud", "farmstead"];
       if (special.includes(c.action.kind)) score += 4;
+    }
+    if (c.action.type === "invest") {
+      // 机器人只自授。「把名分送给别人换他去那个方向发力」是一步需要读局势的棋，
+      // 基线不做——基线要能被模型超过，不是要替模型下棋
+      if (c.action.to !== f) score -= 20;
+      // 按**这个号真能收几郡**加分，不按「授官是件大事」加分。
+      // 系数不是拍的，是拿这个画像自己给一郡开的价换算的：征伐花 2 令换 1 郡，
+      // 故一郡值 campaign/2；传檄要等 swaySeasons 季且中途可能被人抢先，
+      // 再打对折。苟活流的 campaign 是 −100（它根本不用这条价），退回 6
+      else {
+        const perCommandery = (w.campaign > 0 ? w.campaign : 6) / 2;
+        score += perCommandery * Math.min(c.sway?.commanderies ?? 0, 4) * 0.5;
+      }
     }
     if (c.action.type === "withdraw") {
       // 此前是 `/已围 (\d+) 季，余 (\d+) 人/` 的正则 + 「季数×2 + 残兵少加 4」。
