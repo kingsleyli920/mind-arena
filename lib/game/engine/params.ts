@@ -101,6 +101,7 @@ export interface EngineParams {
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
   siegeGripRatio: number; siegeEncircle: boolean;
   isolatedSubmit: boolean;
+  swaySeasons: number; swaySoleOnly: boolean;
   /** 行军。见内容包 constants.行军 */
   marchDayPerCost: number; marchSeasonDays: number;
   marchAssaultWindow: number; marchGearMul: number;
@@ -296,6 +297,8 @@ export function loadParams(pack: RawPack): EngineParams {
     // 布尔值不走 num()——那个函数是给数值用的，会把 true 判成缺数据
     siegeEncircle: C["围城"]?.["合围_邻郡过半"] === true,
     isolatedSubmit: C["孤悬"]?.["四邻皆属一家"] === true,
+    swaySeasons: g("孤悬", "归附_季数"),
+    swaySoleOnly: C["孤悬"]?.["归附_只一家接壤"] === true,
     marchDayPerCost: g("行军", "日每单位"),
     marchSeasonDays: g("行军", "一季日数"),
     marchAssaultWindow: g("行军", "攻城窗口日"),

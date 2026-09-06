@@ -2167,3 +2167,40 @@ test("孤悬：四邻皆属一家，不必出兵，粮尽即归附", () => {
   assert.notEqual(one.commanderies[victim.id].owner, me, "第一季就白送了");
   assert.equal(one.commanderies[victim.id].provisions, prov0 - 1, "孤悬却没扣粮");
 });
+
+test("归附：无主郡周围只有一家势力，久之举郡归附；两家以上则是四战之地", () => {
+  const s = fresh();
+  const me = "yuanshao";
+  const n0 = Object.values(s.commanderies).find((c) => !c.owner
+    && (G.adj.get(c.id) ?? []).length >= 2);
+  assert.ok(n0, "没有无主郡，测不出");
+  // 只让袁绍一家接壤：其余邻郡设为无主
+  for (const e of G.adj.get(n0.id) ?? []) s.commanderies[e.to].owner = null;
+  const first = (G.adj.get(n0.id) ?? [])[0].to;
+  s.commanderies[first].owner = me;
+
+  let cur = s;
+  for (let i = 0; i < P.swaySeasons + 1; i += 1) {
+    cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
+    if (cur.commanderies[n0.id].owner) break;
+  }
+  assert.equal(cur.commanderies[n0.id].owner, me,
+    `四境唯袁绍一家，${P.swaySeasons + 1} 季仍不归附`);
+  assert.ok(cur.log.some((e) => e.kind === "sway-submit"), "没有举郡归附的记载");
+
+  // 两家以上接壤则归零 —— 四战之地谁也别想白拿。
+  // 实测终局幸存的四个无主郡（颍川、豫章、苍梧、郁林）**全是**这一种：
+  // 颍川邻郡分属五家，郁林与苍梧各有士燮与刘表两家
+  const t = fresh();
+  const n1 = Object.values(t.commanderies).find((c) => !c.owner
+    && (G.adj.get(c.id) ?? []).length >= 2);
+  const nbs = (G.adj.get(n1.id) ?? []).map((e) => e.to);
+  t.commanderies[nbs[0]].owner = me;
+  t.commanderies[nbs[1]].owner = "lubu";
+  let two = t;
+  for (let i = 0; i < P.swaySeasons + 2; i += 1) {
+    two = resolve(refreshAp(two, P), [], G, P, ROSTER, GEO).state;
+  }
+  assert.equal(two.commanderies[n1.id].sway, 0, "两家接壤却在累积归附意向");
+  assert.ok(!two.commanderies[n1.id].owner, "四战之地被白送了");
+});

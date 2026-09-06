@@ -67,6 +67,7 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       // 存粮由产出档定，开局即满。产出档本身是 log10(户数)，
       // 所以「富郡耐围、瘠郡易饥」不必另立数据
       provisions: provisionsCap(c.yieldTier, P),
+      sway: 0, swayTo: null,
       buildings: [],
       resources: resOf.get(c.id) ?? [],
       moraleTier: c.moraleTier,

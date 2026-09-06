@@ -943,6 +943,28 @@ export function resolve(
       }
       fallen.push([c.id, lord]);
     }
+    // ── 归附意向：无主郡周围**只有一家**势力 ──────────────────────────
+    //
+    // 孤悬那条判的是「四邻皆属一家」，实测只占无主郡·季的 0.4%。剩下的空城是
+    // 另一回事：周围只有一家势力、其余邻郡也是无主。交州的郁林与苍梧就是这样,
+    // 邻郡里只有士燮一家，于是六局全都撑到终局——不是没人要，是没人够得着：
+    // 出兵要花令、要够兵力，而没有第二家跟它抢，所以永远不急。
+    // 有两家以上接壤则归零：那是四战之地（颍川邻郡分属五家），谁也别想白拿
+    for (const c of Object.values(s.commanderies)) {
+      if (c.owner) { c.sway = 0; c.swayTo = null; continue; }
+      const lords = new Set((g.adj.get(c.id) ?? [])
+        .map((e) => s.commanderies[e.to]?.owner).filter((x): x is FactionId => !!x));
+      const sole = lords.size === 1 ? [...lords][0] : null;
+      if (!sole || (P.swaySoleOnly && lords.size !== 1)) { c.sway = 0; c.swayTo = null; continue; }
+      if (c.swayTo !== sole) { c.swayTo = sole; c.sway = 0; }
+      c.sway += 1;
+      if (c.sway < P.swaySeasons) continue;
+      c.owner = sole;
+      c.sway = 0; c.swayTo = null;
+      c.provisions = provCapOf(c, P);
+      log(s, { kind: "sway-submit", faction: sole,
+               text: `${c.id} 四境唯我一家，${P.swaySeasons} 季无人来争，举郡归附` });
+    }
     // 本季已因孤悬扣过粮的，下面无主郡那个循环不能再 +1 补回去——
     // 一扣一补净零，孤悬这条就等于没写（实测会稽郡照样挂了十季）
     for (const c of Object.values(s.commanderies)) {
