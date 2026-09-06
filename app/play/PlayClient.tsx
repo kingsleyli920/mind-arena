@@ -490,9 +490,9 @@ function TileLayer({ view, screenW }: {
       const y0 = (r * TILE) / L.h, y1 = Math.min((r + 1) * TILE, L.h) / L.h;
       if (x1 < fx0 - pad || x0 > fx1 + pad || y1 < fy0 - pad || y0 > fy1 + pad) continue;
       out.push(
-        // eslint-disable-next-line @next/next/no-img-element
         // 文件名是 `${列}-${行}`（见 tools/slice-map-tiles.mjs 的 tx-ty），
         // 写成行-列会把整幅转置——第一版就是这样，图上出现了几道明暗错位的方块
+        // eslint-disable-next-line @next/next/no-img-element
         <img key={`${L.z}-${c}-${r}`} src={`${TILES}/z${L.z}/${c}-${r}.webp`} alt=""
           loading="eager" decoding="async"
           style={{ position: "absolute", left: `${x0 * 100}%`, top: `${y0 * 100}%`,
@@ -1587,14 +1587,13 @@ export function PlayClient() {
               const s = 30 / Math.sqrt(view.k);
               const mine = a.faction === seat;
               return (
-                <g key={a.id} className="siege-flag" transform={`translate(${x + s * 0.75} ${y - s * 0.5})`}>
-                  <line x1={0} y1={0} x2={0} y2={-s * 1.15} stroke="#2b251e"
-                    strokeWidth={s * 0.055} />
-                  <path d={`M 0 ${-s * 1.15} L ${s * 0.78} ${-s * 0.92} L 0 ${-s * 0.7} Z`}
-                    fill={engine.colorOf.get(a.faction) ?? "#7a7266"}
-                    stroke="#2b251e" strokeWidth={s * 0.04} />
-                  <text x={s * 0.16} y={-s * 0.2} fontSize={s * 0.4}
-                    className={mine ? "mine" : undefined}>
+                // 城下的围军画营垒——与在途的行营是同一套画。此前这里是一面
+                // 手画的三角小旗，与旁边的笔墨城印摆在一起就是两套语言
+                <g key={a.id} className={`siege-camp${mine ? " mine" : ""}`}>
+                  <ArmyMark x={x + s * 1.15} y={y + s * 0.28} s={s * 0.86}
+                    color={engine.colorOf.get(a.faction) ?? "#7a7266"}
+                    marching={false} at={a.id} />
+                  <text x={x + s * 1.15} y={y + s * 0.86} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
                   </text>
                 </g>

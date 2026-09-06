@@ -171,10 +171,7 @@
 .map-wrap svg .army.marching > g { animation: camp-breathe 3.2s ease-in-out infinite;
   transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes camp-breathe { 50% { transform: translateY(-1.5%) scale(1.04); } }
-/* 围城的旗在动。城下之围是这局里最要紧的事，图上却与太平无事一个样 */
-.map-wrap svg .siege-flag path { transform-box: fill-box; transform-origin: 0% 50%;
-  animation: banner-wave 2.6s ease-in-out infinite; }
-@keyframes banner-wave { 50% { transform: skewY(-7deg) scaleX(0.9); } }
+/* 城下的围军见下面「营垒」那一节。营垒本身不动——它就是不动才叫围 */
 /* 围城圈的呼吸。**不能动 r**：SVG 里 r 写百分比是按视口算的，
    一个 36 单位的圈会当场胀成半张地图（第一版就是这样） */
 .map-wrap svg .siege-ring {
@@ -184,7 +181,7 @@
 @keyframes siege-pulse { 50% { opacity: 0.4; transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) {
   .map-wrap svg .march-path, .map-wrap svg .army.marching > g,
-  .map-wrap svg .siege-flag path, .map-wrap svg .siege-ring { animation: none; }
+  .map-wrap svg .siege-ring { animation: none; }
   .map-stage { transition: none; }
 }
 
@@ -354,14 +351,12 @@
   stroke: rgba(250, 246, 237, 0.35); stroke-width: 6; stroke-linejoin: round;
 }
 
-/* 围城旗 */
-.map-stage svg .siege-flag line,
-.map-stage svg .siege-flag path { vector-effect: non-scaling-stroke; }
-.map-stage svg .siege-flag text {
+/* 城下的围军：营垒 + 「几季·多少人」 */
+.map-stage svg .siege-camp text {
   fill: var(--ink-soft); paint-order: stroke;
   stroke: rgba(250, 246, 237, 0.9); stroke-width: 3; stroke-linejoin: round;
 }
-.map-stage svg .siege-flag text.mine { fill: var(--seal); font-weight: 700; }
+.map-stage svg .siege-camp.mine text { fill: var(--seal); font-weight: 700; }
 
 /* ── 装饰：图题与压角章 ────────────────────────────────────────────
    两者都在屏幕固定层，不进 .map-stage —— 进去会随缩放放大六倍。

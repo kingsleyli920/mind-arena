@@ -14,7 +14,7 @@ import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, t
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
-import { marchSeasons, provCapOf, provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provCapOf, type EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
