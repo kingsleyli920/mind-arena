@@ -46,3 +46,7 @@ yarn-error.log*
 public/game/map/han-terrain.png
 tsconfig.tsbuildinfo
 .tmp-preview/
+
+# 评测记录与浏览器抓图：都是跑出来的，不入库
+eval-out/
+.playwright-mcp/
