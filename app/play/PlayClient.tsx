@@ -296,231 +296,102 @@ const MAP = { w: 1815, h: 1485, west: 94, north: 43, ppd: 55 };
 
 /**
  * 城池图元。圆点看不出等级也看不出归属，只是「标了个位置」——
- * 这里按等级画不同的城：州治是重城带旌旗，大郡是双阙，寻常郡是单垣。
- * 无主之城不填色，只留墨廓。
+ * 这里按等级换不同的一幅：州治重檐带角楼、大郡带门楼、寻常郡一段城墙。
+ * 图本身是 tools/render-map-glyphs.mjs 用画底图那支笔渲的（见下面 GLYPH 的注）。
  */
 function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail }: {
   x: number; y: number; size: number; fill: string | null;
   mine: boolean; seat: boolean; besieged: boolean;
-  /** 近观档：画城郭而不是把同一个小印放大 */
+  /** 近观档：换更大的一幅，细节多一级 */
   detail?: boolean;
 }) {
-  const w = size, h = size * 0.78;
-  const l = x - w / 2, r = x + w / 2, b = y + h / 2, tp = y - h / 2;
-  const notch = w / 7;
-  const paint = fill ?? "rgba(252,249,242,0.9)";
-  const ink = "#2b251e";
-  const lw = size * (mine ? 0.105 : 0.068);
-  // 垛口：城头三个凹口
-  const crown = [
-    `M ${l} ${b}`, `L ${l} ${tp + notch}`,
-    `L ${l + notch} ${tp + notch}`, `L ${l + notch} ${tp}`,
-    `L ${l + notch * 2.2} ${tp}`, `L ${l + notch * 2.2} ${tp + notch}`,
-    `L ${r - notch * 2.2} ${tp + notch}`, `L ${r - notch * 2.2} ${tp}`,
-    `L ${r - notch} ${tp}`, `L ${r - notch} ${tp + notch}`,
-    `L ${r} ${tp + notch}`, `L ${r} ${b}`, "Z",
-  ].join(" ");
-  /** 庑殿顶：两端起翘的一道檐。汉阙的样子全在这条曲线上 */
-  const roof = (cx: number, cy: number, hw: number, hh: number) =>
-    `M ${cx - hw} ${cy} Q ${cx - hw * 0.46} ${cy - hh * 0.2} ${cx - hw * 0.3} ${cy - hh}`
-    + ` L ${cx + hw * 0.3} ${cy - hh} Q ${cx + hw * 0.46} ${cy - hh * 0.2} ${cx + hw} ${cy} Z`;
+  // 三等城：州治重檐带角楼、大郡带门楼、寻常郡只一段墙。
+  // 等级差别画在**笔墨里**，不靠加个小旗表示
+  const id = isSeat ? "city-seat" : detail || size > 26 ? "city-large" : "city-small";
+  const w = size * 2.3;
+  const l = x - w / 2, t = y - w * GLYPH_BASE;
   return (
     <g className="city">
-      {/* 纸色衬底：城印落在斑驳的地形上，没有衬底就糊成一团 */}
-      <ellipse cx={x} cy={y + h * 0.06} rx={w * 0.82} ry={h * 0.86} className="city-halo" />
-      {besieged && (
-        <circle cx={x} cy={y} r={w * 1.15} className="siege-ring" />
-      )}
-      <path d={crown} fill={paint} stroke={ink} strokeWidth={lw} strokeLinejoin="miter" />
-      {/* 城门 */}
-      <path d={`M ${x - notch * 0.8} ${b} L ${x - notch * 0.8} ${y + h * 0.06}
-                 A ${notch * 0.8} ${notch * 0.8} 0 0 1 ${x + notch * 0.8} ${y + h * 0.06}
-                 L ${x + notch * 0.8} ${b} Z`}
-        fill="#332d25" opacity={0.72} />
-      {detail && (
-        <>
-          {/*
-           * 近观档：城不再是一个印，是一座城郭。
-           *
-           * 放大六倍时图元本来就长到两倍大（按 √k 长），把同一个小印摊大只是
-           * 让它更糊；这一档另画——两侧角楼、门上城楼、州治再加一层重檐。
-           * 远景不画这些：整幅可见时一百零五座城各带三层檐，就是一层噪点
-           */}
-          <path d={`M ${l - w * 0.14} ${b} L ${l - w * 0.14} ${y + h * 0.02}
-                    L ${l} ${y + h * 0.02} L ${l} ${b} Z`}
-            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
-          <path d={`M ${r} ${b} L ${r} ${y + h * 0.02}
-                    L ${r + w * 0.14} ${y + h * 0.02} L ${r + w * 0.14} ${b} Z`}
-            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
-          {/* 门楼：一层屋身 + 一道檐 */}
-          <rect x={x - w * 0.22} y={tp - h * 0.3} width={w * 0.44} height={h * 0.34}
-            fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
-          <path d={roof(x, tp - h * 0.3, w * 0.42, h * 0.26)}
-            fill={ink} opacity={0.86} />
-          {isSeat && (
-            <>
-              {/* 州治：重檐两层 */}
-              <rect x={x - w * 0.15} y={tp - h * 0.78} width={w * 0.3} height={h * 0.26}
-                fill={paint} stroke={ink} strokeWidth={lw * 0.8} />
-              <path d={roof(x, tp - h * 0.78, w * 0.32, h * 0.24)} fill={ink} opacity={0.86} />
-            </>
-          )}
-        </>
-      )}
-      {isSeat && (
-        <>
-          {/* 州治：城上立旗 */}
-          <line x1={x} y1={detail ? tp - h * 1.02 : tp} x2={x} y2={tp - h * (detail ? 1.6 : 0.62)}
-            stroke="#332d25" strokeWidth={size * 0.06} />
-          <path d={`M ${x} ${tp - h * (detail ? 1.6 : 0.62)}
-                    L ${x + w * 0.42} ${tp - h * (detail ? 1.42 : 0.44)}
-                    L ${x} ${tp - h * (detail ? 1.24 : 0.26)} Z`} fill="#8c3b2f" />
-        </>
-      )}
+      {/* 纸色衬底：符号落在斑驳的墨底上，没有衬底就糊成一团。
+          比早先的实心椭圆淡得多——笔墨版本身有飞白，压太实反而假 */}
+      <ellipse cx={x} cy={y - w * 0.28} rx={w * 0.44} ry={w * 0.34} className="city-halo" />
+      {besieged && <circle cx={x} cy={y - w * 0.3} r={w * 0.52} className="siege-ring" />}
+      {/* 势力色刷在 wash 面上：mask 用 objectBoundingBox，一份 mask 供全图复用 */}
+      <rect x={l} y={t} width={w} height={w} fill={fill ?? "#efe9dc"}
+        mask={`url(#wash-${id})`} opacity={mine ? 1 : 0.88} />
+      <image href={`${GLYPH}/${id}-ink.png`} x={l} y={t} width={w} height={w} />
     </g>
   );
 }
+
+/**
+ * 图上符号的笔墨版，由 tools/render-map-glyphs.mjs 用画底图那支笔渲出。
+ *
+ * 为什么不再手写 <path>：底图是 brush.mjs 的笔锋（钉头鼠尾、飞白、墨度沿
+ * 笔身衰减）加三十枚公有领域山水画的皴法图章画出来的，而符号是平涂加硬描边。
+ * 两套工艺摆在一张图上，形状再怎么调也是贴纸压在画上。
+ *
+ * 每个符号两张：ink 是墨线（不随势力变），wash 是可上色的面——
+ * 界面拿它作 mask 刷势力色，于是三十一家仍各有其色，而墨还是那支笔的墨
+ */
+const GLYPH = "/game/glyphs";
+/** 有可上色面的那几个 */
+const WASHED = ["city-small", "city-large", "city-seat", "tent", "camp"] as const;
+/** 符号画面里的地平线在 0.82 处：图元要**站在**那个点上，不是以它为心 */
+const GLYPH_BASE = 0.82;
 
 const NODE_CN: Record<string, string> = {
   gate: "关隘", pass: "谷道", ford: "渡口", port: "港口", depot: "粮仓", battlefield: "古战场",
 };
 
 /**
- * 关津港仓的图元。与城印同一套笔法——画出来，不写字。
- *
- * 头一版是「圆圈里写个关字」：城印是画的、关津是写的，两套笔法摆在一张舆图上，
- * 远看就是一层标签贴纸。这里每一种据点各有形制：
- *   关隘  双阙夹一门，门上横楣——虎牢、函谷的样子
- *   谷道  两山夹一线，线是道
- *   渡口  两岸之间一叶横舟
- *   港口  舟上张帆
- *   粮仓  廪屋，尖顶带囷
- *   战场  折戟，两戈交叉
+ * 关津港仓的图元。走过两版都被指出「粗糙」：
+ *   一版 圆圈里写个「关」字——城印是画的、关津是写的，两套笔法摆在一张图上
+ *   二版 手写 <path> 的矢量形——形状对了，可平涂加硬描边仍是「软件里的图标」
+ * 现在是笔墨版：关是双阙夹券门上覆飞檐、道是两峰夹栈道、津是一叶横舟、
+ * 港是舟上张帆、仓是两座圆囷、战是折戟交叉
  */
 function NodeMark({ x, y, r, kind }: { x: number; y: number; r: number; kind: string }) {
-  const ink = "#2b251e";
-  const wash = kind === "ford" || kind === "port" ? "#5b8098"
-    : kind === "gate" || kind === "pass" ? "#a05043" : "#6f6552";
-  // 图元比城印小一号：关津是**次要注记**，与城印同重的话，整幅就分不出主次了。
-  // 线也比城印细——那是印，这是注
-  const w = r * 1.42, h = r * 1.3;
-  const l = x - w / 2, rt = x + w / 2, b = y + h / 2, t = y - h / 2;
-  const lw = r * 0.13;
+  const w = r * 3.4;
   return (
     <g className={`node ${kind}`}>
-      {/* 纸色衬底。比城印的淡：它不该在墨底上挖一个白洞 */}
-      <ellipse cx={x} cy={y + h * 0.04} rx={w * 0.66} ry={h * 0.72} className="node-halo" />
-      {kind === "gate" && (
-        <>
-          {/* 关：两墩夹一门洞，上覆一道飞檐。门洞留墨，远看是「过得去的一个口」 */}
-          <path d={`M ${l} ${b} L ${l} ${y - h * 0.12} L ${l + w * 0.3} ${y - h * 0.12}
-                    L ${l + w * 0.3} ${b} Z`} fill={wash} stroke={ink} strokeWidth={lw} />
-          <path d={`M ${rt - w * 0.3} ${b} L ${rt - w * 0.3} ${y - h * 0.12} L ${rt} ${y - h * 0.12}
-                    L ${rt} ${b} Z`} fill={wash} stroke={ink} strokeWidth={lw} />
-          <path d={`M ${x - w * 0.17} ${b} L ${x - w * 0.17} ${y + h * 0.06}
-                    A ${w * 0.17} ${h * 0.18} 0 0 1 ${x + w * 0.17} ${y + h * 0.06}
-                    L ${x + w * 0.17} ${b} Z`} fill={ink} opacity={0.82} />
-          {/* 飞檐：两端微翘 */}
-          <path d={`M ${l - w * 0.16} ${y - h * 0.1} Q ${x} ${t - h * 0.16} ${rt + w * 0.16} ${y - h * 0.1}`}
-            fill="none" stroke={ink} strokeWidth={lw * 1.6} strokeLinecap="round" />
-        </>
-      )}
-      {kind === "pass" && (
-        <>
-          {/* 道：两峰夹一线，线是栈道 */}
-          <path d={`M ${l} ${b} L ${x - w * 0.14} ${t + h * 0.06} L ${x + w * 0.06} ${b} Z`}
-            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-          <path d={`M ${x - w * 0.02} ${b} L ${x + w * 0.2} ${t + h * 0.24} L ${rt} ${b} Z`}
-            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-          <path d={`M ${l + w * 0.1} ${b} Q ${x} ${y + h * 0.1} ${rt - w * 0.1} ${b}`}
-            fill="none" stroke="#fbf8f1" strokeWidth={lw * 1.5} strokeLinecap="round" />
-        </>
-      )}
-      {(kind === "ford" || kind === "port") && (
-        <>
-          {/* 水：一道波纹压在下面，舟浮其上。港张帆，津只系缆 */}
-          <path d={`M ${l - w * 0.1} ${b} Q ${x - w * 0.3} ${b - h * 0.16} ${x} ${b}
-                    Q ${x + w * 0.3} ${b + h * 0.16} ${rt + w * 0.1} ${b}`}
-            fill="none" stroke={wash} strokeWidth={lw * 1.2} strokeLinecap="round" />
-          <path d={`M ${l} ${y + h * 0.16} Q ${x} ${y + h * 0.5} ${rt} ${y + h * 0.16} Z`}
-            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-          {kind === "port" ? (
-            <path d={`M ${x - w * 0.04} ${y + h * 0.14} L ${x - w * 0.04} ${t}
-                      Q ${x + w * 0.34} ${y - h * 0.22} ${x + w * 0.06} ${y + h * 0.1} Z`}
-              fill="#fbf8f1" stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-          ) : (
-            <line x1={x} y1={y + h * 0.14} x2={x} y2={t + h * 0.1}
-              stroke={ink} strokeWidth={lw * 1.1} strokeLinecap="round" />
-          )}
-        </>
-      )}
-      {kind === "depot" && (
-        <>
-          {/* 仓：圆囷，笠顶。方屋会与关墩撞形，圆的才一眼分得开 */}
-          <path d={`M ${l + w * 0.06} ${y - h * 0.06} L ${x} ${t - h * 0.04} L ${rt - w * 0.06} ${y - h * 0.06} Z`}
-            fill={wash} stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-          <path d={`M ${l + w * 0.16} ${y - h * 0.06} L ${l + w * 0.16} ${b - h * 0.06}
-                    Q ${x} ${b + h * 0.16} ${rt - w * 0.16} ${b - h * 0.06}
-                    L ${rt - w * 0.16} ${y - h * 0.06} Z`}
-            fill="#fbf8f1" stroke={ink} strokeWidth={lw} strokeLinejoin="round" />
-        </>
-      )}
-      {kind === "battlefield" && (
-        <>
-          {/* 战：两戟交叉，一支的锋已折。头一版画成一竖一斜，远看是个「人」字 */}
-          <line x1={l + w * 0.08} y1={b} x2={rt - w * 0.08} y2={t + h * 0.08}
-            stroke={ink} strokeWidth={lw * 1.5} strokeLinecap="round" />
-          <line x1={rt - w * 0.08} y1={b} x2={l + w * 0.08} y2={t + h * 0.08}
-            stroke={ink} strokeWidth={lw * 1.5} strokeLinecap="round" />
-          {/* 一支的月牙刃 */}
-          <path d={`M ${rt - w * 0.08} ${t + h * 0.08} Q ${rt - w * 0.42} ${t - h * 0.02}
-                    ${rt - w * 0.3} ${t + h * 0.32}`}
-            fill="none" stroke={wash} strokeWidth={lw * 1.6} strokeLinecap="round" />
-          {/* 另一支折了：断口处留一小截 */}
-          <line x1={l + w * 0.08} y1={t + h * 0.08} x2={l + w * 0.24} y2={t + h * 0.02}
-            stroke={wash} strokeWidth={lw * 1.4} strokeLinecap="round" />
-        </>
-      )}
+      <ellipse cx={x} cy={y - w * 0.26} rx={w * 0.38} ry={w * 0.3} className="node-halo" />
+      <image href={`${GLYPH}/${kind}-ink.png`}
+        x={x - w / 2} y={y - w * GLYPH_BASE} width={w} height={w} />
     </g>
   );
 }
 
 /**
- * 军团图元。在途画行营（帐上一面旗），待命画营垒（一列栅栏）。
- * 两者的处境不同，图元也该不同：一个是「已经动了、还没到」，一个是「在家闲着」。
- * 颜色取势力色——图上一眼看得出这支兵是谁的
+ * 军团图元。在途画行营（帐上一面旗），待命画营垒（一列栅栏）——
+ * 两者的处境不同：一个是「已经动了、还没到」，一个是「在家闲着」。
+ * 帐面与栅面刷势力色，图上一眼看得出这支兵是谁的
  */
 function ArmyMark({ x, y, s, color, marching }: {
   x: number; y: number; s: number; color: string; marching: boolean;
 }) {
-  const ink = "#2b251e";
-  if (marching) {
-    return (
-      <g>
-        {/* 帐：一顶尖帐，帐顶出旗 */}
-        <path d={`M ${x - s * 0.62} ${y + s * 0.4} Q ${x} ${y + s * 0.58} ${x + s * 0.62} ${y + s * 0.4}
-                  L ${x} ${y - s * 0.44} Z`}
-          fill={color} stroke={ink} strokeWidth={s * 0.09} strokeLinejoin="round" />
-        <line x1={x} y1={y - s * 0.44} x2={x} y2={y - s * 0.92}
-          stroke={ink} strokeWidth={s * 0.07} />
-        <path d={`M ${x} ${y - s * 0.92} L ${x + s * 0.44} ${y - s * 0.78}
-                  L ${x} ${y - s * 0.64} Z`} fill={ink} />
-      </g>
-    );
-  }
+  const id = marching ? "tent" : "camp";
+  const w = s * 2.4;
+  const l = x - w / 2, t = y - w * GLYPH_BASE;
   return (
     <g>
-      {/* 垒：一段栅栏，三根桩 */}
-      <path d={`M ${x - s * 0.6} ${y + s * 0.34} L ${x - s * 0.6} ${y - s * 0.16}
-                L ${x + s * 0.6} ${y - s * 0.16} L ${x + s * 0.6} ${y + s * 0.34} Z`}
-        fill={color} stroke={ink} strokeWidth={s * 0.09} strokeLinejoin="round" />
-      {[-0.34, 0, 0.34].map((d) => (
-        <line key={d} x1={x + s * d} y1={y - s * 0.16} x2={x + s * d} y2={y - s * 0.42}
-          stroke={ink} strokeWidth={s * 0.08} strokeLinecap="round" />
-      ))}
+      <rect x={l} y={t} width={w} height={w} fill={color}
+        mask={`url(#wash-${id})`} opacity={0.9} />
+      <image href={`${GLYPH}/${id}-ink.png`} x={l} y={t} width={w} height={w} />
     </g>
   );
 }
+
+/**
+ * 图上符号的笔墨版，由 tools/render-map-glyphs.mjs 用画底图那支笔渲出。
+ *
+ * 为什么不再手写 <path>：底图是 brush.mjs 的笔锋（钉头鼠尾、飞白、墨度沿
+ * 笔身衰减）加三十枚公有领域山水画的皴法图章画出来的，而符号是平涂加硬描边。
+ * 两套工艺摆在一张图上，形状再怎么调也是贴纸压在画上。
+ *
+ * 每个符号两张：ink 是墨线（不随势力变），wash 是可上色的面——
+ * 界面拿它作 mask 刷势力色，于是三十一家仍各有其色，而墨还是那支笔的墨
+ */
 
 /** 边的地形怎么画。引擎按 cost 算行军天数，图上要看得出这条路难在哪 */
 const EDGE_STYLE: Record<string, { stroke: string; dash: string; width: number }> = {
@@ -551,14 +422,12 @@ interface Engine {
 
 /** 图例里的小图与地图上的是同一段代码画的——另画一份必然与地图分家 */
 const legendGlyph = (kind: string) => (
-  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
-    <NodeMark x={11} y={11} r={8} kind={kind} />
-  </svg>
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src={`${GLYPH}/${kind}-ink.png`} alt="" width={24} height={24} />
 );
 const legendArmy = (marching: boolean) => (
-  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
-    <ArmyMark x={11} y={11} s={13} color="#8c3b2f" marching={marching} />
-  </svg>
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src={`${GLYPH}/${marching ? "tent" : "camp"}-ink.png`} alt="" width={24} height={24} />
 );
 
 /**
@@ -1524,6 +1393,14 @@ export function PlayClient() {
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
             <defs>
+              {/* 可上色面的 mask。maskContentUnits=objectBoundingBox 让同一份
+                  mask 贴到任意位置任意大小的矩形上——否则一百零五座城要一百零五份 */}
+              {WASHED.map((id) => (
+                <mask key={id} id={`wash-${id}`} maskContentUnits="objectBoundingBox">
+                  <image href={`${GLYPH}/${id}-wash.png`} x="0" y="0" width="1" height="1"
+                    preserveAspectRatio="none" />
+                </mask>
+              ))}
               <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
                 markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />

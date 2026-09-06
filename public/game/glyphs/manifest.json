@@ -1,0 +1,44 @@
+{
+ "note": "图上符号，由 tools/render-map-glyphs.mjs 用 brush.mjs 渲出，勿手改。",
+ "size": 256,
+ "glyphs": {
+  "city-small": {
+   "ink": "city-small-ink.png",
+   "wash": "city-small-wash.png"
+  },
+  "city-large": {
+   "ink": "city-large-ink.png",
+   "wash": "city-large-wash.png"
+  },
+  "city-seat": {
+   "ink": "city-seat-ink.png",
+   "wash": "city-seat-wash.png"
+  },
+  "gate": {
+   "ink": "gate-ink.png"
+  },
+  "pass": {
+   "ink": "pass-ink.png"
+  },
+  "ford": {
+   "ink": "ford-ink.png"
+  },
+  "port": {
+   "ink": "port-ink.png"
+  },
+  "depot": {
+   "ink": "depot-ink.png"
+  },
+  "battlefield": {
+   "ink": "battlefield-ink.png"
+  },
+  "tent": {
+   "ink": "tent-ink.png",
+   "wash": "tent-wash.png"
+  },
+  "camp": {
+   "ink": "camp-ink.png",
+   "wash": "camp-wash.png"
+  }
+ }
+}
