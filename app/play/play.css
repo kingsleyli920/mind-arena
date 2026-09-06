@@ -5,10 +5,24 @@
   --ink-soft: #6b6355;
   --rule: #cec4b0;
   --seal: #8c3b2f;
+  /* 绫边：装裱时画心四周那一圈素绢。比纸略深、略偏黄，不抢画心 */
+  --silk: #e3d9c2;
+  --silk-line: #b9a98a;
   min-height: 100dvh;
-  background: var(--paper);
   color: var(--ink);
   font-family: "Songti SC", "STSong", "Source Han Serif SC", serif;
+  /*
+   * 纸纹铺底。此前是一块纯色——「没有纸纹，无论怎么设色都像印刷品而不像
+   * 画在纸上」这句话写在 tools/make-paper.mjs 的开头，可那张纸只用在了地图上，
+   * 界面自己还是纯色。256 见方可平铺，24KB，与底图同一张纸
+   */
+  background: var(--paper) url("/game/ui-paper.webp") repeat;
+  background-blend-mode: multiply;
+}
+/* 纸纹会把面板也压暗一层，故面板自己再铺一次浅的，形成「纸上贴纸」的层次 */
+.play .paperish {
+  background: #fbf8f1 url("/game/ui-paper.webp") repeat;
+  background-blend-mode: multiply;
 }
 
 .play-head { padding: 1.4rem clamp(1rem, 3vw, 2.4rem) 0.9rem; }
@@ -63,11 +77,17 @@
 @media (max-width: 1000px) { .play-body { grid-template-columns: 1fr; } }
 
 .map-wrap {
-  position: relative; border: 1px solid var(--rule); border-radius: 3px;
+  position: relative; border-radius: 2px;
   overflow: hidden; background: #e8e2d4;
-  /* 局条：装裱时紧贴画心的一圈深色细边。固定 px，不随缩放变粗，
-     色取古铜褐而非纯黑 */
-  box-shadow: inset 0 0 0 2px #5c3719;
+  /* 装裱三道，由内而外：
+     局条——紧贴画心的一圈深色细边，色取古铜褐而非纯黑
+     绫边——一圈素绢
+     外框——一道细墨压住绢边
+     这三道是册页的样子；此前只有第一道，画心直接贴在纯色背景上 */
+  box-shadow: inset 0 0 0 2px #5c3719,
+              0 0 0 7px var(--silk),
+              0 0 0 8px var(--silk-line);
+  margin: 6px;
 }
 .map-wrap { touch-action: none; user-select: none; }
 .map-stage { position: relative; transform-origin: 0 0; will-change: transform; }
@@ -78,6 +98,8 @@
 /* 瓦片层：整幅铺满，块与块之间靠百分比对齐。
    相邻块之间有时会露出一条亚像素缝，靠 outline 同色描一圈补掉 */
 .map-stage .tiles { position: absolute; inset: 0; }
+/* 海波层：铺满，压在瓦片之上、疆域之下 */
+.map-stage img.decor { position: absolute; inset: 0; pointer-events: none; }
 .map-stage .tiles img { display: block; aspect-ratio: auto; outline: 1px solid transparent; }
 .map-stage img, .map-stage canvas, .map-stage svg {
   display: block; width: 100%; height: auto; aspect-ratio: 1815 / 1485;
@@ -173,7 +195,13 @@
 .brief b { color: var(--ink); }
 
 .acts { display: grid; gap: 0.4rem; overflow-y: auto; padding-inline-end: 0.2rem; }
-.acts details { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.acts details {
+  border: 1px solid var(--rule); border-radius: 2px;
+  background: #fbf8f1 url("/game/ui-paper.webp") repeat; background-blend-mode: multiply;
+  /* 绫边：外一道浅绢、再一道细墨。册页的边就是这么两道 */
+  box-shadow: 0 0 0 2px var(--silk), 0 0 0 3px var(--silk-line);
+  margin: 2px;
+}
 .acts summary {
   cursor: pointer; padding: 0.45rem 0.7rem; font-size: 0.85rem; letter-spacing: 0.08em;
   display: flex; justify-content: space-between; align-items: center;
@@ -379,7 +407,11 @@
 .panel .status b { font-size: 1.05rem; color: var(--ink); letter-spacing: 0.08em; }
 .panel .status em { font-style: normal; color: var(--seal); flex-basis: 100%; font-size: 0.78rem; }
 
-.panel .brief-fold { border: 1px solid var(--rule); border-radius: 3px; background: #fbf8f1; }
+.panel .brief-fold {
+  border: 1px solid var(--rule); border-radius: 2px;
+  background: #fbf8f1 url("/game/ui-paper.webp") repeat; background-blend-mode: multiply;
+  box-shadow: 0 0 0 2px var(--silk), 0 0 0 3px var(--silk-line); margin: 2px;
+}
 .panel .brief-fold summary {
   cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.78rem;
   letter-spacing: 0.1em; color: var(--ink-soft);

@@ -51,6 +51,12 @@ const levelFor = (k: number, screenW: number) =>
   LEVELS.find((L) => L.w >= screenW * k) ?? LEVELS[LEVELS.length - 1];
 
 const BASE = "/game/map/play-base.webp";
+/**
+ * 海波与云气。底图把陆地画得很足，海却是一片平色——传世舆图不这么画。
+ * 单出一层是因为它要跟着海岸走、要避开陆地，那要读高程栅格（283MB），
+ * 只能离线出（tools/render-map-decor.mjs）
+ */
+const DECOR = "/game/map/decor.webp";
 // 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
 // 越拉越糊——而底图本来就有 7260 的细节可用
 
@@ -299,15 +305,18 @@ const MAP = { w: 1815, h: 1485, west: 94, north: 43, ppd: 55 };
  * 这里按等级换不同的一幅：州治重檐带角楼、大郡带门楼、寻常郡一段城墙。
  * 图本身是 tools/render-map-glyphs.mjs 用画底图那支笔渲的（见下面 GLYPH 的注）。
  */
-function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail }: {
+function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail, at }: {
   x: number; y: number; size: number; fill: string | null;
   mine: boolean; seat: boolean; besieged: boolean;
   /** 近观档：换更大的一幅，细节多一级 */
   detail?: boolean;
+  /** 郡名。用来定取哪一幅——同一个郡永远同一幅 */
+  at: string;
 }) {
   // 三等城：州治重檐带角楼、大郡带门楼、寻常郡只一段墙。
   // 等级差别画在**笔墨里**，不靠加个小旗表示
-  const id = isSeat ? "city-seat" : detail || size > 26 ? "city-large" : "city-small";
+  const kind = isSeat ? "city-seat" : detail || size > 26 ? "city-large" : "city-small";
+  const id = `${kind}-${variantOf(at, kind)}`;
   const w = size * 2.3;
   const l = x - w / 2, t = y - w * GLYPH_BASE;
   return (
@@ -335,10 +344,32 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail }: {
  * 界面拿它作 mask 刷势力色，于是三十一家仍各有其色，而墨还是那支笔的墨
  */
 const GLYPH = "/game/glyphs";
+/**
+ * 每类几幅。同一类城在图上出现几十次，一幅反复贴就是重复图案——
+ * 那正是「元素堆砌」的观感来源。
+ *
+ * 这份表必须与 public/game/glyphs/manifest.json 对得上，
+ * tests 里「符号变体数与渲出来的对得上」钉住这件事：贴一幅不存在的图，
+ * 界面上是一个空洞，控制台一声不吭
+ */
+const GLYPH_N: Record<string, number> = {
+  "city-small": 3, "city-large": 3, "city-seat": 2,
+  gate: 3, pass: 2, ford: 2, port: 2, depot: 2, battlefield: 2, tent: 2, camp: 2,
+};
 /** 有可上色面的那几个 */
 const WASHED = ["city-small", "city-large", "city-seat", "tent", "camp"] as const;
 /** 符号画面里的地平线在 0.82 处：图元要**站在**那个点上，不是以它为心 */
 const GLYPH_BASE = 0.82;
+/**
+ * 取哪一幅。按名字的哈希定：同一个郡永远是同一幅，
+ * 换了席位、读了存档、翻到下一季都不变——图上的城不该每季换一副面孔
+ */
+function variantOf(id: string, kind: string): number {
+  const n = GLYPH_N[kind] ?? 1;
+  let h = 0x811c9dc5;
+  for (const ch of `${kind}:${id}`) { h ^= ch.codePointAt(0) ?? 0; h = Math.imul(h, 0x01000193) >>> 0; }
+  return h % n;
+}
 
 const NODE_CN: Record<string, string> = {
   gate: "关隘", pass: "谷道", ford: "渡口", port: "港口", depot: "粮仓", battlefield: "古战场",
@@ -351,12 +382,14 @@ const NODE_CN: Record<string, string> = {
  * 现在是笔墨版：关是双阙夹券门上覆飞檐、道是两峰夹栈道、津是一叶横舟、
  * 港是舟上张帆、仓是两座圆囷、战是折戟交叉
  */
-function NodeMark({ x, y, r, kind }: { x: number; y: number; r: number; kind: string }) {
+function NodeMark({ x, y, r, kind, id }: {
+  x: number; y: number; r: number; kind: string; id: string;
+}) {
   const w = r * 3.4;
   return (
     <g className={`node ${kind}`}>
       <ellipse cx={x} cy={y - w * 0.26} rx={w * 0.38} ry={w * 0.3} className="node-halo" />
-      <image href={`${GLYPH}/${kind}-ink.png`}
+      <image href={`${GLYPH}/${kind}-${variantOf(id, kind)}-ink.png`}
         x={x - w / 2} y={y - w * GLYPH_BASE} width={w} height={w} />
     </g>
   );
@@ -367,10 +400,13 @@ function NodeMark({ x, y, r, kind }: { x: number; y: number; r: number; kind: st
  * 两者的处境不同：一个是「已经动了、还没到」，一个是「在家闲着」。
  * 帐面与栅面刷势力色，图上一眼看得出这支兵是谁的
  */
-function ArmyMark({ x, y, s, color, marching }: {
+function ArmyMark({ x, y, s, color, marching, at }: {
   x: number; y: number; s: number; color: string; marching: boolean;
+  /** 军团 id：同一支军团一路上是同一顶帐 */
+  at: string;
 }) {
-  const id = marching ? "tent" : "camp";
+  const kind = marching ? "tent" : "camp";
+  const id = `${kind}-${variantOf(at, kind)}`;
   const w = s * 2.4;
   const l = x - w / 2, t = y - w * GLYPH_BASE;
   return (
@@ -423,11 +459,11 @@ interface Engine {
 /** 图例里的小图与地图上的是同一段代码画的——另画一份必然与地图分家 */
 const legendGlyph = (kind: string) => (
   // eslint-disable-next-line @next/next/no-img-element
-  <img src={`${GLYPH}/${kind}-ink.png`} alt="" width={24} height={24} />
+  <img src={`${GLYPH}/${kind}-0-ink.png`} alt="" width={24} height={24} />
 );
 const legendArmy = (marching: boolean) => (
   // eslint-disable-next-line @next/next/no-img-element
-  <img src={`${GLYPH}/${marching ? "tent" : "camp"}-ink.png`} alt="" width={24} height={24} />
+  <img src={`${GLYPH}/${marching ? "tent" : "camp"}-0-ink.png`} alt="" width={24} height={24} />
 );
 
 /**
@@ -1390,17 +1426,23 @@ export function PlayClient() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={BASE} alt="汉末地形" />
           <TileLayer view={view} screenW={stageW} />
+          {/* 海波压在瓦片之上、疆域之下：它是底图的一部分，
+              但疆域的色域要盖得住它 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="decor" src={DECOR} alt="" />
           <canvas ref={canvasRef} />
           <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
             <defs>
               {/* 可上色面的 mask。maskContentUnits=objectBoundingBox 让同一份
                   mask 贴到任意位置任意大小的矩形上——否则一百零五座城要一百零五份 */}
-              {WASHED.map((id) => (
-                <mask key={id} id={`wash-${id}`} maskContentUnits="objectBoundingBox">
-                  <image href={`${GLYPH}/${id}-wash.png`} x="0" y="0" width="1" height="1"
-                    preserveAspectRatio="none" />
-                </mask>
-              ))}
+              {WASHED.flatMap((kind) =>
+                Array.from({ length: GLYPH_N[kind] ?? 1 }, (_, v) => (
+                  <mask key={`${kind}-${v}`} id={`wash-${kind}-${v}`}
+                    maskContentUnits="objectBoundingBox">
+                    <image href={`${GLYPH}/${kind}-${v}-wash.png`} x="0" y="0" width="1" height="1"
+                      preserveAspectRatio="none" />
+                  </mask>
+                )))}
               <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
                 markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
@@ -1428,7 +1470,7 @@ export function PlayClient() {
                 onMouseEnter={() => setNodeTip(m.n)} onMouseLeave={() => setNodeTip(null)}>
                 {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
                 <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
-                <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} />
+                <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
                 {lod >= 2 && (
                   <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
                     textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
@@ -1468,6 +1510,7 @@ export function PlayClient() {
                   fill="transparent" />
                 <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
                   mine={m.mine} seat={m.isSeat} besieged={m.besieged} detail={lod >= 2}
+                  at={m.c.id}
                   fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
               </g>
             ))}
@@ -1495,7 +1538,8 @@ export function PlayClient() {
                     <line className="march-path" x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y}
                       stroke={col} strokeWidth={2.4 / Math.sqrt(view.k)} />
                   )}
-                  <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching} />
+                  <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching}
+                    at={t.a.id} />
                   <text x={t.x} y={t.y + s2 * 0.98} textAnchor="middle" fontSize={s2 * 0.5}>
                     {(t.a.troops / 1000).toFixed(1)}千
                     {t.marching ? `·尚需 ${t.a.marchLeft} 季` : ""}

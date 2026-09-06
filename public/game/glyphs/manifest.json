@@ -1,44 +1,64 @@
 {
  "note": "图上符号，由 tools/render-map-glyphs.mjs 用 brush.mjs 渲出，勿手改。",
  "size": 256,
+ "base": 0.82,
+ "variants": {
+  "city-small": 3,
+  "city-large": 3,
+  "city-seat": 2,
+  "gate": 3,
+  "pass": 2,
+  "ford": 2,
+  "port": 2,
+  "depot": 2,
+  "battlefield": 2,
+  "tent": 2,
+  "camp": 2
+ },
  "glyphs": {
   "city-small": {
-   "ink": "city-small-ink.png",
-   "wash": "city-small-wash.png"
+   "variants": 3,
+   "wash": true
   },
   "city-large": {
-   "ink": "city-large-ink.png",
-   "wash": "city-large-wash.png"
+   "variants": 3,
+   "wash": true
   },
   "city-seat": {
-   "ink": "city-seat-ink.png",
-   "wash": "city-seat-wash.png"
+   "variants": 2,
+   "wash": true
   },
   "gate": {
-   "ink": "gate-ink.png"
+   "variants": 3,
+   "wash": false
   },
   "pass": {
-   "ink": "pass-ink.png"
+   "variants": 2,
+   "wash": false
   },
   "ford": {
-   "ink": "ford-ink.png"
+   "variants": 2,
+   "wash": false
   },
   "port": {
-   "ink": "port-ink.png"
+   "variants": 2,
+   "wash": false
   },
   "depot": {
-   "ink": "depot-ink.png"
+   "variants": 2,
+   "wash": false
   },
   "battlefield": {
-   "ink": "battlefield-ink.png"
+   "variants": 2,
+   "wash": false
   },
   "tent": {
-   "ink": "tent-ink.png",
-   "wash": "tent-wash.png"
+   "variants": 2,
+   "wash": true
   },
   "camp": {
-   "ink": "camp-ink.png",
-   "wash": "camp-wash.png"
+   "variants": 2,
+   "wash": true
   }
  }
 }

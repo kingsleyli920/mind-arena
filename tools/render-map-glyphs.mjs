@@ -132,50 +132,61 @@ function battlement(D, x0, x1, yTop, yBot, rnd, seed = 1) {
 }
 
 // ── 各符号的笔顺 ────────────────────────────────────────────────────
+//
+// 每个符号出**若干变体**：同一类城在图上出现几十次，一幅画反复贴就是重复图案，
+// 那正是「元素堆砌」的观感来源。变体不是换个随机种子那么简单——那只换飞白的
+// 位置，轮廓一模一样；这里连比例一起动：墙高矮、垛口数、门楼偏左偏右、
+// 峰的高低、舟的胖瘦。界面按郡名的哈希取一幅，同一个郡永远是同一幅。
+//
 // 每个返回 { ink, wash }，两块深度场
 const GLYPHS = {
-  /** 寻常郡城：一段城墙 + 城门 */
-  "city-small": () => {
-    const rnd = rng(11), ink = field(), wa = field();
-    const x0 = PAD + 26, x1 = S - PAD - 26, yT = 118, yB = 200;
-    wash(wa, x0 + 6, yT + 6, x1 - 6, yB - 4, rng(12));
-    battlement(ink, x0, x1, yT, yB, rnd, 1);
+  /** 寻常郡城：一段城墙 + 城门。三幅：墙高、墙矮、偏窄一段 */
+  "city-small": (v = 0) => {
+    const rnd = rng(11 + v * 37), ink = field(), wa = field();
+    const inset = [26, 20, 34][v % 3];
+    const x0 = PAD + inset, x1 = S - PAD - inset;
+    const yT = [118, 128, 122][v % 3], yB = 200;
+    wash(wa, x0 + 6, yT + 6, x1 - 6, yB - 4, rng(12 + v * 37));
+    battlement(ink, x0, x1, yT, yB, rnd, 1 + v * 400);
     // 城门：一道圆券，券内留暗。两条各自弯的弧接不成券，
     // 第一版画出来是个叉
-    const cx = S / 2;
-    stroke(ink, arcPts(cx, yB - 6, 20, Math.PI, 2 * Math.PI), { wMax: 7, A0: 0.9, seed: 61 });
-    stroke(ink, line(cx - 20, yB - 6, cx - 20, yB, rnd, 0, 0.4), { wMax: 7, A0: 0.88, seed: 62 });
-    stroke(ink, line(cx + 20, yB - 6, cx + 20, yB, rnd, 0, 0.4), { wMax: 7, A0: 0.88, seed: 63 });
-    washTrap(ink, cx, yB - 22, 16, yB, 18, rnd, { A0: 0.5 });
+    const cx = S / 2 + [0, -10, 8][v % 3];
+    const gr = [20, 18, 21][v % 3];
+    stroke(ink, arcPts(cx, yB - 6, gr, Math.PI, 2 * Math.PI), { wMax: 7, A0: 0.9, seed: 61 + v });
+    stroke(ink, line(cx - gr, yB - 6, cx - gr, yB, rnd, 0, 0.4), { wMax: 7, A0: 0.88, seed: 62 + v });
+    stroke(ink, line(cx + gr, yB - 6, cx + gr, yB, rnd, 0, 0.4), { wMax: 7, A0: 0.88, seed: 63 + v });
+    washTrap(ink, cx, yB - gr - 2, gr * 0.8, yB, gr * 0.9, rnd, { A0: 0.5 });
     return { ink, wash: wa };
   },
-  /** 大郡：城墙 + 门楼 */
-  "city-large": () => {
-    const rnd = rng(21), ink = field(), wa = field();
-    const x0 = PAD + 20, x1 = S - PAD - 20, yT = 128, yB = 208;
-    wash(wa, x0 + 6, yT + 6, x1 - 6, yB - 4, rng(22));
-    wash(wa, S / 2 - 34, 84, S / 2 + 34, yT - 2, rng(23));
-    battlement(ink, x0, x1, yT, yB, rnd, 100);
+  /** 大郡：城墙 + 门楼。三幅：门楼居中、偏左、偏右且矮一档 */
+  "city-large": (v = 0) => {
+    const rnd = rng(21 + v * 53), ink = field(), wa = field();
+    const x0 = PAD + 20, x1 = S - PAD - 20, yT = [128, 124, 132][v % 3], yB = 208;
+    const tx = S / 2 + [0, -26, 24][v % 3];          // 门楼横向偏心
+    const ty = [84, 80, 92][v % 3];                  // 门楼高低
+    wash(wa, x0 + 6, yT + 6, x1 - 6, yB - 4, rng(22 + v * 53));
+    wash(wa, tx - 34, ty, tx + 34, yT - 2, rng(23 + v * 53));
+    battlement(ink, x0, x1, yT, yB, rnd, 100 + v * 400);
     // 门楼屋身
-    stroke(ink, line(S / 2 - 36, 84, S / 2 - 36, yT, rnd, 0, 0.6), { wMax: 7, A0: 0.85, seed: 131 });
-    stroke(ink, line(S / 2 + 36, 84, S / 2 + 36, yT, rnd, 0, 0.6), { wMax: 7, A0: 0.85, seed: 132 });
-    roof(ink, S / 2, 84, 52, 22, rnd, 140);
-    const cx = S / 2;
-    stroke(ink, arcPts(cx, yB - 6, 18, Math.PI, 2 * Math.PI), { wMax: 7, A0: 0.9, seed: 161 });
+    stroke(ink, line(tx - 36, ty, tx - 36, yT, rnd, 0, 0.6), { wMax: 7, A0: 0.85, seed: 131 + v });
+    stroke(ink, line(tx + 36, ty, tx + 36, yT, rnd, 0, 0.6), { wMax: 7, A0: 0.85, seed: 132 + v });
+    roof(ink, tx, ty, [52, 48, 55][v % 3], 22, rnd, 140 + v * 7);
+    const cx = tx;
+    stroke(ink, arcPts(cx, yB - 6, 18, Math.PI, 2 * Math.PI), { wMax: 7, A0: 0.9, seed: 161 + v });
     washTrap(ink, cx, yB - 20, 15, yB, 16, rnd, { A0: 0.5 });
     return { ink, wash: wa };
   },
-  /** 州治：重檐两层 + 角楼 + 旌旗 */
-  "city-seat": () => {
-    const rnd = rng(31), ink = field(), wa = field();
+  /** 州治：重檐两层 + 角楼。两幅：角楼在墙内 / 角楼探出墙外一档 */
+  "city-seat": (v = 0) => {
+    const rnd = rng(31 + v * 71), ink = field(), wa = field();
     const x0 = PAD + 8, x1 = S - PAD - 8, yT = 150, yB = 222;
     wash(wa, x0 + 6, yT + 6, x1 - 6, yB - 4, rng(32));
     wash(wa, S / 2 - 30, 104, S / 2 + 30, yT - 2, rng(33));
     wash(wa, S / 2 - 20, 56, S / 2 + 20, 96, rng(34));
-    battlement(ink, x0, x1, yT, yB, rnd, 200);
+    battlement(ink, x0, x1, yT, yB, rnd, 200 + v * 400);
     // 两侧角楼
     for (const s of [-1, 1]) {
-      const cx = S / 2 + s * 84;
+      const cx = S / 2 + s * [84, 92][v % 2];
       stroke(ink, line(cx - 15, yT - 26, cx - 15, yT, rnd, 0, 0.6), { wMax: 6, A0: 0.8, seed: 210 + s });
       stroke(ink, line(cx + 15, yT - 26, cx + 15, yT, rnd, 0, 0.6), { wMax: 6, A0: 0.8, seed: 214 + s });
       roof(ink, cx, yT - 26, 22, 12, rnd, 220 + s * 3);
@@ -192,10 +203,10 @@ const GLYPHS = {
     washTrap(ink, cx, yB - 20, 14, yB, 15, rnd, { A0: 0.5 });
     return { ink, wash: wa };
   },
-  /** 关隘：两墩夹门洞，上覆飞檐，两翼接城垣 */
-  gate: () => {
-    const rnd = rng(41), ink = field();
-    const yB = 206, yT = 120;
+  /** 关隘：两墩夹门洞，上覆飞檐，两翼接城垣。三幅：关楼高、平、两翼长 */
+  gate: (v = 0) => {
+    const rnd = rng(41 + v * 91), ink = field();
+    const yB = 206, yT = [120, 128, 116][v % 3];
     for (const s of [-1, 1]) {
       const cx = S / 2 + s * 62;
       stroke(ink, line(cx - 24, yT, cx - 24, yB, rnd, 0, 0.6), { wMax: 8, A0: 0.88, seed: 411 + s });
@@ -209,17 +220,17 @@ const GLYPHS = {
     stroke(ink, line(S / 2 + 30, yB - 22, S / 2 + 30, yB, rnd, 0, 0.4), { wMax: 8, A0: 0.9, seed: 434 });
     washTrap(ink, S / 2, yB - 46, 22, yB, 27, rnd, { A0: 0.66, fwTarget: 0.22 });
     // 门上飞檐：这一笔决定它像不像关
-    roof(ink, S / 2, yT - 6, 78, 26, rnd, 450);
+    roof(ink, S / 2, yT - 6, [78, 72, 84][v % 3], [26, 22, 30][v % 3], rnd, 450 + v * 9);
     // 两翼城垣没入画外
     for (const s of [-1, 1]) {
-      stroke(ink, line(S / 2 + s * 86, yB - 26, S / 2 + s * 124, yB - 14, rnd, 0.06, 2),
-        { wMax: 7, aProf: APROF.dry, A0: 0.7, fwTarget: 0.3, seed: 461 + s });
+      stroke(ink, line(S / 2 + s * 86, yB - 26, S / 2 + s * [124, 112, 136][v % 3], yB - 14, rnd, 0.06, 2),
+        { wMax: 7, aProf: APROF.dry, A0: 0.7, fwTarget: 0.3, seed: 461 + s + v });
     }
     return { ink };
   },
   /** 谷道：两峰夹一线栈道 */
-  pass: () => {
-    const rnd = rng(51), ink = field();
+  pass: (v = 0) => {
+    const rnd = rng(51 + v * 101), ink = field();
     const yB = 208;
     const peak = (cx, top, hw, seed) => {
       stroke(ink, line(cx - hw, yB, cx, top, rnd, 0.06, 2.4),
@@ -233,16 +244,16 @@ const GLYPHS = {
         { wMax: 5, wProf: WPROF.fupiSmall, aProf: APROF.dry, A0: 0.6,
           fwTarget: 0.36, seed: seed + 2 });
     };
-    peak(S / 2 - 46, 76, 52, 511);
-    peak(S / 2 + 52, 100, 46, 521);
+    peak(S / 2 - 46, [76, 88][v % 2], [52, 46][v % 2], 511 + v * 3);
+    peak(S / 2 + [52, 46][v % 2], [100, 82][v % 2], [46, 54][v % 2], 521 + v * 3);
     // 栈道：一条淡线从两峰之间穿过
     stroke(ink, arcSpine(S / 2 - 96, yB - 8, -0.12, 190, 0.16, 2, rnd),
       { wMax: 6, aProf: APROF.dry, A0: 0.55, fwTarget: 0.4, seed: 531 });
     return { ink };
   },
   /** 渡口：一叶舟系于岸，下有水波 */
-  ford: () => {
-    const rnd = rng(61), ink = field();
+  ford: (v = 0) => {
+    const rnd = rng(61 + v * 113), ink = field();
     const yW = 176;
     for (let i = 0; i < 3; i += 1) {
       stroke(ink, arcSpine(PAD + 10, yW + 22 + i * 16, 0.03, S - PAD * 2 - 20, 0.1 * (i % 2 ? -1 : 1), 3, rnd),
@@ -254,13 +265,13 @@ const GLYPHS = {
     stroke(ink, line(S / 2 - 66, yW - 22, S / 2 + 66, yW - 22, rnd, -0.02, 1),
       { wMax: 6, A0: 0.78, seed: 622 });
     // 篙
-    stroke(ink, line(S / 2 + 10, yW - 24, S / 2 + 34, 86, rnd, 0.03, 1.5),
-      { wMax: 5, A0: 0.8, seed: 623 });
+    stroke(ink, line(S / 2 + [10, -14][v % 2], yW - 24, S / 2 + [34, -28][v % 2], [86, 96][v % 2],
+      rnd, 0.03, 1.5), { wMax: 5, A0: 0.8, seed: 623 + v });
     return { ink };
   },
   /** 港口：舟张帆，帆上有篷骨 */
-  port: () => {
-    const rnd = rng(71), ink = field();
+  port: (v = 0) => {
+    const rnd = rng(71 + v * 127), ink = field();
     const yW = 186;
     for (let i = 0; i < 3; i += 1) {
       stroke(ink, arcSpine(PAD + 10, yW + 18 + i * 15, -0.03, S - PAD * 2 - 20, 0.1 * (i % 2 ? 1 : -1), 3, rnd),
@@ -283,8 +294,8 @@ const GLYPHS = {
     return { ink };
   },
   /** 粮仓：圆囷两座，笠顶 */
-  depot: () => {
-    const rnd = rng(81), ink = field();
+  depot: (v = 0) => {
+    const rnd = rng(81 + v * 131), ink = field();
     const yB = 206;
     const bin = (cx, top, hw, seed) => {
       // 笠顶：半圆券压出来的斗笠，两侧出檐
@@ -300,13 +311,13 @@ const GLYPHS = {
       stroke(ink, arcSpine(cx - hw * 0.7, yB - 34, 0.02, hw * 1.4, 0.12, 1.2, rnd),
         { wMax: 5, aProf: APROF.dry, A0: 0.55, fwTarget: 0.35, seed: seed + 4 });
     };
-    bin(S / 2 - 40, 96, 40, 811);
-    bin(S / 2 + 46, 116, 32, 821);
+    bin(S / 2 - 40, [96, 104][v % 2], [40, 34][v % 2], 811 + v * 3);
+    bin(S / 2 + [46, 40][v % 2], [116, 98][v % 2], [32, 38][v % 2], 821 + v * 3);
     return { ink };
   },
   /** 古战场：折戟交叉，一支的锋已断 */
-  battlefield: () => {
-    const rnd = rng(91), ink = field();
+  battlefield: (v = 0) => {
+    const rnd = rng(91 + v * 137), ink = field();
     stroke(ink, line(PAD + 34, S - PAD - 34, S - PAD - 40, PAD + 46, rnd, 0.03, 1.6),
       { wMax: 9, wProf: WPROF.fupi, A0: 0.9, seed: 911 });
     stroke(ink, line(S - PAD - 34, S - PAD - 34, PAD + 52, PAD + 54, rnd, -0.03, 1.6),
@@ -320,9 +331,9 @@ const GLYPHS = {
     return { ink };
   },
   /** 行营：一顶尖帐，帐顶出旗 */
-  tent: () => {
-    const rnd = rng(101), ink = field(), wa = field();
-    const yB = 198, apex = 96;
+  tent: (v = 0) => {
+    const rnd = rng(101 + v * 139), ink = field(), wa = field();
+    const yB = 198, apex = [96, 88][v % 2];
     wash(wa, S / 2 - 58, apex + 26, S / 2 + 58, yB - 6, rng(102));
     stroke(ink, line(S / 2 - 72, yB, S / 2, apex, rnd, 0.04, 1.4), { wMax: 9, A0: 0.9, seed: 1011 });
     stroke(ink, line(S / 2 + 72, yB, S / 2, apex, rnd, -0.04, 1.4), { wMax: 9, A0: 0.9, seed: 1012 });
@@ -337,9 +348,9 @@ const GLYPHS = {
     return { ink, wash: wa };
   },
   /** 营垒：一段栅栏，后有帐脊 */
-  camp: () => {
-    const rnd = rng(111), ink = field(), wa = field();
-    const yB = 196, yT = 128;
+  camp: (v = 0) => {
+    const rnd = rng(111 + v * 149), ink = field(), wa = field();
+    const yB = 196, yT = [128, 136][v % 2];
     wash(wa, PAD + 22, yT + 8, S - PAD - 22, yB - 6, rng(112));
     stroke(ink, line(PAD + 18, yB, S - PAD - 18, yB, rnd, 0.01, 0.8), { wMax: 8, A0: 0.9, seed: 1111 });
     stroke(ink, line(PAD + 18, yT, S - PAD - 18, yT, rnd, -0.015, 1), { wMax: 7, A0: 0.85, seed: 1112 });
@@ -373,20 +384,29 @@ async function writePng(D, file, rgb) {
   await sharp(buf, { raw: { width: S, height: S, channels: 4 } }).png().toFile(file);
 }
 
+/** 各出几幅。城最多——图上出现得最多的就是它 */
+const VARIANTS = {
+  "city-small": 3, "city-large": 3, "city-seat": 2,
+  gate: 3, pass: 2, ford: 2, port: 2, depot: 2, battlefield: 2, tent: 2, camp: 2,
+};
+
 fs.mkdirSync(OUT, { recursive: true });
-const manifest = { note: "图上符号，由 tools/render-map-glyphs.mjs 用 brush.mjs 渲出，勿手改。", size: S, glyphs: {} };
+const manifest = {
+  note: "图上符号，由 tools/render-map-glyphs.mjs 用 brush.mjs 渲出，勿手改。",
+  size: S, base: 0.82, variants: VARIANTS, glyphs: {},
+};
 for (const [id, make] of Object.entries(GLYPHS)) {
-  const { ink, wash: wa } = make();
-  await writePng(ink, path.join(OUT, `${id}-ink.png`), [43, 37, 30]);
-  const entry = { ink: `${id}-ink.png` };
-  if (wa) {
-    // 可上色的面出成白版，界面拿它当 mask
-    await writePng(wa, path.join(OUT, `${id}-wash.png`), [255, 255, 255]);
-    entry.wash = `${id}-wash.png`;
+  const n = VARIANTS[id] ?? 1;
+  let kb = 0;
+  for (let v = 0; v < n; v += 1) {
+    const { ink, wash: wa } = make(v);
+    await writePng(ink, path.join(OUT, `${id}-${v}-ink.png`), [43, 37, 30]);
+    if (wa) await writePng(wa, path.join(OUT, `${id}-${v}-wash.png`), [255, 255, 255]);
+    kb += fs.statSync(path.join(OUT, `${id}-${v}-ink.png`)).size / 1024;
   }
-  manifest.glyphs[id] = entry;
-  const kb = (fs.statSync(path.join(OUT, `${id}-ink.png`)).size / 1024).toFixed(0);
-  console.log(`→ ${id}　${kb}KB${wa ? " + wash" : ""}`);
+  manifest.glyphs[id] = { variants: n, wash: !!make(0).wash };
+  console.log(`→ ${id}　${n} 幅　${kb.toFixed(0)}KB`);
 }
 fs.writeFileSync(path.join(OUT, "manifest.json"), `${JSON.stringify(manifest, null, 1)}\n`);
-console.log(`\n共 ${Object.keys(GLYPHS).length} 个符号 → ${OUT}`);
+const total = Object.values(VARIANTS).reduce((a, b) => a + b, 0);
+console.log(`\n共 ${Object.keys(GLYPHS).length} 类 ${total} 幅 → ${OUT}`);

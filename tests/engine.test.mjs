@@ -444,6 +444,34 @@ const attackPair = (s, faction) => {
   return { from, edge };
 };
 
+test("图上符号：界面的变体表与真渲出来的对得上，且每一幅都在", () => {
+  // 贴一幅不存在的图，界面上是一个空洞，控制台一声不吭——SVG 的 <image>
+  // 取不到资源不报错。所以这三样必须对账：
+  //   渲染器的 VARIANTS（tools/render-map-glyphs.mjs）
+  //   → manifest.json（渲出来的实况）
+  //   → 界面的 GLYPH_N（贴图时按它取模）
+  const manifest = JSON.parse(fs.readFileSync("public/game/glyphs/manifest.json", "utf8"));
+  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  const block = /const GLYPH_N: Record<string, number> = \{([^}]+)\}/.exec(client);
+  assert.ok(block, "界面里找不到 GLYPH_N —— 贴图的变体数没有出处");
+  const declared = {};
+  for (const m of block[1].matchAll(/"?([a-z-]+)"?:\s*(\d+)/g)) declared[m[1]] = Number(m[2]);
+
+  assert.deepEqual(declared, manifest.variants,
+    "界面声明的变体数与 manifest 对不上");
+  for (const [id, g] of Object.entries(manifest.glyphs)) {
+    for (let v = 0; v < g.variants; v += 1) {
+      assert.ok(fs.existsSync(`public/game/glyphs/${id}-${v}-ink.png`), `缺 ${id}-${v}-ink.png`);
+      if (g.wash) {
+        assert.ok(fs.existsSync(`public/game/glyphs/${id}-${v}-wash.png`), `缺 ${id}-${v}-wash.png`);
+      }
+    }
+  }
+  // 地平线：图元要**站在**郡治那个点上。界面按 0.82 摆，渲染器也得是这个数
+  const base = /const GLYPH_BASE = ([\d.]+)/.exec(client);
+  assert.equal(Number(base?.[1]), manifest.base, "地平线位置两边对不上，城会浮在半空");
+});
+
 test("界面的候选分组两张表都要覆盖每一类动作", () => {
   // 加阵型时界面上直接显示了 `array` 这个内部 id：候选是新的，
   // 而分组名表还是旧的。
