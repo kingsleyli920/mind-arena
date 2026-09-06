@@ -1265,7 +1265,57 @@ export function resolve(
       controlledZhou: f.startZhou,
       zhouSeats: f.startSeats,
     });
-    if (GRADE_RANK[grade] > GRADE_RANK[f.bestGrade]) f.bestGrade = grade;
+    const rose = GRADE_RANK[grade] > GRADE_RANK[f.bestGrade];
+    if (rose) f.bestGrade = grade;
+    // ── 联军：一家坐大到霸档，天下共讨之 ────────────────────────────
+    //
+    // 汉末的讨董联军、关东诸侯就是这么来的——不是谁道德高尚，是谁也不愿意
+    // 看着一家独大。这条借自《宏图策：三国》（它有「联军」而我们没有）。
+    //
+    // 为什么用绝盟而不是给霸者加数值惩罚：减产、减令是**战力那根管子**，
+    // 这个仓库量过挂在那根上的四次实验全部打平。绝盟走既有的外交机制，
+    // 代价全落在「他能不能继续扩张」上——而档位判的正是控州与郡数的增量，
+    // 也就是记分函数那根管子（挂在那上面的 gain 实测 +17.2±5.7）。
+    //
+    // 于是「要不要现在就冲到霸档」成了一个真取舍：冲得早，独食早期红利
+    // 但提前招来围攻；冲得晚，稳，但可能被别人先冲
+    // 门槛用**郡数占比**而不是档位：第一版拿霸档（绝对 7 州）当门槛，一次都没触发
+    // ——机器人 40 季最多只到 2 控州，因为控一个州要占该州过半的郡。
+    // 这个游戏里「一家独大」表现为郡数。占全图 20% 且是第二名的 1.5 倍：
+    // 机器人峰值 13–16 郡（12–15%）够不着，基线不受扰动；而模型局里
+    // haiku 执袁绍打到 23 郡（22%）正好在门槛之上——联军管的正是失控的扩张
+    const held: Record<string, number> = {};
+    for (const c of Object.values(s.commanderies)) if (c.owner) held[c.owner] = (held[c.owner] ?? 0) + 1;
+    const mine_ = held[f.id] ?? 0;
+    const runner = Math.max(0, ...Object.entries(held)
+      .filter(([k]) => k !== f.id).map(([, v]) => v));
+    const dominant = mine_ >= Object.keys(s.commanderies).length * P.coalitionShare
+      && mine_ >= runner * P.coalitionLead;
+    if (dominant && P.coalitionBreak && !f.coalitionAgainst) {
+      f.coalitionAgainst = true;
+      const gone = s.treaties.filter((t) => t.a === f.id || t.b === f.id);
+      s.treaties = s.treaties.filter((t) => t.a !== f.id && t.b !== f.id);
+      f.allyBanUntil = Math.max(f.allyBanUntil, s.turn + P.coalitionBanSeasons);
+      // 与他接壤的诸家自动互盟：单独一家挡不住霸者，联起来才挡得住
+      const border = [...new Set(Object.values(s.commanderies)
+        .filter((c) => c.owner === f.id)
+        .flatMap((c) => (g.adj.get(c.id) ?? []).map((e) => s.commanderies[e.to]?.owner))
+        .filter((x): x is FactionId => !!x && x !== f.id))].sort(cmp);
+      let pacts = 0;
+      for (let i = 0; i < border.length; i += 1) {
+        for (let j = i + 1; j < border.length; j += 1) {
+          const [a, b] = [border[i], border[j]];
+          if (s.treaties.some((t) => (t.a === a && t.b === b) || (t.a === b && t.b === a))) continue;
+          s.treaties.push({ a, b, kind: "alliance",
+                            from: s.turn + 1, until: s.turn + P.coalitionAllySeasons });
+          pacts += 1;
+        }
+      }
+      log(s, { kind: "coalition", faction: f.id,
+               text: `${f.id} 独据 ${mine_} 郡（次强 ${runner}），天下共讨之：`
+                   + `旧盟 ${gone.length} 约尽废，${P.coalitionBanSeasons} 季内无人肯与之盟；`
+                   + `接壤 ${border.length} 家结为联军（新盟 ${pacts} 约）` });
+    }
   }
 
   // 迁治生效。放在结算之后、时钟推进之前——本季的补给、产出、溃散

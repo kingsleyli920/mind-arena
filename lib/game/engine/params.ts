@@ -102,6 +102,9 @@ export interface EngineParams {
   siegeGripRatio: number; siegeEncircle: boolean;
   isolatedSubmit: boolean;
   swaySeasons: number; swaySoleOnly: boolean;
+  /** 联军：一家坐大到霸档，天下共讨之。见内容包 constants.联军 */
+  coalitionShare: number; coalitionLead: number; coalitionBreak: boolean;
+  coalitionBanSeasons: number; coalitionAllySeasons: number;
   /** 行军。见内容包 constants.行军 */
   marchDayPerCost: number; marchSeasonDays: number;
   marchAssaultWindow: number; marchGearMul: number;
@@ -299,6 +302,11 @@ export function loadParams(pack: RawPack): EngineParams {
     isolatedSubmit: C["孤悬"]?.["四邻皆属一家"] === true,
     swaySeasons: g("孤悬", "归附_季数"),
     swaySoleOnly: C["孤悬"]?.["归附_只一家接壤"] === true,
+    coalitionShare: g("联军", "门槛_占全图郡数"),
+    coalitionLead: g("联军", "门槛_倍于次强"),
+    coalitionBreak: C["联军"]?.["称霸即绝盟"] === true,
+    coalitionBanSeasons: g("联军", "绝盟后不得再缔_季数"),
+    coalitionAllySeasons: g("联军", "接壤诸家自动互盟_季数"),
     marchDayPerCost: g("行军", "日每单位"),
     marchSeasonDays: g("行军", "一季日数"),
     marchAssaultWindow: g("行军", "攻城窗口日"),

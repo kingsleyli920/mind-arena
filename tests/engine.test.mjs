@@ -2204,3 +2204,31 @@ test("归附：无主郡周围只有一家势力，久之举郡归附；两家�
   assert.equal(two.commanderies[n1.id].sway, 0, "两家接壤却在累积归附意向");
   assert.ok(!two.commanderies[n1.id].owner, "四战之地被白送了");
 });
+
+test("联军：一家独据两成郡国，天下共讨之", () => {
+  // 借自《宏图策：三国》——它有「联军」而我们没有。对评测来说它比科技树、贸易
+  // 那些都值钱：它不往战力上乘系数，而是改变「记分函数奖励什么」的形状。
+  // 于是「要不要现在就冲上去」成了真取舍：冲得早独食红利但提前招围攻，
+  // 冲得晚稳但可能被人先冲
+  const s = fresh();
+  const me = "yuanshao";
+  const ids = Object.keys(s.commanderies);
+  const need = Math.ceil(ids.length * P.coalitionShare) + 2;
+  let n = 0;
+  for (const id of ids) { if (n >= need) break; s.commanderies[id].owner = me; n += 1; }
+  // 先给他一个盟约，看会不会被废
+  const friend = Object.values(s.commanderies).find((c) => c.owner && c.owner !== me).owner;
+  s.treaties.push({ a: me, b: friend, kind: "alliance", from: 0, until: s.turn + 20 });
+
+  const cur = resolve(s, [], G, P, ROSTER, GEO).state;
+  assert.ok(cur.log.some((e) => e.kind === "coalition"), "独据两成郡国却无人来讨");
+  assert.equal(cur.treaties.filter((t) => t.a === me || t.b === me).length, 0,
+    "旧盟没废 —— 称霸即绝盟这条没生效");
+  assert.ok(cur.factions[me].allyBanUntil > cur.turn, "没有禁缔盟");
+  assert.ok(cur.treaties.length > 0, "接壤诸家没有结成联军");
+
+  // **一局只发一次**：否则霸者每季被绝一次盟，那不是取舍是酷刑
+  const again = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
+  assert.equal(again.log.slice(cur.log.length).filter((e) => e.kind === "coalition").length, 0,
+    "联军每季重复触发");
+});

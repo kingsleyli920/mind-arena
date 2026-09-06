@@ -154,6 +154,11 @@ export interface FactionState {
    * 「背盟有代价」此前只写在包的文案里，引擎一分代价都不收
    */
   allyBanUntil: number;
+  /**
+   * 天下是否已共讨此家。一局只发一次——联军是「坐大」这件事的一次性代价，
+   * 不是逐季重复的惩罚；否则霸者每季都被绝一次盟，那不是取舍是酷刑
+   */
+  coalitionAgainst: boolean;
   /** 本局曾达到过的最高档 —— 冲高后回落不扣分 */
   bestGrade: Grade;
   eliminated: boolean;
