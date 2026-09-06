@@ -90,7 +90,8 @@ export function forecastSiege(
     // 逐条重复要在每个席·季上付一次钱。「累加 +N 缺口」同理由「已围 N 季」推得出来。
     // 实测这两句去掉之后刘璋的观测峰值从 10242 压回闸门以内
     text: `续围：缺口 ${lo.breach === hi.breach ? lo.breach : `${lo.breach}–${hi.breach}`}`
-        + ` 对可防守 ${lo.hold}→${verdict}（已围 ${army.siegeSeasons} 季）`,
+        + ` 对可防守 ${lo.hold}→${verdict}（已围 ${army.siegeSeasons} 季`
+        + `，城中存粮可支 ${tgt.provisions} 季）`,
   };
 }
 
@@ -147,6 +148,7 @@ export function projectSiege(
   let troops = army.troops;
   let garrison = tgt0.garrison;
   let defense = tgt0.defense;
+  let prov = tgt0.provisions;
   let ss = army.siegeSeasons;
   for (let n = 0; ; n += 1) {
     const bonus = (atk?.breachBonus ?? 0) + ss * P.siegeBreachPerSeason + formEdge;
@@ -156,6 +158,12 @@ export function projectSiege(
       return { seasons: n,
                text: n === 0 ? "本季即破" : `照此耗法还要 ${n} 季可破` };
     }
+    // 守方那只钟：城中存粮每季 −1，归零则不战自下。围城由**先响的那只**结束，
+    // 所以前瞻必须同时推两只——只推强攻那只，会把「打不动但围得死」报成「围不下来」
+    if (prov - 1 <= 0) {
+      return { seasons: n, text: n === 0 ? "本季城中粮尽，可不战而下" : `再围 ${n} 季城中粮尽` };
+    }
+    prov -= 1;
     // 首季是强攻，此后转围困——两档折损不同，外推必须跟着分
     troops = Math.round(troops * (1 - (ss === 0 ? P.failLossRatio : P.siegeAttackerLoss)));
     garrison = Math.max(P.siegeGarrisonFloor,

@@ -17,7 +17,7 @@ const statSum = (o: OfficerRef) =>
   o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
-import type { EngineParams } from "./params.ts";
+import { provisionsCap, type EngineParams } from "./params.ts";
 import type {
   Action, Candidate, CommanderyId, FactionId, GameState, Order, Formation,
 } from "./types.ts";
@@ -181,6 +181,7 @@ export function governPrice(
     return Math.round(c.garrison * (P.levyMultiplier - 1) * P.goldPerLevyTroop);
   }
   if (policy === "wall") return P.goldPerWall * P.wallGain;
+  if (policy === "stock") return P.provStockGold;
   if (policy === "forge") {
     const next = P.gearLadder[Math.min(P.gearLadder.indexOf(c.gear) + 1,
                                        P.gearLadder.length - 1)];
@@ -194,7 +195,7 @@ export function governPrice(
 export const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 /** 内政方针的中文名。同上，候选标签与结算回执必须是同一套字 */
 export const POLICY_CN: Record<string, string> = {
-  farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民", forge: "治械",
+  farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民", forge: "治械", stock: "屯粮",
 };
 const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 
@@ -561,12 +562,18 @@ export function listActions(
       // 要了小势力的命：曹操只有一个郡，若临敌优先治械（900 金）而国库不够，
       // 他这一季就一条内政候选都没有——实测出局率因此从 42% 升到 53%，
       // 而他死时国库还有上千金。删掉的不是钱，是选项
+      // 正被围时屯粮排第一：那一刻它是唯一能推迟开城的令，而守方每郡每季只有 2 条。
+      // 攻方选强攻还是围困，守方就得押哪一头——押错则另一头破城
+      const besiegedNow = s.armies.some((x) => x.target === c.id && x.faction !== f);
+      const provCap = provisionsCap(c.yieldTier, P);
       const wants: Array<[string, boolean, string]> = [
+        ["stock", besiegedNow && c.provisions < provCap, `被围，存粮仅 ${c.provisions} 季`],
         ["soothe", c.moraleTier <= 2 && c.moraleTier < 5, "民心告急"],
         ["wall", isFront && c.defense < 55, "临敌且城防薄"],
         ["levy", isFront && c.garrison < 4000, "临敌且兵少"],
         ["forge", isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1],
          `器械仅「${GEAR_CN[c.gear]}」`],
+        ["stock", isFront && c.provisions < provCap, `临敌，存粮 ${c.provisions}/${provCap} 季`],
         ["farm", c.yieldTier < 10, "产出可增"],
         ["soothe", c.moraleTier < 5, "民心可安"],
         ["wall", c.defense < 100, "城防可修"],

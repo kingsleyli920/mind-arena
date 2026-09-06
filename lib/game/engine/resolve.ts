@@ -14,7 +14,7 @@ import { canonicalOrder, orderCost, governPrice, GEAR_CN, POLICY_CN, type Graph,
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
-import type { EngineParams } from "./params.ts";
+import { provisionsCap, type EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
@@ -113,7 +113,7 @@ function betray(
 function beginSiege(
   s: GameState, faction: FactionId, from: CommanderyId, target: CommanderyId,
   troops: number, a: { commander: OfficerId | null; strength: Posture },
-  retinue: readonly OfficerRef[], gear: SiegeGear, unit: string,
+  retinue: readonly OfficerRef[], gear: SiegeGear, unit: string, P: EngineParams,
 ): void {
   // 龙套不进 retinue：它是「这个郡没人」的占位，不该被记成随军出征的实体
   const ids = retinue.filter((o) => !isFiller(o)).map((o) => o.id);
@@ -121,7 +121,7 @@ function beginSiege(
     id: `${faction}:${s.turn}:${from}>${target}`,
     faction, commander: a.commander ?? ids[0] ?? null, retinue: ids, troops,
     at: target, target, posture: a.strength, gear, unit,
-    siegeSeasons: 0, idleSeasons: 0, home: from,
+    siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: from,
   });
 }
 
@@ -366,6 +366,8 @@ export function resolve(
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
                      c.moraleTier = Math.max(1, c.moraleTier - 1); break;
       case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
+      case "stock":  c.provisions = Math.min(provisionsCap(c.yieldTier, P),
+                                             c.provisions + P.provStockSeasons); break;
       case "soothe": c.moraleTier = Math.min(5, c.moraleTier + 1); break;
       // 治械：逐级打造，不可越级。首版里器械是征伐时的自由选项，
       // 不花任何代价就能给每次攻城白送缺口
@@ -481,7 +483,7 @@ export function resolve(
         troops,
         at: a.at, target: null, posture: "main", gear: s.commanderies[a.at].gear,
         unit: s.commanderies[a.at].unit,
-        siegeSeasons: 0, idleSeasons: 0, home: a.at,
+        siegeSeasons: 0, idleSeasons: 0, supply: P.armySupplyCap, home: a.at,
       });
     }
     s.commanderies[a.at].gear = "none";
@@ -587,7 +589,7 @@ export function resolve(
       });
       if (won && tgt.owner !== o.faction) {
         // 击退围城军后接手围城
-        beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit);
+        beginSiege(s, o.faction, a.from, a.target, won, a, corps, gear, src.unit, P);
       } else if (won) {
         // 解自家之围：残部入城为戍——但只在**围真的解了**的时候。
         //
@@ -632,7 +634,7 @@ export function resolve(
                text: `增兵 ${a.target} 城下，共 ${mine.troops} 人` });
       continue;
     }
-    beginSiege(s, o.faction, a.from, a.target, troops, a, corps, gear, src.unit);
+    beginSiege(s, o.faction, a.from, a.target, troops, a, corps, gear, src.unit, P);
   }
 
   // ── 阶段七：围城结算 ──────────────────────────────────────────────
@@ -640,6 +642,8 @@ export function resolve(
   // 这才让「围点打援」「围魏救赵」成为真选项，而不是攻城一击定胜负。
   const sieges = s.armies.filter((x) => x.target)
     .sort((x, y) => cmp(x.faction, y.faction) || cmp(x.target!, y.target!));
+  /** 本季已扣过存粮的郡。围城结算是逐军团跑的，而存粮是每城每季一份 */
+  const starved = new Set<CommanderyId>();
   for (const [i, army] of sieges.entries()) {
     const tgt = s.commanderies[army.target!];
     if (!tgt || tgt.owner === army.faction) { lift(s, army); continue; }
@@ -738,6 +742,32 @@ export function resolve(
                             Math.round(tgt.garrison * (1 - P.siegeDefenderLoss)));
     tgt.defense = Math.max(P.siegeDefenseFloor, tgt.defense - P.siegeDefenseErosion);
     army.siegeSeasons += 1;
+
+    // ── 守方的钟：城中存粮每季 −1，归零则不战自下 ──────────────────
+    //
+    // 围城此前只有攻方的钟（满 N 季自动撤围），于是「围困」永远只是
+    // 「强攻失败的慢速版」：耗到上限还是得走。给守方一只钟，围下去才第一次
+    // 成为一条**能赢**的路。这也正是「围点打援」成立的条件——守方的存粮
+    // 给了援军一个明确的窗口，而此前那个窗口是零。
+    // 攻方那一侧的代价照收：每季掉 12% 兵、照付军费、后方可能被断
+    // 每城每季只扣一次，不是每支围城军扣一次——同一座城被两家围就一季扣 2、
+    // 被四家围扣 4，存粮 4 的城一季见底；而且结果会依赖有几支军团在场，是 R6 隐患
+    if (!starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= 1; }
+    if (tgt.provisions <= 0) {
+      const loser = tgt.owner;
+      // 粮尽而降，不经攻城判定：守军成建制归降（比强攻破城留得多），
+      // 城防与民心不因巷战而毁，武将也不算被俘——开城不是城破
+      if (loser) s.factions[army.faction].conquests += 1;
+      tgt.owner = army.faction;
+      tgt.provisions = provisionsCap(tgt.yieldTier, P);
+      tgt.moraleTier = Math.max(1, tgt.moraleTier - 1);
+      lift(s, army);
+      log(s, { kind: "siege-starve", faction: army.faction,
+               text: `围 ${army.target} ${army.siegeSeasons} 季，城中粮尽，`
+                   + `${loser ? `${loser} ` : ""}开城出降`,
+               attribution: { 投入: army.troops, 已围季: army.siegeSeasons, ...who } });
+      continue;
+    }
     if (army.siegeSeasons >= P.siegeMaxSeasons || army.troops < P.siegeMinTroops) {
       const kept = Math.round(army.troops * P.siegeWithdrawKeep);
       lift(s, army);
@@ -763,11 +793,13 @@ export function resolve(
   // 而河南尹、颍川、梁国、鲁国正卡在中原正中央把地图切成两半。
   // 城防进的是可防守（每 30 点 +1），涨得慢且有上限，晚取只多啃一两级
   const wall = P.neutralWall[s.epoch] ?? 0;
-  if (wall > 0) {
-    for (const c of Object.values(s.commanderies)) {
-      if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
-      c.defense = Math.min(P.neutralWallCap, c.defense + wall);
-    }
+  for (const c of Object.values(s.commanderies)) {
+    if (c.owner || s.armies.some((x) => x.target === c.id)) continue;
+    if (wall > 0) c.defense = Math.min(P.neutralWallCap, c.defense + wall);
+    // 无主郡的存粮也要回补。第八阶段只遍历各势力自己的郡，无主郡走不到那里——
+    // 而无主郡正是最常被打的目标，不补的话被围过一次就永远空仓，
+    // 下一次来人当季就开城。实测漏了这条时「围到粮尽开城」20 次**全部**发生在第 1 季
+    c.provisions = Math.min(provisionsCap(c.yieldTier, P), c.provisions + 1);
   }
 
   for (const f of Object.values(s.factions)) {
@@ -813,9 +845,13 @@ export function resolve(
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
       if (s.armies.some((x) => x.target === c.id && x.faction !== f.id)) {
-        log(s, { kind: "besieged", faction: f.id, text: `${c.id} 被围，本季无产出` });
+        log(s, { kind: "besieged", faction: f.id,
+                 text: `${c.id} 被围，本季无产出（存粮尚可支 ${c.provisions} 季）` });
         continue;
       }
+      // 围解则存粮逐季回补。不补的话一座被围过的城就永远是空仓，
+      // 下一次被围当场即降——那不是「守方有钟」，是「被围过一次就废了」
+      c.provisions = Math.min(provisionsCap(c.yieldTier, P), c.provisions + 1);
       const gov = roster ? governEffect(governorOf(s, roster, c.id, P), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
       c.garrison = Math.min(
@@ -903,22 +939,40 @@ export function resolve(
     }
   }
 
-  // 断粮的军团溃散（R28）。围城军身在敌境，若其后方走廊被切断，
+  // 断粮的军团（R28）。围城军身在敌境，若其后方走廊被切断，
   // 它就是一支没有补给的孤军——「绕后断粮」由此成为真战术。
+  //
+  // 从「下季即溃散」改成**存粮倒计时**。此前是悬崖不是曲线：兵力 100% 蒸发、
+  // 一人不退，而治所一失全境军团同季全灭，偏偏迁治的生效排在这个循环之后，
+  // 当季无解。实测 6 局×40 季里治所失守溃散 242 + 断粮溃散 189 = 431 支，
+  // 多过破城的 496——死于补给的比死于战斗的还多，而这条机制连一个数值旋钮都没有。
+  // 给三季余地，那条**已经存在**的迁治令（治所已失时才列出）才答得上：
+  // 实测 89 个「势力·局」丢过治所，56.2% 后来又有了治所。
+  //
+  // supplyReach 按势力记一次。它此前写在逐军团的循环体内，即每季
+  // O(军团数 × 全图) 次 DFS——机器人峰值 2 支无所谓，模型席位实测囤到 210 支
+  const reachOf = new Map<FactionId, ReturnType<typeof supplyReach>>();
   for (const army of [...s.armies]) {
-    const reach = supplyReach(s, g, army.faction);
+    let reach = reachOf.get(army.faction);
+    if (!reach) { reach = supplyReach(s, g, army.faction); reachOf.set(army.faction, reach); }
     // 围城军挂在**起兵郡**上，不是它脚下站的那块地——它身在敌境，
     // 脚下的郡本来就不可能在己方连通分量里。所以「绕后断粮」要断的是
     // 它的后方走廊，不是围着的那座城。包里的补给条目已写明这一条
     const anchor = army.target ? army.home : army.at;
-    if (reach.has(anchor)) continue;
+    if (reach.has(anchor)) { army.supply = P.armySupplyCap; continue; }
+    army.supply -= 1;
+    const who = army.target ? `围 ${army.target} 之师` : `${army.at} 驻军`;
     const capLost = !s.factions[army.faction]?.capital
       || s.commanderies[s.factions[army.faction].capital!]?.owner !== army.faction;
+    if (army.supply > 0) {
+      log(s, { kind: capLost ? "capital-lost-low" : "supply-cut-low", faction: army.faction,
+               text: `${capLost ? "治所已失" : "后路断绝"}，${who}存粮仅余 ${army.supply} 季` });
+      continue;
+    }
     s.armies = s.armies.filter((x) => x.id !== army.id);
-    const who = army.target ? `围 ${army.target} 之师` : `${army.at} 驻军`;
     log(s, capLost
       ? { kind: "capital-lost-scatter", faction: army.faction,
-          text: `治所已失，${who}无所归，粮尽溃散` }
+          text: `治所已失，${who}粮尽溃散` }
       : { kind: "supply-cut-scatter", faction: army.faction,
           text: `${who}后路断绝，粮尽溃散` });
   }

@@ -55,7 +55,7 @@ const NO_WITHDRAW = process.argv.includes("--no-withdraw");
 
 /** 每支军团一条履历：出生、每季兵力、结局。按 id 跨季追踪 */
 const lives = new Map();
-const breachAfter = [];   // 破城时「已围了几季」
+const breachAfter = [], starve = [];   // 破城时「已围了几季」
 const endReason = {};     // 军团结局计数
 let campaigns = 0, musters = 0;
 let firstFail = 0, longSiege = 0;
@@ -84,6 +84,12 @@ for (let gi = 0; gi < GAMES; gi += 1) {
     const r = resolve(s, orders, G, P, ROSTER, GEO, DEFAULT_RULES);
 
     for (const e of r.state.log.slice(mark)) {
+      if (e.kind === "siege-starve") {
+        // 粮尽开城也是「城拿下了」，且它正是围城时钟走完的那一种，
+        // 不计进来这张表就只反映强攻
+        const m = (e.text ?? "").match(/围 (\S+?) (\d+) 季/);
+        if (m) starve.push(+m[2]);
+      }
       if (e.kind === "siege-win") {
         const m = (e.text ?? "").match(/取 (\S+?)（/);
         const key = `${e.faction}|${m ? m[1] : ""}`;
@@ -93,10 +99,12 @@ for (let gi = 0; gi < GAMES; gi += 1) {
       // capital-lost-scatter 一定要在这张表里：实测它是**最大**的一项（对照跑里 252 次，
       // 比断粮溃散 193 和撤围 143 都多）。第一版漏了它，于是「军团都去哪了」这张表
       // 少了最大的一格，我据此说过好几句错话
-      for (const [k, tag] of [["siege-lift", "撤围"], ["siege-abort", "溃散"],
+      for (const [k, tag] of [["siege-lift", "撤围"], ["siege-abort", "粮尽撤围"],
                               ["muster-return", "归队"], ["supply-cut-scatter", "断粮溃散"],
                               ["capital-lost-scatter", "治所失守溃散"],
-                              ["siege-win", "破城"]]) {
+                              ["supply-cut-low", "存粮告急"], ["capital-lost-low", "治所失守·尚有粮"],
+                              ["siege-starve", "围到粮尽·开城"],
+                              ["siege-win", "强攻破城"]]) {
         if (e.kind === k) endReason[tag] = (endReason[tag] ?? 0) + 1;
       }
     }
@@ -137,6 +145,9 @@ line(`  首攻即克 ${pct(breachAfter.filter((v) => v === 0).length, breachAfte
    + `　中位 ${q(breachAfter, 0.5)}　九分位 ${q(breachAfter, 0.9)}`);
 // 这三个数才是「围城活没活过来」的判据：
 // 首攻未克之后还站在城下的有多少、其中撑到第二季以上的有多少
+{ const h = {}; for (const v of starve) h[v] = (h[v] ?? 0) + 1;
+  line(`  围到粮尽开城 ${starve.length} 次，用了几季 ${JSON.stringify(h)}`
+     + `　占拿下的城 ${pct(starve.length, starve.length + breachAfter.length)}`); }
 line(`  首攻未克转入围困 ${firstFail} 次　（占出征 ${pct(firstFail, campaigns)}）`);
 line(`  围过两季以上　　 ${longSiege} 次　（占转入围困 ${pct(longSiege, firstFail)}）`);
 

@@ -6,7 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-import { buildGraph, listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { buildGraph, listActions, DEFAULT_RULES, POLICY_CN } from "../lib/game/engine/actions.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
@@ -189,10 +189,12 @@ test("提示词：规则摘要不含开发者旁白 —— 那是在教模型怎
 
 test("提示词：规则摘要与引擎一致——方针数不能对不上", () => {
   const sys = renderSystem(pack);
-  const engine = ["farm", "levy", "wall", "soothe", "forge"];
+  // 读引擎自己的枚举，不再手抄一份。此前这里硬写着 ["farm","levy","wall","soothe","forge"]
+  // ——那正是这个仓库反复吃亏的「同一份数据两个副本」，加屯粮时它自己也漏了同步
+  const engine = Object.keys(POLICY_CN);
   const govern = pack.actions.find((a) => a.id === "govern");
   const policy = govern.params.find((p) => p.name === "policy");
-  assert.equal(policy.tiers.length, engine.length,
+  assert.deepEqual([...policy.tiers.map((t) => t.id)].sort(), [...engine].sort(),
     `包里 ${policy.tiers.length} 个方针，引擎有 ${engine.length} 个 —— 摘要在向模型漏说一条`);
   assert.ok(sys.includes("治械"), "摘要里没有治械，而器械是攻城缺口的来源之一");
 });

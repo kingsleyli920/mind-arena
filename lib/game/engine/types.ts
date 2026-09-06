@@ -29,6 +29,14 @@ export interface CommanderyState {
    * 从第 20 季起一个都没易过手。见包里「为何要封顶」
    */
   startGarrison: number;
+  /**
+   * 存粮，以**季**计：被围时还撑得住几季，归零则不战自下。
+   *
+   * 不是第二种货币（包里两处明令禁止），是给「补给」这个已经在支配全局却
+   * 一个数值旋钮都没有的机制装上刻度盘——实测死于补给的军团多过死于战斗的。
+   * 用「季」而不用吨数：与「缺口是小整数一眼可数」同一条理由。
+   */
+  provisions: number;
   yieldTier: number;      // 1–10
   moraleTier: number;     // 1–5
   defense: number;        // 0–100
@@ -150,6 +158,14 @@ export interface Army {
    * 还继续吃军费。实测一局 104 季军团数 0 → 266 只增不减。见包里「为何要归队」
    */
   idleSeasons: number;
+  /**
+   * 随身辎重，以季计。补给通畅则每季补满，断绝则每季 −1，归零方溃散。
+   *
+   * 此前断供是**下季即溃散、一人不退**——悬崖而非曲线；而治所一失全境军团
+   * 同季蒸发，偏偏迁治的生效排在溃散循环之后，当季无解。给三季余地，
+   * 那条已经存在的迁治令才答得上。
+   */
+  supply: number;
   /** 撤围或溃退时退回的郡 */
   home: CommanderyId;
 }
@@ -237,7 +253,8 @@ export type Action =
       strength: Posture; siegeGear: SiegeGear }
   | { type: "muster"; at: CommanderyId; from: CommanderyId[]; commander: OfficerId | null;
       deadline: 1 | 2 }
-  | { type: "govern"; at: CommanderyId; policy: "farm" | "levy" | "wall" | "soothe" | "forge" }
+  | { type: "govern"; at: CommanderyId;
+      policy: "farm" | "levy" | "wall" | "soothe" | "forge" | "stock" }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
   | { type: "ally"; to: FactionId; act: "form" | "break"; term: 4 | 8 }
   | { type: "passage"; to: FactionId }

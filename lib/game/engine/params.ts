@@ -99,6 +99,9 @@ export interface EngineParams {
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
+  /** 粮：一律以「季」计，不是第二种货币。见内容包 constants.粮 */
+  provBase: number; provPerTier: number; provCap: number;
+  provStockSeasons: number; provStockGold: number; armySupplyCap: number;
   siegeDefenseErosion: number;
   /** 野战：援军进入被围郡时与围城军交战 */
   fieldRout: number; fieldPush: number; fieldStall: number;
@@ -276,6 +279,12 @@ export function loadParams(pack: RawPack): EngineParams {
     betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
+    provBase: g("粮", "郡存粮_基数"),
+    provPerTier: g("粮", "郡存粮_每产出档"),
+    provCap: g("粮", "郡存粮_上限"),
+    provStockSeasons: g("粮", "屯粮_加季"),
+    provStockGold: g("粮", "屯粮_金"),
+    armySupplyCap: g("粮", "军团存粮_上限"),
     siegeBreachPerSeason: g("围城", "每季加缺口"),
     siegeAttackerLoss: g("围城", "攻方每季损耗"),
     siegeDefenderLoss: g("围城", "守方每季损耗"),
@@ -304,4 +313,15 @@ export function loadParams(pack: RawPack): EngineParams {
     neutralWall: { 1: 0, 2: g("时钟", "无主筑壁_纪元二"), 3: g("时钟", "无主筑壁_纪元三") },
     neutralWallCap: g("时钟", "无主筑壁_上限"),
   };
+}
+
+/**
+ * 一郡的存粮上限，以**季**计。产出档 1–10 → 2–5 季。
+ *
+ * 放在这里而不是 setup.ts：setup 与 resolve 都要用它，而 setup 依赖 resolve 的类型，
+ * 放过去会成环。它只吃产出档与参数，本来也不属于「开局装配」。
+ * 产出档本身是 log10(户数)，所以「富郡耐围、瘠郡易饥」不必另立一份数据。
+ */
+export function provisionsCap(yieldTier: number, P: EngineParams): number {
+  return Math.min(P.provCap, P.provBase + Math.floor(yieldTier * P.provPerTier));
 }

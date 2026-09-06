@@ -2,7 +2,7 @@
 //
 // 数据全部来自 lib/game/data/，本模块不含任何硬编码的游戏数值——
 // 数值改动只该发生在数据文件与内容包里。
-import type { EngineParams } from "./params.ts";
+import { provisionsCap, type EngineParams } from "./params.ts";
 import { rollRecruitPool, type Roster } from "./officers.ts";
 import { standingOf, zhouEquiv, type Geography } from "./victory.ts";
 import { cmp } from "./cmp.ts";
@@ -59,6 +59,9 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
       owner: c.factionId && !PLACEHOLDER_FACTIONS.has(c.factionId) ? c.factionId : null,
       garrison: c.garrison, startGarrison: c.garrison,
       yieldTier: c.yieldTier,
+      // 存粮由产出档定，开局即满。产出档本身是 log10(户数)，
+      // 所以「富郡耐围、瘠郡易饥」不必另立数据
+      provisions: provisionsCap(c.yieldTier, P),
       moraleTier: c.moraleTier,
       defense: c.defense,
       unit: unitOf.get(c.id) ?? "infantry",

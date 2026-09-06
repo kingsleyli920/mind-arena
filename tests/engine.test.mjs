@@ -13,7 +13,7 @@ import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/co
 import { observe } from "../lib/game/engine/observe.ts";
 import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { loadParams, provisionsCap } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildIndex, captureFrame, attachOutcome, FORM_IDS } from "../lib/game/replay.ts";
 import { tierOf } from "../lib/game/engine/intel.ts";
@@ -697,20 +697,35 @@ test("围城：首攻未克则留在城下，缺口逐季累加", () => {
     + `（${held.attribution.缺口}对${held.attribution.可防守} → ${ev.attribution.缺口}对${ev.attribution.可防守}）`);
 });
 
-test("围城：满上限自动撤围，残兵退回起兵郡", () => {
+test("围城：两只钟，先响的那只决定围城怎么结束", () => {
+  // 从前只有攻方一只钟（满 N 季自动撤围），于是「围困」永远只是「强攻失败的
+  // 慢速版」。现在守方也有一只：城中存粮每季 −1，归零则不战自下。
+  // 这条测的是两只钟都真的在走，且先归零的那只决定结局
   const s = fresh();
   const { from, edge } = attackPair(s, "yuanshao");
   s.commanderies[from.id].garrison = 9000;
   s.commanderies[edge.to].garrison = 12000;
   s.commanderies[edge.to].defense = 100;
+  const prov0 = s.commanderies[edge.to].provisions;
+  assert.ok(prov0 >= 2 && prov0 <= P.provCap, `存粮初值 ${prov0} 不在 [2, ${P.provCap}]`);
 
   let cur = s;
   const order = { faction: "yuanshao", action: { type: "campaign",
     target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } };
   cur = resolve(cur, [order], G, P, ROSTER, GEO).state;
-  for (let i = 0; i < P.siegeMaxSeasons; i += 1) cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
-  assert.ok(cur.log.some((e) => e.kind === "siege-abort"), "围满上限未自动撤围");
-  assert.equal(cur.armies.filter((a) => a.target === edge.to).length, 0, "撤围后军团仍在城下");
+  assert.equal(cur.commanderies[edge.to].provisions, prov0 - 1, "被围首季存粮未减");
+
+  for (let i = 0; i < P.siegeMaxSeasons + 1; i += 1) {
+    cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
+    if (!cur.armies.some((a) => a.target === edge.to)) break;
+  }
+  const ended = cur.log.filter((e) => ["siege-starve", "siege-abort", "siege-win"].includes(e.kind));
+  assert.ok(ended.length, "围了满上限，两只钟一只都没响");
+  assert.equal(cur.armies.filter((a) => a.target === edge.to).length, 0, "围城结束后军团仍在城下");
+  // 存粮 prov0 季 < 攻方上限 siegeMaxSeasons，所以该是守方先粮尽
+  assert.ok(cur.log.some((e) => e.kind === "siege-starve"),
+    `存粮 ${prov0} 季、攻方上限 ${P.siegeMaxSeasons} 季，守方本该先响`);
+  assert.equal(cur.commanderies[edge.to].owner, "yuanshao", "粮尽却没开城");
 });
 
 test("围城：撤围令可主动收兵，保住的残兵多于续围", () => {
@@ -784,10 +799,24 @@ test("军团：后路断绝则粮尽溃散", () => {
   // 抽掉起兵郡：围城军的后方走廊断了
   const cut = refreshAp(r1.state, P);
   cut.commanderies[from.id].owner = "lubu";
+  // 把守方那只钟按住：这条测的是「绕后断粮」，不是「谁先粮尽」。
+  // 不按住的话城会先开门、围城结束，攻方的存粮根本走不完
+  cut.commanderies[edge.to].provisions = 99;
   assert.equal(cut.commanderies[cap].owner, "yuanshao", "治所应仍在手，否则测的是别的东西");
-  const after = resolve(cut, [], G, P, ROSTER, GEO).state;
+  // 断粮不再是「下季即蒸发」的悬崖，是存粮倒计时：先报存粮告急，粮尽方溃散。
+  // 这个余地是给**迁治**留的——治所一失全境军团同季全灭，而迁治的生效
+  // 排在溃散循环之后，当季根本无解
+  let after = resolve(cut, [], G, P, ROSTER, GEO).state;
+  assert.ok(after.log.some((e) => e.kind === "supply-cut-low"),
+    "后路断绝首季未报存粮告急");
+  assert.ok(after.armies.some((a) => a.target === edge.to),
+    "断粮首季就蒸发了 —— 倒计时没生效");
+  for (let i = 0; i < P.armySupplyCap; i += 1) {
+    if (!after.armies.some((a) => a.target === edge.to)) break;
+    after = resolve(refreshAp(after, P), [], G, P, ROSTER, GEO).state;
+  }
   assert.ok(after.log.some((e) => e.kind === "supply-cut-scatter"),
-    "后路断绝的围城军未溃散 —— 「绕后断粮」仍是空话");
+    "存粮耗尽仍未溃散 —— 「绕后断粮」仍是空话");
   // 起兵郡易主而治所尚在，这是真·走廊被切，不该记成治所失守
   assert.ok(!after.log.some((e) => e.kind === "capital-lost-scatter"),
     "治所尚在却报成治所失守 —— 两种成因又混回一条了");
@@ -1300,9 +1329,12 @@ test("编制：无名将之郡由龙套顶上，弱但不为零", () => {
 test("内政不给空操作：已至上限的方针不该出现在候选里", () => {
   const t = fresh();
   const at = Object.values(t.commanderies).find((c) => c.owner === "yuanshao").id;
-  // 顶满：产出 10、民心 5、城防 100、器械最高
+  // 顶满：产出 10、民心 5、城防 100、器械最高、存粮满仓。
+  // 存粮是后加的一维：产出档一提，粮仓上限跟着涨（存粮上限由产出档定），
+  // 于是只顶前四项的话「屯粮」会冒出来——那不是 bug，是这条测试少顶了一维
   Object.assign(t.commanderies[at], { yieldTier: 10, moraleTier: 5, defense: 100,
-    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000 });
+    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000,
+    provisions: provisionsCap(10, P) });
   const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO);
   const noop = cs.filter((c) => c.action.type === "govern" && c.action.at === at);
   // 「南郡 劝农（已至上限）」曾经每季都出现，白耗一条令
