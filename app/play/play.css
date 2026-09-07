@@ -384,7 +384,7 @@
 .map-wrap .legend {
   position: absolute; inset-block-start: 0.6rem; inset-inline-start: 0.6rem;
   background: rgba(251, 248, 241, 0.94); border: 1px solid var(--rule); border-radius: 3px;
-  font-size: 0.72rem; color: var(--ink-soft); max-width: 23rem;
+  font-size: 0.72rem; color: var(--ink-soft); max-width: 26rem;
 }
 .map-wrap .legend > summary { padding: 0.25rem 0.55rem; cursor: pointer; color: var(--ink); }
 .map-wrap .legend ul { margin: 0; padding: 0.1rem 0.6rem 0.5rem; list-style: none; display: grid; gap: 0.3rem; }

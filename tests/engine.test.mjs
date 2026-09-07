@@ -1721,6 +1721,19 @@ test("调任候选要写明会不会换掉太守 —— 收入按太守政治打
   assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
 });
 
+test("候选标签里的 markdown 不许漏到界面上", () => {
+  // 标签同时给模型与界面看：** 是给模型的强调（如「**天下共讨之**」），
+  // 界面直出就是一对星号。界面那边剥掉，这条钉住「剥的规则还在」
+  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  assert.ok(/c\.label\.replace\(/.test(client),
+    "界面渲染候选标签时没有剥掉 markdown 强调");
+  // 图例是纯 JSX 文本，那儿写 ** 会原样显示
+  const i = client.indexOf('className="legend"');
+  const legend = client.slice(i, client.indexOf("</details>", i))
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+  assert.ok(!legend.includes("**"), "图例里有 markdown 星号 —— JSX 不吃这个");
+});
+
 test("候选标签不重抄观测里已有的郡情 —— 一季十条内政等于抄十遍", () => {
   const s = fresh();
   const o = observe(s, "liubiao", G, P, ROSTER, GEO);

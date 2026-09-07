@@ -545,6 +545,11 @@ const legendGlyph = (kind: string) => (
   // eslint-disable-next-line @next/next/no-img-element
   <img src={`${GLYPH}/${kind}-0-ink.png`} alt="" width={24} height={24} />
 );
+/** 图例里的单幅小图（建筑、兵种、器械都只有一幅） */
+const legendPlain = (id: string) => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src={`${GLYPH}/${id}-0-ink.png`} alt="" width={22} height={22} />
+);
 const legendArmy = (marching: boolean) => (
   // eslint-disable-next-line @next/next/no-img-element
   <img src={`${GLYPH}/${marching ? "tent" : "camp"}-0-ink.png`} alt="" width={24} height={24} />
@@ -2076,9 +2081,35 @@ export function PlayClient() {
               </li>
               <li>
                 <span>{legendArmy(true)}行军中</span>
-                <span>{legendArmy(false)}待命</span>
-                <span><b className="flagg" />城下围城</span>
+                <span>{legendArmy(false)}待命／城下围城</span>
               </li>
+              <li>
+                {/* 兵种贴在帐左、器械贴在帐右。野战有相克，看图就能判胜负 */}
+                <span>{legendPlain("u-infantry")}步卒</span>
+                <span>{legendPlain("u-cavalry")}骑兵</span>
+                <span>{legendPlain("u-archer")}弓弩</span>
+                <span>{legendPlain("u-navy")}水军</span>
+              </li>
+              <li>
+                <span>{legendPlain("g-ram")}冲车</span>
+                <span>{legendPlain("g-mound")}土山</span>
+                <em>攻城更易，但行军慢一季</em>
+              </li>
+              <li>
+                <span>{legendPlain("b-office")}官府</span>
+                <span>{legendPlain("b-granary")}仓廪</span>
+                <span>{legendPlain("b-market")}市</span>
+                <span>{legendPlain("b-drill")}校场</span>
+              </li>
+              <li>
+                <span>{legendPlain("b-ironworks")}铁官</span>
+                <span>{legendPlain("b-saltern")}盐场</span>
+                <span>{legendPlain("b-stud")}马苑</span>
+                <span>{legendPlain("b-farmstead")}屯田</span>
+              </li>
+              {/* JSX 里不吃 markdown：这行原来写成 **淡影**，图例上露出一对星号 */}
+              <li><em>建筑画在城下（只画自家的）。<b>淡影</b>是「有这个物产、
+                但那座还没修」——铁官须有铁、盐场须有盐、马苑须有牧苑、屯田须可垦</em></li>
               <li><em>细线是道路：实线平道、短划丘陵、点线山道、长短线水路、朱线关道。
                 指到某郡，它那几条会提亮并标出行军日数</em></li>
             </ul>
@@ -2379,7 +2410,9 @@ export function PlayClient() {
                                 {c.forecast.fog === "tier" && <u>未探</u>}
                               </span>
                             )}
-                            <span className="act-detail">{c.label}</span>
+                            {/* 标签里的 ** 是给模型读的强调（如「**天下共讨之**」），
+                                界面上要剥掉，否则露出一对星号 */}
+                            <span className="act-detail">{c.label.replace(/\*\*/g, "")}</span>
                           </span>
                           <b className="cost">
                             {why ? why.slice(0, 10) : c.cost === 0 ? "免费" : `${c.cost} 令`}
