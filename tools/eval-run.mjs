@@ -58,6 +58,11 @@ const MEMORY = arg("memory", "on") !== "off";
  * 哪一条起了作用。这一条的对照臂正是用它跑的
  */
 const DROPBACK = arg("dropback", "on") !== "off";
+/** --barenote=off：征伐标签上不标「倾巢」。这一条的 A/B 对照臂用它 */
+const BARE_NOTE = arg("barenote", "on") !== "off";
+/** 本跑用的规则。**只有这一份**——模型席位、机器人席位、准入层都从这里取，
+ *  各处自己写 DEFAULT_RULES 的话，开关就只对其中一处生效 */
+const RULES = { ...DEFAULT_RULES, bareNote: BARE_NOTE };
 /**
  * --provider=A,B：钉住提供方。
  *
@@ -124,7 +129,7 @@ const REASONING = arg("reasoning", "") ? { effort: arg("reasoning", "") } : unde
 const MODEL_DEPS = client
   ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
       ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}),
-      rules: DEFAULT_RULES, nameOf, keyEnum: KEY_ENUM, reasoning: REASONING }
+      rules: RULES, nameOf, keyEnum: KEY_ENUM, reasoning: REASONING }
   : null;
 
 // 每局同时跑几局。局与局之间**完全独立**——各自的 seed、各自的 GameState，
@@ -209,13 +214,13 @@ async function playGame(gi) {
         };
       } else if (f === under) {
         const o = observe(s, f, G, P, ROSTER, GEO, { nameOf, since });
-        const cands = listActions(s, f, G, P, DEFAULT_RULES, ROSTER, undefined, GEO);
+        const cands = listActions(s, f, G, P, RULES, ROSTER, undefined, GEO);
         // 机器人也走 picks → admit：绕过准入层的话，illegalRate 与令数用率
         // 两列对基线是空的，而那正是判「模型有没有在乱下令」的参照
         const dec = agentKind === "bot"
-          ? botPick(s, f, G, agentVariant, DEFAULT_RULES, ROSTER, P, GEO)
+          ? botPick(s, f, G, agentVariant, RULES, ROSTER, P, GEO)
           : stubDecide(s, f, cands, agentVariant);
-        const a = admit(s, f, dec.picks, cands, G, ROSTER, DEFAULT_RULES);
+        const a = admit(s, f, dec.picks, cands, G, ROSTER, RULES);
         orders.push(...a.orders);
         mine = {
           turn: s.turn, seat: f, obsTokens: estTokens(JSON.stringify(o)),
@@ -412,7 +417,7 @@ if (JSON_OUT) {
     // 否则「48 局的排名」可能其实只有 11 局
     played: results.length, spentUsd: +spent.toFixed(4), halted,
     keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null, memory: MEMORY,
-    dropback: DROPBACK,
+    dropback: DROPBACK, bareNote: BARE_NOTE,
     // 这一跑是在什么条件下跑的。缺了这些，两周后这份结果与新结果之间
     // 的差是「模型变了」还是「我们改了提示词/内容包/引擎」就分不清——
     // 而这个仓库的提示词、内容包、引擎每周都在动

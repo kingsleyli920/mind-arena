@@ -37,6 +37,8 @@ export interface Rules {
   campaignAp: number;
   normalAp: number;
   perCommanderyOrders: number;
+  /** 征伐标签上标不标「倾巢」（出兵后本郡守不住）。见 DEFAULT_RULES 的注 */
+  bareNote?: boolean;
 }
 
 /** 这座己方郡国此刻是否正被别家围着（在途的不算——它还在路上） */
@@ -74,6 +76,10 @@ export function ordersLeft(
 }
 
 export const DEFAULT_RULES: Rules = {
+  // 征伐标签上标不标「倾巢」。默认标；关掉是为了跑 A/B——
+  // 这个警告在弱席上每条候选都会亮（曹操 10/10、袁术 14/14），
+  // 有没有用不能靠猜
+  bareNote: true,
   perTypeCap: 12,
   totalCap: 60,
   freeUses: { scout: 3, appoint: 5 },
@@ -500,6 +506,21 @@ export function listActions(
         const scarce = tgt.resources.filter((r) => r !== "tuntian");
         const resNote = scarce.length
           ? `｜有${scarce.map((r) => RESOURCE_CN[r]).join("、")}` : "";
+        // 出兵之后这个郡还守不守得住：邻敌最多带得走自己八成戍兵，而破开两档
+        // 可防守要兵力比 2.0——故余兵低于「最强邻敌 × 0.4」就是一击可破。
+        //
+        // 这个数机器人一直在算（bot.ts 的 safeRatio，掏空老巢的候选它根本看不见），
+        // 而模型看得见却要自己去查邻郡守军。实测：gpt-5-nano 的 11 次灭亡
+        // **全部**落在最弱的两席（袁术 6/8、曹操 5/8），而在最强的袁绍席上
+        // 它 +7.0 反超机器人的 +6.2——它不是不会打，是穷的时候会把自己玩死。
+        // 所以把这个比较写成一个数摆在标签上，而不是让它自己去比
+        const foe = Math.max(0, ...(g.adj.get(e.from) ?? [])
+          .map((x) => s.commanderies[x.to])
+          .filter((x) => x?.owner && x.owner !== f)
+          .map((x) => observedGarrison(s, f, x.id, P).value));
+        const bare = foe > 0 && left < foe * (Math.max(...Object.values(P.strengthRatio))
+          / (P.breachLadder.find(([, n]) => n === 3)?.[0] ?? 2));
+        const bareNote = bare && rules.bareNote !== false ? `｜**倾巢**：余 ${left} 人，邻敌最强 ${Math.round(foe)}` : "";
         const capNote = send < want
           ? `（${named.length || 1} 将统兵上限 ${cap}，余 ${want - send} 人带不走）` : "";
         const ffc = foeSiege ? forecastField(s, f, e.from, foeSiege, send, g, P, roster) : null;
@@ -538,7 +559,7 @@ export function listActions(
                + `：出 ${send} 人${capNote}，本郡余 ${left}；敌守军 ${seen.text}`
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
-               + `${coalition}${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
+               + `${bareNote}${coalition}${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }
