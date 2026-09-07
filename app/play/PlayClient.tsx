@@ -1223,8 +1223,11 @@ export function PlayClient() {
       {nodeMarks.map((m) => (
         <g key={m.n.id}
           onMouseEnter={() => setNodeTip(m.n)} onMouseLeave={() => setNodeTip(null)}>
-          {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
-          <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
+          {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸。
+              必须带 mark 类——整张 svg 是 pointer-events:none（不然它会
+              吞掉拖动），只有 .mark 重新打开。少这个类，上面那两个
+              onMouseEnter 就是永远不触发的死代码，关津的悬停详情根本出不来 */}
+          <circle className="mark" cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
           <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
           {lod >= 2 && (
             <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
