@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.12.0";
+export const PROMPT_VERSION = "1.13.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -26,10 +26,12 @@ export function renderSystem(pack: unknown): string {
     "  再用免费的次数补刺探与调任。",
     "- 候选逐条合法，但**一起下不一定合法**：同一郡每季至多 2 令，刺探 3 次、任命 5 次，",
     "  金也要够。越界的会被逐条丢弃，不作废整回合——但那是白费的机会。",
-    "  所以 picks 要当作**一组**来挑：**先按郡数一遍**——同一个郡出现两次就到顶了，",
-    "  第三次必被丢弃。郡名就在 key 里（`govern:魏郡:soothe` 占魏郡、",
-    "  `campaign:安定郡>上郡:allout` 占安定郡）；集结从多个郡抽调，key 里看不出来，",
-    "  那类候选另带 `sites` 列出全部来源郡。再把金加一遍，别超过国库。",
+    // 1.12 试过在这里加一句「先按郡数一遍——同一个郡出现两次就到顶」，
+    // 24 局 A/B 量下来是**负的**：令数用率 71.3% → 66.9%（−4.3±3.5pp，显著），
+    // 而非法率只从 9.26% 降到 8.11%（−1.15±1.58pp，不显著）。
+    // 教它数令位，它就变谨慎、少下令——换回来的那点合法性还盖不住损失。
+    // 已退回 1.11 的写法，结论记在 docs/EVAL.md 第 21 条
+    "  所以 picks 要当作**一组**来挑：同一个郡在几条 key 里出现过几次？加起来花多少金？",
     "- `droppedLastSeason` 出现时，那是你**上季选了却没执行**的令，附了原因。",
     "  它是这一季最该先读的一段：同一个错重犯两季，等于白扔两季的令。",
     "- `budget.wastedLastSeason` 出现时，它是你**上季作废掉**的令数——说明上季没花完。",
