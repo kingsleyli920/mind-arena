@@ -560,7 +560,7 @@ const GLYPHS = {
   },
   /** 鱼鳞：密阵突击。层层错落的鳞片，尖朝上 */
   "f-scale": () => {
-    const rnd = rng(3101), ink = field();
+    const ink = field();
     const cx = S / 2;
     for (let row = 0; row < 3; row += 1) {
       const y = 118 + row * 34;

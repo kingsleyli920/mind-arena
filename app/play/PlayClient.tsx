@@ -979,7 +979,7 @@ export function PlayClient() {
     setPicked([]);
     setSince(r.state.log.length);
     setBusy(false);
-  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort, plans]);
+  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort, plans, drops]);
 
   // ── 疆域绘制 ────────────────────────────────────────────────────
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），

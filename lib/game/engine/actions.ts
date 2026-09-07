@@ -17,7 +17,7 @@ const statSum = (o: OfficerRef) =>
   o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
-import { marchSeasons, provCapOf, provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provCapOf, type EngineParams } from "./params.ts";
 import type {
   Action, Building, Candidate, CommanderyId, FactionId, GameState, Order, Formation, Resource,
 } from "./types.ts";

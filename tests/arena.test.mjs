@@ -18,6 +18,7 @@ import { pick as botPick } from "../lib/game/engine/bot.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
 import { GRADE_SCORE, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
+import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { renderSystem } from "../lib/arena/seat/prompt.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
@@ -361,4 +362,77 @@ test("准入：被提供方转码搞坏的 key 要复原，但幻觉不许洗白
   // 复原只在「复原后恰好命中候选」时才认，所以编造的 key 复原之后仍然不在表里
   assert.equal(a.dropped.length, 1);
   assert.equal(a.dropped[0].reason, "unknown-key", "幻觉被复原逻辑洗白了");
+});
+
+// ── 降级梯的记忆：一次抖动不该改变「我们在测什么」 ────────────────────
+//
+// 档位不是实现细节。候选 key 的 enum 一旦失效，实测非法率 0.7% → 8.6%、
+// unknown-key 0 → 47（docs/EVAL.md）——测的东西从「会不会玩」变成
+// 「能不能一字不差地抄中文郡名」。所以「这个模型只能用低档」这个结论
+// 必须来自两次证据，不能来自上游的一次限流。
+//
+// 真事：qwen3.7-flash 的上游在并发下限流，OpenRouter 把提供方的错误裹成
+// 4xx 转出来，于是整个进程都掉到了 text 档。
+
+/** 造一个假 fetch：按顺序吐预置的响应，并记下每次请求用的档位 */
+function fakeFetch(plan) {
+  const seen = [];
+  let i = 0;
+  const f = async (_url, init) => {
+    const body = JSON.parse(init.body);
+    // 四档的真实差别：temperature（最上一档独有）与 provider.require_parameters
+    seen.push(!body.response_format ? "text"
+      : body.temperature !== undefined ? "schema"
+      : body.provider?.require_parameters ? "schema-notemp" : "schema-any");
+    const step = plan[Math.min(i, plan.length - 1)];
+    i += 1;
+    if (step === 200) {
+      return { ok: true, status: 200, headers: new Headers(),
+        json: async () => ({ model: "m", choices: [{ message: { content: '{"picks":[],"reason":"x"}' },
+          finish_reason: "stop" }], usage: { prompt_tokens: 10, completion_tokens: 5 } }) };
+    }
+    return { ok: false, status: step, headers: new Headers(), text: async () => "上游抖了一下" };
+  };
+  return { f, seen };
+}
+
+const REQ = { model: "", system: "s", user: "u", schema: { type: "object" } };
+
+test("同一档只被拒一次：下次调用仍从最高档起步", async () => {
+  const { f, seen } = fakeFetch([400, 200, 200]);
+  const real = globalThis.fetch;
+  globalThis.fetch = f;
+  try {
+    const c = new OpenRouterClient("k");
+    const r1 = await c.chat({ ...REQ, model: "试:抖一下" });
+    assert.equal(r1.rung, "schema-notemp", "当场要降档——这一季总得答出来");
+    await c.chat({ ...REQ, model: "试:抖一下" });
+    assert.deepEqual(seen, ["schema", "schema-notemp", "schema"],
+      "第二次调用必须回到 schema 档：一次 4xx 不足以断定它不支持结构化输出");
+  } finally { globalThis.fetch = real; }
+});
+
+test("同一档连拒两次才写进记忆：第三次直接从低档起步", async () => {
+  const { f, seen } = fakeFetch([400, 200, 400, 200, 200]);
+  const real = globalThis.fetch;
+  globalThis.fetch = f;
+  try {
+    const c = new OpenRouterClient("k");
+    for (let i = 0; i < 3; i += 1) await c.chat({ ...REQ, model: "试:真不支持" });
+    assert.deepEqual(seen,
+      ["schema", "schema-notemp", "schema", "schema-notemp", "schema-notemp"],
+      "第三次不该再交一遍 schema 档的学费");
+  } finally { globalThis.fetch = real; }
+});
+
+test("429 是限流不是不支持：一次都不许记进降级梯", async () => {
+  const { f, seen } = fakeFetch([429, 200, 200]);
+  const real = globalThis.fetch;
+  globalThis.fetch = f;
+  try {
+    const c = new OpenRouterClient("k", { maxAttempts: 4 });
+    const r = await c.chat({ ...REQ, model: "试:限流" });
+    assert.equal(r.rung, "schema", "限流要原档重试，不能降档");
+    assert.deepEqual(seen, ["schema", "schema"]);
+  } finally { globalThis.fetch = real; }
 });

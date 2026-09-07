@@ -35,6 +35,15 @@ const eslintConfig = defineConfig([
         version: "detect",
       },
     },
+    rules: {
+      // 全角空格（U+3000）是这个项目里对齐中文表格的正当手段——
+      // 控制台报表、注释里的对照表都靠它。默认规则在模板串与注释里也拦，
+      // 于是 lint 长期红着 47 条，而红着的 lint 等于没有 lint。
+      //
+      // 放开的只是模板串与注释，**代码本身照拦**：一个全角空格混进
+      // 标识符或运算符之间是真事故，那种得报出来
+      "no-irregular-whitespace": ["error", { skipTemplates: true, skipComments: true }],
+    },
   },
 ]);
 

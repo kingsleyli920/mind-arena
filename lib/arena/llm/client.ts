@@ -21,7 +21,9 @@ export type Rung = "schema" | "schema-notemp" | "schema-any" | "text";
 const LADDER: Rung[] = ["schema", "schema-notemp", "schema-any", "text"];
 
 /**
- * 每个模型学到的最高可用档位，按客户端实例记忆。
+ * 每个模型学到的最高可用档位。**按模型 id 记，作用域是整个进程**
+ *（不是按客户端实例——这里曾经写着「按实例」，而代码一直是模块级的）。
+ * 键是模型 id，所以 melee 那种一进程多模型的跑法不会互相串味。
  *
  * 阶梯原本每次调用都从头试。实测 qwen3.7-flash 打一整局：
  * `档位：schema-any 16`——十六次决策全都降到第三档，也就是每次都要
@@ -30,9 +32,23 @@ const LADDER: Rung[] = ["schema", "schema-notemp", "schema-any", "text"];
  *
  * 记住之后从该档起步。**只记不忘**：档位只会因为再次被拒而下降，
  * 不会自己升回去——升回去等于把刚学到的东西每次都再交一遍学费。
- * 记忆按实例而非全局：评测里每个对局方一个客户端，互不串味
  */
 const learned = new Map<string, number>();
+
+/**
+ * 某个「模型×档位」被拒过几次。**要两次才作数**，一次不记。
+ *
+ * 起因是一次真实的误判：qwen3.7-flash 的上游在并发下限流，
+ * OpenRouter 把提供方的错误裹成 4xx 转出来——本档的参数明明没问题，
+ * 却被当成「这个模型不支持结构化输出」写进 learned，此后**整个进程**
+ * 都在 text 档跑。而档位不是无关紧要的细节：候选 key 的 enum 一失效，
+ * 实测非法率 0.7% → 8.6%、unknown-key 0 → 47（见 docs/EVAL.md）。
+ * 一次限流就把「测策略」悄悄换成了「测中文转写」。
+ *
+ * 本次调用照样当场降档——总得先把这一季答出来；只是不写进记忆。
+ * 真不支持的模型第二次还会被拒，代价只是多试一轮
+ */
+const rejects = new Map<string, number>();
 
 /**
  * 出参预算的默认值。
@@ -260,9 +276,13 @@ export class OpenRouterClient implements LlmClient {
       // 本档的参数组合不被任何端点接受 —— 降一档重来，而不是一步退到自由文本。
       // 此前 404 直接把结构化输出整个丢掉，而实测只要去掉 temperature 就能过
       if (last.kind === "degradable" && rungIdx < LADDER.length - 1) {
+        // 同一档被拒到第二次才写进记忆——第一次可能只是上游抖了一下
+        const k = `${req.model}\u0000${rung}`;
+        const n = (rejects.get(k) ?? 0) + 1;
+        rejects.set(k, n);
         rungIdx += 1;
         // 学到了就记住：下次直接从这一档起步，不再把前面那几档重交一遍学费
-        learned.set(req.model, rungIdx);
+        if (n >= 2) learned.set(req.model, Math.max(learned.get(req.model) ?? 0, rungIdx));
         continue;
       }
       if (last.kind !== "retryable" && last.kind !== "infra") break;
