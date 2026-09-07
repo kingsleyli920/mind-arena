@@ -125,7 +125,25 @@ const KEY_ENUM = arg("keyenum", "on") !== "off";
 // --reasoning=low|medium|high 统一各模型的推理档位。不给则各用各的默认值——
 // 实测 gpt-5-nano 每次烧 6739 出参 tok（97.7% 是 reasoning），haiku 只烧 103，
 // 差 65 倍。不控这一项，跨模型比的就不是策略能力，而是各家默认给多少算力
-const REASONING = arg("reasoning", "") ? { effort: arg("reasoning", "") } : undefined;
+/**
+ * --reasoning=low|medium|high 走 effort；--reasoning=cap:4000 走推理 token 上限。
+ *
+ * 加 cap 是因为 effort 对有些模型根本不起作用。实测两例（各 2 局、32 席·季）：
+ *   qwen3.6-35b-a3b   每局出 20.8 万 tok（93% 是推理），8/32 季顶穿 32000 的
+ *                     出参上限、内容返空；48 局要 $16.64，价目表说 $1.61
+ *   ling-3.0-flash-fin 每局出 33.6 万 tok，**27/32 季**返空，令数用率 9%
+ * 两个都是带着 --reasoning=low 跑的。它们不是答不上来，是没让它们说完——
+ * 而继续翻倍到 64k 只是把钱烧得更快，一次决策的正文本来只要两百 token。
+ *
+ * 上限是**另一种设定**，不是同一个模型的同一次测量：报告里要标出来，
+ * 跨设定的分不能直接比。
+ */
+const REASONING = (() => {
+  const v = arg("reasoning", "");
+  if (!v) return undefined;
+  const m = /^cap:(\d+)$/.exec(v);
+  return m ? { max_tokens: Number(m[1]) } : { effort: v };
+})();
 const MODEL_DEPS = client
   ? { client, model: MODEL, pack, g: G, P, roster: ROSTER, geo: GEO,
       ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}),
@@ -516,7 +534,9 @@ if (JSON_OUT) {
     // 预算停手时，games 与实际跑完的局数不同。报告必须看得见这件事，
     // 否则「48 局的排名」可能其实只有 11 局
     played: results.length, spentUsd: +spent.toFixed(4), halted,
-    keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null, memory: MEMORY,
+    keyEnum: KEY_ENUM,
+    reasoning: REASONING?.effort ?? (REASONING?.max_tokens ? `cap:${REASONING.max_tokens}` : null),
+    memory: MEMORY,
     dropback: DROPBACK, bareNote: BARE_NOTE,
     // 这一跑是在什么条件下跑的。缺了这些，两周后这份结果与新结果之间
     // 的差是「模型变了」还是「我们改了提示词/内容包/引擎」就分不清——
