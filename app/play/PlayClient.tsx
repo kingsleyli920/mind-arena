@@ -348,7 +348,14 @@ function CityMark({ x, y, size, fill, mine, seat: isSeat, besieged, detail, at }
       {/* 纸色衬底：符号落在斑驳的墨底上，没有衬底就糊成一团。
           比早先的实心椭圆淡得多——笔墨版本身有飞白，压太实反而假 */}
       <ellipse cx={x} cy={y - w * 0.28} rx={w * 0.44} ry={w * 0.34} className="city-halo" />
-      {besieged && <circle cx={x} cy={y - w * 0.3} r={w * 0.52} className="siege-ring" />}
+      {besieged && (() => {
+        const rr = w * 0.52;
+        return (
+          <circle className="siege-ring" cx={x} cy={y - w * 0.3} r={rr}
+            strokeWidth={rr * 0.1}
+            strokeDasharray={`${(rr * 0.52).toFixed(2)} ${(rr * 0.44).toFixed(2)}`} />
+        );
+      })()}
       {/* 势力色刷在 wash 面上：mask 用 objectBoundingBox，一份 mask 供全图复用 */}
       <rect x={l} y={t} width={w} height={w} fill={fill ?? "#efe9dc"}
         mask={`url(#wash-${id})`} opacity={mine ? 1 : 0.88} />
@@ -636,15 +643,26 @@ export function PlayClient() {
   // 高清底图按需加载：整幅可见时不必先下 671KB
   // 舞台在屏上有多宽。取哪一级瓦片全看它——同样放大六倍，
   // 27 寸屏要的像素是笔记本的两倍，写死一个数就必然有一边糊
-  const wrapRef = useRef<HTMLElement>(null);
   const [box, setBox] = useState({ w: 1200, h: 980 });
-  useEffect(() => {
-    const el = wrapRef.current;
+  const roRef = useRef<ResizeObserver | null>(null);
+  /**
+   * 用**回调 ref** 挂观察者，不用 useEffect + []。
+   *
+   * 那样写的话，effect 在选席页就跑了一次——那时地图还没渲染、ref 是 null，
+   * 于是直接 return，而依赖是空数组，再也不会重跑。box 就一直停在初始值
+   * 1200×980，实际画框是 1181×821。后果两处：
+   *   矢量层的变换按 1200 算，与底图错开约 16 像素（静止探针量出来的）
+   *   minK（铺满画框的倍数）按 980 算，「全图」并没有真的铺满
+   */
+  const wrapRef = useCallback((el: HTMLElement | null) => {
+    roRef.current?.disconnect();
+    roRef.current = null;
     if (!el) return;
+    setBox({ w: el.clientWidth, h: el.clientHeight });
     const ro = new ResizeObserver(([e]) =>
       setBox({ w: e.contentRect.width, h: e.contentRect.height }));
     ro.observe(el);
-    return () => ro.disconnect();
+    roRef.current = ro;
   }, []);
   const stageW = box.w;
   /**
@@ -1068,6 +1086,88 @@ export function PlayClient() {
     // 实测缩放时九分位帧 116ms、最慢 129ms——一步一顿
   }, [engine, lod]);
 
+  // 几何与悬停无关，单独算一次。此前整个 roads 挂在 focus 上，
+  // 于是每悬停一次就把 232 条边连同它们的 JSX 全重建一遍
+  const roadGeom = useMemo(() => (engine ? engine.edges.map((e, i) => {
+    const p = (id: string) => {
+      const q = engine.points.find((c) => c.id === id);
+      return q ? { x: (q.longitude - MAP.west) * MAP.ppd, y: (MAP.north - q.latitude) * MAP.ppd } : null;
+    };
+    const a = p(e.from), b = p(e.to);
+    if (!a || !b) return null;
+    return { key: `${e.from}-${e.to}-${i}`, a, b, st: EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain, e,
+             // 行军天数：cost × 每 cost 多少日。这个数就是候选标签里那句「道远」的来源
+             days: Math.round(e.cost * engine.P.marchDayPerCost) };
+  }).filter((r): r is NonNullable<typeof r> => r !== null) : []), [engine]);
+
+  /**
+   * 不随悬停变的三层，缓存成现成的 JSX。
+   *
+   * 它们与「指着谁」毫无关系：focus 一变就把水系 671×2 条、道路 232 条、
+   * 关津 61 处、疆界 2 条全部重新建元素再交给 React diff，纯属白干。
+   *
+   * （当初动手是因为量到「悬停一座城要 1797ms 才出帧」，那个数是假的——
+   *   自动化浏览器把 rAF 限到了 1Hz。缓存本身仍然该做，只是它省的不是 1.8 秒）
+   */
+  const waterEls = useMemo(() => (water && (
+    <g className="water">
+      {water.coast.map((d, i) => <path key={`c${i}`} className="coast" d={d} />)}
+      {water.rivers.map((r, i) => (
+        <g key={`r${i}`}>
+          <path className="river-ink" d={r.d} strokeWidth={r.w} />
+          <path className="river-fill" d={r.d} strokeWidth={r.w * 0.5} />
+        </g>
+      ))}
+    </g>
+  )), [water]);
+
+  const roadEls = useMemo(() => (
+    <g className="roads">
+      {roadGeom.map((r) => (
+        <line key={r.key} className={`road lod${lod}`} x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
+          stroke={r.st.stroke} strokeDasharray={r.st.dash}
+          strokeWidth={r.st.width / view.k ** 0.82} />
+      ))}
+    </g>
+  ), [roadGeom, lod, view.k]);
+
+  // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
+  // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
+  // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
+  // 就是一层噪点
+  const nodeMarks = useMemo(() => (lod === 0 || !engine ? [] : engine.nodes)
+    .filter((n) => lod >= 2 || n.kind === "gate" || n.kind === "port")
+    .map((n) => ({
+      n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
+      r: 12 / view.k ** 0.82,
+    })), [engine, lod, view.k]);
+
+  const nodeEls = useMemo(() => (
+    <g className="nodes">
+      {nodeMarks.map((m) => (
+        <g key={m.n.id}
+          onMouseEnter={() => setNodeTip(m.n)} onMouseLeave={() => setNodeTip(null)}>
+          {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
+          <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
+          <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
+          {lod >= 2 && (
+            <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
+              textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
+          )}
+        </g>
+      ))}
+    </g>
+  ), [nodeMarks, lod]);
+
+  const borderEls = useMemo(() => (
+    <>
+      <path className="border other" d={borders.other}
+        strokeWidth={1.2 / [1, 2.4, 8][lod] ** 0.82} />
+      <path className="border mine" d={borders.mine}
+        strokeWidth={2.4 / [1, 2.4, 8][lod] ** 0.82} />
+    </>
+  ), [borders, lod]);
+
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
   if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;
 
@@ -1294,7 +1394,15 @@ export function PlayClient() {
     return { z, x: (lon - MAP.west) * MAP.ppd, y: (MAP.north - lat) * MAP.ppd };
   }).filter((m): m is NonNullable<typeof m> => m !== null);
 
-  const placed: Array<[number, number, number, number]> = [];
+  // 避让表先把**城印本身**占上：此前只放牌记，于是路的题记会压在城墙上
+  // （实测悬停京兆尹时「关道·潼关 41 日」正压在城楼上）。
+  // 城印是画面上最实的一块，谁都不该压它
+  const placed: Array<[number, number, number, number]> = marks
+    .filter((m) => !hidden.has(m.c.id))
+    .map((m) => {
+      const w = m.base * 2.3;
+      return [m.x - w / 2, m.y - w * GLYPH_BASE, w, w] as [number, number, number, number];
+    });
   const labels = [...marks]
     // 先放最该看见的：当前指向者 → 己方 → 州治 → 大城
     .sort((a, b) => Number(focus === b.c.id) - Number(focus === a.c.id)
@@ -1319,14 +1427,64 @@ export function PlayClient() {
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
-  // 出兵箭头：已勾选的用实线，正指向的用虚线。
-  // 「自南阳郡征河南尹」——不熟地理的人根本不知道这两个郡在哪，
-  // 候选表与地图此前完全没有联动，读到的只是两个地名
+
+  /** 郡 → 图上坐标。道路、箭头、军团都要它 */
   const xy = (id: string) => {
     const p = engine.points.find((c) => c.id === id);
     return p ? { x: (p.longitude - MAP.west) * MAP.ppd, y: (MAP.north - p.latitude) * MAP.ppd }
              : null;
   };
+
+  // ── 道路层：边的地形 ─────────────────────────────────────────────
+  //
+  // 引擎按边的 cost 算行军天数（日三十里），可图上此前一条路都没有：
+  // 「自南阳征河南尹要走一季」这件事，看图的人无从验证，也看不出难在哪。
+  // 232 条边全铺出来会盖住墨底，所以常态极淡，指到某郡时它那几条才提亮
+  const hub = pinned ?? focus;
+  const roads = roadGeom.map((r) => {
+    const hot = hub === r.e.from || hub === r.e.to;
+    const near = hub === r.e.from ? r.a : r.b, far = hub === r.e.from ? r.b : r.a;
+    return { ...r, hot, near, far };
+  });
+
+  // ── 路的题记也要避让 ─────────────────────────────────────────────
+  //
+  // 它此前按「边长的六成」摆：放大十四倍后那个点早跑到屏外，或正好压在别人的
+  // 名字上。实测钉住京兆尹时五条题记有四条与牌记或围城营垒的字相压
+  // （「关道·武关 80 日」压在「京兆尹」上、「丘陵 3 日」压在「左冯翊」上）。
+  //
+  // 改成：从所指之郡往外量一段**屏幕距离**，撞上了就再往外挪一档，
+  // 三档都撞就不发这一条——与牌记同一套办法，且它们共用同一张已占位表
+  const roadTips = roads.filter((r) => r.hot).map((r) => {
+    const size = 19 / view.k ** 0.88;
+    const text = `${EDGE_CN[r.e.terrain] ?? r.e.terrain}`
+      + `${r.e.nodes.length ? `·${r.e.nodes[0].name}` : ""} ${r.days} 日`;
+    // 宽度按字宽分别估：中日韩字宽约 1em，数字与空格约 0.55em。
+    // 一刀切 0.62 会低估中文串的宽度，避让就漏判——实测「关道·潼关 41 日」
+    // 因此仍压在左冯翊的城印上
+    const w = [...text].reduce((n, ch) => n + size * (/[\u4e00-\u9fff·]/.test(ch) ? 1 : 0.55), 0);
+    const h = size * 1.2;
+    const seg = Math.hypot(r.far.x - r.near.x, r.far.y - r.near.y) || 1;
+    // 从**城印外沿**往外量，不用固定像素：城印宽 2.3×base，而 base 随倍数缩，
+    // 固定像素在十四倍下第一档就落在自己城墙里（实测五条题记一条都发不出来）
+    const hubW = (marks.find((m) => m.c.id === hub)?.base ?? 24) * 2.3;
+    for (const out of [hubW * 1.4, hubW * 2.2, hubW * 3.2]) {
+      const t = Math.min(0.62, out / seg);
+      const x = r.near.x + (r.far.x - r.near.x) * t;
+      const y = r.near.y + (r.far.y - r.near.y) * t;
+      const box: [number, number, number, number] = [x - w / 2, y - h / 2, w, h];
+      const hit = placed.some(([qx, qy, qw, qh]) =>
+        box[0] < qx + qw && box[0] + w > qx && box[1] < qy + qh && box[1] + h > qy);
+      if (hit) continue;
+      placed.push(box);
+      return { key: r.key, x, y, size, text };
+    }
+    return null;
+  }).filter((t): t is NonNullable<typeof t> => t !== null);
+
+  // 出兵箭头：已勾选的用实线，正指向的用虚线。
+  // 「自南阳郡征河南尹」——不熟地理的人根本不知道这两个郡在哪，
+  // 候选表与地图此前完全没有联动，读到的只是两个地名
   const arrows = [...new Set([...picked, hoverKey].filter((k): k is string => !!k))]
     .map((k) => {
       const c = candidates.find((x) => x.key === k);
@@ -1337,37 +1495,6 @@ export function PlayClient() {
                sortie: c.action.from === c.action.target };
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
-
-  // ── 道路层：边的地形 ─────────────────────────────────────────────
-  //
-  // 引擎按边的 cost 算行军天数（日三十里），可图上此前一条路都没有：
-  // 「自南阳征河南尹要走一季」这件事，看图的人无从验证，也看不出难在哪。
-  // 232 条边全铺出来会盖住墨底，所以常态极淡，指到某郡时它那几条才提亮
-  const roads = engine.edges.map((e, i) => {
-    const a = xy(e.from), b = xy(e.to);
-    if (!a || !b) return null;
-    const st = EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain;
-    const hub = pinned ?? focus;
-    const hot = hub === e.from || hub === e.to;
-    // 题记压在**离所指之郡六成远**处，不压在中点：中点全挤在枢纽附近，
-    // 一个郡有五条边时五行字叠成一团。从所指那头往外量，它们自然扇开
-    const near = hub === e.from ? a : b, far = hub === e.from ? b : a;
-    return { key: `${e.from}-${e.to}-${i}`, a, b, st, hot, e,
-             tx: near.x + (far.x - near.x) * 0.6, ty: near.y + (far.y - near.y) * 0.6,
-             // 行军天数：cost × 每 cost 多少日。这个数就是候选标签里那句「道远」的来源
-             days: Math.round(e.cost * engine.P.marchDayPerCost) };
-  }).filter((r): r is NonNullable<typeof r> => r !== null);
-
-  // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
-  // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
-  // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
-  // 就是一层噪点
-  const nodeMarks = (lod === 0 ? [] : engine.nodes)
-    .filter((n) => lod >= 2 || n.kind === "gate" || n.kind === "port")
-    .map((n) => ({
-      n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
-      r: 12 / view.k ** 0.82,
-    }));
 
   // ── 军团：在途的也要画 ───────────────────────────────────────────
   //
@@ -1635,66 +1762,55 @@ export function PlayClient() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="decor" src={DECOR} alt="" />
           <canvas ref={canvasRef} />
-          <svg viewBox={`0 0 ${MAP.w} ${MAP.h}`}>
+          </div>
+          {/*
+           * 矢量层单独一屏大，内部用一个 <g> 做与 stage 相同的平移缩放。
+           *
+           * 跟着 stage 一起放大的话，十四倍下这一层是 16531×13526 CSS 像素，
+           * 而看得见的永远只有一屏。搬出来之后画的就只有看得见的那块。
+           *
+           * 内部变换要与 stage 逐像素对齐：stage 宽 = 画框宽 W，图上 1815 单位铺满它，
+           * 故一图上单位 = W/1815 CSS 像素，再乘缩放倍数；平移则是 view.x% 换算成像素
+           */}
+          <div className="map-vec">
+          {/* 不给 viewBox：viewBox 的比例与元素比例一旦不一致，默认的
+              preserveAspectRatio 会把整层等比缩放再居中，矢量层就与底图错开
+              （实测横向偏差 −73/−56/−24 像素，随位置变——那是缩放不一致的特征）。
+              不给 viewBox 时用户单位就是 CSS 像素，下面的变换直接落在屏幕坐标上 */}
+          <svg>
+            <g transform={`translate(${(view.x / 100) * box.w} `
+              + `${(view.y / 100) * (box.w * MAP.h / MAP.w)}) `
+              + `scale(${(box.w / MAP.w) * view.k})`}>
             <defs>
               <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
                 markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
               </marker>
             </defs>
-            {/* 疆界：己方朱、他方墨。两条 path，任意倍数都是实的 */}
-            {/* 笔宽按**档位**给，不按倍数连续变：改一次 strokeWidth，浏览器就要把
+            {/* 疆界：己方朱、他方墨。两条 path，任意倍数都是实的。
+                笔宽按**档位**给，不按倍数连续变：改一次 strokeWidth，浏览器就要把
                 这三千多段曲线的笔画几何重算一遍。三档够用，且只在过档时改一次 */}
-            <path className="border other" d={borders.other}
-              strokeWidth={1.2 / [1, 2.4, 8][lod] ** 0.82} />
-            <path className="border mine" d={borders.mine}
-              strokeWidth={2.4 / [1, 2.4, 8][lod] ** 0.82} />
+            {borderEls}
             {/* 水：河心提亮 + 两岸落墨，与底图同一套画法。只在近观档出——
                 整幅可见时底图那份已经够 */}
-            {water && (
-              <g className="water">
-                {water.coast.map((d, i) => (
-                  <path key={`c${i}`} className="coast" d={d} />
-                ))}
-                {water.rivers.map((r, i) => (
-                  <g key={`r${i}`}>
-                    {/* 两岸落墨、河心提亮：与底图同一套画法（那边是
-                        |u|>0.5 落墨、|u|<0.5 提亮），故墨是全宽、亮是半宽 */}
-                    <path className="river-ink" d={r.d} strokeWidth={r.w} />
-                    <path className="river-fill" d={r.d} strokeWidth={r.w * 0.5} />
-                  </g>
-                ))}
-              </g>
-            )}
+            {waterEls}
             {/* 道路：画在州名与城印之下。地形决定行军天数，指到某郡时它那几条提亮，
                 并在路当中标上「山道 47 日」——「道远」这句候选标签的出处 */}
-            {roads.map((r) => (
-              <line key={r.key} className={`road lod${lod}${r.hot ? " hot" : ""}`}
+            {roadEls}
+            {/* 提亮的那几条单独画在上面：把 hot 塞进上面那 232 条里，
+                等于每悬停一次就重建一遍整层 */}
+            {roads.filter((r) => r.hot).map((r) => (
+              <line key={`h-${r.key}`} className={`road lod${lod} hot`}
                 x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
                 stroke={r.st.stroke} strokeDasharray={r.st.dash}
-                strokeWidth={r.st.width * (r.hot ? 2.2 : 1) / view.k ** 0.82} />
+                strokeWidth={r.st.width * 2.2 / view.k ** 0.82} />
             ))}
-            {roads.filter((r) => r.hot).map((r) => (
-              <text key={`d-${r.key}`} className="road-tip"
-                x={r.tx} y={r.ty}
-                textAnchor="middle" fontSize={19 / view.k ** 0.88}>
-                {EDGE_CN[r.e.terrain] ?? r.e.terrain}
-                {r.e.nodes.length ? `·${r.e.nodes[0].name}` : ""} {r.days} 日
-              </text>
+            {roadTips.map((t) => (
+              <text key={`d-${t.key}`} className="road-tip" x={t.x} y={t.y}
+                textAnchor="middle" fontSize={t.size}>{t.text}</text>
             ))}
-            {/* 关津港仓：一字一印。关隘与港口整幅可见，其余放大后才铺开 */}
-            {nodeMarks.map((m) => (
-              <g key={m.n.id}
-                onMouseEnter={() => setNodeTip(m.n)} onMouseLeave={() => setNodeTip(null)}>
-                {/* 透明命中圆：图元本身只有十来像素，低于可点区域的最低尺寸 */}
-                <circle cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
-                <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
-                {lod >= 2 && (
-                  <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
-                    textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
-                )}
-              </g>
-            ))}
+            {/* 关津港仓：各有形制。关隘与港口整幅可见，其余放大后才铺开 */}
+            {nodeEls}
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
                 fontSize={62 / view.k ** 0.82}>{m.z}</text>
@@ -1785,11 +1901,14 @@ export function PlayClient() {
               return (
                 // 城下的围军画营垒——与在途的行营是同一套画。此前这里是一面
                 // 手画的三角小旗，与旁边的笔墨城印摆在一起就是两套语言
+                // 营垒要摆在城印**之外**：城印半宽约 (24..41)/k^0.82，而 s 是
+                // 30/k^0.82，1.15s 正好压在城墙上——图上是围军蹲在城里。
+                // 往东北挪到 2.1s，字再压在营垒下面，避开城名那块牌记（它在城的正下方）
                 <g key={a.id} className={`siege-camp${mine ? " mine" : ""}`}>
-                  <ArmyMark x={x + s * 1.15} y={y + s * 0.28} s={s * 0.86}
+                  <ArmyMark x={x + s * 2.1} y={y - s * 0.25} s={s * 0.86}
                     color={engine.colorOf.get(a.faction) ?? "#7a7266"}
                     marching={false} at={a.id} />
-                  <text x={x + s * 1.15} y={y + s * 0.86} textAnchor="middle" fontSize={s * 0.4}>
+                  <text x={x + s * 2.1} y={y + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
                   </text>
                 </g>
@@ -1803,6 +1922,7 @@ export function PlayClient() {
                 <text x={l.x} y={l.y} textAnchor="middle" fontSize={l.size}>{l.name}</text>
               </g>
             ))}
+            </g>
           </svg>
           </div>
           {/* 图题：古地图的图题不在固定角落，是写在图面构图里的一个墨线框。

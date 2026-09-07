@@ -99,7 +99,19 @@
   margin: 6px;
 }
 .map-wrap { touch-action: none; user-select: none; }
-.map-stage { position: relative; transform-origin: 0 0; will-change: transform; }
+.map-stage { position: relative; transform-origin: 0 0; }
+/*
+ * will-change 只在**拖动/滚轮期间**加。
+ *
+ * 常驻的话，浏览器会把整个舞台提成一张合成层——十四倍下那是 16531×13526 CSS 像素，
+ * 远超光栅化预算，于是它按降级的分辨率栅格一次再用 GPU 拉大：图上一切矢量
+ * （牌记的字、疆界、围城圈、河岸）全糊，而且糊得跟底图一模一样，看着像
+ * 「瓦片不够清晰」——实际是这一行。去掉之后同一处截图立刻是实的。
+ *
+ * 交互期间仍然要它：拖动时每帧重新栅格三千多段曲线会掉帧。
+ * 松手即恢复，浏览器按当前倍数重栅一次
+ */
+.map-wrap.dragging .map-stage { will-change: transform; }
 /* 镜头缓动：按加号、点候选定位过去时，图是**移过去**的而不是跳过去的。
    拖动时必须关掉——每一帧都带 260ms 缓动，手感会像在拽橡皮筋 */
 .map-stage { transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -110,26 +122,42 @@
 /* 海波层：铺满，压在瓦片之上、疆域之下 */
 .map-stage img.decor { position: absolute; inset: 0; pointer-events: none; }
 .map-stage .tiles img { display: block; aspect-ratio: auto; outline: 1px solid transparent; }
-.map-stage img, .map-stage canvas, .map-stage svg {
+.map-stage img, .map-stage canvas {
   display: block; width: 100%; height: auto; aspect-ratio: 1815 / 1485;
 }
 /* 画框吃满一屏高。此前画框的高由画心的定比决定——屏幕再大，看见的也只是
    一张与栏同宽的图，下面全是空白。现在反过来：画框占满，画心按「铺满」
    那个倍数起手（见 minK），屏幕越大看见的地图越大 */
 .map-wrap { height: calc(100dvh - 7.5rem); min-height: 420px; }
-.map-stage canvas, .map-stage svg { position: absolute; inset: 0; }
+.map-stage canvas { position: absolute; inset: 0; }
+/*
+ * 矢量层**不在** .map-stage 里，单独铺满画框一屏大，内部用一个 <g> 做同样的
+ * 平移缩放。
+ *
+ * 放在 stage 里的话，它跟着 stage 一起被放大——十四倍下那层是 16531×13526
+ * CSS 像素，而看得见的只有一屏。搬出来之后这一层永远只有一屏大。
+ *
+ * （当初写这条时附了一个「重画一帧 995ms」的数，那是假的：自动化浏览器把
+ *   rAF 限到了 1Hz，量到的是帧节拍不是工作量。用 longtask 复量：静止与悬停
+ *   都是 0 条长任务，强制布局 0.3ms。这一层该搬，理由是层的尺寸本身，
+ *   不是那个数）
+ */
+.map-vec {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.map-vec svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-stage canvas { mix-blend-mode: multiply; }
-.map-stage svg text {
+.map-vec svg text {
   fill: var(--ink); font-family: inherit; letter-spacing: 0.06em;
 }
-.map-stage svg .tag rect {
+.map-vec svg .tag rect {
   fill: rgba(250, 246, 237, 0.9); stroke: rgba(70, 61, 50, 0.35);
   stroke-width: 1; vector-effect: non-scaling-stroke;
 }
-.map-stage svg .tag.hot rect {
+.map-vec svg .tag.hot rect {
   fill: #fff6e6; stroke: var(--seal); stroke-width: 1.6; vector-effect: non-scaling-stroke;
 }
-.map-stage svg .tag.hot text { font-weight: 700; fill: var(--seal); }
+.map-vec svg .tag.hot text { font-weight: 700; fill: var(--seal); }
 .map-wrap .tip {
   position: absolute; inset-block-end: 0.6rem; inset-inline-start: 0.6rem;
   display: grid; gap: 0.15rem; padding: 0.55rem 0.7rem;
@@ -141,73 +169,80 @@
 /* ── 道路层 ────────────────────────────────────────────────────
    常态极淡：232 条边压在墨底上，稍一加重整幅就成了网格纸。
    指到某郡时它那几条才提亮，并露出「山道 47 日」 */
+/* 图上一切「衬字的白圈」都必须 non-scaling-stroke：stroke-width 是用户单位，
+   随舞台一起放大——十四倍下 3 用户单位就是 42 个屏幕像素，字被自己的白圈吃掉，
+   图上看是几团糊在一起的白斑。围城圈那个暗红扇形是同一类错误的另一种表现 */
+
 /* ── 疆界 ────────────────────────────────────────────────────────
    己方朱、他方墨，与此前画在画布上时同色。线宽用非缩放笔画：
    界是注记，屏上该恒定粗细，不随缩放长成一条红带 */
 /* 线宽在 tsx 里按倍数给，不用 vector-effect：三千多段曲线挂 non-scaling-stroke
    会让每一帧重算笔画几何，缩放时肉眼可见地卡 */
-.map-wrap svg .border { fill: none; stroke-linecap: round; }
-.map-wrap svg .border.mine { stroke: rgba(118, 44, 34, 0.82); }
-.map-wrap svg .border.other { stroke: rgba(52, 45, 37, 0.38); }
+.map-vec svg .border { fill: none; stroke-linecap: round; }
+.map-vec svg .border.mine { stroke: rgba(118, 44, 34, 0.82); }
+.map-vec svg .border.other { stroke: rgba(52, 45, 37, 0.38); }
 
 /* ── 水 ────────────────────────────────────────────────────────
    色与底图那份一致（RIVER_INK 108,124,120 / RIVER_FILL 206,218,214）：
    两份叠在一起要读成同一条河，不是两条。河心先提亮、再压两岸的墨 */
-.map-wrap svg .water { pointer-events: none; }
-.map-wrap svg .water path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.map-wrap svg .water .river-fill { stroke: rgba(206, 218, 214, 0.7); }
-.map-wrap svg .water .river-ink { stroke: rgba(108, 124, 120, 0.42); }
-.map-wrap svg .water .coast { stroke: rgba(90, 108, 108, 0.55); stroke-width: 1.2; }
+.map-vec svg .water { pointer-events: none; }
+.map-vec svg .water path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.map-vec svg .water .river-fill { stroke: rgba(206, 218, 214, 0.7); }
+.map-vec svg .water .river-ink { stroke: rgba(108, 124, 120, 0.42); }
+.map-vec svg .water .coast { stroke: rgba(90, 108, 108, 0.55); stroke-width: 1.2; }
 
 /* 道路按出图档分轻重：远观时它只是底噪，近观时它是「怎么打过去」的答案 */
-.map-wrap svg .road { opacity: 0.4; pointer-events: none; }
-.map-wrap svg .road.lod0 { opacity: 0.18; }
-.map-wrap svg .road.lod2 { opacity: 0.62; }
-.map-wrap svg .road.hot { opacity: 0.95; }
-.map-wrap svg .road-tip {
+.map-vec svg .road { opacity: 0.4; pointer-events: none; }
+.map-vec svg .road.lod0 { opacity: 0.18; }
+.map-vec svg .road.lod2 { opacity: 0.62; }
+.map-vec svg .road.hot { opacity: 0.95; }
+.map-vec svg .road-tip {
   fill: #4a4234; paint-order: stroke; stroke: rgba(251, 248, 241, 0.92); stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 /* ── 关津港仓 ──────────────────────────────────────────────────
    一字一印。朱色是关（打得起来的地方），青色是水（津与港），
    墨色是仓与古战场 */
-.map-wrap svg .node-halo { fill: rgba(251, 248, 241, 0.62); }
-.map-wrap svg g:hover > .node .node-halo { fill: rgba(255, 255, 255, 0.96); }
-.map-wrap svg .node .node-name {
+.map-vec svg .node-halo { fill: rgba(251, 248, 241, 0.62); }
+.map-vec svg g:hover > .node .node-halo { fill: rgba(255, 255, 255, 0.96); }
+.map-vec svg .node .node-name {
   fill: #574d3e; paint-order: stroke; stroke: rgba(251, 248, 241, 0.9); stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
 }
 
 /* ── 军团 ──────────────────────────────────────────────────────
    在途画帐、待命画垒。行军虚线指向目标，己方加重 */
-.map-wrap svg .army text {
+.map-vec svg .army text {
   fill: #4a4234; paint-order: stroke; stroke: rgba(251, 248, 241, 0.9); stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
-.map-wrap svg .army.mine text { fill: #7a2f26; font-weight: 600; }
+.map-vec svg .army.mine text { fill: #7a2f26; font-weight: 600; }
 /* 行军线在**流动**：虚线沿着走向目标推移。静止的虚线只说明「这两点有关系」，
    流动的虚线才说明「这支兵正朝那边去」。军团一季一动，图上却是死的，
    看不出它在动——这是最省的一种「动起来」：不伪造位置，只把方向画出来 */
-.map-wrap svg .march-path {
+.map-vec svg .march-path {
   opacity: 0.42; stroke-dasharray: 10 7; animation: march-flow 1.4s linear infinite;
 }
-.map-wrap svg .army.mine .march-path { opacity: 0.8; }
+.map-vec svg .army.mine .march-path { opacity: 0.8; }
 @keyframes march-flow { to { stroke-dashoffset: -17; } }
 /* 行营在原地微微起伏：一顶不动的帐与一座城印没有分别 */
-.map-wrap svg .army.marching > g { animation: camp-breathe 3.2s ease-in-out infinite;
+.map-vec svg .army.marching > g { animation: camp-breathe 3.2s ease-in-out infinite;
   transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes camp-breathe { 50% { transform: translateY(-1.5%) scale(1.04); } }
 /* 城下的围军见下面「营垒」那一节。营垒本身不动——它就是不动才叫围 */
 /* 围城圈的呼吸。**不能动 r**：SVG 里 r 写百分比是按视口算的，
    一个 36 单位的圈会当场胀成半张地图（第一版就是这样） */
-.map-wrap svg .siege-ring {
+.map-vec svg .siege-ring {
   transform-box: fill-box; transform-origin: 50% 50%;
   animation: siege-pulse 2.8s ease-in-out infinite;
 }
 @keyframes siege-pulse { 50% { opacity: 0.4; transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) {
-  .map-wrap svg .march-path, .map-wrap svg .army.marching > g,
-  .map-wrap svg .siege-ring { animation: none; }
+  .map-vec svg .march-path, .map-vec svg .army.marching > g,
+  .map-vec svg .siege-ring { animation: none; }
   .map-stage { transition: none; }
 }
 
@@ -327,21 +362,22 @@
 }
 
 /* ── 城池图元 ── */
-.map-stage svg { pointer-events: none; }
-.map-stage svg .mark { pointer-events: auto; cursor: pointer; }
-.map-stage svg .city path,
-.map-stage svg .city line { vector-effect: non-scaling-stroke; }
+.map-vec svg { pointer-events: none; }
+.map-vec svg .mark { pointer-events: auto; cursor: pointer; }
+.map-vec svg .city path,
+.map-vec svg .city line { vector-effect: non-scaling-stroke; }
 /* 衬底：笔墨版的符号自带飞白，衬底压实反而像贴纸。只留极淡一层托住墨色 */
-.map-stage svg .city-halo { fill: rgba(250, 246, 237, 0.34); stroke: none; }
+.map-vec svg .city-halo { fill: rgba(250, 246, 237, 0.34); stroke: none; }
 /* 让位者的小点：外圈一道纸色，压在墨底上才看得见 */
-.map-stage svg .dot { stroke: rgba(250, 246, 237, 0.8); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-.map-stage svg .siege-ring {
-  fill: none; stroke: #8c3b2f; stroke-width: 3; stroke-dasharray: 7 6; opacity: 0.9;
-  vector-effect: non-scaling-stroke;
-}
-.map-stage svg .mark.mine .city > path:first-of-type { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); }
-.map-stage svg .mark:hover .city { filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); }
-.map-stage svg text.hot { font-weight: 700; }
+.map-vec svg .dot { stroke: rgba(250, 246, 237, 0.8); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+/* 围城圈：笔宽与虚线都由 tsx 按圈的半径给，**不能**用 non-scaling-stroke 加
+   用户单位的虚线——那两样在放大后各走各的：十四倍下这个圈被算成 26 像素粗、
+   62 像素长的两段弧，图上看是城边上贴了两块暗红扇形。
+   按半径给则任意倍数都是同一个「七段虚线的圈」 */
+.map-vec svg .siege-ring { fill: none; stroke: #8c3b2f; opacity: 0.9; }
+.map-vec svg .mark.mine .city > path:first-of-type { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); }
+.map-vec svg .mark:hover .city { filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); }
+.map-vec svg text.hot { font-weight: 700; }
 
 .map-wrap .legend {
   position: absolute; inset-block-start: 0.6rem; inset-inline-start: 0.6rem;
@@ -373,18 +409,19 @@
 }
 .map-wrap .zoom button:hover { background: #fff; }
 
-.map-stage svg text.zhou {
+.map-vec svg text.zhou {
   fill: rgba(46, 40, 33, 0.2); letter-spacing: 0.42em;
   font-weight: 700; paint-order: stroke;
   stroke: rgba(250, 246, 237, 0.35); stroke-width: 6; stroke-linejoin: round;
 }
 
 /* 城下的围军：营垒 + 「几季·多少人」 */
-.map-stage svg .siege-camp text {
+.map-vec svg .siege-camp text {
   fill: var(--ink-soft); paint-order: stroke;
   stroke: rgba(250, 246, 237, 0.9); stroke-width: 3; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
-.map-stage svg .siege-camp.mine text { fill: var(--seal); font-weight: 700; }
+.map-vec svg .siege-camp.mine text { fill: var(--seal); font-weight: 700; }
 
 /* ── 装饰：图题与压角章 ────────────────────────────────────────────
    两者都在屏幕固定层，不进 .map-stage —— 进去会随缩放放大六倍。
@@ -461,8 +498,8 @@
 }
 
 /* 地图上被选中的城 */
-.map-stage svg .mark.pinned .city > path { stroke: var(--seal); stroke-width: 3.5; }
-.map-stage svg .mark { cursor: pointer; }
+.map-vec svg .mark.pinned .city > path { stroke: var(--seal); stroke-width: 3.5; }
+.map-vec svg .mark { cursor: pointer; }
 
 /* 候选区腾出来的高度 */
 .acts { max-height: 58vh; }
@@ -481,24 +518,24 @@
    封令之后地图上什么都不动，玩家不知道刚才发生了什么。
    只画与自己相关的——全图一季平均易主 5.6 处，涉及自己的只有 0.4–1.2 处，
    全画等于把「什么都没动」换成「满屏都在闪」。 */
-.map-stage svg circle.flip {
+.map-vec svg circle.flip {
   fill: none; stroke-width: 5; vector-effect: non-scaling-stroke;
   animation: flip-ring 1.6s ease-out forwards;
 }
-.map-stage svg circle.flip.gain { stroke: var(--seal); }
-.map-stage svg circle.flip.loss { stroke: #3a332a; }
+.map-vec svg circle.flip.gain { stroke: var(--seal); }
+.map-vec svg circle.flip.loss { stroke: #3a332a; }
 @keyframes flip-ring {
   0%   { opacity: 0; transform: scale(0.35); transform-box: fill-box; transform-origin: center; }
   25%  { opacity: 0.95; }
   100% { opacity: 0; transform: scale(1.6); transform-box: fill-box; transform-origin: center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .map-stage svg circle.flip { animation: none; opacity: 0; }
+  .map-vec svg circle.flip { animation: none; opacity: 0; }
 }
 
 /* 城池的键盘焦点 */
-.map-stage svg .mark:focus { outline: none; }
-.map-stage svg .mark:focus-visible .city > path:nth-of-type(1) {
+.map-vec svg .mark:focus { outline: none; }
+.map-vec svg .mark:focus-visible .city > path:nth-of-type(1) {
   stroke: var(--seal); stroke-width: 4;
 }
 
@@ -544,20 +581,20 @@
 .lands tbody tr.warn td:last-child { color: var(--seal); font-weight: 600; }
 
 /* ── 出兵箭头：候选与地图的联动 ── */
-.map-stage svg #arrowhead path { fill: var(--seal); }
-.map-stage svg .arrow {
+.map-vec svg #arrowhead path { fill: var(--seal); }
+.map-vec svg .arrow {
   stroke: var(--seal); fill: none; opacity: 0.45;
   stroke-dasharray: 10 8; stroke-linecap: round; pointer-events: none;
 }
 /* 已勾选的用实线：那是「我要下的令」，与「我正在看的」不是一回事 */
-.map-stage svg .arrow.on { opacity: 0.85; stroke-dasharray: none; }
-.map-stage svg .sortie {
+.map-vec svg .arrow.on { opacity: 0.85; stroke-dasharray: none; }
+.map-vec svg .sortie {
   stroke: var(--seal); fill: none; stroke-width: 4; opacity: 0.45;
   stroke-dasharray: 8 7; pointer-events: none;
 }
-.map-stage svg .sortie.on { opacity: 0.85; stroke-dasharray: none; }
+.map-vec svg .sortie.on { opacity: 0.85; stroke-dasharray: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .map-stage svg .arrow { animation: march 1.6s linear infinite; }
+  .map-vec svg .arrow { animation: march 1.6s linear infinite; }
 }
 @keyframes march { to { stroke-dashoffset: -18; } }
 
