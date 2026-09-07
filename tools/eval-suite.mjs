@@ -73,6 +73,17 @@ const BUDGET = Number(arg("budget", "0")) || 0;
 /** --provider=A,B：钉住提供方，见 eval-run 的同名参数 */
 const PROVIDER = arg("provider", "");
 const payingCount = Math.max(1, AGENTS.filter((a) => a.startsWith("model:")).length);
+/**
+ * --maxcost=<美元>：单个对局方的预估上限，超了就**拒跑**。默认 1.5。
+ *
+ * 立这条闸门是因为一次真实的浪费：开发期的一份榜里 gpt-5-mini 一个花了 $5.31，
+ * 比同一份榜上其他所有对局方加起来还多，而它给出的信息量并不比 $1 的
+ * gpt-5-nano 多——两者都被基线打穿，结论完全一样。
+ *
+ * 开发期该全用便宜档（flash 那一档，48 局 $0.6–1.5，其中最便宜的几个是国产的）；
+ * 贵的留到规则冻结之后的最终榜，那时再显式写 --maxcost 放行。
+ */
+const MAX_COST = Number(arg("maxcost", "1.5"));
 
 function runOne(spec) {
   const [kind, ...rest] = spec.split(":");
@@ -296,6 +307,15 @@ const px = await priceTable();
                 : "\u3000⚠ 未设 --budget，跑砸了没有闸门"}`);
     if (BUDGET && total > BUDGET) {
       console.log(`  ⚠ 预估已超预算，部分对局方会在跑满 ${GAMES} 局前停手`);
+    }
+    const overs = known.filter(([, v]) => v > MAX_COST);
+    if (overs.length) {
+      console.error(`\n✗ 这些对局方的预估超过单个上限 $${MAX_COST.toFixed(2)}：`);
+      for (const [id, v] of overs) console.error(`    ${id.padEnd(42)}$${v.toFixed(2)}`);
+      console.error("  开发期请用便宜档（flash 一档 48 局约 $0.6–1.5，最便宜的几个是国产的）：");
+      console.error("    qwen/qwen3.7-flash  ~deepseek/deepseek-v4-flash-latest  z-ai/glm-4.7-flash");
+      console.error(`  确实要跑贵的，显式放行：--maxcost=${Math.ceil(Math.max(...overs.map(([, v]) => v)))}`);
+      process.exit(4);
     }
     console.log("");
   }
