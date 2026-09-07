@@ -217,6 +217,8 @@ type Bundle = {
   adjacency: { edges: Array<{ from: string; to: string; km: number; terrain: string; cost: number;
     crossings: string[]; nodes: Array<{ id: string; name: string; kind: string; offset: number }> }> };
   nodes: MapNode[];
+  hydrology: { coastline: Array<Array<[number, number]>>;
+               rivers: Array<{ name: string; points: Array<[number, number]> }> };
   troopTypes: unknown; resources: unknown; provinceSeats: unknown;
   officers: unknown[]; pack: unknown;
 };
@@ -476,6 +478,8 @@ interface Engine {
   nodes: MapNode[];
   /** 边的地形与关津。图上画路要用，引擎那边只认 cost */
   edges: Bundle["adjacency"]["edges"];
+  /** 水系。线在任意倍数下重画，不跟着底图一起糊 */
+  water: Bundle["hydrology"];
 }
 
 /** 图例里的小图与地图上的是同一段代码画的——另画一份必然与地图分家 */
@@ -703,6 +707,7 @@ export function PlayClient() {
           points: b.commanderies,
           nodes: b.nodes ?? [],
           edges: b.adjacency.edges,
+          water: b.hydrology ?? { coastline: [], rivers: [] },
           data: {
             commanderyState: b.commanderyState as never,
             scenario: b.scenario as never,
@@ -1275,6 +1280,52 @@ export function PlayClient() {
   // 还画同一个小印就是把它糊开
   const lod = view.k >= 3.2 ? 2 : view.k >= 1.6 ? 1 : 0;
 
+  // ── 水：线在任意倍数下重画 ───────────────────────────────────────
+  //
+  // 瓦片金字塔总有个头：z4 是 14520，Retina 屏放到十四倍仍要拉伸 2.3 倍。
+  // 再切一级要 700MB 的源图与两千八百块瓦片，而下一次还要再翻一倍——
+  // 拿像素追分辨率是追不完的。
+  //
+  // 但**糊起来最扎眼的是线**（河岸、海岸这种一笔下去的边），而线本来就不必是
+  // 像素：水系是矢量数据，4473 个点、90KB，在这儿按当前倍数重画一遍就永远是实的。
+  // 底图那份仍在下面垫着——两份出自同一份数据、同一套投影，叠在一起是同一条河。
+  //
+  // 河宽照抄底图那条水力几何式（w ∝ Q^0.5，下游渐阔），两份才对得齐：
+  // 见 tools/render-terrain-map.mjs 的「水系」一节
+  const RIVER_W: Record<string, number> = {
+    黄河: 1.0, 长江: 1.0, 淮水: 0.62, 汉水: 0.62, 渭水: 0.55, 济水: 0.5,
+    "珠江（西江）": 0.62, 辽水: 0.42, 湘水: 0.45, 赣水: 0.45, 泗水: 0.42,
+  };
+  const toPath = (pts: Array<[number, number]>) => {
+    let d = "";
+    for (let i = 0; i < pts.length; i += 1) {
+      const x = (pts[i][0] - MAP.west) * MAP.ppd, y = (MAP.north - pts[i][1]) * MAP.ppd;
+      d += `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    return d;
+  };
+  // 近观才画：整幅可见时底图那份已经够，两份叠着只会把河描粗
+  const water = lod >= 2 ? {
+    coast: engine.water.coastline.filter((s2) => s2.length > 1).map(toPath),
+    // 一条河拆成若干段，每段照它在全程的位置取宽——一笔到底画不出下游渐阔
+    rivers: engine.water.rivers.flatMap((r) => {
+      const w0 = RIVER_W[r.name] ?? 0.34;
+      const n = r.points.length;
+      const STEP = 6;
+      const out: Array<{ d: string; w: number }> = [];
+      for (let i = 0; i + 1 < n; i += STEP) {
+        const seg = r.points.slice(i, Math.min(n, i + STEP + 1));
+        if (seg.length < 2) continue;
+        const u = (i + seg.length / 2) / n;
+        // 底图那边是**半宽** half = w0 · PPD · 0.03 · (0.35 + u^0.8 · 1.6)，
+        // PPD = 55，故全宽 = w0 · 3.3 · (…)。第一版把它当半宽又乘了 1.7/2.1，
+        // 渭水画出来是一条四十像素宽的青带
+        out.push({ d: toPath(seg), w: w0 * 3.3 * (0.35 + u ** 0.8 * 1.6) });
+      }
+      return out;
+    }),
+  } : null;
+
   // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
   // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
   // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
@@ -1559,6 +1610,23 @@ export function PlayClient() {
                 <path d="M 0 0 L 10 5 L 0 10 z" />
               </marker>
             </defs>
+            {/* 水：河心提亮 + 两岸落墨，与底图同一套画法。只在近观档出——
+                整幅可见时底图那份已经够 */}
+            {water && (
+              <g className="water">
+                {water.coast.map((d, i) => (
+                  <path key={`c${i}`} className="coast" d={d} />
+                ))}
+                {water.rivers.map((r, i) => (
+                  <g key={`r${i}`}>
+                    {/* 两岸落墨、河心提亮：与底图同一套画法（那边是
+                        |u|>0.5 落墨、|u|<0.5 提亮），故墨是全宽、亮是半宽 */}
+                    <path className="river-ink" d={r.d} strokeWidth={r.w} />
+                    <path className="river-fill" d={r.d} strokeWidth={r.w * 0.5} />
+                  </g>
+                ))}
+              </g>
+            )}
             {/* 道路：画在州名与城印之下。地形决定行军天数，指到某郡时它那几条提亮，
                 并在路当中标上「山道 47 日」——「道远」这句候选标签的出处 */}
             {roads.map((r) => (

@@ -141,6 +141,15 @@
 /* ── 道路层 ────────────────────────────────────────────────────
    常态极淡：232 条边压在墨底上，稍一加重整幅就成了网格纸。
    指到某郡时它那几条才提亮，并露出「山道 47 日」 */
+/* ── 水 ────────────────────────────────────────────────────────
+   色与底图那份一致（RIVER_INK 108,124,120 / RIVER_FILL 206,218,214）：
+   两份叠在一起要读成同一条河，不是两条。河心先提亮、再压两岸的墨 */
+.map-wrap svg .water { pointer-events: none; }
+.map-wrap svg .water path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.map-wrap svg .water .river-fill { stroke: rgba(206, 218, 214, 0.7); }
+.map-wrap svg .water .river-ink { stroke: rgba(108, 124, 120, 0.42); }
+.map-wrap svg .water .coast { stroke: rgba(90, 108, 108, 0.55); stroke-width: 1.2; }
+
 /* 道路按出图档分轻重：远观时它只是底噪，近观时它是「怎么打过去」的答案 */
 .map-wrap svg .road { opacity: 0.4; pointer-events: none; }
 .map-wrap svg .road.lod0 { opacity: 0.18; }

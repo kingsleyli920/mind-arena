@@ -38,6 +38,25 @@ const bundle = {
     households: c.households, population: c.population,
   })),
   adjacency: read("adjacency.json"),
+  /**
+   * 水系。**只带点，不带考据**——出处、别名、串接方法留在全量文件里。
+   *
+   * 为什么运行时要它：线是矢量的，可它此前只存在于烤好的底图里。
+   * 底图再大也有个头（z4 是 14520，Retina 屏放到十四倍仍要拉伸 2.3 倍），
+   * 而糊起来最扎眼的正是线——河岸、海岸这种一笔下去的边。
+   * 带上这 4473 个点（约 90KB），线就能在任意倍数下重画一遍，永远是实的
+   */
+  hydrology: (() => {
+    const h = read("hydrology.json");
+    const r4 = (v) => Math.round(v * 1e4) / 1e4;
+    return {
+      coastline: h.coastline.map((seg) => seg.map(([lon, lat]) => [r4(lon), r4(lat)])),
+      rivers: h.rivers.map((r) => ({
+        name: r.name,
+        points: r.points.map(([lon, lat]) => [r4(lon), r4(lat)]),
+      })),
+    };
+  })(),
   // 关津港仓：图上画得出「这条路上卡着什么」，靠的是这 61 个据点的经纬度。
   // 只带画图要用的字段——史料出处、别名、今地对照留在 lib/game/data 的全量文件里，
   // 那些是给人考订用的，不必让每个浏览器都下一遍
