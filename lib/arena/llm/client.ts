@@ -62,6 +62,22 @@ const rejects = new Map<string, number>();
  * 决策本身只要 ~200 tok（一串 key + 一句话），余量全是给推理留的。
  */
 const DEFAULT_MAX_TOKENS = 8000;
+
+/**
+ * 每个模型学到的出参预算。与降级梯的 learned 同一个道理：
+ * 交过的学费不该每季再交一遍。
+ *
+ * 实测 deepseek-v4-flash 打真实观测：出参 419 万 token 里 **400 万是推理**
+ *（每次 5305 tok），一份 48 局的跑里 **129/756 季**被推理顶到饥饿、翻倍重试。
+ * 那 129 次里每一次都白发了一个 8000 tok 的请求——钱照付、时间照花，
+ * 而 harness 明明在第一次就知道了「这个模型要更大的预算」。
+ *
+ * 只涨不落，和档位同理：落回去等于把学费再交一遍。上限仍是
+ * MAX_MAX_TOKENS，且只在**真的饿过**之后才涨——没饿过的模型照旧用默认值，
+ * 不然一个不推理的模型也会被拖去发大预算的请求（提供方按上限预留算力，
+ * 排队会变慢）。
+ */
+const learnedBudget = new Map<string, number>();
 /** 饿死后翻倍重试的上限。再高就不是预算问题，是模型不收敛 */
 const MAX_MAX_TOKENS = 32_000;
 
@@ -193,7 +209,8 @@ export class OpenRouterClient implements LlmClient {
     const maxAttempts = this.opts.maxAttempts ?? 6;
     // 没给 schema 就直接从 text 档起步，不必把上面三档白试一遍
     let rungIdx = req.schema ? (learned.get(req.model) ?? 0) : LADDER.length - 1;
-    let budget = req.maxTokens ?? DEFAULT_MAX_TOKENS;
+    let budget = Math.max(req.maxTokens ?? DEFAULT_MAX_TOKENS,
+                          learnedBudget.get(req.model) ?? 0);
     let attempts = 0;
     let starved = 0;
     let last: Failure | null = null;
@@ -252,6 +269,8 @@ export class OpenRouterClient implements LlmClient {
           last = { kind: "starved", status: 200,
                    message: `出参预算 ${budget} 被推理占满（reasoning ${reasoning}），已翻倍重试` };
           budget = Math.min(budget * 2, MAX_MAX_TOKENS);
+          // 记住：下一季直接从这个预算起步，不再白发一个注定被砍断的请求
+          learnedBudget.set(req.model, Math.max(learnedBudget.get(req.model) ?? 0, budget));
           continue;
         }
 

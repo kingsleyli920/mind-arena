@@ -464,3 +464,45 @@ test("榜分：同档内按州进度单调，一个州治约合半个州", () =>
                boardScore({ grade: "yi", zhouEquiv: 0, startZhouEquiv: 0, seats: 2 }),
                "1 州 = 2 个州治：与定档判据同源（多 1 州 = 多 2 州治 = 甲）");
 });
+
+test("出参预算也要记住：饿过一次之后，下一次直接从翻倍后的预算起步", async () => {
+  const seen = [];
+  const real = globalThis.fetch;
+  let i = 0;
+  globalThis.fetch = async (_u, init) => {
+    seen.push(JSON.parse(init.body).max_tokens);
+    // 第一次：推理把出参吃光（finish=length）→ 翻倍重试；之后正常
+    const starve = i === 0;
+    i += 1;
+    return { ok: true, status: 200, headers: new Headers(),
+      json: async () => ({ model: "m",
+        choices: [{ message: { content: starve ? "" : '{"picks":[],"reason":"x"}' },
+                    finish_reason: starve ? "length" : "stop" }],
+        usage: { prompt_tokens: 10, completion_tokens: starve ? 8000 : 5,
+                 completion_tokens_details: { reasoning_tokens: starve ? 7900 : 0 } } }) };
+  };
+  try {
+    const c = new OpenRouterClient("k");
+    await c.chat({ ...REQ, model: "试:重推理" });
+    await c.chat({ ...REQ, model: "试:重推理" });
+    assert.deepEqual(seen, [8000, 16000, 16000],
+      "第二次调用要直接用 16000——白发一个注定被砍断的 8000 请求，钱照付时间照花");
+  } finally { globalThis.fetch = real; }
+});
+
+test("没饿过的模型不涨预算：涨了会让提供方按上限预留算力、排队变慢", async () => {
+  const seen = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = async (_u, init) => {
+    seen.push(JSON.parse(init.body).max_tokens);
+    return { ok: true, status: 200, headers: new Headers(),
+      json: async () => ({ model: "m", choices: [{ message: { content: '{"picks":[],"reason":"x"}' },
+        finish_reason: "stop" }], usage: { prompt_tokens: 10, completion_tokens: 5 } }) };
+  };
+  try {
+    const c = new OpenRouterClient("k");
+    await c.chat({ ...REQ, model: "试:不推理" });
+    await c.chat({ ...REQ, model: "试:不推理" });
+    assert.deepEqual(seen, [8000, 8000]);
+  } finally { globalThis.fetch = real; }
+});
