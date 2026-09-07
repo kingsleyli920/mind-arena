@@ -311,6 +311,8 @@
 .map-stage svg .city line { vector-effect: non-scaling-stroke; }
 /* 衬底：笔墨版的符号自带飞白，衬底压实反而像贴纸。只留极淡一层托住墨色 */
 .map-stage svg .city-halo { fill: rgba(250, 246, 237, 0.34); stroke: none; }
+/* 让位者的小点：外圈一道纸色，压在墨底上才看得见 */
+.map-stage svg .dot { stroke: rgba(250, 246, 237, 0.8); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .map-stage svg .siege-ring {
   fill: none; stroke: #8c3b2f; stroke-width: 3; stroke-dasharray: 7 6; opacity: 0.9;
   vector-effect: non-scaling-stroke;

@@ -42,8 +42,9 @@ yarn-error.log*
 # 皴法提取用的参考画作（可用 tools/fetch-refs.mjs 重新下载）
 /refs/
 
-# 地形源图（27MB，由 tools/render-terrain-map.mjs 重新生成；运行时用 tiles/）
+# 地形源图（45MB / 180MB，由 tools/render-terrain-map.mjs 重新生成；运行时用 tiles/）
 public/game/map/han-terrain.png
+public/game/map/han-terrain-4x.png
 tsconfig.tsbuildinfo
 .tmp-preview/
 

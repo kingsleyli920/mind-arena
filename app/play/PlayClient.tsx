@@ -32,9 +32,12 @@ import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/type
 import { cmp } from "@/lib/game/engine/cmp";
 
 /**
- * 瓦片金字塔。tools/slice-map-tiles.mjs 早就切好了四级
- * （z0 908×743 → z3 7260×5940，512 见方，webp，合计 5MB），
+ * 瓦片金字塔。tools/slice-map-tiles.mjs 切的五级
+ * （z0 908×743 → z4 14520×11880，512 见方，webp），
  * 而对局页此前一直只贴那张 1815 的整图——放大到六倍看的仍是同一张图放大六倍。
+ *
+ * z4 是这一轮新渲的：缩放上限提到 14 之后，7260 那一级在八倍上就糊了。
+ * 底图按 PPD=440 重渲（14520×11880，180MB 的源图不入库，跑 npm run map:base4x 重生成）
  *
  * 换成按视野取瓦片：屏上要多少像素就取哪一级，只加载看得见的那十几块。
  * z3 全级 180 块，实际同屏最多二十来块
@@ -45,6 +48,7 @@ const LEVELS = [
   { z: 1, w: 1815, h: 1485 },
   { z: 2, w: 3630, h: 2970 },
   { z: 3, w: 7260, h: 5940 },
+  { z: 4, w: 14520, h: 11880 },
 ];
 /** 放大到几倍换哪一级：屏宽 × 倍数超过该级像素宽就该换下一级 */
 const levelFor = (k: number, screenW: number) =>
@@ -1145,6 +1149,32 @@ export function PlayClient() {
     };
   }).filter((m): m is NonNullable<typeof m> => m !== null);
 
+  // ── 城印避让 ────────────────────────────────────────────────────
+  //
+  // 缩放律改对之后，放大能把城分开了；缩小时仍分不开——那不是缩放律的问题，
+  // 是地上本来就挤：京兆尹与左冯翊隔 16 像素、辽西与辽东属国隔 8，
+  // 而整幅可见时城印有 48–83 像素宽，画多少层都必然叠。
+  //
+  // 按牌记那套办法办：重要的先放（己方 → 州治 → 大城），叠上去的这一季
+  // 让位——但**不是不画**，让位者留一枚小点，「这儿有个郡」与点击区都还在。
+  // 放大到彼此不再相碰，它们自己就回来了
+  const placedMarks: Array<[number, number, number]> = [];
+  const ranked = [...marks].sort((a, b) =>
+    Number(focus === b.c.id) - Number(focus === a.c.id)
+    || Number(pinned === b.c.id) - Number(pinned === a.c.id)
+    || Number(b.mine) - Number(a.mine)
+    || Number(b.isSeat) - Number(a.isSeat)
+    || b.base - a.base || cmp(a.c.id, b.c.id));
+  const hidden = new Set<string>();
+  for (const m of ranked) {
+    const r = m.base * 1.05;                       // 城印半径（含笔锋外溢）
+    if (placedMarks.some(([px, py, pr]) => Math.hypot(px - m.x, py - m.y) < (pr + r) * 0.62)) {
+      hidden.add(m.c.id);
+      continue;
+    }
+    placedMarks.push([m.x, m.y, r]);
+  }
+
   // 州名题记：舆图必有的一层。缩得越小越该看见大区划，放大后让位给郡治
   const zhouMarks = [...engine.geo.zhouMembers].map(([z, ids]) => {
     const pts = engine.points.filter((p) => ids.includes(p.id));
@@ -1162,6 +1192,7 @@ export function PlayClient() {
       || Number(b.isSeat) - Number(a.isSeat) || b.base - a.base)
     // 放大后铺开全部郡名：整幅可见时只标己方与州治是为了不叠字，
     // 放大之后地方够了，还藏着就是白放大
+    .filter((m) => !hidden.has(m.c.id) || focus === m.c.id)
     .filter((m) => view.k >= 2.2 || m.mine || m.isSeat || focus === m.c.id)
     .map((m) => {
       // 牌记比图元收得更狠一点：字在屏上只需**够读**，不需要跟着放大。
@@ -1573,10 +1604,16 @@ export function PlayClient() {
                     远低于可点区域的最低尺寸 */}
                 <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / view.k ** 0.88)}
                   fill="transparent" />
-                <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
-                  mine={m.mine} seat={m.isSeat} besieged={m.besieged} detail={lod >= 2}
-                  at={m.c.id}
-                  fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
+                {hidden.has(m.c.id) ? (
+                  // 让位者：一枚小点。位置还在、点得到、归属看得见
+                  <circle className="dot" cx={m.x} cy={m.y} r={m.base * 0.2}
+                    fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : "#efe9dc"} />
+                ) : (
+                  <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
+                    mine={m.mine} seat={m.isSeat} besieged={m.besieged} detail={lod >= 2}
+                    at={m.c.id}
+                    fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : null} />
+                )}
               </g>
             ))}
             {/* 本季易主：得手画朱环，失守画墨环。key 带上季号，
