@@ -127,6 +127,10 @@ export interface EngineParams {
   buildGold: Record<string, number>;
   officeOrders: number; granarySeasons: number; marketMul: number; drillMul: number;
   ironworksForgeCut: number; salternGold: number; studTroopMul: number;
+  /** 铁官让器械只降几级（而非清零）。包里写着，此前引擎硬编码成 1 */
+  ironworksGearDrop: number;
+  /** 募兵扣几档民心、安民加几档。同上，此前是写死的 ±1 */
+  levyMorale: number; sootheMorale: number;
   farmsteadProv: number; farmsteadDrillMul: number;
   farmsteadUpkeepCut: number; officeCutYield: number; granaryProv: number;
   siegeDefenseErosion: number;
@@ -346,6 +350,9 @@ export function loadParams(pack: RawPack): EngineParams {
     marketMul: g("建筑", "市_产金倍"),
     drillMul: g("建筑", "校场_增兵倍"),
     ironworksForgeCut: g("建筑", "铁官_治械折"),
+    ironworksGearDrop: g("建筑", "铁官_降几级"),
+    levyMorale: g("内政", "募兵扣民心"),
+    sootheMorale: g("内政", "安民增民心"),
     salternGold: g("建筑", "盐场_每季产金"),
     studTroopMul: g("建筑", "马苑_统兵倍"),
     farmsteadProv: g("建筑", "屯田_邻郡回粮"),

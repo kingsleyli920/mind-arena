@@ -461,11 +461,11 @@ export function resolve(
     switch (o.action.policy) {
       case "farm":   c.yieldTier = Math.min(10, c.yieldTier + P.farmGain); break;
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
-                     c.moraleTier = Math.max(1, c.moraleTier - 1); break;
+                     c.moraleTier = Math.max(1, c.moraleTier - P.levyMorale); break;
       case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
       case "stock":  c.provisions = Math.min(provCapOf(c, P),
                                              c.provisions + P.provStockSeasons); break;
-      case "soothe": c.moraleTier = Math.min(5, c.moraleTier + 1); break;
+      case "soothe": c.moraleTier = Math.min(5, c.moraleTier + P.sootheMorale); break;
       // 治械：逐级打造，不可越级。首版里器械是征伐时的自由选项，
       // 不花任何代价就能给每次攻城白送缺口
       case "forge": {
@@ -709,12 +709,14 @@ export function resolve(
       src.garrison -= troops;
     }
     // 器械随军出征，本郡即刻回到无械状态：它是一次性的投入，不是永久加成。
-    // 铁官使它只降一级而非清零——「不清零」试过，太强：消融实验里关掉铁官，
-    // 均衡对进攻的分差从 0 回到 +16.6，因为建筑随郡易主，序列攻方白捡别人的常备器械
+    // 铁官使它只降 ironworksGearDrop 级而非清零——「不清零」试过，太强：
+    // 消融实验里关掉铁官，均衡对进攻的分差从 0 回到 +16.6，
+    // 因为建筑随郡易主，序列攻方白捡别人的常备器械。
+    // 降几级现在读内容包（此前写死 1，而包里那句还写着「常备」，两边对不上）
     const gear = src.gear;
     if (src.buildings.includes("ironworks")) {
       const i = P.gearLadder.indexOf(src.gear);
-      src.gear = (P.gearLadder[Math.max(0, i - 1)] ?? "none") as SiegeGear;
+      src.gear = (P.gearLadder[Math.max(0, i - P.ironworksGearDrop)] ?? "none") as SiegeGear;
     } else src.gear = "none";
 
     // 在途的敌军不触发野战——那会变成「解围」打一支还在路上的军队

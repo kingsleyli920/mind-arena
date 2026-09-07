@@ -1721,6 +1721,42 @@ test("调任候选要写明会不会换掉太守 —— 收入按太守政治打
   assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
 });
 
+test("定价不许两份：DEFAULT_RULES 与内容包必须逐项相同", () => {
+  // 「规则即数据」的反例：令数的定价同时写在 pack 的 constants.定价 与
+  // actions.ts 的 DEFAULT_RULES 里。眼下两份恰好一致，但没有任何东西拦着它们分家，
+  // 而分家之后模型按包算、引擎按 TS 算，谁也不会报错
+  const 定价 = PACK.constants["定价"];
+  assert.equal(DEFAULT_RULES.normalAp, 定价["一般"], "一般令的定价两份对不上");
+  assert.equal(DEFAULT_RULES.campaignAp, 定价["征伐"], "征伐令的定价两份对不上");
+  assert.equal(DEFAULT_RULES.perCommanderyOrders, 定价["同郡每季上限"],
+    "同郡每季上限两份对不上");
+});
+
+test("包里的数值常数不许没人读 —— 写了不读就是在对模型说谎", () => {
+  // 实测抓到过一条真的：包里写「铁官让本郡器械常备」，引擎实际只降一级，
+  // 而那个布尔量根本没人读。这条把「包里有、params 不读」的常数列出来，
+  // 只放行确实由别处实现且已在此登记的几个
+  const 允许 = new Set([
+    "时钟.季每年",            // 季名表在界面里，引擎只按季序推进
+    "定价.一般", "定价.征伐", "定价.同郡每季上限",  // 走 DEFAULT_RULES，上一条已对账
+    "名器.授官_令",           // 走 rules.normalAp
+    "名器.改授即撤前任", "名器.朝廷易主不作废",     // 行为由 resolve 实现，无参数可调
+    "建筑.铁官_器械降级",      // 开关恒真，降几级由 铁官_降几级 驱动
+  ]);
+  const 旁白 = /说明|依据|理由|为何|意图|意义|教训|代价|出处|注$|接法|口径|记法|门槛/;
+  const src = fs.readFileSync("lib/game/engine/params.ts", "utf8");
+  const 漏读 = [];
+  for (const [sec, body] of Object.entries(PACK.constants)) {
+    if (!body || typeof body !== "object") continue;
+    for (const [k, v] of Object.entries(body)) {
+      if (typeof v !== "number" && typeof v !== "boolean") continue;
+      if (旁白.test(k) || 允许.has(`${sec}.${k}`)) continue;
+      if (!src.includes(`"${k}"`)) 漏读.push(`${sec}.${k}`);
+    }
+  }
+  assert.deepEqual(漏读, [], `这些常数包里写了、params.ts 不读：${漏读.join("、")}`);
+});
+
 test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不能看两场战争", () => {
   // 四方对账里最容易漏的一处：模型的观测里有存粮、器械、兵种、建筑，
   // 而界面那张「我的郡国」表只有兵产心防阵将——人少看四样，
