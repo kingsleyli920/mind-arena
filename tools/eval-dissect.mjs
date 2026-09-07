@@ -22,8 +22,13 @@ if (!files.length) {
   process.exit(2);
 }
 
+// 列头用中文。英文 key 排成一行谁都会看串——我就把「调任 3.31」读成了
+// 「改阵 3.31」，还据此在文档里写下一句错的结论
 const TYPES = ["campaign", "muster", "govern", "build", "scout", "appoint",
                "array", "ally", "relief", "invest", "submit", "suade"];
+const TYPE_CN = { campaign: "出征", muster: "集结", govern: "内政", build: "营建",
+                  scout: "刺探", appoint: "调任", array: "改阵", ally: "结盟",
+                  relief: "赈济", invest: "授官", submit: "归降", suade: "招降" };
 const pad = (s, n) => String(s).padEnd(n - (String(s).match(/[一-鿿（）]/g)?.length ?? 0));
 const num = (v, n = 6, d = 2) => v.toFixed(d).padStart(n);
 
@@ -31,6 +36,17 @@ const runs = files.map((f) => {
   const d = JSON.parse(fs.readFileSync(f, "utf8"));
   return { tag: (d.agent === "model" ? d.model : `${d.agent}`) ?? f, d };
 });
+
+// 「没能作答」的季次必须剔出分母。
+//
+// 这一条是被自己骗过一次才加的：一份榜里 glm 有 141/754 季因提供方报错
+// 一条令都没下，而按全部季平均出来的令数用率是 69.3%——我据此写了
+// 「模型少下三成的令却拿到一样的分」，还说它推翻了第 17 条。**全错。**
+// 剔掉空季之后是 85.3%，每季 9.55 条令，比机器人的 9.18 还多。
+//
+// 分母里混着没作答的季，任何按季平均的指标都是错的。
+const answered = (d) => (d.records ?? []).filter((r) => !r.failure);
+const skipped = (d) => (d.records ?? []).length - answered(d).length;
 
 // ── 一、按席位 ──────────────────────────────────────────────────────
 // 强席与弱席混在一个均分里，正是「模型是不是普遍地差」这个问题被答错的地方
@@ -52,12 +68,17 @@ for (const s of seats) {
 // ── 二、动作构成 ────────────────────────────────────────────────────
 // 每席·季下了几条各类令。免费的（刺探、调任）也算进来——
 // 机器人正是靠把免费的用满，把每季的令数拉到 9.2
-console.log("\n══ 每席·季的动作构成 ══");
+console.log("\n══ 每席·季的动作构成（已剔除没能作答的季）══");
+for (const { tag, d } of runs) {
+  const n = skipped(d);
+  if (n) console.log(`  ⚠ ${tag}：${n}/${(d.records ?? []).length} 季因提供方报错一条令都没下，`
+    + "已剔出下面所有按季平均的分母");
+}
 const shown = TYPES.filter((t) => runs.some(({ d }) =>
   (d.records ?? []).some((r) => (r.picks ?? []).some((p) => p.startsWith(`${t}:`)))));
-console.log(pad("对局方", 22) + "  合计" + shown.map((t) => pad(t, 9).padStart(9)).join(""));
+console.log(pad("对局方", 22) + "  合计" + shown.map((t) => pad(TYPE_CN[t] ?? t, 7).padStart(7)).join(""));
 for (const { tag, d } of runs) {
-  const recs = d.records ?? [];
+  const recs = answered(d);
   if (!recs.length) { console.log(pad(tag, 22) + "  （无逐季记录）"); continue; }
   const n = recs.length;
   const c = Object.fromEntries(shown.map((t) => [t, 0]));
@@ -69,7 +90,7 @@ for (const { tag, d } of runs) {
       tot += 1;
     }
   }
-  console.log(pad(tag, 22) + num(tot / n) + shown.map((t) => num(c[t] / n, 9)).join(""));
+  console.log(pad(tag, 22) + num(tot / n) + shown.map((t) => num(c[t] / n, 7)).join(""));
 }
 
 // ── 三、被丢的令 ────────────────────────────────────────────────────
@@ -98,7 +119,7 @@ for (const { tag, d } of runs) {
 // ── 四、令数用率 ────────────────────────────────────────────────────
 console.log("\n══ 令数用率（spent / ap，按席·季）══");
 for (const { tag, d } of runs) {
-  const recs = d.records ?? [];
+  const recs = answered(d);
   if (!recs.length) { console.log(`${pad(tag, 22)}（无逐季记录）`); continue; }
   const ap = recs.map((r) => r.spent / Math.max(1, r.ap)).sort((a, b) => a - b);
   const q = (p) => ap[Math.floor((ap.length - 1) * p)];
