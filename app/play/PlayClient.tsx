@@ -277,16 +277,34 @@ function blurRGBA(d: Uint8ClampedArray, w: number, h: number, r: number): void {
 }
 
 /**
+ * 缩放的上下限。
+ *
+ * 上限从 6 提到 14：瓦片有 7260 那一级，六倍根本没用上；而更要紧的是
+ * **图元要靠放大才分得开**——京兆尹与左冯翊图上只隔 16 像素，六倍下城印仍有
+ * 34 像素宽，怎么拉都叠着。
+ * 下限不是 1，是「铺满画框」那个倍数（minK）：画框比画心高时，1 倍会在
+ * 上下留白，那正是「地图拉不开」的观感来源
+ */
+const K_MAX = 14;
+
+/**
  * 以视野中心为锚点缩放。按 (0,0) 缩放的话，每按一次加号都往左上角跑，
  * 想看的地方反而离开视野。
  */
-function zoomAt(v: { k: number; x: number; y: number }, mul: number) {
-  const k = Math.min(6, Math.max(1, v.k * mul));
+function zoomAt(v: { k: number; x: number; y: number }, mul: number, kMin = 1) {
+  const k = Math.min(K_MAX, Math.max(kMin, v.k * mul));
   const lim = (n: number) => Math.min(0, Math.max(-(k - 1) * 100, n));
   // 视野中心在图上的归一化位置，缩放前后保持不变
   const cx = (0.5 - v.x / 100) / v.k;
   const cy = (0.5 - v.y / 100) / v.k;
   return { k, x: lim((0.5 - cx * k) * 100), y: lim((0.5 - cy * k) * 100) };
+}
+
+/** 「全图」：铺满画框，居中。画框比画心高时这不是 1 倍 */
+function fitAll(kMin: number) {
+  const k = Math.max(1, kMin);
+  const lim = (n: number) => Math.min(0, Math.max(-(k - 1) * 100, n));
+  return { k, x: lim((0.5 - 0.5 * k) * 100), y: lim((0.5 - 0.5 * k) * 100) };
 }
 
 /** 把某个经纬度移到视野中心 */
@@ -611,14 +629,24 @@ export function PlayClient() {
   // 舞台在屏上有多宽。取哪一级瓦片全看它——同样放大六倍，
   // 27 寸屏要的像素是笔记本的两倍，写死一个数就必然有一边糊
   const wrapRef = useRef<HTMLElement>(null);
-  const [stageW, setStageW] = useState(1200);
+  const [box, setBox] = useState({ w: 1200, h: 980 });
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setStageW(e.contentRect.width));
+    const ro = new ResizeObserver(([e]) =>
+      setBox({ w: e.contentRect.width, h: e.contentRect.height }));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  const stageW = box.w;
+  /**
+   * 铺满画框要几倍。
+   *
+   * 画心是 1815×1485 的定比，而画框现在占满一屏高——1 倍会在上下留白，
+   * 屏幕越大留白越多。缩放的下限因此不是 1 而是这个数：
+   * 「全图」也铺满，而不是缩成中间一小块
+   */
+  const minK = Math.max(1, (box.h / (box.w * (MAP.h / MAP.w))) || 1);
 
   /**
    * 这一次视角变化要不要缓动。
@@ -731,8 +759,8 @@ export function PlayClient() {
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
-    setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
-  }, [engine, modelSeats, modelPick, seasons]);
+    setView(p ? centerOn(p.longitude, p.latitude, Math.max(3.2, minK), MAP) : fitAll(minK));
+  }, [engine, modelSeats, modelPick, seasons, minK]);
 
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
@@ -1043,7 +1071,7 @@ export function PlayClient() {
                 const cap = resume.game.factions[resume.seat]?.capital;
                 const p = cap ? engine.points.find((c) => c.id === cap) : null;
                 setSmooth(true);
-                setView(p ? centerOn(p.longitude, p.latitude, 2.4, MAP) : { k: 1, x: 0, y: 0 });
+                setView(p ? centerOn(p.longitude, p.latitude, Math.max(3.2, minK), MAP) : fitAll(minK));
                 setResume(null);
               }}>继续</button>
               <button className="ghost" onClick={() => { clearSave(); setResume(null); }}>
@@ -1104,9 +1132,16 @@ export function PlayClient() {
       y: (MAP.north - c.latitude) * MAP.ppd,
       mine: st.owner === seat,
       besieged: game.armies.some((a) => a.target === c.id),
-      // 按缩放的平方根衰减。完全跟着放大会成巨幅贴纸，完全屏幕恒定又
-      // 让「放大是为了看清」落空——取半衰：放大三倍，图元长到约 1.7 倍
-      base: (isSeat ? 36 : hh > 150000 ? 30 : hh > 60000 ? 25 : 21) / Math.sqrt(view.k),
+      // 缩放律。此前是 1/√k：放大六倍，图元在**图上**只缩 2.45 倍，
+      // 而屏幕放大了 6 倍——于是越拉越挤，京兆尹与左冯翊（图上只隔 16 像素）
+      // 怎么拉都叠着。
+      //
+      // 现在 1/k^0.82：图上缩得比屏幕放得快，放大才真的把城分得开；
+      // 屏上仍随 k^0.18 缓慢长大，「放大是为了看清」不落空。
+      //   k=1   城印宽 48–83 像素（图上），与全图时相同
+      //   k=6   宽 12–21，京兆尹与左冯翊已分开
+      //   k=14  宽 6–11，辽西与辽东属国（隔 8 像素）也分得开
+      base: (isSeat ? 36 : hh > 150000 ? 30 : hh > 60000 ? 25 : 21) / view.k ** 0.82,
     };
   }).filter((m): m is NonNullable<typeof m> => m !== null);
 
@@ -1129,15 +1164,17 @@ export function PlayClient() {
     // 放大之后地方够了，还藏着就是白放大
     .filter((m) => view.k >= 2.2 || m.mine || m.isSeat || focus === m.c.id)
     .map((m) => {
-      const size = (m.isSeat ? 25 : 21) / Math.sqrt(view.k);
+      // 牌记比图元收得更狠一点：字在屏上只需**够读**，不需要跟着放大。
+      // 1/k^0.88 意味着屏上按 k^0.12 长——十四倍下也只大三成半
+      const size = (m.isSeat ? 25 : 21) / view.k ** 0.88;
       const w = m.c.name.length * size * 1.02, h = size * 1.3;
-      const x = m.x - w / 2, y = m.y + m.base * 0.62 + 4 / Math.sqrt(view.k);
+      const x = m.x - w / 2, y = m.y + m.base * 0.62 + 4 / view.k ** 0.88;
       const box: [number, number, number, number] = [x, y, w, h];
       const hit = placed.some(([px, py, pw, ph]) =>
         x < px + pw && x + w > px && y < py + ph && y + h > py);
       if (hit && focus !== m.c.id) return null;
       placed.push(box);
-      return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8 / Math.sqrt(view.k),
+      return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8 / view.k ** 0.88,
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
@@ -1200,7 +1237,7 @@ export function PlayClient() {
     .filter((n) => lod >= 2 || n.kind === "gate" || n.kind === "port")
     .map((n) => ({
       n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
-      r: 12 / Math.sqrt(view.k),
+      r: 12 / view.k ** 0.82,
     }));
 
   // ── 军团：在途的也要画 ───────────────────────────────────────────
@@ -1287,7 +1324,7 @@ export function PlayClient() {
 
   const centerOnId = (id: string) => {
     const p = engine.points.find((c) => c.id === id);
-    if (p) { setSmooth(true); setView(centerOn(p.longitude, p.latitude, 3.2, MAP)); }
+    if (p) { setSmooth(true); setView(centerOn(p.longitude, p.latitude, Math.max(4.4, minK), MAP)); }
   };
   // 家底一览。被围与断供直接决定这一季能不能出兵，排在最前面
   const supplied = supplyReach(game, engine.G, seat);
@@ -1417,7 +1454,7 @@ export function PlayClient() {
             const px = (e.clientX - box.left) / box.width;
             const py = (e.clientY - box.top) / box.height;
             setView((v) => {
-              const k = Math.min(6, Math.max(1, v.k * (e.deltaY < 0 ? 1.18 : 1 / 1.18)));
+              const k = Math.min(K_MAX, Math.max(minK, v.k * (e.deltaY < 0 ? 1.18 : 1 / 1.18)));
               // 以指针为锚点缩放，否则放大时目标会跑出视野
               const x = px - ((px - v.x / 100) * k) / v.k;
               const y = py - ((py - v.y / 100) * k) / v.k;
@@ -1482,12 +1519,12 @@ export function PlayClient() {
               <line key={r.key} className={`road lod${lod}${r.hot ? " hot" : ""}`}
                 x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
                 stroke={r.st.stroke} strokeDasharray={r.st.dash}
-                strokeWidth={r.st.width * (r.hot ? 2.2 : 1) / Math.sqrt(view.k)} />
+                strokeWidth={r.st.width * (r.hot ? 2.2 : 1) / view.k ** 0.82} />
             ))}
             {roads.filter((r) => r.hot).map((r) => (
               <text key={`d-${r.key}`} className="road-tip"
                 x={r.tx} y={r.ty}
-                textAnchor="middle" fontSize={19 / Math.sqrt(view.k)}>
+                textAnchor="middle" fontSize={19 / view.k ** 0.88}>
                 {EDGE_CN[r.e.terrain] ?? r.e.terrain}
                 {r.e.nodes.length ? `·${r.e.nodes[0].name}` : ""} {r.days} 日
               </text>
@@ -1507,16 +1544,16 @@ export function PlayClient() {
             ))}
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
-                fontSize={62 / Math.sqrt(view.k)}>{m.z}</text>
+                fontSize={62 / view.k ** 0.82}>{m.z}</text>
             ))}
             {arrows.map((ar) => (ar.sortie ? (
               // 出城迎战：起点即目标，画一圈而不是一条线
               <circle key={ar.key} className={`sortie${ar.on ? " on" : ""}`}
-                cx={ar.a.x} cy={ar.a.y} r={30 / Math.sqrt(view.k)} />
+                cx={ar.a.x} cy={ar.a.y} r={30 / view.k ** 0.82} />
             ) : (
               <line key={ar.key} className={`arrow${ar.on ? " on" : ""}`}
                 x1={ar.a.x} y1={ar.a.y} x2={ar.b.x} y2={ar.b.y}
-                strokeWidth={5 / Math.sqrt(view.k)} markerEnd="url(#arrowhead)" />
+                strokeWidth={5 / view.k ** 0.82} markerEnd="url(#arrowhead)" />
             )))}
             {marks.map((m) => (
               <g key={m.c.id}
@@ -1534,7 +1571,7 @@ export function PlayClient() {
                 aria-label={`${m.c.id}${m.mine ? "（我方）" : ""}`}>
                 {/* 独立的透明命中圆：视觉上的城印只有十来像素，
                     远低于可点区域的最低尺寸 */}
-                <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / Math.sqrt(view.k))}
+                <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / view.k ** 0.88)}
                   fill="transparent" />
                 <CityMark x={m.x} y={m.y} size={m.base * (focus === m.c.id ? 1.3 : 1)}
                   mine={m.mine} seat={m.isSeat} besieged={m.besieged} detail={lod >= 2}
@@ -1551,20 +1588,20 @@ export function PlayClient() {
               const y = (MAP.north - p.latitude) * MAP.ppd;
               return (
                 <circle key={`${fl.turn}-${fl.id}`} className={`flip ${fl.gained ? "gain" : "loss"}`}
-                  cx={x} cy={y} r={44 / Math.sqrt(view.k)} />
+                  cx={x} cy={y} r={44 / view.k ** 0.82} />
               );
             })}
             {/* 军团：在途的画在路上，待命的画在驻地。
                 在途的连一条虚线到目标——「这支兵冲着谁去」是最该一眼看出的事 */}
             {troops.map((t) => {
-              const s2 = 26 / Math.sqrt(view.k);
+              const s2 = 26 / view.k ** 0.82;
               const col = engine.colorOf.get(t.a.faction) ?? "#7a7266";
               return (
                 <g key={t.a.id}
                   className={`army${t.mine ? " mine" : ""}${t.marching ? " marching" : ""}`}>
                   {t.marching && t.from && t.to && (
                     <line className="march-path" x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y}
-                      stroke={col} strokeWidth={2.4 / Math.sqrt(view.k)} />
+                      stroke={col} strokeWidth={2.4 / view.k ** 0.82} />
                   )}
                   <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching}
                     at={t.a.id} />
@@ -1584,7 +1621,7 @@ export function PlayClient() {
               if (!p) return null;
               const x = (p.longitude - MAP.west) * MAP.ppd;
               const y = (MAP.north - p.latitude) * MAP.ppd;
-              const s = 30 / Math.sqrt(view.k);
+              const s = 30 / view.k ** 0.82;
               const mine = a.faction === seat;
               return (
                 // 城下的围军画营垒——与在途的行营是同一套画。此前这里是一面
@@ -1676,9 +1713,9 @@ export function PlayClient() {
           </details>
 
           <div className="zoom">
-            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1.4)); }}>＋</button>
-            <button onClick={() => { setSmooth(true); setView({ k: 1, x: 0, y: 0 }); }}>全图</button>
-            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4)); }}>－</button>
+            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1.4, minK)); }}>＋</button>
+            <button onClick={() => { setSmooth(true); setView(fitAll(minK)); }}>全图</button>
+            <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4, minK)); }}>－</button>
           </div>
           {/* 关津的悬停详情。它与郡的详情共用一个位置：两者不会同时指到 */}
           {nodeTip && !focus && (

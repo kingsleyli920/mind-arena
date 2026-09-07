@@ -109,6 +109,10 @@
 .map-stage img, .map-stage canvas, .map-stage svg {
   display: block; width: 100%; height: auto; aspect-ratio: 1815 / 1485;
 }
+/* 画框吃满一屏高。此前画框的高由画心的定比决定——屏幕再大，看见的也只是
+   一张与栏同宽的图，下面全是空白。现在反过来：画框占满，画心按「铺满」
+   那个倍数起手（见 minK），屏幕越大看见的地图越大 */
+.map-wrap { height: calc(100dvh - 7.5rem); min-height: 420px; }
 .map-stage canvas, .map-stage svg { position: absolute; inset: 0; }
 .map-stage canvas { mix-blend-mode: multiply; }
 .map-stage svg text {
