@@ -9,8 +9,8 @@
 // 这一层不替模型做决策：它只把引擎已有的公式在观测量上跑一遍，
 // 结果是一个**区间**与三值判断，不是断言。MERS 要测的是「往哪打、
 // 什么时候打」（S1/S2），不是心算能力。
-import { breachCount, fieldOutcome, formationEdge, FORMATION_CN,
-         unitPower, unitGuard } from "./combat.ts";
+import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
+         FORMATION_CN, unitPower, unitGuard } from "./combat.ts";
 import { garrisonBand, observedFormation, tierOf } from "./intel.ts";
 import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
@@ -77,15 +77,17 @@ export function forecastSiege(
   // 所以是**潜伏**漂移：adjacency 是 tools/build-adjacency.mjs 生成的，
   // 重建一次就可能分家，那时预告会对着器械说谎（atGate 决定器械缺口要不要减半）
   const atGate = (edge?.gates.length ?? 0) > 0;
-  const bonus = (atk?.breachBonus ?? 0) + persist + formEdge;
+  const bonus = (atk?.breachBonus ?? 0) + persist + formEdge + formAtkBonus(P, src.formation);
   const mul = power * (atk?.attackMul ?? 1);
   const guard = unitGuard(P, tgt.unit);
 
   // 围城时守军是**真值**：自家军团就在城下，看得见
   const lo = breachCount(P, army.troops * (1 - P.jitter) * mul, tgt.garrison * guard,
-                         tgt.defense, army.gear, terrain, atGate, bonus, def?.holdBonus ?? 0);
+                         tgt.defense, army.gear, terrain, atGate, bonus,
+                         (def?.holdBonus ?? 0) + formDefBonus(P, tgt.formation));
   const hi = breachCount(P, army.troops * (1 + P.jitter) * mul, tgt.garrison * guard,
-                         tgt.defense, army.gear, terrain, atGate, bonus, def?.holdBonus ?? 0);
+                         tgt.defense, army.gear, terrain, atGate, bonus,
+                         (def?.holdBonus ?? 0) + formDefBonus(P, tgt.formation));
   const verdict = lo.breach > lo.hold ? "破城" : hi.breach > hi.hold ? "未知" : "不破";
   return {
     breachLo: lo.breach, breachHi: hi.breach,
@@ -150,7 +152,8 @@ export function projectSiege(
   const atGate = (edge?.gates.length ?? 0) > 0;
   const mul = power * (atk?.attackMul ?? 1);
   const guard = unitGuard(P, tgt0.unit);
-  const holdBonus = def?.holdBonus ?? 0;
+  // 守方阵之长（方圆 +1、鱼鳞 −1）与主将加成同属可防守那一侧
+  const holdBonus = (def?.holdBonus ?? 0) + formDefBonus(P, tgt0.formation);
 
   // 逐季推进，每一步都与 resolve 的围城结算同序：先判这一击，再折损，再进季，再判撤围
   let troops = army.troops;
@@ -159,7 +162,8 @@ export function projectSiege(
   let prov = tgt0.provisions;
   let ss = army.siegeSeasons;
   for (let n = 0; ; n += 1) {
-    const bonus = (atk?.breachBonus ?? 0) + ss * P.siegeBreachPerSeason + formEdge;
+    const bonus = (atk?.breachBonus ?? 0) + ss * P.siegeBreachPerSeason + formEdge
+      + formAtkBonus(P, src.formation);
     const r = breachCount(P, troops * (1 - P.jitter) * mul, garrison * guard,
                           defense, army.gear, terrain, atGate, bonus, holdBonus);
     if (r.breach > r.hold) {

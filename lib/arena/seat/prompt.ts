@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.9.0";
+export const PROMPT_VERSION = "1.10.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -57,6 +57,13 @@ export function renderSystem(pack: unknown): string {
     "  带械攻城更易，却可能因此错过本季这一击。同一目标常有两条路，快的兵少、慢的兵多。",
     "- 兴建是永久的，每郡至多三座而可选常有五到七种，所以位子要留给**别处建不了**的：",
     "  铁官、盐场、马苑、屯田须该郡有物产，征伐候选会写明目标郡有什么。",
+    "",
+    "## 三阵各有所长",
+    "- 相克之外，三阵还各有一项本事，且落在不同的地方：",
+    "  **鱼鳞**攻城 +1 缺口、守城 −1 可防守；**鹤翼**行军少一季、攻城 −1 缺口；",
+    "  **方圆**城中存粮 +1 季（默认阵，只此一项）。",
+    "- 所以改阵不只是为了反克：要打，换鱼鳞；要抢那一击、要救得及，换鹤翼；",
+    "  要熬住围城，方圆。阵是**郡的属性**——出兵按起兵郡的阵，守城按被攻郡的阵。",
     "",
     "## 名器",
     "- 空城不必都靠打。无主之郡若四境唯你一家，几季后自己举郡来附；",

@@ -65,6 +65,15 @@ export interface EngineParams {
   /** 金这一层是否启用。关着时收入/军费/价格一律为零 */
   /** 阵型相克加减的缺口数。见内容包 constants.阵型 */
   formationBreach: number;
+  /**
+   * 三阵各自的长处。相克之外，各落在**不同的管子**上——
+   * 鱼鳞加攻减守、鹤翼加速减攻、方圆加守减速。见内容包 constants.阵型.各阵之长
+   */
+  formAtk: Record<string, number>;
+  formDef: Record<string, number>;
+  /** 阵型给城中存粮加几季。方圆结圆自守，耐围 */
+  formProv: Record<string, number>;
+  formMarch: Record<string, number>;
   /** 招降：窗口季数、基础成功率、每点五维折减、同乡加成 */
   suadeWindow: number;
   suadeBase: number;
@@ -271,6 +280,10 @@ export function loadParams(pack: RawPack): EngineParams {
     fillerPolitics: g("武将", "庸将_政治"),
     fillerCharisma: g("武将", "庸将_魅力"),
     formationBreach: g("阵型", "克制加缺口"),
+    formAtk: { scale: g("阵型", "鱼鳞_攻缺口"), wings: g("阵型", "鹤翼_攻缺口"), square: 0 },
+    formDef: { scale: g("阵型", "鱼鳞_守可防守"), wings: 0, square: 0 },
+    formProv: { scale: 0, wings: 0, square: g("阵型", "方圆_加存粮") },
+    formMarch: { scale: 0, wings: g("阵型", "鹤翼_行军季"), square: g("阵型", "方圆_行军季") },
     suadeWindow: g("招降", "窗口季数"),
     suadeBase: g("招降", "基础成功率"),
     suadePerStat: g("招降", "每点五维折减"),
@@ -396,17 +409,31 @@ export function provisionsCap(yieldTier: number, P: EngineParams): number {
  * 带器械再乘 marchGearMul：辎重重则行迟。这把「带械攻城更易」与
  * 「可能错过本季这一击」摆成一个取舍。
  */
-export function marchSeasons(cost: number, withGear: boolean, P: EngineParams): number {
+export function marchSeasons(
+  cost: number, withGear: boolean, P: EngineParams,
+  /**
+   * 起兵郡的阵型。鹤翼两翼包抄、轻捷，少走一季；方圆结圆自守、辎重多，多走一季。
+   * 不给则按 0 算——这条要能在不知阵型的地方（如纯地理的尺子）照旧算出天数
+   */
+  form?: string,
+): number {
   const days = cost * P.marchDayPerCost * (withGear ? P.marchGearMul : 1);
-  if (days <= P.marchAssaultWindow) return 0;
-  return Math.ceil((days - P.marchAssaultWindow) / P.marchSeasonDays);
+  const base = days <= P.marchAssaultWindow
+    ? 0 : Math.ceil((days - P.marchAssaultWindow) / P.marchSeasonDays);
+  // 最少 0：鹤翼能把「一季到」变成「当季即至」，但变不出负的季数
+  return Math.max(0, base + (form ? P.formMarch[form] ?? 0 : 0));
 }
 
 /**
  * 一郡的存粮上限：底数由产出档定，仓廪再加 granarySeasons 季。
  * 无主郡没有建筑，走的也是同一个函数——口径要一致，不能一处带建筑一处不带。
  */
-export function provCapOf(c: { yieldTier: number; buildings: readonly string[] }, P: EngineParams): number {
+export function provCapOf(
+  c: { yieldTier: number; buildings: readonly string[]; formation?: string },
+  P: EngineParams,
+): number {
   return provisionsCap(c.yieldTier, P)
-    + (c.buildings.includes("granary") ? P.granarySeasons : 0);
+    + (c.buildings.includes("granary") ? P.granarySeasons : 0)
+    // 方圆结圆自守，城中多囤一季。围它要多熬一季，而强攻的判据一点不动
+    + (c.formation ? P.formProv[c.formation] ?? 0 : 0);
 }

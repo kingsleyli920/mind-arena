@@ -13,7 +13,7 @@ import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/co
 import { observe } from "../lib/game/engine/observe.ts";
 import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams, marchSeasons, provisionsCap } from "../lib/game/engine/params.ts";
+import { loadParams, marchSeasons, provisionsCap, provCapOf } from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildIndex, captureFrame, attachOutcome, FORM_IDS } from "../lib/game/replay.ts";
 import { tierOf } from "../lib/game/engine/intel.ts";
@@ -691,6 +691,47 @@ test("阵型：相克改变破城与否，且方向正确", () => {
     `克制未加缺口：${even} → ${win}`);
   assert.equal(even - lose, P.formationBreach,
     `被克未减缺口：${even} → ${lose}`);
+});
+
+test("阵型：三阵各有所长，且各落在不同的管子上", () => {
+  // 相克是「谁对上谁」，这一条钉的是「这个阵本身长于什么」——不取决于对手。
+  //
+  // 三项分别落在攻（缺口）、速（行军季）、耐（存粮）上，而不是都往缺口上加：
+  // 都加缺口的话「哪个阵最强」有唯一解，改阵就不成其为决策
+  const s = fresh();
+
+  // 一、鱼鳞攻城 +1 缺口、守城 −1 可防守；鹤翼攻城 −1
+  assert.equal(P.formAtk.scale, 1, "鱼鳞不加攻");
+  assert.equal(P.formAtk.wings, -1, "鹤翼不减攻");
+  assert.equal(P.formDef.scale, -1, "鱼鳞不减守");
+  assert.equal(P.formDef.square, 0, "方圆动了可防守 —— 63 个郡是方圆，那是全图调参");
+
+  // 二、鹤翼行军少一季，方圆是默认阵、不动行军
+  // 全图最长的路也只要一季（464 条边里 54 条是一季，其余当季即至），
+  // 所以鹤翼那一季的意思是「弓弩之郡出兵永不误期」
+  const slow = Object.values(s.commanderies)
+    .flatMap((c) => (G.adj.get(c.id) ?? []).map((e) => e.cost))
+    .find((cost) => marchSeasons(cost, false, P, "square") >= 1);
+  assert.ok(slow, "地图上找不到要走一季的路");
+  assert.equal(marchSeasons(slow, false, P, "wings"),
+    marchSeasons(slow, false, P, "square") - 1, "鹤翼没少走一季");
+  assert.equal(marchSeasons(slow, false, P, "square"),
+    marchSeasons(slow, false, P), "方圆动了行军 —— 默认阵该是中性的");
+  // 最少 0：鹤翼变不出负的季数
+  const near = Object.values(s.commanderies)
+    .flatMap((c) => (G.adj.get(c.id) ?? []).map((e) => e.cost))
+    .find((cost) => marchSeasons(cost, false, P, "square") === 0);
+  assert.equal(marchSeasons(near, false, P, "wings"), 0, "鹤翼把行军算成了负季");
+
+  // 三、方圆城中多囤一季粮
+  const c0 = Object.values(s.commanderies)[0];
+  const base = { yieldTier: c0.yieldTier, buildings: [] };
+  assert.equal(provCapOf({ ...base, formation: "square" }, P),
+    provCapOf({ ...base, formation: "scale" }, P) + 1, "方圆没多囤一季");
+
+  // 四、这三项与相克是**两回事**：未探明敌阵时相克归零，而阵之长照算
+  assert.equal(formationEdge(P, "scale", null), 0, "未探明还在算相克");
+  assert.equal(P.formAtk.scale, 1, "未探明就把自己的阵之长也丢了");
 });
 
 test("阵型：兵力比够不着门槛时，任何加成都造不出缺口", () => {
@@ -2085,7 +2126,9 @@ test("行军：远路之师在途，不算在城下", () => {
     for (const e of G.adj.get(c.id) ?? []) {
       const t = s.commanderies[e.to];
       if (!t || t.owner === c.owner) continue;
-      if (marchSeasons(e.cost, false, P) > 0) { pick = { from: c, to: t }; break; }
+      // 算行军要带**起兵郡的阵型**，与引擎同一个调用：鹤翼少走一季，
+      // 不带的话这里挑出来的「慢路」在引擎里可能是当季即至（实测就这么漏过一次）
+      if (marchSeasons(e.cost, false, P, c.formation) > 0) { pick = { from: c, to: t }; break; }
     }
     if (pick) break;
   }

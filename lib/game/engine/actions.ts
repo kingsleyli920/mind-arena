@@ -479,9 +479,13 @@ export function listActions(
           : s.commanderies[e.from].garrison - send;
         // 行军：这一击本季落不落得下。带械行迟，所以两档兵力共用同一个判断，
         // 但器械那一项会改结果——「带械攻城更易，却可能错过本季这一击」正是取舍所在
-        const mSeasons = marchSeasons(e.cost, src0.gear !== "none", P);
+        // 阵型进得来：鹤翼少走一季、方圆多走一季，与结算同一个函数同一套参数
+        const mSeasons = marchSeasons(e.cost, src0.gear !== "none", P, src0.formation);
+        const formNote = P.formMarch[src0.formation]
+          ? `（${FORMATION_CN[src0.formation]}${P.formMarch[src0.formation] < 0 ? "行疾" : "辎重多"}）`
+          : "";
         const marchNote = mSeasons === 0 ? ""
-          : `｜道远，行军 ${mSeasons} 季${src0.gear !== "none" ? "（带械行迟）" : ""}`;
+          : `｜道远，行军 ${mSeasons} 季${src0.gear !== "none" ? "（带械行迟）" : ""}${formNote}`;
         // 目标郡的物产：铁官只能建在有铁之郡，别处建不得——所以「该抢哪个郡」
         // 因此有了地理上的答案。这条挂在记分函数那根管子上（赔付是一个郡），
         // 而这个仓库量过：挂在记分函数上的信息 +17.2±5.7，挂在产出档/城防/民心上

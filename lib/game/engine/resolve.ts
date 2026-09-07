@@ -12,7 +12,8 @@ import { roll } from "./rng.ts";
 import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, type Graph,
   type Rules, DEFAULT_RULES, validate, orderSites, submitChance } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
-import { breachCount, fieldOutcome, formationEdge, FORMATION_CN, unitPower, unitGuard,
+import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
+  FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
 import { marchSeasons, provCapOf, type EngineParams } from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
@@ -182,7 +183,9 @@ function beginSiege(
   // 行军：不到攻城窗口就当季抵达并首攻，超过则先在路上走几季。
   // 带器械行迟——这把「带械攻城更易」与「可能错过本季这一击」摆成一个取舍
   const edge = (g.adj.get(from) ?? []).find((e) => e.to === target);
-  const left = marchSeasons(edge?.cost ?? 1, gear !== "none", P);
+  // 阵型也算在里头：鹤翼少走一季、方圆多走一季（内容包 constants.阵型.各阵之长）
+  const left = marchSeasons(edge?.cost ?? 1, gear !== "none", P,
+                            s.commanderies[from]?.formation);
   s.armies.push({
     id: `${faction}:${s.turn}:${from}>${target}`,
     faction, commander: a.commander ?? ids[0] ?? null, retinue: ids, troops,
@@ -809,12 +812,16 @@ export function resolve(
     const persist = army.siegeSeasons * P.siegeBreachPerSeason;   // 围得越久缺口越大
     // 阵型相克：结算用真值（预告那边才走迷雾）。攻方起兵郡的阵对被攻郡的阵，
     // 克之 +1 缺口、被克 −1。实测余量有 43.1% 落在 {0,1}，这一项能翻转近半攻城
-    const formEdge = formationEdge(P, s.commanderies[army.home]?.formation ?? "square",
-                                   tgt.formation);
+    const myForm = s.commanderies[army.home]?.formation ?? "square";
+    const formEdge = formationEdge(P, myForm, tgt.formation);
+    // 相克之外，两阵各自的长处：攻方鱼鳞 +1 / 鹤翼 −1，守方方圆 +1 / 鱼鳞 −1。
+    // 与相克不同，这两项不取决于对手是谁，故未探明也照算
+    const formAtk = formAtkBonus(P, myForm);
+    const formDef = formDefBonus(P, tgt.formation);
     const { breach, hold } = breachCount(P, attack, tgt.garrison * unitGuard(P, tgt.unit),
                                          tgt.defense, army.gear, terrain, atGate,
-                                         (atk?.breachBonus ?? 0) + persist + formEdge,
-                                         def?.holdBonus ?? 0);
+                                         (atk?.breachBonus ?? 0) + persist + formEdge + formAtk,
+                                         (def?.holdBonus ?? 0) + formDef);
     // 算式要能**自乘得通**，否则这一行比没有还坏：读者按它验算会算出别的数。
     // 此前把 unitPower 的返回值标成「主将加成」，又漏了战力浮动与真正的主将加成，
     // 三场全部乘不通（+12.6% / −14.9% / −61）。核算实录时被逐场抓出来
@@ -831,7 +838,8 @@ export function resolve(
       + `\u3000城防 ${tgt.defense}\u3000地形 ${P.terrainName[terrain] ?? terrain}`
       + `（守备加成 ${((P.terrainDefense[terrain] ?? 0) * 100).toFixed(0)}%）`
       + `\n    缺口 ${breach} ＝ 兵力比阶梯 + 器械 ${army.gear}`
-      + ` + 主将 ${atk?.breachBonus ?? 0} + 围城累加 ${persist} + 阵型 ${formEdge}`
+      + ` + 主将 ${atk?.breachBonus ?? 0} + 围城累加 ${persist}`
+      + ` + 阵型相克 ${formEdge} + 我阵之长 ${formAtk} + 敌阵之长 ${formDef}`
       + `\n    可防守 ${hold} ＝ 基数 ${P.holdBase} + 城防/${P.defensePerHold}`
       + ` + 守军规模档 + 守将 ${def?.holdBonus ?? 0}`
       + `\n    判据：缺口 ${breach} ${breach > hold ? ">" : "≤"} 可防守 ${hold}`

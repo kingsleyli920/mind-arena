@@ -119,3 +119,20 @@ export function formationEdge(
   if (BEATS[def] === atk) return -P.formationBreach;
   return 0;
 }
+
+/**
+ * 攻方阵型自带的缺口修正（与相克无关）。
+ *
+ * 相克是「谁对上谁」，这一项是「这个阵本身长于什么」：
+ * 鱼鳞密阵突击 +1、鹤翼两翼包抄 −1（轻捷而不利于撞城）、方圆 0。
+ * 未探明敌阵时相克那一项归零，但**这一项照算**——它不取决于对手是谁。
+ */
+export const formAtkBonus = (P: EngineParams, atk: Formation): number =>
+  P.formAtk[atk] ?? 0;
+
+/**
+ * 守方阵型自带的可防守修正。方圆结圆自守 +1、鱼鳞 −1（密阵利攻不利守）。
+ * 与上面同理：不取决于攻方是谁
+ */
+export const formDefBonus = (P: EngineParams, def: Formation): number =>
+  P.formDef[def] ?? 0;
