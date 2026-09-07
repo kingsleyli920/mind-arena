@@ -400,6 +400,28 @@ spent += prior.spent;
 
 const avg = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
 console.log(`对局方 ${AGENT}\u3000${GAMES} 局\u3000席位轮换 ${SEATS.length} 席\n`);
+
+// 席位配额不平就喊出来。
+//
+// 席位轮换靠 gi % SEATS.length，局数不是席位数的整数倍时配额就不平——
+// 而各席难度差得极远（一份实测里刘表 +13.9 郡、吕布 −0.7 郡）。
+// 一次被预算截断在 44/48 的跑，配额是 8/8/7/7/7/7，且**恰好把最后四局
+// 挡在外面**，那四局是 +117 / −97 / −200 / −196（两局被灭）：
+// 截断前 +31.3 ±25.8 显著，跑满后 +20.8 ±27.7 不显著。
+// **被截断的榜不是随机子样本，名次不能照读。**
+{
+  // 从全体席位起算，不是从「出现过的席位」起算——没轮到的那几席
+  // 计数为 0，而那正是配额最不平的情形（4 局 6 席时两席一局没跑）
+  const per = Object.fromEntries(SEATS.map((f) => [f, 0]));
+  for (const r of results) per[r.seat] = (per[r.seat] ?? 0) + 1;
+  const ns = Object.values(per);
+  if (results.length && (Math.max(...ns) !== Math.min(...ns))) {
+    console.log(`⚠ 席位配额不平：${Object.entries(per)
+      .map(([k, v]) => `${nameOf(k)} ${v}`).join("　")}`);
+    console.log(`  ${results.length} 局不是 ${SEATS.length} 席的整数倍。各席难度差得远，`
+      + "名次会被多跑的那一席带偏——**这一跑的排名不可当结论**。\n");
+  }
+}
 console.log("局".padStart(3), "席位".padEnd(10), "档".padStart(3), "分".padStart(4),
   "终郡".padStart(5), "非法率".padStart(7), "观测峰".padStart(7), "令数用率".padStart(9));
 for (const r of results) {
