@@ -1721,6 +1721,22 @@ test("调任候选要写明会不会换掉太守 —— 收入按太守政治打
   assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
 });
 
+test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不能看两场战争", () => {
+  // 四方对账里最容易漏的一处：模型的观测里有存粮、器械、兵种、建筑，
+  // 而界面那张「我的郡国」表只有兵产心防阵将——人少看四样，
+  // 其中「粮」还是围城那只钟（被围每季 −1，归零则不战自下）。
+  const obs = fs.readFileSync("lib/game/engine/observe.ts", "utf8");
+  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  const i = client.indexOf('className="lands"');
+  const head = client.slice(i, client.indexOf("</thead>", i));
+  for (const [field, col] of [["provisions", "粮"], ["gear", "械"],
+                              ["built", "建"], ["unit", "种"]]) {
+    assert.ok(obs.includes(`${field}`), `观测里没有 ${field}，这条对账的前提变了`);
+    assert.ok(head.includes(`<th>${col}</th>`),
+      `郡国表缺「${col}」列 —— 模型看得见 ${field}，人看不见`);
+  }
+});
+
 test("候选标签里的 markdown 不许漏到界面上", () => {
   // 标签同时给模型与界面看：** 是给模型的强调（如「**天下共讨之**」），
   // 界面直出就是一对星号。界面那边剥掉，这条钉住「剥的规则还在」

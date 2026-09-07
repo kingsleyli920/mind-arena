@@ -24,7 +24,8 @@ import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
-import { loadParams, marchSeasons, type EngineParams } from "@/lib/game/engine/params.ts";
+import { loadParams, marchSeasons, provCapOf, type EngineParams }
+  from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
@@ -2226,8 +2227,11 @@ export function PlayClient() {
             <summary>我的郡国<i>{myLands.length}</i></summary>
             <table className="lands">
               <thead>
-                <tr><th>郡国</th><th>兵</th><th>产</th><th>心</th><th>防</th>
-                  <th>阵</th><th>将</th><th>状况</th></tr>
+                {/* 与观测的 mine 段对账加出来的四列：粮、种、械、建。
+                    模型这四样都看得见，而人只看得见兵产心防阵将——
+                    「人和模型看的不是同一场战争」在这张表上就是四个字段的差 */}
+                <tr><th>郡国</th><th>兵</th><th>种</th><th>产</th><th>心</th><th>防</th>
+                  <th>粮</th><th>阵</th><th>械</th><th>将</th><th>建</th><th>状况</th></tr>
               </thead>
               <tbody>
                 {myLands.map((L) => (
@@ -2235,11 +2239,20 @@ export function PlayClient() {
                     onClick={() => { setPinned(L.c.id); setFocus(L.c.id); centerOnId(L.c.id); }}>
                     <td>{L.c.id}</td>
                     <td>{L.c.garrison}</td>
+                    <td>{UNIT_CN2[L.c.unit] ?? L.c.unit}</td>
                     <td>{L.c.yieldTier}</td>
                     <td>{L.c.moraleTier}</td>
                     <td>{L.c.defense}</td>
+                    {/* 存粮是围城那只钟：被围时每季 −1，归零则不战自下。
+                        满仓写「满」，免得一列数字里看不出哪个是危的 */}
+                    <td className={L.c.provisions <= 1 ? "warn-cell" : undefined}>
+                      {L.c.provisions >= provCapOf(L.c, engine.P) ? "满" : L.c.provisions}
+                    </td>
                     <td>{FORMATION_CN[L.c.formation]}</td>
+                    <td>{GEAR_CN2[L.c.gear] ?? "—"}</td>
                     <td>{L.officers.length ? L.officers.map((o) => o.name).join("、") : "—"}</td>
+                    <td>{L.c.buildings.length
+                      ? L.c.buildings.map((b) => BUILD_CN2[b] ?? b).join("·") : "—"}</td>
                     <td>{L.note}</td>
                   </tr>
                 ))}

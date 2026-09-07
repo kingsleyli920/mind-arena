@@ -476,6 +476,7 @@
 .panel .status b { font-size: 1.05rem; color: var(--ink); letter-spacing: 0.08em; }
 .panel .status em { font-style: normal; color: var(--seal); flex-basis: 100%; font-size: 0.78rem; }
 
+.lands .warn-cell { color: var(--seal); font-weight: 700; }
 .panel .brief-fold {
   border: 1px solid var(--rule); border-radius: 2px;
   background: #fbf8f1 url("/game/ui-paper.webp") repeat; background-blend-mode: multiply;
