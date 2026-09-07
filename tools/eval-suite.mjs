@@ -64,6 +64,34 @@ async function priceTable() {
   } catch { return new Map(); }
 }
 
+/**
+ * 这个模型有没有哪个提供方支持结构化输出。
+ *
+ * 没有的话，候选 key 的 enum 就强制不上——降级梯会一路退到 text 档，
+ * 而那时测的已经不是「会不会玩」，是「能不能一字不差地抄中文郡名」：
+ * 实测非法率 0.7% → 8.6%、unknown-key 0 → 47（docs/EVAL.md）。
+ *
+ * 这件事必须在跑之前问清楚。qwen3.7-flash 就是这样：只有 Alibaba 一个
+ * 提供方，supported_parameters 里没有 structured_outputs，带
+ * require_parameters 发过去是 404。而我是花钱跑了十几分钟才发现的——
+ * 报告上只多一行「档位：text 16」，不会说这意味着量尺换了。
+ *
+ * 返回 null 表示问不出来（浮动别名如 ~x/y-latest 查不到端点），不作准。
+ */
+async function structuredOk(modelId) {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return null;
+  try {
+    const r = await fetch(
+      `https://openrouter.ai/api/v1/models/${modelId.replace(/^~/, "")}/endpoints`,
+      { headers: { Authorization: `Bearer ${key}` } });
+    if (!r.ok) return null;
+    const eps = (await r.json())?.data?.endpoints ?? [];
+    if (!eps.length) return null;
+    return eps.some((e) => (e.supported_parameters ?? []).includes("structured_outputs"));
+  } catch { return null; }
+}
+
 /** 各对局方的实时进度，供心跳行显示 */
 const progress = new Map();
 /** 一旦有人撞上额度耗尽，剩下的都不必再跑 */
@@ -105,6 +133,9 @@ function runOne(spec) {
   // 预算按**花钱的对局方**均摊。bot 与 stub 不发请求，把额度分给它们
   // 等于白扔——此前这个闸门根本没被透传，加了等于没加
   if (BUDGET && kind === "model") args.push(`--budget=${(BUDGET / payingCount).toFixed(4)}`);
+  // 逐季心跳只在单跑时有用。套件是几路并发，交错刷屏之外还会灌满
+  // 这里收集的 stderr——那份 stderr 是失败时唯一的现场
+  args.push("--heartbeat=off");
 
   return new Promise((resolve) => {
     const t0 = Date.now();
@@ -318,6 +349,23 @@ const px = await priceTable();
       process.exit(4);
     }
     console.log("");
+
+    // 跑之前问清楚每个模型能不能上结构化输出。上不了不拦——那也是一份
+    // 有意义的成绩，只是要**当场说清它读的是另一把尺**，而不是让人事后
+    // 从「档位：text 16」里自己悟
+    const flags = await Promise.all(est.map(([id]) => structuredOk(id)));
+    const noStruct = est.filter((_, i) => flags[i] === false).map(([id]) => id);
+    const unknown = est.filter((_, i) => flags[i] === null).map(([id]) => id);
+    if (noStruct.length) {
+      console.log("⚠ 这些模型没有任何提供方支持结构化输出，会一路降到 text 档：");
+      for (const id of noStruct) console.log(`    ${id}`);
+      console.log("  候选 key 的 enum 强制不上，非法率与 unknown-key 会显著变高"
+        + "（实测 0.7% → 8.6%、0 → 47）。\n  它们的分要按「另一把尺」读："
+        + "低的那部分里有多少是不会玩、有多少是抄错字，分不开。\n");
+    }
+    if (unknown.length) {
+      console.log(`（${unknown.join("、")} 查不到端点信息——浮动别名通常如此，档位看跑起来的第一行心跳）\n`);
+    }
   }
 }
 // 心跳：每 60 秒报一次各对局方跑到哪。没有它，一个慢的提供方在外面看

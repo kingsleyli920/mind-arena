@@ -154,6 +154,8 @@ const results = [];
  *（有的提供方 completion_tokens 不含 reasoning），拿它当闸门等于没有闸门。
  */
 const BUDGET = Number(arg("budget", "0")) || 0;
+/** --heartbeat=off 关掉逐季心跳。套件多进程并发时几路交错刷屏，那里关掉 */
+const HEARTBEAT = arg("heartbeat", "on") !== "off";
 let spent = 0;
 let halted = null;
 
@@ -244,7 +246,21 @@ async function playGame(gi) {
       console.error("  这与模型能力无关。充值后重跑，本次结果不可用。");
       process.exit(3);
     }
-    if (mine) turns.push(mine);
+    if (mine) {
+      turns.push(mine);
+      // 逐季心跳。此前进度只在整局跑完时打一次，而一局是 16 次调用——
+      // 慢提供方那里一局要十几分钟，外面看整整十几分钟「什么都没发生」，
+      // 分不清是在跑、在重试、还是挂了。实测为此白等过两次。
+      // 一行里带上档位与耗时：模型被限流打到 text 档这类事，
+      // 在这里当场就看得见，不用等跑完翻 JSON
+      if (HEARTBEAT) {
+        process.stderr.write(`[季] 局${gi + 1} 第${s.turn + 1}季 ${mine.seat}`
+          + `　令 ${mine.admitted}/${mine.pickCount}`
+          + `${mine.rung && mine.rung !== "schema" ? `　档 ${mine.rung}` : ""}`
+          + `${mine.elapsedMs ? `　${(mine.elapsedMs / 1000).toFixed(1)}s` : ""}`
+          + `${mine.failure ? `　✗ ${mine.failure.slice(0, 60)}` : ""}\n`);
+      }
+    }
     since = s.log.length;
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     if (r.rejected.some((x) => x.reason.startsWith("令数不足"))) {

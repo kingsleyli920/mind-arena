@@ -30,6 +30,8 @@ npm run melee -- --seats=caocao=<id>,yuanshao=<id> --seasons=32
 `--budget=<美元>` 是花超即停的闸门，`--provider=A,B` 钉住提供方（见第 7 条）。
 `--maxcost=<美元>`（默认 1.5）是**跑之前**的闸门：任一对局方预估超了就拒跑，
 开发期用便宜档，贵的要显式放行（见第 22 条）。
+单跑 `npm run eval` 时逐季打一行心跳（局/季/令数/档位/耗时），`--heartbeat=off`
+可关；套件默认关掉——几路并发交错刷屏，还会灌满失败时唯一的现场 stderr。
 
 密钥放 `.env.local`（已在 `.gitignore`）。**必须走 `npm run eval`**——脚本是
 plain node，靠 npm script 里的 `--env-file-if-exists=.env.local` 才读得到，
