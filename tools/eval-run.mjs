@@ -192,7 +192,10 @@ async function playGame(gi) {
           admitted: record.admission.admitted.length, spent: record.admission.spent,
           ap: s.factions[f].ap, illegalRate: record.admission.illegalRate,
           mojibake: record.admission.mojibake ?? 0,
-          dropped: record.admission.dropped.map((d) => d.reason),
+          // 连 detail 一起存：只存 reason 的话，事后想知道「rejected 具体被哪条
+          // 规则拒的」就只能重跑一次。实测为查这件事白跑了一轮
+          dropped: record.admission.dropped.map((d) =>
+            d.detail ? `${d.reason}: ${d.detail}` : d.reason),
           usage: record.usage, failure: record.failure, reason: record.reason,
           plan: record.plan,
           structured: record.structured, rung: record.rung,

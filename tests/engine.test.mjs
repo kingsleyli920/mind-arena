@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
-import { buildGraph, listActions, validate, canonicalOrder, DEFAULT_RULES }
+import { buildGraph, listActions, validate, canonicalOrder, orderSites, DEFAULT_RULES }
   from "../lib/game/engine/actions.ts";
 import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
@@ -1778,6 +1778,23 @@ test("包里的数值常数不许没人读 —— 写了不读就是在对模型
     }
   }
   assert.deepEqual(漏读, [], `这些常数包里写了、params.ts 不读：${漏读.join("、")}`);
+});
+
+test("每条令占用哪个郡，从 key 里就看得出来", () => {
+  // 想给候选补一个 sites 字段，结果实测**一条都发不出来**：占用的郡名全在 key 里，
+  // 连集结也是（muster:中山国:中山国+安平国+河闲国 三个来源郡都在）。
+  // 也就是说「同一郡每季至多 2 令」这件事模型本来就算得出来，
+  // 它只是没去数——所以修法是提示词教它数，不是再塞一份数据。
+  // 这条钉住那个前提：哪天有候选的令位不在 key 里，就得把 sites 加回来
+  const s = fresh();
+  for (const f of ["yuanshao", "caocao", "liubiao"]) {
+    for (const c of listActions(s, f, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)) {
+      for (const id of orderSites(c.action)) {
+        assert.ok(c.key.includes(id),
+          `${c.key} 占用 ${id}，而 key 里看不出来 —— 模型无从数令位`);
+      }
+    }
+  }
 });
 
 test("被丢的令要回授：不告诉模型，它就每季重犯同一个错", () => {
