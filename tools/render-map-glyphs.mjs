@@ -558,6 +558,46 @@ const GLYPHS = {
     }
     return { ink };
   },
+  /** 鱼鳞：密阵突击。层层错落的鳞片，尖朝上 */
+  "f-scale": () => {
+    const rnd = rng(3101), ink = field();
+    const cx = S / 2;
+    for (let row = 0; row < 3; row += 1) {
+      const y = 118 + row * 34;
+      const n = 2 + row;
+      for (let i = 0; i < n; i += 1) {
+        const x = cx + (i - (n - 1) / 2) * 44;
+        stroke(ink, arcPts(x, y + 16, 22, Math.PI + 0.1, 2 * Math.PI - 0.1, 12),
+          { wMax: 7, A0: 0.86, seed: 3110 + row * 5 + i });
+      }
+    }
+    return { ink };
+  },
+  /** 鹤翼：两翼包抄。中一竖，两翼张开如翅 */
+  "f-wings": () => {
+    const rnd = rng(3201), ink = field();
+    const cx = S / 2, cy = 158;
+    stroke(ink, line(cx, cy - 46, cx, cy + 52, rnd, 0, 0.5), { wMax: 9, A0: 0.9, seed: 3210 });
+    for (const sgn of [-1, 1]) {
+      stroke(ink, arcSpine(cx + sgn * 8, cy - 34, sgn > 0 ? 0.55 : Math.PI - 0.55, 96,
+        sgn > 0 ? -0.3 : 0.3, 2, rnd), { wMax: 9, A0: 0.88, seed: 3220 + sgn });
+      stroke(ink, arcSpine(cx + sgn * 8, cy + 2, sgn > 0 ? 0.42 : Math.PI - 0.42, 78,
+        sgn > 0 ? -0.26 : 0.26, 2, rnd), { wMax: 7, A0: 0.8, seed: 3230 + sgn });
+    }
+    return { ink };
+  },
+  /** 方圆：结圆自守。外圆内方 */
+  "f-square": () => {
+    const rnd = rng(3301), ink = field();
+    const cx = S / 2, cy = 152;
+    stroke(ink, arcPts(cx, cy, 78, 0, Math.PI * 2, 28), { wMax: 9, A0: 0.9, seed: 3310 });
+    const h = 40;
+    stroke(ink, line(cx - h, cy - h, cx + h, cy - h, rnd, -0.02, 0.6), { wMax: 8, A0: 0.86, seed: 3311 });
+    stroke(ink, line(cx + h, cy - h, cx + h, cy + h, rnd, 0, 0.6), { wMax: 8, A0: 0.86, seed: 3312 });
+    stroke(ink, line(cx + h, cy + h, cx - h, cy + h, rnd, 0.02, 0.6), { wMax: 8, A0: 0.86, seed: 3313 });
+    stroke(ink, line(cx - h, cy + h, cx - h, cy - h, rnd, 0, 0.6), { wMax: 8, A0: 0.86, seed: 3314 });
+    return { ink };
+  },
   /** 行营：一顶尖帐，帐顶出旗 */
   tent: (v = 0) => {
     const rnd = rng(101 + v * 139), ink = field(), wa = field();
@@ -622,6 +662,8 @@ const VARIANTS = {
   // 兵种与器械：军团上的小标
   "u-infantry": 1, "u-cavalry": 1, "u-archer": 1, "u-navy": 1,
   "g-ram": 1, "g-mound": 1,
+  // 阵型：城边一枚。三阵现在各有实属性（攻/速/耐），不画出来就只能翻表格
+  "f-scale": 1, "f-wings": 1, "f-square": 1,
 };
 
 fs.mkdirSync(OUT, { recursive: true });

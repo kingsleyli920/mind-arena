@@ -13,7 +13,8 @@ import { buildGraph, listActions, validate, POLICY_CN, type Graph }
   from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
-import { observedGarrison, visibleLog, PUBLIC_EVENTS } from "@/lib/game/engine/intel.ts";
+import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
+  from "@/lib/game/engine/intel.ts";
 import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { modelDecide, type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
@@ -390,12 +391,24 @@ const GLYPH_N: Record<string, number> = {
   "b-ironworks": 1, "b-saltern": 1, "b-stud": 1, "b-farmstead": 1,
   "u-infantry": 1, "u-cavalry": 1, "u-archer": 1, "u-navy": 1,
   "g-ram": 1, "g-mound": 1,
+  "f-scale": 1, "f-wings": 1, "f-square": 1,
 };
 /** 兵种与器械的中文。军团上那两个小标全靠它 */
 const UNIT_CN2: Record<string, string> = {
   infantry: "步卒", cavalry: "骑兵", archer: "弓弩", navy: "水军",
 };
 const GEAR_CN2: Record<string, string> = { ram: "冲车", mound: "土山" };
+/**
+ * 阵型。三阵现在各有实属性（鱼鳞攻、鹤翼速、方圆耐围），不画出来就只能翻表格。
+ *
+ * **受迷雾约束**：自家的看真值，他家的要刺探过或结了盟才看得见——
+ * 与观测里的 observedFormation 同一条规矩，否则鼠标一悬就等于开天眼
+ */
+const FORM_TIP: Record<string, string> = {
+  scale: "鱼鳞：攻城 +1 缺口、守城 −1 可防守",
+  wings: "鹤翼：行军少一季、攻城 −1 缺口",
+  square: "方圆：城中存粮 +1 季",
+};
 /**
  * 物产 → 它能建的那座建筑。
  *
@@ -1908,6 +1921,20 @@ export function PlayClient() {
                   fill="transparent" />
                 {/* 城下一排建筑。只画自家的，且只在近观档：
                     他家城里建了什么，观测里本来就看不到 */}
+                {/* 阵型：城左上一枚，受迷雾约束（他家的须刺探过） */}
+                {lod >= 2 && !hidden.has(m.c.id) && (() => {
+                  const f = observedFormation(game, seat, m.c.id);
+                  if (!f) return null;
+                  const fs2 = m.base * 0.66;
+                  return (
+                    <g className="form-mark">
+                      <title>{FORM_TIP[f]}</title>
+                      <image href={`${GLYPH}/f-${f}-0-ink.png`}
+                        x={m.x - m.base * 1.15 - fs2 / 2} y={m.y - m.base * 1.5}
+                        width={fs2} height={fs2} />
+                    </g>
+                  );
+                })()}
                 {/* 物产：画成那座建筑的**虚影**——「这个郡有铁，但铁官还没修」。
                     物产是常量、不随迷雾变（候选标签里本来就写「有铁」），
                     所以他家的也画。已建的那座不再重复画虚影 */}
@@ -2108,6 +2135,14 @@ export function PlayClient() {
                 <span>{legendPlain("b-farmstead")}屯田</span>
               </li>
               {/* JSX 里不吃 markdown：这行原来写成 **淡影**，图例上露出一对星号 */}
+              <li>
+                <span>{legendPlain("f-scale")}鱼鳞</span>
+                <span>{legendPlain("f-wings")}鹤翼</span>
+                <span>{legendPlain("f-square")}方圆</span>
+                <em>攻／速／耐围，画在城左上</em>
+              </li>
+              <li><em>阵型受迷雾约束：自家的看得见，他家的要刺探过或结了盟。
+                相克成环——鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，克之 +1 缺口</em></li>
               <li><em>建筑画在城下（只画自家的）。<b>淡影</b>是「有这个物产、
                 但那座还没修」——铁官须有铁、盐场须有盐、马苑须有牧苑、屯田须可垦</em></li>
               <li><em>细线是道路：实线平道、短划丘陵、点线山道、长短线水路、朱线关道。

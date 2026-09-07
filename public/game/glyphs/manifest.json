@@ -27,7 +27,10 @@
   "u-archer": 1,
   "u-navy": 1,
   "g-ram": 1,
-  "g-mound": 1
+  "g-mound": 1,
+  "f-scale": 1,
+  "f-wings": 1,
+  "f-square": 1
  },
  "glyphs": {
   "city-small": {
@@ -119,6 +122,18 @@
    "wash": false
   },
   "g-mound": {
+   "variants": 1,
+   "wash": false
+  },
+  "f-scale": {
+   "variants": 1,
+   "wash": false
+  },
+  "f-wings": {
+   "variants": 1,
+   "wash": false
+  },
+  "f-square": {
    "variants": 1,
    "wash": false
   },
