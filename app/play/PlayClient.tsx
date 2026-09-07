@@ -388,6 +388,25 @@ const GLYPH_N: Record<string, number> = {
   gate: 3, pass: 2, ford: 2, port: 2, depot: 2, battlefield: 2, tent: 2, camp: 2,
   "b-office": 1, "b-granary": 1, "b-market": 1, "b-drill": 1,
   "b-ironworks": 1, "b-saltern": 1, "b-stud": 1, "b-farmstead": 1,
+  "u-infantry": 1, "u-cavalry": 1, "u-archer": 1, "u-navy": 1,
+  "g-ram": 1, "g-mound": 1,
+};
+/** 兵种与器械的中文。军团上那两个小标全靠它 */
+const UNIT_CN2: Record<string, string> = {
+  infantry: "步卒", cavalry: "骑兵", archer: "弓弩", navy: "水军",
+};
+const GEAR_CN2: Record<string, string> = { ram: "冲车", mound: "土山" };
+/**
+ * 物产 → 它能建的那座建筑。
+ *
+ * 未建的物产就画那座建筑的**虚影**：一眼看出「这个郡有铁，但铁官还没修」。
+ * 不必另画一套物产图元，而且这正是它在玩法里的意义——物产是建筑的前提
+ */
+const RES_BUILD: Record<string, string> = {
+  iron: "ironworks", salt: "saltern", horse: "stud", tuntian: "farmstead",
+};
+const RESOURCE_CN2: Record<string, string> = {
+  iron: "铁", salt: "盐", horse: "牧苑", tuntian: "可垦之地",
 };
 /**
  * 建筑：引擎里每郡至多三座、八种各有实数（官府加令、仓廪加存粮、市产金 1.3 倍、
@@ -445,20 +464,38 @@ function NodeMark({ x, y, r, kind, id }: {
  * 两者的处境不同：一个是「已经动了、还没到」，一个是「在家闲着」。
  * 帐面与栅面刷势力色，图上一眼看得出这支兵是谁的
  */
-function ArmyMark({ x, y, s, color, marching, at }: {
+function ArmyMark({ x, y, s, color, marching, at, unit, gear }: {
   x: number; y: number; s: number; color: string; marching: boolean;
   /** 军团 id：同一支军团一路上是同一顶帐 */
   at: string;
+  /** 兵种。野战有相克，图上一眼看得出这支打不打得过那支 */
+  unit?: string;
+  /** 攻城器械。它决定攻城那一击，也决定行军慢一季 */
+  gear?: string;
 }) {
   const kind = marching ? "tent" : "camp";
   const id = `${kind}-${variantOf(at, kind)}`;
   const w = s * 2.4;
   const l = x - w / 2, t = y - w * GLYPH_BASE;
+  const badge = w * 0.52;
   return (
     <g>
       <rect x={l} y={t} width={w} height={w} fill={color}
         mask={`url(#wash-${id})`} opacity={0.9} />
       <image href={`${GLYPH}/${id}-ink.png`} x={l} y={t} width={w} height={w} />
+      {/* 兵种在帐左、器械在帐右。引擎里这两样都有，图上此前一律画同一顶帐 */}
+      {unit && UNIT_CN2[unit] && (
+        <g><title>{UNIT_CN2[unit]}</title>
+          <image href={`${GLYPH}/u-${unit}-0-ink.png`}
+            x={l - badge * 0.72} y={y - badge * 0.92} width={badge} height={badge} />
+        </g>
+      )}
+      {gear && gear !== "none" && GEAR_CN2[gear] && (
+        <g><title>{GEAR_CN2[gear]}</title>
+          <image href={`${GLYPH}/g-${gear}-0-ink.png`}
+            x={l + w - badge * 0.28} y={y - badge * 0.92} width={badge} height={badge} />
+        </g>
+      )}
     </g>
   );
 }
@@ -1432,8 +1469,14 @@ export function PlayClient() {
       const size = (m.isSeat ? 25 : 21) / view.k ** 0.88;
       const w = m.c.name.length * size * 1.02, h = size * 1.3;
       // 城下有建筑时牌记往下让一档，否则字压在屋顶上
-      const hasBuilds = lod >= 2 && m.mine && m.st.buildings.length > 0;
-      const x = m.x - w / 2, y = m.y + m.base * (hasBuilds ? 1.12 : 0.62) + 4 / view.k ** 0.88;
+      const nBuild = lod >= 2 && m.mine ? m.st.buildings.length : 0;
+      const nRes = lod >= 2
+        ? m.st.resources.filter((r) => RES_BUILD[r]
+            && !m.st.buildings.includes(RES_BUILD[r] as never)).length : 0;
+      // 城下每多一行（建筑、物产虚影），牌记就再往下让一档
+      const rows = (nBuild ? 1 : 0) + (nRes ? 1 : 0);
+      const x = m.x - w / 2;
+      const y = m.y + m.base * (0.62 + rows * 0.5) + 4 / view.k ** 0.88;
       const box: [number, number, number, number] = [x, y, w, h];
       const hit = placed.some(([px, py, pw, ph]) =>
         x < px + pw && x + w > px && y < py + ph && y + h > py);
@@ -1860,6 +1903,23 @@ export function PlayClient() {
                   fill="transparent" />
                 {/* 城下一排建筑。只画自家的，且只在近观档：
                     他家城里建了什么，观测里本来就看不到 */}
+                {/* 物产：画成那座建筑的**虚影**——「这个郡有铁，但铁官还没修」。
+                    物产是常量、不随迷雾变（候选标签里本来就写「有铁」），
+                    所以他家的也画。已建的那座不再重复画虚影 */}
+                {lod >= 2 && !hidden.has(m.c.id) && m.st.resources
+                  .filter((r) => RES_BUILD[r] && !m.st.buildings.includes(RES_BUILD[r] as never))
+                  .map((r, i, all) => {
+                    const bs = m.base * 0.8;
+                    const bx = m.x + (i - (all.length - 1) / 2) * bs * 0.92;
+                    const dy = m.mine && m.st.buildings.length ? m.base * 1.06 : m.base * 0.06;
+                    return (
+                      <g key={`r-${r}`} className="res-ghost">
+                        <title>{`有${RESOURCE_CN2[r] ?? r}（未建）`}</title>
+                        <image href={`${GLYPH}/b-${RES_BUILD[r]}-0-ink.png`}
+                          x={bx - bs / 2} y={m.y + dy} width={bs} height={bs} />
+                      </g>
+                    );
+                  })}
                 {lod >= 2 && m.mine && !hidden.has(m.c.id) && m.st.buildings.map((b, i, all) => {
                   // 一座指甲盖大就白画了：第一版 0.62×base，图上只是两个小点。
                   // 放到 0.95×base，牌记那边也跟着往下让（见 labels 的 y）
@@ -1910,7 +1970,8 @@ export function PlayClient() {
                       stroke={col} strokeWidth={2.4 / view.k ** 0.82} />
                   )}
                   <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching}
-                    at={t.a.id} />
+                    at={t.a.id} unit={lod >= 1 ? t.a.unit : undefined}
+                    gear={lod >= 1 ? t.a.gear : undefined} />
                   <text x={t.x} y={t.y + s2 * 0.98} textAnchor="middle" fontSize={s2 * 0.5}>
                     {(t.a.troops / 1000).toFixed(1)}千
                     {t.marching ? `·尚需 ${t.a.marchLeft} 季` : ""}
@@ -1938,7 +1999,8 @@ export function PlayClient() {
                 <g key={a.id} className={`siege-camp${mine ? " mine" : ""}`}>
                   <ArmyMark x={x + s * 2.1} y={y - s * 0.25} s={s * 0.86}
                     color={engine.colorOf.get(a.faction) ?? "#7a7266"}
-                    marching={false} at={a.id} />
+                    marching={false} at={a.id}
+                    unit={lod >= 1 ? a.unit : undefined} gear={lod >= 1 ? a.gear : undefined} />
                   <text x={x + s * 2.1} y={y + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
                   </text>

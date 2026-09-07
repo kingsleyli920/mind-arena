@@ -368,6 +368,8 @@
 .map-vec svg .city line { vector-effect: non-scaling-stroke; }
 /* 衬底：笔墨版的符号自带飞白，衬底压实反而像贴纸。只留极淡一层托住墨色 */
 .map-vec svg .city-halo { fill: rgba(250, 246, 237, 0.34); stroke: none; }
+/* 物产虚影：能建而未建。压得比已建的淡一半，一眼分得出「有」与「已修」 */
+.map-vec svg .res-ghost { opacity: 0.38; }
 /* 让位者的小点：外圈一道纸色，压在墨底上才看得见 */
 .map-vec svg .dot { stroke: rgba(250, 246, 237, 0.8); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 /* 围城圈：笔宽与虚线都由 tsx 按圈的半径给，**不能**用 non-scaling-stroke 加

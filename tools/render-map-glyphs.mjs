@@ -470,6 +470,94 @@ const GLYPHS = {
     }
     return { ink };
   },
+  /** 步卒：戟与盾 */
+  "u-infantry": () => {
+    const rnd = rng(2101), ink = field();
+    const cx = S / 2;
+    // 长戟
+    stroke(ink, line(cx + 34, 214, cx + 20, PAD + 10, rnd, 0.02, 1), { wMax: 10, A0: 0.92, seed: 2110 });
+    stroke(ink, arcSpine(cx + 20, PAD + 22, -0.5, 56, 0.7, 2, rnd), { wMax: 8, A0: 0.88, seed: 2111 });
+    // 盾：上圆下尖
+    stroke(ink, arcPts(cx - 44, 130, 46, Math.PI + 0.15, 2 * Math.PI - 0.15), { wMax: 9, A0: 0.9, seed: 2112 });
+    stroke(ink, line(cx - 88, 132, cx - 44, 210, rnd, 0.03, 1), { wMax: 9, A0: 0.9, seed: 2113 });
+    stroke(ink, line(cx, 132, cx - 44, 210, rnd, -0.03, 1), { wMax: 9, A0: 0.9, seed: 2114 });
+    washTrap(ink, cx - 44, 110, 30, 196, 22, rnd, { A0: 0.32 });
+    return { ink };
+  },
+  /** 骑兵：一个马首，鬃尾飞扬 */
+  "u-cavalry": () => {
+    const rnd = rng(2201), ink = field();
+    const cx = S / 2 + 10;
+    stroke(ink, arcSpine(cx - 40, 214, -1.2, 116, 0.3, 2, rnd), { wMax: 13, A0: 0.92, seed: 2210 });
+    stroke(ink, arcSpine(cx + 6, 96, -0.32, 62, 0.4, 2, rnd), { wMax: 11, A0: 0.9, seed: 2211 });
+    // 鬃
+    for (let i = 0; i < 4; i += 1) {
+      stroke(ink, arcSpine(cx - 22 + i * 12, 104 + i * 12, 2.4, 54 - i * 6, -0.35, 4, rnd),
+        { wMax: 7, wProf: WPROF.fupiSmall, aProf: APROF.dry, A0: 0.7, fwTarget: 0.36, seed: 2220 + i });
+    }
+    // 口鼻
+    stroke(ink, line(cx + 58, 118, cx + 76, 128, rnd, 0, 1), { wMax: 6, A0: 0.8, seed: 2230 });
+    return { ink };
+  },
+  /** 弓弩：一张开满的弓 */
+  "u-archer": () => {
+    const rnd = rng(2301), ink = field();
+    const cx = S / 2 - 12;
+    stroke(ink, arcPts(cx, 150, 82, -Math.PI / 2 - 1.15, -Math.PI / 2 + 1.15, 22),
+      { wMax: 11, A0: 0.92, seed: 2310 });
+    // 弦
+    stroke(ink, line(cx + 32, 76, cx + 32, 224, rnd, 0, 0.4), { wMax: 5, A0: 0.8, seed: 2311 });
+    // 箭
+    stroke(ink, line(cx + 30, 150, cx - 76, 150, rnd, 0, 0.6), { wMax: 7, A0: 0.9, seed: 2312 });
+    stroke(ink, line(cx - 76, 150, cx - 56, 140, rnd, 0, 0.5), { wMax: 5, A0: 0.85, seed: 2313 });
+    stroke(ink, line(cx - 76, 150, cx - 56, 160, rnd, 0, 0.5), { wMax: 5, A0: 0.85, seed: 2314 });
+    return { ink };
+  },
+  /** 水军：一叶楼船，舷上张帆 */
+  "u-navy": () => {
+    const rnd = rng(2401), ink = field();
+    const yW = 190, cx = S / 2;
+    for (let i = 0; i < 2; i += 1) {
+      stroke(ink, arcSpine(PAD + 8, yW + 20 + i * 16, -0.02, S - PAD * 2 - 16, 0.1 * (i % 2 ? 1 : -1), 3, rnd),
+        { wMax: 5, aProf: APROF.dry, A0: 0.48, fwTarget: 0.42, seed: 2410 + i });
+    }
+    stroke(ink, arcSpine(cx - 84, yW - 10, 0.02, 168, 0.4, 1.2, rnd),
+      { wMax: 11, wProf: WPROF.yudian, A0: 0.92, seed: 2420 });
+    // 舱楼
+    stroke(ink, line(cx - 34, yW - 26, cx - 34, 108, rnd, 0, 0.6), { wMax: 8, A0: 0.88, seed: 2421 });
+    stroke(ink, line(cx + 34, yW - 26, cx + 34, 108, rnd, 0, 0.6), { wMax: 8, A0: 0.88, seed: 2422 });
+    roof(ink, cx, 108, 52, 22, rnd, 2430);
+    return { ink };
+  },
+  /** 冲车：带轮的撞木，前端包铁 */
+  "g-ram": () => {
+    const rnd = rng(2501), ink = field();
+    const cy = 150;
+    stroke(ink, line(PAD + 10, cy, S - PAD - 40, cy, rnd, -0.015, 0.6), { wMax: 16, A0: 0.9, seed: 2510 });
+    washTrap(ink, S - PAD - 46, cy - 22, 16, cy + 22, 16, rnd, { A0: 0.66 });
+    stroke(ink, line(S - PAD - 62, cy - 24, S - PAD - 62, cy + 24, rnd, 0, 0.4), { wMax: 8, A0: 0.9, seed: 2511 });
+    for (const x of [PAD + 44, S / 2 + 6]) {
+      stroke(ink, arcPts(x, cy + 54, 30, 0, Math.PI * 2, 20), { wMax: 8, A0: 0.88, seed: 2520 + x });
+      stroke(ink, line(x, cy + 24, x, cy + 54, rnd, 0, 0.4), { wMax: 6, A0: 0.82, seed: 2530 + x });
+    }
+    return { ink };
+  },
+  /** 土山：垒土成坡，坡上有人往上运土 */
+  "g-mound": () => {
+    const rnd = rng(2601), ink = field();
+    const yB = 208;
+    stroke(ink, arcSpine(PAD + 6, yB, -0.42, 200, -0.2, 2, rnd),
+      { wMax: 12, wProf: WPROF.fupi, aProf: APROF.dry, lProf: LPROF_SIDE,
+        A0: 0.9, fwTarget: 0.22, seed: 2610 });
+    stroke(ink, line(PAD + 6, yB, S - PAD - 6, yB, rnd, 0.01, 0.5), { wMax: 9, A0: 0.88, seed: 2611 });
+    stroke(ink, line(S - PAD - 40, yB, S - PAD - 40, 96, rnd, 0, 0.6), { wMax: 8, A0: 0.86, seed: 2612 });
+    washTrap(ink, S / 2 - 6, 108, 24, yB, 96, rnd, { A0: 0.3 });
+    // 两筐土
+    for (const [x, y] of [[110, 148], [150, 122]]) {
+      stroke(ink, arcPts(x, y, 16, 0, Math.PI, 12), { wMax: 6, A0: 0.8, seed: 2620 + x });
+    }
+    return { ink };
+  },
   /** 行营：一顶尖帐，帐顶出旗 */
   tent: (v = 0) => {
     const rnd = rng(101 + v * 139), ink = field(), wa = field();
@@ -531,6 +619,9 @@ const VARIANTS = {
   // 建筑各出一幅：它们在图上只有指甲盖大，多出变体也分不出来
   "b-office": 1, "b-granary": 1, "b-market": 1, "b-drill": 1,
   "b-ironworks": 1, "b-saltern": 1, "b-stud": 1, "b-farmstead": 1,
+  // 兵种与器械：军团上的小标
+  "u-infantry": 1, "u-cavalry": 1, "u-archer": 1, "u-navy": 1,
+  "g-ram": 1, "g-mound": 1,
 };
 
 fs.mkdirSync(OUT, { recursive: true });
