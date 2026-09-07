@@ -362,6 +362,11 @@
 }
 
 /* ── 城池图元 ── */
+/* 整张 svg 不收指针事件，否则它盖在底图上会吞掉地图的拖动与缩放。
+   **凡是要响应鼠标的图元，都必须带 .mark 类**——这一条不写在 JSX 边上，
+   于是曾经漏过一次：关津的透明命中圆没加类，它那两个 onMouseEnter
+   就成了永远不触发的死代码，六十一处关津的悬停详情从未显示过。
+   在 svg 里新加交互元素时，先想这一行。 */
 .map-vec svg { pointer-events: none; }
 .map-vec svg .mark { pointer-events: auto; cursor: pointer; }
 .map-vec svg .city path,

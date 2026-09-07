@@ -154,7 +154,14 @@ const results = [];
  *（有的提供方 completion_tokens 不含 reasoning），拿它当闸门等于没有闸门。
  */
 const BUDGET = Number(arg("budget", "0")) || 0;
-/** --heartbeat=off 关掉逐季心跳。套件多进程并发时几路交错刷屏，那里关掉 */
+/**
+ * --heartbeat=off 关掉**屏幕上**的逐季心跳。套件多进程并发时几路交错刷屏，
+ * 还会灌满失败时唯一的现场 stderr，所以那里关掉。
+ *
+ * 但关掉屏幕不等于不记：给了 --json 就同时往 `<json>.log` 落一份。
+ * 不然套件一开跑就是个黑箱——实测吃过一次：一臂十分钟 0/48，
+ * 是慢还是挂完全看不出来，只能另花钱单跑一局才知道是「一季 39 秒」。
+ */
 const HEARTBEAT = arg("heartbeat", "on") !== "off";
 let spent = 0;
 let halted = null;
@@ -253,15 +260,18 @@ async function playGame(gi) {
       // 分不清是在跑、在重试、还是挂了。实测为此白等过两次。
       // 一行里带上档位与耗时：模型被限流打到 text 档这类事，
       // 在这里当场就看得见，不用等跑完翻 JSON
-      if (HEARTBEAT) {
-        process.stderr.write(`[季] 局${gi + 1} 第${s.turn + 1}季 ${mine.seat}`
+      {
+        const line = `[季] 局${gi + 1} 第${s.turn + 1}季 ${mine.seat}`
           + `　令 ${mine.admitted}/${mine.pickCount}`
           + `${mine.rung && mine.rung !== "schema" ? `　档 ${mine.rung}` : ""}`
           + `${mine.elapsedMs ? `　${(mine.elapsedMs / 1000).toFixed(1)}s` : ""}`
           // 尝试次数是分辨「慢」与「挂」的那一位：341 秒里如果 attempts=2，
           // 那是 300 秒超时 + 41 秒重试成功，提供方在挂请求而不是在慢慢算
           + `${mine.attempts > 1 ? `　试 ${mine.attempts} 次` : ""}`
-          + `${mine.failure ? `　✗ ${mine.failure.slice(0, 60)}` : ""}\n`);
+          + `${mine.failure ? `　✗ ${mine.failure.slice(0, 60)}` : ""}\n`;
+        if (HEARTBEAT) process.stderr.write(line);
+        // 落一份到 <json>.log：套件里屏幕是关的，而这份是唯一的现场
+        if (JSON_OUT) fs.appendFileSync(`${JSON_OUT}.log`, line);
       }
     }
     since = s.log.length;

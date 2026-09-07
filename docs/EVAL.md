@@ -32,8 +32,10 @@ npm run melee -- --seats=caocao=<id>,yuanshao=<id> --seasons=32
 是不同的家，开榜前先 `npm run models` 查（见第 23 条）。
 `--maxcost=<美元>`（默认 1.5）是**跑之前**的闸门：任一对局方预估超了就拒跑，
 开发期用便宜档，贵的要显式放行（见第 22 条）。
-单跑 `npm run eval` 时逐季打一行心跳（局/季/令数/档位/耗时），`--heartbeat=off`
-可关；套件默认关掉——几路并发交错刷屏，还会灌满失败时唯一的现场 stderr。
+单跑 `npm run eval` 时逐季打一行心跳（局/季/令数/档位/耗时/尝试次数），
+`--heartbeat=off` 可关；套件默认关掉——几路并发交错刷屏，还会灌满失败时
+唯一的现场 stderr。**但关屏不等于不记**：给了 `--json` 就同时往 `<json>.log`
+落一份，套件跑到一半想知道某一臂是慢还是挂了，`tail` 那个文件即可。
 
 密钥放 `.env.local`（已在 `.gitignore`）。**必须走 `npm run eval`**——脚本是
 plain node，靠 npm script 里的 `--env-file-if-exists=.env.local` 才读得到，
