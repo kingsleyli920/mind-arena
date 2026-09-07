@@ -258,6 +258,9 @@ async function playGame(gi) {
           + `　令 ${mine.admitted}/${mine.pickCount}`
           + `${mine.rung && mine.rung !== "schema" ? `　档 ${mine.rung}` : ""}`
           + `${mine.elapsedMs ? `　${(mine.elapsedMs / 1000).toFixed(1)}s` : ""}`
+          // 尝试次数是分辨「慢」与「挂」的那一位：341 秒里如果 attempts=2，
+          // 那是 300 秒超时 + 41 秒重试成功，提供方在挂请求而不是在慢慢算
+          + `${mine.attempts > 1 ? `　试 ${mine.attempts} 次` : ""}`
           + `${mine.failure ? `　✗ ${mine.failure.slice(0, 60)}` : ""}\n`);
       }
     }

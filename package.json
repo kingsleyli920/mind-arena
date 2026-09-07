@@ -29,7 +29,8 @@
     "eval:suite": "node --env-file-if-exists=.env.local --experimental-strip-types tools/eval-suite.mjs",
     "match": "node --env-file-if-exists=.env.local --experimental-strip-types tools/match-log.mjs",
     "melee": "node --env-file-if-exists=.env.local --experimental-strip-types tools/melee.mjs",
-    "eval:dissect": "node tools/eval-dissect.mjs"
+    "eval:dissect": "node tools/eval-dissect.mjs",
+    "models": "node --env-file-if-exists=.env.local tools/model-survey.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
