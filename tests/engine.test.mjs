@@ -1780,6 +1780,26 @@ test("包里的数值常数不许没人读 —— 写了不读就是在对模型
   assert.deepEqual(漏读, [], `这些常数包里写了、params.ts 不读：${漏读.join("、")}`);
 });
 
+test("被丢的令要回授：不告诉模型，它就每季重犯同一个错", () => {
+  // 第一份 48 局排行榜挖出来的：两个模型的非法率 7.6% / 9.4%，而 mojibake 与
+  // unknown-key 都是 0——被丢的全是「单看每条都合法、合起来不合法」。
+  // 规则在提示词里写着，模型照样每季重犯，因为我们把令丢掉却从不告诉它
+  const s = fresh();
+  const me = "yuanshao";
+  const drops = [
+    { key: "govern:魏郡:soothe", reason: "rejected", detail: "本郡本季已下满 2 令" },
+    { key: "scout:河内郡", reason: "duplicate" },
+    { key: "campaign:魏郡>河内郡:allout", reason: "over-budget", detail: "余 0 令，需 2" },
+  ];
+  const o = observe(s, me, G, P, ROSTER, GEO, { dropped: drops });
+  assert.equal(o.droppedLastSeason?.length, 3, "被丢的令没进观测");
+  assert.ok(o.droppedLastSeason.some((d) => d.why.includes("两遍")), "重复没说清");
+  assert.ok(o.droppedLastSeason.some((d) => d.why.includes("令数不够")), "超预算没说清");
+  // 干净的那些季不该多这一段：绝大多数季没有被丢的令，逐季声明纯属浪费
+  assert.equal(observe(s, me, G, P, ROSTER, GEO, {}).droppedLastSeason, undefined,
+    "没有被丢的令时也发了这一段");
+});
+
 test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不能看两场战争", () => {
   // 四方对账里最容易漏的一处：模型的观测里有存粮、器械、兵种、建筑，
   // 而界面那张「我的郡国」表只有兵产心防阵将——人少看四样，

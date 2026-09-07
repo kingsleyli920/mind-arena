@@ -120,12 +120,17 @@ export async function modelDecide(
   s: GameState, faction: FactionId, since: number, deps: ModelSeatDeps,
   /** 该席位上季写下的跨季方略。不给则本季无记忆 */
   plan: string | null = null,
+  /**
+   * 该席位上季被丢掉的令。与方略同理：不回授的话，模型每季重犯同一个错
+   * 而收不到任何信号——实测非法率 7.6–9.4%，全是「合起来不合法」那一类
+   */
+  dropped: Array<{ key: string; reason: string; detail?: string }> = [],
 ): Promise<{ orders: Order[]; record: ModelTurnRecord }> {
   const rules = deps.rules ?? DEFAULT_RULES;
   const cands = listActions(s, faction, deps.g, deps.P, rules, deps.roster,
     deps.nameOf, deps.geo);
   const o = observe(s, faction, deps.g, deps.P, deps.roster, deps.geo,
-    { nameOf: deps.nameOf, rules, since, plan });
+    { nameOf: deps.nameOf, rules, since, plan, dropped });
   const user = renderUser(o);
 
   const base: ModelTurnRecord = {

@@ -155,6 +155,8 @@ async function playGame(gi) {
   let since = 0;
   // 被测席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆
   let plan = null;
+  /** 上季被丢掉的令，回授给下一季 */
+  let dropped = [];
   const turns = [];
 
   while (!s.finished) {
@@ -164,9 +166,11 @@ async function playGame(gi) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       if (f === under && MODEL_DEPS) {
         const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS,
-          MEMORY ? plan : null);
+          MEMORY ? plan : null, MEMORY ? dropped : []);
         // 只在模型给出新方略时更新。答不上来的那一季不该把记忆抹掉
         if (record.plan) plan = record.plan;
+        // 被丢的令回授给下一季：不回授的话模型每季重犯同一个错而收不到信号
+        dropped = record.admission?.dropped ?? [];
         orders.push(...os);
         // 实扣逐次累加，供预算闸门判断。取不到就不加——宁可闸门失灵报得少，
         // 也不要拿一个估算值去冒充实扣

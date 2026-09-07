@@ -683,6 +683,9 @@ export function PlayClient() {
   // 各模型席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆。
   // 没有它，模型每季都在从零重想，只能做一季就见效的事
   const [plans, setPlans] = useState<Record<string, string>>({});
+  /** 各模型席位上季被丢掉的令。回授给下一季，见 observe 的 droppedLastSeason */
+  const [drops, setDrops] = useState<Record<string,
+    Array<{ key: string; reason: string; detail?: string }>>>({});
   const [modelErr, setModelErr] = useState<string | null>(null);
   /**
    * 本局季数。默认取内容包的 16——那是**评测口径**（一局 16 次调用，
@@ -904,9 +907,12 @@ export function PlayClient() {
     const done = await Promise.all(byModel.map(async (f) => {
       try {
         const { orders: os, record } = await modelDecide(game, f, since,
-          { ...deps, model: modelOf[f], reasoning: { effort } }, plans[f] ?? null);
+          { ...deps, model: modelOf[f], reasoning: { effort } },
+          plans[f] ?? null, drops[f] ?? []);
         // 答不上来的那一季不该把记忆抹掉，所以只在给出新方略时更新
         if (record.plan) setPlans((p) => ({ ...p, [f]: record.plan! }));
+        // 被丢的令回授给下一季：与方略同理，不回授模型就每季重犯
+        setDrops((d) => ({ ...d, [f]: record.admission?.dropped ?? [] }));
         setThinking((t) => ({ ...t,
           [f]: record.failure ? `失败：${record.failure}` : `${os.length} 令` }));
         return { f, os, record };

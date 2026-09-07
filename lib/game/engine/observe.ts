@@ -177,6 +177,18 @@ export interface Observation {
    * null 表示开局，或上一季没写
    */
   plan: string | null;
+  /**
+   * 上季**被丢掉的令**：选了但没执行的那几条，附原因。
+   *
+   * 这是第一份 48 局排行榜挖出来的：两个模型的非法率 7.6% 与 9.4%，
+   * 而 mojibake 与 unknown-key 都是 0——枚举拦住了幻觉，被丢的全是
+   * 「单看每条都合法、合起来不合法」：同一郡每季至多 2 令、金不够、令不够、
+   * 同一条选了两遍（nano 93 次）。规则在提示词里写着，模型照样每季重犯，
+   * 因为**我们把令丢掉却从不告诉它**——与「作废的令数不回传」是同一类错。
+   *
+   * 空数组时不发：绝大多数季是干净的，逐季声明「本季没有被丢的令」纯属浪费
+   */
+  droppedLastSeason?: Array<{ key: string; why: string }>;
   /** 本季候选。模型只能从这里选，按 key 引用 */
   candidates: ObsCandidate[];
 }
@@ -237,6 +249,8 @@ export function observe(
     worldCap?: number;
     /** 上季该席位自己写下的跨季方略。原样回传，是它唯一的记忆 */
     plan?: string | null;
+    /** 上季被丢掉的令。见 Observation.droppedLastSeason */
+    dropped?: Array<{ key: string; reason: string; detail?: string }>;
   } = {},
 ): Observation {
   const nameOf = opts.nameOf ?? ((id: FactionId) => id);
@@ -347,6 +361,17 @@ export function observe(
       .filter((t) => t.a === faction || t.b === faction)
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
     plan: opts?.plan ?? null,
+    // 至多报五条：重犯的往往是同一类，前几条足以说明问题，
+    // 而观测预算是按席·季结算的
+    ...(opts?.dropped?.length
+      ? { droppedLastSeason: opts.dropped.slice(0, 5).map((d) => ({
+          key: d.key,
+          why: d.reason === "duplicate" ? "同一条选了两遍"
+            : d.reason === "over-budget" ? `令数不够（${d.detail ?? ""}）`
+            : d.reason === "unknown-key" ? "候选里没有这条"
+            : d.detail ?? "引擎拒收",
+        })) }
+      : {}),
     report: {
       // 攻城的**缺口对可防守**要跟着战报回来。这两个数就在事件的 attribution 上，
       // 此前只抄 text 就把它丢了——而围城是唯一一类跨季、可逐季加码的决策，

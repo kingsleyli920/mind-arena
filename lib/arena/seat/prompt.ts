@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.10.0";
+export const PROMPT_VERSION = "1.11.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {
@@ -24,8 +24,11 @@ export function renderSystem(pack: unknown): string {
     "  但正因为白给，它们不能代替花令的事：光靠免费动作填满 picks，",
     "  令数照样一条没花，这一季实际什么都没推进。先把令花在征伐、集结、内政上，",
     "  再用免费的次数补刺探与调任。",
-    "- 候选逐条合法，但**一起下不一定合法**：同一郡每季至多 2 令，刺探 3 次、任命 5 次。",
-    "  越界的会被逐条丢弃，不作废整回合——但那是白费的机会。",
+    "- 候选逐条合法，但**一起下不一定合法**：同一郡每季至多 2 令，刺探 3 次、任命 5 次，",
+    "  金也要够。越界的会被逐条丢弃，不作废整回合——但那是白费的机会。",
+    "  所以 picks 要当作**一组**来挑：同一个郡在几条 key 里出现过几次？加起来花多少金？",
+    "- `droppedLastSeason` 出现时，那是你**上季选了却没执行**的令，附了原因。",
+    "  它是这一季最该先读的一段：同一个错重犯两季，等于白扔两季的令。",
     "- `budget.wastedLastSeason` 出现时，它是你**上季作废掉**的令数——说明上季没花完。",
     "  这一季先把令填满再谈别的：拿四分之三的行动经济，打不过满负荷的对手。",
     "",
