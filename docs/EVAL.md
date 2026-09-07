@@ -16,6 +16,9 @@ npm run eval -- --agent=model --model=anthropic/claude-sonnet-5 --games=48
 npm run eval:suite -- --agents=bot:balanced,bot:purpose,model:<id>,model:<id> \
   --games=48 --reasoning=low --jobs=4 --budget=6 --out=./eval-out
 
+# 把一次跑拆开看：按席位、动作构成、被丢的令、令数用率
+npm run eval:dissect -- eval-out/board1/*.json
+
 # 一整局的逐季实录（引擎级算式、候选全文、逐郡 diff、游戏外元数据）
 npm run match -- --model=<id> --seasons=32          # 席位随机抽签
 npm run match -- --model=<id> --seasons=32 --pick3  # 抽三家交互选一
