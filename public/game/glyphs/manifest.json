@@ -13,7 +13,15 @@
   "depot": 2,
   "battlefield": 2,
   "tent": 2,
-  "camp": 2
+  "camp": 2,
+  "b-office": 1,
+  "b-granary": 1,
+  "b-market": 1,
+  "b-drill": 1,
+  "b-ironworks": 1,
+  "b-saltern": 1,
+  "b-stud": 1,
+  "b-farmstead": 1
  },
  "glyphs": {
   "city-small": {
@@ -50,6 +58,38 @@
   },
   "battlefield": {
    "variants": 2,
+   "wash": false
+  },
+  "b-office": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-granary": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-market": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-drill": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-ironworks": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-saltern": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-stud": {
+   "variants": 1,
+   "wash": false
+  },
+  "b-farmstead": {
+   "variants": 1,
    "wash": false
   },
   "tent": {

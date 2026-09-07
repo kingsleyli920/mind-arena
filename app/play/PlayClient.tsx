@@ -386,6 +386,20 @@ const GLYPH = "/game/glyphs";
 const GLYPH_N: Record<string, number> = {
   "city-small": 3, "city-large": 3, "city-seat": 2,
   gate: 3, pass: 2, ford: 2, port: 2, depot: 2, battlefield: 2, tent: 2, camp: 2,
+  "b-office": 1, "b-granary": 1, "b-market": 1, "b-drill": 1,
+  "b-ironworks": 1, "b-saltern": 1, "b-stud": 1, "b-farmstead": 1,
+};
+/**
+ * 建筑：引擎里每郡至多三座、八种各有实数（官府加令、仓廪加存粮、市产金 1.3 倍、
+ * 校场增兵 1.6 倍、铁官治械半价、盐场每季 70 金、马苑统兵 1.25 倍、屯田军费半价），
+ * 而图上此前**一座都不画**。近观档在城下摆一排。
+ *
+ * 只画自家的：他家城里建了什么，观测里本来就看不到（迷雾），
+ * 画出来等于开天眼
+ */
+const BUILD_CN2: Record<string, string> = {
+  office: "官府", granary: "仓廪", market: "市", drill: "校场",
+  ironworks: "铁官", saltern: "盐场", stud: "马苑", farmstead: "屯田",
 };
 /** 有可上色面的那几个 */
 const WASHED = ["city-small", "city-large", "city-seat", "tent", "camp"] as const;
@@ -1417,7 +1431,9 @@ export function PlayClient() {
       // 1/k^0.88 意味着屏上按 k^0.12 长——十四倍下也只大三成半
       const size = (m.isSeat ? 25 : 21) / view.k ** 0.88;
       const w = m.c.name.length * size * 1.02, h = size * 1.3;
-      const x = m.x - w / 2, y = m.y + m.base * 0.62 + 4 / view.k ** 0.88;
+      // 城下有建筑时牌记往下让一档，否则字压在屋顶上
+      const hasBuilds = lod >= 2 && m.mine && m.st.buildings.length > 0;
+      const x = m.x - w / 2, y = m.y + m.base * (hasBuilds ? 1.12 : 0.62) + 4 / view.k ** 0.88;
       const box: [number, number, number, number] = [x, y, w, h];
       const hit = placed.some(([px, py, pw, ph]) =>
         x < px + pw && x + w > px && y < py + ph && y + h > py);
@@ -1842,6 +1858,21 @@ export function PlayClient() {
                     远低于可点区域的最低尺寸 */}
                 <circle cx={m.x} cy={m.y} r={Math.max(m.base * 0.9, 26 / view.k ** 0.88)}
                   fill="transparent" />
+                {/* 城下一排建筑。只画自家的，且只在近观档：
+                    他家城里建了什么，观测里本来就看不到 */}
+                {lod >= 2 && m.mine && !hidden.has(m.c.id) && m.st.buildings.map((b, i, all) => {
+                  // 一座指甲盖大就白画了：第一版 0.62×base，图上只是两个小点。
+                  // 放到 0.95×base，牌记那边也跟着往下让（见 labels 的 y）
+                  const bs = m.base * 0.95;
+                  const bx = m.x + (i - (all.length - 1) / 2) * bs * 0.92;
+                  return (
+                    <g key={b}>
+                      <title>{BUILD_CN2[b] ?? b}</title>
+                      <image href={`${GLYPH}/b-${b}-0-ink.png`}
+                        x={bx - bs / 2} y={m.y + m.base * 0.06} width={bs} height={bs} />
+                    </g>
+                  );
+                })}
                 {hidden.has(m.c.id) ? (
                   // 让位者：一枚小点。位置还在、点得到、归属看得见
                   <circle className="dot" cx={m.x} cy={m.y} r={m.base * 0.2}
