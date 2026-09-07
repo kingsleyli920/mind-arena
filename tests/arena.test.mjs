@@ -20,7 +20,8 @@ import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
 import { GRADE_SCORE, boardScore, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { VERIFIED_MODELS } from "../lib/arena/verified-models.ts";
-import { renderSystem } from "../lib/arena/seat/prompt.ts";
+import { renderSystem, PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
+import { GRADE_CUTS } from "../lib/game/engine/victory.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -522,4 +523,22 @@ test("实测模型表：每条都要有实扣与实测结论，不许凭印象�
     assert.ok(m.note.length >= 10, `${m.id} 缺实测结论`);
     assert.ok(/\d/.test(m.note), `${m.id} 的结论里没有一个数字——那多半是印象不是实测`);
   }
+});
+
+// ── 定档门槛的第四方对账：写给模型的那一份 ──────────────────────────
+//
+// 门槛住在四个地方：内容包（玩家读的规则）、gradeOf（引擎判的）、
+// 开局页的说明（玩家读的）、规则摘要（**模型唯一读到的**）。
+// 改了前三处而漏掉第四处，模型就在按一套过时的规则决策，而报告上什么都看不出来。
+// 这次改门槛时，提示词里那句「多控一州或多据一州治 → 乙；多控两州 → 甲」
+// 正是靠通读才发现的——没有闸门就会漏。
+test("规则摘要里的定档门槛与引擎一致", () => {
+  const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+  const sys = renderSystem(pack);
+  for (const [g, cut] of Object.entries(GRADE_CUTS)) {
+    assert.ok(sys.includes(`≥${cut}`),
+      `规则摘要里找不到 ${g} 的门槛「≥${cut}」——模型读到的定档规则与引擎判的不是同一套`);
+  }
+  assert.ok(!/多控两州\s*→\s*甲/.test(sys), "摘要里还留着旧门槛的写法");
+  assert.match(PROMPT_VERSION, /^\d+\.\d+\.\d+$/);
 });

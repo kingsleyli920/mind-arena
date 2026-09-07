@@ -130,20 +130,54 @@ export function epochLimitFor(
   return Math.max(P.epochLimit, Math.ceil(s.seasonsPerGame / P.epochCount));
 }
 
+/**
+ * 定档门槛。**这里是唯一来源**：内容包里的 `victory[].test` 只是同一件事的
+ * 人类可读写法，一条测试逐字对账（tests/engine.test.mjs）。
+ * 两处各改各的，玩家读到的规则与引擎判的就是两回事了。
+ */
+export const GRADE_CUTS = { chao: 2, jia: 1, yi: 0.5 } as const;
+/** 霸与王判绝对疆域，与开局无关 */
+export const ABS_CUTS = { wang: 11, ba: 7 } as const;
+
 export function gradeOf(st: Standing, start: StartStanding): Grade {
   const zhouGain = st.controlledZhou - start.controlledZhou;
   const seatGain = st.zhouSeats - start.zhouSeats;
+  /**
+   * 州分：一个州治算半个州。
+   *
+   * 这个换算本来就藏在旧规则里——旧甲档写的是「多 2 州，**或**多 1 州又多
+   * 2 州治」，即 2 州治 = 1 州。只是它被拆成两条不等式的「或」，
+   * 于是中间那些结局（多 1 州又多 1 州治）无处安放，只能落回乙档。
+   */
+  const zhouScore = zhouGain + 0.5 * seatGain;
   // 甲以上两档判**绝对**疆域，不判增量。
   //
   // 增量判据在短局里是对的：四年里多拿一两个州就是本事，且它中和了开局强弱。
   // 但它到甲档就封顶了——六十季的长局里控了八个州，判据照样只给甲，
   // 于是后半局的每一次胜利都不再有回报，长局等于没有目标。
   // 十三州过半即霸，十一州即王：这两条与开局无关，谁做到都算数
-  if (st.controlledZhou >= 11) return "wang";
-  if (st.controlledZhou >= 7) return "ba";
-  if (zhouGain >= 4) return "chao";
-  if (zhouGain >= 2 || (zhouGain >= 1 && seatGain >= 2)) return "jia";
-  if (zhouGain >= 1 || seatGain >= 1) return "yi";
+  if (st.controlledZhou >= ABS_CUTS.wang) return "wang";
+  if (st.controlledZhou >= ABS_CUTS.ba) return "ba";
+  // 门槛按 16 季**实际能达到的区间**标定，并用机器人自对局实测过。
+  //
+  // 旧门槛是「乙 ≥0.5、甲 ≥2、超 ≥4」。毛病有二：甲要多控两个整州，
+  // 192 局实测里那是 93 分位——九成的局够不着；而乙把「多据一个州治」
+  // 与「多控一整州」判成同一档，可那是两回事，一个是立足一个是成势。
+  // 结果六百局自对局里 45% 落在乙，超档一局都没有。
+  //
+  // 新门槛 0.5 / 1 / 2 —— 州治入乙、整州入甲、两州入超。
+  // 三组阈值各跑 600 局机器人自对局（免费，见 npm run selfplay）：
+  //
+  //   门槛            丁    丙    乙    甲    超   最大桶
+  //   0.5/2/4（旧）   31%  15%  45%  10%   0%    45%
+  //   0.5/1.5/2.5     32%  15%  40%  10%   4%    40%
+  //   0.5/1/2（现用） 32%  15%  33%  11%  10%    33%
+  //
+  // 有腾挪空间的席位摊得最明显（刘表：旧 甲31/乙37 → 新 超31/甲28/乙9）。
+  // 曹操、吕布这类小席位仍然挤在丙丁——那是局面本身窄，不是尺子的事
+  if (zhouScore >= GRADE_CUTS.chao) return "chao";
+  if (zhouScore >= GRADE_CUTS.jia) return "jia";
+  if (zhouScore >= GRADE_CUTS.yi) return "yi";
   // 「不低于开局」在第一季就自动成立，等于白送保底档。必须是「高于」，
   // 且至少一郡夺自他方——只捡无主之地不算进攻
   if (st.commanderies > start.commanderies && st.conquests >= 1) return "bing";
@@ -207,7 +241,7 @@ export function gradeIfTaken(
  *
  * 候选标签只讲单个目标的攻防，讲不出「往哪个方向打才算数」。
  * 而档位判据是州级的——吕布开局据兖州，豫州六郡里有三个无主，
- * 占到四郡即多控一州升乙档；贪心地打最近最弱的目标则永远停在丁档。
+ * 占到四郡即多控一州升甲档；贪心地打最近最弱的目标则永远停在丁档。
  * 若不把这层信息摆出来，胜负判据对模型就是不可见的，评测测的将是猜谜。
  */
 export function briefFor(

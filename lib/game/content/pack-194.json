@@ -1285,20 +1285,20 @@
     {
       "id": "chao",
       "name": "超",
-      "test": "zhouGain >= 4",
-      "description": "控制州数比开局多 ≥4。名额分 400"
+      "test": "zhouScore >= 2",
+      "description": "州分 ≥2：多控 2 整州。名额分 400"
     },
     {
       "id": "jia",
       "name": "甲",
-      "test": "zhouGain >= 2 || (zhouGain >= 1 && seatGain >= 2)",
-      "description": "控制州数比开局多 ≥2；或多 ≥1 州且多据 ≥2 个州治。控制一州 = 拥有该州过半郡国。名额分 300"
+      "test": "zhouScore >= 1",
+      "description": "州分 ≥1：多控 1 整州，或多据 2 个州治。**成势**。名额分 300"
     },
     {
       "id": "yi",
       "name": "乙",
-      "test": "zhouGain >= 1 || seatGain >= 1",
-      "description": "控制州数比开局多 ≥1；或多据 ≥1 个州治。名额分 200"
+      "test": "zhouScore >= 0.5",
+      "description": "州分 ≥0.5：多据 ≥1 个州治。**立足**——据一处州治与控住整个州是两回事，故分为两档。控制一州 = 拥有该州过半郡国；一个州治算半个州。名额分 200"
     },
     {
       "id": "bing",

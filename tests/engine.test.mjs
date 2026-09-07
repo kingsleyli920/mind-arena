@@ -4,7 +4,8 @@ import fs from "node:fs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { buildGraph, listActions, validate, canonicalOrder, orderSites, DEFAULT_RULES }
   from "../lib/game/engine/actions.ts";
-import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor } from "../lib/game/engine/victory.ts";
+import { buildGeography, standingOf, gradeOf, gradeIfTaken, briefFor,
+         GRADE_CUTS, ABS_CUTS } from "../lib/game/engine/victory.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "../lib/game/engine/intel.ts";
 import { retinueAt, stationedAt, isFiller, attackRetinue, suadeChance }
@@ -1094,11 +1095,12 @@ test("胜负：判的是相对开局的增量，不是绝对位置", () => {
   assert.equal(
     gradeOf(st, { commanderies: lb.startCommanderies, controlledZhou: lb.startZhou, zhouSeats: lb.startSeats }),
     "ding", "开局态势本身不该产生任何档位");
-  // 多控一州即升乙
+  // 多控一整州即升甲（州治入乙、整州入甲——见下面那条门槛测试）。
+  // 这条要的是「判增量不判绝对位置」：同一个 st，只因为比开局多了一州就升档
   assert.equal(
     gradeOf({ ...st, controlledZhou: st.controlledZhou + 1 },
       { commanderies: lb.startCommanderies, controlledZhou: lb.startZhou, zhouSeats: lb.startSeats }),
-    "yi");
+    "jia");
 });
 
 test("胜负：控制一州以过半郡国为准，州治齐备且唯一", () => {
@@ -2531,4 +2533,41 @@ test("联军：一家独据两成郡国，天下共讨之", () => {
   const again = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
   assert.equal(again.log.slice(cur.log.length).filter((e) => e.kind === "coalition").length, 0,
     "联军每季重复触发");
+});
+
+// ── 定档门槛：包与代码逐字对账 ────────────────────────────────────────
+//
+// 门槛是玩家读得到的规则（包里的 victory[].test 会渲进规则速览），
+// 也是引擎判的东西。两处各改各的，人读到的和引擎判的就是两回事了。
+test("定档门槛：内容包里的判据与 gradeOf 的常数一致", () => {
+  const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+  const want = {
+    wang: `controlledZhou >= ${ABS_CUTS.wang}`,
+    ba: `controlledZhou >= ${ABS_CUTS.ba}`,
+    chao: `zhouScore >= ${GRADE_CUTS.chao}`,
+    jia: `zhouScore >= ${GRADE_CUTS.jia}`,
+    yi: `zhouScore >= ${GRADE_CUTS.yi}`,
+  };
+  for (const v of pack.victory) {
+    if (!(v.id in want)) continue;
+    assert.equal(v.test, want[v.id], `${v.id} 的判据：包里「${v.test}」，代码里「${want[v.id]}」`);
+  }
+});
+
+test("定档：一个州治算半个州，门槛落在 16 季够得着的区间", () => {
+  const st = (z, s) => ({ controlledZhou: z, zhouSeats: s, commanderies: 9, conquests: 1 });
+  const start = { controlledZhou: 0, zhouSeats: 0, commanderies: 9 };
+  // 州分 = 州增量 + 0.5×州治增量
+  assert.equal(gradeOf(st(0, 1), start), "yi", "多 1 个州治 = 州分 0.5 → 乙（立足）");
+  // 旧规则把这两件事判成同一档。据一处州治与控住整个州不是一回事，
+  // 而 45% 的局都堆在乙——分开之后最大桶降到 33%
+  assert.equal(gradeOf(st(1, 0), start), "jia", "多 1 整州 = 州分 1.0 → 甲（成势）");
+  assert.equal(gradeOf(st(0, 2), start), "jia", "多 2 个州治 = 1.0 → 甲");
+  assert.equal(gradeOf(st(2, 0), start), "chao", "多 2 整州 = 2.0 → 超");
+  // 绝对疆域两档不看开局
+  assert.equal(gradeOf(st(7, 0), { controlledZhou: 6, zhouSeats: 0, commanderies: 9 }), "ba");
+  assert.equal(gradeOf(st(11, 0), { controlledZhou: 10, zhouSeats: 0, commanderies: 9 }), "wang");
+  // 守成仍然不得分
+  assert.equal(gradeOf(st(0, 0), { ...start, commanderies: 9 }), "ding",
+    "郡数没涨、州分为 0 —— 守成不得分这条不能因为换轴而松掉");
 });

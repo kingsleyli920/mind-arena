@@ -176,7 +176,7 @@ const STRENGTH_CN: Record<string, string> = { skirmish: "偏师", main: "主力"
  * 终局时说清「差的那一步是什么」。对局中状态栏另有一句 nextStep，
  * 那句只报下一档的判据；这里要把现状与判据的差摊开算给玩家看。
  *
- * 判据是州级的（多控一州 / 多据一州治 / 多控两州），而整局十六季都在郡这一层
+ * 判据是州级的（多据一州治 / 多控一整州 / 多控两州），而整局十六季都在郡这一层
  * 做决定。只报一个「丁档」，玩家算不出自己离下一档差多少，也就无从改进——
  * 那正是十六季之后最该回答的问题。数字全部现算，与 victory.ts 的 gradeOf 同源。
  */
@@ -1264,7 +1264,8 @@ export function PlayClient() {
           <h1>汉末沙盘</h1>
           <p>兴平元年·一九四{"\u3000"}择一席入局。
             <b>谁先一统天下谁赢</b>；打满 {seasons ?? engine.P.seasonsPerGame} 季仍未定于一，
-            则按<b>相对开局的增量</b>定档——守成不得分，多控一州或多据一州治方入乙档。</p>
+            则按<b>相对开局的增量</b>定档——守成不得分；多据一个州治入乙（立足），
+            多控一整州入甲（成势），多控两州入超。</p>
         </header>
         <details className="primer-fold">
           <summary>怎么玩<i>没玩过先看这个</i></summary>
@@ -1430,7 +1431,7 @@ export function PlayClient() {
     : standing.controlledZhou > me.startZhou || standing.zhouSeats > me.startSeats
       ? `再多控 ${me.startZhou + 2 - standing.controlledZhou} 州 → 甲`
       : standing.commanderies > me.startCommanderies && standing.conquests > 0
-        ? "多控一州或多据一州治 → 乙"
+        ? "多据一州治 → 乙；多控一整州 → 甲"
         : "郡数高于开局且至少一郡夺自他方 → 丙";
 
   // 城池与标注。标注在屏幕空间做贪心避让——冀州、兖州一带郡治密集，
