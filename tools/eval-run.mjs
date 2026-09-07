@@ -52,6 +52,13 @@ const SEASONS = Number(arg("seasons", "0")) || 0;
  */
 const MEMORY = arg("memory", "on") !== "off";
 /**
+ * --dropback=off：不把上季被丢掉的令回授给模型。
+ *
+ * 必须与 --memory 分开：两者都是「跨季回授」，挂在同一个开关上就分离不出
+ * 哪一条起了作用。这一条的对照臂正是用它跑的
+ */
+const DROPBACK = arg("dropback", "on") !== "off";
+/**
  * --provider=A,B：钉住提供方。
  *
  * 不钉的话同一个模型 id 会在提供方之间跳——一份 24 季实录里跳了 7 家，
@@ -166,7 +173,7 @@ async function playGame(gi) {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       if (f === under && MODEL_DEPS) {
         const { orders: os, record } = await modelDecide(s, f, since, MODEL_DEPS,
-          MEMORY ? plan : null, MEMORY ? dropped : []);
+          MEMORY ? plan : null, DROPBACK ? dropped : []);
         // 只在模型给出新方略时更新。答不上来的那一季不该把记忆抹掉
         if (record.plan) plan = record.plan;
         // 被丢的令回授给下一季：不回授的话模型每季重犯同一个错而收不到信号
@@ -402,6 +409,7 @@ if (JSON_OUT) {
     // 否则「48 局的排名」可能其实只有 11 局
     played: results.length, spentUsd: +spent.toFixed(4), halted,
     keyEnum: KEY_ENUM, reasoning: REASONING?.effort ?? null, memory: MEMORY,
+    dropback: DROPBACK,
     // 这一跑是在什么条件下跑的。缺了这些，两周后这份结果与新结果之间
     // 的差是「模型变了」还是「我们改了提示词/内容包/引擎」就分不清——
     // 而这个仓库的提示词、内容包、引擎每周都在动
