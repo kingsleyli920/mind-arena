@@ -113,9 +113,23 @@ const payingCount = Math.max(1, AGENTS.filter((a) => a.startsWith("model:")).len
  */
 const MAX_COST = Number(arg("maxcost", "1.5"));
 
+/**
+ * 一个对局方的规格。`model:<id>` 之后可以跟 `@提供方+提供方` 逐个钉住。
+ *
+ * 全局的 --provider 不够用：一份榜上不同模型的快提供方是不同的家
+ *（glm-5.3-flash 要钉 BaseTen，deepseek-v4-flash 要钉 Alibaba），
+ * 而不钉就可能被路由到 5 tok/s 的那家——实测一季 341 秒对 6 秒。
+ * 见 npm run models。提供方之间用 + 不用逗号：逗号已经用来分对局方了
+ */
+function parseSpec(spec) {
+  const [body, prov] = spec.split("@");
+  const [kind, ...rest] = body.split(":");
+  return { kind, variant: rest.join(":"),
+           provider: prov ? prov.split("+").join(",") : PROVIDER };
+}
+
 function runOne(spec) {
-  const [kind, ...rest] = spec.split(":");
-  const variant = rest.join(":");
+  const { kind, variant, provider } = parseSpec(spec);
   const jsonOut = path.join(tmp, `${spec.replace(/[/:]/g, "_")}.json`);
   const args = ["--env-file-if-exists=.env.local", "--experimental-strip-types",
     "tools/eval-run.mjs", `--games=${GAMES}`, `--json=${jsonOut}`];
@@ -129,7 +143,7 @@ function runOne(spec) {
   else args.push(`--agent=${spec}`);
   if (REASONING && kind === "model") args.push(`--reasoning=${REASONING}`);
   if (KEYENUM && kind === "model") args.push(`--keyenum=${KEYENUM}`);
-  if (PROVIDER && kind === "model") args.push(`--provider=${PROVIDER}`);
+  if (provider && kind === "model") args.push(`--provider=${provider}`);
   // 预算按**花钱的对局方**均摊。bot 与 stub 不发请求，把额度分给它们
   // 等于白扔——此前这个闸门根本没被透传，加了等于没加
   if (BUDGET && kind === "model") args.push(`--budget=${(BUDGET / payingCount).toFixed(4)}`);
@@ -318,7 +332,8 @@ const px = await priceTable();
   const est = [];
   for (const a of AGENTS) {
     if (!a.startsWith("model:")) continue;
-    const id = a.slice(6);
+    // 规格里可能带 @提供方，价目与端点都要按裸 id 查
+    const { variant: id } = parseSpec(a);
     const p = px.get(id);
     if (!p) { est.push([id, null]); continue; }
     const per = (PER_GAME_IN * Number(p.prompt) + PER_GAME_OUT * Number(p.completion)) * MARKUP;

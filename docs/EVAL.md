@@ -27,7 +27,9 @@ npm run match -- --model=<id> --seasons=32 --pick3  # 抽三家交互选一
 npm run melee -- --seats=caocao=<id>,yuanshao=<id> --seasons=32
 ```
 
-`--budget=<美元>` 是花超即停的闸门，`--provider=A,B` 钉住提供方（见第 7 条）。
+`--budget=<美元>` 是花超即停的闸门，`--provider=A,B` 钉住提供方（见第 7 条）；
+套件里逐个对局方钉写成 `model:<id>@BaseTen+Modal`——一份榜上各模型的快提供方
+是不同的家，开榜前先 `npm run models` 查（见第 23 条）。
 `--maxcost=<美元>`（默认 1.5）是**跑之前**的闸门：任一对局方预估超了就拒跑，
 开发期用便宜档，贵的要显式放行（见第 22 条）。
 单跑 `npm run eval` 时逐季打一行心跳（局/季/令数/档位/耗时），`--heartbeat=off`
@@ -635,6 +637,43 @@ $4 买到的是一个统计上分不开的差别。
 **让「花大钱」成为一次刻意的动作，而不是默认动作。**
 
 贵的模型留到规则冻结之后的正式榜；那时结论要发出去，才值这个钱。
+
+### 23. 开榜之前先普查提供方：28 倍的差别可能出在路由不在模型
+
+烟测国产便宜档，一季 341 秒。依次怀疑过：模型慢、上游限流、降级梯出错。
+都不是。`~deepseek/deepseek-v4-flash-latest` 这个**浮动别名**被路由到了
+DigitalOcean，p50 吞吐 **5 tok/s**。同一个模型钉 Alibaba 是 78，
+glm-5.3-flash 钉 BaseTen 是 139。一季约 1500 出参 token：
+
+| 路由 | p50 吞吐 | 实测一季 |
+|---|---|---|
+| 浮动别名（落 DigitalOcean） | 5 tok/s | **341 秒** |
+| `--provider=BaseTen,Modal` | 139 tok/s | **5–20 秒** |
+
+`npm run models` 就是为这件事做的（`tools/model-survey.mjs`，只读价目与端点
+统计，不花钱）。开榜前它回答三个问题：
+
+1. **有没有哪家支持 structured_outputs。** 没有就上不了候选 key 的 enum，
+   整跑退到 text 档——那时测的是中文转写不是策略能力（见 enum 那一节）。
+   qwen3.7-flash 就是这样：只有 Alibaba 一家，不支持，
+   带 `require_parameters` 发过去是 `404 No endpoints found`。
+2. **该钉哪家。** 按 p50 吞吐排，并把吞吐折成工期——「48 局要跑几小时」
+   才是要判的事。
+3. **量化档。** 同一模型各家的 quantization 不同（fp8/fp4/unknown）。
+   一份榜里混着 fp8 与 fp4 就不可比，钉的时候要挑同一档。
+
+钉法：套件里写 `model:<id>@BaseTen+Modal`（提供方之间用 `+`，逗号留给分
+对局方）。**排两家而不是一家**：`allow_fallbacks:false` 加单家，
+提供方一抽风就是整季丢失——实测钉单家时第 1 季直接 0 令。
+
+三条推论：
+
+- **别名不要用在榜上。** `~作者/型号-latest` 查不到端点、路由不可控，
+  而它慢下来的样子跟「模型笨」在报告上长得一模一样。
+- **慢与挂要分开。** 心跳里的 `试 N 次` 就是这一位：341 秒里 attempts=2，
+  那是 300 秒超时 + 41 秒重试成功，是提供方在挂请求。
+- **重试要付钱。** 实测一季试 2–4 次很常见，实扣会比预估高，
+  `--budget` 要按这个留余量。
 
 ## 候选 key 写进 schema 的 enum：拿钱换正确性
 
