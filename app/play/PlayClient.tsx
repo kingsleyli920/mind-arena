@@ -946,37 +946,64 @@ export function PlayClient() {
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(pad, 0, 0, cv.width, cv.height);
 
-    // 二、疆界墨线：只描不同势力之间的分界，同势力内部不描。
-    // 每段中点按格坐标做确定性抖动后画成弧线——照直画格边，出来是一张
-    // 棱角分明的沃罗诺伊图，看着像算出来的而不是画出来的。
+    // 疆界墨线不在这儿画了——它是**线**，而线不必是像素。
+    // 格网是 0.1°（图上 5.5 像素），画进这块画布再放到十四倍，一格就是
+    // 七十七个屏幕像素，那道界成了一排积木。移到 SVG 里按矢量描，见下面 borders
+  }, [terr, game, engine, seat, near]);
+
+  // ── 疆界：矢量描，不进画布 ───────────────────────────────────────
+  //
+  // 这道界此前画在那块低分辨率画布上：格网 0.1°（图上 5.5 像素），放到十四倍
+  // 一格就是七十七个屏幕像素——界成了一排红积木，比山糊得还扎眼。
+  // 而它是**线**：把格边接成折线、按同一套确定性抖动画成弧，
+  // 两条 path（己方一条、他方一条）就够，任意倍数都是实的。
+  //
+  // 抖动函数与原来逐字相同：照直画格边出来是棱角分明的沃罗诺伊图，
+  // 看着像算出来的而不是画出来的
+  const borders = useMemo(() => {
+    if (!terr || !game) return { mine: "", other: "" };
+    const { cols, rows, none } = terr.meta;
+    const own = new Array<string | null>(cols * rows).fill(null);
+    for (let i = 0; i < terr.idx.length; i += 1) {
+      const k = terr.idx[i];
+      if (k === none) continue;
+      own[i] = game.commanderies[terr.order[k]]?.owner ?? null;
+    }
+    // 格坐标 → 图上坐标。territory-grid 与地图同一套等距圆柱投影
+    const cell = (terr.meta as { cellSize?: number }).cellSize ?? 0.1;
+    const gx = (c: number) => ((terr.meta.west + c * cell) - MAP.west) * MAP.ppd;
+    const gy = (r: number) => (MAP.north - (terr.meta.north - r * cell)) * MAP.ppd;
+    const W_CELL = cell * MAP.ppd;                      // 一格在图上多宽
     const wobble = (a: number, b: number) => {
       const n = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
-      return (n - Math.floor(n) - 0.5) * S * 1.5;
+      // 抖幅照旧：原来是 (rand−0.5)·S·1.5，S 是一格 5 像素，即 ±0.75 格。
+      // 第一版只给了 ±0.3 格，界画出来是一条规整的阶梯——那正是这个抖动要避开的
+      return (n - Math.floor(n) - 0.5) * W_CELL * 1.5;
     };
-    const seg = (x1: number, y1: number, x2: number, y2: number, k: number) => {
+    const d = { mine: "", other: "" };
+    const put = (into: "mine" | "other",
+                 x1: number, y1: number, x2: number, y2: number, k: number) => {
       const mx = (x1 + x2) / 2 + wobble(k, 7.3);
       const my = (y1 + y2) / 2 + wobble(k, 19.1);
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.quadraticCurveTo(mx, my, x2, y2);
-      ctx.stroke();
+      d[into] += `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} `
+               + `${x2.toFixed(1)} ${y2.toFixed(1)}`;
     };
-    ctx.lineCap = "round";
     for (let r = 0; r < rows; r += 1) {
       for (let c = 0; c < cols; c += 1) {
         const i = r * cols + c;
         const f = own[i];
         if (!f) continue;
-        const right = c + 1 < cols ? own[i + 1] : null;
-        const down = r + 1 < rows ? own[i + cols] : null;
-        const mine = f === seat;
-        ctx.strokeStyle = mine ? "rgba(118, 44, 34, 0.82)" : "rgba(52, 45, 37, 0.38)";
-        ctx.lineWidth = mine ? 2.4 : 1.2;
-        if (right !== f) seg((c + 1) * S, r * S, (c + 1) * S, (r + 1) * S, i);
-        if (down !== f) seg(c * S, (r + 1) * S, (c + 1) * S, (r + 1) * S, i + 0.5);
+        const into = f === seat ? "mine" : "other";
+        if ((c + 1 < cols ? own[i + 1] : null) !== f) {
+          put(into, gx(c + 1), gy(r), gx(c + 1), gy(r + 1), i);
+        }
+        if ((r + 1 < rows ? own[i + cols] : null) !== f) {
+          put(into, gx(c), gy(r + 1), gx(c + 1), gy(r + 1), i + 0.5);
+        }
       }
     }
-  }, [terr, game, engine, seat, near]);
+    return d;
+  }, [terr, game, seat]);
 
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
   if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;
@@ -1610,6 +1637,11 @@ export function PlayClient() {
                 <path d="M 0 0 L 10 5 L 0 10 z" />
               </marker>
             </defs>
+            {/* 疆界：己方朱、他方墨。两条 path，任意倍数都是实的 */}
+            <path className="border other" d={borders.other}
+              strokeWidth={1.2 / view.k ** 0.82} />
+            <path className="border mine" d={borders.mine}
+              strokeWidth={2.4 / view.k ** 0.82} />
             {/* 水：河心提亮 + 两岸落墨，与底图同一套画法。只在近观档出——
                 整幅可见时底图那份已经够 */}
             {water && (
