@@ -28,7 +28,7 @@ import { admit } from "../lib/arena/seat/admit.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
-import { GRADE_SCORE } from "../lib/arena/scoring.ts";
+import { GRADE_SCORE, boardScore } from "../lib/arena/scoring.ts";
 import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
 
 const arg = (k, d) => {
@@ -163,6 +163,39 @@ const BUDGET = Number(arg("budget", "0")) || 0;
  * 是慢还是挂完全看不出来，只能另花钱单跑一局才知道是「一季 39 秒」。
  */
 const HEARTBEAT = arg("heartbeat", "on") !== "off";
+
+/**
+ * --resume=<既有 json>：接着跑，别把已经跑完的局再跑一遍。
+ *
+ * 起因是一次真实的浪费：一臂跑到 44/48 撞了预算停手，要补那 4 局，
+ * 按原样重跑就是把 44 局的钱再花一遍（约 $1.8 换 4 局）。
+ *
+ * 只接同一套设定的续跑——对局方、模型、席位、局长、局数任一不同就拒绝。
+ * 混着两套设定的结果拼成一份「48 局的榜」，比缺 4 局危险得多。
+ */
+const RESUME = arg("resume", "");
+const prior = { results: [], records: [], spent: 0 };
+if (RESUME) {
+  if (!fs.existsSync(RESUME)) {
+    console.error(`✗ --resume 指向的文件不存在：${RESUME}`);
+    process.exit(2);
+  }
+  const d = JSON.parse(fs.readFileSync(RESUME, "utf8"));
+  const same = d.agent === AGENT && (d.model ?? null) === (MODEL || null)
+    && JSON.stringify(d.seats) === JSON.stringify(SEATS)
+    && Number(d.games) === Number(GAMES);
+  if (!same) {
+    console.error("✗ --resume 的设定与本次不一致，拒绝续跑：");
+    console.error(`    既有：${d.agent}/${d.model ?? "—"}　${d.games} 局　席位 ${(d.seats ?? []).join(",")}`);
+    console.error(`    本次：${AGENT}/${MODEL || "—"}　${GAMES} 局　席位 ${SEATS.join(",")}`);
+    process.exit(2);
+  }
+  prior.results = d.results ?? [];
+  prior.records = d.records ?? [];
+  prior.spent = d.spentUsd ?? 0;
+  console.log(`续跑：既有 ${prior.results.length}/${GAMES} 局（已花 $${prior.spent.toFixed(2)}），`
+    + `本次只跑缺的 ${GAMES - prior.results.length} 局\n`);
+}
 let spent = 0;
 let halted = null;
 
@@ -288,6 +321,13 @@ async function playGame(gi) {
     result: {
       game: gi, seed, seat: under, seatName: nameOf(under),
       grade: f.bestGrade, score: GRADE_SCORE[f.bestGrade],
+      // 榜分 = 档位分 + 档内连续进度。档位分那把尺在甲档有两州宽，
+      // 实测 25/44 局的配对差是平局——差一两个州被记成打平。见 scoring.ts
+      boardScore: boardScore({
+        grade: f.bestGrade,
+        zhouEquiv: zhouEquiv(s, GEO, under), startZhouEquiv: f.startZhouEquiv ?? 0,
+        seats: standingOf(s, GEO, under).zhouSeats, startSeats: f.startSeats,
+      }),
       // **终局档**：局终这一刻实际站在哪一档，与 bestGrade 分开报。
       //
       // bestGrade 是**历史最高档的棘轮**（resolve.ts 只往上不往下）。
@@ -331,23 +371,32 @@ async function playGame(gi) {
 
 // 有限并发。完成一局报一次进度——进度走 stderr，不污染报告；
 // 没有它，一个慢的提供方在外面看就是「什么都没发生」
-const queue = Array.from({ length: GAMES }, (_, i) => i);
+const done0 = new Set(prior.results.map((r) => r.game));
+const queue = Array.from({ length: GAMES }, (_, i) => i).filter((i) => !done0.has(i));
 const done = [];
-await Promise.all(Array.from({ length: Math.min(GAME_JOBS, GAMES) }, async () => {
+await Promise.all(Array.from({ length: Math.max(1, Math.min(GAME_JOBS, queue.length)) }, async () => {
   while (queue.length) {
     if (halted) { queue.length = 0; break; }
     const gi = queue.shift();
     done.push(await playGame(gi));
-    process.stderr.write(`[progress] ${done.length}/${GAMES}\n`);
+    process.stderr.write(`[progress] ${done.length + prior.results.length}/${GAMES}\n`);
     if (BUDGET && spent >= BUDGET) {
       halted = `累计实扣 $${spent.toFixed(4)} 达到预算 $${BUDGET.toFixed(2)}`;
-      process.stderr.write(`[halt] ${halted}，已完成 ${done.length}/${GAMES} 局\n`);
+      process.stderr.write(`[halt] ${halted}，已完成 ${done.length + prior.results.length}/${GAMES} 局\n`);
     }
   }
 }));
-// 并发完成的顺序不定，按局号排回来——报告与 jsonl 的行序必须可复现
+// 并发完成的顺序不定，按局号排回来——报告与 jsonl 的行序必须可复现。
+// 续跑时先把既有的那些放回去，再按局号整体排序：一份续跑出来的文件
+// 与一次跑满的文件，行序必须一模一样，否则两者不能互相校对
+results.push(...prior.results);
+records.push(...prior.records);
 done.sort((a, b) => a.result.game - b.result.game);
 for (const d of done) { results.push(d.result); records.push(...d.records); }
+results.sort((a, b) => a.game - b.game);
+records.sort((a, b) => (a.game - b.game) || (a.turn - b.turn));
+// 续跑的花费是两段之和——只报本次那段会让「这份榜花了多少」少算
+spent += prior.spent;
 
 const avg = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
 console.log(`对局方 ${AGENT}\u3000${GAMES} 局\u3000席位轮换 ${SEATS.length} 席\n`);

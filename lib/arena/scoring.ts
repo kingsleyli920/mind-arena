@@ -72,6 +72,41 @@ export function contScore(r: {
   return 100 * (dz + 0.5 * ds);
 }
 
+/**
+ * **排行榜分**：档位分 + 档内的连续进度。这是榜上排名用的那一列。
+ *
+ * 定档只有七级，而甲这一档有两州宽（zhouGain 2 与 3 同为 300 分）。
+ * 一份 44 局的实测里，模型与机器人的配对差有 **25/44 局是平局**——
+ * 差了一两个州，记成打平。四档的台阶把大半信号扔掉了。
+ *
+ * 实测（配对差的 80% 功效所需局数，越小越灵敏）：
+ *
+ * |                | 两机器人之间 | glm−机器人 | deepseek−机器人 | 平局 |
+ * |----------------|---------|---------|-------------|------|
+ * | 档位分（旧）    | 51      | 83      | 412         | 25/44 |
+ * | **本函数**     | 53      | **61**  | **193**     | **1/44** |
+ * | contScore 纯连续 | 347 ✗   | 30      | 19          | 1/44 |
+ *
+ * 纯连续那把（contScore）更灵敏，但**它分不开两个机器人**：两者疆域几乎一样，
+ * 差别在「挑值钱的郡过线」，那正是档位在量而连续量看不见的东西。
+ * 所以不能拿它单独排名——榜上它作为另一列并列，读者自己看两把尺是否同向。
+ *
+ * 加的这一项被压在 0–99：**低一档永远压不过高一档**，档位仍是头号指标。
+ * 权重与定档判据同源——州进度（zhouEquiv，按「我方郡数 ÷ 过半所需」计、封顶 1）
+ * 加半个州治，因为定档里一个州治约合半个州。
+ *
+ * 与 fineScore 的分别：那个是字典序压位，连续项被压到 1/169 量级、几乎不带信息
+ *（实测 83 → 69 局，聊胜于无）；这个直接按百步尺加，量级才够。
+ */
+export function boardScore(r: {
+  grade: Grade; zhouEquiv: number; startZhouEquiv?: number;
+  seats?: number; startSeats?: number;
+}): number {
+  const dz = r.zhouEquiv - (r.startZhouEquiv ?? 0);
+  const ds = (r.seats ?? 0) - (r.startSeats ?? 0);
+  return GRADE_SCORE[r.grade] + Math.min(99, Math.max(0, 10 * (dz + 0.5 * ds)));
+}
+
 /** 从内容包核对：包里的名额分与这张表必须一致 */
 export function checkScoringAgainstPack(pack: unknown): string[] {
   const errs: string[] = [];

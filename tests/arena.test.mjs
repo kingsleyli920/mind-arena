@@ -17,7 +17,7 @@ import { admit } from "../lib/arena/seat/admit.ts";
 import { pick as botPick } from "../lib/game/engine/bot.ts";
 import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
-import { GRADE_SCORE, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
+import { GRADE_SCORE, boardScore, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { renderSystem } from "../lib/arena/seat/prompt.ts";
 
@@ -435,4 +435,32 @@ test("429 是限流不是不支持：一次都不许记进降级梯", async () =
     assert.equal(r.rung, "schema", "限流要原档重试，不能降档");
     assert.deepEqual(seen, ["schema", "schema"]);
   } finally { globalThis.fetch = real; }
+});
+
+// ── 榜分：档位 + 档内连续进度 ──────────────────────────────────────
+//
+// 加连续项是为了把「差一两个州却记成打平」的局分开（实测 25/44 局平局）。
+// 但它一旦能翻过一整档，档位就不再是头号指标了——那会把「多控一州」
+// 这条产品语义变成一个可以用零碎进度换掉的东西。
+
+test("榜分：低一档永远压不过高一档", () => {
+  const 甲最差 = boardScore({ grade: "jia", zhouEquiv: 2, startZhouEquiv: 2 });
+  const 乙最好 = boardScore({ grade: "yi", zhouEquiv: 99, startZhouEquiv: 0, seats: 99 });
+  assert.ok(甲最差 > 乙最好,
+    `甲档最差 ${甲最差} 必须高于乙档最好 ${乙最好}——连续项被压在 0–99 就是为这个`);
+});
+
+test("榜分：守成不得分——增量为零或为负都不加分", () => {
+  assert.equal(boardScore({ grade: "yi", zhouEquiv: 3, startZhouEquiv: 3 }), GRADE_SCORE.yi);
+  assert.equal(boardScore({ grade: "yi", zhouEquiv: 1, startZhouEquiv: 3 }), GRADE_SCORE.yi,
+    "缩了疆域不该比原地不动更高——负增量夹到 0，不是往下扣");
+});
+
+test("榜分：同档内按州进度单调，一个州治约合半个州", () => {
+  const a = boardScore({ grade: "jia", zhouEquiv: 3.75, startZhouEquiv: 0 });
+  const b = boardScore({ grade: "jia", zhouEquiv: 1.25, startZhouEquiv: 0 });
+  assert.ok(a > b, "同为甲档，多拿两州半的那局必须更高——这正是旧尺子记成平局的那种");
+  assert.equal(boardScore({ grade: "yi", zhouEquiv: 1, startZhouEquiv: 0 }),
+               boardScore({ grade: "yi", zhouEquiv: 0, startZhouEquiv: 0, seats: 2 }),
+               "1 州 = 2 个州治：与定档判据同源（多 1 州 = 多 2 州治 = 甲）");
 });

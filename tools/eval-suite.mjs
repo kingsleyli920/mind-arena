@@ -293,7 +293,13 @@ function summarize(run, px) {
     played: run.played ?? rs.length, halted: run.halted ?? null,
     // 逐局分数按局号存下来，配对检验要用。各对局方跑的是同一批
     //(seed, 席位)，所以同局号可直接相减
-    byGame: Object.fromEntries(rs.map((x) => [x.game, x.score])),
+    // 配对差算在**榜分**上（档位分 + 档内连续进度）。算在纯档位分上时
+    // 实测 25/44 局是平局——差一两个州被记成打平，区间被平局撑宽。
+    // 旧记录没有这一列就退回档位分，并在列头标出来
+    byGame: Object.fromEntries(rs.map((x) => [x.game, x.boardScore ?? x.score])),
+    hasBoardScore: rs.every((x) => x.boardScore !== undefined),
+    boardScore: rs.some((x) => x.boardScore !== undefined)
+      ? avg(rs.filter((x) => x.boardScore !== undefined).map((x) => x.boardScore)) : null,
     reasoning: run.reasoning, keyEnum: run.keyEnum,
     elapsed: run.elapsed,
   };
@@ -447,15 +453,18 @@ console.log(`排行榜（同 seed、同对手、席位轮换、每局 ${SEASONS 
       ? `\u3000⚠ ${GAMES} 局分辨力不足，名次不可当结论` : ""}\n`);
 // 均分（历史最高档）与终局分并列。两者背离得越大，
 // 「中途辉煌、终局崩掉」的局越多——而长局里这正是要看的东西
-console.log("对局方".padEnd(40) + "均分".padStart(7) + "终局分".padStart(8)
-  + "州进度".padStart(8) + "对基线±95%".padStart(12)
+// 均分（历史最高档）｜榜分（档位 + 档内连续，配对差算在它上面）｜
+// 终局分（局终实际站在哪一档）｜州进度（纯连续，另一把尺）
+console.log("对局方".padEnd(38) + "均分".padStart(7) + "榜分".padStart(8)
+  + "终局分".padStart(8) + "州进度".padStart(8) + "对基线±95%".padStart(12)
   + "疆域倍数".padStart(9) + "出局".padStart(6) + "非法率".padStart(7)
   + "令数用率".padStart(9) + "成本".padStart(9));
 for (const r of rows) {
   const vs = pairedVs(r, bot);
   console.log(
-    r.spec.slice(0, 38).padEnd(40)
+    r.spec.slice(0, 36).padEnd(38)
     + r.score.toFixed(1).padStart(7)
+    + (r.boardScore == null ? "—" : r.boardScore.toFixed(1)).padStart(8)
     + (r.finalScore == null ? "—" : r.finalScore.toFixed(1)).padStart(8)
     + (r.contScore == null ? "—"
         : `${r.contScore >= 0 ? "+" : ""}${r.contScore.toFixed(0)}`).padStart(8)
