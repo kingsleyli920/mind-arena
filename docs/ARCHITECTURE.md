@@ -46,17 +46,56 @@ Mind Arena 是一个网页三国战略游戏，同时用作比较不同大语言
 ## 地图管线
 
 ```
-tools/fetch-dem.mjs        AWS 高程瓦片 → refs/dem-raster.raw（不入库，可重下）
-tools/fetch-refs.mjs       公有领域山水画 → refs/（不入库）
-tools/extract-cun.mjs      从山水画提取皴法墨迹 → public/game/ink/
-tools/render-terrain-map.mjs  晕渲 + 设色 + 皴法 + 势力疆域 + 水系 → 底图 PNG
+tools/fetch-dem.mjs           AWS 高程瓦片 → refs/dem-raster.raw（不入库，可重下）
+tools/fetch-refs.mjs          公有领域山水画 → refs/（不入库）
+tools/extract-cun.mjs         从山水画提取皴法墨迹 → public/game/ink/
+tools/make-paper.mjs          可平铺宣纸纹理 → paper.png
+tools/shrink-ui-paper.mjs     同一张纸压到 [228,255] 供界面用 → ui-paper.webp
+tools/render-terrain-map.mjs  晕渲 + 设色 + 皴法 + 水系 → 底图 PNG（PPD=440，14520×11880）
                               另导出 public/game/data/map-labels.json（标注数据）
-tools/slice-map-tiles.mjs  底图 → 512px webp 四级瓦片
+tools/slice-map-tiles.mjs     底图 → 512px webp 五级瓦片（z0 908 → z4 14520）
+tools/make-play-base.mjs      底图 → 1815 的垫底整图（瓦片没到时不露空洞）
+tools/render-map-decor.mjs    海波与云气（读同一份高程判海）→ decor.webp
+tools/render-map-glyphs.mjs   城郭、关津港仓、行营营垒 → glyphs/（每类多幅）
+tools/build-territory-grid.mjs 0.1° 格网：每格属哪个郡 → territory-grid.json
 ```
 
-底图 7260×5940，瓦片 244 张共 11MB。**标注不烤进底图**——烤进去就在所有缩放级别
-固定大小固定密度，洛阳周边八个关津必然重叠。标注是 PixiJS 屏幕空间实时绘制，
-按缩放分级、贪心避让。
+底图 14520×11880，瓦片 940 张共 13MB。
+
+### 哪一层用像素，哪一层用矢量
+
+判据只有一条：**线用矢量，染用像素**。栅格金字塔总有个头——z4 在 1181 逻辑像素的
+画框上，放到十四倍仍要拉伸 2.28 倍；再切一级要 700MB 源图与两千八百块瓦片，
+而下一次还要再翻一倍。但拉伸最扎眼的是线（河岸、疆界这种一笔下去的边），
+不是那片渐变的染。所以：
+
+| 层 | 形式 | 为什么 |
+|---|---|---|
+| 地势晕渲、皴、设色 | 瓦片（z1–z4） | 是**染**，拉伸看不出来；且它是逐像素算光学深度画的，浏览器跑不动 |
+| 疆域色域 | 画布（0.1° 格网） | 是染。近观档不糊边、色让到 55%，让地形透出来 |
+| 疆界墨线 | SVG 两条 path | 是线。3265 段、147KB 的 d 串，任意倍数都是实的 |
+| 水系（河、海岸） | SVG path | 是线。4473 个点、90KB，河宽照抄底图那条水力几何式 |
+| 道路 | SVG line | 是线。232 条边按地形分笔法 |
+| 城郭 / 关津 / 军团 | PNG 贴图 + 遮罩上色 | 是**画**。离线用 brush.mjs 渲，每类多幅，按名字哈希取 |
+| 牌记与题记 | SVG text | 屏幕空间贪心避让 |
+
+标注不烤进底图——烤进去就在所有缩放级别固定大小固定密度，洛阳周边八个关津必然重叠。
+
+### 分档
+
+三档，与瓦片那几级同呼吸：远观（k<1.6）只出疆域、州名、城印；中观（<3.2）出关与港、
+铺开郡名；近观（≥3.2）据点全出并标名、城画成城郭、水系与道路提亮。
+分档的理由不是性能，是**一张图放不下**。
+
+图元按 1/k^0.82 缩：图上缩得比屏幕放得快，放大才真的把挨在一起的城分开
+（京兆尹与左冯翊图上只隔 16 像素）。缩小时靠贪心避让，让位者留一枚小点。
+
+### 实测
+
+- 缩放时中位帧 8.3ms、九分位 10ms；过瓦片档时一次 60–120ms 的解码卡顿，
+  整个缩放区间发生三次，大半被 280ms 的镜头缓动盖住。
+- 疆界的 strokeWidth 曾按倍数连续变，改一次浏览器要把三千多段曲线的笔画几何
+  重算一遍；改成按档位给三个值。
 
 ## 对局协议
 
