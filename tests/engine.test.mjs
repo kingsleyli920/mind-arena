@@ -1484,9 +1484,12 @@ test("内政不给空操作：已至上限的方针不该出现在候选里", ()
   // 顶满：产出 10、民心 5、城防 100、器械最高、存粮满仓。
   // 存粮是后加的一维：产出档一提，粮仓上限跟着涨（存粮上限由产出档定），
   // 于是只顶前四项的话「屯粮」会冒出来——那不是 bug，是这条测试少顶了一维
+  // 存粮要顶到**真**上限（provCapOf：含仓廪 +2、方圆 +1），
+  // 顶到 provisionsCap 那个基础值的话「屯粮」照样冒出来——
+  // 而那不是候选的 bug，是这行少算了建筑与阵型
   Object.assign(t.commanderies[at], { yieldTier: 10, moraleTier: 5, defense: 100,
-    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000,
-    provisions: provisionsCap(10, P) });
+    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000 });
+  t.commanderies[at].provisions = provCapOf(t.commanderies[at], P);
   const cs = listActions(t, "yuanshao", G, P, undefined, ROSTER, undefined, GEO);
   const noop = cs.filter((c) => c.action.type === "govern" && c.action.at === at);
   // 「南郡 劝农（已至上限）」曾经每季都出现，白耗一条令
@@ -1719,6 +1722,26 @@ test("调任候选要写明会不会换掉太守 —— 收入按太守政治打
   }
   // 不换太守时不发这一段——那是最常见的情形，逐条写一遍纯属浪费
   assert.ok(cands.some((c) => !/太守政/.test(c.label)), "每条都发了，等于没有条件");
+});
+
+test("存粮上限：候选与结算必须用同一个数，否则有仓廪的城永远填不满", () => {
+  // 候选那边算上限用的是 provisionsCap（只按产出档），结算用 provCapOf（含仓廪 +2、
+  // 方圆 +1）。差的后果是候选以为满了就不再列屯粮，而围城那只钟正是按存粮走的
+  const s = fresh();
+  const me = "yuanshao";
+  const c = Object.values(s.commanderies).find((x) => x.owner === me);
+  // 内政每郡只给一条候选（按优先级取第一条命中的），所以别的先顶满
+  Object.assign(c, { yieldTier: 10, moraleTier: 5, defense: 100,
+    gear: P.gearLadder[P.gearLadder.length - 1], garrison: 50000 });
+  c.buildings = ["granary"];
+  c.formation = "square";
+  c.provisions = provisionsCap(c.yieldTier, P);      // 只按基础上限算「满」
+  s.factions[me].gold = 9999;
+  assert.ok(provCapOf(c, P) > c.provisions, "加了仓廪与方圆却没抬高上限");
+  const keys = listActions(s, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((x) => x.key === `govern:${c.id}:stock`);
+  assert.equal(keys.length, 1,
+    `${c.id} 存粮 ${c.provisions}/${provCapOf(c, P)}，候选里却没有屯粮`);
 });
 
 test("定价不许两份：DEFAULT_RULES 与内容包必须逐项相同", () => {

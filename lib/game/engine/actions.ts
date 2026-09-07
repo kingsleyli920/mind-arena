@@ -17,7 +17,7 @@ const statSum = (o: OfficerRef) =>
   o.leadership + o.might + o.intellect + o.politics + o.charisma;
 import { attackRetinue } from "./officers.ts";
 import { gradeIfTaken, standingOf, GRADE_CN, GRADE_RANK, type Geography } from "./victory.ts";
-import { marchSeasons, provisionsCap, type EngineParams } from "./params.ts";
+import { marchSeasons, provCapOf, provisionsCap, type EngineParams } from "./params.ts";
 import type {
   Action, Building, Candidate, CommanderyId, FactionId, GameState, Order, Formation, Resource,
 } from "./types.ts";
@@ -699,7 +699,11 @@ export function listActions(
       // 正被围时屯粮排第一：那一刻它是唯一能推迟开城的令，而守方每郡每季只有 2 条。
       // 攻方选强攻还是围困，守方就得押哪一头——押错则另一头破城
       const underSiege = besiegedNow(s, c.id, f);
-      const provCap = provisionsCap(c.yieldTier, P);
+      // 上限要用 provCapOf 而不是 provisionsCap：后者只按产出档算，
+      // 不含仓廪的 +2 与方圆的 +1，而结算那边用的是含的那个。
+      // 差的后果是**有仓廪的城永远填不满最后那两档**——候选以为满了就不再列屯粮，
+      // 而围城那只钟正是按存粮走的
+      const provCap = provCapOf(c, P);
       // 被围时募兵与劝农都不合法（见 validate 的 govern 分支），候选也不能列，
       // 否则「按界面贪心勾选，引擎不应拒绝任何一条」当场破
       const wants: Array<[string, boolean, string]> = [
