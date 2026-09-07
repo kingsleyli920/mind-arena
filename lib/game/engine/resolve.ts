@@ -459,13 +459,13 @@ export function resolve(
     }
     fs2.gold -= price;
     switch (o.action.policy) {
-      case "farm":   c.yieldTier = Math.min(10, c.yieldTier + P.farmGain); break;
+      case "farm":   c.yieldTier = Math.min(P.yieldMax, c.yieldTier + P.farmGain); break;
       case "levy":   c.garrison = Math.round(c.garrison * P.levyMultiplier);
                      c.moraleTier = Math.max(1, c.moraleTier - P.levyMorale); break;
-      case "wall":   c.defense = Math.min(100, c.defense + P.wallGain); break;
+      case "wall":   c.defense = Math.min(P.defenseMax, c.defense + P.wallGain); break;
       case "stock":  c.provisions = Math.min(provCapOf(c, P),
                                              c.provisions + P.provStockSeasons); break;
-      case "soothe": c.moraleTier = Math.min(5, c.moraleTier + P.sootheMorale); break;
+      case "soothe": c.moraleTier = Math.min(P.moraleMax, c.moraleTier + P.sootheMorale); break;
       // 治械：逐级打造，不可越级。首版里器械是征伐时的自由选项，
       // 不花任何代价就能给每次攻城白送缺口
       case "forge": {
@@ -1137,7 +1137,7 @@ export function resolve(
           + `${gov?.yieldMul && gov.yieldMul !== 1 ? ` × 太守 ${gov.yieldMul.toFixed(2)}` : ""}`
           + ` = ${row.toFixed(0)} 金\u3000守军 ${fmt0(c.garrison)}`);
       }
-      if (gov?.moraleGain) c.moraleTier = Math.min(5, c.moraleTier + gov.moraleGain);
+      if (gov?.moraleGain) c.moraleTier = Math.min(P.moraleMax, c.moraleTier + gov.moraleGain);
     }
 
     // ── 军费 ──────────────────────────────────────────────────────

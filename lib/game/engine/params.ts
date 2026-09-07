@@ -131,6 +131,8 @@ export interface EngineParams {
   ironworksGearDrop: number;
   /** 募兵扣几档民心、安民加几档。同上，此前是写死的 ±1 */
   levyMorale: number; sootheMorale: number;
+  /** 三项的顶。此前写死在 resolve 里，包里没有——模型于是不知道 5 是不是满 */
+  yieldMax: number; moraleMax: number; defenseMax: number;
   farmsteadProv: number; farmsteadDrillMul: number;
   farmsteadUpkeepCut: number; officeCutYield: number; granaryProv: number;
   siegeDefenseErosion: number;
@@ -353,6 +355,9 @@ export function loadParams(pack: RawPack): EngineParams {
     ironworksGearDrop: g("建筑", "铁官_降几级"),
     levyMorale: g("内政", "募兵扣民心"),
     sootheMorale: g("内政", "安民增民心"),
+    yieldMax: g("产出", "产出档上限"),
+    moraleMax: g("内政", "民心档上限"),
+    defenseMax: g("内政", "城防上限"),
     salternGold: g("建筑", "盐场_每季产金"),
     studTroopMul: g("建筑", "马苑_统兵倍"),
     farmsteadProv: g("建筑", "屯田_邻郡回粮"),

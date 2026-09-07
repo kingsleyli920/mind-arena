@@ -708,15 +708,15 @@ export function listActions(
       // 否则「按界面贪心勾选，引擎不应拒绝任何一条」当场破
       const wants: Array<[string, boolean, string]> = [
         ["stock", underSiege && c.provisions < provCap, `被围，存粮仅 ${c.provisions} 季`],
-        ["soothe", c.moraleTier <= 2 && c.moraleTier < 5, "民心告急"],
+        ["soothe", c.moraleTier <= 2 && c.moraleTier < P.moraleMax, "民心告急"],
         ["wall", isFront && c.defense < 55, "临敌且城防薄"],
         ["levy", !underSiege && isFront && c.garrison < 4000, "临敌且兵少"],
         ["forge", isFront && c.gear !== P.gearLadder[P.gearLadder.length - 1],
          `器械仅「${GEAR_CN[c.gear]}」`],
         ["stock", isFront && c.provisions < provCap, `临敌，存粮 ${c.provisions}/${provCap} 季`],
-        ["farm", !underSiege && c.yieldTier < 10, "产出可增"],
-        ["soothe", c.moraleTier < 5, "民心可安"],
-        ["wall", c.defense < 100, "城防可修"],
+        ["farm", !underSiege && c.yieldTier < P.yieldMax, "产出可增"],
+        ["soothe", c.moraleTier < P.moraleMax, "民心可安"],
+        ["wall", c.defense < P.defenseMax, "城防可修"],
       ];
       for (const [policy, want, why] of wants) {
         if (!want) continue;
