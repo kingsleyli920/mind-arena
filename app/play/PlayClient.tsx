@@ -659,6 +659,13 @@ export function PlayClient() {
    * 滚轮与拖动不行：每一帧都挂 280ms 缓动，手感像在拽橡皮筋
    */
   const [smooth, setSmooth] = useState(true);
+  /**
+   * 展卷：把右边那栏收起来，画心占满整屏。
+   *
+   * 屏幕越大越需要它——同样一块屏，看图时不该有三分之一让给候选表。
+   * 收起来不是关掉：令数、档位、结算都还在顶栏，展开一次就回来
+   */
+  const [unrolled, setUnrolled] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // cnText 要在 engine 载入前后都可用，用 ref 取当前值而不进依赖数组
   const engineRef = useRef<Engine | null>(null);
@@ -879,6 +886,8 @@ export function PlayClient() {
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），
   // 再在**不同势力**之间描墨线。只在势力之间描——同一方内部的郡界描出来
   // 就是一张网格纸，那正是「元素堆砌」的观感来源。
+  // 近观档：疆域色让一档、不再糊边。挂 view.k 会每帧重画，故只认这个布尔量
+  const near = view.k >= 3.2;
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv || !terr || !game || !engine) return;
@@ -913,14 +922,20 @@ export function PlayClient() {
       const c = rgb.get(f) ?? [122, 114, 102];
       img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2];
       // 疆域是注记不是主角：地形墨色要透得出来。三十一个势力彼此接壤，
-      // 色块一重，整幅就退回「涂色地图」
-      img.data[o + 3] = f === seat ? 104 : 54;
+      // 色块一重，整幅就退回「涂色地图」。
+      // 近观时再让一档：格网是 0.1°（图上 5.5 像素）的，放大八倍后一格就有
+      // 四十八个屏幕像素，那片色成了糊在地形上的一层雾——凑近看要看见地，
+      // 归属交给城印与那道墨界
+      img.data[o + 3] = Math.round((f === seat ? 104 : 54) * (near ? 0.55 : 1));
     }
     // 在小画布上先做一遍 JS 模糊，再平滑放大。
     // 不用 ctx.filter：Safari 桌面到 17.6 不支持、18 起默认关闭，
-    // 那边看到的会是棱角分明的沃罗诺伊格子——正是这行想避免的观感
-    blurRGBA(img.data, cols, rows, 1);
-    blurRGBA(img.data, cols, rows, 1);
+    // 那边看到的会是棱角分明的沃罗诺伊格子——正是这行想避免的观感。
+    // 近观时不糊：那两遍模糊在格网上是 ±2 格，放大八倍就是一百个屏幕像素的雾
+    if (!near) {
+      blurRGBA(img.data, cols, rows, 1);
+      blurRGBA(img.data, cols, rows, 1);
+    }
     pctx.putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
@@ -956,7 +971,7 @@ export function PlayClient() {
         if (down !== f) seg(c * S, (r + 1) * S, (c + 1) * S, (r + 1) * S, i + 0.5);
       }
     }
-  }, [terr, game, engine, seat]);
+  }, [terr, game, engine, seat, near]);
 
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
   if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;
@@ -1473,7 +1488,7 @@ export function PlayClient() {
           </div>
         </div>
       )}
-      <div className="play-body">
+      <div className={`play-body${unrolled ? " unrolled" : ""}`}>
         {/* 遮罩定义挂在这儿，地图与图例都引它 */}
         <WashDefs />
         <section
@@ -1750,6 +1765,10 @@ export function PlayClient() {
           </details>
 
           <div className="zoom">
+            <button onClick={() => setUnrolled((v) => !v)}
+              title={unrolled ? "收卷：把候选表放回来" : "展卷：画心占满整屏"}>
+              {unrolled ? "收卷" : "展卷"}
+            </button>
             <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1.4, minK)); }}>＋</button>
             <button onClick={() => { setSmooth(true); setView(fitAll(minK)); }}>全图</button>
             <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4, minK)); }}>－</button>

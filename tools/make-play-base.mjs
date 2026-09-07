@@ -6,18 +6,17 @@
 import fs from "node:fs";
 import sharp from "sharp";
 
-const SRC = process.env.SRC ?? "public/game/map/han-terrain.png";
+const SRC = process.env.SRC ?? "public/game/map/han-terrain-4x.png";
 
 if (!fs.existsSync(SRC)) {
   console.error(`缺少 ${SRC}，先跑 npm run map:base`);
   process.exit(1);
 }
 
-// 出两档。整幅可见时用 1815；放大后换 3630——否则是把 1815 插值放大六倍，
-// 越拉越糊，而底图本来就有 7260 的细节可用
+// 只出一档。它现在的职责只剩「垫底」——瓦片是逐块到的，没有垫底的话
+// 缩放那一瞬会露出空洞；细节由 z1–z4 的瓦片给，@2x 那张 733KB 是白下的
 const STEPS = [
   { out: "public/game/map/play-base.webp", w: 1815, h: 1485, q: 88 },
-  { out: "public/game/map/play-base@2x.webp", w: 3630, h: 2970, q: 82 },
 ];
 for (const s of STEPS) {
   await sharp(SRC, { limitInputPixels: false })

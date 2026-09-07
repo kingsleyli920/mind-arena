@@ -80,6 +80,10 @@
   padding-inline: clamp(0.8rem, 2vw, 1.8rem);
 }
 @media (max-width: 1000px) { .play-body { grid-template-columns: 1fr; } }
+/* 展卷：右栏收起，画心占满。屏幕越大越需要——同一块屏，看图时不该有
+   三分之一让给候选表 */
+.play-body.unrolled { grid-template-columns: 1fr; }
+.play-body.unrolled > .panel, .play-body.unrolled > aside.panel { display: none; }
 
 .map-wrap {
   position: relative; border-radius: 2px;
