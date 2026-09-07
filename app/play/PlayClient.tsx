@@ -1005,6 +1005,69 @@ export function PlayClient() {
     return d;
   }, [terr, game, seat]);
 
+  // ── 出图分级 ─────────────────────────────────────────────────────
+  //
+  // 三档，与瓦片那三级同呼吸：
+  //   0 远观（k<1.6，z1）  一幅舆图：疆域、州名、城印。关津不出，道路极淡
+  //   1 中观（k<3.2，z2）  关与港出（它们答「路通不通」），郡名铺开
+  //   2 近观（k≥3.2，z3）  据点全出并标名，城画成城郭，道路提亮
+  //
+  // 分档的理由不是性能，是**一张图放不下**：一百零五座城各带三层檐、
+  // 六十一处据点各带一个名，整幅可见时就是一层噪点。放大之后地方够了，
+  // 还画同一个小印就是把它糊开
+  const lod = view.k >= 3.2 ? 2 : view.k >= 1.6 ? 1 : 0;
+
+  // ── 水：线在任意倍数下重画 ───────────────────────────────────────
+  //
+  // 瓦片金字塔总有个头：z4 是 14520，Retina 屏放到十四倍仍要拉伸 2.3 倍。
+  // 再切一级要 700MB 的源图与两千八百块瓦片，而下一次还要再翻一倍——
+  // 拿像素追分辨率是追不完的。
+  //
+  // 但**糊起来最扎眼的是线**（河岸、海岸这种一笔下去的边），而线本来就不必是
+  // 像素：水系是矢量数据，4473 个点、90KB，在这儿按当前倍数重画一遍就永远是实的。
+  // 底图那份仍在下面垫着——两份出自同一份数据、同一套投影，叠在一起是同一条河。
+  //
+  // 河宽照抄底图那条水力几何式（w ∝ Q^0.5，下游渐阔），两份才对得齐：
+  // 见 tools/render-terrain-map.mjs 的「水系」一节
+  const water = useMemo(() => {
+    if (!engine || lod < 2) return null;
+    const RIVER_W: Record<string, number> = {
+    黄河: 1.0, 长江: 1.0, 淮水: 0.62, 汉水: 0.62, 渭水: 0.55, 济水: 0.5,
+    "珠江（西江）": 0.62, 辽水: 0.42, 湘水: 0.45, 赣水: 0.45, 泗水: 0.42,
+  };
+    const toPath = (pts: Array<[number, number]>) => {
+    let d = "";
+    for (let i = 0; i < pts.length; i += 1) {
+      const x = (pts[i][0] - MAP.west) * MAP.ppd, y = (MAP.north - pts[i][1]) * MAP.ppd;
+      d += `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    return d;
+  };
+    // 近观才画：整幅可见时底图那份已经够，两份叠着只会把河描粗
+    return {
+      coast: engine.water.coastline.filter((s2) => s2.length > 1).map(toPath),
+    // 一条河拆成若干段，每段照它在全程的位置取宽——一笔到底画不出下游渐阔
+    rivers: engine.water.rivers.flatMap((r) => {
+      const w0 = RIVER_W[r.name] ?? 0.34;
+      const n = r.points.length;
+      const STEP = 6;
+      const out: Array<{ d: string; w: number }> = [];
+      for (let i = 0; i + 1 < n; i += STEP) {
+        const seg = r.points.slice(i, Math.min(n, i + STEP + 1));
+        if (seg.length < 2) continue;
+        const u = (i + seg.length / 2) / n;
+        // 底图那边是**半宽** half = w0 · PPD · 0.03 · (0.35 + u^0.8 · 1.6)，
+        // PPD = 55，故全宽 = w0 · 3.3 · (…)。第一版把它当半宽又乘了 1.7/2.1，
+        // 渭水画出来是一条四十像素宽的青带
+        out.push({ d: toPath(seg), w: w0 * 3.3 * (0.35 + u ** 0.8 * 1.6) });
+      }
+      return out;
+    }),
+    };
+    // 只认 engine 与档位：此前它在渲染体里，每次重绘都要把 4473 个点重拼一遍，
+    // 实测缩放时九分位帧 116ms、最慢 129ms——一步一顿
+  }, [engine, lod]);
+
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
   if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;
 
@@ -1295,64 +1358,6 @@ export function PlayClient() {
              days: Math.round(e.cost * engine.P.marchDayPerCost) };
   }).filter((r): r is NonNullable<typeof r> => r !== null);
 
-  // ── 出图分级 ─────────────────────────────────────────────────────
-  //
-  // 三档，与瓦片那三级同呼吸：
-  //   0 远观（k<1.6，z1）  一幅舆图：疆域、州名、城印。关津不出，道路极淡
-  //   1 中观（k<3.2，z2）  关与港出（它们答「路通不通」），郡名铺开
-  //   2 近观（k≥3.2，z3）  据点全出并标名，城画成城郭，道路提亮
-  //
-  // 分档的理由不是性能，是**一张图放不下**：一百零五座城各带三层檐、
-  // 六十一处据点各带一个名，整幅可见时就是一层噪点。放大之后地方够了，
-  // 还画同一个小印就是把它糊开
-  const lod = view.k >= 3.2 ? 2 : view.k >= 1.6 ? 1 : 0;
-
-  // ── 水：线在任意倍数下重画 ───────────────────────────────────────
-  //
-  // 瓦片金字塔总有个头：z4 是 14520，Retina 屏放到十四倍仍要拉伸 2.3 倍。
-  // 再切一级要 700MB 的源图与两千八百块瓦片，而下一次还要再翻一倍——
-  // 拿像素追分辨率是追不完的。
-  //
-  // 但**糊起来最扎眼的是线**（河岸、海岸这种一笔下去的边），而线本来就不必是
-  // 像素：水系是矢量数据，4473 个点、90KB，在这儿按当前倍数重画一遍就永远是实的。
-  // 底图那份仍在下面垫着——两份出自同一份数据、同一套投影，叠在一起是同一条河。
-  //
-  // 河宽照抄底图那条水力几何式（w ∝ Q^0.5，下游渐阔），两份才对得齐：
-  // 见 tools/render-terrain-map.mjs 的「水系」一节
-  const RIVER_W: Record<string, number> = {
-    黄河: 1.0, 长江: 1.0, 淮水: 0.62, 汉水: 0.62, 渭水: 0.55, 济水: 0.5,
-    "珠江（西江）": 0.62, 辽水: 0.42, 湘水: 0.45, 赣水: 0.45, 泗水: 0.42,
-  };
-  const toPath = (pts: Array<[number, number]>) => {
-    let d = "";
-    for (let i = 0; i < pts.length; i += 1) {
-      const x = (pts[i][0] - MAP.west) * MAP.ppd, y = (MAP.north - pts[i][1]) * MAP.ppd;
-      d += `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
-    }
-    return d;
-  };
-  // 近观才画：整幅可见时底图那份已经够，两份叠着只会把河描粗
-  const water = lod >= 2 ? {
-    coast: engine.water.coastline.filter((s2) => s2.length > 1).map(toPath),
-    // 一条河拆成若干段，每段照它在全程的位置取宽——一笔到底画不出下游渐阔
-    rivers: engine.water.rivers.flatMap((r) => {
-      const w0 = RIVER_W[r.name] ?? 0.34;
-      const n = r.points.length;
-      const STEP = 6;
-      const out: Array<{ d: string; w: number }> = [];
-      for (let i = 0; i + 1 < n; i += STEP) {
-        const seg = r.points.slice(i, Math.min(n, i + STEP + 1));
-        if (seg.length < 2) continue;
-        const u = (i + seg.length / 2) / n;
-        // 底图那边是**半宽** half = w0 · PPD · 0.03 · (0.35 + u^0.8 · 1.6)，
-        // PPD = 55，故全宽 = w0 · 3.3 · (…)。第一版把它当半宽又乘了 1.7/2.1，
-        // 渭水画出来是一条四十像素宽的青带
-        out.push({ d: toPath(seg), w: w0 * 3.3 * (0.35 + u ** 0.8 * 1.6) });
-      }
-      return out;
-    }),
-  } : null;
-
   // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
   // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
   // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
@@ -1638,10 +1643,12 @@ export function PlayClient() {
               </marker>
             </defs>
             {/* 疆界：己方朱、他方墨。两条 path，任意倍数都是实的 */}
+            {/* 笔宽按**档位**给，不按倍数连续变：改一次 strokeWidth，浏览器就要把
+                这三千多段曲线的笔画几何重算一遍。三档够用，且只在过档时改一次 */}
             <path className="border other" d={borders.other}
-              strokeWidth={1.2 / view.k ** 0.82} />
+              strokeWidth={1.2 / [1, 2.4, 8][lod] ** 0.82} />
             <path className="border mine" d={borders.mine}
-              strokeWidth={2.4 / view.k ** 0.82} />
+              strokeWidth={2.4 / [1, 2.4, 8][lod] ** 0.82} />
             {/* 水：河心提亮 + 两岸落墨，与底图同一套画法。只在近观档出——
                 整幅可见时底图那份已经够 */}
             {water && (
