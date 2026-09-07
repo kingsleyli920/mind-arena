@@ -19,6 +19,7 @@ import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { decisionSchema, parseDecision } from "../lib/arena/seat/parse.ts";
 import { GRADE_SCORE, boardScore, checkScoringAgainstPack } from "../lib/arena/scoring.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
+import { VERIFIED_MODELS } from "../lib/arena/verified-models.ts";
 import { renderSystem } from "../lib/arena/seat/prompt.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
@@ -505,4 +506,20 @@ test("没饿过的模型不涨预算：涨了会让提供方按上限预留算�
     await c.chat({ ...REQ, model: "试:不推理" });
     assert.deepEqual(seen, [8000, 8000]);
   } finally { globalThis.fetch = real; }
+});
+
+// 这张表是给玩家看的推荐位，写进去就等于说「这个能玩、大概这个价」。
+// 它只许收有实测数据的模型——凭印象填一条，代价是别人照着花钱
+test("实测模型表：每条都要有实扣与实测结论，不许凭印象填", () => {
+  assert.ok(VERIFIED_MODELS.length > 0, "表不该是空的");
+  const ids = new Set();
+  for (const m of VERIFIED_MODELS) {
+    assert.match(m.id, /^~?[a-z0-9-]+\/[A-Za-z0-9.\-_:]+$/, `${m.id} 不像一个 OpenRouter 模型 id`);
+    assert.ok(!ids.has(m.id), `${m.id} 重复`);
+    ids.add(m.id);
+    assert.ok(m.usdPerGame > 0 && m.usdPerGame < 1,
+      `${m.id} 的每局实扣 ${m.usdPerGame} 不合理——实测值在 $0.03–0.06 这个量级`);
+    assert.ok(m.note.length >= 10, `${m.id} 缺实测结论`);
+    assert.ok(/\d/.test(m.note), `${m.id} 的结论里没有一个数字——那多半是印象不是实测`);
+  }
 });

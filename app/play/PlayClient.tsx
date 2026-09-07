@@ -19,6 +19,7 @@ import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { modelDecide, type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
 import { ProxyLlmClient } from "@/lib/arena/llm/proxy-client.ts";
+import { VERIFIED_MODELS, VERIFIED_IDS } from "@/lib/arena/verified-models.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
@@ -1307,13 +1308,33 @@ export function PlayClient() {
               下的令也走同一道准入——所以它的胜负是可比的。</p>
             <label>
               <span>模型</span>
+              {/* 验过的排在最前，并把实扣写出来。选择器里有四百多个模型，
+                  而实测「便宜档」里至少一半根本产不出正文（见 EVAL 第 27 条）——
+                  按人气平铺等于让人从四百个里盲选。
+                  不给未验模型估价：价目表在重推理模型上低估十倍 */}
               <select value={modelPick} onChange={(e) => setModelPick(e.target.value)}>
-                <option value={DEFAULT_MODEL}>{DEFAULT_MODEL}（免费，可先跑通）</option>
-                {models.filter((m) => m.id !== DEFAULT_MODEL).map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}{m.structuredOutput ? "" : "（无结构化输出）"}
-                  </option>
-                ))}
+                <optgroup label="实测跑过整局">
+                  {VERIFIED_MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {`${m.label}\u3000约 $${m.usdPerGame.toFixed(2)}/局`
+                       + `\u3000${m.note.split("；")[0]}`}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="免费">
+                  <option value={DEFAULT_MODEL}>{DEFAULT_MODEL}（免费；出参多半烧在推理上，会慢）</option>
+                </optgroup>
+                <optgroup label="其余（未验过，价目表在重推理模型上会低估十倍）">
+                  {models
+                    .filter((m) => m.id !== DEFAULT_MODEL && !VERIFIED_IDS.has(m.id))
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}{m.structuredOutput ? "" : "（无结构化输出）"}
+                        {`　入 $${(Number(m.promptPrice) * 1e6).toFixed(2)}`
+                         + ` 出 $${(Number(m.completionPrice) * 1e6).toFixed(2)}/M`}
+                      </option>
+                    ))}
+                </optgroup>
               </select>
             </label>
             <label>
