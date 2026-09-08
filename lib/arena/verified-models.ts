@@ -24,6 +24,8 @@ export const VERIFIED_MODELS: VerifiedModel[] = [
     note: "48 局榜分 315.4，显著强于最强机器人（+76.4 ±26.1）；非法率 3.2%" },
   { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash", usdPerGame: 0.043,
     note: "48 局榜分 277.0，显著强于最强机器人（+38.1 ±31.2）；48 局只被灭 1 次，最耐打" },
+  { id: "tencent/hy3", label: "Tencent Hy3", usdPerGame: 0.056,
+    note: "48 局榜分 270.2，强于最强机器人（+31.2 ±28.8）；非法率 3.0%，三者中最低" },
 ];
 
 export const VERIFIED_IDS = new Set(VERIFIED_MODELS.map((m) => m.id));

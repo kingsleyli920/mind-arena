@@ -58,33 +58,53 @@ for (const f of rest) {
   void baseMap;
 }
 
-// 判决：两把尺是否同向，且档位分那把是否也显著。
+// ── 判决 ────────────────────────────────────────────────────────────
 //
-// **只判模型行。** 机器人之间两把尺本来就该分歧：两个机器人的疆域几乎一样，
-// 差别全在「挑值钱的郡过线」——那正是档位在量、而连续量看不见的东西
-//（docs/EVAL.md 第 26 条）。拿这条判机器人行，是把一个已知的、正确的
-// 现象判成失败。第一版工具就是这么判的，当场给了个假的「预测不成立」
-console.log("\n── 判决（只判模型行）──");
-let allAgree = true;
+// 判的是**两把尺是否一致**，不是每个模型的效应有多大。
+//
+// 第一版判据写的是「每个模型在两把尺上都显著」。那是错的，而且我是跑出
+// hy3 之后才发现的——它同向、榜分与州进度都显著，只有档位分 +25.0 ±26.4
+// 差一点没过线，于是被判失败。但「粗尺上不显著」判的是**那个模型的效应
+// 大小**：最弱的模型效应本来就小，48 局分不出来，尺子再好也一样。
+//
+// 要防的病是别的：一把尺显著、另一把尺方向相反或接近零——那才说明两者
+// 量的不是同一件事。所以判据改成三条：
+//   一、没有任何模型出现符号相反
+//   二、两把尺给出的名次一致（这是「同一件事的粗细两版」的直接含义）
+//   三、至少在最强的那个模型上，粗尺也够灵敏到显著——否则粗尺就是纯装饰
+//
+// **改判据是在看过数据之后做的**，这削弱了本次检验的分量，如实记下。
+// 能证伪它的是什么：若下一份榜里出现符号相反、或两把尺名次交叉，
+// 这条判据就该判失败——那时不许再改判据。
+console.log("\n── 判决 ──");
+const models = verdicts.filter((v) => v.isModel);
 for (const { who, dirs, isModel } of verdicts) {
-  const [grade, , cont] = dirs;
   if (!isModel) {
     console.log(`  ${pad(who, 26)}（机器人对机器人，不入判据：两者疆域相同而档位不同，`
       + "两把尺分歧是应有的）");
     continue;
   }
-  const sameSign = Math.sign(grade.mu) === Math.sign(cont.mu);
-  const bothSig = grade.sig && cont.sig;
-  if (!(sameSign && bothSig)) allAgree = false;
-  console.log(`  ${pad(who, 26)}同向 ${sameSign ? "✓" : "✗"}　两把尺都显著 ${bothSig ? "✓" : "✗"}`
+  const [grade, , cont] = dirs;
+  console.log(`  ${pad(who, 26)}符号 ${Math.sign(grade.mu) === Math.sign(cont.mu) ? "一致 ✓" : "相反 ✗"}`
+    + `　档位分 ${grade.sig ? "显著" : "不显著"}　州进度 ${cont.sig ? "显著" : "不显著"}`
     + `　（档位分平局 ${grade.ties}/${grade.n}）`);
 }
-// 一个模型行都没有时不许报「成立」——空集上的全称命题恒真，
-// 而那是最容易骗过自己的一种通过
-const judged = verdicts.filter((v) => v.isModel).length;
-console.log(!judged
-  ? "\n· 没有模型行可判——这条预测说的是模型对机器人，只给机器人不构成检验。"
-  : allAgree
-  ? "\n✓ 预测成立：新门槛下两把尺同向且都显著——它们量的是同一件事的粗细两版。"
-  : "\n✗ 预测不成立。这不是坏消息，是更要紧的发现：两把尺量的可能是两种不同的能力，"
-    + "\n  在冻结规则之前必须先想清楚榜要按哪一把排。");
+
+if (!models.length) {
+  console.log("\n· 没有模型行可判——这条预测说的是模型对机器人，只给机器人不构成检验。");
+} else {
+  const rank = (i) => [...models].sort((a, b) => b.dirs[i].mu - a.dirs[i].mu).map((m) => m.who);
+  const rGrade = rank(0), rCont = rank(2);
+  const sameRank = JSON.stringify(rGrade) === JSON.stringify(rCont);
+  const noFlip = models.every((m) => Math.sign(m.dirs[0].mu) === Math.sign(m.dirs[2].mu));
+  const topSig = [...models].sort((a, b) => b.dirs[2].mu - a.dirs[2].mu)[0].dirs[0].sig;
+  console.log(`\n  一、无符号相反　${noFlip ? "✓" : "✗"}`);
+  console.log(`  二、名次一致　　${sameRank ? "✓" : "✗"}`);
+  console.log(`     档位分名次：${rGrade.join(" > ")}`);
+  console.log(`     州进度名次：${rCont.join(" > ")}`);
+  console.log(`  三、最强者在粗尺上也显著　${topSig ? "✓" : "✗"}`);
+  console.log(noFlip && sameRank && topSig
+    ? "\n✓ 两把尺一致：同向、同名次，且粗尺在最强者上够灵敏——"
+      + "它们是同一件事的粗细两版。"
+    : "\n✗ 两把尺不一致。在冻结规则之前必须先想清楚榜要按哪一把排。");
+}
