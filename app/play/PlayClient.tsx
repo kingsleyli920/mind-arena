@@ -242,6 +242,12 @@ type Territory = {
   order: string[]; grid: string;
 };
 
+/** 实走路径：在高程栅格上算出的折线，经过挂在该边上的关。见 tools/route-roads.mjs */
+type RoadFile = { step: number; roads: Array<{
+  from: string; to: string; terrain: string; via?: string[]; straight?: boolean;
+  pts: Array<[number, number]>;
+}> };
+
 /** 关津港仓：非郡治的战略据点。图上画得出「这条路上卡着什么」全靠它 */
 type MapNode = {
   id: string; name: string; kind: string;
@@ -563,6 +569,8 @@ interface Engine {
   nodes: MapNode[];
   /** 边的地形与关津。图上画路要用，引擎那边只认 cost */
   edges: Bundle["adjacency"]["edges"];
+  /** 边 → 实走折线（经纬度）。离线在高程栅格上算，取不到就退回城心直连 */
+  roads: Map<string, Array<[number, number]>>;
   /** 水系。线在任意倍数下重画，不跟着底图一起糊 */
   water: Bundle["hydrology"];
 }
@@ -787,9 +795,13 @@ export function PlayClient() {
     let alive = true;
     (async () => {
       try {
-        const [b, t] = await Promise.all([
+        const [b, t, rd] = await Promise.all([
           fetch("/game/runtime-194.json").then((r) => r.json() as Promise<Bundle>),
           fetch("/game/territory-grid.json").then((r) => r.json() as Promise<Territory>),
+          // 实走路径。取不到就退回城心直连（旧行为），不让一份缺失的附加数据
+          // 把整张图拖垮——它是「更好看」，不是「能不能玩」
+          fetch("/game/roads.json").then((r) => (r.ok ? r.json() : null))
+            .catch(() => null) as Promise<RoadFile | null>,
         ]);
         if (!alive) return;
         const P = loadParams(b.pack as never);
@@ -814,6 +826,9 @@ export function PlayClient() {
           points: b.commanderies,
           nodes: b.nodes ?? [],
           edges: b.adjacency.edges,
+          // 键取「两端郡名」而非边序号：路由是离线烤的，边表若增删一条，
+          // 按序号对齐会整体错位而没人察觉
+          roads: new Map((rd?.roads ?? []).map((r) => [`${r.from}\u0000${r.to}`, r.pts])),
           water: b.hydrology ?? { coastline: [], rivers: [] },
           data: {
             commanderyState: b.commanderyState as never,
@@ -1303,6 +1318,19 @@ export function PlayClient() {
 
   // 几何与悬停无关，单独算一次。此前整个 roads 挂在 focus 上，
   // 于是每悬停一次就把 232 条边连同它们的 JSX 全重建一遍
+  /**
+   * 道路。**从关上穿过去，而不是城心直连**。
+   *
+   * 此前每条边画成一条直线，而关津画在它们各自的真实坐标上——于是关不在
+   * 路上。汉中往蜀地那一带最明显：阳平、白水、葭萌、剑门四关悬在直线旁边，
+   * 看图的人有理由问「这几个关卡在这起什么作用」。关的意义是扼守必经之路，
+   * 而它没长在路上，就什么也扼不住。
+   *
+   * 数据本来就够：每条边的 nodes 记着它经过哪些关（引擎判地形加成也用这份），
+   * 而每个关在 nodes 表里有真实经纬度。这里把两者接上——按在 a→b 上的投影
+   * 排序，串成折线。于是「自汉中征广汉属国要过阳平关、白水关」这件事，
+   * 图上看得见，而且与引擎判的是同一件事。
+   */
   const roadGeom = useMemo(() => (engine ? engine.edges.map((e, i) => {
     const p = (id: string) => {
       const q = engine.points.find((c) => c.id === id);
@@ -1310,7 +1338,56 @@ export function PlayClient() {
     };
     const a = p(e.from), b = p(e.to);
     if (!a || !b) return null;
-    return { key: `${e.from}-${e.to}-${i}`, a, b, st: EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain, e,
+    // 有实走路径就用它——那是在高程栅格上按最小代价算出来的，会自己找河谷。
+    // 没有（数据缺失、或这条边新加而路由没重跑）就退回下面那套「串关的折线」
+    const baked = engine.roads.get(`${e.from}\u0000${e.to}`)
+      ?? engine.roads.get(`${e.to}\u0000${e.from}`);
+    if (baked && baked.length >= 2) {
+      const pts = baked.map(([lo, la]) => ({ x: (lo - MAP.west) * MAP.ppd,
+                                             y: (MAP.north - la) * MAP.ppd }));
+      // 折线走成圆角：每段取中点，拐点作控制点。原始折线是格点序列，
+      // 直接连会有一格一格的棱角
+      let d = `M${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      for (let k = 1; k < pts.length - 1; k += 1) {
+        const cur = pts[k], nxt = pts[k + 1];
+        d += `Q${cur.x.toFixed(1)} ${cur.y.toFixed(1)} `
+           + `${((cur.x + nxt.x) / 2).toFixed(1)} ${((cur.y + nxt.y) / 2).toFixed(1)}`;
+      }
+      const last = pts[pts.length - 1];
+      d += `L${last.x.toFixed(1)} ${last.y.toFixed(1)}`;
+      return { key: `${e.from}-${e.to}-${i}`, a, b, d, via: (e.nodes ?? []).length,
+               st: EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain, e,
+               days: Math.round(e.cost * engine.P.marchDayPerCost) };
+    }
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len2 = dx * dx + dy * dy || 1;
+    // 边上的关，按在 a→b 上的投影排序。投影落在两端之外的不串进来——
+    // 同一个关可能挂在好几条边上（阳平关就挂着两条），拿它当另一条路的
+    // 拐点会把路拉出图外
+    const via = (e.nodes ?? [])
+      .map((nd: { id: string }) => engine.nodes.find((x) => x.id === nd.id))
+      .filter((n): n is MapNode => !!n)
+      .map((n) => {
+        const x = (n.longitude - MAP.west) * MAP.ppd, y = (MAP.north - n.latitude) * MAP.ppd;
+        return { x, y, t: ((x - a.x) * dx + (y - a.y) * dy) / len2 };
+      })
+      .filter((v) => v.t > 0.04 && v.t < 0.96)
+      .sort((u, v) => u.t - v.t);
+    // 折线走成圆角：拐点处用二次贝塞尔过渡，免得关口出现硬折角。
+    // 没有关的边照旧是一条直线
+    const pts = [a, ...via, b];
+    let d = `M${a.x.toFixed(1)} ${a.y.toFixed(1)}`;
+    if (pts.length === 2) d += `L${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+    else {
+      for (let k = 1; k < pts.length - 1; k += 1) {
+        const cur = pts[k], nxt = pts[k + 1];
+        const mx = (cur.x + nxt.x) / 2, my = (cur.y + nxt.y) / 2;
+        d += `Q${cur.x.toFixed(1)} ${cur.y.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+      }
+      d += `L${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+    }
+    return { key: `${e.from}-${e.to}-${i}`, a, b, d, via: via.length,
+             st: EDGE_STYLE[e.terrain] ?? EDGE_STYLE.plain, e,
              // 行军天数：cost × 每 cost 多少日。这个数就是候选标签里那句「道远」的来源
              days: Math.round(e.cost * engine.P.marchDayPerCost) };
   }).filter((r): r is NonNullable<typeof r> => r !== null) : []), [engine]);
@@ -1339,7 +1416,7 @@ export function PlayClient() {
   const roadEls = useMemo(() => (
     <g className="roads">
       {roadGeom.map((r) => (
-        <line key={r.key} className={`road lod${lod}`} x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
+        <path key={r.key} className={`road lod${lod}`} d={r.d} fill="none"
           stroke={r.st.stroke} strokeDasharray={r.st.dash}
           strokeWidth={r.st.width / view.k ** 0.82} />
       ))}
@@ -2205,8 +2282,7 @@ export function PlayClient() {
             {/* 提亮的那几条单独画在上面：把 hot 塞进上面那 232 条里，
                 等于每悬停一次就重建一遍整层 */}
             {roads.filter((r) => r.hot).map((r) => (
-              <line key={`h-${r.key}`} className={`road lod${lod} hot`}
-                x1={r.a.x} y1={r.a.y} x2={r.b.x} y2={r.b.y}
+              <path key={`h-${r.key}`} className={`road lod${lod} hot`} d={r.d} fill="none"
                 stroke={r.st.stroke} strokeDasharray={r.st.dash}
                 strokeWidth={r.st.width * 2.2 / view.k ** 0.82} />
             ))}
