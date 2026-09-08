@@ -78,7 +78,13 @@ export function breachCount(
  */
 export function holdOf(P: EngineParams, defend: number, defense: number, holdBonus: number): number {
   return P.holdBase
-    + Math.floor(defense / P.defensePerHold)
+    // 城防那一项。基线一格不动——两次试错的结论：可防守只要整体动一格，
+    // 不论朝哪个方向，征服节奏就变，而节奏一变大势力就滚得更快
+    //（ρ 0.37 → 0.66 与 0.60，两次都退回，见 docs/EVAL.md 第 30 条）。
+    + Math.floor(Math.max(0, defense - P.defenseFloorBase) / P.defensePerHold)
+    // **坚城**：只给修上去的那些城再加。开局最高才 79，够不着这条线——
+    // 修一次 +8、上限 100，所以这是纯粹的投资回报，不是普遍加防
+    + (defense >= P.fortLine ? P.fortBonus : 0)
     + Math.max(0, Math.floor(Math.log2(Math.max(1, defend / P.garrisonPerHold))))
     + holdBonus;
 }
