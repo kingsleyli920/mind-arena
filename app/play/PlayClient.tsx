@@ -9,6 +9,7 @@
 // 归属由 territory-grid 逐格查表后按当前局势实时着色——烤进去的疆域
 // 一开打就不对了。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fitLabel, textWidth, type Box } from "./label-fit.ts";
 import { buildGraph, listActions, validate, POLICY_CN, type Graph }
   from "@/lib/game/engine/actions.ts";
 import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
@@ -1531,14 +1532,12 @@ export function PlayClient() {
               onMouseEnter 就是永远不触发的死代码，关津的悬停详情根本出不来 */}
           <circle className="mark" cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
           <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
-          {lod >= 2 && (
-            <text className="node-name" x={m.x} y={m.y + m.r * 1.9}
-              textAnchor="middle" fontSize={m.r * 0.9}>{m.n.name}</text>
-          )}
+          {/* 名字不在这儿画：它要跟郡名、路题记共用同一张避让表，
+              而那张表要等城印的位置定了才建得起来。见 nodeLabels */}
         </g>
       ))}
     </g>
-  ), [nodeMarks, lod]);
+  ), [nodeMarks]);
 
   const borderEls = useMemo(() => (
     <>
@@ -1821,11 +1820,11 @@ export function PlayClient() {
   // 避让表先把**城印本身**占上：此前只放牌记，于是路的题记会压在城墙上
   // （实测悬停京兆尹时「关道·潼关 41 日」正压在城楼上）。
   // 城印是画面上最实的一块，谁都不该压它
-  const placed: Array<[number, number, number, number]> = marks
+  const placed: Box[] = marks
     .filter((m) => !hidden.has(m.c.id))
     .map((m) => {
       const w = m.base * 2.3;
-      return [m.x - w / 2, m.y - w * GLYPH_BASE, w, w] as [number, number, number, number];
+      return [m.x - w / 2, m.y - w * GLYPH_BASE, w, w] as Box;
     });
   const labels = [...marks]
     // 先放最该看见的：当前指向者 → 己方 → 州治 → 大城
@@ -1850,15 +1849,45 @@ export function PlayClient() {
       const rows = (nBuild ? 1 : 0) + (nRes ? 1 : 0);
       const x = m.x - w / 2;
       const y = m.y + m.base * (0.62 + rows * 0.5) + 4 / view.k ** 0.88;
-      const box: [number, number, number, number] = [x, y, w, h];
-      const hit = placed.some(([px, py, pw, ph]) =>
-        x < px + pw && x + w > px && y < py + ph && y + h > py);
-      if (hit && focus !== m.c.id) return null;
-      placed.push(box);
+      const box: Box = [x, y, w, h];
+      if (!fitLabel(placed, [box]) && focus !== m.c.id) return null;
       return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8 / view.k ** 0.88,
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // ── 关津的名字也进同一张避让表 ───────────────────────────────────
+  //
+  // 此前它们完全不参与避让，各自在自己的图元正下方硬画。实测同一屏上
+  // 十四对标签互相压着，**全是关津**：白马津/黎阳津、延津/棘津、
+  // 孟津/小平津、剑门关/葭萌关、赤壁/乌林，以及关津压郡名
+  // （虎牢关压河内郡、敖仓压河内郡、伊阙关与轘辕关一起压河南尹）。
+  //
+  // 成对出现不是巧合：黄河四津彼此不过数十里，本来就该挨着——
+  // 地理没错，错的是一律画在正下方，那两个名字必然重合。
+  //
+  // 排在牌记之后、路题记之前：郡名比关名重要，关名比「丘陵 3 日」重要。
+  // 先把关津的**图元**占进表里，免得名字落到别的关的图上
+  for (const m of nodeMarks) {
+    placed.push([m.x - m.r, m.y - m.r, m.r * 2, m.r * 2]);
+  }
+  const nodeLabels = (lod < 2 ? [] : nodeMarks).map((m) => {
+    const size = m.r * 0.9;
+    // 估宽再加一丝余量：字面外还有 3px 的纸色描边，而且实际字距比 1em 略宽——
+    // 实测「剑门关／葭萌关」按净字宽算恰好错开 0.7 单位，画出来仍蹭在一起
+    const w = textWidth(m.n.name, size) + size * 0.3, h = size * 1.45;
+    // 撞上了换一档：下、上、右、左。四档都撞就不发这一条——
+    // 挤到无处可放时，少一个名字远好过多一团糊字。放大后地方够了它们自己就回来
+    const slots: Array<[number, number]> = [
+      [0, m.r * 1.9], [0, -m.r * 1.5], [m.r * 1.7, m.r * 0.4], [-m.r * 1.7, m.r * 0.4],
+    ];
+    for (const [dx, dy] of slots) {
+      const box: Box = [m.x + dx - w / 2, m.y + dy - h * 0.8, w, h];
+      if (!fitLabel(placed, [box])) continue;
+      return { id: m.n.id, name: m.n.name, x: m.x + dx, y: m.y + dy, size };
+    }
+    return null;
+  }).filter((l): l is NonNullable<typeof l> => l !== null);
 
   /** 郡 → 图上坐标。道路、箭头、军团都要它 */
   const xy = (id: string) => {
@@ -1894,7 +1923,7 @@ export function PlayClient() {
     // 宽度按字宽分别估：中日韩字宽约 1em，数字与空格约 0.55em。
     // 一刀切 0.62 会低估中文串的宽度，避让就漏判——实测「关道·潼关 41 日」
     // 因此仍压在左冯翊的城印上
-    const w = [...text].reduce((n, ch) => n + size * (/[\u4e00-\u9fff·]/.test(ch) ? 1 : 0.55), 0);
+    const w = textWidth(text, size);
     const h = size * 1.2;
     const seg = Math.hypot(r.far.x - r.near.x, r.far.y - r.near.y) || 1;
     // 从**城印外沿**往外量，不用固定像素：城印宽 2.3×base，而 base 随倍数缩，
@@ -1904,11 +1933,8 @@ export function PlayClient() {
       const t = Math.min(0.62, out / seg);
       const x = r.near.x + (r.far.x - r.near.x) * t;
       const y = r.near.y + (r.far.y - r.near.y) * t;
-      const box: [number, number, number, number] = [x - w / 2, y - h / 2, w, h];
-      const hit = placed.some(([qx, qy, qw, qh]) =>
-        box[0] < qx + qw && box[0] + w > qx && box[1] < qy + qh && box[1] + h > qy);
-      if (hit) continue;
-      placed.push(box);
+      const box: Box = [x - w / 2, y - h / 2, w, h];
+      if (!fitLabel(placed, [box])) continue;
       return { key: r.key, x, y, size, text };
     }
     return null;
@@ -2432,6 +2458,10 @@ export function PlayClient() {
             ))}
             {/* 关津港仓：各有形制。关隘与港口整幅可见，其余放大后才铺开 */}
             {nodeEls}
+            {nodeLabels.map((l) => (
+              <text key={`nn-${l.id}`} className="node-name" x={l.x} y={l.y}
+                textAnchor="middle" fontSize={l.size}>{l.name}</text>
+            ))}
             {view.k < 2.2 && zhouMarks.map((m) => (
               <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
                 fontSize={62 / view.k ** 0.82}>{m.z}</text>

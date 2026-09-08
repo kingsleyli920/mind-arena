@@ -265,7 +265,11 @@
    墨色是仓与古战场 */
 .map-vec svg .node-halo { fill: rgba(251, 248, 241, 0.62); }
 .map-vec svg g:hover > .node .node-halo { fill: rgba(255, 255, 255, 0.96); }
-.map-vec svg .node .node-name {
+/* 关津名。选择器此前是 `.node .node-name`，而外层的类叫 `nodes`——
+   类选择器是整词匹配，`.node` 匹配不上 `.nodes`，这条规则**从来没生效过**：
+   实测 computed 的 stroke 是 none、paint-order 是 normal，
+   于是几十个小字一直在没有纸色描边的情况下压在墨底与皴笔上 */
+.map-vec svg .node-name {
   fill: #574d3e; paint-order: stroke; stroke: rgba(251, 248, 241, 0.9); stroke-width: 3px;
   vector-effect: non-scaling-stroke;
 }
