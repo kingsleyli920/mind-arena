@@ -943,3 +943,7 @@
   display: inline-block; width: 1.5em; height: 0.72em; margin-inline-end: 0.3em;
   border: 1px solid var(--rule); vertical-align: -0.08em; border-radius: 1px;
 }
+
+/* 据点的归属环。据点有主之后「这个关在谁手里」是图上第一等的信息——
+   它决定从这条路打过去，守方还有没有关隘之利 */
+.map-vec svg .hold-ring { opacity: 0.85; }

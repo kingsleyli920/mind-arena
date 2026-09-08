@@ -90,7 +90,7 @@ const SEATS_ROT = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu
 const POOL = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu",
   "liubei", "gongsunzan", "lijue", "sunce", "gongsundu", "shixie", "zhangyang",
   "zhanglu", "maten", "hansui", "kongrong", "wanglang", "liuyao", "luking"];
-const probe = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+const probe = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
 const playable = POOL.filter((id) => probe.factions[id] && !probe.factions[id].eliminated);
 
 function drawSeat(n) {
@@ -168,7 +168,7 @@ async function main() {
     nameOf, reasoning: { effort: REASONING },
     ...(PROVIDER ? { provider: { order: PROVIDER.split(","), allow_fallbacks: false } } : {}) };
 
-  let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+  let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
   const f0 = s.factions[SEAT];
   const st0 = standingOf(s, GEO, SEAT);
 

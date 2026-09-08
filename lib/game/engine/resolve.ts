@@ -9,7 +9,7 @@
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
 import { roll } from "./rng.ts";
-import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, type Graph,
+import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, KIND_CN, POLICY_CN, type Graph,
   type Rules, DEFAULT_RULES, validate, orderSites, submitChance } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
@@ -88,6 +88,16 @@ function provGainOf(s: GameState, c: CommanderyState, g: Graph, P: EngineParams)
   if (c.buildings.includes("granary")) n += P.granaryProv;
   if (c.buildings.includes("farmstead")) return n + P.farmsteadProv;
   if (!c.owner) return n;
+  // 仓：敖仓、黎阳仓、乌巢、郿坞。**这是仓在引擎里第一次有作用。**
+  // 它扼在某条路上，谁占着谁的邻郡多一份粮——它本来就是粮台，
+  // 官渡烧的乌巢就是这个东西
+  for (const site of g.sites.values()) {
+    if (site.kind !== "depot") continue;
+    if (s.holds[site.id]?.owner !== c.owner) continue;
+    if (!site.on.some(([a, b]) => a === c.id || b === c.id)) continue;
+    n += P.depotProvision;
+    break;
+  }
   for (const e of g.adj.get(c.id) ?? []) {
     const o = s.commanderies[e.to];
     if (o?.owner === c.owner && o.buildings.includes("farmstead")) return n + P.farmsteadProv;
@@ -274,6 +284,31 @@ export interface Trace {
   faction?: FactionId;
   lines: string[];
 }
+
+/**
+ * 这条边上的关渡，此刻在谁手里？
+ *
+ * **扼于某处的加成，归那处的主人。**攻方若已据此关，守方就失去关隘之利——
+ * 地形加成没收，攻城器械也不再减半。这是「据点」这套东西唯一的规则，
+ * 五类据点共用它。
+ *
+ * 关渡若无主（开局在无主之郡境内），仍算在守方一边：那儿有当地人守着，
+ * 攻方没去取，就没资格享用。
+ */
+function gateHeldByAttacker(
+  s: GameState, g: Graph, from: CommanderyId, to: CommanderyId, attacker: FactionId,
+): boolean {
+  let any = false;
+  for (const site of g.sites.values()) {
+    if (site.kind !== "gate" && site.kind !== "pass"
+      && site.kind !== "ford" && site.kind !== "port") continue;
+    if (!site.on.some(([a, b]) => (a === from && b === to) || (a === to && b === from))) continue;
+    any = true;
+    if (s.holds[site.id]?.owner !== attacker) return false;   // 有一处不在攻方手里就不算
+  }
+  return any;
+}
+
 
 export function resolve(
   prev: GameState, orders: readonly Order[], g: Graph, P: EngineParams,
@@ -636,6 +671,37 @@ export function resolve(
              text: `自 ${army.target} 撤围，携 ${kept} 人退回 ${army.home}` });
   }
 
+  // ── 阶段五半：取据点 ──────────────────────────────────────────────
+  //
+  // 排在征伐**之前**：先拿下路口再打过去，是同一季里说得通的一件事——
+  // 关就在境边，不像出征要走一季的路。反过来排则「取关」永远晚一步，
+  // 那条令就只有下一季才用得上，等于半废。
+  for (const o of accepted) {
+    if (o.action.type !== "seize") continue;
+    const a = o.action;
+    const site = g.sites.get(a.node);
+    const src = s.commanderies[a.from];
+    if (!site || !src || src.owner !== o.faction) continue;
+    const h = s.holds[a.node] ?? { owner: null, garrison: P.holdGarrison };
+    if (h.owner === o.faction) continue;
+    const send = Math.floor(src.garrison * P.strengthRatio.main);
+    const need = Math.ceil(h.garrison * P.holdSeizeRatio);
+    const lossA = Math.round(send * P.holdLoss);
+    src.garrison = Math.max(0, src.garrison - lossA);
+    const kind = KIND_CN[site.kind] ?? site.kind;
+    if (send >= need) {
+      const before = h.owner;
+      s.holds[a.node] = { owner: o.faction, garrison: Math.max(1, Math.round(send / 2)) };
+      log(s, { kind: "seize-win", faction: o.faction, at: a.from,
+               text: `取 ${site.name}（${kind}）：出 ${send} 人克 ${h.garrison} 人`
+                 + `${before ? `，自 ${before} 手中夺得` : "（原无主）"}` });
+    } else {
+      s.holds[a.node] = { owner: h.owner, garrison: Math.max(1, h.garrison - Math.round(h.garrison * P.holdLoss)) };
+      log(s, { kind: "seize-fail", faction: o.faction, at: a.from,
+               text: `攻 ${site.name}（${kind}）不克：出 ${send} 人，需 ${need} 人` });
+    }
+  }
+
   // ── 阶段六：征伐 ──────────────────────────────────────────────────
   // 三种情形，按目标郡当下的态势分流：
   //   目标有敌方围城军 → 野战（解围，或击破他人的围城军去抢这座城）
@@ -799,8 +865,10 @@ export function resolve(
     if (!tgt || tgt.owner === army.faction) { lift(s, army); continue; }
 
     const edge = (g.adj.get(army.home) ?? []).find((e) => e.to === army.target);
-    const terrain = edge?.terrain ?? "plain";
-    const atGate = (edge?.gates.length ?? 0) > 0;
+    // 关渡若已被攻方取下，这条边对守方就不再是关道：地形加成与器械减半一并没收
+    const taken = gateHeldByAttacker(s, g, army.home, army.target!, army.faction);
+    const terrain = taken ? "plain" : (edge?.terrain ?? "plain");
+    const atGate = !taken && (edge?.gates.length ?? 0) > 0;
     // 攻方按随军编制，守方按城内编制。两侧都与 forecast 走同一对函数
     const corps = roster
       ? army.retinue.map((id) => roster.byId.get(id)).filter((o) => !!o)

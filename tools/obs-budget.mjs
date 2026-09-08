@@ -60,7 +60,7 @@ const EVAL_SEASONS = 16;
 /** 按 parse.ts 允许的上限造一段方略，测最坏情形 */
 const WORST_PLAN = "先".repeat(300);
 let s = createGame(DATA, { seed: process.env.SEED ?? "budget-gate",
-  roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+  roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
 const rows = [];
 let since = 0;
 while (!s.finished) {

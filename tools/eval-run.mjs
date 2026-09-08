@@ -223,7 +223,7 @@ async function playGame(gi) {
   // 席位轮换：同一 seed 下每个被测席位都轮过一遍位置，消掉席位固有优劣
   const rot = gi % SEATS.length;
   const under = SEATS[(0 + rot) % SEATS.length];       // 本局由 agent 驾驶的席位
-  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO,
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO, graph: G,
                              ...(SEASONS ? { seasons: SEASONS } : {}) }, P);
   let since = 0;
   // 被测席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆

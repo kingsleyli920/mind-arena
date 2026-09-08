@@ -39,7 +39,10 @@ const ROSTER = buildRoster(
   new Map(read("commanderies.json").map((c) => [c.name, c.id])),
 );
 const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
-const fresh = (seed = "t-001") => createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
+// 传 graph：据点表由它建起来。不传则本局没有据点，而对局界面是传的——
+// 两边分家，测试就验不到真正跑的那一套
+const fresh = (seed = "t-001") =>
+  createGame(DATA, { seed, roster: ROSTER, geo: GEO, graph: G }, P);
 
 
 test("开局状态自洽", () => {
@@ -2650,4 +2653,83 @@ test("围城耗粮：屯重兵于孤城，粮尽更快", () => {
   assert.ok(siegeHoldSeasons({ startGarrison: 4000, garrison: 12000, provisions: 9 }, P)
     > siegeHoldSeasons({ startGarrison: 4000, garrison: 4000, provisions: 2 }, P),
     "存粮九石的大城塞满兵，也该比存粮两石的小城耐围");
+});
+
+
+// ── 据点 ────────────────────────────────────────────────────────────
+// 「港口、渡口这些都是可以利用起来当据点的」。此前六十一个据点里三十七个
+// 在引擎里什么都不做——图上画着，玩家碰不到。这三条钉住那套新规则。
+test("据点：开局有主，归它所在之郡的主人", () => {
+  const s = fresh();
+  const n = Object.keys(s.holds).length;
+  assert.ok(n >= 20, `据点只有 ${n} 个 —— 通行图没把它们挂上来`);
+  for (const [id, h] of Object.entries(s.holds)) {
+    const site = G.sites.get(id);
+    assert.ok(site, `${id} 不在通行图里`);
+    assert.equal(h.owner, s.commanderies[site.host]?.owner ?? null,
+      `${site.name} 的主人应与它所在之郡 ${site.host} 一致`);
+    assert.ok(h.garrison > 0, "据点得有守军，否则不成其为据点");
+  }
+  // 据点不是郡：它不该计入任何一家的郡数
+  const jun = Object.values(s.commanderies).length;
+  assert.equal(jun, 105, "据点混进郡里了");
+});
+
+test("据点：取得下才列；取下即换主，守军来自攻方", () => {
+  const s = fresh();
+  const cands = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith("seize:"));
+  assert.ok(cands.length > 0, "袁绍一条取据点的候选都没有");
+  for (const c of cands) {
+    // 只列取得下的：取据点的胜负是确定的，列必败项是纯噪声
+    const [, node, from] = c.key.split(":");
+    const send = Math.floor(s.commanderies[from].garrison * P.strengthRatio.main);
+    assert.ok(send >= Math.ceil(s.holds[node].garrison * P.holdSeizeRatio),
+      `${c.label} 取不下却被列了出来`);
+  }
+  const pick = cands[0];
+  const [, node, from] = pick.key.split(":");
+  const before = s.holds[node].owner;
+  const r = resolve(s, [{ faction: "yuanshao", action: pick.action }], G, P, ROSTER, GEO).state;
+  assert.equal(r.holds[node].owner, "yuanshao", "取下了却没换主");
+  assert.notEqual(r.holds[node].owner, before);
+  assert.ok(r.commanderies[from].garrison < s.commanderies[from].garrison, "攻方该有折损");
+  assert.ok(r.log.some((e) => e.kind === "seize-win"));
+});
+
+test("据点：关在攻方手里，守方就失去关隘之利", () => {
+  // 找一条关道边，两侧都要有郡
+  const base = fresh();
+  const pair = (() => {
+    for (const c of Object.values(base.commanderies)) {
+      if (c.owner !== "yuanshao") continue;
+      for (const e of G.adj.get(c.id) ?? []) {
+        const t = base.commanderies[e.to];
+        if (!t?.owner || t.owner === "yuanshao") continue;
+        if (e.terrain !== "gate") continue;
+        return { from: c.id, to: e.to };
+      }
+    }
+    return null;
+  })();
+  if (!pair) return;                                   // 本图上袁绍无关道边，跳过
+  const run = (holdIt) => {
+    const t = fresh();
+    t.commanderies[pair.from].garrison = 60000;
+    t.commanderies[pair.to].garrison = 9000;
+    t.commanderies[pair.to].defense = 60;
+    for (const site of G.sites.values()) {
+      if (!site.on.some(([a, b]) => (a === pair.from && b === pair.to) || (a === pair.to && b === pair.from))) continue;
+      if (!["gate", "pass", "ford", "port"].includes(site.kind)) continue;
+      t.holds[site.id] = { owner: holdIt ? "yuanshao" : null, garrison: P.holdGarrison };
+    }
+    const r = resolve(t, [{ faction: "yuanshao", action: { type: "campaign",
+      target: pair.to, from: pair.from, commander: null, strength: "allout", siegeGear: "ram" } }],
+      G, P, ROSTER, GEO);
+    return r.state.log.find((e) => e.kind.startsWith("siege-"))?.attribution;
+  };
+  const withGate = run(true), without = run(false);
+  if (!withGate || !without) return;
+  assert.ok(Number(withGate.缺口) >= Number(without.缺口),
+    `据关反而更难打：${JSON.stringify(without)} → ${JSON.stringify(withGate)}`);
 });

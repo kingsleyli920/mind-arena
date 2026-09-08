@@ -103,7 +103,8 @@
     {
      "id": "juyong-guan",
      "name": "居庸关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上谷郡"
     }
    ],
    "rough": 6.45
@@ -265,7 +266,8 @@
     {
      "id": "juyong-guan",
      "name": "居庸关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上谷郡"
     }
    ],
    "rough": 8.51
@@ -313,7 +315,8 @@
     {
      "id": "yanmen-guan",
      "name": "雁门关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "雁门郡"
     }
    ],
    "rough": 15.18
@@ -329,7 +332,8 @@
     {
      "id": "yanmen-guan",
      "name": "雁门关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "雁门郡"
     }
    ],
    "rough": 8.46
@@ -375,7 +379,8 @@
     {
      "id": "juyong-guan",
      "name": "居庸关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上谷郡"
     }
    ],
    "rough": 6.28
@@ -391,7 +396,8 @@
     {
      "id": "juyong-guan",
      "name": "居庸关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "涿郡"
     }
    ],
    "rough": 8.75
@@ -427,7 +433,8 @@
     {
      "id": "juyong-guan",
      "name": "居庸关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "中山国"
     }
    ],
    "rough": 6.56
@@ -758,7 +765,8 @@
     {
      "id": "tianjing-guan",
      "name": "天井关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上党郡"
     }
    ],
    "rough": 4.5
@@ -944,7 +952,8 @@
     {
      "id": "tianjing-guan",
      "name": "天井关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上党郡"
     }
    ],
    "rough": 4.72
@@ -1055,7 +1064,8 @@
     {
      "id": "puban-jin",
      "name": "蒲坂津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "河东郡"
     }
    ],
    "rough": 2.53
@@ -1147,7 +1157,8 @@
     {
      "id": "xiao-guan",
      "name": "萧关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "安定郡"
     }
    ],
    "rough": 32.6
@@ -1187,7 +1198,8 @@
     {
      "id": "tianjing-guan",
      "name": "天井关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河内郡"
     }
    ],
    "rough": 8.73
@@ -1215,7 +1227,8 @@
     {
      "id": "liyang-cang",
      "name": "黎阳仓",
-     "kind": "depot"
+     "kind": "depot",
+     "host": "东郡"
     }
    ],
    "rough": 1.29
@@ -1233,17 +1246,20 @@
     {
      "id": "yan-jin",
      "name": "延津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "河内郡"
     },
     {
      "id": "ji-jin",
      "name": "棘津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "东郡"
     },
     {
      "id": "baima-jin",
      "name": "白马津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "东郡"
     }
    ],
    "rough": 1.34
@@ -1271,7 +1287,8 @@
     {
      "id": "xiaoping-jin",
      "name": "小平津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "河南尹"
     }
    ],
    "rough": 12.41
@@ -1290,12 +1307,14 @@
     {
      "id": "meng-jin",
      "name": "孟津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "河南尹"
     },
     {
      "id": "tianjing-guan",
      "name": "天井关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "上党郡"
     }
    ],
    "rough": 8.26
@@ -1375,12 +1394,14 @@
     {
      "id": "meng-jin",
      "name": "孟津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "河南尹"
     },
     {
      "id": "hulao-guan",
      "name": "虎牢关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河内郡"
     }
    ],
    "rough": 2.15
@@ -1399,12 +1420,14 @@
     {
      "id": "yan-jin",
      "name": "延津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "陈留郡"
     },
     {
      "id": "wuchao",
      "name": "乌巢",
-     "kind": "depot"
+     "kind": "depot",
+     "host": "陈留郡"
     }
    ],
    "rough": 1.45
@@ -1549,12 +1572,14 @@
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河南尹"
     },
     {
      "id": "han-hangu-guan",
      "name": "汉函谷关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河南尹"
     }
    ],
    "rough": 8.41
@@ -1592,7 +1617,8 @@
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河南尹"
     }
    ],
    "rough": 2.43
@@ -1611,7 +1637,8 @@
     {
      "id": "tong-guan",
      "name": "潼关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "弘农郡"
     }
    ],
    "rough": 7.82
@@ -1641,12 +1668,14 @@
     {
      "id": "dasan-guan",
      "name": "大散关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "右扶风"
     },
     {
      "id": "chencang-dao",
      "name": "陈仓道",
-     "kind": "pass"
+     "kind": "pass",
+     "host": "武都郡"
     }
    ],
    "rough": 26.95
@@ -1753,12 +1782,14 @@
     {
      "id": "han-hangu-guan",
      "name": "汉函谷关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "弘农郡"
     },
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "弘农郡"
     }
    ],
    "rough": 4.98
@@ -1777,7 +1808,8 @@
     {
      "id": "tangluo-dao",
      "name": "傥骆道",
-     "kind": "pass"
+     "kind": "pass",
+     "host": "右扶风"
     }
    ],
    "rough": 30.79
@@ -1795,7 +1827,8 @@
     {
      "id": "yangping-guan",
      "name": "阳平关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "汉中郡"
     }
    ],
    "rough": 32.84
@@ -1814,17 +1847,20 @@
     {
      "id": "puban-jin",
      "name": "蒲坂津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "左冯翊"
     },
     {
      "id": "xiaoping-jin",
      "name": "小平津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "南阳郡"
     },
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "南阳郡"
     }
    ],
    "rough": 5.16
@@ -1840,7 +1876,8 @@
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "河南尹"
     }
    ],
    "rough": 2.14
@@ -1914,17 +1951,20 @@
     {
      "id": "puban-jin",
      "name": "蒲坂津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "京兆尹"
     },
     {
      "id": "xiaoping-jin",
      "name": "小平津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "南阳郡"
     },
     {
      "id": "yique-guan",
      "name": "伊阙关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "南阳郡"
     }
    ],
    "rough": 5.12
@@ -1963,7 +2003,8 @@
     {
      "id": "tangluo-dao",
      "name": "傥骆道",
-     "kind": "pass"
+     "kind": "pass",
+     "host": "汉中郡"
     }
    ],
    "rough": 26.98
@@ -2024,12 +2065,14 @@
     {
      "id": "jianmen-guan",
      "name": "剑门关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "广汉属国"
     },
     {
      "id": "baishui-guan",
      "name": "白水关",
-     "kind": "gate"
+     "kind": "gate",
+     "host": "广汉属国"
     }
    ],
    "rough": 28.01
@@ -2047,7 +2090,8 @@
     {
      "id": "micang-dao",
      "name": "米仓道",
-     "kind": "pass"
+     "kind": "pass",
+     "host": "汉中郡"
     }
    ],
    "rough": 14.89
@@ -2099,7 +2143,8 @@
     {
      "id": "hengjiang-jin",
      "name": "横江津",
-     "kind": "ford"
+     "kind": "ford",
+     "host": "丹阳郡"
     }
    ],
    "rough": 1.39
@@ -2130,7 +2175,8 @@
     {
      "id": "micang-dao",
      "name": "米仓道",
-     "kind": "pass"
+     "kind": "pass",
+     "host": "汉中郡"
     }
    ],
    "rough": 15.75
@@ -2182,7 +2228,8 @@
     {
      "id": "jiang-jin",
      "name": "江津",
-     "kind": "port"
+     "kind": "port",
+     "host": "南郡"
     }
    ],
    "rough": 1.66
@@ -2233,12 +2280,14 @@
     {
      "id": "jiang-jin",
      "name": "江津",
-     "kind": "port"
+     "kind": "port",
+     "host": "南郡"
     },
     {
      "id": "xiakou",
      "name": "夏口",
-     "kind": "port"
+     "kind": "port",
+     "host": "江夏郡"
     }
    ],
    "rough": 1.18
@@ -2266,7 +2315,8 @@
     {
      "id": "jiang-jin",
      "name": "江津",
-     "kind": "port"
+     "kind": "port",
+     "host": "南郡"
     }
    ],
    "rough": 1.07
@@ -2317,7 +2367,8 @@
     {
      "id": "hukou",
      "name": "湖口",
-     "kind": "port"
+     "kind": "port",
+     "host": "豫章郡"
     }
    ],
    "rough": 1.53
@@ -2336,7 +2387,8 @@
     {
      "id": "hukou",
      "name": "湖口",
-     "kind": "port"
+     "kind": "port",
+     "host": "豫章郡"
     }
    ],
    "rough": 1.4
@@ -2375,7 +2427,8 @@
     {
      "id": "hukou",
      "name": "湖口",
-     "kind": "port"
+     "kind": "port",
+     "host": "豫章郡"
     }
    ],
    "rough": 1.26
@@ -2394,7 +2447,8 @@
     {
      "id": "hukou",
      "name": "湖口",
-     "kind": "port"
+     "kind": "port",
+     "host": "豫章郡"
     }
    ],
    "rough": 1.28
@@ -2433,12 +2487,14 @@
     {
      "id": "xiakou",
      "name": "夏口",
-     "kind": "port"
+     "kind": "port",
+     "host": "江夏郡"
     },
     {
      "id": "jiang-jin",
      "name": "江津",
-     "kind": "port"
+     "kind": "port",
+     "host": "武陵郡"
     }
    ],
    "rough": 1.14
@@ -2603,7 +2659,8 @@
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 7.43
@@ -2622,7 +2679,8 @@
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 4.14
@@ -2650,7 +2708,8 @@
     {
      "id": "panyu",
      "name": "番禺",
-     "kind": "port"
+     "kind": "port",
+     "host": "南海郡"
     }
    ],
    "rough": 4.79
@@ -2680,7 +2739,8 @@
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 2.82
@@ -2708,7 +2768,8 @@
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 1.56
@@ -2726,7 +2787,8 @@
     {
      "id": "panyu",
      "name": "番禺",
-     "kind": "port"
+     "kind": "port",
+     "host": "南海郡"
     }
    ],
    "rough": 5.43
@@ -2744,7 +2806,8 @@
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 2.66
@@ -2784,12 +2847,14 @@
     {
      "id": "panyu",
      "name": "番禺",
-     "kind": "port"
+     "kind": "port",
+     "host": "南海郡"
     },
     {
      "id": "hepu",
      "name": "合浦",
-     "kind": "port"
+     "kind": "port",
+     "host": "合浦郡"
     }
    ],
    "rough": 1.5

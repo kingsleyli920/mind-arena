@@ -309,6 +309,21 @@ export interface GameState {
   captives: Array<{ officer: OfficerId; by: FactionId; at: CommanderyId; since: number }>;
   /** 本局可招募的在野武将。由 seed 抽定，是全局唯一的开局随机 */
   recruitPool: OfficerId[];
+  /**
+   * 据点：关隘、谷道、渡口、港、仓。**它们有主，可占可守可打。**
+   *
+   * 此前六十一个据点里只有二十九个在引擎里起作用，而那作用是「这条边算关道」
+   * ——一条边的属性，与谁占着它无关。于是图上画着它们，玩家碰不到它们：
+   * 「把所有地理位置都做进去，但很多都没有实际用途，其实是没有意义的。」
+   *
+   * 现在一条规则贯穿全部五类：**扼于某处的加成，归那处的主人。**
+   * 攻方若已据此关，守方就失去关隘之利（地形加成与器械减半一并没收）。
+   * 仓另有其用：给它主人的邻郡添粮。
+   *
+   * 只有**落在某条边上**的据点进这张表——不在路上的据点仍然是不存在的，
+   * 这一点没有变，变的是「在路上」现在由最省路径判定，不是靠垂距硬凑。
+   */
+  holds: Record<string, { owner: FactionId | null; garrison: number }>;
   log: GameEvent[];
   finished: boolean;
   /**
@@ -327,6 +342,8 @@ export type Action =
       strength: Posture; siegeGear: SiegeGear }
   | { type: "muster"; at: CommanderyId; from: CommanderyId[]; commander: OfficerId | null;
       deadline: 1 | 2 }
+  /** 取据点：自己一郡出兵夺路上的关渡港仓。就在境边，不走行军 */
+  | { type: "seize"; node: string; from: CommanderyId }
   | { type: "govern"; at: CommanderyId;
       policy: "farm" | "levy" | "wall" | "soothe" | "forge" | "stock" }
   | { type: "build"; at: CommanderyId; kind: Building }

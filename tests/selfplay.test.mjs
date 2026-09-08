@@ -32,7 +32,7 @@ const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const SCORE = GRADE_SCORE;   // 唯一来源，不再另存副本
 
 function play(seed, rot) {
-  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO, graph: G }, P);
   // **全部势力**都轮换画像，不只 SEATS 那六家。
   //
   // 此前非 SEATS 的一律 balanced，于是每局三十一家里只有六家进画像统计——

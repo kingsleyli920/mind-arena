@@ -22,6 +22,11 @@ export interface EngineParams {
   breachLadder: Array<[number, number]>;
   /** 可防守数 = base + floor(城防/defensePerHold) + log2(守军/garrisonPerHold) */
   holdBase: number;
+  /** 据点：开局守军、取兵比、折损、仓补粮 */
+  holdGarrison: number;
+  holdSeizeRatio: number;
+  holdLoss: number;
+  depotProvision: number;
   defensePerHold: number;
   garrisonPerHold: number;
   /** 战力浮动幅度（±） */
@@ -249,6 +254,10 @@ export function loadParams(pack: RawPack): EngineParams {
       [g("攻城", "缺口比_二"), 2], [g("攻城", "缺口比_一"), 1],
     ],
     holdBase: g("攻城", "可防守基数"),
+    holdGarrison: g("据点", "守军"),
+    holdSeizeRatio: g("据点", "取兵比"),
+    holdLoss: g("据点", "折损"),
+    depotProvision: g("据点", "仓补粮"),
     defensePerHold: g("攻城", "城防每档"),
     garrisonPerHold: g("攻城", "守军每档"),
     jitter: g("野战", "战力浮动"),

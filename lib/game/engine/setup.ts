@@ -28,6 +28,12 @@ export interface SetupOptions {
   roster?: Roster;
   /** 州与州治。开局态势由它算出，是此后一切档位判定的基准 */
   geo: Geography;
+  /**
+   * 通行图。传了才建得起据点表——据点归它所在之郡的主人，
+   * 而「在哪条边上、算哪个郡境内」只有通行图知道。
+   * 不传则本局没有据点（旧存档与只验某一条规则的测试用得着）
+   */
+  graph?: { sites: Map<string, { id: string; name: string; kind: string; host: string }> };
   year?: number;
   /** 只保留这些势力为可操作席位；其余转为规则驱动。不传则全部保留 */
   playable?: string[];
@@ -140,6 +146,12 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
     capturedOfficers: [],
     captives: [],
     recruitPool: opts.roster ? rollRecruitPool(opts.roster, opts.seed, P.wildRecruitRatio) : [],
+    // 据点开局归它所在之郡的主人：关设在境内，自然是这一家的。
+    // 无主之郡上的据点也无主——谁先去取谁得
+    holds: Object.fromEntries([...(opts.graph?.sites.values() ?? [])].map((n) => [n.id, {
+      owner: commanderies[n.host]?.owner ?? null,
+      garrison: P.holdGarrison,
+    }])),
     log: [],
     finished: false,
   };

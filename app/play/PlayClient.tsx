@@ -271,6 +271,8 @@ type MapNode = {
 
 type MapPoint = {
   id: string; name: string; zhou: string;
+  /** 治所名。邺、邯郸、濮阳——城印底下的牌记写的是它，不是郡名 */
+  seat?: string | null;
   longitude: number; latitude: number;
   households?: number | null; population?: number | null;
 };
@@ -931,6 +933,9 @@ export function PlayClient() {
     const s = createGame(engine.data, {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
       roster: engine.roster, geo: engine.geo,
+      // 传通行图才建得起据点表：据点归它所在之郡的主人，
+      // 而「在哪条边上、算哪个郡境内」只有通行图知道
+      graph: engine.G,
       seasons: seasons ?? engine.P.seasonsPerGame,
     }, engine.P);
     clearSave(); setResume(null);
@@ -1667,6 +1672,10 @@ export function PlayClient() {
       r: 12 / view.k ** 0.82,
     })), [engine, lod, view.k]);
 
+  /** 这个据点此刻在谁手里。图上、悬停详情、候选标签三处共用 */
+  const holdOwner = useCallback(
+    (id: string) => game?.holds?.[id]?.owner ?? null, [game]);
+
   const nodeEls = useMemo(() => (
     <g className="nodes">
       {nodeMarks.map((m) => (
@@ -1678,12 +1687,19 @@ export function PlayClient() {
               onMouseEnter 就是永远不触发的死代码，关津的悬停详情根本出不来 */}
           <circle className="mark" cx={m.x} cy={m.y} r={m.r * 1.2} fill="transparent" />
           <NodeMark x={m.x} y={m.y} r={m.r} kind={m.n.kind} id={m.n.id} />
+          {/* 归属环：据点有主之后，「这个关在谁手里」是图上第一等的信息——
+              它决定从这条路打过去守方还有没有关隘之利 */}
+          {holdOwner(m.n.id) && (
+            <circle className="hold-ring" cx={m.x} cy={m.y} r={m.r * 1.15}
+              stroke={engine?.colorOf.get(holdOwner(m.n.id)!) ?? "#7a7266"}
+              strokeWidth={m.r * 0.28} fill="none" />
+          )}
           {/* 名字不在这儿画：它要跟郡名、路题记共用同一张避让表，
               而那张表要等城印的位置定了才建得起来。见 nodeLabels */}
         </g>
       ))}
     </g>
-  ), [nodeMarks]);
+  ), [nodeMarks, holdOwner, engine?.colorOf]);
 
   const borderEls = useMemo(() => (
     <>
@@ -1719,7 +1735,8 @@ export function PlayClient() {
 
   // ── 选席 ────────────────────────────────────────────────────────
   if (!game || !seat) {
-    const probe = createGame(engine.data, { seed: "preview", roster: engine.roster, geo: engine.geo }, engine.P);
+    const probe = createGame(engine.data, { seed: "preview", roster: engine.roster,
+      geo: engine.geo, graph: engine.G }, engine.P);
     const seats = Object.values(probe.factions)
       .filter((f) => !f.eliminated)
       .map((f) => ({ f, n: f.startCommanderies, st: standingOf(probe, engine.geo, f.id) }))
@@ -2055,8 +2072,9 @@ export function PlayClient() {
   //
   // 指到／钉住的那个郡例外：它的辖境正整块亮着，名字必须跟上，
   // 不然「我指的这一片是谁」还是答不出来。
-  const junNames = (lod < 1 || !junBand ? [] : marks).map((m) => {
-    const bands = junBand.get(m.c.id);
+  const bandOf = junBand;                       // 收进局部常量，闭包里 TS 才收得住
+  const junNames = (lod < 1 || !bandOf ? [] : marks).map((m) => {
+    const bands = bandOf?.get(m.c.id);
     if (!bands?.length) return null;
     const hot = focus === m.c.id || pinned === m.c.id;
     // 字号由**最宽**那条行定（占它七成），三条落点共用同一个字号：
@@ -2164,15 +2182,19 @@ export function PlayClient() {
     .map((k) => {
       const c = candidates.find((x) => x.key === k);
       if (!c || c.action.type !== "campaign") return null;
-      const a = xy(c.action.from), b = xy(c.action.target);
+      // 收进一个局部常量再用：动作联合里加了 seize（也带 from）之后，
+      // 在闭包里反复写 c.action.from 会让 TS 的收窄失效——报的是
+      // 「govern 上没有 from」，看着像别处的错
+      const act = c.action;
+      const a = xy(act.from), b = xy(act.target);
       if (!a || !b) return null;
       // 预览也要走真正的路。军团已经沿路走了，而「出兵之前看它会走哪条」
       // 还是一条直线——那正是最该看清路线的时候：它要过哪些关、绕多远
       const r = roadGeom.find((x) =>
-        (x.e.from === c.action.from && x.e.to === c.action.target)
-        || (x.e.to === c.action.from && x.e.from === c.action.target));
+        (x.e.from === act.from && x.e.to === act.target)
+        || (x.e.to === act.from && x.e.from === act.target));
       return { key: k, a, b, d: r?.d ?? null, on: picked.includes(k),
-               sortie: c.action.from === c.action.target };
+               sortie: act.from === act.target };
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
 

@@ -104,7 +104,7 @@ test("排序不得依赖宿主地区：篡改 localeCompare 也不改变局面",
   const BOTS = ["turtle", "balanced", "aggressive", "opportunist"];
 
   const play = () => {
-    let s = createGame(DATA, { seed: "locale", roster: ROSTER, geo: GEO, seasons: 8 }, P);
+    let s = createGame(DATA, { seed: "locale", roster: ROSTER, geo: GEO, graph: G, seasons: 8 }, P);
     while (!s.finished) {
       const orders = [];
       for (const [i, f] of Object.keys(s.factions).sort().entries()) {

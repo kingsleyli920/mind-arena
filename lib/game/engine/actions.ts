@@ -26,6 +26,14 @@ import { cmp } from "./cmp.ts";
 export interface Graph {
   /** 郡 → 邻接郡及其通行代价与地形 */
   adj: Map<CommanderyId, Array<{ to: CommanderyId; cost: number; terrain: string; gates: string[] }>>;
+  /**
+   * 路上的据点：关渡港仓。**它们有主**，开局归所在之郡的主人。
+   *
+   * `on` 是它扼守的那些边——一个渡口常服务多条路线，取下它，那几条路
+   * 一起变。`host` 是它算在哪个郡境内，由通行图生成器按到两端治所的距离判定。
+   */
+  sites: Map<string, { id: string; name: string; kind: string; host: CommanderyId;
+                       on: Array<[CommanderyId, CommanderyId]> }>;
 }
 
 export interface Rules {
@@ -90,9 +98,10 @@ export const DEFAULT_RULES: Rules = {
 
 export function buildGraph(adjacency: { edges: Array<{
   from: string; to: string; cost: number; terrain: string;
-  nodes: Array<{ name: string; kind: string }>;
+  nodes: Array<{ id?: string; name: string; kind: string; host?: string }>;
 }> }): Graph {
   const adj = new Map<string, Array<{ to: string; cost: number; terrain: string; gates: string[] }>>();
+  const sites: Graph["sites"] = new Map();
   const push = (a: string, b: string, cost: number, terrain: string, gates: string[]) => {
     if (!adj.has(a)) adj.set(a, []);
     adj.get(a)!.push({ to: b, cost, terrain, gates });
@@ -101,8 +110,15 @@ export function buildGraph(adjacency: { edges: Array<{
     const gates = e.nodes.filter((n) => n.kind === "gate" || n.kind === "pass").map((n) => n.name);
     push(e.from, e.to, e.cost, e.terrain, gates);
     push(e.to, e.from, e.cost, e.terrain, gates);
+    for (const n of e.nodes) {
+      if (!n.id) continue;
+      const cur = sites.get(n.id);
+      if (cur) { cur.on.push([e.from, e.to]); continue; }
+      sites.set(n.id, { id: n.id, name: n.name, kind: n.kind,
+                        host: n.host ?? e.from, on: [[e.from, e.to]] });
+    }
   }
-  return { adj };
+  return { adj, sites };
 }
 
 const ownedBy = (s: GameState, f: FactionId) =>
@@ -270,6 +286,10 @@ export function governPrice(
 /** 器械的中文名。兵种名走内容包，器械只有三级且是引擎的内部枚举，就近定义。
     导出给 resolve 的内政回执共用——各存一份迟早写出两套说法 */
 export const GEAR_CN: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
+/** 据点的中文名。候选标签、结算回执、界面三处共用 */
+export const KIND_CN: Record<string, string> = {
+  gate: "关隘", pass: "谷道", ford: "渡口", port: "港", depot: "仓", battlefield: "古战场",
+};
 /** 内政方针的中文名。同上，候选标签与结算回执必须是同一套字 */
 export const POLICY_CN: Record<string, string> = {
   farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民", forge: "治械", stock: "屯粮",
@@ -419,7 +439,15 @@ export function listActions(
       // 目标级，两个兵力档共用一份——同一目标的 main/allout 两条标签
       // 本来就有六成字是逐字重复的，不必再算两遍
       const gn = geo ? gainOf(s, geo, f, tid) : undefined;
-      const gateNote = e.gates.length ? `，扼于${e.gates.join("、")}` : "";
+      // 关在谁手里，直接决定这一仗守方有没有关隘之利——模型必须看得见。
+      // 「扼于虎牢关」不说归属，等于把一条已经生效的规则藏起来
+      const onEdge = [...g.sites.values()].filter((n) =>
+        (n.kind === "gate" || n.kind === "pass" || n.kind === "ford" || n.kind === "port")
+        && n.on.some(([x, y]) => (x === e.from && y === tid) || (x === tid && y === e.from)));
+      const allMine = onEdge.length > 0 && onEdge.every((n) => s.holds[n.id]?.owner === f);
+      const gateNote = e.gates.length
+        ? `，扼于${e.gates.join("、")}${allMine ? "（已在我手，守方无关隘之利）" : ""}`
+        : "";
       // 随军编制由起兵郡唯一确定（驻地编制），写进 label 让模型看得见「谁去打」、
       // 也看得见「能带多少兵」——出征兵力上限就是随军人数 × 每将统兵
       const corps = roster ? retinueAt(s, roster, e.from, P) : [];
@@ -757,6 +785,48 @@ export function listActions(
         // 而内政候选一季能有十条，等于把同一份郡情抄十遍。
         // why 留着——它是引擎的优先级判断（「临敌且城防薄」），别处推不出来
         label: `${c.id} 行${POLICY_CN[policy]}${price > 0 ? `（${price} 金）` : ""}（${why}）`,
+      });
+    }
+  }
+
+  // ── 取据点：路上的关渡港仓 ──────────────────────────────────────────
+  //
+  // 只列**邻边上、且不归自己**的。据点不计入郡数，取它图的是那条路：
+  // 关渡到手，从这条路打过去守方就没有关隘之利了；仓到手，邻郡多一份粮。
+  if (ap >= rules.normalAp) {
+    const seen = new Set<string>();
+    const cands: Array<{ site: NonNullable<ReturnType<typeof g.sites.get>>; from: CommanderyId }> = [];
+    for (const c of mine) {
+      if (!canOrder(c.id)) continue;
+      for (const site of g.sites.values()) {
+        if (seen.has(site.id)) continue;
+        if (!site.on.some(([a, b]) => a === c.id || b === c.id)) continue;
+        if (s.holds[site.id]?.owner === f) continue;
+        seen.add(site.id);
+        cands.push({ site, from: c.id });
+      }
+    }
+    for (const { site, from } of cands.sort((a, b) => cmp(a.site.id, b.site.id))
+      .slice(0, rules.perTypeCap)) {
+      const h = s.holds[site.id];
+      const send = Math.floor(s.commanderies[from].garrison * P.strengthRatio.main);
+      const need = Math.ceil((h?.garrison ?? P.holdGarrison) * P.holdSeizeRatio);
+      // **只列取得下的。**取据点的胜负是确定的（出兵 ≥ 需兵即克），
+      // 列出必败的一条就是纯噪声——实测机器人一局刷了 355 次必败的攻，
+      // 而取下的只有 82 次。这与 R13「引擎预筛出你实际打得动的」是同一条：
+      // 征伐要列打不下的，是因为守军未探、结果本来就不确定；这里没有未知
+      if (send < need) continue;
+      // 那几条路一起变——一个渡口常服务多条路线，标签要说清取它值在哪
+      const roads = site.on.filter(([a, b]) => a === from || b === from)
+        .map(([a, b]) => (a === from ? b : a));
+      out.push({
+        key: `seize:${site.id}:${from}`,
+        action: { type: "seize", node: site.id, from },
+        cost: rules.normalAp,
+        label: `自${from} 取${site.name}（${KIND_CN[site.kind] ?? site.kind}）`
+          + `　出 ${send} 人，守军 ${h?.garrison ?? P.holdGarrison}，需 ${need} 人`
+          + `${h?.owner ? `　现属 ${nameOf(h.owner)}` : "　无主"}`
+          + (roads.length ? `　扼 ${roads.join("、")} 之路` : ""),
       });
     }
   }
@@ -1347,6 +1417,15 @@ export function validate(
       if (holder?.id === a.to) return "此州之牧已是此人";
       return null;
     }
+    case "seize": {
+      if (!own(a.from)) return "非己方郡国";
+      if (!quota(a.from)) return "该郡本季令数已满";
+      const site = g.sites.get(a.node);
+      if (!site) return "无此据点";
+      if (!site.on.some(([x, y]) => x === a.from || y === a.from)) return "该据点不在此郡的邻边上";
+      if (s.holds[a.node]?.owner === o.faction) return "此据点已归我方";
+      return null;
+    }
     case "build": {
       if (!own(a.at)) return "非己方郡国";
       if (!quota(a.at)) return "该郡本季令数已满";
@@ -1431,7 +1510,8 @@ export function validate(
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
     ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, build: 2, relocate: 2, passage: 3,
-       ally: 4, submit: 4, invest: 4, muster: 5, withdraw: 6, campaign: 7, retire: 8 })[t] ?? 9;
+       ally: 4, submit: 4, invest: 4, muster: 5, withdraw: 6, seize: 6.5, campaign: 7,
+       retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)
     || cmp(x.faction, y.faction)

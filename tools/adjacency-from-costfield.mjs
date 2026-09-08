@@ -254,7 +254,14 @@ const edges = routed.map(({ a, b, r }) => {
     terrain,
     cost: +((km / 100) * TC[terrain]).toFixed(2),
     crossings: [...rivers],
-    nodes: list.map((n) => ({ id: n.id, name: n.name, kind: n.kind })),
+    // host = 这个据点算在哪个郡的境内。**据点有主**，开局归它所在之郡的主人；
+    // 取哪一端不能靠遍历先后，按到两端治所的距离判
+    nodes: list.map((n) => {
+      const s3 = KM(ROWS / 2);
+      const dA = Math.hypot((n.longitude - a.longitude) * s3.x / STEP, (n.latitude - a.latitude) * s3.y / STEP);
+      const dB = Math.hypot((n.longitude - b.longitude) * s3.x / STEP, (n.latitude - b.latitude) * s3.y / STEP);
+      return { id: n.id, name: n.name, kind: n.kind, host: dA <= dB ? a.id : b.id };
+    }),
     rough: +rough.toFixed(2),
   };
 });

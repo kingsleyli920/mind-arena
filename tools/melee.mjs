@@ -79,7 +79,7 @@ if (explicit) {
 } else {
   const models = arg("models", "").split(",").filter(Boolean);
   if (!models.length) { console.error("要么 --seats=席位=模型,…\u3000要么 --models=A,B,C"); process.exit(2); }
-  const probe = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+  const probe = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
   // 抽签用同一套确定性随机源：同 seed 同签，混战也可复现
   const drawn = POOL.filter((id) => probe.factions[id] && !probe.factions[id].eliminated)
     .map((id, i) => ({ id, r: roll({ seed: SEED, year: 0, season: 0, faction: "-", event: "melee", seq: i }) }))
@@ -101,7 +101,7 @@ const say = (t = "") => { lines.push(t); console.log(t); };
 const fmt = (n) => n.toLocaleString("en-US");
 const SEASON_CN = ["", "春", "夏", "秋", "冬"];
 
-let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
 const plans = new Map(), spent = new Map(), calls = new Map(), meta = [];
 let since = 0;
 

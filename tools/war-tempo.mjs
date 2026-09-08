@@ -61,7 +61,7 @@ let campaigns = 0, musters = 0;
 let firstFail = 0, longSiege = 0;
 
 for (let gi = 0; gi < GAMES; gi += 1) {
-  let s = createGame(DATA, { seed: `tempo-${gi}`, roster: ROSTER, geo: GEO, seasons: SEASONS }, P);
+  let s = createGame(DATA, { seed: `tempo-${gi}`, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
   const seen = new Map();
   while (!s.finished) {
     let orders = [];

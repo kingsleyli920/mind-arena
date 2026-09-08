@@ -49,7 +49,7 @@ const PROFILE_LIST = process.env.PROFILES === "5"
 // 计分表唯一来源在 lib/arena/scoring.ts。此处曾各存一份副本，迟早分家
 
 function playOne(seed, rotation) {
-  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
+  let s = createGame(DATA, { seed, roster: ROSTER, geo: GEO, graph: G }, P);
   // 非六大席位的其余势力一律 balanced
   const profileOf = (f) => {
     const i = SEATS.indexOf(f);
