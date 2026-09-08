@@ -144,6 +144,15 @@ export interface ChatResult {
   structured: boolean;
   /** 实际落在哪一档。评测报告要按档位分组，否则跨模型的分数不可比 */
   rung: Rung;
+  /**
+   * 本次调用里因推理吃光出参而翻倍重试的次数。
+   *
+   * 与 maxTokens 不是一回事：预算按模型记忆之后，后面每一季都**从**提高后的
+   * 预算起步却一次没重试。报告里曾拿 `maxTokens > 8000` 当重试数，
+   * 于是一份 766 季的跑报出「757 季被推理顶到翻倍重试」——听着像 harness
+   * 快散架了，实际上那正是记忆在起作用
+   */
+  starved: number;
   /** 最终用的出参预算。被饿死翻倍过就与请求值不同 */
   maxTokens: number;
   finishReason: string | null;
@@ -285,7 +294,7 @@ export class OpenRouterClient implements LlmClient {
             cost: costAccum || (typeof json.usage.cost === "number" ? json.usage.cost : null),
           } : null,
           structured: rung !== "text",
-          rung, maxTokens: budget, finishReason,
+          rung, maxTokens: budget, starved, finishReason,
           provider: json.provider ?? null, generationId: json.id ?? null,
           attempts, elapsedMs: Date.now() - started,
         };

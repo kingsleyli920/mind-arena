@@ -46,6 +46,8 @@ export interface ModelTurnRecord {
   rung: Rung | null;
   /** 最终用的出参预算。被推理饿死翻倍过就与默认值不同 */
   maxTokens: number;
+  /** 本季因推理吃光出参而真正翻倍重试的次数。与 maxTokens 不是一回事 */
+  starved?: number;
   finishReason: string | null;
   attempts: number;
   elapsedMs: number;
@@ -137,7 +139,7 @@ export async function modelDecide(
     turn: s.turn, seat: faction, model: deps.model, promptVersion: PROMPT_VERSION,
     obsChars: user.length, obsTokens: estTokens(user), candidates: cands.length,
     picks: [], admission: { admitted: [], dropped: [], spent: 0, illegalRate: 0, mojibake: 0 },
-    usage: null, structured: false, rung: null, maxTokens: 0,
+    usage: null, structured: false, rung: null, maxTokens: 0, starved: 0,
     finishReason: null, attempts: 0, elapsedMs: 0,
   };
   if (!cands.length) return { orders: [], record: base };
@@ -199,11 +201,11 @@ export async function modelDecide(
 }
 
 const meta = (r: { model: string; usage: ModelTurnRecord["usage"]; structured: boolean;
-                   rung: Rung; maxTokens: number; finishReason: string | null;
+                   rung: Rung; maxTokens: number; starved: number; finishReason: string | null;
                    attempts: number; elapsedMs: number;
                    provider?: string | null; generationId?: string | null }) => ({
   model: r.model, usage: r.usage, structured: r.structured,
-  rung: r.rung, maxTokens: r.maxTokens, finishReason: r.finishReason,
+  rung: r.rung, maxTokens: r.maxTokens, starved: r.starved, finishReason: r.finishReason,
   attempts: r.attempts, elapsedMs: r.elapsedMs,
   provider: r.provider ?? null, generationId: r.generationId ?? null,
 });

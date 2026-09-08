@@ -265,7 +265,8 @@ async function playGame(gi) {
           plan: record.plan,
           structured: record.structured, rung: record.rung,
           failureKind: record.failureKind,
-          maxTokens: record.maxTokens, finishReason: record.finishReason,
+          maxTokens: record.maxTokens, starved: record.starved ?? 0,
+          finishReason: record.finishReason,
           elapsedMs: record.elapsedMs, attempts: record.attempts,
           // OpenRouter 会静默改路由：同一个 model id 换到别的提供方，
           // 量化精度与上下文都可能不同，而 model 字段照旧。留这两项才回查得了
@@ -512,9 +513,20 @@ if (usage.length) {
     console.log(`注：每次调用烧 ${Math.round(sum("reasoning") / usage.length)} tok 推理，`
       + `未指定 --reasoning，该模型用的是自家默认档位`);
   }
+  // 「真的重试过」与「从提高后的预算起步」是两回事。
+  //
+  // 出参预算按模型记忆之后，第一次饿过就永久提高，后面每一季都从那个预算
+  // 起步却一次没重试。这里曾拿 `maxTokens > 8000` 当重试数，于是一份 766 季
+  // 的跑报出「757 季被推理顶到翻倍重试」——听着像 harness 快散架了，
+  // 而那正是记忆在起作用。真正白花的钱只有第一次
+  const retried = records.filter((r) => (r.starved ?? 0) > 0);
   const grown = records.filter((r) => r.maxTokens > 8000);
   if (grown.length) {
-    console.log(`⚠ ${grown.length} 季被推理顶到翻倍重试（harness 的配置问题，不是模型的分）`);
+    console.log(`注：${grown.length} 季在提高后的出参预算下跑（该模型推理吃得多，`
+      + `预算已按模型记住，不重复交学费）`);
+  }
+  if (retried.length) {
+    console.log(`⚠ ${retried.length} 季真的被推理顶到翻倍重试（harness 的配置问题，不是模型的分）`);
   }
 }
 console.log(`\n均分 ${avg(results.map((r) => r.score)).toFixed(1)}`

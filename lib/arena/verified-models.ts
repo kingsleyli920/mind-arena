@@ -20,10 +20,10 @@ export type VerifiedModel = {
 
 /** 见 docs/EVAL.md 第 24–27 条。48 局同 seed 同席位轮换，推理档 low */
 export const VERIFIED_MODELS: VerifiedModel[] = [
-  { id: "z-ai/glm-5.3-flash", label: "GLM 5.3 Flash", usdPerGame: 0.0375,
-    note: "48 局榜分 223.9，与最强机器人分不开（+20.8 ±27.7）；非法率 3.8%" },
-  { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash", usdPerGame: 0.046,
-    note: "48 局榜分 220.4；疆域倍数 2.10、48 局只被灭 1 次，最耐打" },
+  { id: "z-ai/glm-5.3-flash", label: "GLM 5.3 Flash", usdPerGame: 0.038,
+    note: "48 局榜分 315.4，显著强于最强机器人（+76.4 ±26.1）；非法率 3.2%" },
+  { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash", usdPerGame: 0.043,
+    note: "48 局榜分 277.0，显著强于最强机器人（+38.1 ±31.2）；48 局只被灭 1 次，最耐打" },
 ];
 
 export const VERIFIED_IDS = new Set(VERIFIED_MODELS.map((m) => m.id));
