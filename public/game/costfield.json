@@ -1,0 +1,10 @@
+{
+  "_note": "逐格通行代价。255 = 不可通行（海、雪线之上、太陡、无渡的大江）。",
+  "west": 94,
+  "north": 43,
+  "step": 0.02,
+  "cols": 1650,
+  "rows": 1350,
+  "block": 255,
+  "generatedFrom": "tools/build-costfield.mjs"
+}

@@ -35,7 +35,9 @@
     "build:board": "node --experimental-strip-types tools/build-leaderboard.mjs",
     "map:roads": "node --max-old-space-size=8192 tools/route-roads.mjs",
     "map:veg": "node --experimental-strip-types tools/build-vegetation.mjs",
-    "map:forest": "PPD=110 node --max-old-space-size=6144 tools/render-map-forest.mjs"
+    "map:forest": "PPD=110 node --max-old-space-size=6144 tools/render-map-forest.mjs",
+    "map:cost": "node --max-old-space-size=8192 tools/build-costfield.mjs",
+    "map:cost:report": "node --max-old-space-size=8192 tools/costfield-report.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
