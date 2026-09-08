@@ -2571,3 +2571,30 @@ test("定档：一个州治算半个州，门槛落在 16 季够得着的区间"
   assert.equal(gradeOf(st(0, 0), { ...start, commanderies: 9 }), "ding",
     "郡数没涨、州分为 0 —— 守成不得分这条不能因为换轴而松掉");
 });
+
+// ── 界面上「还差多少」必须跟着门槛走 ────────────────────────────────
+//
+// 这件事曾在状态栏与终局各硬编码一遍，改门槛之后三处同时说错话，
+// 而全部测试是绿的——因为没有一条测试读过它们。现在有了。
+test("界面的『离下一档还差多少』从 GRADE_CUTS 算，不写死", async () => {
+  const { nextGrade } = await import("../app/play/grade-gap.ts");
+  // 州分 0：先够丙/乙的门槛
+  const a = nextGrade(0, 0);
+  assert.equal(a.grade, "yi");
+  assert.equal(a.needSeat, 1, "差 0.5 → 一个州治就够");
+  // 多据一个州治 = 0.5 = 乙，下一档是甲（≥1）
+  const b = nextGrade(0, 1);
+  assert.equal(b.grade, "jia");
+  assert.equal(b.needZhou, 1);
+  assert.equal(b.needSeat, 1, "还差 0.5，一个州治即可——不是两个");
+  // 多控一整州 = 1.0 = 甲，下一档是超（≥2）
+  const c = nextGrade(1, 0);
+  assert.equal(c.grade, "chao");
+  assert.equal(c.needZhou, 1);
+  assert.equal(c.needSeat, 2);
+  // 到了超档就没有「下一档」了——上面是霸与王，判绝对疆域
+  assert.equal(nextGrade(2, 0).grade, null,
+    "超档之上不该再报增量门槛：霸与王判的是绝对疆域，与开局无关");
+  // 门槛一改，这几条必须跟着变——它是从 GRADE_CUTS 算的，不是抄的
+  assert.equal(nextGrade(0, 3).score, 1.5);
+});

@@ -23,15 +23,17 @@ import { VERIFIED_MODELS, VERIFIED_IDS } from "@/lib/arena/verified-models.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
+import { nextGrade } from "./grade-gap.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, marchSeasons, provCapOf, type EngineParams }
   from "@/lib/game/engine/params.ts";
 import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
-import { buildGeography, briefFor, standingOf, GRADE_CN, type Geography }
+import { buildGeography, briefFor, standingOf, GRADE_CN, GRADE_RANK, GRADE_CUTS, ABS_CUTS,
+         type Geography }
   from "@/lib/game/engine/victory.ts";
-import type { Action, Candidate, GameState, Order } from "@/lib/game/engine/types.ts";
+import type { Action, Candidate, GameState, Grade, Order } from "@/lib/game/engine/types.ts";
 import { cmp } from "@/lib/game/engine/cmp";
 
 /**
@@ -186,18 +188,28 @@ function endingGap(
 ): string {
   const zhouGain = st.controlledZhou - me.startZhou;
   const seatGain = st.zhouSeats - me.startSeats;
-  if (me.bestGrade === "jia") return "已至甲档，本剧本的顶。";
-  if (me.bestGrade === "yi") {
-    const byZhou = 2 - zhouGain;
-    const bySeat = zhouGain >= 1 ? 2 - seatGain : null;
-    return `距甲档：再多控 ${byZhou} 州`
-      + (bySeat !== null && bySeat > 0 ? `，或再多据 ${bySeat} 个州治` : "")
-      + "。";
+  const n = nextGrade(zhouGain, seatGain);
+  if (me.bestGrade === "ba" || me.bestGrade === "wang") {
+    return `已至${GRADE_CN[me.bestGrade]}档——判的是绝对疆域，与开局无关。`;
   }
-  if (me.bestGrade === "bing") {
-    return "距乙档：相对开局多控一整州（拥有该州过半郡国），或多据一个州治。"
+  if (n.grade) {
+    // 档位是**全程最高**的棘轮，而这里的差距按**终局**状态算。两者会背离：
+    // 本局摸到过乙档、后来又把那个州治丢了，于是「乙档」与「距乙档」并排出现。
+    // 那不是矛盾，是这一局真实发生过的事——但必须说出来，不然读着像 bug。
+    // 实测就撞见过：终局「乙 档 200 分」下面跟着「距乙档：再多控 1 州」
+    const fellBack = GRADE_RANK[n.grade] <= GRADE_RANK[me.bestGrade as Grade];
+    return (fellBack
+      ? `本局曾达${GRADE_CN[me.bestGrade as Grade]}档，终局时已跌回——`
+        + `档位按曾达到的最高档记，故仍作${GRADE_CN[me.bestGrade as Grade]}。`
+        + `此刻距${GRADE_CN[n.grade]}档：`
+      : `距${GRADE_CN[n.grade]}档：`)
+      + `再多控 ${n.needZhou} 州，或再多据 ${n.needSeat} 个州治（一个州治算半个州）。`
       + `现控 ${st.controlledZhou} 州（开局 ${me.startZhou}）、`
       + `据 ${st.zhouSeats} 个州治（开局 ${me.startSeats}）。`;
+  }
+  if (me.bestGrade === "chao") {
+    return `已至超档。再往上是霸（控 ${ABS_CUTS.ba} 州）与王（控 ${ABS_CUTS.wang} 州），`
+      + "判绝对疆域，与开局无关。";
   }
   // 丁档：拆开说，两个条件缺哪个是两回事——只捡无主之地永远拿不到丙
   const need: string[] = [];
@@ -1440,12 +1452,14 @@ export function PlayClient() {
   const standing = standingOf(game, engine.geo, seat);
   // 「离升档还差什么」——这一句比整段简报更该常驻。
   // 档位判的是相对开局的增量，不看绝对疆域
-  const nextStep = standing.controlledZhou >= me.startZhou + 2 ? "已达甲档条件"
-    : standing.controlledZhou > me.startZhou || standing.zhouSeats > me.startSeats
-      ? `再多控 ${me.startZhou + 2 - standing.controlledZhou} 州 → 甲`
-      : standing.commanderies > me.startCommanderies && standing.conquests > 0
-        ? "多据一州治 → 乙；多控一整州 → 甲"
-        : "郡数高于开局且至少一郡夺自他方 → 丙";
+  const step = nextGrade(standing.controlledZhou - me.startZhou,
+                         standing.zhouSeats - me.startSeats);
+  const nextStep = step.grade
+    ? (step.score < GRADE_CUTS.yi
+        && !(standing.commanderies > me.startCommanderies && standing.conquests > 0)
+        ? "郡数高于开局且至少一郡夺自他方 → 丙"
+        : `再多控 ${step.needZhou} 州，或多据 ${step.needSeat} 个州治 → ${GRADE_CN[step.grade]}`)
+    : `已达超档；再往上判绝对疆域（控 ${ABS_CUTS.ba} 州为霸）`;
 
   // 城池与标注。标注在屏幕空间做贪心避让——冀州、兖州一带郡治密集，
   // 全部铺出来必然叠字，那正是「简略」的观感来源之一
@@ -1654,14 +1668,19 @@ export function PlayClient() {
   // 连续同文合并。治所失守之后「全境政令不通」会逐季重复，
   // 一个第 9 季覆灭的局面里这一句能占掉年表的一半——那不是年表，是回声
   const chronicle: Array<{ when: string; text: string; from: number; to: number; n: number }> = [];
+  // 合并时把数字抹掉再比。「山阳郡 被围，本季无产出（存粮尚可支 4 季）」
+  // 逐季只有那个数在变，逐字比对合并不了——实测一份 22 条的年表里
+  // 有 4 条是同一件事的四个存粮读数，占了近两成。
+  // 合并后显示**最后一次**的文本：那是这段围城结束时的状态，比首次的有用
+  const same = (a: string, b: string) => a.replace(/\d+/g, "#") === b.replace(/\d+/g, "#");
   for (const e of game.log) {
     if (e.faction !== seat || !BIG.has(e.kind)) continue;
     const text = cnText(e.text);
     const last = chronicle[chronicle.length - 1];
     // 只合并**相邻季**的同一句。跨季合并会让「194 秋—195 冬（×2 季）」
     // 读起来像连续六季，其实只是首末两次
-    if (last && last.text === text && e.turn === last.to + 1) {
-      last.to = e.turn; last.n += 1;
+    if (last && same(last.text, text) && e.turn === last.to + 1) {
+      last.to = e.turn; last.n += 1; last.text = text;
       continue;
     }
     chronicle.push({ when: "", text, from: e.turn, to: e.turn, n: 1 });
