@@ -181,10 +181,14 @@
 .map-vec svg .border { fill: none; stroke-linecap: round; }
 .map-vec svg .border.mine { stroke: rgba(118, 44, 34, 0.82); }
 .map-vec svg .border.other { stroke: rgba(52, 45, 37, 0.38); }
-/* 郡国界：每个郡国自己管多大一片。传世舆图上这叫「界画」——
-   比疆域界更细更淡，是底纹不是主角；疆域界压在它上面，
-   两者同时出现时读者先看见的应当是「谁占着」，其次才是「界在哪」 */
-.map-vec svg .border.jun { stroke: rgba(52, 45, 37, 0.28); }
+/* 郡国界：每个郡国自己管多大一片。
+   **虚线**——制图学的通例是「界线用虚线、道路用实线」，而我一度把它做反了：
+   为了消噪把路的虚线全去掉，却让界也是细实线，于是两者长得一模一样，
+   看图的人分不清哪根是路哪根是界。界改回虚线、并偏冷灰，与路的暖褐分开 */
+.map-vec svg .border.jun {
+  stroke: rgba(74, 78, 86, 0.5); stroke-linecap: round;
+  /* dasharray 在 JSX 里按档位算——它走用户单位，不缩就会随缩放变稀 */
+}
 /* 指到某郡时，它的辖境整块点亮。一圈淡线答不了「管多大一片」，
    得让整块地亮起来——而颜色要压得住地形又不能盖掉城印与道路 */
 .map-vec svg .jun-area {
@@ -205,13 +209,23 @@
 .map-vec svg .water .coast { stroke: rgba(90, 108, 108, 0.55); stroke-width: 1.2; }
 
 /* 道路按出图档分轻重：远观时它只是底噪，近观时它是「怎么打过去」的答案 */
-/* 路。常态压得很淡——两百三十二条路全部铺出来，无论多好看都是一层网。
+/* 路。一律实线（与虚线的界线区分开），并**带衬边**：底下一条淡色的宽笔、
+   上面一条本色的窄笔——那是真实地图上路的画法，读起来是「一条路」而不是
+   「一根线」。衬边同时把路从底纹（皴笔、树点）里托出来。
+
+   常态压得很淡——两百三十二条路全部铺出来，无论多好看都是一层网。
    要看某条路，指到它两端任一座城，那几条会提亮（.hot）。
    圆头圆角：折线是格点序列，方头接缝在拐点处会露出小豁口 */
 .map-vec svg .road {
   opacity: 0.34; pointer-events: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
+.map-vec svg .road-casing {
+  fill: none; pointer-events: none; opacity: 0.5;
+  stroke: #f2ecdd; stroke-linecap: round; stroke-linejoin: round;
+}
+.map-vec svg .road-casing.lod0 { opacity: 0.22; }
+.map-vec svg .road-casing.lod2 { opacity: 0.62; }
 .map-vec svg .road.lod0 { opacity: 0.14; }
 .map-vec svg .road.lod2 { opacity: 0.5; }
 .map-vec svg .road.hot { opacity: 0.95; }

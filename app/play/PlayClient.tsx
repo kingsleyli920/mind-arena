@@ -1438,6 +1438,12 @@ export function PlayClient() {
 
   const roadEls = useMemo(() => (
     <g className="roads">
+      {/* 衬边先铺一层：所有路的淡色宽笔画完，再画本色窄笔。
+          分两遍是因为若逐条「衬边+本色」地画，后一条的衬边会盖住前一条的路面 */}
+      {roadGeom.map((r) => (
+        <path key={`c-${r.key}`} className={`road-casing lod${lod}`} d={r.d}
+          strokeWidth={(r.st.width + 2.2) / view.k ** 0.82} />
+      ))}
       {roadGeom.map((r) => (
         <path key={r.key} className={`road lod${lod}`} d={r.d} fill="none"
           stroke={r.st.stroke} strokeDasharray={r.st.dash}
@@ -1491,8 +1497,13 @@ export function PlayClient() {
         </>
       )}
       {lod >= 1 && (
+        // 虚线的间隔也要按档位缩：dasharray 走的是用户单位，而这一层挂着
+        // 缩放变换——不缩的话放大六倍后虚线变成「12 像素实、30 像素虚」，
+        // 稀到看不见。除以同一个系数，屏幕上的虚线长度才恒定
         <path className="border jun" d={junBorders}
-          strokeWidth={0.7 / [1, 2.4, 8][lod] ** 0.82} />
+          strokeWidth={0.9 / [1, 2.4, 8][lod] ** 0.82}
+          strokeDasharray={`${2.2 / [1, 2.4, 8][lod] ** 0.82} `
+            + `${3.4 / [1, 2.4, 8][lod] ** 0.82}`} />
       )}
       <path className="border other" d={borders.other}
         strokeWidth={1.2 / [1, 2.4, 8][lod] ** 0.82} />
