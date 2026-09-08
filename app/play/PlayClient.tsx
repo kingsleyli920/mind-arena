@@ -693,8 +693,11 @@ export function PlayClient() {
   const [picked, setPicked] = useState<string[]>([]);
   /** delta：本季各家郡数增减。由结算前后的归属对比算出，不从战报文字里抠——
       「原属 X」那种解析一旦措辞改了就悄悄失效 */
-  const [flash, setFlash] = useState<{ mine: string[]; world: string[]; delta: Record<string, number> }>(
-    { mine: [], world: [], delta: {} });
+  const [flash, setFlash] = useState<{
+    mine: string[]; world: string[]; delta: Record<string, number>;
+    /** 上一季在哪儿打过。地点取事件的 at 字段——不从战报文字里抠 */
+    battles: Array<{ id: string; kind: string; mine: boolean }>;
+  }>({ mine: [], world: [], delta: {}, battles: [] });
   const [focus, setFocus] = useState<string | null>(null);
   // 点城筛选。地图此前是纯装饰：要打南阳，得去右边面板展开征伐、
   // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
@@ -910,7 +913,7 @@ export function PlayClient() {
       seasons: seasons ?? engine.P.seasonsPerGame,
     }, engine.P);
     clearSave(); setResume(null);
-    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [], delta: {} }); setFlips([]);
+    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [], delta: {}, battles: [] }); setFlips([]);
     setRecords([]); setThinking({}); setSince(0); setPlans({});
     // 模型派给「除你之外郡数最多的 N 家」。派给最弱的几家没有意义：
     // 一郡小势力十六季里多半只在修城，看不出模型强弱
@@ -1018,8 +1021,20 @@ export function PlayClient() {
       if (c.owner) delta[c.owner] = (delta[c.owner] ?? 0) + 1;
       if (was) delta[was] = (delta[was] ?? 0) - 1;
     }
+    // 上一季的战事所在。只收「打过」的那几类：破城由易主的朱墨环画，
+    // 这里画的是**打了但城没换手**的那些——强攻未克、野战、被围、解围。
+    // 图上此前只看得见结果（谁的地盘变了），看不见过程（哪儿在打）
+    const FIGHT = new Set(["siege-hold", "field-win", "field-fail", "besieged",
+                           "siege-lift", "relief"]);
+    const seenAt = new Set<string>();
+    const battles: Array<{ id: string; kind: string; mine: boolean }> = [];
+    for (const e of fresh) {
+      if (!e.at || !FIGHT.has(e.kind) || seenAt.has(e.at)) continue;
+      seenAt.add(e.at);
+      battles.push({ id: e.at, kind: e.kind, mine: e.faction === seat });
+    }
     setFlash({
-      delta,
+      delta, battles,
       mine: fresh.filter((e) => e.faction === seat).map((e) => cnText(e.text)),
       // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
       // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
@@ -1666,7 +1681,7 @@ export function PlayClient() {
               </div>
               <button onClick={() => {
                 setSeat(resume.seat); setGame(resume.game); setPicked(resume.picked);
-                setFlash({ mine: [], world: [], delta: {} }); setFlips([]);
+                setFlash({ mine: [], world: [], delta: {}, battles: [] }); setFlips([]);
                 // since 决定模型看到的战报从哪一条起。读档不重置它会从 0 起算，
                 // 于是模型收到整局的日志——观测直接撑爆 token 预算
                 setSince(resume.game.log.length); setRecords([]); setThinking({});
@@ -1889,7 +1904,12 @@ export function PlayClient() {
       if (!c || c.action.type !== "campaign") return null;
       const a = xy(c.action.from), b = xy(c.action.target);
       if (!a || !b) return null;
-      return { key: k, a, b, on: picked.includes(k),
+      // 预览也要走真正的路。军团已经沿路走了，而「出兵之前看它会走哪条」
+      // 还是一条直线——那正是最该看清路线的时候：它要过哪些关、绕多远
+      const r = roadGeom.find((x) =>
+        (x.e.from === c.action.from && x.e.to === c.action.target)
+        || (x.e.to === c.action.from && x.e.from === c.action.target));
+      return { key: k, a, b, d: r?.d ?? null, on: picked.includes(k),
                sortie: c.action.from === c.action.target };
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
@@ -2401,7 +2421,11 @@ export function PlayClient() {
               // 出城迎战：起点即目标，画一圈而不是一条线
               <circle key={ar.key} className={`sortie${ar.on ? " on" : ""}`}
                 cx={ar.a.x} cy={ar.a.y} r={30 / view.k ** 0.82} />
+            ) : ar.d ? (
+              <path key={ar.key} className={`arrow${ar.on ? " on" : ""}`} d={ar.d} fill="none"
+                strokeWidth={5 / view.k ** 0.82} markerEnd="url(#arrowhead)" />
             ) : (
+              // 没有实走路径（数据缺失）才退回直线
               <line key={ar.key} className={`arrow${ar.on ? " on" : ""}`}
                 x1={ar.a.x} y1={ar.a.y} x2={ar.b.x} y2={ar.b.y}
                 strokeWidth={5 / view.k ** 0.82} markerEnd="url(#arrowhead)" />
@@ -2482,6 +2506,24 @@ export function PlayClient() {
                 )}
               </g>
             ))}
+            {/* 上一季打过的地方：交叉两笔。破城由下面的朱墨环画，这里画的是
+                **打了但城没换手**的——强攻未克、野战、被围、解围。
+                图上此前只看得见结果（谁的地盘变了），看不见过程（哪儿在打） */}
+            {flash.battles.map((b) => {
+              const p2 = engine.points.find((c) => c.id === b.id);
+              if (!p2) return null;
+              const x = (p2.longitude - MAP.west) * MAP.ppd;
+              const y = (MAP.north - p2.latitude) * MAP.ppd;
+              const s3 = 17 / view.k ** 0.82;
+              return (
+                <g key={`b-${b.id}`} className={`battle${b.mine ? " mine" : ""}`}>
+                  <path d={`M${x - s3} ${y - s3}L${x + s3} ${y + s3}`}
+                    strokeWidth={2.6 / view.k ** 0.82} />
+                  <path d={`M${x + s3} ${y - s3}L${x - s3} ${y + s3}`}
+                    strokeWidth={2.6 / view.k ** 0.82} />
+                </g>
+              );
+            })}
             {/* 本季易主：得手画朱环，失守画墨环。key 带上季号，
                 连续两季易主的同一郡才会重播 */}
             {flips.map((fl) => {
@@ -2528,6 +2570,16 @@ export function PlayClient() {
                     <circle className="army-ring" cx={t.x} cy={t.y} r={rr * 1.55}
                       strokeWidth={1.4 / view.k ** 0.82}
                       strokeDasharray={`${2.6 / view.k ** 0.82} ${2.6 / view.k ** 0.82}`} />
+                  )}
+                  {/* 「还要几季到」只给自己的在途军团标出来。
+                      改成圆点时把这一行也一并去掉了，那是丢东西——援军赶不赶得到
+                      是围城那只钟的另一半，它不该藏在悬停详情里。
+                      他方的不标：那是免费情报 */}
+                  {t.marching && t.mine && lod >= 1 && (
+                    <text className="army-eta" x={t.x} y={t.y - rr * 2.1}
+                      textAnchor="middle" fontSize={rr * 1.15}>
+                      尚需 {t.a.marchLeft} 季
+                    </text>
                   )}
                 </g>
               );

@@ -258,6 +258,14 @@ export interface GameEvent {
   kind: string;
   faction?: FactionId;
   text: string;
+  /**
+   * 事发之地。**只给界面用**——图上要标出「上一季在哪儿打过」，而地点此前
+   * 只藏在 text 里，从那儿抠正则正是这个仓库反复禁止的事。
+   *
+   * 观测层只取 e.text（见 observe.ts），所以这一项不会进模型的提示词、
+   * 不占观测预算。加它是免费的。
+   */
+  at?: CommanderyId;
   /** 结算归因：哪个维度、哪个适性、哪个地形各贡献多少（MERS R38） */
   attribution?: Record<string, number | string>;
 }

@@ -833,3 +833,15 @@
 .map-vec svg .army-ring { fill: none; stroke: rgba(40, 34, 26, 0.6); }
 .map-vec svg .march-path { opacity: 0.5; stroke-linecap: round; stroke-linejoin: round; }
 .tip .army-who { border-left: 3px solid var(--c, var(--rule)); padding-inline-start: .45rem; }
+/* 「还要几季到」：只给自己的在途军团。他方的不标——那是免费情报 */
+.map-vec svg .army-eta {
+  fill: #4a3f2e; paint-order: stroke; stroke: #fbf8f1; stroke-width: 2.4px;
+  vector-effect: non-scaling-stroke; font-weight: 600;
+}
+
+/* 上一季打过的地方：交叉两笔。己方的用朱，他方的用墨——
+   「哪儿在打」与「谁在打」是两件事，颜色分开 */
+.map-vec svg .battle path {
+  fill: none; stroke: rgba(52, 45, 37, 0.62); stroke-linecap: round;
+}
+.map-vec svg .battle.mine path { stroke: rgba(150, 46, 34, 0.82); }

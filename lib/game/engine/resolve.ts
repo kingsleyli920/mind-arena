@@ -243,14 +243,14 @@ function fieldBattle(
   if (atkWins) {
     lift(s, x.foe);
     returnHome(s, x.foe, foeLeft);
-    log(s, { kind: "field-win", faction: x.atkFaction,
+    log(s, { kind: "field-win", faction: x.atkFaction, at: x.at,
              text: `${x.at} 城下野战，破 ${x.foe.faction} 围城之师`, attribution });
     return atkLeft;
   }
   // 攻方未胜：残部退回起兵郡，围城继续
   x.foe.troops = foeLeft;
   returnHome(s, { faction: x.atkFaction, home: x.from }, atkLeft);
-  log(s, { kind: "field-fail", faction: x.atkFaction,
+  log(s, { kind: "field-fail", faction: x.atkFaction, at: x.at,
            text: `${x.at} 城下野战${outcome}，未能解围`, attribution });
   return 0;
 }
@@ -631,7 +631,7 @@ export function resolve(
     const kept = Math.round(army.troops * P.siegeWithdrawKeep);
     s.armies.splice(idx, 1);
     returnHome(s, army, kept);
-    log(s, { kind: "siege-lift", faction: o.faction,
+    log(s, { kind: "siege-lift", faction: o.faction, at: army.target ?? undefined,
              text: `自 ${army.target} 撤围，携 ${kept} 人退回 ${army.home}` });
   }
 
@@ -880,7 +880,7 @@ export function resolve(
       tgt.moraleTier = Math.max(1, tgt.moraleTier - 1);
       tgt.defense = Math.max(20, tgt.defense - 15);
       lift(s, army);
-      log(s, { kind: "siege-win", faction: army.faction,
+      log(s, { kind: "siege-win", faction: army.faction, at: army.target ?? undefined,
                text: `自 ${army.home} 取 ${army.target}${loser ? `（原属 ${loser}）` : "（无主）"}`,
                attribution: { 投入: army.troops, 缺口: breach, 可防守: hold,
                               城防: tgt.defense, 地形: terrain, ...who } });
@@ -935,7 +935,7 @@ export function resolve(
                text: `围 ${army.target} ${army.siegeSeasons} 季不下，粮尽撤围，${kept} 人退回`,
                attribution: { 缺口: breach, 可防守: hold, ...who } });
     } else {
-      log(s, { kind: "siege-hold", faction: army.faction,
+      log(s, { kind: "siege-hold", faction: army.faction, at: army.target ?? undefined,
                text: `${assault ? `强攻 ${army.target} 未克，折损后` : `围 ${army.target} 第 ${army.siegeSeasons} 季，`}`
                    + `余 ${army.troops} 人转为围困`,
                attribution: { 缺口: breach, 可防守: hold, ...who } });
@@ -1099,7 +1099,7 @@ export function resolve(
       // 被围之城同样无产出。若照常补兵，守军逐季回血会把围城累加的缺口抵消掉，
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
       if (besiegedBy(s, c.id, f.id, P, g)) {
-        log(s, { kind: "besieged", faction: f.id,
+        log(s, { kind: "besieged", faction: f.id, at: c.id,
                  text: `${c.id} 被围，本季无产出（存粮尚可支 ${c.provisions} 季）` });
         continue;
       }
