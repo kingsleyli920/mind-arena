@@ -863,3 +863,21 @@
   fill: none; stroke: rgba(120, 92, 48, 0.75); stroke-linecap: round;
 }
 .map-vec svg .siege-gauge.urgent { stroke: rgba(157, 59, 47, 0.9); }
+
+/* 对局中的年表。与终局那份共用 .chron 的列表样式，外框另起一套：
+   它在侧栏里，要比终局那块更收敛——默认折叠，别跟本季战报抢地方 */
+.chron-fold {
+  margin: 0 0 0.55rem; border: 1px solid var(--rule); border-radius: 3px;
+  background: #fbf8f1;
+}
+.chron-fold summary {
+  cursor: pointer; padding: 0.36rem 0.7rem; font-size: 0.76rem;
+  letter-spacing: 0.08em; color: var(--ink-soft);
+}
+.chron-fold summary i {
+  font-style: normal; margin-inline-start: 0.4rem; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+/* 对局中按**倒序**排（最近的在最上面）：查的多半是刚发生的事。
+   终局那份是正序——那是给人从头读一遍的 */
+.chron-fold .chron { max-height: 11rem; }

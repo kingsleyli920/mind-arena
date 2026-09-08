@@ -2959,6 +2959,25 @@ export function PlayClient() {
             </div>
           )}
 
+          {/* 本局年表。此前它只在终局出现，对局中只有「上季战报」——
+              中途想问「我什么时候丢的山阳郡」「这场围城围了几季了」，
+              无从查起，而错过的那一屏就永远没了。
+              年表本来就每季在算（chronicle），只是被关在终局块里。
+              默认折叠：它是「要查的时候才看」的东西，不该跟本季战报抢地方 */}
+          {!over && chronicle.length > 0 && (
+            <details className="chron-fold">
+              <summary>本局年表<i>{chronicle.length} 事</i></summary>
+              <ol className="chron">
+                {chronicle.slice().reverse().map((e, i) => (
+                  <li key={i}>
+                    <b>{e.when}</b>
+                    <span>{e.text}{e.n > 1 ? `（连 ${e.n} 季）` : ""}</span>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+
           {pinned && (
             <div className="pinned-bar">
               <b>{pinned}</b>
