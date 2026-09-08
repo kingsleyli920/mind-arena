@@ -22,7 +22,7 @@
     "map:decor": "PPD=110 node --max-old-space-size=6144 tools/render-map-decor.mjs",
     "map:uipaper": "SIZE=256 OUT=/tmp/ui-paper.png node tools/make-paper.mjs && node tools/shrink-ui-paper.mjs /tmp/ui-paper.png",
     "map:territory": "node tools/build-territory-grid.mjs",
-    "map:all": "npm run map:paper && npm run map:base && npm run map:base4x && npm run map:tiles && npm run map:play && npm run map:glyphs && npm run map:decor && npm run map:territory && npm run map:roads && npm run map:audit",
+    "map:all": "npm run map:paper && npm run map:base && npm run map:base4x && npm run map:tiles && npm run map:play && npm run map:glyphs && npm run map:decor && npm run map:territory && npm run map:roads && npm run map:veg && npm run map:forest && npm run map:audit",
     "map:audit": "node tools/audit-ink.mjs",
     "obs:budget": "node --experimental-strip-types tools/obs-budget.mjs",
     "eval": "node --env-file-if-exists=.env.local --experimental-strip-types tools/eval-run.mjs",
@@ -33,7 +33,9 @@
     "models": "node --env-file-if-exists=.env.local tools/model-survey.mjs",
     "verdict": "node --experimental-strip-types tools/verdict.mjs",
     "build:board": "node --experimental-strip-types tools/build-leaderboard.mjs",
-    "map:roads": "node --max-old-space-size=8192 tools/route-roads.mjs"
+    "map:roads": "node --max-old-space-size=8192 tools/route-roads.mjs",
+    "map:veg": "node --experimental-strip-types tools/build-vegetation.mjs",
+    "map:forest": "PPD=110 node --max-old-space-size=6144 tools/render-map-forest.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

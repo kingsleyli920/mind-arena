@@ -66,6 +66,18 @@ const BASE = "/game/map/play-base.webp";
  * 只能离线出（tools/render-map-decor.mjs）
  */
 const DECOR = "/game/map/decor.webp";
+/**
+ * 林。
+ *
+ * 起因是一句反问：「森林是森林……其他三国游戏呢？」——查下来《三国志11》
+ * 的地形（平原/森林/砂地/水面）是**游戏设计的地形**而非卫星数据，而它的
+ * 画法恰恰是水墨。所以「水墨」与「山是山、林是林」不是二选一，是同一件事。
+ * 我此前答成了二选一，那是错的。
+ *
+ * 数据取 Natural Earth II（公有领域，理想化自然植被、几乎不含人类影响——
+ * 对公元 194 年比现代土地覆盖更合适）。只画林与疏林，山地高原留给皴笔
+ */
+const FOREST = "/game/map/forest.webp";
 // 放大后换高清一档。只有一张 1815 的话，k=6 是把它插值放大六倍，
 // 越拉越糊——而底图本来就有 7260 的细节可用
 
@@ -2252,6 +2264,9 @@ export function PlayClient() {
           <TileLayer view={view} screenW={stageW} />
           {/* 海波压在瓦片之上、疆域之下：它是底图的一部分，
               但疆域的色域要盖得住它 */}
+          {/* 林画在海波云气之下：它是底纹里最底的一层 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="decor forest" src={FOREST} alt="" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="decor" src={DECOR} alt="" />
           <canvas ref={canvasRef} />
@@ -2560,8 +2575,13 @@ export function PlayClient() {
                 相克成环——鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，克之 +1 缺口</em></li>
               <li><em>建筑画在城下（只画自家的）。<b>淡影</b>是「有这个物产、
                 但那座还没修」——铁官须有铁、盐场须有盐、马苑须有牧苑、屯田须可垦</em></li>
-              <li><em>细线是道路：实线平道、短划丘陵、点线山道、长短线水路、朱线关道。
+              <li><em>道路一律实线，按<b>颜色与粗细</b>分：平道最细最淡、丘陵、山道、
+                水路走青、<b>关道最粗最深</b>。路是在高程上算出来的实走路径，
+                会沿河谷绕开山脊，并从挂在它上面的关穿过去。
                 指到某郡，它那几条会提亮并标出行军日数</em></li>
+              <li><em>成片的墨点是<b>林</b>（南方多、北方少），取自公有领域的
+                理想化自然植被——那是「几乎无人类影响」的一版，比现代地表更近汉末。
+                山地高原不叠树点，那里留给皴笔</em></li>
             </ul>
           </details>
 
