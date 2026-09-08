@@ -97,7 +97,10 @@ const FACTIONS = [
     color: "#9e6759",
     situation: "受诏为扬州刺史，因寿春已为袁术所据，渡江治曲阿，逐吴景、孙贲于历阳，扼江东门户。" },
   { id: "wanglang", name: "王朗", courtesyName: "景兴", seat: "会稽郡",
-    color: "#1bdcac",
+    // 由 #1bdcac 微调而来（ΔE 3.6，图上看不出差别）。通行图改由代价场求出
+    // 之后刘备与王朗成了接壤（徐州—扬州沿海一线），而接壤两家要求 ΔE≥30，
+    // 原色只有 28.9。挑的是「与刘备够远、与其余三十家都 ≥20、且离原色最近」的那一个
+    color: "#15e0b6",
     situation: "由汉廷所拜会稽太守，据山阴抚循郡民，尚未与孙氏交锋。" },
   { id: "yanbaihu", name: "严白虎等吴会宗帅", courtesyName: null, seat: "吴郡",
     color: "#f97760",

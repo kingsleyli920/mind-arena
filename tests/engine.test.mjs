@@ -339,9 +339,7 @@ test("武将：守将统率与守城适性抬高可防守数", () => {
 
 test("武将：主将统率抬高战力，破城后守将被俘", () => {
   const s = fresh();
-  const from = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
-  const edge = [...(G.adj.get(from.id) ?? [])].find((e) => s.commanderies[e.to]?.owner
-    && s.commanderies[e.to].owner !== "yuanshao");
+  const { from, edge } = attackPair(s, "yuanshao");
   assert.ok(edge, "袁绍无可攻目标");
 
   const run = (leader, defender) => {
@@ -439,11 +437,34 @@ test("武将：太守政治抬高产出、魅力抬高民心", () => {
 // ── 围城与野战 ──────────────────────────────────────────────────────
 // 首版里军团是空壳：muster 造出来后无人读取，征伐直接用郡守军，
 // 行军瞬时、围城无过程。这几条锁住「围城是持续的、可被解的」。
-const attackPair = (s, faction) => {
-  const from = Object.values(s.commanderies).find((c) => c.owner === faction);
-  const edge = [...(G.adj.get(from.id) ?? [])]
-    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== faction);
-  return { from, edge };
+/**
+ * 挑一对「打得着」的郡：己方任一郡 → 相邻的他家之郡，取**行军最省**的那条。
+ *
+ * 原先取第一个郡的第一条邻边。那默默依赖了通行图的排列顺序——
+ * 通行图改由代价场求出之后，第一条边变成了一条要走两个月的山道，
+ * 军队当季到不了城下，于是十几条验围城机制的测试一起挂掉，
+ * 报的却是「首攻应转入围困」——看着像围城坏了，其实是地图换了。
+ *
+ * 这些测试要验的是围城怎么结算，不是哪条边最近。取最省的那条，
+ * 让它们对地图的形状不敏感。
+ */
+const attackPair = (s, faction, want) => {
+  let best = null;
+  for (const c of Object.values(s.commanderies)) {
+    if (c.owner !== faction) continue;
+    for (const e of G.adj.get(c.id) ?? []) {
+      const t = s.commanderies[e.to];
+      if (!t?.owner || t.owner === faction) continue;
+      // 验战斗公式的测试要一条**平地**边：关道与山地给守方的加成能把缺口压到 0，
+      // 那时「换阵型改变缺口」这类断言比的是 0 与 0，看着像公式坏了
+      if (want && e.terrain !== want) continue;
+      if (!best || e.cost < best.edge.cost
+        || (e.cost === best.edge.cost && `${c.id}${e.to}` < `${best.from.id}${best.edge.to}`)) {
+        best = { from: c, edge: e };
+      }
+    }
+  }
+  return best ?? { from: null, edge: null };
 };
 
 test("图上符号：界面的变体表与真渲出来的对得上，且每一幅都在", () => {
@@ -671,7 +692,7 @@ test("招降：控其籍贯郡则成功率更高，名将则基本招不来", ()
 
 test("阵型：相克改变破城与否，且方向正确", () => {
   const base = fresh();
-  const { from, edge } = attackPair(base, "yuanshao");
+  const { from, edge } = attackPair(base, "yuanshao", "plain");
   const setup = (mine, theirs) => {
     const s = fresh();
     s.commanderies[from.id].garrison = 20000;
@@ -874,6 +895,10 @@ test("围城：兵力不够就围不住——城照常吃饭，产出也不停",
   s.commanderies[from.id].garrison = 3000;      // 派得出的兵远少于守军
   s.commanderies[edge.to].garrison = 30000;
   s.commanderies[edge.to].defense = 100;
+  // 存粮先填满：没满的城本季会自然回补一格，那时「不该扣粮」验的是等式就不成立
+  //（实测 4 → 5，报的是「围不住却扣了粮」，其实是围不住所以照常回补——
+  //  两件事都对，只是断言写窄了）
+  s.commanderies[edge.to].provisions = provCapOf(s.commanderies[edge.to], P);
   const prov0 = s.commanderies[edge.to].provisions;
   const cur = resolve(s, [{ faction: "yuanshao", action: { type: "campaign",
     target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
@@ -1000,8 +1025,11 @@ test("集结：待命军团可整建制出征，兵力大于按档抽调", () =>
     `集结 ${army.troops} 人未多于就地倾国 ${byTier} 人，集结失去意义`);
 
   // 后续征伐整建制调用该军团，而非再按兵力档抽调
+  // 取**行军最省**的那条，不是第一条：第一条可能是要走两个月的山道，
+  // 军队当季到不了城下，报出来的却是「征伐未整建制调用待命军团」
   const tgt = [...(G.adj.get(hub.id) ?? [])]
-    .find((e) => r.state.commanderies[e.to]?.owner !== "yuanshao");
+    .filter((e) => r.state.commanderies[e.to]?.owner !== "yuanshao")
+    .sort((a, b) => a.cost - b.cost || (a.to < b.to ? -1 : 1))[0];
   if (tgt) {
     const r2 = resolve(refreshAp(r.state, P), [{ faction: "yuanshao", action: { type: "campaign",
       target: tgt.to, from: hub.id, commander: null, strength: "skirmish", siegeGear: "none" } }],
@@ -1142,9 +1170,7 @@ test("兵种：骑兵在山地关隘减半，水军在江河见长", () => {
 
 test("兵种：换兵种会改变同一场攻城的结果", () => {
   const s = fresh();
-  const from = Object.values(s.commanderies).find((c) => c.owner === "yuanshao");
-  const edge = [...(G.adj.get(from.id) ?? [])]
-    .find((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== "yuanshao");
+  const { from, edge } = attackPair(s, "yuanshao", "plain");
   const run = (unit, garrison) => {
     const t = fresh();
     t.commanderies[from.id].unit = unit;

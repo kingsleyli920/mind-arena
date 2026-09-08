@@ -6,5 +6,6 @@
   "cols": 1650,
   "rows": 1350,
   "block": 255,
-  "generatedFrom": "tools/build-costfield.mjs"
+  "generatedFrom": "tools/build-costfield.mjs",
+  "water": "costfield-water.bin：同样尺寸的水路场。海 4 / 大江 5 / 小河 9 / 近岸 90 / 港渡 30，其余不可行"
 }

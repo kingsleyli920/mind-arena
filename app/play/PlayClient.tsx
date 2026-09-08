@@ -244,7 +244,7 @@ type Bundle = {
   commanderyState: unknown; commanderies: Array<{ id: string; name: string; zhou: string;
     longitude: number; latitude: number }>;
   adjacency: { edges: Array<{ from: string; to: string; km: number; terrain: string; cost: number;
-    crossings: string[]; nodes: Array<{ id: string; name: string; kind: string; offset: number }> }> };
+    crossings: string[]; nodes: Array<{ id: string; name: string; kind: string }> }> };
   nodes: MapNode[];
   hydrology: { coastline: Array<Array<[number, number]>>;
                rivers: Array<{ name: string; points: Array<[number, number]> }> };

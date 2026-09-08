@@ -211,6 +211,31 @@ for (const [lo, la] of crossings) {
     if (c >= 0 && c < COLS && r >= 0 && r < ROWS) gap[r * COLS + c] = 1;
   }
 }
+// ── 古道也是地形 ────────────────────────────────────────────────────
+//
+// 一个关之所以在那儿，是因为那儿有一条修了几百年的路——蜀道的栈、
+// 太行八陉的道、黄河的津渡。走它比翻生山坡便宜得多，所以最省路径
+// 本来就该往那儿走。
+//
+// 不给这一层，最省路径会绕开所有关口去爬缓坡：实测 61 个据点只有 24 个
+// 落在路上，虎牢关、武关、井陉关、蜀道五条全部落空。
+// 那不是它们不重要，是模型里没有「路」这个东西。
+const ROADY = new Set(["gate", "pass", "ford", "port"]);
+let roadCells = 0;
+for (const n of nodes) {
+  if (!ROADY.has(n.kind)) continue;
+  const [c0, r0] = cell(n.longitude, n.latitude);
+  for (let dr = -3; dr <= 3; dr += 1) for (let dc = -3; dc <= 3; dc += 1) {
+    const c = c0 + dc, r = r0 + dr;
+    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
+    const k = r * COLS + c;
+    if (cost[k] === BLOCK) continue;
+    const cut2 = Math.max(3, Math.round(cost[k] * 0.35));
+    if (cut2 < cost[k]) { cost[k] = cut2; roadCells += 1; }
+  }
+}
+console.log(`古道折价：${roadCells} 格（关隘、谷道、渡口、港的近旁）`);
+
 let cut = 0;
 for (let i = 0; i < cost.length; i += 1) {
   if (!river[i] || gap[i] || cost[i] === BLOCK) continue;
@@ -221,12 +246,45 @@ const pass = cost.reduce((n, v) => n + (v !== BLOCK ? 1 : 0), 0);
 console.log(`大江断流 ${cut} 格　渡口港口开口 ${crossings.length} 处`);
 console.log(`可通行 ${(pass / 1e6).toFixed(2)}M / ${(COLS * ROWS / 1e6).toFixed(2)}M（${(pass / cost.length * 100).toFixed(0)}%）`);
 
+// ── 第二张场：水路 ──────────────────────────────────────────────────
+//
+// 「长江流域的那些港口，理论上来说都能到」——江与海本身就是路，
+// 而且是比陆路便宜得多的路。只有一张陆路场时，公孙度隔着渤海据东莱
+// 就成了「孤悬粮尽」，白送给孔融；而历史上他正是渡海去的。
+//
+// 水上便宜、岸边可上下、内陆走不通。港与渡口是两张场之间的口子。
+const wcost = new Uint8Array(COLS * ROWS);
+for (let r = 0; r < ROWS; r += 1) {
+  for (let c = 0; c < COLS; c += 1) {
+    const i = r * COLS + c;
+    if (avg[i] <= 0) { wcost[i] = 4; continue; }            // 海
+    if (river[i]) { wcost[i] = river[i] === 2 ? 5 : 9; continue; }  // 大江 / 小河
+    // 陆上：只有很近岸的低地能拖船／换乘，其余走不通
+    wcost[i] = avg[i] < 60 ? 90 : BLOCK;
+  }
+}
+// 港与渡口：岸上那一圈打通，船能靠、人能上
+for (const n of nodes) {
+  if (n.kind !== "port" && n.kind !== "ford") continue;
+  const [c0, r0] = cell(n.longitude, n.latitude);
+  for (let dr = -5; dr <= 5; dr += 1) for (let dc = -5; dc <= 5; dc += 1) {
+    const c = c0 + dc, r = r0 + dr;
+    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
+    const k = r * COLS + c;
+    if (wcost[k] === BLOCK) wcost[k] = 30;
+  }
+}
+const wpass = wcost.reduce((n, v) => n + (v !== BLOCK ? 1 : 0), 0);
+console.log(`水路场：可行 ${(wpass / 1e6).toFixed(2)}M 格（海、江、近岸与港渡）`);
+
 fs.mkdirSync("public/game", { recursive: true });
 fs.writeFileSync("public/game/costfield.bin", Buffer.from(cost.buffer));
+fs.writeFileSync("public/game/costfield-water.bin", Buffer.from(wcost.buffer));
 fs.writeFileSync("public/game/costfield.json", JSON.stringify({
   _note: "逐格通行代价。255 = 不可通行（海、雪线之上、太陡、无渡的大江）。",
   west: W_DEG, north: N_DEG, step: STEP, cols: COLS, rows: ROWS, block: BLOCK,
   generatedFrom: "tools/build-costfield.mjs",
+  water: "costfield-water.bin：同样尺寸的水路场。海 4 / 大江 5 / 小河 9 / 近岸 90 / 港渡 30，其余不可行",
 }, null, 2));
 console.log(`→ public/game/costfield.bin  ${(cost.length / 1024).toFixed(0)}KB`);
 

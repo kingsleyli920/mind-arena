@@ -1017,7 +1017,15 @@ export function resolve(
     for (const [id, lord] of fallen) {
       const c = s.commanderies[id];
       const loser = c.owner;
-      if (loser) s.factions[lord].conquests += 1;
+      // **不记 conquests。**
+      //
+      // 包里写死了丙档是「必须进攻才能拿」，而这一条是邻郡自己断了补给、
+      // 走投无路举郡来归——受方一令未下。原先照记，于是「静坐一整局」
+      // 也能升到丙：实测通行图改由代价场求出之后，公孙度隔海的东莱与
+      // 韩遂孤悬的金城相继归附邻家，孔融、宋建都是这么白得一档的。
+      //
+      // 旧图碰巧没触发（它有一条横跨渤海的陆路边把东莱接着），
+      // 所以这个洞一直没露头——但它一直在。
       c.owner = lord;
       c.provisions = provCapOf(c, P);
       c.moraleTier = Math.max(1, c.moraleTier - 1);

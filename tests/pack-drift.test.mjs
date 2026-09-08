@@ -193,13 +193,13 @@ test("冻结闸：胜负数值的指纹未变", () => {
   // 改规则数值时，把下面两行更新成新指纹，**同时**：
   //   一、升 pack.version（0.2.0 → 1.0.0 是冻结那一次）
   //   二、重跑机器人基线，并在 docs/EVAL.md 里说明新旧榜不可比
-  const WANT = { count: 294, hash: "azaim968ikyo" };
+  const WANT = { count: 294, hash: "6u2ro0rcbije" };
   assert.equal(fp.count, WANT.count,
     `胜负数值的条数变了（${WANT.count} → ${fp.count}）——加/删了一个数`);
   assert.equal(fp.hash, WANT.hash,
     "胜负数值变了。这不是禁止，是提醒：升 pack.version、重跑基线、"
     + "并在 EVAL 里写明新旧榜不可比。确认之后把本测试里的指纹更新掉");
-  assert.equal(pack.version, "1.2.0", "冻结版本号");
+  assert.equal(pack.version, "2.0.0", "冻结版本号");
 });
 
 // ── 通行图也要冻 ────────────────────────────────────────────────────
@@ -221,9 +221,9 @@ test("通行图的形状被钉住", () => {
     es.map((e) => [e.from, e.to, e.terrain, e.cost]).sort())).digest("hex").slice(0, 12);
 
   assert.equal(es.length, 233, "边数");
-  assert.deepEqual(hist, { plain: 119, hill: 37, gate: 33, river: 18, mountain: 26 },
+  assert.deepEqual(hist, { mountain:  61,  river:  42,  plain:  72,  gate:  27,  hill:  31 },
     "各地形档的边数");
-  assert.equal(sig, "4325eb050ccf",
+  assert.equal(sig, "4099a2d6951b",
     "通行图指纹（from/to/地形/代价）。改动了就更新这个值，"
     + "并且**必须先跑一遍 npm run selfplay**——四道闸与 ρ 都得过");
 });
