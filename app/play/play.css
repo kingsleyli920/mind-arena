@@ -205,9 +205,15 @@
 .map-vec svg .water .coast { stroke: rgba(90, 108, 108, 0.55); stroke-width: 1.2; }
 
 /* 道路按出图档分轻重：远观时它只是底噪，近观时它是「怎么打过去」的答案 */
-.map-vec svg .road { opacity: 0.4; pointer-events: none; }
-.map-vec svg .road.lod0 { opacity: 0.18; }
-.map-vec svg .road.lod2 { opacity: 0.62; }
+/* 路。常态压得很淡——两百三十二条路全部铺出来，无论多好看都是一层网。
+   要看某条路，指到它两端任一座城，那几条会提亮（.hot）。
+   圆头圆角：折线是格点序列，方头接缝在拐点处会露出小豁口 */
+.map-vec svg .road {
+  opacity: 0.34; pointer-events: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.map-vec svg .road.lod0 { opacity: 0.14; }
+.map-vec svg .road.lod2 { opacity: 0.5; }
 .map-vec svg .road.hot { opacity: 0.95; }
 .map-vec svg .road-tip {
   fill: #4a4234; paint-order: stroke; stroke: rgba(251, 248, 241, 0.92); stroke-width: 3px;

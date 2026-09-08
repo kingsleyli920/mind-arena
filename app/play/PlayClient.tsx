@@ -545,12 +545,23 @@ function ArmyMark({ x, y, s, color, marching, at, unit, gear }: {
  */
 
 /** 边的地形怎么画。引擎按 cost 算行军天数，图上要看得出这条路难在哪 */
+/**
+ * 边的画法。**一律实线**——虚线在这张图上是灾难。
+ *
+ * 原本丘陵是 9 5、山道是 3 6、水路是 13 4 3 4。问题是底图的山脉皴笔本身
+ * 就是一地短墨点，与这些短划形状几乎一样；再叠上细波浪的郡国界，
+ * 三套细线混在一起，眼睛分不出哪根是路。用户的原话是「压根看不懂」。
+ *
+ * 改成实线之后，地形只靠**颜色与粗细**区分：平道最细最淡，关道最粗最深
+ *（关道正是要一眼看出来的那一类），水路走青色。虚线省下的那点信息量，
+ * 远不抵它制造的噪声。
+ */
 const EDGE_STYLE: Record<string, { stroke: string; dash: string; width: number }> = {
-  plain:    { stroke: "#8a7c62", dash: "",       width: 1.5 },
-  hill:     { stroke: "#7d7050", dash: "9 5",    width: 1.5 },
-  mountain: { stroke: "#5d5443", dash: "3 6",    width: 1.7 },
-  river:    { stroke: "#5b7f93", dash: "13 4 3 4", width: 1.7 },
-  gate:     { stroke: "#7a3b32", dash: "",       width: 2.1 },
+  plain:    { stroke: "#8a7c62", dash: "", width: 1.3 },
+  hill:     { stroke: "#7b6c4a", dash: "", width: 1.5 },
+  mountain: { stroke: "#5d5443", dash: "", width: 1.7 },
+  river:    { stroke: "#5b7f93", dash: "", width: 1.9 },
+  gate:     { stroke: "#7a3b32", dash: "", width: 2.3 },
 };
 const EDGE_CN: Record<string, string> = {
   plain: "平道", hill: "丘陵", mountain: "山道", river: "水路", gate: "关道",
