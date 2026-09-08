@@ -9,6 +9,10 @@
   --silk: #e3d9c2;
   --silk-line: #b9a98a;
   min-height: 100dvh;
+  /* 全局有一条 `main { overflow: hidden }`。它会让**所有后代的 sticky 失效**
+     ——顶栏与画心都钉不住，一滚就没。画心自己另有 overflow:hidden 兜着，
+     这一层不需要裁剪 */
+  overflow: visible;
   color: var(--ink);
   font-family: "Songti SC", "STSong", "Source Han Serif SC", serif;
   /*
@@ -31,9 +35,23 @@
 .play-note, .play-error { padding: 2rem; color: var(--ink-soft); }
 .play-error { color: var(--seal); }
 
+/*
+ * 顶栏与画心都钉住。
+ *
+ * 此前两者都随页滚：右栏一长（战报 + 天下形势 + 年表 + 二十二条征伐候选，
+ * 实测 1727px，而画心 880px、视口 1000px），**读候选表就必然把地图和令数
+ * 一起翻出屏幕**——而那两样正是读候选时要对着看的：「自济北国征泰山郡」
+ * 得在图上找这两个郡，「2 令」得对着剩几令算。一局十六季，每季都要滚回去一趟。
+ *
+ * 顶栏钉在 0，画心钉在顶栏之下。--bar-h 由 PlayClient 用 ResizeObserver 量了写进来：
+ * 顶栏在窄屏会折行变高，写死一个值会让画心底边被切掉。
+ */
 .play-bar {
   display: flex; align-items: baseline; gap: 1.2rem; flex-wrap: wrap;
   border-bottom: 1px solid var(--rule); padding-bottom: 0.7rem;
+  position: sticky; top: 0; z-index: 30;
+  background: var(--paper) url("/game/ui-paper.webp") repeat;
+  background-blend-mode: multiply;
 }
 .play-bar .era, .play-bar .ap { font-size: 0.86rem; color: var(--ink-soft); letter-spacing: 0.05em; }
 .play-bar .who {
@@ -129,6 +147,13 @@
    一张与栏同宽的图，下面全是空白。现在反过来：画框占满，画心按「铺满」
    那个倍数起手（见 minK），屏幕越大看见的地图越大 */
 .map-wrap { height: calc(100dvh - 7.5rem); min-height: 420px; }
+/* 单栏布局（窄屏）下画心在右栏之上，钉住反而会挡住候选表——只在双栏时钉 */
+@media (min-width: 1001px) {
+  .play-body > .map-wrap {
+    position: sticky; top: calc(var(--bar-h, 4.2rem) + 0.45rem);
+    height: calc(100dvh - var(--bar-h, 4.2rem) - 1.6rem);
+  }
+}
 .map-stage canvas { position: absolute; inset: 0; }
 /*
  * 矢量层**不在** .map-stage 里，单独铺满画框一屏大，内部用一个 <g> 做同样的

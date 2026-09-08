@@ -715,6 +715,24 @@ export function PlayClient() {
   const [resume, setResume] = useState<SavedGame | null>(null);
   /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
   const [hoverKey, setHoverKey] = useState<string | null>(null);
+
+  // 顶栏钉在顶上，画心钉在顶栏之下——而顶栏在窄屏会折行。把实测高度写成
+  // CSS 变量，画心的 top 与高度都由它算，写死一个值会让画心底边被切掉。
+  //
+  // 用**回调 ref** 而不是 useRef + useEffect([])：顶栏要等选完席位才挂载，
+  // 而 [] 的 effect 在首次挂载时就跑完了，那一刻 ref 还是 null，
+  // 于是变量永远不写（实测 --bar-h 为空，全靠 CSS 里的回退值凑巧对上）
+  const barObs = useRef<ResizeObserver | null>(null);
+  const barRef = useCallback((el: HTMLElement | null) => {
+    barObs.current?.disconnect();
+    barObs.current = null;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--bar-h", `${el.offsetHeight}px`);
+    });
+    ro.observe(el);
+    barObs.current = ro;
+  }, []);
   /** 图例里的开关：常驻只画自家接出去的路，想看全网时打开 */
   const [allRoads, setAllRoads] = useState(false);
   /** 指到哪支军团。兵种、器械、主将、去向这些都在悬停详情里说 */
@@ -2196,7 +2214,7 @@ export function PlayClient() {
 
   return (
     <main className="play">
-      <header className="play-head play-bar">
+      <header className="play-head play-bar" ref={barRef}>
         {/* 局终之后 turn 已经推到 seasonsPerGame，再加一就成了「第 17/16 季」——
             而同一屏的终局块自己写着「16 季年表」，两个数字互相打架。夹住上限 */}
         <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}
