@@ -184,25 +184,7 @@ test("关隘：地形标记与关津节点必须一致，否则预告与结算�
 //
 // 指纹只取**数字**，不取文字：常数分组里大半是说明与依据，改一句措辞
 // 不该让这道闸响；而任何一个影响胜负判定的数一动，它必须响。
-function ruleFingerprint(pack) {
-  const nums = [];
-  const walk = (v, path) => {
-    if (typeof v === "number") { nums.push(`${path}=${v}`); return; }
-    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`)); return; }
-    if (v && typeof v === "object") {
-      for (const k of Object.keys(v).sort()) walk(v[k], `${path}.${k}`);
-    }
-    // 字符串一律不取：判据的 test 串由 tests/engine.test.mjs 与 GRADE_CUTS 对账
-  };
-  for (const k of ["constants", "actions", "victory", "terrain", "units", "skills"]) {
-    walk(pack[k], k);
-  }
-  nums.sort();
-  // 不引第三方哈希：这里要的是「变了没有」，一个稳定的和就够
-  let h = 0n;
-  for (const s of nums) for (const ch of s) h = (h * 131n + BigInt(ch.codePointAt(0))) % (2n ** 61n - 1n);
-  return { count: nums.length, hash: h.toString(36) };
-}
+const { ruleFingerprint } = await import("../lib/game/content/fingerprint.ts");
 
 test("冻结闸：胜负数值的指纹未变", () => {
   const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));

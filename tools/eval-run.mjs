@@ -29,6 +29,7 @@ import { stubDecide } from "../lib/arena/seat/stub-seat.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE, boardScore } from "../lib/arena/scoring.ts";
+import { ruleFingerprint } from "../lib/game/content/fingerprint.ts";
 import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
 
 const arg = (k, d) => {
@@ -556,6 +557,8 @@ if (JSON_OUT) {
     stamp: {
       promptVersion: PROMPT_VERSION,
       packVersion: pack?.version ?? null,
+      // 版本号会滞后，指纹不会。两份榜能不能并排读，看的是这一行
+      packFingerprint: (() => { try { return ruleFingerprint(pack).hash; } catch { return null; } })(),
       packScenario: pack?.scenario ?? null,
       git: (() => {
         try {

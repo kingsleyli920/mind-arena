@@ -31,7 +31,8 @@
     "melee": "node --env-file-if-exists=.env.local --experimental-strip-types tools/melee.mjs",
     "eval:dissect": "node tools/eval-dissect.mjs",
     "models": "node --env-file-if-exists=.env.local tools/model-survey.mjs",
-    "verdict": "node --experimental-strip-types tools/verdict.mjs"
+    "verdict": "node --experimental-strip-types tools/verdict.mjs",
+    "build:board": "node --experimental-strip-types tools/build-leaderboard.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

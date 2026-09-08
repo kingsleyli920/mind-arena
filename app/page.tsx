@@ -1,7 +1,12 @@
 import { ArenaLab } from "./ArenaLab";
 import Link from "next/link";
+import board from "@/public/game/leaderboard.json";
 
-const modelRoster = ["DeepSeek", "Kimi", "Qwen", "GLM", "Doubao", "MiniMax"];
+// 阵容不再写死。这个面板原本列的是六个「计划接入」的模型名，标着 PLANNED；
+// 而现在有实测的榜了，首页最显眼的位置该放真数字而不是愿望。
+// 数据来自 npm run build:board，同一份 JSON 也喂着 /board 页
+const measured = board.rows.filter((r) => r.kind === "model");
+const shortName = (id: string) => id.split("/").pop() ?? id;
 
 export default function Home() {
   return (
@@ -16,6 +21,7 @@ export default function Home() {
         </a>
         <nav aria-label="主要导航">
           <a href="#games">游戏</a>
+          <Link href="/board">排行榜</Link>
           <a href="#protocol">协议</a>
           <a href="#roadmap">路线图</a>
         </nav>
@@ -45,21 +51,31 @@ export default function Home() {
         <aside className="arena-panel" aria-label="计划模型阵容">
           <div className="panel-topline">
             <span>MODEL ROSTER</span>
-            <span>PLANNED</span>
+            <span>实测 · {board.rows[0]?.games ?? 0} 局</span>
           </div>
           <div className="arena-orbit" aria-hidden="true">
             <span className="orbit-ring ring-one" />
             <span className="orbit-ring ring-two" />
             <span className="arena-core">VS</span>
-            {modelRoster.map((model, index) => (
-              <span className={`model-node node-${index + 1}`} key={model}>{index + 1}</span>
+            {measured.map((m, index) => (
+              <span className={`model-node node-${index + 1}`} key={m.id}>{index + 1}</span>
             ))}
           </div>
           <ol className="model-list">
-            {modelRoster.map((model, index) => (
-              <li key={model}><span>{String(index + 1).padStart(2, "0")}</span>{model}<i /></li>
+            {measured.map((m, index) => (
+              <li key={m.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {shortName(m.id)}
+                <i>{m.board}</i>
+              </li>
             ))}
           </ol>
+          <p className="panel-foot">
+            榜分 = 档位分 + 档内进度。最强的机器人基线 {
+              board.rows.find((r) => r.id === board.baseline)?.board
+            }。
+            <Link href="/board">看完整排行榜与置信区间 →</Link>
+          </p>
         </aside>
       </section>
 

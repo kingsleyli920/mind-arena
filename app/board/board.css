@@ -1,0 +1,72 @@
+/* 排行榜。与地图页同一套底色与字体——这是同一个东西的两个面 */
+.board-page {
+  min-height: 100dvh; padding: 0 0 3rem;
+  background: #16130e; color: #e8dfc7;
+  font-family: "Songti SC", "STSong", "Source Han Serif SC", serif;
+}
+.board-head { padding: 18px 24px 14px; border-bottom: 1px solid #3a3226; }
+.board-head .era { font-size: 12px; letter-spacing: .34em; color: #a08f68; }
+.board-head h1 { margin: 3px 0 6px; font-size: 26px; letter-spacing: .16em; font-weight: 600; }
+.board-head p { margin: 0; max-width: 62em; font-size: 12.5px; line-height: 1.85; color: #9c9078; }
+.board-head code { color: #b09a64; font-size: 11.5px; }
+
+.board-wrap { overflow-x: auto; padding: 20px 24px 0; }
+table.board { border-collapse: collapse; font-size: 12.5px; min-width: 100%; }
+table.board th, table.board td { padding: 7px 12px; border-bottom: 1px solid #2e2820; white-space: nowrap; }
+table.board th {
+  text-align: right; font-weight: 500; color: #a3977c;
+  letter-spacing: .08em; border-bottom-color: #4a4030;
+}
+table.board th.who, table.board td.who, table.board th.dist, table.board td.dist { text-align: left; }
+table.board td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.board td.strong { color: #f0e6cb; font-size: 14px; }
+table.board td.who { color: #e2d8bd; }
+table.board td.who i { margin-left: .5em; font-style: normal; font-size: 11px; color: #7d735d; }
+table.board tr.bot td { color: #8f866f; }
+table.board tr.bot td.strong { color: #a79b80; }
+
+/* 显著与否必须一眼看得出来。带 · 的是区间盖过零——分不开，不是略胜 */
+.d { font-variant-numeric: tabular-nums; }
+.d i { font-style: normal; color: #7d735d; margin-left: .25em; }
+.d em { font-style: normal; color: #8a7f66; margin-left: .3em; }
+.d.sig { color: #c9b477; }
+.base { color: #7d735d; }
+
+.g { display: inline-block; margin-right: .45em; padding: 1px 6px; border-radius: 2px;
+     font-size: 11.5px; border: 1px solid #4a4030; color: #b6aa8e; }
+.g-chao { border-color: #8a6a2e; color: #e0c07a; }
+.g-jia  { border-color: #6f5c33; color: #cbb489; }
+.g-ding { border-color: #4a3a3a; color: #9a8080; }
+
+.rulers, .seats, .caveats { padding: 26px 24px 0; max-width: 76em; }
+.rulers h2, .seats h2, .caveats h2 {
+  margin: 0 0 10px; font-size: 15px; letter-spacing: .16em; font-weight: 600; color: #d9cfb4;
+}
+.rulers dl { margin: 0; display: grid; gap: 10px; }
+.rulers dl > div { display: grid; grid-template-columns: 6em 1fr; gap: 14px; align-items: start; }
+.rulers dt { color: #c9b477; font-size: 12.5px; letter-spacing: .1em; }
+.rulers dd { margin: 0; font-size: 12.5px; line-height: 1.85; color: #9c9078; }
+.rulers .verdict { margin: 14px 0 0; font-size: 12.5px; color: #b6aa8e; }
+.rulers .verdict b { color: #e0c07a; font-weight: 600; }
+
+.seats .note { margin: 0 0 12px; font-size: 12.5px; line-height: 1.8; color: #8f866f; max-width: 58em; }
+.seats table.board { margin-top: 4px; }
+.seats td.num i { font-style: normal; color: #9a8080; }
+
+.caveats ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.caveats li { font-size: 12.5px; line-height: 1.85; color: #9c9078; }
+.caveats li b { color: #c3b795; font-weight: 600; }
+.caveats li.skew { color: #a3977c; }
+.caveats .foot { margin: 22px 0 0; display: flex; gap: 22px; }
+.caveats .foot a { color: #c9b477; text-decoration: none; font-size: 13px; letter-spacing: .08em; }
+.caveats .foot a:hover { text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .board-head, .board-wrap, .rulers, .seats, .caveats { padding-left: 14px; padding-right: 14px; }
+  .rulers dl > div { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* 三把尺的对照表。窄一些，与上面的解释并置 */
+table.rulers-table { margin: 16px 0 0; }
+table.rulers-table th { text-align: right; }
+table.rulers-table th.who, table.rulers-table td.who { text-align: left; min-width: 16em; }

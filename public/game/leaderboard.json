@@ -1,0 +1,384 @@
+{
+  "packVersion": "0.2.0/1.0.0",
+  "packFingerprint": null,
+  "versionSkewNote": "核实过：8d71194→205074a 只改了 version 与 _frozen 标记（git diff 12 增 1 删，全是元数据），规则数值未动",
+  "frozen": {
+    "日期": "2026-09-08",
+    "依据提交": "8d71194",
+    "判据": [
+      "档位分布最大桶 ≤40%——实测 33%（600 局机器人自对局，三组阈值择优）",
+      "档位分与州进度对模型同向且都显著——glm +66.7±23.6 / +109.7±44.4，deepseek +31.3±29.3 / +82.7±30.3（npm run verdict）",
+      "四道游戏验收闸通过（npm run selfplay）"
+    ],
+    "含义": "规则数值自此不再为调参而动。再动就要重跑基线，且新旧榜不可比——跑出来的每一份榜都要带 stamp.packVersion，两份 packVersion 不同的榜不能并排读。",
+    "不含": "这不冻结地图、界面与评测工具；也不冻结内容的增补（新剧本、新武将），只冻结影响胜负判定的数值与判据。"
+  },
+  "seasons": 16,
+  "seats": [
+    "caocao",
+    "yuanshao",
+    "liubiao",
+    "liuzhang",
+    "yuanshu",
+    "lubu"
+  ],
+  "baseline": "bot:purpose",
+  "totalUsd": 6.56,
+  "git": "dbf5c0e",
+  "rows": [
+    {
+      "id": "z-ai/glm-5.3-flash",
+      "kind": "model",
+      "games": 48,
+      "grade": 293.8,
+      "board": 315.4,
+      "cont": 214,
+      "growth": 2.18,
+      "elim": 2,
+      "illegal": 3.2,
+      "usd": 1.83,
+      "grades": {
+        "yi": 14,
+        "chao": 15,
+        "jia": 17,
+        "bing": 2
+      },
+      "bySeat": {
+        "曹操": {
+          "n": 8,
+          "dead": 1,
+          "gain": 1.1
+        },
+        "袁绍": {
+          "n": 8,
+          "dead": 0,
+          "gain": 15.4
+        },
+        "刘表": {
+          "n": 8,
+          "dead": 0,
+          "gain": 13.4
+        },
+        "刘璋": {
+          "n": 8,
+          "dead": 0,
+          "gain": 10.1
+        },
+        "袁术": {
+          "n": 8,
+          "dead": 1,
+          "gain": 2.1
+        },
+        "吕布（张邈、陈宫）": {
+          "n": 8,
+          "dead": 0,
+          "gain": 3.9
+        }
+      },
+      "vs": {
+        "grade": {
+          "mu": 66.7,
+          "ci": 23.6,
+          "sig": true,
+          "n": 48
+        },
+        "board": {
+          "mu": 76.4,
+          "ci": 26.1,
+          "sig": true,
+          "n": 48
+        },
+        "cont": {
+          "mu": 109.7,
+          "ci": 44.4,
+          "sig": true,
+          "n": 48
+        }
+      },
+      "reasoning": "low",
+      "halted": null,
+      "rungs": "schema"
+    },
+    {
+      "id": "deepseek/deepseek-v4-flash",
+      "kind": "model",
+      "games": 48,
+      "grade": 258.3,
+      "board": 277,
+      "cont": 187,
+      "growth": 2.47,
+      "elim": 1,
+      "illegal": 5,
+      "usd": 2.04,
+      "grades": {
+        "yi": 12,
+        "chao": 11,
+        "jia": 16,
+        "bing": 8,
+        "ding": 1
+      },
+      "bySeat": {
+        "曹操": {
+          "n": 8,
+          "dead": 1,
+          "gain": 3
+        },
+        "袁绍": {
+          "n": 8,
+          "dead": 0,
+          "gain": 7.8
+        },
+        "刘表": {
+          "n": 8,
+          "dead": 0,
+          "gain": 14.6
+        },
+        "刘璋": {
+          "n": 8,
+          "dead": 0,
+          "gain": 6.5
+        },
+        "袁术": {
+          "n": 8,
+          "dead": 0,
+          "gain": 3.9
+        },
+        "吕布（张邈、陈宫）": {
+          "n": 8,
+          "dead": 0,
+          "gain": 3
+        }
+      },
+      "vs": {
+        "grade": {
+          "mu": 31.3,
+          "ci": 29.3,
+          "sig": true,
+          "n": 48
+        },
+        "board": {
+          "mu": 38.1,
+          "ci": 31.2,
+          "sig": true,
+          "n": 48
+        },
+        "cont": {
+          "mu": 82.7,
+          "ci": 30.3,
+          "sig": true,
+          "n": 48
+        }
+      },
+      "reasoning": "low",
+      "halted": null,
+      "rungs": "schema"
+    },
+    {
+      "id": "tencent/hy3",
+      "kind": "model",
+      "games": 48,
+      "grade": 252.1,
+      "board": 270.2,
+      "cont": 171,
+      "growth": 1.84,
+      "elim": 4,
+      "illegal": 3,
+      "usd": 2.69,
+      "grades": {
+        "bing": 8,
+        "chao": 14,
+        "jia": 9,
+        "yi": 15,
+        "ding": 2
+      },
+      "bySeat": {
+        "曹操": {
+          "n": 8,
+          "dead": 3,
+          "gain": 0.3
+        },
+        "袁绍": {
+          "n": 8,
+          "dead": 0,
+          "gain": 14
+        },
+        "刘表": {
+          "n": 8,
+          "dead": 0,
+          "gain": 15.5
+        },
+        "刘璋": {
+          "n": 8,
+          "dead": 0,
+          "gain": 7.5
+        },
+        "袁术": {
+          "n": 8,
+          "dead": 1,
+          "gain": 0.9
+        },
+        "吕布（张邈、陈宫）": {
+          "n": 8,
+          "dead": 0,
+          "gain": 1.3
+        }
+      },
+      "vs": {
+        "grade": {
+          "mu": 25,
+          "ci": 26.4,
+          "sig": false,
+          "n": 48
+        },
+        "board": {
+          "mu": 31.2,
+          "ci": 28.8,
+          "sig": true,
+          "n": 48
+        },
+        "cont": {
+          "mu": 67.4,
+          "ci": 38.2,
+          "sig": true,
+          "n": 48
+        }
+      },
+      "reasoning": "low",
+      "halted": null,
+      "rungs": "schema"
+    },
+    {
+      "id": "bot:purpose",
+      "kind": "bot",
+      "games": 48,
+      "grade": 227.1,
+      "board": 238.9,
+      "cont": 104,
+      "growth": 1.54,
+      "elim": 4,
+      "illegal": 0,
+      "usd": 0,
+      "grades": {
+        "yi": 25,
+        "chao": 7,
+        "ding": 3,
+        "bing": 4,
+        "jia": 9
+      },
+      "bySeat": {
+        "曹操": {
+          "n": 8,
+          "dead": 2,
+          "gain": 0.9
+        },
+        "袁绍": {
+          "n": 8,
+          "dead": 0,
+          "gain": 7.4
+        },
+        "刘表": {
+          "n": 8,
+          "dead": 0,
+          "gain": 9.4
+        },
+        "刘璋": {
+          "n": 8,
+          "dead": 0,
+          "gain": 3.4
+        },
+        "袁术": {
+          "n": 8,
+          "dead": 0,
+          "gain": 0.5
+        },
+        "吕布（张邈、陈宫）": {
+          "n": 8,
+          "dead": 2,
+          "gain": -0.9
+        }
+      },
+      "vs": {
+        "grade": null,
+        "board": null,
+        "cont": null
+      },
+      "reasoning": null,
+      "halted": null,
+      "rungs": ""
+    },
+    {
+      "id": "bot:balanced",
+      "kind": "bot",
+      "games": 48,
+      "grade": 181.3,
+      "board": 190.9,
+      "cont": 85,
+      "growth": 1.46,
+      "elim": 3,
+      "illegal": 0,
+      "usd": 0,
+      "grades": {
+        "bing": 15,
+        "yi": 22,
+        "jia": 8,
+        "chao": 1,
+        "ding": 2
+      },
+      "bySeat": {
+        "曹操": {
+          "n": 8,
+          "dead": 1,
+          "gain": 0.5
+        },
+        "袁绍": {
+          "n": 8,
+          "dead": 0,
+          "gain": 7.1
+        },
+        "刘表": {
+          "n": 8,
+          "dead": 0,
+          "gain": 7.1
+        },
+        "刘璋": {
+          "n": 8,
+          "dead": 0,
+          "gain": 3.5
+        },
+        "袁术": {
+          "n": 8,
+          "dead": 0,
+          "gain": 0.6
+        },
+        "吕布（张邈、陈宫）": {
+          "n": 8,
+          "dead": 2,
+          "gain": 0
+        }
+      },
+      "vs": {
+        "grade": {
+          "mu": -45.8,
+          "ci": 29.2,
+          "sig": true,
+          "n": 48
+        },
+        "board": {
+          "mu": -48,
+          "ci": 31,
+          "sig": true,
+          "n": 48
+        },
+        "cont": {
+          "mu": -19.4,
+          "ci": 27.8,
+          "sig": false,
+          "n": 48
+        }
+      },
+      "reasoning": null,
+      "halted": null,
+      "rungs": ""
+    }
+  ]
+}

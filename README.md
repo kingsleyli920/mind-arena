@@ -51,6 +51,11 @@ How to run an evaluation — and the measured constraints that bound it — is i
 - `npm run eval`: run one agent (bot / stub / model) over N games
 - `npm run eval:suite`: run several agents over the same seeds and print a leaderboard
 - `npm run eval:dissect`: split one run open — by seat, action mix, dropped orders, AP usage
+- `npm run build:board`: compress a board's results into `public/game/leaderboard.json`
+  for the `/board` page. Refuses to mix arms whose rule fingerprints differ.
+- `npm run verdict`: check whether the coarse ruler (grades) and the continuous one
+  (territory progress) agree — same sign, same ranking, and the coarse one sensitive
+  enough on the strongest entrant.
 - `npm run models`: survey candidate opponents before opening a board — price per 48
   games, whether any provider supports structured outputs, measured p50 throughput,
   and which provider to pin. Reads pricing and endpoint stats only; costs nothing.
