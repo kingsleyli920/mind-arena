@@ -160,22 +160,40 @@ for (const seat of SEATS) {
 // 用「开局郡数」与「实际得分」求 Spearman。
 // 注意不能用终局郡数——评分是相对开局的增量，十三郡涨到二十七郡只有 2.1 倍，
 // 七郡涨到二十四郡是 3.4 倍，后者得分更高。拿绝对郡数比会得出相反结论。
+//
+// **在全部势力上算，不是只在六大席位上。**
+//
+// 原先只取 SEATS 那六家。n=6 的 Spearman 标准误约 0.58——它的取值只能落在
+// 寥寥几个离散点上，0.37 与 0.60 在这个样本量下根本分不开。而我拿它当过
+// 精密判据用：同一批改动里，MIN_SHARE 0.06 报 0.60、0.11 报 0.60、0.13 报 −0.09，
+// 跳了 0.7，那不是机制在动，是统计量在抖。
+//
+// 改成全部有郡的势力（约 30 家）之后 n 涨五倍，标准误降到 0.19，
+// 才配当一条验收判据。这与 docs/EVAL.md 里「6 局样本对着 20 分的差距零分辨率」
+// 是同一课，只是这次交学费的是分母不是分子。
+const RHO_SEATS = Object.keys(results[0].factions)
+  .filter((f) => results[0].factions[f].start > 0)
+  .sort();
 const spearman = (rankA, rankB) => {
   let d2 = 0;
-  for (const s of SEATS) d2 += (rankA.indexOf(s) - rankB.indexOf(s)) ** 2;
-  return 1 - (6 * d2) / (SEATS.length * (SEATS.length ** 2 - 1));
+  for (const s of RHO_SEATS) d2 += (rankA.indexOf(s) - rankB.indexOf(s)) ** 2;
+  const n = RHO_SEATS.length;
+  return 1 - (6 * d2) / (n * (n ** 2 - 1));
 };
-const startRank = [...SEATS].sort((a, b) =>
-  results[0].factions[b].start - results[0].factions[a].start);
-const scoreAvg = Object.fromEntries(SEATS.map((s) =>
-  [s, avg(results.map((r) => r.factions[s]), "score")]));
-const endAvg = Object.fromEntries(SEATS.map((s) =>
-  [s, avg(results.map((r) => r.factions[s]), "end")]));
-const rhoSize = spearman(startRank, [...SEATS].sort((a, b) => endAvg[b] - endAvg[a]));
-const rhoScore = spearman(startRank, [...SEATS].sort((a, b) => scoreAvg[b] - scoreAvg[a]));
+const startRank = [...RHO_SEATS].sort((a, b) =>
+  results[0].factions[b].start - results[0].factions[a].start || (a < b ? -1 : 1));
+const scoreAvg = Object.fromEntries(RHO_SEATS.map((s) =>
+  [s, avg(results.map((r) => r.factions[s]).filter(Boolean), "score")]));
+const endAvg = Object.fromEntries(RHO_SEATS.map((s) =>
+  [s, avg(results.map((r) => r.factions[s]).filter(Boolean), "end")]));
+const rhoSize = spearman(startRank,
+  [...RHO_SEATS].sort((a, b) => endAvg[b] - endAvg[a] || (a < b ? -1 : 1)));
+const rhoScore = spearman(startRank,
+  [...RHO_SEATS].sort((a, b) => scoreAvg[b] - scoreAvg[a] || (a < b ? -1 : 1)));
 console.log(`  开局郡数 ↔ 终局郡数   ρ = ${rhoSize.toFixed(2)}（滚雪球程度，仅供参考）`);
 console.log(`  开局郡数 ↔ 实际得分   ρ = ${rhoScore.toFixed(2)}  ← 这才是评测的区分度`);
-console.log(`  各席位均分：${SEATS.map((s) => `${(NAME[s] ?? s).slice(0, 3)}${scoreAvg[s].toFixed(0)}`).join("  ")}`);
+console.log(`  （ρ 在全部 ${RHO_SEATS.length} 家有郡的势力上算，不是只在六大席位）`);
+console.log(`  六大席位均分：${SEATS.map((s) => `${(NAME[s] ?? s).slice(0, 3)}${(scoreAvg[s] ?? 0).toFixed(0)}`).join("  ")}`);
 const passD = rhoScore < 0.9;
 console.log(`  ${passD ? "✓" : "✗"} 判据：得分 ρ < 0.9（得分完全由开局决定则测不出模型强弱）\n`);
 

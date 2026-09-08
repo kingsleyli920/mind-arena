@@ -4,7 +4,7 @@
   "generatedFrom": "tools/adjacency-from-costfield.mjs",
   "costfield": "public/game/costfield.bin（tools/build-costfield.mjs）",
   "commanderies": 105,
-  "edges": 233,
+  "edges": 232,
   "costUnit": "1 = 100km 平原",
   "terrainCost": {
    "plain": 1,
@@ -95,9 +95,9 @@
   {
    "from": "上谷郡",
    "to": "渔阳郡",
-   "km": 142,
+   "km": 156,
    "terrain": "gate",
-   "cost": 3.7,
+   "cost": 4.05,
    "crossings": [],
    "nodes": [
     {
@@ -107,19 +107,26 @@
      "host": "上谷郡"
     }
    ],
-   "rough": 6.45
+   "rough": 5.97
   },
   {
    "from": "渔阳郡",
    "to": "辽东郡",
-   "km": 705,
-   "terrain": "plain",
-   "cost": 7.05,
+   "km": 752,
+   "terrain": "gate",
+   "cost": 19.54,
    "crossings": [
     "辽水"
    ],
-   "nodes": [],
-   "rough": 1.42
+   "nodes": [
+    {
+     "id": "lulong-sai",
+     "name": "卢龙塞",
+     "kind": "gate",
+     "host": "渔阳郡"
+    }
+   ],
+   "rough": 1.97
   },
   {
    "from": "辽东郡",
@@ -258,9 +265,9 @@
   {
    "from": "广阳郡",
    "to": "上谷郡",
-   "km": 121,
+   "km": 122,
    "terrain": "gate",
-   "cost": 3.15,
+   "cost": 3.18,
    "crossings": [],
    "nodes": [
     {
@@ -270,7 +277,7 @@
      "host": "上谷郡"
     }
    ],
-   "rough": 8.51
+   "rough": 8.5
   },
   {
    "from": "广阳郡",
@@ -305,40 +312,6 @@
    "rough": 7.72
   },
   {
-   "from": "定襄郡",
-   "to": "雁门郡",
-   "km": 121,
-   "terrain": "gate",
-   "cost": 3.15,
-   "crossings": [],
-   "nodes": [
-    {
-     "id": "yanmen-guan",
-     "name": "雁门关",
-     "kind": "gate",
-     "host": "雁门郡"
-    }
-   ],
-   "rough": 15.18
-  },
-  {
-   "from": "雁门郡",
-   "to": "代郡",
-   "km": 165,
-   "terrain": "gate",
-   "cost": 4.28,
-   "crossings": [],
-   "nodes": [
-    {
-     "id": "yanmen-guan",
-     "name": "雁门关",
-     "kind": "gate",
-     "host": "雁门郡"
-    }
-   ],
-   "rough": 8.46
-  },
-  {
    "from": "张掖郡",
    "to": "张掖居延属国",
    "km": 363,
@@ -369,11 +342,45 @@
    "rough": 9.76
   },
   {
+   "from": "定襄郡",
+   "to": "雁门郡",
+   "km": 124,
+   "terrain": "gate",
+   "cost": 3.21,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yanmen-guan",
+     "name": "雁门关",
+     "kind": "gate",
+     "host": "雁门郡"
+    }
+   ],
+   "rough": 15.88
+  },
+  {
+   "from": "雁门郡",
+   "to": "代郡",
+   "km": 164,
+   "terrain": "gate",
+   "cost": 4.25,
+   "crossings": [],
+   "nodes": [
+    {
+     "id": "yanmen-guan",
+     "name": "雁门关",
+     "kind": "gate",
+     "host": "雁门郡"
+    }
+   ],
+   "rough": 8.91
+  },
+  {
    "from": "涿郡",
    "to": "上谷郡",
-   "km": 175,
+   "km": 176,
    "terrain": "gate",
-   "cost": 4.54,
+   "cost": 4.57,
    "crossings": [],
    "nodes": [
     {
@@ -383,14 +390,14 @@
      "host": "上谷郡"
     }
    ],
-   "rough": 6.28
+   "rough": 6.29
   },
   {
    "from": "涿郡",
    "to": "代郡",
-   "km": 377,
+   "km": 379,
    "terrain": "gate",
-   "cost": 9.81,
+   "cost": 9.84,
    "crossings": [],
    "nodes": [
     {
@@ -413,31 +420,21 @@
    "rough": 1.3
   },
   {
-   "from": "张掖属国",
-   "to": "张掖居延属国",
-   "km": 422,
-   "terrain": "mountain",
-   "cost": 8.85,
-   "crossings": [],
-   "nodes": [],
-   "rough": 9.08
-  },
-  {
    "from": "中山国",
    "to": "代郡",
-   "km": 529,
+   "km": 323,
    "terrain": "gate",
-   "cost": 13.75,
+   "cost": 8.4,
    "crossings": [],
    "nodes": [
     {
-     "id": "juyong-guan",
-     "name": "居庸关",
+     "id": "feihu-kou",
+     "name": "飞狐口",
      "kind": "gate",
-     "host": "中山国"
+     "host": "代郡"
     }
    ],
-   "rough": 6.56
+   "rough": 16.26
   },
   {
    "from": "中山国",
@@ -448,6 +445,16 @@
    "crossings": [],
    "nodes": [],
    "rough": 1.18
+  },
+  {
+   "from": "张掖属国",
+   "to": "张掖居延属国",
+   "km": 422,
+   "terrain": "mountain",
+   "cost": 8.85,
+   "crossings": [],
+   "nodes": [],
+   "rough": 9.08
   },
   {
    "from": "张掖郡",
@@ -542,12 +549,19 @@
   {
    "from": "常山国",
    "to": "雁门郡",
-   "km": 360,
-   "terrain": "mountain",
-   "cost": 7.57,
+   "km": 366,
+   "terrain": "gate",
+   "cost": 9.51,
    "crossings": [],
-   "nodes": [],
-   "rough": 13.17
+   "nodes": [
+    {
+     "id": "jingxing-guan",
+     "name": "井陉关",
+     "kind": "gate",
+     "host": "常山国"
+    }
+   ],
+   "rough": 13.02
   },
   {
    "from": "常山国",
@@ -757,11 +771,17 @@
   {
    "from": "赵国",
    "to": "上党郡",
-   "km": 381,
+   "km": 411,
    "terrain": "gate",
-   "cost": 9.91,
+   "cost": 10.67,
    "crossings": [],
    "nodes": [
+    {
+     "id": "fukou-xing",
+     "name": "滏口陉",
+     "kind": "gate",
+     "host": "赵国"
+    },
     {
      "id": "tianjing-guan",
      "name": "天井关",
@@ -769,7 +789,7 @@
      "host": "上党郡"
     }
    ],
-   "rough": 4.5
+   "rough": 4.4
   },
   {
    "from": "济南国",
@@ -944,9 +964,9 @@
   {
    "from": "魏郡",
    "to": "上党郡",
-   "km": 357,
+   "km": 387,
    "terrain": "gate",
-   "cost": 9.28,
+   "cost": 10.07,
    "crossings": [],
    "nodes": [
     {
@@ -954,9 +974,15 @@
      "name": "天井关",
      "kind": "gate",
      "host": "上党郡"
+    },
+    {
+     "id": "hu-guan",
+     "name": "壶关",
+     "kind": "gate",
+     "host": "上党郡"
     }
    ],
-   "rough": 4.72
+   "rough": 5.32
   },
   {
    "from": "陇西郡",
@@ -1051,26 +1077,6 @@
    "rough": 22.92
   },
   {
-   "from": "河东郡",
-   "to": "左冯翊",
-   "km": 226,
-   "terrain": "river",
-   "cost": 4.07,
-   "crossings": [
-    "黄河",
-    "渭水"
-   ],
-   "nodes": [
-    {
-     "id": "puban-jin",
-     "name": "蒲坂津",
-     "kind": "ford",
-     "host": "河东郡"
-    }
-   ],
-   "rough": 2.53
-  },
-  {
    "from": "鲁国",
    "to": "东平国",
    "km": 68,
@@ -1147,9 +1153,9 @@
   {
    "from": "汉阳郡",
    "to": "安定郡",
-   "km": 271,
+   "km": 275,
    "terrain": "gate",
-   "cost": 7.03,
+   "cost": 7.14,
    "crossings": [
     "渭水"
    ],
@@ -1161,7 +1167,7 @@
      "host": "安定郡"
     }
    ],
-   "rough": 32.6
+   "rough": 32.84
   },
   {
    "from": "东平国",
@@ -1190,9 +1196,9 @@
   {
    "from": "河内郡",
    "to": "上党郡",
-   "km": 163,
+   "km": 160,
    "terrain": "gate",
-   "cost": 4.23,
+   "cost": 4.17,
    "crossings": [],
    "nodes": [
     {
@@ -1202,17 +1208,38 @@
      "host": "河内郡"
     }
    ],
-   "rough": 8.73
+   "rough": 9.05
   },
   {
    "from": "河内郡",
    "to": "魏郡",
-   "km": 196,
-   "terrain": "plain",
-   "cost": 1.96,
-   "crossings": [],
-   "nodes": [],
-   "rough": 1.36
+   "km": 213,
+   "terrain": "river",
+   "cost": 3.83,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [
+    {
+     "id": "yan-jin",
+     "name": "延津",
+     "kind": "ford",
+     "host": "河内郡"
+    },
+    {
+     "id": "liyang-jin",
+     "name": "黎阳津",
+     "kind": "ford",
+     "host": "魏郡"
+    },
+    {
+     "id": "liyang-cang",
+     "name": "黎阳仓",
+     "kind": "depot",
+     "host": "魏郡"
+    }
+   ],
+   "rough": 1.29
   },
   {
    "from": "魏郡",
@@ -1236,9 +1263,9 @@
   {
    "from": "河内郡",
    "to": "东郡",
-   "km": 178,
+   "km": 182,
    "terrain": "river",
-   "cost": 3.2,
+   "cost": 3.27,
    "crossings": [
     "黄河"
    ],
@@ -1250,8 +1277,8 @@
      "host": "河内郡"
     },
     {
-     "id": "ji-jin",
-     "name": "棘津",
+     "id": "liyang-jin",
+     "name": "黎阳津",
      "kind": "ford",
      "host": "东郡"
     },
@@ -1260,9 +1287,15 @@
      "name": "白马津",
      "kind": "ford",
      "host": "东郡"
+    },
+    {
+     "id": "liyang-cang",
+     "name": "黎阳仓",
+     "kind": "depot",
+     "host": "东郡"
     }
    ],
-   "rough": 1.34
+   "rough": 1.35
   },
   {
    "from": "任城国",
@@ -1275,49 +1308,30 @@
    "rough": 1.2
   },
   {
-   "from": "河南尹",
+   "from": "河内郡",
    "to": "河东郡",
-   "km": 195,
+   "km": 259,
    "terrain": "river",
-   "cost": 3.52,
+   "cost": 4.67,
    "crossings": [
+    "济水",
     "黄河"
-   ],
-   "nodes": [
-    {
-     "id": "xiaoping-jin",
-     "name": "小平津",
-     "kind": "ford",
-     "host": "河南尹"
-    }
-   ],
-   "rough": 12.41
-  },
-  {
-   "from": "河南尹",
-   "to": "上党郡",
-   "km": 184,
-   "terrain": "gate",
-   "cost": 4.78,
-   "crossings": [
-    "黄河",
-    "济水"
    ],
    "nodes": [
     {
      "id": "meng-jin",
      "name": "孟津",
      "kind": "ford",
-     "host": "河南尹"
+     "host": "河内郡"
     },
     {
-     "id": "tianjing-guan",
-     "name": "天井关",
-     "kind": "gate",
-     "host": "上党郡"
+     "id": "xiaoping-jin",
+     "name": "小平津",
+     "kind": "ford",
+     "host": "河内郡"
     }
    ],
-   "rough": 8.26
+   "rough": 9.68
   },
   {
    "from": "右扶风",
@@ -1382,10 +1396,29 @@
   },
   {
    "from": "河南尹",
+   "to": "河东郡",
+   "km": 194,
+   "terrain": "river",
+   "cost": 3.5,
+   "crossings": [
+    "黄河"
+   ],
+   "nodes": [
+    {
+     "id": "xiaoping-jin",
+     "name": "小平津",
+     "kind": "ford",
+     "host": "河南尹"
+    }
+   ],
+   "rough": 12.55
+  },
+  {
+   "from": "河南尹",
    "to": "河内郡",
-   "km": 99,
+   "km": 301,
    "terrain": "gate",
-   "cost": 2.56,
+   "cost": 7.83,
    "crossings": [
     "黄河",
     "济水"
@@ -1404,46 +1437,39 @@
      "host": "河内郡"
     }
    ],
-   "rough": 2.15
-  },
-  {
-   "from": "河内郡",
-   "to": "陈留郡",
-   "km": 155,
-   "terrain": "river",
-   "cost": 2.79,
-   "crossings": [
-    "黄河",
-    "济水"
-   ],
-   "nodes": [
-    {
-     "id": "yan-jin",
-     "name": "延津",
-     "kind": "ford",
-     "host": "陈留郡"
-    },
-    {
-     "id": "wuchao",
-     "name": "乌巢",
-     "kind": "depot",
-     "host": "陈留郡"
-    }
-   ],
-   "rough": 1.45
+   "rough": 2.65
   },
   {
    "from": "陈留郡",
    "to": "东郡",
-   "km": 126,
+   "km": 159,
    "terrain": "river",
-   "cost": 2.27,
+   "cost": 2.87,
    "crossings": [
     "济水",
     "黄河"
    ],
-   "nodes": [],
-   "rough": 1.36
+   "nodes": [
+    {
+     "id": "baima-jin",
+     "name": "白马津",
+     "kind": "ford",
+     "host": "东郡"
+    },
+    {
+     "id": "liyang-jin",
+     "name": "黎阳津",
+     "kind": "ford",
+     "host": "东郡"
+    },
+    {
+     "id": "liyang-cang",
+     "name": "黎阳仓",
+     "kind": "depot",
+     "host": "东郡"
+    }
+   ],
+   "rough": 1.35
   },
   {
    "from": "鲁国",
@@ -1472,14 +1498,27 @@
   {
    "from": "陈留郡",
    "to": "济阴郡",
-   "km": 116,
+   "km": 193,
    "terrain": "plain",
-   "cost": 1.16,
+   "cost": 1.93,
    "crossings": [
     "济水"
    ],
-   "nodes": [],
-   "rough": 1.42
+   "nodes": [
+    {
+     "id": "wuchao",
+     "name": "乌巢",
+     "kind": "depot",
+     "host": "陈留郡"
+    },
+    {
+     "id": "ji-jin",
+     "name": "棘津",
+     "kind": "ford",
+     "host": "陈留郡"
+    }
+   ],
+   "rough": 1.47
   },
   {
    "from": "彭城国",
@@ -1502,6 +1541,26 @@
    "crossings": [],
    "nodes": [],
    "rough": 1.26
+  },
+  {
+   "from": "河东郡",
+   "to": "左冯翊",
+   "km": 226,
+   "terrain": "river",
+   "cost": 4.07,
+   "crossings": [
+    "黄河",
+    "渭水"
+   ],
+   "nodes": [
+    {
+     "id": "puban-jin",
+     "name": "蒲坂津",
+     "kind": "ford",
+     "host": "河东郡"
+    }
+   ],
+   "rough": 2.57
   },
   {
    "from": "东海郡",
@@ -1562,9 +1621,9 @@
   {
    "from": "河南尹",
    "to": "弘农郡",
-   "km": 205,
+   "km": 224,
    "terrain": "gate",
-   "cost": 5.33,
+   "cost": 5.83,
    "crossings": [
     "黄河"
    ],
@@ -1582,7 +1641,7 @@
      "host": "河南尹"
     }
    ],
-   "rough": 8.41
+   "rough": 7.93
   },
   {
    "from": "梁国",
@@ -1599,36 +1658,43 @@
   {
    "from": "颍川郡",
    "to": "陈留郡",
-   "km": 126,
-   "terrain": "plain",
-   "cost": 1.26,
+   "km": 143,
+   "terrain": "hill",
+   "cost": 1.92,
    "crossings": [],
-   "nodes": [],
-   "rough": 1.48
+   "nodes": [
+    {
+     "id": "guandu",
+     "name": "官渡",
+     "kind": "ford",
+     "host": "陈留郡"
+    }
+   ],
+   "rough": 1.5
   },
   {
    "from": "河南尹",
    "to": "颍川郡",
-   "km": 175,
+   "km": 106,
    "terrain": "gate",
-   "cost": 4.56,
+   "cost": 2.74,
    "crossings": [],
    "nodes": [
     {
-     "id": "yique-guan",
-     "name": "伊阙关",
+     "id": "huanyuan-guan",
+     "name": "轘辕关",
      "kind": "gate",
      "host": "河南尹"
     }
    ],
-   "rough": 2.43
+   "rough": 7.37
   },
   {
    "from": "弘农郡",
    "to": "左冯翊",
-   "km": 189,
+   "km": 272,
    "terrain": "gate",
-   "cost": 4.9,
+   "cost": 7.06,
    "crossings": [
     "黄河",
     "渭水"
@@ -1639,28 +1705,41 @@
      "name": "潼关",
      "kind": "gate",
      "host": "弘农郡"
+    },
+    {
+     "id": "puban-jin",
+     "name": "蒲坂津",
+     "kind": "ford",
+     "host": "弘农郡"
     }
    ],
-   "rough": 7.82
+   "rough": 7.59
   },
   {
    "from": "汉阳郡",
    "to": "武都郡",
-   "km": 119,
-   "terrain": "mountain",
-   "cost": 2.5,
+   "km": 143,
+   "terrain": "gate",
+   "cost": 3.73,
    "crossings": [
     "渭水"
    ],
-   "nodes": [],
-   "rough": 43.81
+   "nodes": [
+    {
+     "id": "qishan-dao",
+     "name": "祁山道",
+     "kind": "pass",
+     "host": "汉阳郡"
+    }
+   ],
+   "rough": 46.38
   },
   {
    "from": "右扶风",
    "to": "武都郡",
-   "km": 327,
+   "km": 330,
    "terrain": "gate",
-   "cost": 8.5,
+   "cost": 8.59,
    "crossings": [
     "渭水"
    ],
@@ -1678,7 +1757,7 @@
      "host": "武都郡"
     }
    ],
-   "rough": 26.95
+   "rough": 27.94
   },
   {
    "from": "京兆尹",
@@ -1770,11 +1849,50 @@
    "rough": 1.08
   },
   {
+   "from": "右扶风",
+   "to": "汉中郡",
+   "km": 266,
+   "terrain": "gate",
+   "cost": 6.91,
+   "crossings": [
+    "渭水",
+    "汉水"
+   ],
+   "nodes": [
+    {
+     "id": "baoxie-dao",
+     "name": "褒斜道",
+     "kind": "pass",
+     "host": "汉中郡"
+    }
+   ],
+   "rough": 34.53
+  },
+  {
+   "from": "汉中郡",
+   "to": "武都郡",
+   "km": 200,
+   "terrain": "gate",
+   "cost": 5.2,
+   "crossings": [
+    "汉水"
+   ],
+   "nodes": [
+    {
+     "id": "yangping-guan",
+     "name": "阳平关",
+     "kind": "gate",
+     "host": "汉中郡"
+    }
+   ],
+   "rough": 33.91
+  },
+  {
    "from": "弘农郡",
    "to": "南阳郡",
-   "km": 451,
+   "km": 450,
    "terrain": "gate",
-   "cost": 11.73,
+   "cost": 11.69,
    "crossings": [
     "黄河"
    ],
@@ -1792,78 +1910,7 @@
      "host": "弘农郡"
     }
    ],
-   "rough": 4.98
-  },
-  {
-   "from": "右扶风",
-   "to": "汉中郡",
-   "km": 230,
-   "terrain": "gate",
-   "cost": 5.98,
-   "crossings": [
-    "渭水",
-    "汉水"
-   ],
-   "nodes": [
-    {
-     "id": "tangluo-dao",
-     "name": "傥骆道",
-     "kind": "pass",
-     "host": "右扶风"
-    }
-   ],
-   "rough": 30.79
-  },
-  {
-   "from": "汉中郡",
-   "to": "武都郡",
-   "km": 196,
-   "terrain": "gate",
-   "cost": 5.09,
-   "crossings": [
-    "汉水"
-   ],
-   "nodes": [
-    {
-     "id": "yangping-guan",
-     "name": "阳平关",
-     "kind": "gate",
-     "host": "汉中郡"
-    }
-   ],
-   "rough": 32.84
-  },
-  {
-   "from": "左冯翊",
-   "to": "南阳郡",
-   "km": 692,
-   "terrain": "gate",
-   "cost": 18,
-   "crossings": [
-    "渭水",
-    "黄河"
-   ],
-   "nodes": [
-    {
-     "id": "puban-jin",
-     "name": "蒲坂津",
-     "kind": "ford",
-     "host": "左冯翊"
-    },
-    {
-     "id": "xiaoping-jin",
-     "name": "小平津",
-     "kind": "ford",
-     "host": "南阳郡"
-    },
-    {
-     "id": "yique-guan",
-     "name": "伊阙关",
-     "kind": "gate",
-     "host": "南阳郡"
-    }
-   ],
-   "rough": 5.16
+   "rough": 5.05
   },
   {
    "from": "河南尹",
@@ -1880,7 +1927,7 @@
      "host": "河南尹"
     }
    ],
-   "rough": 2.14
+   "rough": 2.15
   },
   {
    "from": "颍川郡",
@@ -1940,34 +1987,28 @@
   {
    "from": "京兆尹",
    "to": "南阳郡",
-   "km": 722,
+   "km": 494,
    "terrain": "gate",
-   "cost": 18.77,
+   "cost": 12.83,
    "crossings": [
     "渭水",
     "黄河"
    ],
    "nodes": [
     {
-     "id": "puban-jin",
-     "name": "蒲坂津",
-     "kind": "ford",
+     "id": "tong-guan",
+     "name": "潼关",
+     "kind": "gate",
      "host": "京兆尹"
     },
     {
-     "id": "xiaoping-jin",
-     "name": "小平津",
-     "kind": "ford",
-     "host": "南阳郡"
-    },
-    {
-     "id": "yique-guan",
-     "name": "伊阙关",
+     "id": "wu-guan",
+     "name": "武关",
      "kind": "gate",
-     "host": "南阳郡"
+     "host": "京兆尹"
     }
    ],
-   "rough": 5.12
+   "rough": 12.07
   },
   {
    "from": "沛国",
@@ -1992,14 +2033,20 @@
   {
    "from": "京兆尹",
    "to": "汉中郡",
-   "km": 264,
+   "km": 312,
    "terrain": "gate",
-   "cost": 6.88,
+   "cost": 8.12,
    "crossings": [
     "渭水",
     "汉水"
    ],
    "nodes": [
+    {
+     "id": "ziwu-dao",
+     "name": "子午道",
+     "kind": "pass",
+     "host": "京兆尹"
+    },
     {
      "id": "tangluo-dao",
      "name": "傥骆道",
@@ -2007,7 +2054,7 @@
      "host": "汉中郡"
     }
    ],
-   "rough": 26.98
+   "rough": 26.59
   },
   {
    "from": "汝南郡",
@@ -2057,15 +2104,15 @@
   {
    "from": "广汉郡",
    "to": "广汉属国",
-   "km": 330,
+   "km": 380,
    "terrain": "gate",
-   "cost": 8.58,
+   "cost": 9.88,
    "crossings": [],
    "nodes": [
     {
-     "id": "jianmen-guan",
-     "name": "剑门关",
-     "kind": "gate",
+     "id": "yinping-dao",
+     "name": "阴平道",
+     "kind": "pass",
      "host": "广汉属国"
     },
     {
@@ -2075,26 +2122,38 @@
      "host": "广汉属国"
     }
    ],
-   "rough": 28.01
+   "rough": 40.37
   },
   {
    "from": "汉中郡",
    "to": "广汉郡",
-   "km": 442,
+   "km": 416,
    "terrain": "gate",
-   "cost": 11.49,
+   "cost": 10.82,
    "crossings": [
     "汉水"
    ],
    "nodes": [
     {
-     "id": "micang-dao",
-     "name": "米仓道",
-     "kind": "pass",
+     "id": "yangping-guan",
+     "name": "阳平关",
+     "kind": "gate",
+     "host": "汉中郡"
+    },
+    {
+     "id": "jiameng-guan",
+     "name": "葭萌关",
+     "kind": "gate",
+     "host": "汉中郡"
+    },
+    {
+     "id": "jianmen-guan",
+     "name": "剑门关",
+     "kind": "gate",
      "host": "汉中郡"
     }
    ],
-   "rough": 14.89
+   "rough": 17.76
   },
   {
    "from": "广陵郡",
@@ -2133,9 +2192,9 @@
   {
    "from": "九江郡",
    "to": "丹阳郡",
-   "km": 232,
+   "km": 249,
    "terrain": "river",
-   "cost": 4.17,
+   "cost": 4.48,
    "crossings": [
     "长江"
    ],
@@ -2145,21 +2204,40 @@
      "name": "横江津",
      "kind": "ford",
      "host": "丹阳郡"
+    },
+    {
+     "id": "niuzhu",
+     "name": "牛渚",
+     "kind": "port",
+     "host": "丹阳郡"
     }
    ],
-   "rough": 1.39
+   "rough": 1.36
   },
   {
    "from": "广陵郡",
    "to": "丹阳郡",
-   "km": 207,
+   "km": 259,
    "terrain": "river",
-   "cost": 3.73,
+   "cost": 4.66,
    "crossings": [
     "长江"
    ],
-   "nodes": [],
-   "rough": 1.15
+   "nodes": [
+    {
+     "id": "niuzhu",
+     "name": "牛渚",
+     "kind": "port",
+     "host": "丹阳郡"
+    },
+    {
+     "id": "hengjiang-jin",
+     "name": "横江津",
+     "kind": "ford",
+     "host": "丹阳郡"
+    }
+   ],
+   "rough": 1.27
   },
   {
    "from": "汉中郡",
@@ -2179,7 +2257,7 @@
      "host": "汉中郡"
     }
    ],
-   "rough": 15.75
+   "rough": 15.94
   },
   {
    "from": "巴郡",
@@ -2218,13 +2296,19 @@
   {
    "from": "南阳郡",
    "to": "南郡",
-   "km": 322,
+   "km": 356,
    "terrain": "hill",
-   "cost": 4.34,
+   "cost": 4.8,
    "crossings": [
     "汉水"
    ],
    "nodes": [
+    {
+     "id": "han-jin",
+     "name": "汉津",
+     "kind": "port",
+     "host": "南郡"
+    },
     {
      "id": "jiang-jin",
      "name": "江津",
@@ -2232,17 +2316,44 @@
      "host": "南郡"
     }
    ],
-   "rough": 1.66
+   "rough": 1.53
+  },
+  {
+   "from": "南阳郡",
+   "to": "巴郡",
+   "km": 853,
+   "terrain": "gate",
+   "cost": 22.18,
+   "crossings": [
+    "汉水",
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "jiang-guan",
+     "name": "江关",
+     "kind": "gate",
+     "host": "巴郡"
+    }
+   ],
+   "rough": 28.1
   },
   {
    "from": "九江郡",
    "to": "庐江郡",
-   "km": 166,
+   "km": 244,
    "terrain": "hill",
-   "cost": 2.24,
+   "cost": 3.29,
    "crossings": [],
-   "nodes": [],
-   "rough": 2.21
+   "nodes": [
+    {
+     "id": "ruxu-kou",
+     "name": "濡须口",
+     "kind": "port",
+     "host": "庐江郡"
+    }
+   ],
+   "rough": 2.08
   },
   {
    "from": "丹阳郡",
@@ -2257,21 +2368,28 @@
   {
    "from": "丹阳郡",
    "to": "庐江郡",
-   "km": 233,
+   "km": 245,
    "terrain": "river",
-   "cost": 4.19,
+   "cost": 4.4,
    "crossings": [
     "长江"
    ],
-   "nodes": [],
-   "rough": 1.82
+   "nodes": [
+    {
+     "id": "ruxu-kou",
+     "name": "濡须口",
+     "kind": "port",
+     "host": "庐江郡"
+    }
+   ],
+   "rough": 1.81
   },
   {
    "from": "南郡",
    "to": "江夏郡",
-   "km": 279,
+   "km": 307,
    "terrain": "river",
-   "cost": 5.02,
+   "cost": 5.52,
    "crossings": [
     "汉水",
     "长江"
@@ -2284,13 +2402,19 @@
      "host": "南郡"
     },
     {
+     "id": "han-jin",
+     "name": "汉津",
+     "kind": "port",
+     "host": "南郡"
+    },
+    {
      "id": "xiakou",
      "name": "夏口",
      "kind": "port",
      "host": "江夏郡"
     }
    ],
-   "rough": 1.18
+   "rough": 1.17
   },
   {
    "from": "广汉郡",
@@ -2356,9 +2480,9 @@
   {
    "from": "庐江郡",
    "to": "豫章郡",
-   "km": 352,
+   "km": 362,
    "terrain": "river",
-   "cost": 6.33,
+   "cost": 6.51,
    "crossings": [
     "长江",
     "赣水"
@@ -2369,29 +2493,35 @@
      "name": "湖口",
      "kind": "port",
      "host": "豫章郡"
+    },
+    {
+     "id": "chaisang",
+     "name": "柴桑",
+     "kind": "port",
+     "host": "豫章郡"
     }
    ],
-   "rough": 1.53
+   "rough": 1.77
   },
   {
    "from": "江夏郡",
    "to": "豫章郡",
-   "km": 345,
+   "km": 352,
    "terrain": "river",
-   "cost": 6.21,
+   "cost": 6.34,
    "crossings": [
     "长江",
     "赣水"
    ],
    "nodes": [
     {
-     "id": "hukou",
-     "name": "湖口",
+     "id": "chaisang",
+     "name": "柴桑",
      "kind": "port",
      "host": "豫章郡"
     }
    ],
-   "rough": 1.4
+   "rough": 1.61
   },
   {
    "from": "犍为郡",
@@ -2431,7 +2561,7 @@
      "host": "豫章郡"
     }
    ],
-   "rough": 1.26
+   "rough": 1.27
   },
   {
    "from": "会稽郡",
@@ -2451,7 +2581,7 @@
      "host": "豫章郡"
     }
    ],
-   "rough": 1.28
+   "rough": 1.29
   },
   {
    "from": "武陵郡",
@@ -2476,9 +2606,9 @@
   {
    "from": "江夏郡",
    "to": "武陵郡",
-   "km": 435,
+   "km": 418,
    "terrain": "river",
-   "cost": 7.84,
+   "cost": 7.52,
    "crossings": [
     "长江",
     "汉水"
@@ -2491,13 +2621,25 @@
      "host": "江夏郡"
     },
     {
-     "id": "jiang-jin",
-     "name": "江津",
+     "id": "wulin",
+     "name": "乌林",
+     "kind": "battlefield",
+     "host": "江夏郡"
+    },
+    {
+     "id": "chibi",
+     "name": "赤壁",
+     "kind": "battlefield",
+     "host": "江夏郡"
+    },
+    {
+     "id": "baqiu",
+     "name": "巴丘",
      "kind": "port",
      "host": "武陵郡"
     }
    ],
-   "rough": 1.14
+   "rough": 1.27
   },
   {
    "from": "巴郡",
@@ -2729,9 +2871,9 @@
   {
    "from": "苍梧郡",
    "to": "合浦郡",
-   "km": 334,
+   "km": 335,
    "terrain": "mountain",
-   "cost": 7.01,
+   "cost": 7.04,
    "crossings": [
     "珠江（西江）"
    ],
@@ -2743,7 +2885,7 @@
      "host": "合浦郡"
     }
    ],
-   "rough": 2.82
+   "rough": 2.81
   },
   {
    "from": "益州郡",

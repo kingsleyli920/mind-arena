@@ -220,10 +220,10 @@ test("通行图的形状被钉住", () => {
   const sig = createHash("sha256").update(JSON.stringify(
     es.map((e) => [e.from, e.to, e.terrain, e.cost]).sort())).digest("hex").slice(0, 12);
 
-  assert.equal(es.length, 233, "边数");
-  assert.deepEqual(hist, { mountain:  61,  river:  42,  plain:  72,  gate:  27,  hill:  31 },
+  assert.equal(es.length, 232, "边数");
+  assert.deepEqual(hist, { mountain: 59, river: 43, plain: 69, gate: 29, hill: 32 },
     "各地形档的边数");
-  assert.equal(sig, "4099a2d6951b",
+  assert.equal(sig, "1a47c8a48981",
     "通行图指纹（from/to/地形/代价）。改动了就更新这个值，"
     + "并且**必须先跑一遍 npm run selfplay**——四道闸与 ρ 都得过");
 });

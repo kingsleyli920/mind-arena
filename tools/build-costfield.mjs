@@ -220,17 +220,23 @@ for (const [lo, la] of crossings) {
 // 不给这一层，最省路径会绕开所有关口去爬缓坡：实测 61 个据点只有 24 个
 // 落在路上，虎牢关、武关、井陉关、蜀道五条全部落空。
 // 那不是它们不重要，是模型里没有「路」这个东西。
+const ROAD_R = Number(process.env.ROAD_R ?? 3);
+const ROAD_CUT = Number(process.env.ROAD_CUT ?? 0.35);
 const ROADY = new Set(["gate", "pass", "ford", "port"]);
 let roadCells = 0;
 for (const n of nodes) {
   if (!ROADY.has(n.kind)) continue;
   const [c0, r0] = cell(n.longitude, n.latitude);
-  for (let dr = -3; dr <= 3; dr += 1) for (let dc = -3; dc <= 3; dc += 1) {
+  // 半径与折价都是标定出来的：古道是**廊道**不是点。
+  // 3 格（6km）时够不着自然走廊，武关、壶关、井陉关、滏口陉、官渡、濡须口
+  // 十来个真关全部落在最省路径之外，图上画着、引擎里不存在
+  for (let dr = -ROAD_R; dr <= ROAD_R; dr += 1) for (let dc = -ROAD_R; dc <= ROAD_R; dc += 1) {
     const c = c0 + dc, r = r0 + dr;
     if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
+    if (dc * dc + dr * dr > ROAD_R * ROAD_R) continue;      // 圆形，不是方块
     const k = r * COLS + c;
     if (cost[k] === BLOCK) continue;
-    const cut2 = Math.max(3, Math.round(cost[k] * 0.35));
+    const cut2 = Math.max(3, Math.round(cost[k] * ROAD_CUT));
     if (cut2 < cost[k]) { cost[k] = cut2; roadCells += 1; }
   }
 }

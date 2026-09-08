@@ -200,7 +200,107 @@ function route(A, B) {
 }
 
 let t0 = Date.now();
-const routed = pairs.map(([a, b]) => ({ a, b, r: route(a, b) })).filter((x) => x.r);
+/**
+ * 这条边上的**必经点**：史料上扼守这条路的关与谷道。
+ *
+ * 地理决定两郡通不通、有多远；**史料决定这条路走哪个关**。
+ * 光靠代价场复现不出历史道路——路之所以在那儿还有路基、水源、聚落，
+ * 那些不在高程里。实测：上党—魏郡这条边是存在的，可 A* 从别处翻了太行，
+ * 于是壶关、滏口陉双双落空；武关、井陉关、葭萌关、官渡、濡须口同理，
+ * 十来个真关画在图上而引擎里不存在。加宽「古道折价」没用（24–26 个，纹丝不动），
+ * 因为折价对所有关一视同仁，改不了路走哪条走廊。
+ *
+ * 判据用「幅员」79km（相邻郡治间距中位数的一半，项目里已经在用的那个数）：
+ * 关到两治所连线的垂距小于它，就算扼守这条路。渡口与港允许贴近端点——
+ * 它们本就设在城侧；关则要求在路途中段。
+ */
+const WAY_KM = 79;
+function waypointsFor(a, b) {
+  const s4 = KM(ROWS / 2);
+  const ax = (a.longitude / STEP) * s4.x, ay = (a.latitude / STEP) * s4.y;
+  const bx = (b.longitude / STEP) * s4.x, by = (b.latitude / STEP) * s4.y;
+  const L2 = (bx - ax) ** 2 + (by - ay) ** 2;
+  const out = [];
+  for (const nd of nodes) {
+    if (!["gate", "pass", "ford", "port"].includes(nd.kind)) continue;
+    const nx = (nd.longitude / STEP) * s4.x, ny = (nd.latitude / STEP) * s4.y;
+    const t = L2 ? Math.max(0, Math.min(1, ((nx - ax) * (bx - ax) + (ny - ay) * (by - ay)) / L2)) : 0;
+    const cross = nd.kind === "ford" || nd.kind === "port";
+    if (!cross && (t <= 0.08 || t >= 0.92)) continue;
+    if (cross && (t <= 0.02 || t >= 0.98)) continue;
+    const d = Math.hypot(nx - (ax + (bx - ax) * t), ny - (ay + (by - ay) * t));
+    if (d < WAY_KM) out.push({ nd, t, d });
+  }
+  // 同一条路上挤着好几个关时只取最近的两个：三个关串成折线，
+  // 路会为了穿过它们绕出一个不像路的形状
+  return out.sort((x, y) => x.d - y.d).slice(0, 2).sort((x, y) => x.t - y.t);
+}
+
+/** 经必经点分段走完 A→B。任一段不通则退回直连 */
+let WAY_KEEP = null;
+function routeVia(a, b, idx) {
+  const via = waypointsFor(a, b)
+    .filter((v) => !WAY_KEEP || WAY_KEEP.has(`${v.nd.id}|${idx}`));
+  if (!via.length) return route(a, b);
+  const stops = [a, ...via.map((v) => ({ id: `~${v.nd.id}`,
+    longitude: v.nd.longitude, latitude: v.nd.latitude })), b];
+  for (const st of stops) {
+    if (seatCell.has(st.id)) continue;
+    let [x, y] = cell(st.longitude, st.latitude);
+    if (cost[y * COLS + x] === BLOCK) {                 // 关常筑在陡处，就近落到能走的一格
+      let bd = 1e9, best = null;
+      for (let dr = -6; dr <= 6; dr += 1) for (let dc = -6; dc <= 6; dc += 1) {
+        const cc = x + dc, rr = y + dr;
+        if (cc < 0 || cc >= COLS || rr < 0 || rr >= ROWS) continue;
+        if (cost[rr * COLS + cc] === BLOCK) continue;
+        const d = dr * dr + dc * dc;
+        if (d < bd) { bd = d; best = [cc, rr]; }
+      }
+      if (best) [x, y] = best;
+    }
+    seatCell.set(st.id, [x, y]);
+  }
+  let total = 0;
+  const cells = [];
+  for (let i = 0; i + 1 < stops.length; i += 1) {
+    const leg = route(stops[i], stops[i + 1]);
+    if (!leg) return route(a, b);
+    total += leg.cost;
+    cells.push(...(cells.length ? leg.cells.slice(1) : leg.cells));
+  }
+  return { cost: total, cells };
+}
+
+// ── 必经点去重：一个关只归离它最近的两条边 ──────────────────────────
+//
+// 不去重的后果实测过：79km 之内的边都把它认作必经点，于是**关道边从 27 涨到 50**
+// （占全图两成一），行军普遍变慢、大势力更能滚——ρ 从 0.37 弹到 0.60，
+// 评测的区分度当场垮掉。
+//
+// 一个关扼守的是**一条**路，不是它周围所有的路。虎牢关同时挂在河南尹–上党
+// 就是这类错：洛阳去上党翻太行走天井关，不经虎牢。
+{
+  const claim = new Map();                       // nodeId → [{pairIdx, d}]
+  pairs.forEach(([a, b], i) => {
+    for (const v of waypointsFor(a, b)) {
+      if (!claim.has(v.nd.id)) claim.set(v.nd.id, []);
+      claim.get(v.nd.id).push({ i, d: v.d });
+    }
+  });
+  const keep = new Set();
+  for (const [id, list] of claim) {
+    // 渡口与港留三条：一个渡口常服务多条路线
+    const nd = nodes.find((n) => n.id === id);
+    // 关与谷道只归**一条**边：一个关扼守的是一条路。留两条时关道边有 40 条
+    // （手画表是 27），行军普遍变慢，ρ 弹到 0.60。渡口与港留两条——
+    // 一个渡口确实常服务多条路线
+    const n = (nd?.kind === "ford" || nd?.kind === "port") ? 2 : 1;
+    for (const { i } of list.sort((x, y) => x.d - y.d).slice(0, n)) keep.add(`${id}|${i}`);
+  }
+  WAY_KEEP = keep;
+}
+
+const routed = pairs.map(([a, b], i) => ({ a, b, r: routeVia(a, b, i) })).filter((x) => x.r);
 console.log(`逐对求最省路径 ${((Date.now() - t0) / 1000).toFixed(1)}s　通 ${routed.length}/${pairs.length}`);
 
 // ── 标定：一格平地的代价 → 「1 = 100km 平原」 ───────────────────────

@@ -1666,7 +1666,16 @@ export function PlayClient() {
   // 就是一层噪点
   // 关津港仓在**棋盘档就要出全**：它们是路上的据点，是「这一仗怎么打」的一部分，
   // 不是放大后才看的细部。势力图那一档一个都不出
+  //
+  // **只画活着的据点。** 判准是用户定的那一条：凡是画上去的，都得能被占、
+  // 被打、被守，或者能解释前三者。
+  //
+  //   不在任何一条路上的（阳关、徐闻、侯官、敖仓、郿坞）——走不到，等于不存在
+  //   古战场七个——扼守价值实测全是 0，堵死也没人绕路；12 局 5493 场野战
+  //     没有一场发生在它们旁边。它们是「这里打过一仗」，不是「这里能打一仗」。
+  //     数据留着（史料是好的），图上不画
   const nodeMarks = useMemo(() => (lod === 0 || !engine ? [] : engine.nodes)
+    .filter((n) => n.kind !== "battlefield" && engine.G.sites.has(n.id))
     .map((n) => ({
       n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
       r: 12 / view.k ** 0.82,
