@@ -303,11 +303,21 @@
 .act-head .tier.t-cap { color: var(--seal); border-color: var(--seal); }
 .act-nums { font-size: 0.73rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .act-nums u { text-decoration: none; margin-inline-start: 0.4rem; color: var(--seal); }
+/* 详情分段。原本是一整句灰字被夹成两行，读者只看得到开头——
+   而最要紧的那几件（倾巢、背盟）常常在句尾，正好被夹掉。
+   改成分段的行内块：各段各自成块，夹行时夹掉的是整段而不是半句 */
 .act-detail {
+  display: flex; flex-wrap: wrap; gap: 0.16rem 0.5rem;
   font-size: 0.7rem; color: #8b8579; line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  max-height: 3rem; overflow: hidden;
 }
-.act.on .act-detail { -webkit-line-clamp: 4; }
+.act.on .act-detail { max-height: none; }
+.act-detail .seg { white-space: nowrap; }
+/* 段与段之间用竖线隔开，但不用 ｜ 字符——那是数据里的分隔符，
+   显示层自己画线，改了数据格式也不会露出裸符号 */
+.act-detail .seg + .seg { border-inline-start: 1px solid var(--rule); padding-inline-start: 0.5rem; }
+/* 倾巢、背盟这类是**警示**不是补充说明，不能和其余灰字同一个分量 */
+.act-detail .seg.warn { color: #9d3b2f; white-space: normal; }
 .act .cost { align-self: center; }
 .acts summary .only-winnable {
   margin-inline-start: 0.5rem; cursor: pointer; font: inherit; font-size: 0.7rem;
@@ -774,3 +784,7 @@
 .flash .powers i { font-style: normal; font-size: .72rem; text-align: right; }
 .flash .powers i.up { color: #8a6a24; }
 .flash .powers i.down { color: #9d3b2f; }
+/* 提示级：比警示轻一档。没有危局时才出现，两者不并排 */
+.crisis.tip { border-left-color: #6f7b5f; background: #f7f8f1; }
+.crisis.tip b { color: #5c6a4a; }
+.crisis b.inline { border: none; padding: 0; color: inherit; font-size: inherit; letter-spacing: 0; }

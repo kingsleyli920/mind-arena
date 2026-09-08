@@ -1752,6 +1752,27 @@ export function PlayClient() {
   })();
 
   /**
+   * 不耗令的候选还剩多少。
+   *
+   * 刺探与调任的 cost 是 0——它们不占本季令数，下了纯赚。而界面上此前
+   * 没有任何地方说这件事：新玩家看到「令数 6/6」就以为一切都要算计着花，
+   * 于是开局既不探也不调，全境「未探」、预告全是「未知」。
+   *
+   * 这不是猜的：48 局的榜上机器人每席·季用 3.31 次调任、模型只用 1.32，
+   * 而机器人赢在把免费的那部分用满（docs/EVAL.md 第 24 条）。人比模型
+   * 更容易漏掉它——模型至少读得到候选表里的 cost。
+   */
+  const freeLeft = candidates.filter((c) => {
+    if (c.cost !== 0 || picked.includes(c.key)) return false;
+    // **还要真的下得了**。免费不等于无限：刺探有本季配额（战报里那句
+    // 「scout 本季免费次数已用尽」就是它）。不走这一步的话，配额用完之后
+    // 提示条还在说「还有 2 条不耗令的候选」——那是在骗玩家去点一条必被拒的令。
+    // 判据与卡片上的禁用态同源（同一个 validate、同一个 adm.state）
+    if (!adm) return true;
+    return !validate(adm.state, { faction: seat, action: c.action }, engine.G, undefined, engine.roster);
+  });
+
+  /**
    * 危局：势力级的、会持续多季的坏状态。
    *
    * 「家底一览」里已经逐郡标了被围与断供，但**治所失守是势力级的**——
@@ -1860,6 +1881,24 @@ export function PlayClient() {
 
       {/* 危局条。治所失守这类势力级的坏状态会持续好几季，而战报每季重复
           同一句话——那是回声不是信息。常驻一条，并把出路一起给出来 */}
+      {/* 没有危局时，提示还剩多少不耗令的候选。两者不并排——
+          真出了危局，别的都不要紧 */}
+      {!crisis && freeLeft.length > 0 && (
+        <div className="crisis tip" role="status">
+          <b>提示</b>
+          <span>
+            还有 {freeLeft.length} 条<b className="inline">不耗令</b>的候选
+            {/* 按**候选 key 的前缀**取中文名，不按动作类型——
+                relief 与 withdraw 不是动作类型，是引擎派生的键（见 panels.ts） */}
+            （{[...new Set(freeLeft.map((c) => TYPE_CN[c.key.split(":")[0]] ?? c.key.split(":")[0]))]
+              .join("、")}）
+            ——它们不占本季令数。
+          </span>
+          {/* 这一句只在第一季说。逐季重复就是回声——治所失守那条战报
+              每季重播同一句话，正是我要避开的毛病 */}
+          {game.turn === 0 && <i>开局全境未探，攻城预告只会是「未知」；刺探不要钱。</i>}
+        </div>
+      )}
       {crisis && (
         <div className={`crisis ${crisis.level}`} role="status">
           <b>{crisis.level === "grave" ? "危局" : "警"}</b>
@@ -2623,9 +2662,38 @@ export function PlayClient() {
                                 {c.forecast.fog === "tier" && <u>未探</u>}
                               </span>
                             )}
-                            {/* 标签里的 ** 是给模型读的强调（如「**天下共讨之**」），
-                                界面上要剥掉，否则露出一对星号 */}
-                            <span className="act-detail">{c.label.replace(/\*\*/g, "")}</span>
+                            {/* 标签是**给模型的**一整句，界面上原样摊出来就是一堵墙：
+                                徽章已经说过的（缺口/可防守、升某档、倾国）在里面又重复
+                                一遍，真正有用的（出多少兵、敌守军、地形守将、倾巢）
+                                挤在同一行里读不出来。
+
+                                这里只做**显示层的分段**：按 ｜ 切开、丢掉徽章已说过的段、
+                                把倾巢挑出来当警示。不抠数值——这个文件反复写着
+                                「谁也不许从 label 抠正则」，那条禁令针对的是抠错了会
+                                静默读错的数；按分隔符切分最坏只是显示得难看，不会读错。
+
+                                ** 是给模型读的强调（如「**天下共讨之**」），要剥掉 */}
+                            {(() => {
+                              // ｜ 与 ； 都是标签里的天然分隔：前者分「面向」，
+                              // 后者分同一面向下的几件事（出兵／敌情／地形守将）
+                              const segs = c.label.replace(/\*\*/g, "").split(/[｜；]/)
+                                .map((x) => x.trim()).filter(Boolean);
+                              // 首段是对这条令的复述（「自X征Y（倾国）：…」），
+                              // 冒号前那截与标题、兵力徽章重复，去掉
+                              if (segs[0]) segs[0] = segs[0].replace(/^[^：]{0,40}：/, "");
+                              const dup = /^缺口.*可防守|^取下即升|^先野战/;
+                              const keep = segs.filter((x) => x && !dup.test(x));
+                              return (
+                                <span className="act-detail">
+                                  {keep.map((x, i) => (
+                                    <span key={i}
+                                      className={/^倾巢|^⚠|背盟|共讨/.test(x) ? "seg warn" : "seg"}>
+                                      {x}
+                                    </span>
+                                  ))}
+                                </span>
+                              );
+                            })()}
                           </span>
                           <b className="cost">
                             {why ? why.slice(0, 10) : c.cost === 0 ? "免费" : `${c.cost} 令`}
