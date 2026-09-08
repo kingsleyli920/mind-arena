@@ -68,6 +68,7 @@ const BASE = "/game/map/play-base.webp";
  * 只能离线出（tools/render-map-decor.mjs）
  */
 const DECOR = "/game/map/decor.webp";
+const WALL = "/game/map/wall.webp";
 /**
  * 林。
  *
@@ -2625,6 +2626,13 @@ export function PlayClient() {
           <img className="decor forest" src={FOREST} alt="" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="decor" src={DECOR} alt="" />
+          {/* 墙：过不去的地界。规则改成「山是墙、江是墙、关是墙上的口子」之后，
+              这件事必须在图上读得出来——底图把山画得好看，却答不了
+              「大军能不能从这儿过」。棋盘档才出：势力图那一档看的是形势不是路 */}
+          {lod >= 1 && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="decor wall" src={WALL} alt="" />
+          )}
           <canvas ref={canvasRef} />
           </div>
           {/*
@@ -3007,6 +3015,14 @@ export function PlayClient() {
             <ul>
               {/* 图例里的图元与图上是同一段代码画的：另画一份必然与地图分家。
                   每一对「图 + 名」用 nowrap 裹住，否则名字会被折到图的下一行 */}
+              {/* 地色那一层要先解释：图上最要紧的一件事就是「哪儿过得去」 */}
+              <li className="terrain-key">
+                <span><i style={{ background: "rgba(62,54,45,0)" }} />好走</span>
+                <span><i style={{ background: "rgba(62,54,45,0.34)" }} />难行</span>
+                <span><i style={{ background: "rgba(58,50,42,0.82)" }} />过不去</span>
+                <span><i style={{ background: "rgba(58,92,116,0.66)" }} />大江</span>
+                <em>地色由通行代价场画出：越深越难走。关渡就设在深色的豁口上</em>
+              </li>
               <li>
                 <span>{legendGlyph("gate")}关隘</span>
                 <span>{legendGlyph("pass")}谷道</span>

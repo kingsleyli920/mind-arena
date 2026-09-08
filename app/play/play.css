@@ -933,3 +933,13 @@
   font-family: "Songti SC", "STSong", serif;
 }
 .map-vec svg .faction-name.mine { fill: rgba(140, 59, 47, 0.9); }
+
+/* 「过不去」那一层。压在瓦片与林之上、疆域之下——疆域是注记，
+   而这一层是地本身的性质，该在注记之下 */
+.map-stage img.decor.wall { mix-blend-mode: multiply; }
+
+/* 图例里的地色小样：一小块色片而不是图元，因为它标的是**地本身**的性质 */
+.map-wrap .legend .terrain-key i {
+  display: inline-block; width: 1.5em; height: 0.72em; margin-inline-end: 0.3em;
+  border: 1px solid var(--rule); vertical-align: -0.08em; border-radius: 1px;
+}
