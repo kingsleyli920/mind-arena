@@ -542,3 +542,25 @@ test("规则摘要里的定档门槛与引擎一致", () => {
   assert.ok(!/多控两州\s*→\s*甲/.test(sys), "摘要里还留着旧门槛的写法");
   assert.match(PROMPT_VERSION, /^\d+\.\d+\.\d+$/);
 });
+
+// ── 军团圆点上那个字：三十一家必须互不相同 ──────────────────────────
+//
+// 撞了就等于图上两支不同势力的兵长得一模一样，而颜色本来就分不清三十一家。
+test("势力的一字缩写：全部互不相同", async () => {
+  const { factionAbbr } = await import("../app/play/faction-abbr.ts");
+  const b = JSON.parse(fs.readFileSync("public/game/runtime-194.json", "utf8"));
+  const seen = new Map();
+  for (const f of b.scenario.factions) {
+    const a = factionAbbr(f.name);
+    assert.equal([...a].length, 1, `${f.name} → 「${a}」不是一个字`);
+    assert.ok(!seen.has(a), `「${a}」撞了：${seen.get(a)} 与 ${f.name}`);
+    seen.set(a, f.name);
+  }
+  assert.equal(seen.size, b.scenario.factions.length);
+  // 几条取字规矩的样本。姓会撞，所以人名取名的末字
+  assert.equal(factionAbbr("袁绍"), "绍");
+  assert.equal(factionAbbr("袁术"), "术");
+  assert.equal(factionAbbr("吕布（张邈、陈宫）"), "布");
+  assert.equal(factionAbbr("李傕、郭汜"), "傕");
+  assert.equal(factionAbbr("白波军（杨奉、韩暹、李乐、胡才）"), "白");
+});

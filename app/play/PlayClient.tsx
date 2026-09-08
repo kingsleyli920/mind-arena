@@ -24,6 +24,7 @@ import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
 import { nextGrade } from "./grade-gap.ts";
+import { factionAbbr } from "./faction-abbr.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, marchSeasons, provCapOf, type EngineParams }
@@ -2565,6 +2566,12 @@ export function PlayClient() {
                       必须带 mark 类——整张 svg 是 pointer-events:none */}
                   <circle className="mark" cx={t.x} cy={t.y} r={rr * 1.9} fill="transparent" />
                   <circle className="army-dot" cx={t.x} cy={t.y} r={rr} fill={col} />
+                  {/* 圆点上写势力的一字缩写。颜色分不清三十一家，一个字就够；
+                      而「在不在动」由下面那圈虚环表达，不必再写「留／行」 */}
+                  <text className="army-abbr" x={t.x} y={t.y + rr * 0.36}
+                    textAnchor="middle" fontSize={rr * 1.12}>
+                    {factionAbbr(engine.nameOf.get(t.a.faction) ?? t.a.faction)}
+                  </text>
                   {/* 在途的加一圈虚环：静止与移动要一眼分得开 */}
                   {t.marching && (
                     <circle className="army-ring" cx={t.x} cy={t.y} r={rr * 1.55}

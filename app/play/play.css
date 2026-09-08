@@ -828,7 +828,15 @@
 /* ── 军团：一枚小圆点 ── */
 /* 此前是一顶帐 + 兵种徽 + 器械徽 + 一行字，四样挤在十几像素里。
    现在点上只答「谁的、在哪」，其余进悬停详情 */
-.map-vec svg .army-dot { stroke: rgba(30, 26, 20, 0.75); stroke-width: 0; }
+.map-vec svg .army-dot { stroke: rgba(28, 24, 18, 0.85); stroke-width: 0.6px;
+  vector-effect: non-scaling-stroke; }
+/* 圆点上的一字缩写。描一圈同色的边：势力色深浅不一，纯白或纯黑都会在某几家
+   上糊掉——描边让字在任何底色上都读得出 */
+.map-vec svg .army-abbr {
+  fill: #fbf8f1; paint-order: stroke; stroke: rgba(28, 24, 18, 0.55);
+  stroke-width: 2px; vector-effect: non-scaling-stroke;
+  font-weight: 700; pointer-events: none; user-select: none;
+}
 .map-vec svg .army.mine .army-dot { stroke-width: 0; filter: drop-shadow(0 0 2px rgba(0,0,0,.35)); }
 .map-vec svg .army-ring { fill: none; stroke: rgba(40, 34, 26, 0.6); }
 .map-vec svg .march-path { opacity: 0.5; stroke-linecap: round; stroke-linejoin: round; }
