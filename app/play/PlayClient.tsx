@@ -1252,6 +1252,64 @@ export function PlayClient() {
   }, [terr]);
 
   /**
+   * 每个郡辖境里**最宽的一条横行**：区域名写在哪、放不放得下。
+   *
+   * 郡不是城。魏郡是十五个县那一片，城叫邺；赵国五个县，城叫邯郸。
+   * 此前图上只有一枚城印、底下一块牌记写着「魏郡」——把一整个省画成了
+   * 一座城，还把城的名字写错了。名字数据一直是对的（105 个郡的治所名
+   * 全有，且没有一个与郡名相同），错的是画法。
+   *
+   * 所以：城印底下的牌记写**治所名**，郡名写进**辖境的阴影里**。
+   *
+   * 位置不取重心——L 形与新月形的郡（沿河、环山的都是）重心会落在境外。
+   * 取「最宽的一条横行」的中点：横排的字要的正是横向的空间，
+   * 而这条行的长度同时就是**能不能写下**的答案。放不下就不写，
+   * 这条规则自带 LOD——整幅可见时只有大郡有名，放大后小郡自己长出来。
+   */
+  const junBand = useMemo(() => {
+    if (!terr) return null;
+    const { cols, rows, none } = terr.meta;
+    const cell = (terr.meta as { cellSize?: number }).cellSize ?? 0.1;
+    type Band = { x: number; y: number; w: number; r: number };
+    const runs = new Map<string, Band[]>();
+    for (let r = 0; r < rows; r += 1) {
+      let c = 0;
+      while (c < cols) {
+        const k = terr.idx[r * cols + c];
+        if (k === none) { c += 1; continue; }
+        let e = c;
+        while (e + 1 < cols && terr.idx[r * cols + e + 1] === k) e += 1;
+        const len = e - c + 1;
+        const id = terr.order[k];
+        if (id) {
+          if (!runs.has(id)) runs.set(id, []);
+          runs.get(id)!.push({
+            x: ((terr.meta.west + (c + len / 2) * cell) - MAP.west) * MAP.ppd,
+            y: (MAP.north - (terr.meta.north - (r + 0.5) * cell)) * MAP.ppd,
+            w: len * cell * MAP.ppd, r,
+          });
+        }
+        c = e + 1;
+      }
+    }
+    // 每郡留**三条**最宽的行，且彼此至少隔三行——只留一条的话，
+    // 那一条常常正压在自己的城印上（实测魏郡与赵国最宽行同为 16 格，
+    // 赵国写得出来、魏郡写不出来，差别就在城印压住了唯一那个落点）
+    const out = new Map<string, Band[]>();
+    for (const [id, list] of runs) {
+      const sorted = list.sort((a, b) => b.w - a.w || a.r - b.r);
+      const keep: Band[] = [];
+      for (const b of sorted) {
+        if (keep.length >= 3) break;
+        if (keep.some((x) => Math.abs(x.r - b.r) < 3)) continue;
+        keep.push(b);
+      }
+      out.set(id, keep);
+    }
+    return out;
+  }, [terr]);
+
+  /**
    * 指到（或钉住）某郡时，把它的**辖境**整块点亮。
    *
    * 郡国界常驻着，但极淡——一百零五圈轮廓若都画得清楚，图就成了网格纸。
@@ -1839,7 +1897,10 @@ export function PlayClient() {
       // 牌记比图元收得更狠一点：字在屏上只需**够读**，不需要跟着放大。
       // 1/k^0.88 意味着屏上按 k^0.12 长——十四倍下也只大三成半
       const size = (m.isSeat ? 25 : 21) / view.k ** 0.88;
-      const w = m.c.name.length * size * 1.02, h = size * 1.3;
+      // 牌记写的是**城**的名字——邺、邯郸、濮阳，不是它所在的郡。
+      // 这枚城印画的就是那座城；郡名另写在辖境里（见 junBand）
+      const nm = m.c.seat || m.c.name;
+      const w = textWidth(nm, size) + size * 0.1, h = size * 1.3;
       // 城下有建筑时牌记往下让一档，否则字压在屋顶上
       const nBuild = lod >= 2 && m.mine ? m.st.buildings.length : 0;
       const nRes = lod >= 2
@@ -1851,7 +1912,7 @@ export function PlayClient() {
       const y = m.y + m.base * (0.62 + rows * 0.5) + 4 / view.k ** 0.88;
       const box: Box = [x, y, w, h];
       if (!fitLabel(placed, [box]) && focus !== m.c.id) return null;
-      return { id: m.c.id, name: m.c.name, x: m.x, y: y + size, size, w: w + 8 / view.k ** 0.88,
+      return { id: m.c.id, name: nm, x: m.x, y: y + size, size, w: w + 8 / view.k ** 0.88,
                hot: focus === m.c.id };
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
@@ -1887,6 +1948,31 @@ export function PlayClient() {
       return { id: m.n.id, name: m.n.name, x: m.x + dx, y: m.y + dy, size };
     }
     return null;
+  }).filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // ── 郡名：写进辖境的阴影里 ──────────────────────────────────────
+  //
+  // 字号由那条最宽行的宽度定：写不下就不写。所以整幅可见时只有南阳、
+  // 汝南这样的大郡有名，放大之后小郡自己长出来——与牌记、关津同一套 LOD。
+  //
+  // 指到／钉住的那个郡例外：它的辖境正整块亮着，名字必须跟上，
+  // 不然「我指的这一片是谁」还是答不出来。
+  const junNames = (lod < 1 || !junBand ? [] : marks).map((m) => {
+    const bands = junBand.get(m.c.id);
+    if (!bands?.length) return null;
+    const hot = focus === m.c.id || pinned === m.c.id;
+    // 字号由**最宽**那条行定（占它七成），三条落点共用同一个字号：
+    // 换落点是为了躲开城印，不是为了把字写小
+    const fit = (bands[0].w * 0.7) / Math.max(1, m.c.name.length);
+    const size = Math.min(fit, 34 / view.k ** 0.88);
+    // 小于这个就读不出来了，不如不写
+    if (!hot && size < 13 / view.k ** 0.88) return null;
+    const w = textWidth(m.c.name, size), h = size * 1.3;
+    const slots: Box[] = bands.map((b) => [b.x - w / 2, b.y - h * 0.7, w, h]);
+    const got = fitLabel(placed, slots);
+    if (!got && !hot) return null;
+    const b = got ? bands[slots.findIndex((x) => x === got)] : bands[0];
+    return { id: m.c.id, name: m.c.name, x: b.x, y: b.y + size * 0.32, size, hot };
   }).filter((l): l is NonNullable<typeof l> => l !== null);
 
   /** 郡 → 图上坐标。道路、箭头、军团都要它 */
@@ -2455,6 +2541,12 @@ export function PlayClient() {
             {roadTips.map((t) => (
               <text key={`d-${t.key}`} className="road-tip" x={t.x} y={t.y}
                 textAnchor="middle" fontSize={t.size}>{t.text}</text>
+            ))}
+            {/* 郡名题记：写在辖境里，是**区域**的名字，不是城的名字。
+                画在城印与关津之前——它是底层的地名，不该压住上面的符号 */}
+            {junNames.map((l) => (
+              <text key={`jn-${l.id}`} className={`jun-name${l.hot ? " hot" : ""}`}
+                x={l.x} y={l.y} textAnchor="middle" fontSize={l.size}>{l.name}</text>
             ))}
             {/* 关津港仓：各有形制。关隘与港口整幅可见，其余放大后才铺开 */}
             {nodeEls}

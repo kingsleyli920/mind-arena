@@ -910,3 +910,14 @@
 /* 对局中按**倒序**排（最近的在最上面）：查的多半是刚发生的事。
    终局那份是正序——那是给人从头读一遍的 */
 .chron-fold .chron { max-height: 11rem; }
+
+/* 郡名题记：写在辖境的阴影里。它是一整片地的名字，不是一座城的名字——
+   所以不压纸签（那是牌记的样式，牌记标的是城），而是像旧图上的手书地名
+   一样直接落在地面上：淡、疏、带一点字距 */
+.map-vec svg .jun-name {
+  fill: rgba(72, 62, 48, 0.5); letter-spacing: 0.22em;
+  paint-order: stroke; stroke: rgba(250, 246, 237, 0.55); stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke; pointer-events: none;
+  font-family: "Songti SC", "STSong", serif;
+}
+.map-vec svg .jun-name.hot { fill: rgba(140, 59, 47, 0.85); font-weight: 700; }
