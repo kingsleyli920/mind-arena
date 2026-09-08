@@ -2650,6 +2650,11 @@ export function PlayClient() {
               const y = (MAP.north - p.latitude) * MAP.ppd;
               const s = 30 / view.k ** 0.82;
               const mine = a.faction === seat;
+              // 营垒与那行字的位置：从城印中心往东推出进度环的半径再加一点。
+              // 摆在东侧而不是正下方，是为了避开城名那块牌记（它在城的正下方）
+              const cwA = (marks.find((m) => m.c.id === a.target)?.base ?? 24) * 2.3;
+              const campX = x + cwA * 0.52 * 1.3 + s * 0.95;
+              const campY = y - cwA * 0.3;
               return (
                 // 城下的围军画营垒——与在途的行营是同一套画。此前这里是一面
                 // 手画的三角小旗，与旁边的笔墨城印摆在一起就是两套语言
@@ -2665,7 +2670,16 @@ export function PlayClient() {
                   {(() => {
                     const tgt = game.commanderies[a.target!];
                     if (!tgt) return null;
-                    const rr = s * 1.35;
+                    // 圆心取**城印的中心**，不是郡的锚点。
+                    //
+                    // 被围的城上此前画着两个圈：城印里一个朱红虚线圈（绕城印，
+                    // 心在 y − 0.3w），军团层这一个褐色进度环（绕锚点，心在 y）。
+                    // 两个圆心差着 0.7 个城印宽，于是一实一虚交叠成一团，
+                    // 城墙还被从中间切开——实测那正是围城处「看不懂」的来源。
+                    // 现在同心，且这一环走在虚线圈之外，读起来是「圈外一道钟」
+                    const cw = (marks.find((m) => m.c.id === a.target)?.base ?? 24) * 2.3;
+                    const cy = y - cw * 0.3;
+                    const rr = cw * 0.52 * 1.3;
                     const own = tgt.owner === seat;
                     const cap = Math.max(1, provCapOf(tgt, engine.P));
                     // 己方城：存粮剩余比例。他方城：已围季数占上限的比例
@@ -2675,10 +2689,10 @@ export function PlayClient() {
                     const A = -Math.PI / 2, B = A + Math.PI * 2 * frac;
                     const large = frac > 0.5 ? 1 : 0;
                     const px = (t: number) => x + Math.cos(t) * rr;
-                    const py = (t: number) => y + Math.sin(t) * rr;
+                    const py = (t: number) => cy + Math.sin(t) * rr;
                     return (
                       <>
-                        <circle className="siege-track" cx={x} cy={y} r={rr}
+                        <circle className="siege-track" cx={x} cy={cy} r={rr}
                           strokeWidth={3.2 / view.k ** 0.82} />
                         {frac > 0.001 && (
                           <path className={`siege-gauge${frac <= 0.26 ? " urgent" : ""}`}
@@ -2690,11 +2704,13 @@ export function PlayClient() {
                       </>
                     );
                   })()}
-                  <ArmyMark x={x + s * 2.1} y={y - s * 0.25} s={s * 0.86}
+                  {/* 营垒摆在进度环**之外**。此前按 2.1s 摆，而环是 1.35s——
+                      营垒正好骑在环上；现在按环半径推出去，无论城印多大都不相压 */}
+                  <ArmyMark x={campX} y={campY - s * 0.25} s={s * 0.86}
                     color={engine.colorOf.get(a.faction) ?? "#7a7266"}
                     marching={false} at={a.id}
                     unit={lod >= 1 ? a.unit : undefined} gear={lod >= 1 ? a.gear : undefined} />
-                  <text x={x + s * 2.1} y={y + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
+                  <text x={campX} y={campY + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
                     {/* 存粮只在**自己的城**被围时报：他方城的存粮看不见，
                         报出来就是免费情报 */}
