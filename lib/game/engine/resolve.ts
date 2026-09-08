@@ -15,7 +15,8 @@ import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
   FORMATION_CN, unitPower, unitGuard,
   unitName } from "./combat.ts";
-import { marchSeasons, provCapOf, type EngineParams } from "./params.ts";
+import { marchSeasons, provCapOf, siegeEat, siegeHoldSeasons, type EngineParams }
+  from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
   isFiller, suadeChance } from "./officers.ts";
 import { GRADE_CN, GRADE_RANK, gradeOf, standingOf, epochLimitFor, type Geography } from "./victory.ts";
@@ -911,7 +912,9 @@ export function resolve(
     // 不加这一条的话，「一支六百人的偏师饿死两万守军的大郡」仍然成立——
     // 那正是这条规则最不想鼓励的顿兵封锁
     const grip = besiegedBy(s, tgt.id, tgt.owner, P, g);
-    if (grip && !starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= 1; }
+    // 耗粮随城中人马变：屯重兵于孤城，粮尽更快。式子在 params.siegeEat 一处，
+    // 候选标签与界面读的是同一个（缺口曾在候选与结算各算一遍，那次的教训）
+    if (grip && !starved.has(tgt.id)) { starved.add(tgt.id); tgt.provisions -= siegeEat(tgt, P); }
     if (grip && tgt.provisions <= 0) {
       const loser = tgt.owner;
       // 粮尽而降，不经攻城判定：守军成建制归降（比强攻破城留得多），
@@ -1100,7 +1103,8 @@ export function resolve(
       // 围困就永远推不动进度——那等于「持续围城」这条机制只会白耗攻方的兵
       if (besiegedBy(s, c.id, f.id, P, g)) {
         log(s, { kind: "besieged", faction: f.id, at: c.id,
-                 text: `${c.id} 被围，本季无产出（存粮尚可支 ${c.provisions} 季）` });
+                 text: `${c.id} 被围，本季无产出（存粮尚可支 ${siegeHoldSeasons(c, P)} 季`
+                     + `${siegeEat(c, P) > 1 ? `，城中兵多，每季耗 ${siegeEat(c, P)}` : ""}）` });
         continue;
       }
       // 围解则存粮逐季回补。不补的话一座被围过的城就永远是空仓，

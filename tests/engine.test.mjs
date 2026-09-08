@@ -14,7 +14,8 @@ import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/co
 import { observe } from "../lib/game/engine/observe.ts";
 import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams, marchSeasons, provisionsCap, provCapOf } from "../lib/game/engine/params.ts";
+import { loadParams, marchSeasons, provisionsCap, provCapOf, siegeEat, siegeHoldSeasons }
+  from "../lib/game/engine/params.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { buildIndex, captureFrame, attachOutcome, FORM_IDS } from "../lib/game/replay.ts";
 import { tierOf } from "../lib/game/engine/intel.ts";
@@ -828,7 +829,10 @@ test("围城：两只钟，先响的那只决定围城怎么结束", () => {
     target: edge.to, from: from.id, commander: null, strength: "allout", siegeGear: "none" } }],
     G, P, ROSTER, GEO).state;
   assert.ok(cur.armies.some((a) => a.target === edge.to), "首攻就破了城，测不出围困");
-  assert.equal(cur.commanderies[edge.to].provisions, prov0 - 1, "围得住却没扣粮");
+  // 扣多少由 siegeEat 定：城中戍兵超过开局戍兵的倍数越大，耗得越快。
+  // 这里塞了 12000 兵，多半已超编——写死 −1 会在改耗粮规则时静默失效
+  assert.equal(cur.commanderies[edge.to].provisions,
+    prov0 - siegeEat(s.commanderies[edge.to], P), "围得住却没扣粮");
 
   for (let i = 0; i < P.siegeMaxSeasons + 1; i += 1) {
     cur = resolve(refreshAp(cur, P), [], G, P, ROSTER, GEO).state;
@@ -2372,7 +2376,7 @@ test("围城：合围——四面都是我的地，不必再问带了多少人",
   assert.ok(army, "军团没站到城下");
   assert.ok(army.troops < cur.commanderies[tid].garrison * P.siegeGripRatio,
     `兵力 ${army.troops} 已达守军的 ${P.siegeGripRatio} 倍，测的就不是合围了`);
-  assert.equal(cur.commanderies[tid].provisions, prov0 - 1,
+  assert.equal(cur.commanderies[tid].provisions, prov0 - siegeEat(cur.commanderies[tid], P),
     "四面都是我的地，却没断得了它的粮 —— 合围没生效");
 });
 
@@ -2403,7 +2407,8 @@ test("孤悬：四邻皆属一家，不必出兵，粮尽即归附", () => {
   for (const e of G.adj.get(victim.id) ?? []) t.commanderies[e.to].owner = me;
   const one = resolve(t, [], G, P, ROSTER, GEO).state;
   assert.notEqual(one.commanderies[victim.id].owner, me, "第一季就白送了");
-  assert.equal(one.commanderies[victim.id].provisions, prov0 - 1, "孤悬却没扣粮");
+  assert.equal(one.commanderies[victim.id].provisions,
+    prov0 - siegeEat(one.commanderies[victim.id], P), "孤悬却没扣粮");
 });
 
 test("归附：无主郡周围只有一家势力，久之举郡归附；两家以上则是四战之地", () => {
@@ -2597,4 +2602,26 @@ test("界面的『离下一档还差多少』从 GRADE_CUTS 算，不写死", as
     "超档之上不该再报增量门槛：霸与王判的是绝对疆域，与开局无关");
   // 门槛一改，这几条必须跟着变——它是从 GRADE_CUTS 算的，不是抄的
   assert.equal(nextGrade(0, 3).score, 1.5);
+});
+
+// ── 围城耗粮随城中人马变 ────────────────────────────────────────────
+//
+// 此前存粮每季恒 −1，与城里有多少人无关：三万三千戍兵的豫章郡与三百兵的
+// 上谷郡撑一样久，而存粮上限只有 2–5（105 郡里 63 个是 4）——于是每一次
+// 围城都是同一段时间。
+test("围城耗粮：屯重兵于孤城，粮尽更快", () => {
+  const base = { startGarrison: 4000, provisions: 4 };
+  assert.equal(siegeEat({ ...base, garrison: 4000 }, P), 1, "本级戍兵每季耗 1");
+  assert.equal(siegeEat({ ...base, garrison: 5000 }, P), 1, "略高于本级仍是 1");
+  assert.equal(siegeEat({ ...base, garrison: 6000 }, P), 2, "超 1.5 倍耗 2");
+  assert.equal(siegeEat({ ...base, garrison: 12000 }, P), 3, "超 3 倍耗 3");
+  assert.equal(siegeEat({ ...base, garrison: 60000 }, P), P.siegeEatMax, "耗粮有上限");
+  // 撑得住几季 = 存粮 ÷ 每季耗，向上取整
+  assert.equal(siegeHoldSeasons({ ...base, garrison: 4000 }, P), 4);
+  assert.equal(siegeHoldSeasons({ ...base, garrison: 12000 }, P), 2,
+    "同样四石粮，塞三倍兵只撑得住两季");
+  // **不是非黑即白**：富城存粮上限本来就厚，屯得起兵又耐围
+  assert.ok(siegeHoldSeasons({ startGarrison: 4000, garrison: 12000, provisions: 9 }, P)
+    > siegeHoldSeasons({ startGarrison: 4000, garrison: 4000, provisions: 2 }, P),
+    "存粮九石的大城塞满兵，也该比存粮两石的小城耐围");
 });

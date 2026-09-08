@@ -853,3 +853,13 @@
   fill: none; stroke: rgba(52, 45, 37, 0.62); stroke-linecap: round;
 }
 .map-vec svg .battle.mine path { stroke: rgba(150, 46, 34, 0.82); }
+
+/* 围城进度环。画的是守方的钟——存粮还剩几成（自己的城）或已围几季（他方的城）。
+   围城是这局里最长的一条时间线，此前图上只有一个圈，撑多久要去战报里数 */
+.map-vec svg .siege-track {
+  fill: none; stroke: rgba(52, 45, 37, 0.18); stroke-linecap: round;
+}
+.map-vec svg .siege-gauge {
+  fill: none; stroke: rgba(120, 92, 48, 0.75); stroke-linecap: round;
+}
+.map-vec svg .siege-gauge.urgent { stroke: rgba(157, 59, 47, 0.9); }

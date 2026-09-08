@@ -106,6 +106,8 @@ export interface EngineParams {
   betrayBanSeasons: number;
   /** 围城：持续制 */
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
+  /** 围城耗粮的分档：城中戍兵超过开局戍兵这几个倍数时，每季多耗一石 */
+  siegeEatStep1: number; siegeEatStep2: number; siegeEatMax: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
   siegeGripRatio: number; siegeEncircle: boolean;
@@ -316,6 +318,9 @@ export function loadParams(pack: RawPack): EngineParams {
     betrayMoralePenalty: g("外交", "背盟_民心罚"),
     betrayBanSeasons: g("外交", "背盟_禁缔盟季数"),
     siegeMaxSeasons: g("围城", "上限季数"),
+    siegeEatStep1: g("围城", "耗粮_超编一档"),
+    siegeEatStep2: g("围城", "耗粮_超编二档"),
+    siegeEatMax: g("围城", "耗粮上限"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
     siegeGripRatio: g("围城", "有效围困比"),
     // 布尔值不走 num()——那个函数是给数值用的，会把 true 判成缺数据
@@ -448,4 +453,29 @@ export function provCapOf(
     + (c.buildings.includes("granary") ? P.granarySeasons : 0)
     // 方圆结圆自守，城中多囤一季。围它要多熬一季，而强攻的判据一点不动
     + (c.formation ? P.formProv[c.formation] ?? 0 : 0);
+}
+
+/**
+ * 被围时每季耗多少存粮。
+ *
+ * 此前恒 1，与城里有多少人无关——三万三千戍兵的豫章郡与三百兵的上谷郡撑一样久。
+ * 现在按**城中戍兵相对开局戍兵的倍数**分档：基准取 startGarrison（由户口算出），
+ * 那正是「这座城本来养得起多少兵」。
+ *
+ * 一处出处：结算扣粮、候选标签上的「存粮可支 N 季」、界面的进度环都读它。
+ * 分家的代价这个仓库付过好几次（缺口曾在候选与结算各算一遍）。
+ */
+export function siegeEat(
+  c: { garrison: number; startGarrison: number }, P: EngineParams,
+): number {
+  const ratio = c.garrison / Math.max(1, c.startGarrison);
+  const n = ratio >= P.siegeEatStep2 ? 3 : ratio >= P.siegeEatStep1 ? 2 : 1;
+  return Math.min(P.siegeEatMax, n);
+}
+
+/** 被围时还撑得住几季。存粮 ÷ 每季耗粮，向上取整 */
+export function siegeHoldSeasons(
+  c: { garrison: number; startGarrison: number; provisions: number }, P: EngineParams,
+): number {
+  return Math.ceil(c.provisions / siegeEat(c, P));
 }

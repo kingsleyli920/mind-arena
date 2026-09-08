@@ -2609,12 +2609,49 @@ export function PlayClient() {
                 // 30/k^0.82，1.15s 正好压在城墙上——图上是围军蹲在城里。
                 // 往东北挪到 2.1s，字再压在营垒下面，避开城名那块牌记（它在城的正下方）
                 <g key={a.id} className={`siege-camp${mine ? " mine" : ""}`}>
+                  {/* 围城进度环。围城是这局里最长的一条时间线，而图上此前只有
+                      一个圈——「还能撑多久」只能去战报里数季数。
+                      画的是**守方的钟**：存粮还剩几成。己方的城看得见真值；
+                      他方的城看不见存粮，那就只画已围了几季（一季一格），
+                      不编一个自己不知道的数出来 */}
+                  {(() => {
+                    const tgt = game.commanderies[a.target!];
+                    if (!tgt) return null;
+                    const rr = s * 1.35;
+                    const own = tgt.owner === seat;
+                    const cap = Math.max(1, provCapOf(tgt, engine.P));
+                    // 己方城：存粮剩余比例。他方城：已围季数占上限的比例
+                    const frac = own
+                      ? Math.max(0, Math.min(1, tgt.provisions / cap))
+                      : Math.max(0, Math.min(1, 1 - a.siegeSeasons / Math.max(1, engine.P.siegeMaxSeasons)));
+                    const A = -Math.PI / 2, B = A + Math.PI * 2 * frac;
+                    const large = frac > 0.5 ? 1 : 0;
+                    const px = (t: number) => x + Math.cos(t) * rr;
+                    const py = (t: number) => y + Math.sin(t) * rr;
+                    return (
+                      <>
+                        <circle className="siege-track" cx={x} cy={y} r={rr}
+                          strokeWidth={3.2 / view.k ** 0.82} />
+                        {frac > 0.001 && (
+                          <path className={`siege-gauge${frac <= 0.26 ? " urgent" : ""}`}
+                            d={`M${px(A).toFixed(1)} ${py(A).toFixed(1)}`
+                              + `A${rr.toFixed(1)} ${rr.toFixed(1)} 0 ${large} 1 `
+                              + `${px(B).toFixed(1)} ${py(B).toFixed(1)}`}
+                            strokeWidth={3.2 / view.k ** 0.82} />
+                        )}
+                      </>
+                    );
+                  })()}
                   <ArmyMark x={x + s * 2.1} y={y - s * 0.25} s={s * 0.86}
                     color={engine.colorOf.get(a.faction) ?? "#7a7266"}
                     marching={false} at={a.id}
                     unit={lod >= 1 ? a.unit : undefined} gear={lod >= 1 ? a.gear : undefined} />
                   <text x={x + s * 2.1} y={y + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
+                    {/* 存粮只在**自己的城**被围时报：他方城的存粮看不见，
+                        报出来就是免费情报 */}
+                    {game.commanderies[a.target!]?.owner === seat
+                      ? `·粮 ${game.commanderies[a.target!].provisions}` : ""}
                   </text>
                 </g>
               );
