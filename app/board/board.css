@@ -70,3 +70,20 @@ table.board tr.bot td.strong { color: #a79b80; }
 table.rulers-table { margin: 16px 0 0; }
 table.rulers-table th { text-align: right; }
 table.rulers-table th.who, table.rulers-table td.who { text-align: left; min-width: 16em; }
+
+/* 历史：按规则代分组。代与代之间要看得出断口。
+   类名叫 rule-era 不叫 era——页眉那个「兴平元年」用的就是 .era，
+   同一页里两个不同含义的 era 迟早撞（写这段时就撞了一次） */
+.history { padding: 26px 24px 0; max-width: 76em; }
+.history h2 { margin: 0 0 10px; font-size: 15px; letter-spacing: .16em; font-weight: 600; color: #d9cfb4; }
+.history .note { margin: 0 0 16px; max-width: 58em; font-size: 12.5px; line-height: 1.85; color: #9c9078; }
+.history .note b { color: #c3b795; }
+.history .note.dim { margin-top: 14px; color: #7d735d; }
+.rule-era { margin: 0 0 20px; padding-left: 12px; border-left: 2px solid #3a3226; }
+.rule-era.now { border-left-color: #8a6a2e; }
+.rule-era h3 { margin: 0 0 6px; font-size: 12.5px; font-weight: 500; letter-spacing: .08em; color: #a3977c; }
+.rule-era h3 code { color: #b09a64; font-size: 11.5px; }
+.rule-era h3 b { color: #e0c07a; font-weight: 600; }
+.rule-era h3 i { font-style: normal; color: #7d735d; }
+.rule-era table.board td.botcell { color: #7d735d; }
+.rule-era table.board td code { color: #8f866f; font-size: 11px; }

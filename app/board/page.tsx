@@ -1,4 +1,5 @@
 import board from "@/public/game/leaderboard.json";
+import history from "@/public/game/history.json";
 import "./board.css";
 
 export const metadata = { title: "汉末沙盘 · 排行榜" };
@@ -155,6 +156,50 @@ export default function BoardPage() {
             ))}
           </tbody>
         </table>
+      </section>
+
+      {/* 历史按「规则代」分组。代与代之间必须有断口——
+          把跨规则的榜画在同一条线上，是在制造一个不存在的趋势 */}
+      <section className="history">
+        <h2>历史</h2>
+        <p className="note">
+          规则数值一改，前后两份榜就<b>不可比</b>。所以历史不是一条线，是分代的：
+          同一代（规则数值的指纹相同）之内可以连起来看，跨代之间只能各读各的。
+        </p>
+        {history.eras.map((era) => (
+          <div key={era.fingerprint} className={era.fingerprint === history.current ? "rule-era now" : "rule-era"}>
+            <h3>
+              规则代 <code>{era.fingerprint.slice(0, 12)}</code>
+              {era.fingerprint === history.current
+                ? <b>{"\u3000当前（已冻结）"}</b> : <i>{"\u3000已废"}</i>}
+            </h3>
+            <table className="board">
+              <thead>
+                <tr>
+                  <th className="who">榜</th><th>日期</th><th>提交</th>
+                  {era.boards[0]?.rows.map((r) => <th key={r.id}>{r.id.split("/").pop()}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {era.boards.map((b) => (
+                  <tr key={b.id}>
+                    <td className="who">{b.id}</td>
+                    <td className="num">{b.date}</td>
+                    <td className="num"><code>{b.git}</code></td>
+                    {b.rows.map((r) => (
+                      <td key={r.id} className={`num${r.kind === "bot" ? " botcell" : ""}`}>{r.board}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+        <p className="note dim">
+          更早的几份榜不在这里，原因有二：一是它们的各臂跑在<b>不同代</b>的规则上
+          （当时边跑边改），那种榜内部就不可比；二是有的目录里躺着同一次跑的
+          几份快照，那是工作目录不是榜。两种情况都会被产出工具当场拒掉。
+        </p>
       </section>
 
       {/* 读这份榜之前要知道的事。放在页面上而不是脚注里——

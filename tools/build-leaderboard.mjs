@@ -13,6 +13,31 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 import { GRADE_SCORE, boardScore, contScore } from "../lib/arena/scoring.ts";
+import { ruleFingerprint } from "../lib/game/content/fingerprint.ts";
+
+/**
+ * 一份跑是在哪一代规则下跑的。
+ *
+ * 优先读 stamp 里盖的指纹；旧的跑没有（指纹是后加的），就**从它记的提交号
+ * 回溯**：`git show <commit>:内容包` 算一遍。这样历史才是真的——
+ * 否则「跨规则不可比」只能写成一句免责声明，而读者无从判断哪两份能比。
+ */
+const fpCache = new Map();
+function eraOf(run) {
+  const stamped = run.stamp?.packFingerprint;
+  if (stamped) return stamped;
+  const git = run.stamp?.git;
+  if (!git) return null;
+  if (fpCache.has(git)) return fpCache.get(git);
+  let fp = null;
+  try {
+    const pack = JSON.parse(
+      execSync(`git show ${git}:lib/game/content/pack-194.json`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
+    fp = ruleFingerprint(pack).hash;
+  } catch { fp = null; }
+  fpCache.set(git, fp);
+  return fp;
+}
 
 const dir = process.argv[2];
 const outArg = process.argv.slice(3).find((a) => a.startsWith("--out="));
@@ -33,7 +58,7 @@ if (!runs.length) { console.error(`${dir} 里没有结果文件`); process.exit(
 // 撞上了——五个臂里三个 0.2.0、两个 1.0.0，而那次提交只改了版本号与冻结
 // 标记，规则数值一个没动。旧的跑没有指纹（是后来才盖进 stamp 的），
 // 那种情况只能靠 --skew 显式放行，且必须写明理由——理由会跟着数据进页面。
-const fps = [...new Set(runs.map((r) => r.stamp?.packFingerprint).filter(Boolean))];
+const fps = [...new Set(runs.map(eraOf).filter(Boolean))];
 const versions = [...new Set(runs.map((r) => r.stamp?.packVersion ?? "?"))];
 const skewArg = process.argv.find((a) => a.startsWith("--skew="));
 const skew = skewArg ? skewArg.slice(7) : null;
@@ -41,15 +66,38 @@ if (fps.length > 1) {
   console.error(`✗ 这些臂跑在不同的规则数值上（指纹 ${fps.join("、")}）。不可并排读。`);
   process.exit(3);
 }
-if (versions.length > 1 && !skew) {
-  console.error(`✗ 这些臂的内容包版本不一致：${versions.join("、")}`);
-  console.error("  它们没有指纹（指纹是后加的），所以判不了规则数值是否真的相同。");
-  console.error("  先用 git diff 核实那几次提交有没有改数值，确认无改动后显式放行：");
-  console.error("    --skew=\"核实过：那次提交只改了版本号与冻结标记，数值未动\"");
+// 指纹一致时，版本号不一致是无关紧要的——那只说明标签滞后。
+// 只有连指纹都算不出来（提交号丢了）才需要人工放行
+if (fps.length === 0 && versions.length > 1 && !skew) {
+  console.error(`✗ 这些臂的内容包版本不一致（${versions.join("、")}），而指纹也算不出来。`);
+  console.error("  核实那几次提交有没有改数值，确认无改动后显式放行：");
+  console.error("    --skew=\"核实过：那次提交只改了版本号，数值未动\"");
   process.exit(3);
+}
+if (fps.length === 1 && versions.length > 1) {
+  console.log(`注：版本号 ${versions.join("/")} 不一致，但规则数值的指纹相同`
+    + `（${fps[0]}）——可以并排读。版本号只是滞后的标签。`);
 }
 
 const name = (r) => (r.agent === "model" ? r.model : r.agent);
+
+// 一份榜里同一个对局方不能出现两次。
+//
+// 实测撞过：一个工作目录里躺着同一次跑的三份快照（44 局、48 局、原始），
+// 工具把它们当成三个对局方，页面上出现三行同名、React 报重复 key。
+// 那不是一份榜，是个工作目录——榜目录里应当每个对局方恰好一份结果
+{
+  const seen = new Map();
+  for (let i = 0; i < runs.length; i += 1) {
+    const k = name(runs[i]);
+    if (seen.has(k)) {
+      console.error(`✗ ${dir} 里 ${k} 出现了两次：${files[seen.get(k)]} 与 ${files[i]}`);
+      console.error("  一份榜里每个对局方只能有一份结果。这个目录多半是工作目录，不是榜。");
+      process.exit(3);
+    }
+    seen.set(k, i);
+  }
+}
 const key = (x) => `${x.seed}|${x.seat}`;
 const METRICS = [
   ["grade", (x) => GRADE_SCORE[x.grade]],
@@ -123,6 +171,40 @@ const out = {
 };
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, `${JSON.stringify(out, null, 2)}\n`);
+
+// ── 历史：按「规则代」分组 ──────────────────────────────────────────
+//
+// 历史不是一条线，是分代的。规则数值一改，前后两份榜就不可比——
+// 把它们画在同一条折线上，是在制造一个不存在的趋势。
+// 所以按指纹分组，代与代之间在页面上要有明确的断口。
+// 历史**不跟着 --out 走**。--out 是「这一份榜写到哪」，历史是站点唯一的一份
+// 累积记录；跟着 --out 走的话，`--out=/tmp/x.json` 会把历史也写进 /tmp，
+// 于是「记下来了」其实什么都没记。实测踩过一次
+const histArg = process.argv.find((a) => a.startsWith("--history="));
+const HIST = histArg ? histArg.slice(10) : "public/game/history.json";
+const idArg = process.argv.find((a) => a.startsWith("--id="));
+const boardId = idArg ? idArg.slice(5) : path.basename(dir.replace(/\/$/, ""));
+// 产出时间取结果文件里最新的那个 mtime——「这份榜是什么时候跑出来的」
+const when = new Date(Math.max(...files.map((f) => fs.statSync(path.join(dir, f)).mtimeMs)))
+  .toISOString().slice(0, 10);
+const hist = fs.existsSync(HIST) ? JSON.parse(fs.readFileSync(HIST, "utf8")) : { eras: [] };
+const eraKey = fps.length === 1 ? fps[0] : "mixed";
+const entry = {
+  id: boardId, date: when, git: out.git, packVersion: out.packVersion,
+  // 各臂跑在不同规则上的榜要标出来，它内部就不可比，更不能与别人比
+  mixed: fps.length > 1 ? fps : null,
+  rows: rows.map((r) => ({ id: r.id, kind: r.kind, games: r.games, board: r.board, cont: r.cont })),
+};
+let era = hist.eras.find((e) => e.fingerprint === eraKey);
+if (!era) { era = { fingerprint: eraKey, boards: [] }; hist.eras.push(era); }
+era.boards = era.boards.filter((b) => b.id !== boardId).concat(entry)
+  .sort((a, b) => (a.date < b.date ? -1 : 1));
+// 代按各自最早的一份榜排序，最新的代放最后
+hist.eras.sort((a, b) => (a.boards[0]?.date ?? "") < (b.boards[0]?.date ?? "") ? -1 : 1);
+hist.current = eraKey;
+fs.writeFileSync(HIST, `${JSON.stringify(hist, null, 2)}\n`);
+console.log(`→ ${HIST}　${hist.eras.length} 代规则，共 `
+  + `${hist.eras.reduce((n, e) => n + e.boards.length, 0)} 份榜`);
 if (out.versionSkewNote) console.log(`⚠ 版本号不一致，已按理由放行：${out.versionSkewNote}`);
 console.log(`→ ${OUT}　${rows.length} 个对局方　包 ${out.packVersion}　`
   + `${(fs.statSync(OUT).size / 1024).toFixed(1)}KB`);

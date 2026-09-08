@@ -21,6 +21,14 @@ export function ruleFingerprint(pack: unknown): { count: number; hash: string } 
   };
   const p = pack as Record<string, unknown>;
   for (const k of ["constants", "actions", "victory", "terrain", "units", "skills"]) walk(p[k], k);
+  // 定档门槛在包里是**字符串**（"zhouScore >= 1"），只取数字会漏掉它——
+  // 而那正是这道闸最该拦的东西。实测漏过一次：改门槛前后两份榜的指纹相同，
+  // 于是一份旧规则的榜被判成「可以和新榜并排读」。
+  // 只从 victory[].test 里抠数字：说明文字里也有数字，但那些改措辞就会变
+  for (const v of (p.victory as Array<Record<string, unknown>> | undefined) ?? []) {
+    const test = typeof v.test === "string" ? v.test : "";
+    for (const m of test.matchAll(/-?\d+(?:\.\d+)?/g)) nums.push(`victory.${v.id}.test=${m[0]}`);
+  }
   nums.sort();
   // 不引第三方哈希：这里要的是「变了没有」，一个稳定的和就够
   let h = 0n;

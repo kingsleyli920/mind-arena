@@ -1,0 +1,54 @@
+{
+  "eras": [
+    {
+      "fingerprint": "8f74tlk3e22o",
+      "boards": [
+        {
+          "id": "board4",
+          "date": "2026-09-08",
+          "git": "cf02172",
+          "packVersion": "0.2.0/1.0.0",
+          "mixed": null,
+          "rows": [
+            {
+              "id": "z-ai/glm-5.3-flash",
+              "kind": "model",
+              "games": 48,
+              "board": 315.4,
+              "cont": 214
+            },
+            {
+              "id": "deepseek/deepseek-v4-flash",
+              "kind": "model",
+              "games": 48,
+              "board": 277,
+              "cont": 187
+            },
+            {
+              "id": "tencent/hy3",
+              "kind": "model",
+              "games": 48,
+              "board": 270.2,
+              "cont": 171
+            },
+            {
+              "id": "bot:purpose",
+              "kind": "bot",
+              "games": 48,
+              "board": 238.9,
+              "cont": 104
+            },
+            {
+              "id": "bot:balanced",
+              "kind": "bot",
+              "games": 48,
+              "board": 190.9,
+              "cont": 85
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "current": "8f74tlk3e22o"
+}

@@ -1,7 +1,7 @@
 {
   "packVersion": "0.2.0/1.0.0",
-  "packFingerprint": null,
-  "versionSkewNote": "核实过：8d71194→205074a 只改了 version 与 _frozen 标记（git diff 12 增 1 删，全是元数据），规则数值未动",
+  "packFingerprint": "8f74tlk3e22o",
+  "versionSkewNote": null,
   "frozen": {
     "日期": "2026-09-08",
     "依据提交": "8d71194",
@@ -24,7 +24,7 @@
   ],
   "baseline": "bot:purpose",
   "totalUsd": 6.56,
-  "git": "dbf5c0e",
+  "git": "cf02172",
   "rows": [
     {
       "id": "z-ai/glm-5.3-flash",
