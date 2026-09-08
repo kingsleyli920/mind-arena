@@ -648,7 +648,10 @@ export function PlayClient() {
   const [game, setGame] = useState<GameState | null>(null);
   const [seat, setSeat] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
-  const [flash, setFlash] = useState<{ mine: string[]; world: string[] }>({ mine: [], world: [] });
+  /** delta：本季各家郡数增减。由结算前后的归属对比算出，不从战报文字里抠——
+      「原属 X」那种解析一旦措辞改了就悄悄失效 */
+  const [flash, setFlash] = useState<{ mine: string[]; world: string[]; delta: Record<string, number> }>(
+    { mine: [], world: [], delta: {} });
   const [focus, setFocus] = useState<string | null>(null);
   // 点城筛选。地图此前是纯装饰：要打南阳，得去右边面板展开征伐、
   // 在二十条一行文本里找「自X征南阳郡」。地图知道南阳在哪，面板不知道
@@ -853,7 +856,7 @@ export function PlayClient() {
       seasons: seasons ?? engine.P.seasonsPerGame,
     }, engine.P);
     clearSave(); setResume(null);
-    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [] }); setFlips([]);
+    setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [], delta: {} }); setFlips([]);
     setRecords([]); setThinking({}); setSince(0); setPlans({});
     // 模型派给「除你之外郡数最多的 N 家」。派给最弱的几家没有意义：
     // 一郡小势力十六季里多半只在修城，看不出模型强弱
@@ -952,7 +955,17 @@ export function PlayClient() {
     const fresh = visibleLog(r.state, seat, before);
     // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
     // 补给消息埋掉——那是最该第一眼看到的东西
+    // 各家本季的郡数增减：与 setFlips 同一套口径（结算前后归属对比），
+    // 只是不限于己方
+    const delta: Record<string, number> = {};
+    for (const c of Object.values(r.state.commanderies)) {
+      const was = game.commanderies[c.id]?.owner ?? null;
+      if (c.owner === was) continue;
+      if (c.owner) delta[c.owner] = (delta[c.owner] ?? 0) + 1;
+      if (was) delta[was] = (delta[was] ?? 0) - 1;
+    }
     setFlash({
+      delta,
       mine: fresh.filter((e) => e.faction === seat).map((e) => cnText(e.text)),
       // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
       // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
@@ -1379,7 +1392,7 @@ export function PlayClient() {
               </div>
               <button onClick={() => {
                 setSeat(resume.seat); setGame(resume.game); setPicked(resume.picked);
-                setFlash({ mine: [], world: [] }); setFlips([]);
+                setFlash({ mine: [], world: [], delta: {} }); setFlips([]);
                 // since 决定模型看到的战报从哪一条起。读档不重置它会从 0 起算，
                 // 于是模型收到整局的日志——观测直接撑爆 token 预算
                 setSince(resume.game.log.length); setRecords([]); setThinking({});
@@ -1706,6 +1719,84 @@ export function PlayClient() {
       return { c, officers, note, warn: !!besieger || cut };
     })
     .sort((a, b) => Number(b.warn) - Number(a.warn) || cmp(a.c.id, b.c.id));
+  /**
+   * 天下形势：谁在涨。
+   *
+   * 战报里每季十二行「X 自 A 取 B」，信息都在，格局看不出来——读完只知道
+   * 天下很乱，不知道谁在赢。实测自己玩了一局：吕布连吞我三郡、袁绍在北边
+   * 连下四郡，而这两件事和「士燮取日南郡」在战报里是同一个分量。
+   *
+   * 只列前八家与自己。郡数是唯一算得准的公开量（易主是公开事件），
+   * 兵力与国库是不可见的，不能列——列了就是在给玩家假情报。
+   */
+  const powers = (() => {
+    const now: Record<string, number> = {};
+    for (const c of Object.values(game.commanderies)) {
+      if (c.owner) now[c.owner] = (now[c.owner] ?? 0) + 1;
+    }
+    // 本季增减取 flash.delta。**不能在这里现算**：since 在结算时就被推到了
+    // 日志末尾，render 时再 slice(since) 只会得到空——实测第一版就是这样，
+    // 表出来了而增减一个都不显示
+    const delta = flash.delta;
+    const rows = Object.entries(now)
+      .filter(([f]) => !game.factions[f]?.eliminated)
+      .map(([f, n]) => ({ f, n, d: delta[f] ?? 0, mine: f === seat }))
+      .sort((a, b) => b.n - a.n || cmp(a.f, b.f));
+    const top = rows.slice(0, 8);
+    // 自己没进前八也要在，否则这张表对玩家没用
+    if (!top.some((r) => r.mine)) {
+      const me2 = rows.find((r) => r.mine);
+      if (me2) top.push(me2);
+    }
+    return top;
+  })();
+
+  /**
+   * 危局：势力级的、会持续多季的坏状态。
+   *
+   * 「家底一览」里已经逐郡标了被围与断供，但**治所失守是势力级的**——
+   * 它让全境无产出，而界面上此前没有任何地方说这件事。实测自己玩了一局：
+   * 治所被吕布夺走后连着四季颗粒无收，战报里每季重复同一句话，
+   * 而唯一的出路「迁治」躺在征伐那一栏的第 N 条里，一次都没被注意到。
+   *
+   * 所以危局条不只报警，还要把出路一起给出来——引擎已经列了迁治候选，
+   * 这里只是把它顶到眼前。
+   */
+  const crisis = (() => {
+    const cap = me.capital;
+    const capLost = !cap || game.commanderies[cap]?.owner !== seat;
+    const besieged = myLands.filter((l) => l.note.endsWith("围"));
+    const cut = myLands.filter((l) => l.note === "补给断绝");
+    const fix = candidates.find((c) => c.key.startsWith("relocate:"));
+    if (!myLands.length) return null;
+    if (capLost) {
+      return {
+        level: "grave" as const,
+        text: `治所${cap ? ` ${cap}` : ""}已失，全境政令不通——本季无产出。`,
+        fix: fix ? { key: fix.key, label: `迁治于 ${fix.key.split(":")[1]}` } : null,
+        hint: fix ? "迁治下季生效，选连得回最多郡国的那一处。" : "已无可迁之处。",
+      };
+    }
+    if (besieged.length) {
+      return {
+        level: "warn" as const,
+        text: `${besieged.map((l) => l.c.id).join("、")} 被围——围城之郡无产出，`
+          + "守军逐季折损。",
+        fix: null,
+        hint: "从邻郡发兵解围，或出城迎战；候选在「征伐」一栏。",
+      };
+    }
+    if (cut.length) {
+      return {
+        level: "warn" as const,
+        text: `${cut.map((l) => l.c.id).join("、")} 补给断绝——与治所之间的通路被切断。`,
+        fix: null,
+        hint: "补给按己方郡国的连通算：夺回中间那一郡即可复通。",
+      };
+    }
+    return null;
+  })();
+
   // 与选中的城相关的候选：起点、目标、施政地、集结地、刺探对象都算
   const touches = (c: Candidate, id: string) => {
     const a = c.action as Record<string, unknown>;
@@ -1766,6 +1857,25 @@ export function PlayClient() {
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
           aria-expanded={showPrimer}>规则</button>
       </header>
+
+      {/* 危局条。治所失守这类势力级的坏状态会持续好几季，而战报每季重复
+          同一句话——那是回声不是信息。常驻一条，并把出路一起给出来 */}
+      {crisis && (
+        <div className={`crisis ${crisis.level}`} role="status">
+          <b>{crisis.level === "grave" ? "危局" : "警"}</b>
+          <span>{crisis.text}</span>
+          {crisis.fix && (
+            <button type="button" className="crisis-fix"
+              onClick={() => {
+                setPicked((p) => (p.includes(crisis.fix!.key) ? p : [...p, crisis.fix!.key]));
+                setHoverKey(crisis.fix!.key);
+              }}>
+              {crisis.fix.label}
+            </button>
+          )}
+          <i>{crisis.hint}</i>
+        </div>
+      )}
 
       {/* 模型执子状态条。三件事必须常驻：谁在由模型执子、这一季它答成什么样、
           到现在花了多少。看不到这些，就分不清「对手按兵不动」和「模型没答上来」 */}
@@ -2303,6 +2413,30 @@ export function PlayClient() {
                 <>
                   <h3>天下大事</h3>
                   <ul>{flash.world.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                </>
+              )}
+              {/* 天下形势。上面十几行「X 自 A 取 B」是事件，这里是格局——
+                  只有郡数：那是唯一算得准的公开量，兵力与国库不可见，
+                  列出来就是给玩家假情报 */}
+              {powers.length > 1 && (
+                <>
+                  <h3>天下形势<i>郡数</i></h3>
+                  <ol className="powers">
+                    {powers.map((p) => (
+                      <li key={p.f} className={p.mine ? "me" : ""}>
+                        <span className="pn"
+                          style={{ "--c": engine.colorOf.get(p.f) } as React.CSSProperties}>
+                          {engine.nameOf.get(p.f) ?? p.f}
+                        </span>
+                        <b>{p.n}</b>
+                        {p.d !== 0 && (
+                          <i className={p.d > 0 ? "up" : "down"}>
+                            {p.d > 0 ? `+${p.d}` : p.d}
+                          </i>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
                 </>
               )}
             </div>
