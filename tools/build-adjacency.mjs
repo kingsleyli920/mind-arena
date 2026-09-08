@@ -167,7 +167,13 @@ function nodesOnEdge(a, b) {
     if (!isCrossing && (t <= 0.08 || t >= 0.92)) continue;
     if (isCrossing && (t <= 0.02 || t >= 0.98)) continue;
     const d = Math.hypot(nx - (ax + (bx - ax) * t), ny - (ay + (by - ay) * t));
-    if (d < 45) out.push({ id: nd.id, name: nd.name, kind: nd.kind, offset: +d.toFixed(1) });
+    // 半径取「幅员」79 km，不是拍出来的 45。
+    //
+    // 79 = 相邻郡治间距中位数 158 km 的一半——这个数项目里已经在用了
+    // （兵种判定的「幅员」就是它）。45 是拍的，而且拍得正好卡在几个点上：
+    // 郿坞与长坂的垂距都是 44.7 km，差 0.3 km 就挂上了。
+    // 一个据点归不归某条路管，判据该是「它在不在这条路的幅员之内」。
+    if (d < 79) out.push({ id: nd.id, name: nd.name, kind: nd.kind, offset: +d.toFixed(1) });
   }
   return out.sort((x, y) => x.offset - y.offset);
 }
@@ -201,16 +207,18 @@ for (const [i, j] of raw) {
   const gate = onEdge.find((n) => n.kind === "gate" || n.kind === "pass");
   const mtnRatio = s.samples ? s.tally.mountain / s.samples : 0;
   const hillRatio = s.samples ? s.tally.hill / s.samples : 0;
-  const terrain = gate ? "gate"
-    : rivers.length ? "river"
+  // baseTerrain =「这条边若没有关，该算哪一档」。存下来是因为下面的挂载去重
+  // 会把关摘掉，那时必须退回**当初量出来的**这一档，不能另按一套判据现编
+  const baseTerrain = rivers.length ? "river"
     : mtnRatio > 0.35 ? "mountain"
     : hillRatio + mtnRatio > 0.45 ? "hill" : "plain";
+  const terrain = gate ? "gate" : baseTerrain;
 
   const COST = { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 };
   edges.push({
     from: a.id, to: b.id,
     km: Math.round(km),
-    terrain,
+    terrain, baseTerrain,
     cost: +(km / 100 * COST[terrain]).toFixed(2),          // 以 100km 平原为 1 个单位
     maxElev: Math.round(s.maxElev),
     crossings: rivers.map((r) => r.river),
@@ -227,7 +235,7 @@ for (const [i, j] of raw) {
 {
   const have = new Set(edges.map((e) => [e.from, e.to].sort().join("|")));
   const attached = new Set(edges.flatMap((e) => e.nodes.map((n) => n.id)));
-  let addedByNode = 0;
+  let addedByNode = 0, attachedToExisting = 0;
   for (const nd of nodes) {
     if (attached.has(nd.id)) continue;
     if (nd.kind === "battlefield" || nd.kind === "depot") continue;   // 古战场仓城不生成通道
@@ -237,19 +245,35 @@ for (const [i, j] of raw) {
     if (near.length < 2 || near[1].d > 260) continue;                 // 太远说明这不是它扼守的通道
     const [a, b] = [near[0].c, near[1].c];
     const key = [a.id, b.id].sort().join("|");
-    if (have.has(key)) continue;
+    if (have.has(key)) {
+      // **这条边已经有了——那就把这个关挂到它上面，不是丢掉。**
+      //
+      // 上面那句「关津的存在就是此处有路的凭证」，对已经存在的路同样成立；
+      // 原先这里 continue，等于把结论扔了：十个关津因此静悄悄成了孤儿
+      // （大散关、萧关、褒斜道、陈仓道、巴丘、番禺、合浦、阳关、徐闻…），
+      // 图上画着，路上没有，引擎里不存在。实测「因关补出来的边」一条都没有，
+      // 全被这一行拦掉了。
+      const e = edges.find((x) => [x.from, x.to].sort().join("|") === key);
+      if (e && !e.nodes.some((n) => n.id === nd.id)) {
+        e.nodes.push({ id: nd.id, name: nd.name, kind: nd.kind, offset: null });
+        e.nodes.sort((x, y) => (x.offset ?? 1e9) - (y.offset ?? 1e9));
+        attachedToExisting += 1;
+      }
+      continue;
+    }
     const s = sampleEdge(a, b);
     const rivers = crossings(a, b);
     const onEdge = nodesOnEdge(a, b);
     const gate = onEdge.find((n) => n.kind === "gate" || n.kind === "pass");
     const mtn = s.samples ? s.tally.mountain / s.samples : 0;
     const hill = s.samples ? s.tally.hill / s.samples : 0;
-    const terrain = gate ? "gate" : rivers.length ? "river"
+    const baseTerrain = rivers.length ? "river"
       : mtn > 0.35 ? "mountain" : hill + mtn > 0.45 ? "hill" : "plain";
+    const terrain = gate ? "gate" : baseTerrain;
     const COST = { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 };
     const km = dist(a, b);
     edges.push({
-      from: a.id, to: b.id, km: Math.round(km), terrain,
+      from: a.id, to: b.id, km: Math.round(km), terrain, baseTerrain,
       cost: +(km / 100 * COST[terrain]).toFixed(2),
       maxElev: Math.round(s.maxElev),
       crossings: rivers.map((r) => r.river),
@@ -258,7 +282,7 @@ for (const [i, j] of raw) {
     });
     have.add(key); addedByNode += 1;
   }
-  console.log(`按关津补边 ${addedByNode} 条`);
+  console.log(`按关津补边 ${addedByNode} 条，挂到已有边 ${attachedToExisting} 处`);
 }
 
 // ── 补边一点五：同州连通 ────────────────────────────────────────────
@@ -384,15 +408,26 @@ console.log(`保留 ${edges.length} 条边，平均度 ${(edges.length * 2 / com
     }
   }
   console.log(`挂载去重：剔除 ${dropped} 处过远挂载`);
-  // 去重后边的地形档可能变化（关隘被摘掉就不该再算 gate）
+  // 去重后边的地形档可能变化（关隘被摘掉就不该再算 gate）。
+  //
+  // 退回 **baseTerrain**——当初沿边采样量出来的那一档，不是现编的。
+  // 原先这里写的是 `crossings ? river : maxElev > 1400 ? mountain : hill`，
+  // 那是另一套判据（按最高点，而采样按沿线各档的占比），两者本来就会给出
+  // 不同的答案。半径还是 45 时这条极少触发，看不出来；放宽到 79 之后
+  // 一次就冒出四条：代郡–上谷 hill→mountain、河东–上党 hill→mountain、
+  // 广阳–渔阳 plain→hill、钜鹿–中山 plain→hill。
+  // 那四条**从来没有关**，只是短暂地挂上又被摘掉，就换了一个没量过的地形。
   const COST = { plain: 1.0, hill: 1.35, mountain: 2.1, gate: 2.6, river: 1.8 };
   for (const e of edges) {
     const hasGate = e.nodes.some((n) => n.kind === "gate" || n.kind === "pass");
     if (e.terrain === "gate" && !hasGate) {
-      e.terrain = e.crossings.length ? "river" : e.maxElev > 1400 ? "mountain" : "hill";
+      e.terrain = e.baseTerrain
+        ?? (e.crossings.length ? "river" : e.maxElev > 1400 ? "mountain" : "hill");
       e.cost = +(e.km / 100 * COST[e.terrain]).toFixed(2);
     }
   }
+  // baseTerrain 是中间量，不进产物
+  for (const e of edges) delete e.baseTerrain;
 }
 
 // ── 连通性检查：孤岛意味着该郡永远打不到也守不住 ────────────────────

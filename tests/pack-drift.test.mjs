@@ -13,6 +13,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import { toRulesDigest } from "../lib/game/content/schema.ts";
 
 const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
@@ -199,4 +200,30 @@ test("冻结闸：胜负数值的指纹未变", () => {
     "胜负数值变了。这不是禁止，是提醒：升 pack.version、重跑基线、"
     + "并在 EVAL 里写明新旧榜不可比。确认之后把本测试里的指纹更新掉");
   assert.equal(pack.version, "1.2.0", "冻结版本号");
+});
+
+// ── 通行图也要冻 ────────────────────────────────────────────────────
+//
+// 规则指纹只盖规则包（constants / actions / victory / terrain / units / skills）。
+// 但**改通行图一样是改规则**：一条边的地形档决定行军代价（平原 1.0 到关道 2.6）
+// 与守方加成，多一条边就是多一条攻击路线。
+//
+// 实测过一次：把关津挂载半径从 45 km 放宽到 79 km，两条边成了关道、
+// 一条被剪掉的长江渡口边回来了、三条边的地形从**回退公式编出来的** hill
+// 改回**实测的** plain——游戏实打实地变了，而规则指纹纹丝不动。
+// 那一次是有意为之且过了验收（ρ 0.37 不变、四道闸 4/4），但它不该悄悄发生。
+test("通行图的形状被钉住", () => {
+  const adj = JSON.parse(fs.readFileSync("lib/game/data/adjacency.json", "utf8"));
+  const es = adj.edges;
+  const hist = {};
+  for (const e of es) hist[e.terrain] = (hist[e.terrain] ?? 0) + 1;
+  const sig = createHash("sha256").update(JSON.stringify(
+    es.map((e) => [e.from, e.to, e.terrain, e.cost]).sort())).digest("hex").slice(0, 12);
+
+  assert.equal(es.length, 233, "边数");
+  assert.deepEqual(hist, { plain: 119, hill: 37, gate: 33, river: 18, mountain: 26 },
+    "各地形档的边数");
+  assert.equal(sig, "4325eb050ccf",
+    "通行图指纹（from/to/地形/代价）。改动了就更新这个值，"
+    + "并且**必须先跑一遍 npm run selfplay**——四道闸与 ρ 都得过");
 });

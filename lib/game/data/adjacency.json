@@ -3,7 +3,7 @@
   "note": "郡国通行图。Delaunay 取候选边，沿边采样地形网格定档，与水系求交判跨河，关津按垂距挂载。",
   "generatedFrom": "tools/build-adjacency.mjs",
   "commanderies": 105,
-  "edges": 232,
+  "edges": 233,
   "maxEdgeKm": 420,
   "costUnit": "1 = 100km 平原",
   "terrainCost": {
@@ -285,13 +285,57 @@
   },
   {
    "from": "丹阳郡",
+   "to": "庐江郡",
+   "km": 164,
+   "terrain": "river",
+   "cost": 2.96,
+   "maxElev": 165,
+   "crossings": [
+    "长江"
+   ],
+   "nodes": [
+    {
+     "id": "ruxu-kou",
+     "name": "濡须口",
+     "kind": "port",
+     "offset": 46.4
+    },
+    {
+     "id": "hengjiang-jin",
+     "name": "横江津",
+     "kind": "ford",
+     "offset": 71
+    },
+    {
+     "id": "niuzhu",
+     "name": "牛渚",
+     "kind": "port",
+     "offset": 74.4
+    }
+   ]
+  },
+  {
+   "from": "丹阳郡",
    "to": "豫章郡",
    "km": 377,
    "terrain": "plain",
    "cost": 3.77,
    "maxElev": 360,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "hukou",
+     "name": "湖口",
+     "kind": "port",
+     "offset": 63.9
+    },
+    {
+     "id": "chaisang",
+     "name": "柴桑",
+     "kind": "port",
+     "offset": 76.7
+    }
+   ]
   },
   {
    "from": "乐安国",
@@ -342,7 +386,14 @@
    "cost": 1.49,
    "maxElev": 165,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "ruxu-kou",
+     "name": "濡须口",
+     "kind": "port",
+     "offset": 71.7
+    }
+   ]
   },
   {
    "from": "云中郡",
@@ -459,6 +510,18 @@
      "name": "子午道",
      "kind": "pass",
      "offset": 31.5
+    },
+    {
+     "id": "baoxie-dao",
+     "name": "褒斜道",
+     "kind": "pass",
+     "offset": 58.6
+    },
+    {
+     "id": "wuzhangyuan",
+     "name": "五丈原",
+     "kind": "battlefield",
+     "offset": 65.2
     }
    ]
   },
@@ -467,7 +530,7 @@
    "to": "上谷郡",
    "km": 181,
    "terrain": "hill",
-   "cost": 2.45,
+   "cost": 2.44,
    "maxElev": 1585,
    "crossings": [],
    "nodes": []
@@ -593,7 +656,14 @@
    "cost": 1.96,
    "maxElev": 402,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "panyu",
+     "name": "番禺",
+     "kind": "port",
+     "offset": null
+    }
+   ]
   },
   {
    "from": "南郡",
@@ -646,6 +716,12 @@
      "name": "江津",
      "kind": "port",
      "offset": 4.2
+    },
+    {
+     "id": "baqiu",
+     "name": "巴丘",
+     "kind": "port",
+     "offset": 54.6
     }
    ]
   },
@@ -665,6 +741,12 @@
      "name": "汉津",
      "kind": "port",
      "offset": 34
+    },
+    {
+     "id": "changban",
+     "name": "长坂",
+     "kind": "battlefield",
+     "offset": 45.3
     }
    ]
   },
@@ -676,7 +758,14 @@
    "cost": 3.23,
    "maxElev": 366,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "xiakou",
+     "name": "夏口",
+     "kind": "port",
+     "offset": 58.7
+    }
+   ]
   },
   {
    "from": "右北平郡",
@@ -703,7 +792,14 @@
    "cost": 2.66,
    "maxElev": 1323,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "meiwu",
+     "name": "郿坞",
+     "kind": "depot",
+     "offset": 48.1
+    }
+   ]
   },
   {
    "from": "右扶风",
@@ -719,6 +815,30 @@
      "name": "傥骆道",
      "kind": "pass",
      "offset": 16.2
+    },
+    {
+     "id": "meiwu",
+     "name": "郿坞",
+     "kind": "depot",
+     "offset": 45.9
+    },
+    {
+     "id": "baoxie-dao",
+     "name": "褒斜道",
+     "kind": "pass",
+     "offset": 53.5
+    },
+    {
+     "id": "wuzhangyuan",
+     "name": "五丈原",
+     "kind": "battlefield",
+     "offset": 53.8
+    },
+    {
+     "id": "dasan-guan",
+     "name": "大散关",
+     "kind": "gate",
+     "offset": null
     }
    ]
   },
@@ -939,8 +1059,8 @@
    "from": "常山国",
    "to": "中山国",
    "km": 93,
-   "terrain": "hill",
-   "cost": 1.26,
+   "terrain": "plain",
+   "cost": 0.93,
    "maxElev": 64,
    "crossings": [],
    "nodes": []
@@ -1146,7 +1266,20 @@
    "crossings": [
     "长江"
    ],
-   "nodes": [],
+   "nodes": [
+    {
+     "id": "niuzhu",
+     "name": "牛渚",
+     "kind": "port",
+     "offset": 55.5
+    },
+    {
+     "id": "hengjiang-jin",
+     "name": "横江津",
+     "kind": "ford",
+     "offset": 60.1
+    }
+   ],
    "fix": "长江。广陵南渡至丹阳，即孙吴所恃之江防"
   },
   {
@@ -1474,6 +1607,12 @@
      "name": "白水关",
      "kind": "gate",
      "offset": 40.5
+    },
+    {
+     "id": "jiameng-guan",
+     "name": "葭萌关",
+     "kind": "gate",
+     "offset": 75.3
     }
    ]
   },
@@ -1503,6 +1642,12 @@
      "name": "剑门关",
      "kind": "gate",
      "offset": 22.1
+    },
+    {
+     "id": "baishui-guan",
+     "name": "白水关",
+     "kind": "gate",
+     "offset": 67.9
     }
    ]
   },
@@ -1520,6 +1665,12 @@
      "name": "阳平关",
      "kind": "gate",
      "offset": 12.5
+    },
+    {
+     "id": "chencang-dao",
+     "name": "陈仓道",
+     "kind": "pass",
+     "offset": 62.4
     }
    ]
   },
@@ -1527,8 +1678,8 @@
    "from": "汉阳郡",
    "to": "北地郡",
    "km": 347,
-   "terrain": "mountain",
-   "cost": 7.29,
+   "terrain": "gate",
+   "cost": 9.03,
    "maxElev": 2165,
    "crossings": [],
    "nodes": [
@@ -1537,6 +1688,12 @@
      "name": "街亭",
      "kind": "battlefield",
      "offset": 42.8
+    },
+    {
+     "id": "xiao-guan",
+     "name": "萧关",
+     "kind": "gate",
+     "offset": 64.5
     }
    ]
   },
@@ -1544,8 +1701,8 @@
    "from": "汉阳郡",
    "to": "安定郡",
    "km": 207,
-   "terrain": "mountain",
-   "cost": 4.36,
+   "terrain": "gate",
+   "cost": 5.39,
    "maxElev": 2417,
    "crossings": [],
    "nodes": [
@@ -1554,6 +1711,12 @@
      "name": "街亭",
      "kind": "battlefield",
      "offset": 2.9
+    },
+    {
+     "id": "xiao-guan",
+     "name": "萧关",
+     "kind": "gate",
+     "offset": 61.9
     }
    ]
   },
@@ -1630,6 +1793,12 @@
      "name": "柴桑",
      "kind": "port",
      "offset": 43.7
+    },
+    {
+     "id": "hukou",
+     "name": "湖口",
+     "kind": "port",
+     "offset": 78.8
     }
    ]
   },
@@ -1661,6 +1830,12 @@
      "name": "乌林",
      "kind": "battlefield",
      "offset": 39.3
+    },
+    {
+     "id": "baqiu",
+     "name": "巴丘",
+     "kind": "port",
+     "offset": 50.4
     }
    ]
   },
@@ -1800,6 +1975,12 @@
      "name": "棘津",
      "kind": "ford",
      "offset": 20.9
+    },
+    {
+     "id": "guandu",
+     "name": "官渡",
+     "kind": "ford",
+     "offset": 60.7
     }
    ]
   },
@@ -1823,6 +2004,18 @@
      "name": "乌巢",
      "kind": "depot",
      "offset": 31
+    },
+    {
+     "id": "yan-jin",
+     "name": "延津",
+     "kind": "ford",
+     "offset": 50.8
+    },
+    {
+     "id": "ji-jin",
+     "name": "棘津",
+     "kind": "ford",
+     "offset": 51.4
     }
    ]
   },
@@ -1846,6 +2039,12 @@
      "name": "虎牢关",
      "kind": "gate",
      "offset": 28.8
+    },
+    {
+     "id": "meng-jin",
+     "name": "孟津",
+     "kind": "ford",
+     "offset": 67.6
     }
    ]
   },
@@ -1853,8 +2052,8 @@
    "from": "河内郡",
    "to": "魏郡",
    "km": 181,
-   "terrain": "hill",
-   "cost": 2.44,
+   "terrain": "plain",
+   "cost": 1.81,
    "maxElev": 619,
    "crossings": [],
    "nodes": [
@@ -1863,6 +2062,12 @@
      "name": "延津",
      "kind": "ford",
      "offset": 44.3
+    },
+    {
+     "id": "liyang-jin",
+     "name": "黎阳津",
+     "kind": "ford",
+     "offset": 45.4
     }
    ]
   },
@@ -2482,7 +2687,14 @@
    "cost": 2.09,
    "maxElev": 187,
    "crossings": [],
-   "nodes": []
+   "nodes": [
+    {
+     "id": "hepu",
+     "name": "合浦",
+     "kind": "port",
+     "offset": null
+    }
+   ]
   },
   {
    "from": "酒泉郡",
@@ -2856,8 +3068,8 @@
    "from": "魏郡",
    "to": "赵国",
    "km": 32,
-   "terrain": "hill",
-   "cost": 0.43,
+   "terrain": "plain",
+   "cost": 0.32,
    "maxElev": 69,
    "crossings": [],
    "nodes": []
