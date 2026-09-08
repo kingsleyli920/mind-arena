@@ -1125,6 +1125,119 @@ export function PlayClient() {
     return d;
   }, [terr, game, seat]);
 
+  /**
+   * 郡国界：每个郡国自己管多大一片。
+   *
+   * 疆域那条界只描**不同势力之间**，于是同属一家的几个郡在图上连成一片，
+   * 「泰山郡到底管到哪」看不出来。而这正是这套游戏的基本单位——玩家下的
+   * 每一条令都以郡国为单位。
+   *
+   * 与疆域界不同，**这条界是不变的**：郡国的范围由郡治做最近邻定死，
+   * 与谁占着它无关。所以只依赖 terr，不跟着局势重算——它有近万段路径，
+   * 每季重算一遍纯属浪费。
+   *
+   * 抖动的种子与疆域界错开：两条界若抖成同一条曲线，重叠处会显得像描重了。
+   */
+  const junBorders = useMemo(() => {
+    if (!terr) return "";
+    const { cols, rows, none } = terr.meta;
+    const cell = (terr.meta as { cellSize?: number }).cellSize ?? 0.1;
+    const gx = (c: number) => ((terr.meta.west + c * cell) - MAP.west) * MAP.ppd;
+    const gy = (r: number) => (MAP.north - (terr.meta.north - r * cell)) * MAP.ppd;
+    const W_CELL = cell * MAP.ppd;
+    const wob = (a: number, b: number) => {
+      const n = Math.sin(a * 271.3 + b * 419.7) * 26571.1231;
+      return (n - Math.floor(n) - 0.5) * W_CELL * 1.1;
+    };
+    let d = "";
+    const put = (x1: number, y1: number, x2: number, y2: number, k: number) => {
+      const mx = (x1 + x2) / 2 + wob(k, 3.7);
+      const my = (y1 + y2) / 2 + wob(k, 11.9);
+      d += `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} `
+         + `${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    };
+    for (let r = 0; r < rows; r += 1) {
+      for (let c = 0; c < cols; c += 1) {
+        const i = r * cols + c;
+        const k = terr.idx[i];
+        if (k === none) continue;
+        // 只在**两侧都是陆地且分属不同郡国**处描线。与海的交界由海岸线负责，
+        // 在这里再描一遍就是把海岸描重了
+        if (c + 1 < cols && terr.idx[i + 1] !== none && terr.idx[i + 1] !== k) {
+          put(gx(c + 1), gy(r), gx(c + 1), gy(r + 1), i);
+        }
+        if (r + 1 < rows && terr.idx[i + cols] !== none && terr.idx[i + cols] !== k) {
+          put(gx(c), gy(r + 1), gx(c + 1), gy(r + 1), i + 0.5);
+        }
+      }
+    }
+    return d;
+  }, [terr]);
+
+  /**
+   * 指到（或钉住）某郡时，把它的**辖境**整块点亮。
+   *
+   * 郡国界常驻着，但极淡——一百零五圈轮廓若都画得清楚，图就成了网格纸。
+   * 而「泰山郡管多大一片」这个问题，靠一圈淡线是读不出来的，得整块亮起来。
+   *
+   * 只算当前这一个郡：走一遍网格挑出属于它的格子，按行合并成横条
+   *（相邻同行的格子并成一条，路径能小一个量级）。一个郡约几百格，
+   * 每次指过去重算一遍也不贵——比预先算好一百零五块省得多。
+   */
+  const focusArea = useMemo((): { fill: string; line: string } => {
+    // 不在这里看 lod：这个 memo 写在 lod 之前，读它会 ReferenceError
+    //（这个组件里同类的顺序坑已经栽过两次）。档位判断放到渲染处
+    const id = pinned ?? focus;
+    if (!terr || !id) return { fill: "", line: "" };
+    const k = terr.order.indexOf(id);
+    if (k < 0) return { fill: "", line: "" };
+    const { cols, rows } = terr.meta;
+    const cell = (terr.meta as { cellSize?: number }).cellSize ?? 0.1;
+    const gx = (c: number) => ((terr.meta.west + c * cell) - MAP.west) * MAP.ppd;
+    const gy = (r: number) => (MAP.north - (terr.meta.north - r * cell)) * MAP.ppd;
+    // 填充按行合并成横条（路径小一个量级），轮廓另走一遍只取**外边**——
+    // 横条拼出来的路径不能描边：条与条之间的内部线会一起被描出来。
+    //
+    // 轮廓要与常驻的郡国界**用同一套抖动**，否则一条是手绘曲线、一条是方格
+    // 阶梯，叠在一起像描歪了。种子的取法照抄 junBorders：右边取本格序号，
+    // 下边取本格序号 +0.5；而左边就是左邻的右边、上边就是上邻的下边
+    const W_CELL = cell * MAP.ppd;
+    const wob = (a: number, b: number) => {
+      const n = Math.sin(a * 271.3 + b * 419.7) * 26571.1231;
+      return (n - Math.floor(n) - 0.5) * W_CELL * 1.1;
+    };
+    const seg = (x1: number, y1: number, x2: number, y2: number, key: number) => {
+      const mx = (x1 + x2) / 2 + wob(key, 3.7);
+      const my = (y1 + y2) / 2 + wob(key, 11.9);
+      return `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} `
+           + `${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    };
+    let fill = "", line = "";
+    const at = (r: number, c: number) =>
+      (r < 0 || c < 0 || r >= rows || c >= cols) ? -1 : terr.idx[r * cols + c];
+    for (let r = 0; r < rows; r += 1) {
+      let run = -1;
+      for (let c = 0; c <= cols; c += 1) {
+        const on = c < cols && terr.idx[r * cols + c] === k;
+        if (on && run < 0) run = c;
+        if (!on && run >= 0) {
+          fill += `M${gx(run).toFixed(1)} ${gy(r).toFixed(1)}`
+                + `H${gx(c).toFixed(1)}V${gy(r + 1).toFixed(1)}`
+                + `H${gx(run).toFixed(1)}Z`;
+          run = -1;
+        }
+        if (!on || c >= cols) continue;
+        // 四邻里不属于本郡的那一侧才是外边
+        const i = r * cols + c;
+        if (at(r, c - 1) !== k) line += seg(gx(c), gy(r), gx(c), gy(r + 1), i - 1);
+        if (at(r, c + 1) !== k) line += seg(gx(c + 1), gy(r), gx(c + 1), gy(r + 1), i);
+        if (at(r - 1, c) !== k) line += seg(gx(c), gy(r), gx(c + 1), gy(r), i - cols + 0.5);
+        if (at(r + 1, c) !== k) line += seg(gx(c), gy(r + 1), gx(c + 1), gy(r + 1), i + 0.5);
+      }
+    }
+    return { fill, line };
+  }, [terr, pinned, focus]);
+
   // ── 出图分级 ─────────────────────────────────────────────────────
   //
   // 三档，与瓦片那三级同呼吸：
@@ -1266,12 +1379,27 @@ export function PlayClient() {
 
   const borderEls = useMemo(() => (
     <>
+      {/* 郡国界画在最底下、最细最淡：它是底纹，不是主角。
+          远观档（整幅可见）不画——一百零五圈轮廓铺满全图就是一层噪点，
+          而那一档要答的是「天下大势」，不是「泰山郡管到哪」 */}
+      {/* 指到某郡时它的辖境整块点亮。画在界线之下、疆域之上 */}
+      {lod >= 1 && focusArea.fill && (
+        <>
+          <path className="jun-area" d={focusArea.fill} />
+          <path className="jun-area-line" d={focusArea.line}
+            strokeWidth={1.6 / [1, 2.4, 8][lod] ** 0.82} />
+        </>
+      )}
+      {lod >= 1 && (
+        <path className="border jun" d={junBorders}
+          strokeWidth={0.7 / [1, 2.4, 8][lod] ** 0.82} />
+      )}
       <path className="border other" d={borders.other}
         strokeWidth={1.2 / [1, 2.4, 8][lod] ** 0.82} />
       <path className="border mine" d={borders.mine}
         strokeWidth={2.4 / [1, 2.4, 8][lod] ** 0.82} />
     </>
-  ), [borders, lod]);
+  ), [borders, junBorders, focusArea, lod]);
 
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
   if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;

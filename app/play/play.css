@@ -181,6 +181,19 @@
 .map-vec svg .border { fill: none; stroke-linecap: round; }
 .map-vec svg .border.mine { stroke: rgba(118, 44, 34, 0.82); }
 .map-vec svg .border.other { stroke: rgba(52, 45, 37, 0.38); }
+/* 郡国界：每个郡国自己管多大一片。传世舆图上这叫「界画」——
+   比疆域界更细更淡，是底纹不是主角；疆域界压在它上面，
+   两者同时出现时读者先看见的应当是「谁占着」，其次才是「界在哪」 */
+.map-vec svg .border.jun { stroke: rgba(52, 45, 37, 0.28); }
+/* 指到某郡时，它的辖境整块点亮。一圈淡线答不了「管多大一片」，
+   得让整块地亮起来——而颜色要压得住地形又不能盖掉城印与道路 */
+.map-vec svg .jun-area {
+  fill: rgba(150, 112, 52, 0.22); stroke: none; pointer-events: none;
+}
+/* 外轮廓单独一条路径：横条拼的填充不能描边，条与条之间的内部线会一起描出来 */
+.map-vec svg .jun-area-line {
+  fill: none; stroke: rgba(118, 44, 34, 0.6); stroke-linecap: round; pointer-events: none;
+}
 
 /* ── 水 ────────────────────────────────────────────────────────
    色与底图那份一致（RIVER_INK 108,124,120 / RIVER_FILL 206,218,214）：
