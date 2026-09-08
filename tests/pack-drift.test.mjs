@@ -175,3 +175,46 @@ test("关隘：地形标记与关津节点必须一致，否则预告与结算�
   assert.deepEqual(bad, [],
     `这些边的地形标记与关津节点对不上：\n  ${bad.join("\n  ")}`);
 });
+
+// ── 冻结闸：胜负数值的指纹 ────────────────────────────────────────────
+//
+// 内容包 1.0.0 起冻结（见包里的 _frozen）。冻结的含义不是「不许改」，
+// 是「改了必须知道自己在改，并且重跑基线」——两份 packVersion 不同的榜
+// 不能并排读，而那件事在报告上看不出来，只有 stamp 里一行小字。
+//
+// 指纹只取**数字**，不取文字：常数分组里大半是说明与依据，改一句措辞
+// 不该让这道闸响；而任何一个影响胜负判定的数一动，它必须响。
+function ruleFingerprint(pack) {
+  const nums = [];
+  const walk = (v, path) => {
+    if (typeof v === "number") { nums.push(`${path}=${v}`); return; }
+    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`)); return; }
+    if (v && typeof v === "object") {
+      for (const k of Object.keys(v).sort()) walk(v[k], `${path}.${k}`);
+    }
+    // 字符串一律不取：判据的 test 串由 tests/engine.test.mjs 与 GRADE_CUTS 对账
+  };
+  for (const k of ["constants", "actions", "victory", "terrain", "units", "skills"]) {
+    walk(pack[k], k);
+  }
+  nums.sort();
+  // 不引第三方哈希：这里要的是「变了没有」，一个稳定的和就够
+  let h = 0n;
+  for (const s of nums) for (const ch of s) h = (h * 131n + BigInt(ch.codePointAt(0))) % (2n ** 61n - 1n);
+  return { count: nums.length, hash: h.toString(36) };
+}
+
+test("冻结闸：胜负数值的指纹未变", () => {
+  const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+  const fp = ruleFingerprint(pack);
+  // 改规则数值时，把下面两行更新成新指纹，**同时**：
+  //   一、升 pack.version（0.2.0 → 1.0.0 是冻结那一次）
+  //   二、重跑机器人基线，并在 docs/EVAL.md 里说明新旧榜不可比
+  const WANT = { count: 281, hash: "8s2hg013i0h9" };
+  assert.equal(fp.count, WANT.count,
+    `胜负数值的条数变了（${WANT.count} → ${fp.count}）——加/删了一个数`);
+  assert.equal(fp.hash, WANT.hash,
+    "胜负数值变了。这不是禁止，是提醒：升 pack.version、重跑基线、"
+    + "并在 EVAL 里写明新旧榜不可比。确认之后把本测试里的指纹更新掉");
+  assert.equal(pack.version, "1.0.0", "冻结版本号");
+});
