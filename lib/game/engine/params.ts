@@ -108,6 +108,8 @@ export interface EngineParams {
   siegeMaxSeasons: number; siegeBreachPerSeason: number;
   /** 围城耗粮的分档：城中戍兵超过开局戍兵这几个倍数时，每季多耗一石 */
   siegeEatStep1: number; siegeEatStep2: number; siegeEatMax: number;
+  /** 首攻（尚未筑土工造器械）扣几个缺口。围困每季 +1 会把它挣回来 */
+  firstAssaultPenalty: number;
   siegeAttackerLoss: number; siegeDefenderLoss: number; siegeWithdrawKeep: number;
   siegeGarrisonFloor: number; siegeDefenseFloor: number; siegeMinTroops: number;
   siegeGripRatio: number; siegeEncircle: boolean;
@@ -321,6 +323,7 @@ export function loadParams(pack: RawPack): EngineParams {
     siegeEatStep1: g("围城", "耗粮_超编一档"),
     siegeEatStep2: g("围城", "耗粮_超编二档"),
     siegeEatMax: g("围城", "耗粮上限"),
+    firstAssaultPenalty: g("攻城", "首攻缺口罚"),
     siegeMinTroops: g("围城", "撤围_兵力下限"),
     siegeGripRatio: g("围城", "有效围困比"),
     // 布尔值不走 num()——那个函数是给数值用的，会把 true 判成缺数据

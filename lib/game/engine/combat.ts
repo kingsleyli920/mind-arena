@@ -29,6 +29,27 @@ export const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?
  * 用「缺口数」而非「兵力比」是刻意的——比值是连续量，模型难以心算出
  * 自己究竟够不够；缺口数是小整数，一眼可数。
  */
+/**
+ * 围城累加的缺口修正。**首攻扣、围困加。**
+ *
+ * 实测机器人自对局：围城 4734 次里 92% 只持续一季——首攻就破了城，于是围城节
+ * 自己写的目标「让『解围』『围魏救赵』『断其粮道』成为真选项」几乎从不发生，
+ * 存粮那只钟只响 1.6%。原因是首攻不付任何代价：带三倍兵即缺口 4，而典型城池
+ * 可防守才 2–3，首攻破城率 73%。史实上以三比一强攻坚城基本不会一次得手——
+ * 攻城要先筑土工、造器械。
+ *
+ * 于是：首攻 −firstAssaultPenalty，此后每季 +siegeBreachPerSeason。
+ * 即「强攻是赌，围困是稳」。
+ *
+ * 一处出处：结算、攻城预告、续围前瞻三处都读它。同一个量两个出处，
+ * 这个仓库栽过不止一次（缺口曾在候选与结算各算一遍）。
+ */
+export function siegeBreachDelta(siegeSeasons: number, P: EngineParams): number {
+  return siegeSeasons === 0
+    ? -P.firstAssaultPenalty
+    : siegeSeasons * P.siegeBreachPerSeason;
+}
+
 export function breachCount(
   P: EngineParams, attack: number, defend: number, defense: number,
   gear: SiegeGear, terrain: string, atGate: boolean,

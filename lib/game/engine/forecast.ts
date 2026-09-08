@@ -10,7 +10,7 @@
 // 结果是一个**区间**与三值判断，不是断言。MERS 要测的是「往哪打、
 // 什么时候打」（S1/S2），不是心算能力。
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
-         FORMATION_CN, unitPower, unitGuard } from "./combat.ts";
+         FORMATION_CN, unitPower, unitGuard, siegeBreachDelta } from "./combat.ts";
 import { garrisonBand, observedFormation, tierOf } from "./intel.ts";
 import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
@@ -70,7 +70,7 @@ export function forecastSiege(
   const atk = roster ? attackRetinue(corps, P, terrain) : null;
   const def = roster ? defendRetinue(retinueAt(s, roster, army.target!, P), P) : null;
   const power = unitPower(P, army.unit, terrain, tgt.unit);
-  const persist = army.siegeSeasons * P.siegeBreachPerSeason;
+  const persist = siegeBreachDelta(army.siegeSeasons, P);
   const formEdge = formationEdge(P, src.formation, tgt.formation);
   // 与 resolve 同一个表达式。此前这里写 terrain === "gate" 而结算写
   // edge.gates.length > 0——两者在当前 adjacency 上恰好完全重合（31 对 31），
@@ -162,7 +162,7 @@ export function projectSiege(
   let prov = tgt0.provisions;
   let ss = army.siegeSeasons;
   for (let n = 0; ; n += 1) {
-    const bonus = (atk?.breachBonus ?? 0) + ss * P.siegeBreachPerSeason + formEdge
+    const bonus = (atk?.breachBonus ?? 0) + siegeBreachDelta(ss, P) + formEdge
       + formAtkBonus(P, src.formation);
     const r = breachCount(P, troops * (1 - P.jitter) * mul, garrison * guard,
                           defense, army.gear, terrain, atGate, bonus, holdBonus);

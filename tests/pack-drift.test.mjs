@@ -192,7 +192,7 @@ test("冻结闸：胜负数值的指纹未变", () => {
   // 改规则数值时，把下面两行更新成新指纹，**同时**：
   //   一、升 pack.version（0.2.0 → 1.0.0 是冻结那一次）
   //   二、重跑机器人基线，并在 docs/EVAL.md 里说明新旧榜不可比
-  const WANT = { count: 290, hash: "d2uo0f673rs7" };
+  const WANT = { count: 291, hash: "iuck0b23wqf" };
   assert.equal(fp.count, WANT.count,
     `胜负数值的条数变了（${WANT.count} → ${fp.count}）——加/删了一个数`);
   assert.equal(fp.hash, WANT.hash,

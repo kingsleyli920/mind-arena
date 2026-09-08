@@ -14,7 +14,7 @@ import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, POLICY_CN, t
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
   FORMATION_CN, unitPower, unitGuard,
-  unitName } from "./combat.ts";
+  unitName, siegeBreachDelta } from "./combat.ts";
 import { marchSeasons, provCapOf, siegeEat, siegeHoldSeasons, type EngineParams }
   from "./params.ts";
 import { attackRetinue, defendRetinue, governEffect, governorOf, retinueAt, troopCap,
@@ -812,7 +812,8 @@ export function resolve(
                                            faction: army.faction, event: "siege", seq: i }) * P.jitter * 2;
     const power = unitPower(P, army.unit, terrain, tgt.unit);
     const attack = army.troops * jitter * (atk?.attackMul ?? 1) * power;
-    const persist = army.siegeSeasons * P.siegeBreachPerSeason;   // 围得越久缺口越大
+    // 首攻扣、围困加。式子在 combat.siegeBreachDelta 一处出处
+    const persist = siegeBreachDelta(army.siegeSeasons, P);
     // 阵型相克：结算用真值（预告那边才走迷雾）。攻方起兵郡的阵对被攻郡的阵，
     // 克之 +1 缺口、被克 −1。实测余量有 43.1% 落在 {0,1}，这一项能翻转近半攻城
     const myForm = s.commanderies[army.home]?.formation ?? "square";
