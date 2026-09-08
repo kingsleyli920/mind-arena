@@ -492,10 +492,12 @@
 }
 .map-wrap .zoom button:hover { background: #fff; }
 
+/* 州名：势力图那一档的地界题记，当水印画。它与势力名是叠着的两层——
+   一层大字淡墨管地界，一层实墨管人名，舆图上历来如此。
+   所以它比原先再淡一档，也不再描白边：描了就成了压在上面的标签 */
 .map-vec svg text.zhou {
-  fill: rgba(46, 40, 33, 0.2); letter-spacing: 0.42em;
-  font-weight: 700; paint-order: stroke;
-  stroke: rgba(250, 246, 237, 0.35); stroke-width: 6; stroke-linejoin: round;
+  fill: rgba(46, 40, 33, 0.155); letter-spacing: 0.42em;
+  font-weight: 700; pointer-events: none;
 }
 
 /* 城下的围军：营垒 + 「几季·多少人」 */
@@ -921,3 +923,13 @@
   font-family: "Songti SC", "STSong", serif;
 }
 .map-vec svg .jun-name.hot { fill: rgba(140, 59, 47, 0.85); font-weight: 700; }
+
+/* 势力名：只在势力图那一档出，是那一屏的主角。比郡名实、比城名疏——
+   它标的是一整片版图，不是一个地名 */
+.map-vec svg .faction-name {
+  fill: rgba(52, 44, 34, 0.62); letter-spacing: 0.3em; font-weight: 700;
+  paint-order: stroke; stroke: rgba(250, 246, 237, 0.7); stroke-width: 3.5px;
+  vector-effect: non-scaling-stroke; pointer-events: none;
+  font-family: "Songti SC", "STSong", serif;
+}
+.map-vec svg .faction-name.mine { fill: rgba(140, 59, 47, 0.9); }

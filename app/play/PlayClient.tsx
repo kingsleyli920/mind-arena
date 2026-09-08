@@ -947,7 +947,7 @@ export function PlayClient() {
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
-    setView(p ? centerOn(p.longitude, p.latitude, Math.max(3.2, minK), MAP) : fitAll(minK));
+    setView(p ? centerOn(p.longitude, p.latitude, Math.max(4, minK), MAP) : fitAll(minK));
   }, [engine, modelSeats, modelPick, seasons, minK]);
 
   const candidates: Candidate[] = useMemo(() => {
@@ -1310,6 +1310,62 @@ export function PlayClient() {
   }, [terr]);
 
   /**
+   * 势力图那一档要写的名字：每一家的**版图**里最宽的一条横行。
+   *
+   * 势力图上不画城印（那个倍数上 232 条边里 127 条摆不下棋子），
+   * 于是「这片橙的是谁」就没人答了——疆域色块能分出彼此，分不出是谁家。
+   * 三十一家共用三十一种土色，靠色卡认人是认不出来的。
+   *
+   * 与郡名同一套办法（最宽横行、写不下就不写），但聚合的是**当季归属**，
+   * 所以它随打随变：袁绍吞了一郡，冀州那片字就跟着长一点。
+   */
+  const factionBand = useMemo(() => {
+    if (!terr || !game) return null;
+    const { cols, rows, none } = terr.meta;
+    const cell = (terr.meta as { cellSize?: number }).cellSize ?? 0.1;
+    type Band = { x: number; y: number; w: number; r: number };
+    const runs = new Map<string, Band[]>();
+    for (let r = 0; r < rows; r += 1) {
+      let c = 0;
+      while (c < cols) {
+        const k = terr.idx[r * cols + c];
+        const f = k === none ? null : game.commanderies[terr.order[k]]?.owner ?? null;
+        if (!f) { c += 1; continue; }
+        let e = c;
+        while (e + 1 < cols) {
+          const k2 = terr.idx[r * cols + e + 1];
+          const f2 = k2 === none ? null : game.commanderies[terr.order[k2]]?.owner ?? null;
+          if (f2 !== f) break;
+          e += 1;
+        }
+        const len = e - c + 1;
+        if (!runs.has(f)) runs.set(f, []);
+        runs.get(f)!.push({
+          x: ((terr.meta.west + (c + len / 2) * cell) - MAP.west) * MAP.ppd,
+          y: (MAP.north - (terr.meta.north - (r + 0.5) * cell)) * MAP.ppd,
+          w: len * cell * MAP.ppd, r,
+        });
+        c = e + 1;
+      }
+    }
+    // 留四条最宽的行，彼此隔六行以上。只留一条时它常常正落在州名上——
+    // 一家的版图重心与它所据之州的重心本来就在同一处，实测刘表、吕布、
+    // 曹操因此全被「荆州」「兖州」挡掉
+    const out = new Map<string, Band[]>();
+    for (const [f, list] of runs) {
+      const sorted = list.sort((a, b) => b.w - a.w || a.r - b.r);
+      const keep: Band[] = [];
+      for (const b of sorted) {
+        if (keep.length >= 4) break;
+        if (keep.some((x) => Math.abs(x.r - b.r) < 6)) continue;
+        keep.push(b);
+      }
+      out.set(f, keep);
+    }
+    return out;
+  }, [terr, game]);
+
+  /**
    * 指到（或钉住）某郡时，把它的**辖境**整块点亮。
    *
    * 郡国界常驻着，但极淡——一百零五圈轮廓若都画得清楚，图就成了网格纸。
@@ -1383,7 +1439,23 @@ export function PlayClient() {
   // 分档的理由不是性能，是**一张图放不下**：一百零五座城各带三层檐、
   // 六十一处据点各带一个名，整幅可见时就是一层噪点。放大之后地方够了，
   // 还画同一个小印就是把它糊开
-  const lod = view.k >= 3.2 ? 2 : view.k >= 1.6 ? 1 : 0;
+  /**
+   * 三档，各答一个问题。此前三档答的是同一个问题，只是画得大小不同——
+   * 于是「整幅可见」那一屏在假装自己是棋盘：它画了 105 枚城印、军团、
+   * 围城圈，而那个倍数上**只有 45% 的相邻城对摆得下一枚棋子**
+   *（232 条边里 127 条摆不下，最近的阳乐—昌辽只隔 7.4 px）。
+   *
+   *   0　势力图（k < 2）　　答「天下大势」：疆域色块、州名、势力名、军团小点。
+   *                        不画城印、不画路、不画围城——那个倍数上它们只是噪点
+   *   1　棋盘　（2 ≤ k < 6）答「这一仗怎么打」：城、路、路上的关津据点、
+   *                        走在路上的部队、看得懂的围城。**进对局默认落在这一档**
+   *   2　细部　（k ≥ 6）　 答「这座城什么底子」：建筑、物产、阵型
+   *
+   * 4 倍这个点不是拍脑袋：那时 97% 的相邻城对摆得下部队，一屏 440 km
+   * 恰好一个州，而屏上 221 px/度仍在 DEM 源数据的 364 px/度之内——
+   * 三条约束在同一个倍数上对齐。
+   */
+  const lod = view.k >= 6 ? 2 : view.k >= 2 ? 1 : 0;
 
   // ── 水：线在任意倍数下重画 ───────────────────────────────────────
   //
@@ -1549,10 +1621,24 @@ export function PlayClient() {
     if (allRoads || !game || !seat) return roadGeom;
     const mine = new Set(Object.values(game.commanderies)
       .filter((c) => c.owner === seat).map((c) => c.id));
-    return roadGeom.filter((r) => mine.has(r.e.from) || mine.has(r.e.to));
+    // 己方之路，**外加一圈邻居之间的路**。
+    //
+    // 原先只留「至少一头是自己的」那些，七个郡只剩三十条，图上大片空白，
+    // 而关津就坐在那些没画出来的路上——于是它们看着像浮在荒地里的孤点。
+    // 「黎阳仓没被线连通到」正是这么来的：它离最近的路只有 0.7 km，
+    // 只是那条路没画。
+    //
+    // 棋盘这一档要答「这一仗怎么打」，那就得看见敌人从哪条路来——
+    // 邻郡之间的横向连接同样是答案的一部分。
+    const near = new Set(mine);
+    for (const r of roadGeom) {
+      if (mine.has(r.e.from)) near.add(r.e.to);
+      if (mine.has(r.e.to)) near.add(r.e.from);
+    }
+    return roadGeom.filter((r) => near.has(r.e.from) && near.has(r.e.to));
   }, [roadGeom, allRoads, game, seat]);
 
-  const roadEls = useMemo(() => (
+  const roadEls = useMemo(() => (lod === 0 ? null : (
     <g className="roads">
       {/* 衬边先铺一层：所有路的淡色宽笔画完，再画本色窄笔。
           分两遍是因为若逐条「衬边+本色」地画，后一条的衬边会盖住前一条的路面 */}
@@ -1566,14 +1652,15 @@ export function PlayClient() {
           strokeWidth={r.st.width / view.k ** 0.82} />
       ))}
     </g>
-  ), [roadShown, lod, view.k]);
+  )), [roadShown, lod, view.k]);
 
   // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
   // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
   // （它们是「路通不通」的答案），放大后铺开其余——否则六十一个印记压在墨底上
   // 就是一层噪点
+  // 关津港仓在**棋盘档就要出全**：它们是路上的据点，是「这一仗怎么打」的一部分，
+  // 不是放大后才看的细部。势力图那一档一个都不出
   const nodeMarks = useMemo(() => (lod === 0 || !engine ? [] : engine.nodes)
-    .filter((n) => lod >= 2 || n.kind === "gate" || n.kind === "port")
     .map((n) => ({
       n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
       r: 12 / view.k ** 0.82,
@@ -1764,7 +1851,7 @@ export function PlayClient() {
                 const cap = resume.game.factions[resume.seat]?.capital;
                 const p = cap ? engine.points.find((c) => c.id === cap) : null;
                 setSmooth(true);
-                setView(p ? centerOn(p.longitude, p.latitude, Math.max(3.2, minK), MAP) : fitAll(minK));
+                setView(p ? centerOn(p.longitude, p.latitude, Math.max(4, minK), MAP) : fitAll(minK));
                 setResume(null);
               }}>继续</button>
               <button className="ghost" onClick={() => { clearSave(); setResume(null); }}>
@@ -1879,8 +1966,15 @@ export function PlayClient() {
   // （实测悬停京兆尹时「关道·潼关 41 日」正压在城楼上）。
   // 城印是画面上最实的一块，谁都不该压它
   const placed: Box[] = marks
-    .filter((m) => !hidden.has(m.c.id))
+    .filter((m) => lod === 0 || !hidden.has(m.c.id))
     .map((m) => {
+      // 势力图那一档画的是一枚小点（半径 0.2×base），就只该占一枚小点。
+      // 此前不分档位一律按整枚城印占位，于是那一档的避让表里躺着 105 个
+      // **画都没画的**城印——势力名被它们挡得只剩 8 个，而且全是边疆大郡
+      if (lod === 0) {
+        const r = m.base * 0.2;
+        return [m.x - r, m.y - r, r * 2, r * 2] as Box;
+      }
       const w = m.base * 2.3;
       return [m.x - w / 2, m.y - w * GLYPH_BASE, w, w] as Box;
     });
@@ -1892,6 +1986,9 @@ export function PlayClient() {
     // 放大后铺开全部郡名：整幅可见时只标己方与州治是为了不叠字，
     // 放大之后地方够了，还藏着就是白放大
     .filter((m) => !hidden.has(m.c.id) || focus === m.c.id)
+    // 势力图那一档一个城名都不出：那一屏答的是「谁大谁小」，
+    // 城名是棋盘档的事。指到的那个仍然要出——指哪儿就得答哪儿
+    .filter((m) => lod >= 1 || focus === m.c.id)
     .filter((m) => view.k >= 2.2 || m.mine || m.isSeat || focus === m.c.id)
     .map((m) => {
       // 牌记比图元收得更狠一点：字在屏上只需**够读**，不需要跟着放大。
@@ -1932,7 +2029,7 @@ export function PlayClient() {
   for (const m of nodeMarks) {
     placed.push([m.x - m.r, m.y - m.r, m.r * 2, m.r * 2]);
   }
-  const nodeLabels = (lod < 2 ? [] : nodeMarks).map((m) => {
+  const nodeLabels = (lod < 1 ? [] : nodeMarks).map((m) => {
     const size = m.r * 0.9;
     // 估宽再加一丝余量：字面外还有 3px 的纸色描边，而且实际字距比 1em 略宽——
     // 实测「剑门关／葭萌关」按净字宽算恰好错开 0.7 单位，画出来仍蹭在一起
@@ -1974,6 +2071,39 @@ export function PlayClient() {
     const b = got ? bands[slots.findIndex((x) => x === got)] : bands[0];
     return { id: m.c.id, name: m.c.name, x: b.x, y: b.y + size * 0.32, size, hot };
   }).filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // 势力名：只在势力图那一档写。棋盘档有城印与郡名答归属，再写一层就是叠字
+  const factionNames = (lod !== 0 || !factionBand ? [] : [...factionBand])
+    // 自己永远先放，其余按版图大小——挤的时候该让位的是小势力。
+    // 「我在哪」是这一屏最不能答不出来的问题
+    .sort((a, b) => Number(b[0] === seat) - Number(a[0] === seat)
+      || (b[1][0]?.w ?? 0) - (a[1][0]?.w ?? 0))
+    .map(([f, bands]) => {
+      if (!bands.length) return null;
+      const nm = engine.nameOf.get(f) ?? f;
+      // 势力名可以很长（「吕布（张邈、陈宫）」），题记只取姓名那一段
+      const short = nm.split("（")[0];
+      const fit = (bands[0].w * 0.78) / Math.max(1, short.length);
+      const size = Math.min(fit, 46 / view.k ** 0.88);
+      if (size < 11 / view.k ** 0.88) return null;
+      const w = textWidth(short, size), h = size * 1.3;
+      const slots: Box[] = bands.map((b) => [b.x - w / 2, b.y - h * 0.7, w, h]);
+      const got = fitLabel(placed, slots);
+      if (!got && f !== seat) return null;
+      const b = got ? bands[slots.findIndex((x) => x === got)] : bands[0];
+      return { f, name: short, x: b.x, y: b.y + size * 0.32, size, mine: f === seat };
+    }).filter((l): l is NonNullable<typeof l> => l !== null);
+
+  // 州名当**背景水印**：大、极淡、不参与避让，画在所有东西之下。
+  //
+  // 试过让它进避让表，两个方向都不对：州名先占位则自家的名字被压在自家
+  // 所据之州上（吕布压「兖州」、严白虎压「徐州」）；势力名先占位则十三个州
+  // 只剩三个写得出——而州是计分单位，「多控一整州入甲」，它不能没有。
+  //
+  // 两者本来就不该抢：一个是大字淡墨的地界题记，一个是实墨的人名。
+  // 舆图上这两层历来就是叠着的，叠得对就读得开。
+  const zhouShown = (lod !== 0 ? [] : zhouMarks).map((m) => (
+    { z: m.z, x: m.x, y: m.y, size: 58 / view.k ** 0.82 }));
 
   /** 郡 → 图上坐标。道路、箭头、军团都要它 */
   const xy = (id: string) => {
@@ -2175,7 +2305,7 @@ export function PlayClient() {
 
   const centerOnId = (id: string) => {
     const p = engine.points.find((c) => c.id === id);
-    if (p) { setSmooth(true); setView(centerOn(p.longitude, p.latitude, Math.max(4.4, minK), MAP)); }
+    if (p) { setSmooth(true); setView(centerOn(p.longitude, p.latitude, Math.max(5.2, minK), MAP)); }
   };
   // 家底一览。被围与断供直接决定这一季能不能出兵，排在最前面
   const supplied = supplyReach(game, engine.G, seat);
@@ -2544,6 +2674,17 @@ export function PlayClient() {
             ))}
             {/* 郡名题记：写在辖境里，是**区域**的名字，不是城的名字。
                 画在城印与关津之前——它是底层的地名，不该压住上面的符号 */}
+            {/* 州名水印：画在最底下。它是地界题记，不是标签 */}
+            {zhouShown.map((m) => (
+              <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
+                fontSize={m.size}>{m.z}</text>
+            ))}
+            {/* 势力名：势力图那一档的主角。不画城印之后，「这片橙的是谁」
+                得由它来答——三十一家共用三十一种土色，靠色卡是认不出人的 */}
+            {factionNames.map((l) => (
+              <text key={`fn-${l.f}`} className={`faction-name${l.mine ? " mine" : ""}`}
+                x={l.x} y={l.y} textAnchor="middle" fontSize={l.size}>{l.name}</text>
+            ))}
             {junNames.map((l) => (
               <text key={`jn-${l.id}`} className={`jun-name${l.hot ? " hot" : ""}`}
                 x={l.x} y={l.y} textAnchor="middle" fontSize={l.size}>{l.name}</text>
@@ -2554,10 +2695,7 @@ export function PlayClient() {
               <text key={`nn-${l.id}`} className="node-name" x={l.x} y={l.y}
                 textAnchor="middle" fontSize={l.size}>{l.name}</text>
             ))}
-            {view.k < 2.2 && zhouMarks.map((m) => (
-              <text key={m.z} className="zhou" x={m.x} y={m.y} textAnchor="middle"
-                fontSize={62 / view.k ** 0.82}>{m.z}</text>
-            ))}
+
             {arrows.map((ar) => (ar.sortie ? (
               // 出城迎战：起点即目标，画一圈而不是一条线
               <circle key={ar.key} className={`sortie${ar.on ? " on" : ""}`}
@@ -2635,8 +2773,12 @@ export function PlayClient() {
                     </g>
                   );
                 })}
-                {hidden.has(m.c.id) ? (
-                  // 让位者：一枚小点。位置还在、点得到、归属看得见
+                {lod === 0 || hidden.has(m.c.id) ? (
+                  // 让位者与势力图那一档：一枚小点。位置还在、点得到、归属看得见。
+                  //
+                  // 势力图上不画城印是这一档的立身之本：1 倍时 232 条边里有 127 条
+                  // 摆不下一枚棋子，105 枚城印铺上去必然互相压住，读出来的是一团
+                  // 而不是形势。那一屏该答的是「谁大谁小、谁挨着谁」，疆域色块已经答了
                   <circle className="dot" cx={m.x} cy={m.y} r={m.base * 0.2}
                     fill={m.st.owner ? engine.colorOf.get(m.st.owner) ?? "#7a7266" : "#efe9dc"} />
                 ) : (
@@ -2735,7 +2877,7 @@ export function PlayClient() {
                 而这三样正是「要不要去救」的全部依据 */}
             {/* 在途的不算在城下：它这一季不结算攻城、不扣守方存粮，
                 插一面围城旗在那儿，读图的人会以为城已经被围上了 */}
-            {game.armies.filter((a) => a.target && a.marchLeft <= 0).map((a) => {
+            {(lod === 0 ? [] : game.armies.filter((a) => a.target && a.marchLeft <= 0)).map((a) => {
               const p = engine.points.find((c) => c.id === a.target);
               if (!p) return null;
               const x = (p.longitude - MAP.west) * MAP.ppd;
