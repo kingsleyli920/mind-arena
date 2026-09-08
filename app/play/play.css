@@ -821,3 +821,15 @@
 .crisis.tip { border-left-color: #6f7b5f; background: #f7f8f1; }
 .crisis.tip b { color: #5c6a4a; }
 .crisis b.inline { border: none; padding: 0; color: inherit; font-size: inherit; letter-spacing: 0; }
+/* 图例里的开关 */
+.legend-toggle { display: inline-flex; align-items: center; gap: .35rem; cursor: pointer; }
+.legend-toggle input { margin: 0; }
+
+/* ── 军团：一枚小圆点 ── */
+/* 此前是一顶帐 + 兵种徽 + 器械徽 + 一行字，四样挤在十几像素里。
+   现在点上只答「谁的、在哪」，其余进悬停详情 */
+.map-vec svg .army-dot { stroke: rgba(30, 26, 20, 0.75); stroke-width: 0; }
+.map-vec svg .army.mine .army-dot { stroke-width: 0; filter: drop-shadow(0 0 2px rgba(0,0,0,.35)); }
+.map-vec svg .army-ring { fill: none; stroke: rgba(40, 34, 26, 0.6); }
+.map-vec svg .march-path { opacity: 0.5; stroke-linecap: round; stroke-linejoin: round; }
+.tip .army-who { border-left: 3px solid var(--c, var(--rule)); padding-inline-start: .45rem; }

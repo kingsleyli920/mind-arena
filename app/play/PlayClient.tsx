@@ -711,6 +711,10 @@ export function PlayClient() {
   const [resume, setResume] = useState<SavedGame | null>(null);
   /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
   const [hoverKey, setHoverKey] = useState<string | null>(null);
+  /** 图例里的开关：常驻只画自家接出去的路，想看全网时打开 */
+  const [allRoads, setAllRoads] = useState(false);
+  /** 指到哪支军团。兵种、器械、主将、去向这些都在悬停详情里说 */
+  const [armyTip, setArmyTip] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showPrimer, setShowPrimer] = useState(false);
 
@@ -1436,21 +1440,40 @@ export function PlayClient() {
     </g>
   )), [water]);
 
+  /**
+   * 常驻只画**与你有关**的路。
+   *
+   * 232 条路全铺出来，而任何一季你只关心其中六到十条——于是每条路都在跟别的
+   * 路抢注意力，谁也读不出来。这不是「用线条代替道路」的毛病（真实地图上路
+   * 本来就是线），是把整张公路网当底纹铺了。
+   *
+   * 「与你有关」= 自家郡国接出去的边。指到某郡时它那几条另有 hot 层提亮，
+   * 不在这里管。想看全网的按图例里那个开关。
+   */
+  const roadShown = useMemo(() => {
+    // **这一段跑在 game 的空值守卫之前**（hooks 不能写在早退之后）。
+    // 这个组件里同类的顺序坑已经栽过四次了，每次都是 500——所以这里显式判空
+    if (allRoads || !game || !seat) return roadGeom;
+    const mine = new Set(Object.values(game.commanderies)
+      .filter((c) => c.owner === seat).map((c) => c.id));
+    return roadGeom.filter((r) => mine.has(r.e.from) || mine.has(r.e.to));
+  }, [roadGeom, allRoads, game, seat]);
+
   const roadEls = useMemo(() => (
     <g className="roads">
       {/* 衬边先铺一层：所有路的淡色宽笔画完，再画本色窄笔。
           分两遍是因为若逐条「衬边+本色」地画，后一条的衬边会盖住前一条的路面 */}
-      {roadGeom.map((r) => (
+      {roadShown.map((r) => (
         <path key={`c-${r.key}`} className={`road-casing lod${lod}`} d={r.d}
           strokeWidth={(r.st.width + 2.2) / view.k ** 0.82} />
       ))}
-      {roadGeom.map((r) => (
+      {roadShown.map((r) => (
         <path key={r.key} className={`road lod${lod}`} d={r.d} fill="none"
           stroke={r.st.stroke} strokeDasharray={r.st.dash}
           strokeWidth={r.st.width / view.k ** 0.82} />
       ))}
     </g>
-  ), [roadGeom, lod, view.k]);
+  ), [roadShown, lod, view.k]);
 
   // ── 关津港仓：非郡治的战略据点 ────────────────────────────────────
   // 关隘 22、港口 12、渡口 9、谷道 7、古战场 7、粮仓 4。整幅可见时只画关与港
@@ -1876,6 +1899,46 @@ export function PlayClient() {
   // 此前只有围城的军团画了旗，在途的一支都没有：出征之后它在图上**隐身**几季，
   // 然后凭空出现在城下。而行军耗时正是围城那只钟的另一半——援军赶不赶得到，
   // 看的就是它现在走到哪了。位置按 marchLeft 在起兵郡与目标之间插值
+  /**
+   * 沿实走路径取 f 处的点，并顺带给出该处的走向。
+   *
+   * 军团此前是在两城之间做**直线插值**——路已经会拐了，兵还在走直线，
+   * 于是「在途的那支兵」常常悬在山脊上。改成按弧长沿折线走：
+   * f=0.5 是真的走了一半路程，不是「在两城连线的中点」。
+   */
+  const alongRoad = (fromId: string, toId: string, f: number) => {
+    const pts = engine.roads.get(`${fromId}\u0000${toId}`)
+      ?? engine.roads.get(`${toId}\u0000${fromId}`)?.slice().reverse();
+    const A = xy(fromId), B = xy(toId);
+    if (!pts || pts.length < 2 || !A || !B) {
+      if (!A || !B) return null;
+      return { x: A.x + (B.x - A.x) * f, y: A.y + (B.y - A.y) * f,
+               ang: Math.atan2(B.y - A.y, B.x - A.x) };
+    }
+    const P = pts.map(([lo, la]) => ({ x: (lo - MAP.west) * MAP.ppd,
+                                       y: (MAP.north - la) * MAP.ppd }));
+    // 折线是按 from→to 存的；若这条边是反向取的，上面已经 reverse 过
+    const segs: number[] = [];
+    let total = 0;
+    for (let i = 0; i + 1 < P.length; i += 1) {
+      const d = Math.hypot(P[i + 1].x - P[i].x, P[i + 1].y - P[i].y);
+      segs.push(d); total += d;
+    }
+    let want = total * Math.max(0, Math.min(1, f));
+    for (let i = 0; i < segs.length; i += 1) {
+      if (want <= segs[i] || i === segs.length - 1) {
+        const t = segs[i] > 0 ? want / segs[i] : 0;
+        return {
+          x: P[i].x + (P[i + 1].x - P[i].x) * t,
+          y: P[i].y + (P[i + 1].y - P[i].y) * t,
+          ang: Math.atan2(P[i + 1].y - P[i].y, P[i + 1].x - P[i].x),
+        };
+      }
+      want -= segs[i];
+    }
+    return { x: P[P.length - 1].x, y: P[P.length - 1].y, ang: 0 };
+  };
+
   const troops = game.armies.map((a) => {
     const at = xy(a.at);
     if (!at) return null;
@@ -1889,9 +1952,10 @@ export function PlayClient() {
       const t = total > 0 ? (total - a.marchLeft) / total : 1;
       // 出发那一季也要看得见已经动了，故给个起步量
       const f = 0.12 + t * 0.76;
-      return { a, mine, marching: true as const,
-               x: from.x + (to.x - from.x) * f, y: from.y + (to.y - from.y) * f,
-               from, to };
+      // 沿真正的路走，不再在两城之间插直线
+      const p = alongRoad(a.home, a.target, f);
+      if (!p) return null;
+      return { a, mine, marching: true as const, x: p.x, y: p.y, from, to };
     }
     if (a.target) return null;             // 城下的由围城旗那一层画
     return { a, mine, marching: false as const, x: at.x, y: at.y, from: null, to: null };
@@ -2432,23 +2496,39 @@ export function PlayClient() {
             })}
             {/* 军团：在途的画在路上，待命的画在驻地。
                 在途的连一条虚线到目标——「这支兵冲着谁去」是最该一眼看出的事 */}
+            {/* 军团：一枚小圆点，势力色，指上去出详情。
+                此前是一顶帐 + 兵种徽 + 器械徽 + 一行字，四样东西挤在十几像素里，
+                放大后才勉强读得出——而「这支兵是谁的、在哪、往哪去」本来只需要
+                一个点就够。兵种、器械、主将这些移进悬停详情，那里有地方好好写。
+                行军中的把它**走的那条路**整条提亮：一眼看出这支兵冲着谁去 */}
             {troops.map((t) => {
-              const s2 = 26 / view.k ** 0.82;
               const col = engine.colorOf.get(t.a.faction) ?? "#7a7266";
+              // 点的大小随兵力，但压得很扁——五百人与两万人都得看得见，
+              // 而图上不该出现一个盖住半座城的圆
+              const rr = (7 + Math.min(9, Math.log10(Math.max(100, t.a.troops)) * 2.2))
+                / view.k ** 0.82;
+              const road = t.marching && t.a.target ? roadGeom.find((r) =>
+                (r.e.from === t.a.home && r.e.to === t.a.target)
+                || (r.e.to === t.a.home && r.e.from === t.a.target)) : null;
               return (
                 <g key={t.a.id}
-                  className={`army${t.mine ? " mine" : ""}${t.marching ? " marching" : ""}`}>
-                  {t.marching && t.from && t.to && (
-                    <line className="march-path" x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y}
-                      stroke={col} strokeWidth={2.4 / view.k ** 0.82} />
+                  className={`army${t.mine ? " mine" : ""}${t.marching ? " marching" : ""}`}
+                  onMouseEnter={() => setArmyTip(t.a.id)}
+                  onMouseLeave={() => setArmyTip((k) => (k === t.a.id ? null : k))}>
+                  {road && (
+                    <path className="march-path" d={road.d} fill="none"
+                      stroke={col} strokeWidth={2.6 / view.k ** 0.82} />
                   )}
-                  <ArmyMark x={t.x} y={t.y} s={s2} color={col} marching={t.marching}
-                    at={t.a.id} unit={lod >= 1 ? t.a.unit : undefined}
-                    gear={lod >= 1 ? t.a.gear : undefined} />
-                  <text x={t.x} y={t.y + s2 * 0.98} textAnchor="middle" fontSize={s2 * 0.5}>
-                    {(t.a.troops / 1000).toFixed(1)}千
-                    {t.marching ? `·尚需 ${t.a.marchLeft} 季` : ""}
-                  </text>
+                  {/* 命中圆：点本身只有十来像素，低于可点区域的最低尺寸。
+                      必须带 mark 类——整张 svg 是 pointer-events:none */}
+                  <circle className="mark" cx={t.x} cy={t.y} r={rr * 1.9} fill="transparent" />
+                  <circle className="army-dot" cx={t.x} cy={t.y} r={rr} fill={col} />
+                  {/* 在途的加一圈虚环：静止与移动要一眼分得开 */}
+                  {t.marching && (
+                    <circle className="army-ring" cx={t.x} cy={t.y} r={rr * 1.55}
+                      strokeWidth={1.4 / view.k ** 0.82}
+                      strokeDasharray={`${2.6 / view.k ** 0.82} ${2.6 / view.k ** 0.82}`} />
+                  )}
                 </g>
               );
             })}
@@ -2586,6 +2666,15 @@ export function PlayClient() {
                 相克成环——鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，克之 +1 缺口</em></li>
               <li><em>建筑画在城下（只画自家的）。<b>淡影</b>是「有这个物产、
                 但那座还没修」——铁官须有铁、盐场须有盐、马苑须有牧苑、屯田须可垦</em></li>
+              <li>
+                <label className="legend-toggle">
+                  <input type="checkbox" checked={allRoads}
+                    onChange={(e) => setAllRoads(e.target.checked)} />
+                  画出全部 232 条道路
+                </label>
+                <em>常驻只画<b>自家郡国接出去的</b>那些——全网铺开时每条路都在跟
+                  别的路抢注意力，谁也读不出来。指到某郡，它那几条照样会提亮</em>
+              </li>
               <li><em>道路一律实线，按<b>颜色与粗细</b>分：平道最细最淡、丘陵、山道、
                 水路走青、<b>关道最粗最深</b>。路是在高程上算出来的实走路径，
                 会沿河谷绕开山脊，并从挂在它上面的关穿过去。
@@ -2605,8 +2694,36 @@ export function PlayClient() {
             <button onClick={() => { setSmooth(true); setView(fitAll(minK)); }}>全图</button>
             <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4, minK)); }}>－</button>
           </div>
+          {/* 军团的悬停详情。圆点上只留「谁的、在哪」，其余全在这里说——
+              兵种、器械、主将、去向、还要几季。图上挤四样徽记，读者反而
+              什么都读不出 */}
+          {armyTip && (() => {
+            const a = game.armies.find((x) => x.id === armyTip);
+            if (!a) return null;
+            const who = engine.nameOf.get(a.faction) ?? a.faction;
+            const lead = a.retinue.map((o) => engine.roster.byId.get(o)?.name ?? o);
+            const mine = a.faction === seat;
+            return (
+              <div className="tip">
+                <b style={{ "--c": engine.colorOf.get(a.faction) } as React.CSSProperties}
+                  className="army-who">{who}{mine ? "（你）" : ""}</b>
+                <span>{a.marchLeft > 0 && a.target
+                  ? `自 ${a.home} 往 ${a.target}——尚需 ${a.marchLeft} 季`
+                  : a.target ? `围 ${a.target}` : `驻 ${a.at}`}</span>
+                {/* 兵力对他方是**观测值**，不能直报真值——图上别处都按迷雾报带，
+                    这里独报真值就成了免费情报 */}
+                <span>{mine ? `${Math.round(a.troops)} 人`
+                  : (() => { const o = observedGarrison(game, seat, a.at, engine.P);
+                      return o.scouted || o.own ? `约 ${Math.round(o.value)} 人`
+                        : `${Math.round(o.lo)}–${Math.round(o.hi)} 人（未探）`; })()}
+                  {"\u3000"}{UNIT_CN2[a.unit] ?? a.unit}
+                  {a.gear && a.gear !== "none" ? `\u3000${GEAR_LABEL[a.gear] ?? a.gear}` : ""}</span>
+                {lead.length > 0 && <span>{lead.join("、")}</span>}
+              </div>
+            );
+          })()}
           {/* 关津的悬停详情。它与郡的详情共用一个位置：两者不会同时指到 */}
-          {nodeTip && !focus && (
+          {nodeTip && !focus && !armyTip && (
             <div className="tip">
               <b>{nodeTip.name}</b>
               <span>{NODE_CN[nodeTip.kind] ?? nodeTip.kind}
