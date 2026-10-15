@@ -1,0 +1,81 @@
+{
+  "verifiedAt": "2026-09-29T01:48:56.841Z",
+  "scope": "确定性校验、命令收据、下一季反馈、兼容存档与真实页面。未测在线模型在新提示后的纠错能力。",
+  "versions": {
+    "pack": "2.3.0",
+    "prompt": "1.19.0",
+    "observation": "1.5.0",
+    "save": 11
+  },
+  "replay": {
+    "cases": 9,
+    "responsesReplayed": 18,
+    "paidRequests": 0,
+    "unchangedFirstSeasonResults": 9,
+    "nextReceiptMatches": 9,
+    "checkCounts": {
+      "status-stale": 8,
+      "target-owned": 2,
+      "plan-warning": 1,
+      "orders-dropped": 5
+    },
+    "peakObservationTokens": 8959
+  },
+  "engineering": {
+    "tests": {
+      "passed": 205,
+      "failed": 0
+    },
+    "postLabelChangeFocused": {
+      "passed": 3,
+      "failed": 0
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "diffCheck": "passed",
+    "baselineObservation": {
+      "seatSeasons": 333,
+      "peak": 9834,
+      "includesReceipts": false
+    }
+  },
+  "browser": {
+    "origin": "http://localhost:4186",
+    "page": "/play",
+    "mode": "通过临时按钮调用正式save写入历史响应回放存档；不请求模型",
+    "scenes": [
+      "公孙度：辽西已持有；重复复核；主力采纳/倾国拒绝清楚区分",
+      "刘备：状态未更新；东海征伐被拒，起点郡令数已满"
+    ],
+    "reload": "继续游戏后提示和命令记录保留，已用1/1决策",
+    "visual": "两个局面截图已人工查看；右侧文字正常换行、地图无覆盖",
+    "consoleErrors": 0,
+    "cleanup": "临时路由已删除且未进入构建；tab8关闭；dev服务退出0"
+  },
+  "sources": {
+    "lib/game/decision-review.ts": "4a8077e4ada124ef81185abb66e2a3abc6e8972a1cd276e6ec0307465c6e9d8a",
+    "lib/game/session.ts": "e88206b7aeb4946d3842bbe716872def98942b346c8fb6b57c37cd4694562897",
+    "lib/game/engine/observe.ts": "db77bc3f1a0a5c7fc7730e044ed28483e324c8887e752612128ecc1dc5835efb",
+    "lib/arena/seat/model-seat.ts": "889e41da634c4c088136a6fdc515e3b21fd7c31ae0ff45817bec00c598858048",
+    "lib/arena/seat/prompt.ts": "57eea8d27d67d096d97b447299415ef8ea80d139fd3014017be319cc48234313",
+    "app/play/SessionPanel.tsx": "0c4689ef4972e175a29641d158b26b8c1cfe6fd4ea1583474f84aba6802b2772",
+    "app/play/DecisionReviewView.tsx": "38180f035c1a431cb80a471bdc6da41caebf56d3f253f32fdce2fe723872f622",
+    "tests/decision-review.test.mjs": "966f7c13e4114ee956bc33c344930cf705937c47b66d0f957687a8fd513199f4",
+    "tools/decision-review-audit.mjs": "84904789a548d7827ca4a74ade732bb7410dc43d5bb3f4e293c19fe3e9a0f3d0",
+    "tools/eval-run.mjs": "07ce3772eb12f5943bcf7743ac64d15f692af6e402713593dce3f98b8db37648",
+    "tools/match-log.mjs": "26ae986ab9913df692d6f4a526cc1457d7ce3c07eab0d8b1d3e63b2fa6c03acb",
+    "tools/melee.mjs": "db3bb183bc41f470805ccb3294d9f19f05b0a0c5e625c96e1f95817bb7f3d9ed",
+    "docs/DECISION-REVIEW-2026-09-28.md": "62847a93b37c1a95b0bb4eb8e7501369c1a1a559d249bdddf523babb11f3c896"
+  },
+  "artifacts": {
+    "audit.json": "e2d68c311e04a90ee60271b0ca6577880fef966443def31d4aa4934007235ac2",
+    "audit.log": "54448af6f2ace64fd4180b451b9faa71847537efde34477e74f568c651d17c9b",
+    "build.log": "f0082c66199b363d17bafe3c397699dcee0f81a8c3aa171facdffdb74cfa65e0",
+    "final-focused.log": "99feca478dc81ce3539b24db1c009233c63eea13fe3dc873e01f4b07a784ed7d",
+    "lint-final.log": "f11ad03d2fcda8ddecfc9adae5055e791318faecd303a95b4376dff929d77505",
+    "observation-budget.log": "626bd3cbe318c93dee46bd69ee304af10faa8d408fb94c19fe011f9c7f63eb91",
+    "tests.log": "0e45fff15e16c82be2f68711e73dd9e24157ad76d06b9bb54b608edf47b8b524",
+    "typecheck-final.log": "d10beae9b0406ee4b3b90ab74000ff833453a9969f75ab2e1052104891c804fa"
+  }
+}

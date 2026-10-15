@@ -1,0 +1,57 @@
+{
+  "createdAt": "2026-09-29T05:12:42.157Z",
+  "scope": "六次真实决策成对纠错实验；不构成长局棋力或稳定纠错的证明",
+  "decisions": 6,
+  "attempts": 8,
+  "reportedUsd": 0.010733780000000002,
+  "conservativeHeldUsd": 0.02283123,
+  "capUsd": 0.2,
+  "groups": [
+    {
+      "condition": "legacy",
+      "admitted": 14,
+      "dropped": 3
+    },
+    {
+      "condition": "receipt",
+      "admitted": 15,
+      "dropped": 3
+    }
+  ],
+  "structured": 6,
+  "finishedNormally": 6,
+  "postAdmissionRejected": 0,
+  "peakObservationEstimate": 8715,
+  "replayedDecisions": 6,
+  "replayPaidCalls": 0,
+  "exactRequestAndFullStateReplay": true,
+  "tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "knownLimits": [
+    "每例每条件一次；不可排除模型随机性",
+    "两组都使用当前prompt 1.19.0，仅比较收据而非整个新旧prompt",
+    "历史上一季由模型生成，更早一季是人工冲突计划",
+    "两份Flash-Lite复核原文超160字；存储截断，人工判读使用完整原文"
+  ],
+  "replayRepair": "首次重放因内存undefined字段未落入JSON而失败；按落盘表示比较后通过，未重复付费。修复仅涉及回放比较。",
+  "checks": {
+    "eslint": "passed",
+    "diffCheck": "passed"
+  },
+  "sha256": {
+    "tools/decision-correction.mjs": "bd474ce976ffae2d0e2095bdade8756e56e90020eab62f817e712fa12598405c",
+    "tools/lib/comparison-budget.mjs": "16f70b132520e3f226cf7d7da8a7c1ea716c0e2ae0f23b61bbf69ad7a09bef51",
+    "lib/arena/seat/prompt.ts": "57eea8d27d67d096d97b447299415ef8ea80d139fd3014017be319cc48234313",
+    "lib/arena/seat/model-seat.ts": "889e41da634c4c088136a6fdc515e3b21fd7c31ae0ff45817bec00c598858048",
+    "lib/game/decision-review.ts": "4a8077e4ada124ef81185abb66e2a3abc6e8972a1cd276e6ec0307465c6e9d8a",
+    "docs/reports/decision-correction-2026-09-28/live.json": "5a0306ca6c6404ec43cc021b047a038ed690c8dcd0d09e67610c66494e0e51a3",
+    "docs/reports/decision-correction-2026-09-28/replay.json": "575afb7767ef3c39327fa07a452cd6c561039bc948407722be4be66bdbbeafd3",
+    "docs/reports/decision-correction-2026-09-28/preflight.json": "898bccfa6b21b75c39957664bec2848ccc056f67253d1c8e25bc32728a000a54",
+    "docs/reports/decision-correction-2026-09-28/tests.log": "46bb03ab84f259e4dbea75c09b28e647398c4a1f48289580607e9db904a86a71",
+    "docs/DECISION-CORRECTION-2026-09-28.md": "79bbc36f1cd407500e7b6977f6e47a61eb8e3c0a68aa113c9a9c057f384131e2",
+    "docs/EVAL.md": "56a66ab04e535e06dda3f6476a56d43de0fc029935fc4094d2263cb354adb254",
+    "README.md": "45ee90c3a19355fa3ddc9d7fa6b1ff9d1b2cdd8071490176a63757b3cc8702bb"
+  }
+}

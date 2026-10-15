@@ -1,0 +1,60 @@
+[
+  {
+    "reasoning": null,
+    "status": 200,
+    "usage": {
+      "prompt_tokens": 20,
+      "completion_tokens": 248,
+      "total_tokens": 268,
+      "cost": 0.0001012,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0001012,
+        "upstream_inference_prompt_cost": 0.000002,
+        "upstream_inference_completions_cost": 0.0000992
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "content": "{\n  \"picks\": [\n    \"wait\"\n  ],\n  \"reason\": \"本季以观望为主，准备后续行动。\",\n  \"plan\": {\n    \"objective\": \"本季不进行扩张，主要任务是侦察其他玩家的动向，并评估我方当前的实力和潜在的威胁。若有机会，则为下一季的行动做准备。\",\n    \"target\": null,\n    \"stance\": \"develop\",\n    \"preparation\": \"侦察所有相邻郡和关键的交通枢纽。评估我方兵力部署，确保关键区域的防御。同时，观察是否有其他玩家进行大规模调动或结盟。\",\n    \"abortWhen\": \"出现我方无法应对的严重威胁，或发现可以立即抓住的战略机会。\",\n    \"status\": \"continue\",\n    \"review\": \"首季，以“wait”作为指令，目的是避免过早暴露意图或卷入不必要的冲突。通过侦察和评估，为后续季度制定更精准的战略。观察期结束后，根据侦察结果和局势，决定是继续发展、防御还是进攻。\"\n  }\n}"
+  },
+  {
+    "reasoning": {
+      "effort": "low"
+    },
+    "status": 200,
+    "usage": {
+      "prompt_tokens": 20,
+      "completion_tokens": 551,
+      "total_tokens": 571,
+      "cost": 0.0002224,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0002224,
+        "upstream_inference_prompt_cost": 0.000002,
+        "upstream_inference_completions_cost": 0.0002204
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 344,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "content": "{\n  \"picks\": [\"wait\"],\n  \"reason\": \"本季休养生息，积蓄力量，为下一次扩张做准备。\",\n  \"plan\": {\n    \"objective\": \"稳定内部，提升部队训练度，确保粮草充足，为来季进攻打下基础。\",\n    \"target\": null,\n    \"stance\": \"develop\",\n    \"preparation\": \"招募新兵500人，训练现有部队至熟练，储备3个月的粮草。若有余力，可侦察邻近郡的兵力配置。\",\n    \"abortWhen\": \"出现大规模叛乱，或邻近强敌有明显进攻意图。\",\n    \"status\": \"continue\",\n    \"review\": \"作为开局首季，首要任务是巩固根基。目前无明显外部威胁，内部稳定，适合发展。目标为夯实基础，为后续扩张提供支撑。\"\n  }\n}"
+  }
+]

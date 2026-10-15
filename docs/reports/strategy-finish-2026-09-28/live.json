@@ -1,0 +1,4494 @@
+{
+  "runtimeSha256": "050516591bbb3fef3dbdd7da449a2adec75e78a99b2dc06c61bafe32946bb10a",
+  "sourceSha256": "a3e7d50efada2a5abc81d5aae9c20396c1e52ea9a44de9638af2281093f49dbc",
+  "packVersion": "2.2.0",
+  "seed": "strategy-session-2",
+  "live": true,
+  "limits": {
+    "seasons": 4,
+    "calls": 8,
+    "attempts": 2,
+    "maxRequests": 16,
+    "tokens": 8000,
+    "maxInputBytes": 90000,
+    "maxReservedCost": 0.2
+  },
+  "calls": 8,
+  "reservedCost": 0.14491079999999998,
+  "reportedCost": 0.013219044999999999,
+  "unknownCost": 0,
+  "frames": [
+    {
+      "turn": 25,
+      "records": [
+        {
+          "turn": 24,
+          "seat": "liuzhang",
+          "model": "openai/gpt-5-nano",
+          "promptVersion": "1.16.0",
+          "obsChars": 10732,
+          "obsTokens": 7148,
+          "candidates": 60,
+          "picks": [
+            "campaign:上郡>安定郡:allout",
+            "campaign:上郡>安定郡:main",
+            "seize:baoxie-dao:汉中郡",
+            "array:上郡:wings",
+            "scout:安定郡"
+          ],
+          "admission": {
+            "admitted": [
+              "campaign:上郡>安定郡:allout",
+              "campaign:上郡>安定郡:main",
+              "seize:baoxie-dao:汉中郡",
+              "scout:安定郡"
+            ],
+            "dropped": [
+              {
+                "key": "array:上郡:wings",
+                "reason": "rejected",
+                "detail": "该郡本季令数已满"
+              }
+            ],
+            "spent": 5,
+            "mojibake": 0,
+            "illegalRate": 0.2
+          },
+          "usage": {
+            "prompt": 18550,
+            "completion": 1402,
+            "cached": 0,
+            "reasoning": 1088,
+            "cost": 0.0014883
+          },
+          "structured": true,
+          "rung": "schema-notemp",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 2,
+          "elapsedMs": 8726,
+          "provider": "OpenAI",
+          "generationId": "gen-1790637728-eW4XdcCSkl6uUmYWBrf3",
+          "reason": "以上郡两次倾国进攻迅速突破安定郡防线并扩展州治，其次以斜线打通汉中郡要道并切换阵型以增强攻防，辅以刺探锁定信息，小幅增厚胜算；同时通过安定郡刺探获得对方更多信息以指向后续取郡目标。",
+          "plan": "跨季方略：先把上郡的两次征伐打出，力争在本季内扩大对安定郡的控与攻，并通过对汉中郡的夺取打通右扶风的重要通道，提升我方在京兆尹与左右扶风的辖区影响力。阵型改为鹤翼以提高对夜袭与城防的容错，同时通过安定郡的刺探持续收集对手信息，为下一季的主攻方向和潜在盟约/招降提供依据。"
+        },
+        {
+          "turn": 24,
+          "seat": "yuanshao",
+          "model": "z-ai/glm-5.3-flash",
+          "promptVersion": "1.16.0",
+          "obsChars": 11657,
+          "obsTokens": 7631,
+          "candidates": 60,
+          "picks": [
+            "relief:广阳郡>渔阳郡",
+            "campaign:中山国>代郡:main",
+            "appoint:中山国:zhaoyun",
+            "array:勃海郡:scale",
+            "govern:东郡:wall",
+            "build:中山国:ironworks",
+            "scout:济阴郡",
+            "scout:梁国",
+            "scout:琅邪国"
+          ],
+          "admission": {
+            "admitted": [
+              "relief:广阳郡>渔阳郡",
+              "campaign:中山国>代郡:main",
+              "appoint:中山国:zhaoyun",
+              "array:勃海郡:scale",
+              "govern:东郡:wall",
+              "build:中山国:ironworks",
+              "scout:济阴郡",
+              "scout:梁国",
+              "scout:琅邪国"
+            ],
+            "dropped": [],
+            "spent": 8,
+            "mojibake": 0,
+            "illegalRate": 0
+          },
+          "usage": {
+            "prompt": 15632,
+            "completion": 657,
+            "cached": 0,
+            "reasoning": 540,
+            "cost": 0.0026733
+          },
+          "structured": true,
+          "rung": "schema",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 2,
+          "elapsedMs": 256300,
+          "provider": "DigitalOcean",
+          "generationId": "gen-1790637909-gROo0RHrChzWXSzuwXRv",
+          "reason": "解渔阳之围保幽州桥头，同时主力攻代郡（已探必破），其余令投入布防与蓄力",
+          "plan": "两线并进：北线先解渔阳之围、取代郡，幽州再取三郡即控；南线探明济阴、陈留后自东郡连打，凑足兖州控制。同时沿中山—代郡方向扩张。"
+        }
+      ],
+      "leaders": [
+        {
+          "id": "yuanshao",
+          "lands": 22,
+          "zhou": 2,
+          "gold": 14225
+        },
+        {
+          "id": "liuzhang",
+          "lands": 16,
+          "zhou": 2,
+          "gold": 14218
+        },
+        {
+          "id": "nanzhongyi",
+          "lands": 12,
+          "zhou": 1,
+          "gold": 24247
+        },
+        {
+          "id": "lijue",
+          "lands": 11,
+          "zhou": 0,
+          "gold": 12686
+        },
+        {
+          "id": "yanbaihu",
+          "lands": 11,
+          "zhou": 2,
+          "gold": 25088
+        },
+        {
+          "id": "liubiao",
+          "lands": 9,
+          "zhou": 1,
+          "gold": 23262
+        },
+        {
+          "id": "gongsundu",
+          "lands": 7,
+          "zhou": 0,
+          "gold": 13047
+        },
+        {
+          "id": "gongsunzan",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 15832
+        },
+        {
+          "id": "lubu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 6104
+        },
+        {
+          "id": "yuanshu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 11971
+        },
+        {
+          "id": "baibo",
+          "lands": 2,
+          "zhou": 0,
+          "gold": 7165
+        },
+        {
+          "id": "songjian",
+          "lands": 2,
+          "zhou": 0,
+          "gold": 9255
+        }
+      ],
+      "changed": [
+        {
+          "at": "左冯翊",
+          "from": "liubiao",
+          "to": "liuzhang"
+        },
+        {
+          "at": "沛国",
+          "from": "yuanshu",
+          "to": "yanbaihu"
+        },
+        {
+          "at": "北海国",
+          "from": "gongsunzan",
+          "to": "gongsundu"
+        },
+        {
+          "at": "南阳郡",
+          "from": "liuzhang",
+          "to": "liubiao"
+        },
+        {
+          "at": "右北平郡",
+          "from": "gongsundu",
+          "to": "gongsunzan"
+        }
+      ],
+      "events": [
+        {
+          "turn": 24,
+          "kind": "march-arrive",
+          "faction": "liuzhang",
+          "text": "8559 人抵 左冯翊 城下，下季可攻"
+        },
+        {
+          "turn": 24,
+          "kind": "march-arrive",
+          "faction": "baibo",
+          "text": "1307 人抵 涿郡 城下，下季可攻"
+        },
+        {
+          "turn": 24,
+          "kind": "march-arrive",
+          "faction": "gongsundu",
+          "text": "1175 人抵 渔阳郡 城下，下季可攻"
+        },
+        {
+          "turn": 24,
+          "kind": "suade",
+          "faction": "yuanshu",
+          "text": "招降 刘勋 成，驻 沛国",
+          "attribution": {
+            "成功率": 45,
+            "掷点": 29
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "baibo",
+          "text": "刺探回报：中山国 约 13553±8%（已探）、代郡 约 1184±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "baibo",
+          "text": "内政：西河郡 募兵 心3→2 兵1134→1338 −20 金、雁门郡 安民 心2→3"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "gongsundu",
+          "text": "刺探回报：东海郡 约 504±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "gongsundu",
+          "text": "任命：是仪 驻 东莱郡（自 乐浪郡）、张绣 驻 东莱郡（自 乐浪郡）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "gongsunzan",
+          "text": "刺探回报：河闲国 约 12873±8%（已探）、泰山郡 约 6883±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "gongsunzan",
+          "text": "内政：涿郡 安民 心2→3"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "gongsunzan",
+          "text": "任命：田豫 驻 涿郡（自 北海国）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "lijue",
+          "text": "刺探回报：上谷郡 约 1330±8%（已探）、中山国 约 14133±8%（已探）、涿郡 约 1586±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "lijue",
+          "text": "任命：樊稠 驻 代郡（自 定襄郡）、关靖 驻 定襄郡（自 云中郡）、金旋 驻 定襄郡（自 朔方郡）、孟达 驻 代郡（自 定襄郡）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "liubiao",
+          "text": "刺探回报：丹阳郡 约 1635±8%（已探）、九江郡 约 1248±8%（已探）、京兆尹 约 5655±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "liubiao",
+          "text": "任命：蒯越 驻 零陵郡（自 桂阳郡）、向宠 驻 安定郡（自 庐江郡）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "liuzhang",
+          "text": "刺探回报：安定郡 约 762±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "lubu",
+          "text": "刺探回报：彭城国 约 385±8%（已探）、梁国 约 1323±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "lubu",
+          "text": "内政：东平国 募兵 心3→2 兵1183→1396 −21 金、任城国 修城 防44→52 −56 金、济北国 募兵 心4→3 兵1786→2107 −32 金"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "nanzhongyi",
+          "text": "刺探回报：南郡 约 7513±8%（已探）、江夏郡 约 3153±8%（已探）、长沙郡 约 8591±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "nanzhongyi",
+          "text": "内政：九真郡 劝农 产8→9、南海郡 修城 防25→33 −56 金"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "nanzhongyi",
+          "text": "任命：朱符 驻 合浦郡（自 牂牁郡）"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "songjian",
+          "text": "刺探回报：北地郡 约 1983±8%（已探）、汉阳郡 约 1282±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "songjian",
+          "text": "内政：金城郡 安民 心2→3、陇西郡 安民 心1→2"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "yanbaihu",
+          "text": "刺探回报：北海国 约 516±8%（已探）、庐江郡 约 3682±8%（已探）、泰山郡 约 5896±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "yanbaihu",
+          "text": "任命：顾雍 驻 彭城国（自 会稽郡）、凌操 驻 琅邪国（自 九江郡）、孙乾 驻 九江郡（自 东海郡）、许昭 驻 汝南郡（自 下邳国）、诸葛瑾 驻 琅邪国、诸葛玄 驻 九江郡"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "yuanshao",
+          "text": "刺探回报：梁国 约 1305±8%（已探）、济阴郡 约 1310±8%（已探）、琅邪国 约 719±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "yuanshao",
+          "text": "内政：东郡 修城 防40→48 −56 金"
+        },
+        {
+          "turn": 24,
+          "kind": "appoint",
+          "faction": "yuanshao",
+          "text": "任命：赵云 驻 中山国（自 齐国）"
+        },
+        {
+          "turn": 24,
+          "kind": "array",
+          "faction": "yuanshao",
+          "text": "改阵：勃海郡 方圆→鱼鳞"
+        },
+        {
+          "turn": 24,
+          "kind": "scout",
+          "faction": "yuanshu",
+          "text": "刺探回报：东郡 约 10496±8%（已探）、彭城国 约 425±8%（已探）、梁国 约 1223±8%（已探）"
+        },
+        {
+          "turn": 24,
+          "kind": "govern",
+          "faction": "yuanshu",
+          "text": "内政：沛国 安民 心2→3、济阴郡 修城 防44→52 −56 金、陈国 募兵 心3→2 兵1009→1191 −18 金、陈留郡 修城 防41→49 −56 金"
+        },
+        {
+          "turn": 24,
+          "kind": "build",
+          "faction": "yuanshao",
+          "text": "中山国 建成铁官（−240 金）"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 玄菟郡 调兵 636 人至 辽东郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 云中郡 调兵 1367 人至 代郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 五原郡 调兵 827 人至 云中郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 九真郡 调兵 540 人至 交趾郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 益州郡 调兵 1060 人至 交趾郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 郁林郡 调兵 571 人至 合浦郡"
+        },
+        {
+          "turn": 24,
+          "kind": "transfer",
+          "faction": "songjian",
+          "text": "自 金城郡 调兵 958 人至 陇西郡"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-lift",
+          "faction": "baibo",
+          "at": "涿郡",
+          "text": "自 涿郡 撤围，携 1111 人退回 代郡"
+        },
+        {
+          "turn": 24,
+          "kind": "seize-win",
+          "faction": "liuzhang",
+          "at": "汉中郡",
+          "text": "取 褒斜道（谷道）：出 2712 人克 1600 人，自 zhanglu 手中夺得"
+        },
+        {
+          "turn": 24,
+          "kind": "march-out",
+          "faction": "yuanshao",
+          "text": "7889 人自 中山国 发向 代郡，道远，1 季方至"
+        },
+        {
+          "turn": 24,
+          "kind": "field-win",
+          "faction": "liubiao",
+          "at": "桂阳郡",
+          "text": "桂阳郡 城下野战，破 nanzhongyi 围城之师",
+          "attribution": {
+            "我军": 7072,
+            "敌军": 2448,
+            "战力比": 2.06,
+            "围城季": 3,
+            "结果": "溃退",
+            "我将": "杨昂（统率54、山地适性），副将 桓阶",
+            "敌将": "雍闿（统率52、山地适性）",
+            "我兵种": "水军",
+            "敌兵种": "步卒",
+            "地形": "hill"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "relief",
+          "faction": "liubiao",
+          "text": "桂阳郡 解围，6011 人入城"
+        },
+        {
+          "turn": 24,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "渔阳郡",
+          "text": "渔阳郡 城下野战，破 gongsundu 围城之师",
+          "attribution": {
+            "我军": 6540,
+            "敌军": 1175,
+            "战力比": 7.04,
+            "围城季": 0,
+            "结果": "溃退",
+            "我将": "张郃（统率83）",
+            "敌将": "无主将",
+            "我兵种": "骑兵",
+            "敌兵种": "骑兵",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "渔阳郡 解围，5559 人入城"
+        },
+        {
+          "turn": 24,
+          "kind": "field-win",
+          "faction": "liubiao",
+          "at": "庐江郡",
+          "text": "庐江郡 城下野战，破 yanbaihu 围城之师",
+          "attribution": {
+            "我军": 2861,
+            "敌军": 742,
+            "战力比": 3.59,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "邢道荣（统率44）",
+            "敌将": "陈兰（统率50）",
+            "我兵种": "水军",
+            "敌兵种": "水军",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "relief",
+          "faction": "liubiao",
+          "text": "庐江郡 解围，2432 人入城"
+        },
+        {
+          "turn": 24,
+          "kind": "march-out",
+          "faction": "liuzhang",
+          "text": "1777 人自 上郡 发向 安定郡，道远，1 季方至"
+        },
+        {
+          "turn": 24,
+          "kind": "field-win",
+          "faction": "lubu",
+          "at": "梁国",
+          "text": "梁国 城下野战，破 yanbaihu 围城之师",
+          "attribution": {
+            "我军": 1115,
+            "敌军": 735,
+            "战力比": 1.66,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "穆顺（统率50）",
+            "敌将": "钱铜（统率44）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "march-out",
+          "faction": "gongsundu",
+          "text": "1037 人自 辽东郡 发向 渔阳郡，道远，1 季方至"
+        },
+        {
+          "turn": 24,
+          "kind": "march-out",
+          "faction": "nanzhongyi",
+          "text": "278 人自 苍梧郡 发向 桂阳郡，道远，1 季方至"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-reinforce",
+          "faction": "yuanshu",
+          "text": "增兵 汝南郡 城下，共 886 人"
+        },
+        {
+          "turn": 24,
+          "kind": "field-fail",
+          "faction": "yanbaihu",
+          "at": "梁国",
+          "text": "梁国 城下野战大败，未能解围",
+          "attribution": {
+            "我军": 218,
+            "敌军": 948,
+            "战力比": 0.2,
+            "围城季": 0,
+            "结果": "大败",
+            "我将": "顾雍（统率44）",
+            "敌将": "穆顺（统率50）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-reinforce",
+          "faction": "gongsundu",
+          "text": "增兵 北海国 城下，共 1011 人"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "baibo",
+          "at": "定襄郡",
+          "text": "强攻 定襄郡 未克，折损后余 592 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "公孙范（统率52）",
+            "守将": "关靖（统率43、守城适性），副将 金旋",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "方圆对鱼鳞（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-win",
+          "faction": "gongsundu",
+          "at": "北海国",
+          "text": "自 右北平郡 取 北海国（原属 gongsunzan）",
+          "attribution": {
+            "投入": 1011,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 21,
+            "地形": "river",
+            "主将": "无主将",
+            "守将": "北海国守将（统率52）",
+            "围城季": 2,
+            "我军": "骑兵×0.68",
+            "阵": "鹤翼对鱼鳞（被克，−1 缺口）",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "gongsunzan",
+          "at": "代郡",
+          "text": "强攻 代郡 未克，折损后余 702 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "李乐（统率55、山地适性）",
+            "守将": "温恢（统率52）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-win",
+          "faction": "gongsunzan",
+          "at": "右北平郡",
+          "text": "自 北海国 取 右北平郡（原属 gongsundu）",
+          "attribution": {
+            "投入": 398,
+            "缺口": 5,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "river",
+            "主将": "无主将",
+            "守将": "右北平郡守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×0.96",
+            "阵": "鱼鳞对鹤翼（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "lijue",
+          "at": "雁门郡",
+          "text": "强攻 雁门郡 未克，折损后余 933 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "孟达（统率64），副将 樊稠、呼厨泉",
+            "守将": "雁门郡守将（统率52）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对方圆（被克，−1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "officer-captured",
+          "faction": "liubiao",
+          "text": "南阳郡 傅肜、刘循、文聘 被俘"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-win",
+          "faction": "liubiao",
+          "at": "南阳郡",
+          "text": "自 南郡 取 南阳郡（原属 liuzhang）",
+          "attribution": {
+            "投入": 6288,
+            "缺口": 4,
+            "可防守": 2,
+            "城防": 20,
+            "地形": "plain",
+            "主将": "蒯良（统率38），副将 庞季",
+            "守将": "文聘（统率78、守城适性），副将 刘循、傅肜",
+            "围城季": 0,
+            "我军": "水军×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "officer-captured",
+          "faction": "liuzhang",
+          "text": "左冯翊 冷苞 被俘"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-win",
+          "faction": "liuzhang",
+          "at": "左冯翊",
+          "text": "自 上郡 取 左冯翊（原属 liubiao）",
+          "attribution": {
+            "投入": 8559,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "mountain",
+            "主将": "赵韪（统率58、山地适性）",
+            "守将": "冷苞（统率44）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对方圆（被克，−1 缺口）",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "梁国",
+          "text": "强攻 梁国 未克，折损后余 524 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 3,
+            "主将": "穆顺（统率50）",
+            "守将": "梁国守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "济南国",
+          "text": "强攻 济南国 未克，折损后余 835 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 4,
+            "主将": "貂蝉（统率5）",
+            "守将": "高幹（统率68、守城适性）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "officer-captured",
+          "faction": "yanbaihu",
+          "text": "沛国 刘勋 被俘"
+        },
+        {
+          "turn": 24,
+          "kind": "siege-win",
+          "faction": "yanbaihu",
+          "at": "沛国",
+          "text": "自 下邳国 取 沛国（原属 yuanshu）",
+          "attribution": {
+            "投入": 1633,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "plain",
+            "主将": "阚泽（统率22）",
+            "守将": "刘勋（统率58）",
+            "围城季": 0,
+            "我军": "水军×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "siege-hold",
+          "faction": "yuanshu",
+          "at": "汝南郡",
+          "text": "围 汝南郡 第 2 季，余 780 人转为围困",
+          "attribution": {
+            "缺口": 2,
+            "可防守": 2,
+            "主将": "吴景（统率58），副将 孙河",
+            "守将": "许昭（统率42）",
+            "围城季": 1,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 24,
+          "kind": "besieged",
+          "faction": "lijue",
+          "at": "定襄郡",
+          "text": "定襄郡 被围，本季无产出（存粮尚可支 1 季）"
+        },
+        {
+          "turn": 24,
+          "kind": "besieged",
+          "faction": "lijue",
+          "at": "代郡",
+          "text": "代郡 被围，本季无产出（存粮尚可支 2 季）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "lijue",
+          "text": "国库 12686 金（本季入 1057，军费 238）"
+        },
+        {
+          "turn": 24,
+          "kind": "besieged",
+          "faction": "baibo",
+          "at": "雁门郡",
+          "text": "雁门郡 被围，本季无产出（存粮尚可支 5 季）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "baibo",
+          "text": "国库 7165 金（本季入 228，军费 45）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "lubu",
+          "text": "国库 6104 金（本季入 490，军费 43）"
+        },
+        {
+          "turn": 24,
+          "kind": "besieged",
+          "faction": "yuanshao",
+          "at": "济南国",
+          "text": "济南国 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "yuanshao",
+          "text": "国库 14225 金（本季入 1641，军费 861）"
+        },
+        {
+          "turn": 24,
+          "kind": "supply-cut",
+          "faction": "gongsunzan",
+          "text": "右北平郡 补给断绝，本季无产出"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "gongsunzan",
+          "text": "国库 15832 金（本季入 421，军费 26）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "gongsundu",
+          "text": "国库 13047 金（本季入 1164，军费 66）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "yuanshu",
+          "text": "国库 11971 金（本季入 644，军费 47）"
+        },
+        {
+          "turn": 24,
+          "kind": "besieged",
+          "faction": "yanbaihu",
+          "at": "汝南郡",
+          "text": "汝南郡 被围，本季无产出（存粮尚可支 5 季）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "yanbaihu",
+          "text": "国库 25088 金（本季入 1360，军费 101）"
+        },
+        {
+          "turn": 24,
+          "kind": "supply-cut",
+          "faction": "liubiao",
+          "text": "右扶风 补给断绝，本季无产出"
+        },
+        {
+          "turn": 24,
+          "kind": "supply-cut",
+          "faction": "liubiao",
+          "text": "安定郡 补给断绝，本季无产出"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "liubiao",
+          "text": "国库 23262 金（本季入 1416，军费 333）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "liuzhang",
+          "text": "国库 14218 金（本季入 1789，军费 1410）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "songjian",
+          "text": "国库 9255 金（本季入 551，军费 62）"
+        },
+        {
+          "turn": 24,
+          "kind": "treasury",
+          "faction": "nanzhongyi",
+          "text": "国库 24247 金（本季入 1638，军费 176）"
+        },
+        {
+          "turn": 24,
+          "kind": "supply-cut-low",
+          "faction": "yuanshu",
+          "text": "后路断绝，围 汝南郡 之师存粮仅余 2 季"
+        }
+      ]
+    },
+    {
+      "turn": 26,
+      "records": [
+        {
+          "turn": 25,
+          "seat": "liuzhang",
+          "model": "openai/gpt-5-nano",
+          "promptVersion": "1.16.0",
+          "obsChars": 10837,
+          "obsTokens": 7279,
+          "candidates": 60,
+          "picks": [
+            "campaign:上郡>安定郡:allout",
+            "campaign:上郡>安定郡:main",
+            "campaign:京兆尹>右扶风:allout",
+            "campaign:京兆尹>右扶风:main",
+            "transfer:广汉郡>汉中郡",
+            "transfer:犍为郡>巴郡",
+            "scout:南阳郡"
+          ],
+          "admission": {
+            "admitted": [
+              "campaign:上郡>安定郡:allout",
+              "campaign:上郡>安定郡:main",
+              "campaign:京兆尹>右扶风:allout",
+              "campaign:京兆尹>右扶风:main",
+              "transfer:广汉郡>汉中郡",
+              "transfer:犍为郡>巴郡",
+              "scout:南阳郡"
+            ],
+            "dropped": [],
+            "spent": 10,
+            "mojibake": 0,
+            "illegalRate": 0
+          },
+          "usage": {
+            "prompt": 18664,
+            "completion": 1498,
+            "cached": 0,
+            "reasoning": 1152,
+            "cost": 0.0015324
+          },
+          "structured": true,
+          "rung": "schema-notemp",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 2,
+          "elapsedMs": 10299,
+          "provider": "OpenAI",
+          "generationId": "gen-1790637984-gbGVZvS8mpJGX5MFxUfY",
+          "reason": "以上郡与京兆尹为主轴，双线猛攻安定与右扶风，同时辅以调兵和边境支援，辅以刺探压缩敌情并为后续联络与招降积蓄信息与资源。",
+          "plan": "跨季方略：先把上郡的两次征伐打出，力争在本季内扩大对安定郡的控与攻，并通过对汉中郡的夺取打通右扶风的重要通道，提升我方在京兆尹与左右扶风的辖区影响力。阵型改为鹤翼以提高对夜袭与城防的容错，同时通过安定郡的刺探持续收集对手信息，为下一季的主攻方向和潜在盟约/招降提供依据。"
+        },
+        {
+          "turn": 25,
+          "seat": "yuanshao",
+          "model": "z-ai/glm-5.3-flash",
+          "promptVersion": "1.16.0",
+          "obsChars": 11936,
+          "obsTokens": 7857,
+          "candidates": 60,
+          "picks": [
+            "relief:泰山郡>济南国",
+            "relief:渔阳郡>渔阳郡",
+            "campaign:东郡>济阴郡:allout",
+            "govern:东郡:wall",
+            "appoint:泰山郡:yuanshao",
+            "appoint:齐国:zanghong",
+            "scout:陈留郡",
+            "scout:涿郡",
+            "muster:钜鹿郡:钜鹿郡+常山国+中山国",
+            "govern:上党郡:farm"
+          ],
+          "admission": {
+            "admitted": [
+              "relief:泰山郡>济南国",
+              "relief:渔阳郡>渔阳郡",
+              "campaign:东郡>济阴郡:allout",
+              "govern:东郡:wall",
+              "appoint:泰山郡:yuanshao",
+              "appoint:齐国:zanghong",
+              "scout:陈留郡",
+              "scout:涿郡",
+              "muster:钜鹿郡:钜鹿郡+常山国+中山国"
+            ],
+            "dropped": [
+              {
+                "key": "govern:上党郡:farm",
+                "reason": "over-budget",
+                "detail": "余 0 令，需 1"
+              }
+            ],
+            "spent": 10,
+            "mojibake": 0,
+            "illegalRate": 0.1
+          },
+          "usage": {
+            "prompt": 15833,
+            "completion": 636,
+            "cached": 7680,
+            "reasoning": 495,
+            "cost": 0.00177135
+          },
+          "structured": true,
+          "rung": "schema",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 1,
+          "elapsedMs": 49148,
+          "provider": "DigitalOcean",
+          "generationId": "gen-1790637984-qk2KLeQGGHNHW93MEhvh",
+          "reason": "双城被围优先解救，东郡倾国取济阴向兖州控制推进，同时补将固防。",
+          "plan": "两线并进：北线解渔阳之围、代郡军团当季破城，再图幽州三郡；南线解济南之围后自东郡连取济阴、陈留，凑足兖州控制。家中临敌郡补将修城防备。"
+        }
+      ],
+      "leaders": [
+        {
+          "id": "yuanshao",
+          "lands": 23,
+          "zhou": 2,
+          "gold": 14885
+        },
+        {
+          "id": "liuzhang",
+          "lands": 18,
+          "zhou": 2,
+          "gold": 14565
+        },
+        {
+          "id": "nanzhongyi",
+          "lands": 12,
+          "zhou": 1,
+          "gold": 25669
+        },
+        {
+          "id": "lijue",
+          "lands": 11,
+          "zhou": 1,
+          "gold": 13524
+        },
+        {
+          "id": "yanbaihu",
+          "lands": 10,
+          "zhou": 2,
+          "gold": 26202
+        },
+        {
+          "id": "gongsundu",
+          "lands": 7,
+          "zhou": 0,
+          "gold": 14184
+        },
+        {
+          "id": "liubiao",
+          "lands": 7,
+          "zhou": 1,
+          "gold": 24171
+        },
+        {
+          "id": "yuanshu",
+          "lands": 4,
+          "zhou": 0,
+          "gold": 12374
+        },
+        {
+          "id": "gongsunzan",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 16085
+        },
+        {
+          "id": "lubu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 6539
+        },
+        {
+          "id": "songjian",
+          "lands": 2,
+          "zhou": 0,
+          "gold": 9791
+        },
+        {
+          "id": "baibo",
+          "lands": 1,
+          "zhou": 0,
+          "gold": 7317
+        }
+      ],
+      "changed": [
+        {
+          "at": "右扶风",
+          "from": "liubiao",
+          "to": "liuzhang"
+        },
+        {
+          "at": "汝南郡",
+          "from": "yanbaihu",
+          "to": "yuanshu"
+        },
+        {
+          "at": "安定郡",
+          "from": "liubiao",
+          "to": "liuzhang"
+        },
+        {
+          "at": "雁门郡",
+          "from": "baibo",
+          "to": "lijue"
+        },
+        {
+          "at": "代郡",
+          "from": "lijue",
+          "to": "yuanshao"
+        }
+      ],
+      "events": [
+        {
+          "turn": 25,
+          "kind": "march-arrive",
+          "faction": "yuanshao",
+          "text": "7889 人抵 代郡 城下，下季可攻"
+        },
+        {
+          "turn": 25,
+          "kind": "march-arrive",
+          "faction": "liuzhang",
+          "text": "1777 人抵 安定郡 城下，下季可攻"
+        },
+        {
+          "turn": 25,
+          "kind": "march-arrive",
+          "faction": "gongsundu",
+          "text": "1037 人抵 渔阳郡 城下，下季可攻"
+        },
+        {
+          "turn": 25,
+          "kind": "march-arrive",
+          "faction": "nanzhongyi",
+          "text": "278 人抵 桂阳郡 城下，下季可攻"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "baibo",
+          "text": "刺探回报：太原郡 约 5233±8%（已探）、定襄郡 约 294±8%（已探）、常山国 约 2324±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "baibo",
+          "text": "内政：西河郡 安民 心2→3、雁门郡 屯粮（已至上限） −48 金"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "gongsundu",
+          "text": "刺探回报：右北平郡 约 312±8%（已探）、泰山郡 约 6509±8%（已探）、琅邪国 约 943±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "gongsundu",
+          "text": "内政：乐浪郡 劝农 产8→9、北海国 安民 心2→3"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "gongsundu",
+          "text": "任命：是仪 驻 辽东郡（自 东莱郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "gongsunzan",
+          "text": "刺探回报：东莱郡 约 1617±8%（已探）、勃海郡 约 3631±8%（已探）、北海国 约 1113±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "gongsunzan",
+          "text": "内政：上谷郡 修城 防31→39 −56 金、右北平郡 安民 心2→3、涿郡 募兵 心3→2 兵1961→2314 −35 金"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "gongsunzan",
+          "text": "任命：田豫 驻 上谷郡（自 涿郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "lijue",
+          "text": "内政：代郡 屯粮（已至上限） −48 金"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "lijue",
+          "text": "任命：关靖 驻 代郡（自 定襄郡）、金旋 驻 代郡（自 定襄郡）、钟繇 驻 定襄郡（自 武威郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "liubiao",
+          "text": "刺探回报：北地郡 约 2066±8%（已探）、左冯翊 约 8630±8%（已探）、巴郡 约 2591±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "liubiao",
+          "text": "任命：蒯越 驻 庐江郡（自 零陵郡）、邢道荣 驻 南阳郡（自 庐江郡）、杨洪 驻 庐江郡（自 右扶风）、张允 驻 南阳郡（自 江夏郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "liuzhang",
+          "text": "刺探回报：南阳郡 约 6386±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "lubu",
+          "text": "任命：严氏 驻 济北国（自 东平国）"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "nanzhongyi",
+          "text": "任命：雍闿 驻 武陵郡（自 苍梧郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "songjian",
+          "text": "内政：金城郡 安民 心3→4"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "yanbaihu",
+          "text": "刺探回报：梁国 约 940±8%（已探）、济阴郡 约 1553±8%（已探）、豫章郡 约 11094±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "yanbaihu",
+          "text": "任命：陈兰 驻 会稽郡（自 丹阳郡）、凌操 驻 沛国（自 琅邪国）、钱铜 驻 会稽郡（自 彭城国）"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "yuanshao",
+          "text": "刺探回报：涿郡 约 1914±8%（已探）、陈留郡 约 1479±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "yuanshao",
+          "text": "内政：东郡 修城 防48→56 −56 金"
+        },
+        {
+          "turn": 25,
+          "kind": "appoint",
+          "faction": "yuanshao",
+          "text": "任命：袁绍 驻 泰山郡（自 平原郡）、臧洪 驻 齐国（自 太原郡）"
+        },
+        {
+          "turn": 25,
+          "kind": "scout",
+          "faction": "yuanshu",
+          "text": "刺探回报：汝南郡 约 446±8%（已探）、沛国 约 1741±8%（已探）、颍川郡 约 5441±8%（已探）"
+        },
+        {
+          "turn": 25,
+          "kind": "govern",
+          "faction": "yuanshu",
+          "text": "内政：济阴郡 修城 防52→60 −56 金、陈国 安民 心2→3、陈留郡 修城 防49→57 −56 金"
+        },
+        {
+          "turn": 25,
+          "kind": "build",
+          "faction": "yanbaihu",
+          "text": "琅邪国 建成屯田（−140 金）"
+        },
+        {
+          "turn": 25,
+          "kind": "build",
+          "faction": "yuanshu",
+          "text": "济阴郡 建成仓廪（−120 金）"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 乐浪郡 调兵 563 人至 东莱郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 广汉郡 调兵 5995 人至 汉中郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 犍为郡 调兵 3002 人至 巴郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 交趾郡 调兵 1376 人至 合浦郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 牂牁郡 调兵 551 人至 武陵郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "songjian",
+          "text": "自 金城郡 调兵 775 人至 陇西郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "yanbaihu",
+          "text": "自 吴郡 调兵 695 人至 丹阳郡"
+        },
+        {
+          "turn": 25,
+          "kind": "transfer",
+          "faction": "yanbaihu",
+          "text": "自 广陵郡 调兵 709 人至 东海郡"
+        },
+        {
+          "turn": 25,
+          "kind": "muster",
+          "faction": "yuanshao",
+          "text": "于 钜鹿郡 集结 7730 人待命"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-lift",
+          "faction": "gongsundu",
+          "at": "渔阳郡",
+          "text": "自 渔阳郡 撤围，携 881 人退回 辽东郡"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-lift",
+          "faction": "nanzhongyi",
+          "at": "桂阳郡",
+          "text": "自 桂阳郡 撤围，携 236 人退回 苍梧郡"
+        },
+        {
+          "turn": 25,
+          "kind": "campaign-void",
+          "faction": "yuanshao",
+          "text": "渔阳郡 之围已解，渔阳郡 之师未及出战，7960 人退回"
+        },
+        {
+          "turn": 25,
+          "kind": "campaign-void",
+          "faction": "liubiao",
+          "text": "桂阳郡 之围已解，桂阳郡 之师未及出战，6502 人退回"
+        },
+        {
+          "turn": 25,
+          "kind": "march-out",
+          "faction": "nanzhongyi",
+          "text": "5640 人自 合浦郡 发向 零陵郡，道远，1 季方至"
+        },
+        {
+          "turn": 25,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "济南国",
+          "text": "济南国 城下野战，破 lubu 围城之师",
+          "attribution": {
+            "我军": 5184,
+            "敌军": 835,
+            "战力比": 14.75,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "袁绍（统率72、攻城适性）",
+            "敌将": "貂蝉（统率5）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "hill"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "济南国 解围，4406 人入城"
+        },
+        {
+          "turn": 25,
+          "kind": "march-out",
+          "faction": "liubiao",
+          "text": "3254 人自 南阳郡 发向 京兆尹，道远，1 季方至"
+        },
+        {
+          "turn": 25,
+          "kind": "field-win",
+          "faction": "lijue",
+          "at": "定襄郡",
+          "text": "定襄郡 城下野战，破 baibo 围城之师",
+          "attribution": {
+            "我军": 1844,
+            "敌军": 592,
+            "战力比": 3.3,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "云中郡守将（统率52）",
+            "敌将": "公孙范（统率52）",
+            "我兵种": "骑兵",
+            "敌兵种": "骑兵",
+            "地形": "mountain"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "relief",
+          "faction": "lijue",
+          "text": "定襄郡 解围，1567 人入城"
+        },
+        {
+          "turn": 25,
+          "kind": "march-out",
+          "faction": "gongsundu",
+          "text": "1771 人自 东莱郡 发向 东海郡，道远，1 季方至"
+        },
+        {
+          "turn": 25,
+          "kind": "field-win",
+          "faction": "yuanshu",
+          "at": "梁国",
+          "text": "梁国 城下野战，破 lubu 围城之师",
+          "attribution": {
+            "我军": 1183,
+            "敌军": 524,
+            "战力比": 2.29,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "陈国守将（统率52）",
+            "敌将": "穆顺（统率50）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-reinforce",
+          "faction": "lijue",
+          "text": "增兵 雁门郡 城下，共 1637 人"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-reinforce",
+          "faction": "liuzhang",
+          "text": "增兵 安定郡 城下，共 2201 人"
+        },
+        {
+          "turn": 25,
+          "kind": "field-fail",
+          "faction": "lubu",
+          "at": "梁国",
+          "text": "梁国 城下野战大败，未能解围",
+          "attribution": {
+            "我军": 267,
+            "敌军": 1006,
+            "战力比": 0.26,
+            "围城季": 0,
+            "结果": "大败",
+            "我将": "任城国守将（统率52）",
+            "敌将": "无主将",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-abort",
+          "faction": "baibo",
+          "text": "围 定襄郡 1 季不下，粮尽撤围，247 人退回",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "无主将",
+            "守将": "钟繇（统率55）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "方圆对鱼鳞（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "baibo",
+          "at": "河东郡",
+          "text": "强攻 河东郡 未克，折损后余 934 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "王邑（统率34）",
+            "守将": "尹礼（统率52），副将 昌豨",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "gongsunzan",
+          "text": "代郡 关靖、金旋、温恢 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "gongsunzan",
+          "at": "代郡",
+          "text": "自 上谷郡 取 代郡（原属 lijue）",
+          "attribution": {
+            "投入": 702,
+            "缺口": 5,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "mountain",
+            "主将": "李乐（统率55、山地适性）",
+            "守将": "关靖（统率43、守城适性），副将 温恢、金旋",
+            "围城季": 1,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "gongsunzan",
+          "at": "广阳郡",
+          "text": "强攻 广阳郡 未克，折损后余 827 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "王脩（统率46）",
+            "守将": "张郃（统率83）",
+            "围城季": 0,
+            "我军": "骑兵×1.55",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "lijue",
+          "text": "雁门郡 公孙范 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "lijue",
+          "at": "雁门郡",
+          "text": "自 代郡 取 雁门郡（原属 baibo）",
+          "attribution": {
+            "投入": 1637,
+            "缺口": 5,
+            "可防守": 2,
+            "城防": 39,
+            "地形": "gate",
+            "主将": "孟达（统率64），副将 樊稠、呼厨泉",
+            "守将": "公孙范（统率52）",
+            "围城季": 1,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对方圆（被克，−1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "liuzhang",
+          "text": "右扶风 郑度 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "liuzhang",
+          "at": "右扶风",
+          "text": "自 京兆尹 取 右扶风（原属 liubiao）",
+          "attribution": {
+            "投入": 4620,
+            "缺口": 3,
+            "可防守": 2,
+            "城防": 20,
+            "地形": "mountain",
+            "主将": "无主将",
+            "守将": "郑度（统率38、守城适性）",
+            "围城季": 0,
+            "我军": "弓弩×1.26",
+            "阵": "鹤翼对鹤翼",
+            "敌军": "弓弩守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "liuzhang",
+          "text": "安定郡 向宠 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "liuzhang",
+          "at": "安定郡",
+          "text": "自 上郡 取 安定郡（原属 liubiao）",
+          "attribution": {
+            "投入": 2201,
+            "缺口": 3,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "mountain",
+            "主将": "无主将",
+            "守将": "向宠（统率66、守城适性）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "济南国",
+          "text": "强攻 济南国 未克，折损后余 827 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 4,
+            "主将": "严氏（统率14）",
+            "守将": "高幹（统率68、守城适性）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "鲁国",
+          "text": "强攻 鲁国 未克，折损后余 816 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 5,
+            "主将": "无主将",
+            "守将": "鲁国守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "nanzhongyi",
+          "at": "南郡",
+          "text": "强攻 南郡 未克，折损后余 1705 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "雍闿（统率52）",
+            "守将": "蒯良（统率38），副将 庞季",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "songjian",
+          "at": "汉阳郡",
+          "text": "强攻 汉阳郡 未克，折损后余 1583 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "无主将",
+            "守将": "汉阳郡守将（统率52）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "yanbaihu",
+          "at": "庐江郡",
+          "text": "强攻 庐江郡 未克，折损后余 1053 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "韩胤（统率30），副将 金尚",
+            "守将": "杨洪（统率54），副将 蒯越",
+            "围城季": 0,
+            "我军": "水军×1.45",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "yuanshao",
+          "text": "代郡 樊稠、呼厨泉、孟达 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "yuanshao",
+          "at": "代郡",
+          "text": "自 中山国 取 代郡（原属 gongsunzan）",
+          "attribution": {
+            "投入": 7889,
+            "缺口": 5,
+            "可防守": 0,
+            "城防": 20,
+            "地形": "gate",
+            "主将": "赵云（统率78）",
+            "守将": "孟达（统率64），副将 樊稠、呼厨泉",
+            "围城季": 0,
+            "我军": "步卒×1.20",
+            "阵": "方圆对鱼鳞（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "yuanshao",
+          "at": "济阴郡",
+          "text": "强攻 济阴郡 未克，折损后余 5348 人转为围困",
+          "attribution": {
+            "缺口": 3,
+            "可防守": 3,
+            "主将": "颜良（统率54）",
+            "守将": "华佗（统率12）",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "siege-hold",
+          "faction": "yuanshu",
+          "at": "梁国",
+          "text": "强攻 梁国 未克，折损后余 556 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 3,
+            "主将": "无主将",
+            "守将": "梁国守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "officer-captured",
+          "faction": "yuanshu",
+          "text": "汝南郡 许昭 被俘"
+        },
+        {
+          "turn": 25,
+          "kind": "siege-win",
+          "faction": "yuanshu",
+          "at": "汝南郡",
+          "text": "自 沛国 取 汝南郡（原属 yanbaihu）",
+          "attribution": {
+            "投入": 780,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "plain",
+            "主将": "吴景（统率58），副将 孙河",
+            "守将": "许昭（统率42）",
+            "围城季": 2,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "lijue",
+          "text": "国库 13524 金（本季入 1138，军费 252）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "baibo",
+          "text": "国库 7317 金（本季入 233，军费 33）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "lubu",
+          "text": "国库 6539 金（本季入 472，军费 37）"
+        },
+        {
+          "turn": 25,
+          "kind": "besieged",
+          "faction": "yuanshao",
+          "at": "河东郡",
+          "text": "河东郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 25,
+          "kind": "besieged",
+          "faction": "yuanshao",
+          "at": "广阳郡",
+          "text": "广阳郡 被围，本季无产出（存粮尚可支 3 季）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "yuanshao",
+          "text": "国库 14885 金（本季入 1637，军费 921）"
+        },
+        {
+          "turn": 25,
+          "kind": "supply-cut",
+          "faction": "gongsunzan",
+          "text": "右北平郡 补给断绝，本季无产出"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "gongsunzan",
+          "text": "国库 16085 金（本季入 369，军费 25）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "gongsundu",
+          "text": "国库 14184 金（本季入 1216，军费 79）"
+        },
+        {
+          "turn": 25,
+          "kind": "besieged",
+          "faction": "yuanshu",
+          "at": "济阴郡",
+          "text": "济阴郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "yuanshu",
+          "text": "国库 12374 金（本季入 678，军费 43）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "yanbaihu",
+          "text": "国库 26202 金（本季入 1357，军费 103）"
+        },
+        {
+          "turn": 25,
+          "kind": "besieged",
+          "faction": "liubiao",
+          "at": "南郡",
+          "text": "南郡 被围，本季无产出（存粮尚可支 5 季）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "liubiao",
+          "text": "国库 24171 金（本季入 1212，军费 303）"
+        },
+        {
+          "turn": 25,
+          "kind": "besieged",
+          "faction": "liuzhang",
+          "at": "汉阳郡",
+          "text": "汉阳郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "liuzhang",
+          "text": "国库 14565 金（本季入 1791，军费 1444）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "songjian",
+          "text": "国库 9791 金（本季入 597，军费 61）"
+        },
+        {
+          "turn": 25,
+          "kind": "treasury",
+          "faction": "nanzhongyi",
+          "text": "国库 25669 金（本季入 1652，军费 230）"
+        }
+      ]
+    },
+    {
+      "turn": 27,
+      "records": [
+        {
+          "turn": 26,
+          "seat": "liuzhang",
+          "model": "openai/gpt-5-nano",
+          "promptVersion": "1.16.0",
+          "obsChars": 11148,
+          "obsTokens": 7586,
+          "candidates": 60,
+          "picks": [
+            "scout:河内郡",
+            "scout:陇西郡",
+            "scout:颍川郡",
+            "seize:jiameng-guan:广汉郡",
+            "seize:jianmen-guan:广汉郡",
+            "seize:micang-dao:巴郡",
+            "transfer:右扶风>京兆尹",
+            "transfer:广汉郡>巴郡",
+            "transfer:犍为郡>巴郡",
+            "appoint:北地郡:liuzhang"
+          ],
+          "admission": {
+            "admitted": [
+              "scout:河内郡",
+              "scout:陇西郡",
+              "scout:颍川郡",
+              "seize:jiameng-guan:广汉郡",
+              "seize:jianmen-guan:广汉郡",
+              "seize:micang-dao:巴郡",
+              "transfer:右扶风>京兆尹",
+              "transfer:广汉郡>巴郡",
+              "transfer:犍为郡>巴郡",
+              "appoint:北地郡:liuzhang"
+            ],
+            "dropped": [],
+            "spent": 7,
+            "mojibake": 0,
+            "illegalRate": 0
+          },
+          "usage": {
+            "prompt": 18951,
+            "completion": 1763,
+            "cached": 0,
+            "reasoning": 1344,
+            "cost": 0.00165275
+          },
+          "structured": true,
+          "rung": "schema-notemp",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 1,
+          "elapsedMs": 11440,
+          "provider": "OpenAI",
+          "generationId": "gen-1790638033-uJtVU1FU2R6A7AFlJfXy",
+          "reason": "优先通过刺探压缩敌情区间，确保主攻方向；同时对关键通道与枢纽关隘实施夺据与调兵，打通京兆尹与左右扶风防线，稳固本州治所的控制与补给，最后通过任命强化北地郡的治理与兵力上限。",
+          "plan": "跨季方略：以刺探降低未知，先行对河内/陇西/颍川三郡获取情报。以两处关隘/要道的夺据推进对汉中-巴郡线的掌控，确保对汉中至京兆尹与河东的联动通路。通过对广汉郡、犍为郡向巴郡的调兵，支援前线与边境。对右扶风实现调兵与京兆尹协同，提升边境防控与反击能力。对北地郡进行任命以提升治理与产出，确保本季末有更稳固的州治与民心基础。若遇到突发盟约/刺探获悉的新情报再在下一季调整行动重点。"
+        },
+        {
+          "turn": 26,
+          "seat": "yuanshao",
+          "model": "z-ai/glm-5.3-flash",
+          "promptVersion": "1.16.0",
+          "obsChars": 12368,
+          "obsTokens": 8142,
+          "candidates": 60,
+          "picks": [
+            "relief:太原郡>河东郡",
+            "relief:勃海郡>广阳郡",
+            "seize:juyong-guan:代郡",
+            "appoint:代郡:zhaoyun",
+            "govern:东郡:levy",
+            "govern:代郡:soothe",
+            "build:安平国:market",
+            "scout:定襄郡",
+            "scout:云中郡",
+            "suade:mengda"
+          ],
+          "admission": {
+            "admitted": [
+              "relief:太原郡>河东郡",
+              "relief:勃海郡>广阳郡",
+              "seize:juyong-guan:代郡",
+              "appoint:代郡:zhaoyun",
+              "govern:东郡:levy",
+              "govern:代郡:soothe",
+              "build:安平国:market",
+              "scout:定襄郡",
+              "scout:云中郡"
+            ],
+            "dropped": [
+              {
+                "key": "suade:mengda",
+                "reason": "over-budget",
+                "detail": "余 0 令，需 1"
+              }
+            ],
+            "spent": 9,
+            "mojibake": 0,
+            "illegalRate": 0.1
+          },
+          "usage": {
+            "prompt": 16054,
+            "completion": 1041,
+            "cached": 9600,
+            "reasoning": 989,
+            "cost": 0.0017766
+          },
+          "structured": true,
+          "rung": "schema",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 1,
+          "elapsedMs": 34809,
+          "provider": "DigitalOcean",
+          "generationId": "gen-1790638033-2tWDiqEDDj5zRawjnlEZ",
+          "reason": "解河东、广阳两围，取居庸关通幽州西路，东郡募兵备战下季取陈留",
+          "plan": "两线并进：北线解广阳之围、取居庸关开涿郡之路；西线解河东之围保司隶两郡。济阴本季自破，兖州再取一郡即控，下季自东郡图陈留。家中以赵云驻代、募兵修备，并探并州二郡为并州控制铺路。"
+        }
+      ],
+      "leaders": [
+        {
+          "id": "yuanshao",
+          "lands": 24,
+          "zhou": 2,
+          "gold": 15508
+        },
+        {
+          "id": "liuzhang",
+          "lands": 17,
+          "zhou": 2,
+          "gold": 14875
+        },
+        {
+          "id": "nanzhongyi",
+          "lands": 12,
+          "zhou": 1,
+          "gold": 27108
+        },
+        {
+          "id": "lijue",
+          "lands": 11,
+          "zhou": 1,
+          "gold": 14329
+        },
+        {
+          "id": "gongsundu",
+          "lands": 9,
+          "zhou": 1,
+          "gold": 15458
+        },
+        {
+          "id": "yanbaihu",
+          "lands": 9,
+          "zhou": 2,
+          "gold": 27289
+        },
+        {
+          "id": "liubiao",
+          "lands": 7,
+          "zhou": 1,
+          "gold": 24980
+        },
+        {
+          "id": "lubu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 7034
+        },
+        {
+          "id": "songjian",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 10432
+        },
+        {
+          "id": "yuanshu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 12918
+        },
+        {
+          "id": "gongsunzan",
+          "lands": 2,
+          "zhou": 0,
+          "gold": 16430
+        },
+        {
+          "id": "baibo",
+          "lands": 1,
+          "zhou": 0,
+          "gold": 7485
+        }
+      ],
+      "changed": [
+        {
+          "at": "济阴郡",
+          "from": "yuanshu",
+          "to": "yuanshao"
+        },
+        {
+          "at": "东海郡",
+          "from": "yanbaihu",
+          "to": "gongsundu"
+        },
+        {
+          "at": "汉阳郡",
+          "from": "liuzhang",
+          "to": "songjian"
+        },
+        {
+          "at": "右北平郡",
+          "from": "gongsunzan",
+          "to": "gongsundu"
+        }
+      ],
+      "events": [
+        {
+          "turn": 26,
+          "kind": "march-arrive",
+          "faction": "nanzhongyi",
+          "text": "5640 人抵 零陵郡 城下，下季可攻"
+        },
+        {
+          "turn": 26,
+          "kind": "march-arrive",
+          "faction": "liubiao",
+          "text": "3254 人抵 京兆尹 城下，下季可攻"
+        },
+        {
+          "turn": 26,
+          "kind": "march-arrive",
+          "faction": "gongsundu",
+          "text": "1771 人抵 东海郡 城下，下季可攻"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "baibo",
+          "text": "刺探回报：河东郡 约 1646±8%（已探）、雁门郡 约 1691±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "baibo",
+          "text": "内政：西河郡 募兵 心3→2 兵1838→2169 −33 金"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "gongsundu",
+          "text": "刺探回报：齐国 约 10213±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "gongsundu",
+          "text": "内政：东莱郡 安民 心2→3、乐浪郡 劝农 产9→10"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "gongsunzan",
+          "text": "刺探回报：中山国 约 3437±8%（已探）、平原郡 约 3284±8%（已探）、渔阳郡 约 10220±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "gongsunzan",
+          "text": "内政：上谷郡 修城 防39→47 −56 金、涿郡 安民 心2→3"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "gongsunzan",
+          "text": "任命：李乐 驻 涿郡（自 上谷郡）、田豫 驻 涿郡（自 上谷郡）"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "lijue",
+          "text": "刺探回报：代郡 约 7902±8%（已探）、太原郡 约 5357±8%（已探）、常山国 约 1490±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "lijue",
+          "text": "内政：云中郡 修城 防23→31 −56 金、定襄郡 修城 防10→18 −56 金、雁门郡 安民 心2→3"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "lijue",
+          "text": "任命：钟繇 驻 雁门郡（自 定襄郡）"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "liubiao",
+          "text": "刺探回报：合浦郡 约 1435±8%（已探）、武陵郡 约 2425±8%（已探）、汝南郡 约 661±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "liubiao",
+          "text": "任命：傅巽 驻 江夏郡、杨洪 驻 南阳郡（自 庐江郡）、伊籍 驻 零陵郡"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "liuzhang",
+          "text": "刺探回报：河内郡 约 8747±8%（已探）、陇西郡 约 2074±8%（已探）、颍川郡 约 5534±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "liuzhang",
+          "text": "任命：刘璋 驻 北地郡（自 蜀郡）"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "lubu",
+          "text": "刺探回报：济南国 约 4694±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "lubu",
+          "text": "内政：东平国 安民 心2→3"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "nanzhongyi",
+          "text": "内政：九真郡 劝农 产9→10"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "songjian",
+          "text": "内政：金城郡 安民 心4→5"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "yanbaihu",
+          "text": "刺探回报：汝南郡 约 691±8%（已探）、陈国 约 664±8%（已探）、鲁国 约 1149±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "yanbaihu",
+          "text": "任命：陈兰 驻 东海郡（自 会稽郡）、凌操 驻 丹阳郡（自 沛国）"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "yuanshao",
+          "text": "刺探回报：云中郡 约 567±8%（已探）、定襄郡 约 1568±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "yuanshao",
+          "text": "内政：东郡 募兵 心3→2 兵2238→2641 −40 金、代郡 安民 心1→2"
+        },
+        {
+          "turn": 26,
+          "kind": "appoint",
+          "faction": "yuanshao",
+          "text": "任命：赵云 驻 代郡（自 中山国）"
+        },
+        {
+          "turn": 26,
+          "kind": "scout",
+          "faction": "yuanshu",
+          "text": "刺探回报：南阳郡 约 2869±8%（已探）、江夏郡 约 4128±8%（已探）"
+        },
+        {
+          "turn": 26,
+          "kind": "govern",
+          "faction": "yuanshu",
+          "text": "内政：汝南郡 安民 心1→2、济阴郡 屯粮（已至上限） −48 金、陈国 募兵 心3→2 兵627→740 −11 金"
+        },
+        {
+          "turn": 26,
+          "kind": "build",
+          "faction": "yuanshao",
+          "text": "安平国 建成市（−160 金）"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 玄菟郡 调兵 607 人至 辽东郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 五原郡 调兵 662 人至 云中郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 张掖居延属国 调兵 1073 人至 朔方郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 张掖属国 调兵 1482 人至 张掖居延属国"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 朔方郡 调兵 1801 人至 五原郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 右扶风 调兵 1938 人至 京兆尹"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 广汉郡 调兵 3189 人至 巴郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 犍为郡 调兵 1733 人至 巴郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 九真郡 调兵 503 人至 交趾郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 交趾郡 调兵 779 人至 合浦郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 益州郡 调兵 715 人至 牂牁郡"
+        },
+        {
+          "turn": 26,
+          "kind": "transfer",
+          "faction": "songjian",
+          "text": "自 金城郡 调兵 720 人至 陇西郡"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-lift",
+          "faction": "lubu",
+          "at": "济南国",
+          "text": "自 济南国 撤围，携 703 人退回 济北国"
+        },
+        {
+          "turn": 26,
+          "kind": "seize-fail",
+          "faction": "liuzhang",
+          "at": "广汉郡",
+          "text": "攻 葭萌关（关隘）不克：出 1753 人，需 2400 人"
+        },
+        {
+          "turn": 26,
+          "kind": "seize-fail",
+          "faction": "liuzhang",
+          "at": "广汉郡",
+          "text": "攻 剑门关（关隘）不克：出 1609 人，需 2400 人"
+        },
+        {
+          "turn": 26,
+          "kind": "seize-win",
+          "faction": "yuanshao",
+          "at": "代郡",
+          "text": "取 居庸关（关隘）：出 4231 人克 1600 人，自 gongsunzan 手中夺得"
+        },
+        {
+          "turn": 26,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "河东郡",
+          "text": "河东郡 城下野战，破 baibo 围城之师",
+          "attribution": {
+            "我军": 4560,
+            "敌军": 934,
+            "战力比": 6.42,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "太原郡守将（统率52）",
+            "敌将": "王邑（统率34）",
+            "我兵种": "骑兵",
+            "敌兵种": "骑兵",
+            "地形": "mountain"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "河东郡 解围，3876 人入城"
+        },
+        {
+          "turn": 26,
+          "kind": "field-win",
+          "faction": "liubiao",
+          "at": "庐江郡",
+          "text": "庐江郡 城下野战，破 yanbaihu 围城之师",
+          "attribution": {
+            "我军": 3208,
+            "敌军": 1053,
+            "战力比": 4.23,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "刘琦（统率46），副将 傅巽",
+            "敌将": "韩胤（统率30），副将 金尚",
+            "我兵种": "水军",
+            "敌兵种": "水军",
+            "地形": "river"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "relief",
+          "faction": "liubiao",
+          "text": "庐江郡 解围，2727 人入城"
+        },
+        {
+          "turn": 26,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "广阳郡",
+          "text": "广阳郡 城下野战，破 gongsunzan 围城之师",
+          "attribution": {
+            "我军": 3104,
+            "敌军": 827,
+            "战力比": 3.29,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "勃海郡守将（统率52）",
+            "敌将": "王脩（统率46）",
+            "我兵种": "步卒",
+            "敌兵种": "骑兵",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "广阳郡 解围，2638 人入城"
+        },
+        {
+          "turn": 26,
+          "kind": "field-fail",
+          "faction": "yanbaihu",
+          "at": "东海郡",
+          "text": "东海郡 城下野战相持，未能解围",
+          "attribution": {
+            "我军": 2408,
+            "敌军": 1771,
+            "战力比": 0.86,
+            "围城季": 0,
+            "结果": "相持",
+            "我将": "钱铜（统率44），副将 邹他",
+            "敌将": "张绣（统率76）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "river"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "liubiao",
+          "text": "增兵 京兆尹 城下，共 5561 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "songjian",
+          "text": "增兵 汉阳郡 城下，共 3836 人"
+        },
+        {
+          "turn": 26,
+          "kind": "march-out",
+          "faction": "yanbaihu",
+          "text": "1292 人自 东海郡 发向 东莱郡，道远，1 季方至"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "nanzhongyi",
+          "text": "增兵 零陵郡 城下，共 6914 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "nanzhongyi",
+          "text": "增兵 南郡 城下，共 2971 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "yuanshu",
+          "text": "增兵 梁国 城下，共 963 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "gongsundu",
+          "text": "增兵 东海郡 城下，共 1734 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-reinforce",
+          "faction": "lubu",
+          "text": "增兵 鲁国 城下，共 1107 人"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "baibo",
+          "at": "河东郡",
+          "text": "强攻 河东郡 未克，折损后余 775 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "无主将",
+            "守将": "尹礼（统率52），副将 昌豨",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-win",
+          "faction": "gongsundu",
+          "at": "东海郡",
+          "text": "自 东莱郡 取 东海郡（原属 yanbaihu）",
+          "attribution": {
+            "投入": 1734,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "river",
+            "主将": "张绣（统率76）",
+            "守将": "东海郡守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-win",
+          "faction": "gongsundu",
+          "at": "右北平郡",
+          "text": "自 北海国 取 右北平郡（原属 gongsunzan）",
+          "attribution": {
+            "投入": 1197,
+            "缺口": 6,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "river",
+            "主将": "无主将",
+            "守将": "右北平郡守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×0.96",
+            "阵": "鱼鳞对鹤翼（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "gongsunzan",
+          "at": "广阳郡",
+          "text": "强攻 广阳郡 未克，折损后余 673 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "田豫（统率80），副将 李乐",
+            "守将": "张郃（统率83）",
+            "围城季": 0,
+            "我军": "骑兵×1.55",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "liubiao",
+          "at": "丹阳郡",
+          "text": "强攻 丹阳郡 未克，折损后余 963 人转为围困",
+          "attribution": {
+            "缺口": 1,
+            "可防守": 1,
+            "主将": "蒯越（统率52）",
+            "守将": "韩胤（统率30），副将 金尚",
+            "围城季": 0,
+            "我军": "水军×1.45",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "liubiao",
+          "at": "京兆尹",
+          "text": "强攻 京兆尹 未克，折损后余 3615 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "张允（统率52），副将 邢道荣",
+            "守将": "京兆尹守将（统率52）",
+            "围城季": 0,
+            "我军": "水军×0.80",
+            "阵": "方圆对鹤翼（被克，−1 缺口）",
+            "敌军": "弓弩守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "泰山郡",
+          "text": "强攻 泰山郡 未克，折损后余 1164 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "严氏（统率14），副将 貂蝉",
+            "守将": "袁绍（统率72）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "鲁国",
+          "text": "围 鲁国 第 2 季，余 974 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 3,
+            "主将": "无主将",
+            "守将": "鲁国守将（统率52）",
+            "围城季": 1,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "nanzhongyi",
+          "at": "南郡",
+          "text": "围 南郡 第 2 季，余 2614 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "雍闿（统率52）",
+            "守将": "蒯良（统率38），副将 庞季",
+            "围城季": 1,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "nanzhongyi",
+          "at": "零陵郡",
+          "text": "强攻 零陵郡 未克，折损后余 4494 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 4,
+            "主将": "朱符（统率34）",
+            "守将": "伊籍（统率36），副将 刘先、赖恭",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-win",
+          "faction": "songjian",
+          "at": "汉阳郡",
+          "text": "自 陇西郡 取 汉阳郡（原属 liuzhang）",
+          "attribution": {
+            "投入": 3836,
+            "缺口": 5,
+            "可防守": 0,
+            "城防": 20,
+            "地形": "mountain",
+            "主将": "无主将",
+            "守将": "汉阳郡守将（统率52）",
+            "围城季": 1,
+            "我军": "骑兵×0.68",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "yanbaihu",
+          "at": "庐江郡",
+          "text": "强攻 庐江郡 未克，折损后余 548 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "凌操（统率50、水战适性、攻城适性）",
+            "守将": "庐江郡守将（统率52）",
+            "围城季": 0,
+            "我军": "水军×1.45",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "officer-captured",
+          "faction": "yuanshao",
+          "text": "济阴郡 华佗 被俘"
+        },
+        {
+          "turn": 26,
+          "kind": "siege-win",
+          "faction": "yuanshao",
+          "at": "济阴郡",
+          "text": "自 东郡 取 济阴郡（原属 yuanshu）",
+          "attribution": {
+            "投入": 5348,
+            "缺口": 4,
+            "可防守": 2,
+            "城防": 40,
+            "地形": "river",
+            "主将": "颜良（统率54）",
+            "守将": "华佗（统率12）",
+            "围城季": 1,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "yuanshu",
+          "at": "东郡",
+          "text": "强攻 东郡 未克，折损后余 970 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "薛综（统率36）",
+            "守将": "颜良（统率54）",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "siege-hold",
+          "faction": "yuanshu",
+          "at": "梁国",
+          "text": "围 梁国 第 2 季，余 847 人转为围困",
+          "attribution": {
+            "缺口": 2,
+            "可防守": 3,
+            "主将": "无主将",
+            "守将": "梁国守将（统率52）",
+            "围城季": 1,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "lijue",
+          "text": "国库 14329 金（本季入 1189，军费 272）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "baibo",
+          "text": "国库 7485 金（本季入 228，军费 27）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "lubu",
+          "text": "国库 7034 金（本季入 533，军费 38）"
+        },
+        {
+          "turn": 26,
+          "kind": "besieged",
+          "faction": "yuanshao",
+          "at": "泰山郡",
+          "text": "泰山郡 被围，本季无产出（存粮尚可支 1 季，城中兵多，每季耗 2）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "yuanshao",
+          "text": "国库 15508 金（本季入 1701，军费 878）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "gongsunzan",
+          "text": "国库 16430 金（本季入 421，军费 20）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "gongsundu",
+          "text": "国库 15458 金（本季入 1349，军费 75）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "yuanshu",
+          "text": "国库 12918 金（本季入 648，军费 45）"
+        },
+        {
+          "turn": 26,
+          "kind": "supply-cut",
+          "faction": "yanbaihu",
+          "text": "琅邪国 补给断绝，本季无产出"
+        },
+        {
+          "turn": 26,
+          "kind": "besieged",
+          "faction": "yanbaihu",
+          "at": "丹阳郡",
+          "text": "丹阳郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "yanbaihu",
+          "text": "国库 27289 金（本季入 1192，军费 105）"
+        },
+        {
+          "turn": 26,
+          "kind": "besieged",
+          "faction": "liubiao",
+          "at": "南郡",
+          "text": "南郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 26,
+          "kind": "besieged",
+          "faction": "liubiao",
+          "at": "零陵郡",
+          "text": "零陵郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "liubiao",
+          "text": "国库 24980 金（本季入 1056，军费 247）"
+        },
+        {
+          "turn": 26,
+          "kind": "besieged",
+          "faction": "liuzhang",
+          "at": "京兆尹",
+          "text": "京兆尹 被围，本季无产出（存粮尚可支 2 季）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "liuzhang",
+          "text": "国库 14875 金（本季入 1776，军费 1466）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "songjian",
+          "text": "国库 10432 金（本季入 707，军费 66）"
+        },
+        {
+          "turn": 26,
+          "kind": "treasury",
+          "faction": "nanzhongyi",
+          "text": "国库 27108 金（本季入 1672，军费 233）"
+        },
+        {
+          "turn": 26,
+          "kind": "supply-cut-low",
+          "faction": "yuanshu",
+          "text": "后路断绝，济阴郡 驻军存粮仅余 2 季"
+        },
+        {
+          "turn": 26,
+          "kind": "supply-cut-low",
+          "faction": "yanbaihu",
+          "text": "后路断绝，围 东莱郡 之师存粮仅余 2 季"
+        },
+        {
+          "turn": 26,
+          "kind": "muster-return",
+          "faction": "yuanshu",
+          "text": "济阴郡 待命之师逾 6 季未动，895 人归 济阴郡 戍"
+        }
+      ]
+    },
+    {
+      "turn": 28,
+      "records": [
+        {
+          "turn": 27,
+          "seat": "liuzhang",
+          "model": "openai/gpt-5-nano",
+          "promptVersion": "1.16.0",
+          "obsChars": 11277,
+          "obsTokens": 7723,
+          "candidates": 60,
+          "picks": [
+            "scout:汉阳郡",
+            "seize:micang-dao:巴郡",
+            "seize:puban-jin:左冯翊",
+            "seize:qishan-dao:武都郡",
+            "transfer:广汉郡>巴郡",
+            "transfer:汉中郡>右扶风",
+            "appoint:京兆尹:liuzhang",
+            "invest:豫州:liuzhang",
+            "build:巴郡:granary",
+            "build:犍为郡:office",
+            "build:犍为郡:saltern"
+          ],
+          "admission": {
+            "admitted": [
+              "scout:汉阳郡",
+              "seize:micang-dao:巴郡",
+              "seize:puban-jin:左冯翊",
+              "seize:qishan-dao:武都郡",
+              "transfer:广汉郡>巴郡",
+              "transfer:汉中郡>右扶风",
+              "appoint:京兆尹:liuzhang",
+              "invest:豫州:liuzhang",
+              "build:巴郡:granary",
+              "build:犍为郡:office",
+              "build:犍为郡:saltern"
+            ],
+            "dropped": [],
+            "spent": 10,
+            "mojibake": 0,
+            "illegalRate": 0
+          },
+          "usage": {
+            "prompt": 19056,
+            "completion": 1318,
+            "cached": 0,
+            "reasoning": 896,
+            "cost": 0.00148
+          },
+          "structured": true,
+          "rung": "schema-notemp",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 1,
+          "elapsedMs": 9686,
+          "provider": "OpenAI",
+          "generationId": "gen-1790638068-t4JxcCKdqHY6khv5l7dl",
+          "reason": "通过侦察减少未知，优先夺据关隘与要道以稳固汉中-巴郡线的联动；并以调兵与任命巩固边境治理与产出，推动跨季计划中的情报与治理提升。",
+          "plan": "跨季方略：以刺探降低未知，先行对河内/陇西/颍川三郡获取情报。以两处关隘/要道的夺据推进对汉中-巴郡线的掌控，确保对汉中至京兆尹与河东的联动通路。通过对广汉郡、犍为郡向巴郡的调兵，支援前线与边境。对右扶风实现调兵与京兆尹协同，提升边境防控与反击能力。对北地郡进行任命以提升治理与产出，确保本季末有更稳固的州治与民心基础。若遇到突发盟约/刺探获悉的新情报再在下一季调整行动重点。"
+        },
+        {
+          "turn": 27,
+          "seat": "yuanshao",
+          "model": "z-ai/glm-5.3-flash",
+          "promptVersion": "1.16.0",
+          "obsChars": 12123,
+          "obsTokens": 7902,
+          "candidates": 60,
+          "picks": [
+            "relief:河东郡>河东郡",
+            "relief:广阳郡>广阳郡",
+            "relief:乐安国>泰山郡",
+            "relief:东郡>东郡",
+            "suade:huatuo",
+            "scout:东平国",
+            "scout:上谷郡",
+            "scout:北海国"
+          ],
+          "admission": {
+            "admitted": [
+              "relief:河东郡>河东郡",
+              "relief:广阳郡>广阳郡",
+              "relief:乐安国>泰山郡",
+              "relief:东郡>东郡",
+              "suade:huatuo",
+              "scout:东平国",
+              "scout:上谷郡",
+              "scout:北海国"
+            ],
+            "dropped": [],
+            "spent": 9,
+            "mojibake": 0,
+            "illegalRate": 0
+          },
+          "usage": {
+            "prompt": 15817,
+            "completion": 947,
+            "cached": 0,
+            "reasoning": 614,
+            "cost": 0.000844345
+          },
+          "structured": true,
+          "rung": "schema",
+          "maxTokens": 8000,
+          "starved": 0,
+          "finishReason": "stop",
+          "attempts": 1,
+          "elapsedMs": 66353,
+          "provider": "InferenceNet",
+          "generationId": "gen-1790638068-wdmKXQqIgcMVIjyL1EZZ",
+          "reason": "四路被围，本季以解围为纲：河东、广阳、泰山、东郡四城齐解，顺手招降华佗；刺探东平为下季取兖州最后一郡铺路。",
+          "plan": "本季全力解四面之围，保住河东（司隶跳板）、广阳（幽州治所）、泰山、东郡。下季：东平国已探即自山阳取之，兖州即控（升甲稳）；代郡赵云取云中、定襄推进并州；解围之军回整后图河南尹与涿郡。持续招降被俘武将，家中募兵修城补民心。"
+        }
+      ],
+      "leaders": [
+        {
+          "id": "yuanshao",
+          "lands": 24,
+          "zhou": 2,
+          "gold": 16313
+        },
+        {
+          "id": "liuzhang",
+          "lands": 17,
+          "zhou": 2,
+          "gold": 14703
+        },
+        {
+          "id": "nanzhongyi",
+          "lands": 13,
+          "zhou": 1,
+          "gold": 28658
+        },
+        {
+          "id": "lijue",
+          "lands": 11,
+          "zhou": 1,
+          "gold": 15110
+        },
+        {
+          "id": "yanbaihu",
+          "lands": 10,
+          "zhou": 2,
+          "gold": 28400
+        },
+        {
+          "id": "gongsundu",
+          "lands": 9,
+          "zhou": 1,
+          "gold": 16656
+        },
+        {
+          "id": "liubiao",
+          "lands": 6,
+          "zhou": 1,
+          "gold": 24905
+        },
+        {
+          "id": "lubu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 7425
+        },
+        {
+          "id": "songjian",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 11022
+        },
+        {
+          "id": "yuanshu",
+          "lands": 3,
+          "zhou": 0,
+          "gold": 13037
+        },
+        {
+          "id": "gongsunzan",
+          "lands": 2,
+          "zhou": 0,
+          "gold": 16734
+        },
+        {
+          "id": "baibo",
+          "lands": 1,
+          "zhou": 0,
+          "gold": 7700
+        }
+      ],
+      "changed": [
+        {
+          "at": "梁国",
+          "from": null,
+          "to": "yuanshu"
+        },
+        {
+          "at": "陈国",
+          "from": "yuanshu",
+          "to": "yanbaihu"
+        },
+        {
+          "at": "南郡",
+          "from": "liubiao",
+          "to": "nanzhongyi"
+        }
+      ],
+      "events": [
+        {
+          "turn": 27,
+          "kind": "march-arrive",
+          "faction": "yanbaihu",
+          "text": "1292 人抵 东莱郡 城下，下季可攻"
+        },
+        {
+          "turn": 27,
+          "kind": "suade",
+          "faction": "gongsunzan",
+          "text": "招降 关靖 不成，其人不屈",
+          "attribution": {
+            "成功率": 46,
+            "掷点": 49
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "suade",
+          "faction": "gongsunzan",
+          "text": "招降 金旋 不成，其人不屈",
+          "attribution": {
+            "成功率": 44,
+            "掷点": 86
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "suade",
+          "faction": "yuanshao",
+          "text": "招降 华佗 不成，其人不屈",
+          "attribution": {
+            "成功率": 60,
+            "掷点": 84
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "baibo",
+          "text": "内政：西河郡 安民 心2→3"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "gongsundu",
+          "text": "刺探回报：下邳国 约 1058±8%（已探）、九江郡 约 1755±8%（已探）、会稽郡 约 2748±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "gongsundu",
+          "text": "内政：东海郡 安民 心2→3、东莱郡 劝农 产6→7"
+        },
+        {
+          "turn": 27,
+          "kind": "appoint",
+          "faction": "gongsundu",
+          "text": "任命：张绣 驻 东海郡（自 东莱郡）"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "gongsunzan",
+          "text": "刺探回报：广阳郡 约 2885±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "gongsunzan",
+          "text": "内政：上谷郡 修城 防47→55 −56 金、涿郡 募兵 心3→2 兵924→1090 −17 金"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "lijue",
+          "text": "刺探回报：西河郡 约 1416±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "lijue",
+          "text": "内政：云中郡 修城 防31→39 −56 金、定襄郡 修城 防18→26 −56 金"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "liubiao",
+          "text": "刺探回报：弘农郡 约 2724±8%（已探）、河南尹 约 2747±8%（已探）、苍梧郡 约 1836±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "appoint",
+          "faction": "liubiao",
+          "text": "任命：桓阶 驻 庐江郡（自 长沙郡）、刘琮 驻 长沙郡"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "liuzhang",
+          "text": "刺探回报：汉阳郡 约 3561±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "appoint",
+          "faction": "liuzhang",
+          "text": "任命：刘璋 驻 京兆尹（自 北地郡）"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "lubu",
+          "text": "刺探回报：山阳郡 约 3353±8%（已探）、泰山郡 约 1122±8%（已探）、鲁国 约 869±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "lubu",
+          "text": "内政：东平国 募兵 心3→2 兵487→575 −9 金、任城国 修城 防52→60 −56 金"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "nanzhongyi",
+          "text": "刺探回报：桂阳郡 约 9279±8%（已探）、零陵郡 约 8546±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "nanzhongyi",
+          "text": "内政：九真郡 安民 心3→4"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "songjian",
+          "text": "刺探回报：右扶风 约 2071±8%（已探）、安定郡 约 1967±8%（已探）、武都郡 约 6627±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "songjian",
+          "text": "内政：汉阳郡 安民 心1→2、金城郡 修城 防83→91 −56 金、陇西郡 安民 心2→3"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "yanbaihu",
+          "text": "刺探回报：东海郡 约 1578±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "govern",
+          "faction": "yanbaihu",
+          "text": "内政：九江郡 安民 心2→3"
+        },
+        {
+          "turn": 27,
+          "kind": "appoint",
+          "faction": "yanbaihu",
+          "text": "任命：韩胤 驻 琅邪国（自 丹阳郡）、孙河 驻 广陵郡（自 沛国）"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "yuanshao",
+          "text": "刺探回报：上谷郡 约 506±8%（已探）、东平国 约 454±8%（已探）、北海国 约 595±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "scout",
+          "faction": "yuanshu",
+          "text": "刺探回报：济阴郡 约 5000±8%（已探）"
+        },
+        {
+          "turn": 27,
+          "kind": "build",
+          "faction": "liuzhang",
+          "text": "巴郡 建成仓廪（−120 金）"
+        },
+        {
+          "turn": 27,
+          "kind": "build",
+          "faction": "liuzhang",
+          "text": "犍为郡 建成官府（−200 金）"
+        },
+        {
+          "turn": 27,
+          "kind": "build",
+          "faction": "liuzhang",
+          "text": "犍为郡 建成盐场（−200 金）"
+        },
+        {
+          "turn": 27,
+          "kind": "invest",
+          "faction": "liuzhang",
+          "text": "以朝廷之名授 liuzhang 为 豫州 牧"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 乐浪郡 调兵 674 人至 辽东郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 辽东属国 调兵 678 人至 右北平郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "gongsundu",
+          "text": "自 辽西郡 调兵 684 人至 右北平郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 五原郡 调兵 1355 人至 云中郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 张掖居延属国 调兵 1315 人至 朔方郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 张掖属国 调兵 1074 人至 张掖居延属国"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "lijue",
+          "text": "自 朔方郡 调兵 1474 人至 五原郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 广汉郡 调兵 1533 人至 巴郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "liuzhang",
+          "text": "自 汉中郡 调兵 5535 人至 右扶风"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 交趾郡 调兵 731 人至 合浦郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 牂牁郡 调兵 855 人至 武陵郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "nanzhongyi",
+          "text": "自 郁林郡 调兵 591 人至 苍梧郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "songjian",
+          "text": "自 金城郡 调兵 731 人至 陇西郡"
+        },
+        {
+          "turn": 27,
+          "kind": "transfer",
+          "faction": "yanbaihu",
+          "text": "自 吴郡 调兵 554 人至 会稽郡"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-lift",
+          "faction": "baibo",
+          "at": "河东郡",
+          "text": "自 河东郡 撤围，携 659 人退回 西河郡"
+        },
+        {
+          "turn": 27,
+          "kind": "seize-win",
+          "faction": "liuzhang",
+          "at": "左冯翊",
+          "text": "取 蒲坂津（渡口）：出 4984 人克 1600 人，自 baibo 手中夺得"
+        },
+        {
+          "turn": 27,
+          "kind": "seize-win",
+          "faction": "liuzhang",
+          "at": "武都郡",
+          "text": "取 祁山道（谷道）：出 3490 人克 1600 人，自 mateng 手中夺得"
+        },
+        {
+          "turn": 27,
+          "kind": "march-out",
+          "faction": "liubiao",
+          "text": "4756 人自 桂阳郡 发向 南海郡，道远，1 季方至"
+        },
+        {
+          "turn": 27,
+          "kind": "campaign-void",
+          "faction": "yuanshao",
+          "text": "河东郡 之围已解，河东郡 之师未及出战，3515 人退回"
+        },
+        {
+          "turn": 27,
+          "kind": "field-win",
+          "faction": "yanbaihu",
+          "at": "丹阳郡",
+          "text": "丹阳郡 城下野战，破 liubiao 围城之师",
+          "attribution": {
+            "我军": 2588,
+            "敌军": 963,
+            "战力比": 2.85,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "钱铜（统率44），副将 邹他",
+            "敌将": "蒯越（统率52）",
+            "我兵种": "步卒",
+            "敌兵种": "水军",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "relief",
+          "faction": "yanbaihu",
+          "text": "丹阳郡 解围，2200 人入城"
+        },
+        {
+          "turn": 27,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "广阳郡",
+          "text": "广阳郡 城下野战，破 gongsunzan 围城之师",
+          "attribution": {
+            "我军": 2480,
+            "敌军": 673,
+            "战力比": 3.66,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "张郃（统率83）",
+            "敌将": "田豫（统率80），副将 李乐",
+            "我兵种": "骑兵",
+            "敌兵种": "骑兵",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "广阳郡 解围，2108 人入城"
+        },
+        {
+          "turn": 27,
+          "kind": "march-out",
+          "faction": "songjian",
+          "text": "1841 人自 汉阳郡 发向 北地郡，道远，1 季方至"
+        },
+        {
+          "turn": 27,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "东郡",
+          "text": "东郡 城下野战，破 yuanshu 围城之师",
+          "attribution": {
+            "我军": 1695,
+            "敌军": 970,
+            "战力比": 2.05,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "颜良（统率54）",
+            "敌将": "薛综（统率36）",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "东郡 解围，1441 人入城"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-reinforce",
+          "faction": "nanzhongyi",
+          "text": "增兵 南郡 城下，共 4250 人"
+        },
+        {
+          "turn": 27,
+          "kind": "field-fail",
+          "faction": "lijue",
+          "at": "太原郡",
+          "text": "太原郡 城下野战相持，未能解围",
+          "attribution": {
+            "我军": 1228,
+            "敌军": 1740,
+            "战力比": 0.96,
+            "围城季": 0,
+            "结果": "相持",
+            "我将": "钟繇（统率55）",
+            "敌将": "王邑（统率34）",
+            "我兵种": "骑兵",
+            "敌兵种": "骑兵",
+            "地形": "mountain"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "field-win",
+          "faction": "yuanshao",
+          "at": "泰山郡",
+          "text": "泰山郡 城下野战，破 lubu 围城之师",
+          "attribution": {
+            "我军": 1107,
+            "敌军": 1164,
+            "战力比": 2.68,
+            "围城季": 1,
+            "结果": "溃退",
+            "我将": "乐安国守将（统率52）",
+            "敌将": "严氏（统率14），副将 貂蝉",
+            "我兵种": "步卒",
+            "敌兵种": "步卒",
+            "地形": "plain"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "relief",
+          "faction": "yuanshao",
+          "text": "泰山郡 解围，941 人入城"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-reinforce",
+          "faction": "nanzhongyi",
+          "text": "增兵 零陵郡 城下，共 5541 人"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-reinforce",
+          "faction": "yuanshu",
+          "text": "增兵 梁国 城下，共 1343 人"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-reinforce",
+          "faction": "liubiao",
+          "text": "增兵 京兆尹 城下，共 4068 人"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-reinforce",
+          "faction": "lubu",
+          "text": "增兵 鲁国 城下，共 1290 人"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "baibo",
+          "at": "太原郡",
+          "text": "强攻 太原郡 未克，折损后余 905 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "王邑（统率34）",
+            "守将": "太原郡守将（统率52）",
+            "围城季": 0,
+            "我军": "骑兵×0.68",
+            "阵": "方圆对鱼鳞（克，+1 缺口）",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "gongsundu",
+          "at": "琅邪国",
+          "text": "强攻 琅邪国 未克，折损后余 891 人转为围困",
+          "attribution": {
+            "缺口": 1,
+            "可防守": 1,
+            "主将": "张绣（统率76）",
+            "守将": "诸葛瑾（统率66），副将 韩胤",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-abort",
+          "faction": "gongsunzan",
+          "text": "围 广阳郡 1 季不下，粮尽撤围，331 人退回",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 0,
+            "主将": "王脩（统率46）",
+            "守将": "张郃（统率83）",
+            "围城季": 0,
+            "我军": "骑兵×1.55",
+            "阵": "鱼鳞对鱼鳞",
+            "敌军": "骑兵守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "liubiao",
+          "at": "九江郡",
+          "text": "强攻 九江郡 未克，折损后余 1125 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "桓阶（统率42）",
+            "守将": "孙乾（统率36），副将 诸葛玄",
+            "围城季": 0,
+            "我军": "水军×0.75",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "liubiao",
+          "at": "京兆尹",
+          "text": "围 京兆尹 第 2 季，余 3580 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "张允（统率52），副将 邢道荣",
+            "守将": "刘璋（统率38）",
+            "围城季": 1,
+            "我军": "水军×0.80",
+            "阵": "方圆对鹤翼（被克，−1 缺口）",
+            "敌军": "弓弩守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-abort",
+          "faction": "lubu",
+          "text": "围 泰山郡 1 季不下，粮尽撤围，207 人退回",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "无主将",
+            "守将": "袁绍（统率72）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "lubu",
+          "at": "鲁国",
+          "text": "围 鲁国 第 3 季，余 1135 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 3,
+            "主将": "无主将",
+            "守将": "鲁国守将（统率52）",
+            "围城季": 2,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "officer-captured",
+          "faction": "nanzhongyi",
+          "text": "南郡 蒯良、庞季 被俘"
+        },
+        {
+          "turn": 27,
+          "kind": "siege-win",
+          "faction": "nanzhongyi",
+          "at": "南郡",
+          "text": "自 武陵郡 取 南郡（原属 liubiao）",
+          "attribution": {
+            "投入": 4250,
+            "缺口": 4,
+            "可防守": 1,
+            "城防": 20,
+            "地形": "river",
+            "主将": "雍闿（统率52）",
+            "守将": "蒯良（统率38），副将 庞季",
+            "围城季": 2,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "nanzhongyi",
+          "at": "零陵郡",
+          "text": "围 零陵郡 第 2 季，余 4876 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 4,
+            "主将": "朱符（统率34）",
+            "守将": "伊籍（统率36），副将 刘先、赖恭",
+            "围城季": 1,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "yanbaihu",
+          "at": "东莱郡",
+          "text": "强攻 东莱郡 未克，折损后余 840 人转为围困",
+          "attribution": {
+            "缺口": 1,
+            "可防守": 1,
+            "主将": "陈兰（统率50），副将 简雍",
+            "守将": "东莱郡守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-abort",
+          "faction": "yanbaihu",
+          "text": "围 庐江郡 2 季不下，粮尽撤围，410 人退回",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "凌操（统率50、水战适性、攻城适性）",
+            "守将": "蒯越（统率52）",
+            "围城季": 1,
+            "我军": "水军×1.45",
+            "阵": "方圆对方圆",
+            "敌军": "水军守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-win",
+          "faction": "yanbaihu",
+          "at": "陈国",
+          "text": "自 沛国 取 陈国（原属 yuanshu）",
+          "attribution": {
+            "投入": 1104,
+            "缺口": 4,
+            "可防守": 3,
+            "城防": 46,
+            "地形": "plain",
+            "主将": "吴景（统率58）",
+            "守将": "陈国守将（统率52）",
+            "围城季": 0,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-abort",
+          "faction": "yuanshu",
+          "text": "围 东郡 1 季不下，粮尽撤围，201 人退回",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 2,
+            "主将": "无主将",
+            "守将": "颜良（统率54）",
+            "围城季": 0,
+            "我军": "步卒×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-win",
+          "faction": "yuanshu",
+          "at": "梁国",
+          "text": "自 陈国 取 梁国（无主）",
+          "attribution": {
+            "投入": 1343,
+            "缺口": 5,
+            "可防守": 3,
+            "城防": 52,
+            "地形": "plain",
+            "主将": "无主将",
+            "守将": "梁国守将（统率52）",
+            "围城季": 2,
+            "我军": "步卒×1.00",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "siege-hold",
+          "faction": "yuanshu",
+          "at": "沛国",
+          "text": "强攻 沛国 未克，折损后余 913 人转为围困",
+          "attribution": {
+            "缺口": 0,
+            "可防守": 1,
+            "主将": "无主将",
+            "守将": "吴景（统率58）",
+            "围城季": 0,
+            "我军": "水军×0.80",
+            "阵": "方圆对方圆",
+            "敌军": "步卒守",
+            "器械": "none"
+          }
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "lijue",
+          "text": "国库 15110 金（本季入 1189，军费 296）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "baibo",
+          "text": "国库 7700 金（本季入 233，军费 18）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "lubu",
+          "text": "国库 7425 金（本季入 486，军费 30）"
+        },
+        {
+          "turn": 27,
+          "kind": "besieged",
+          "faction": "yuanshao",
+          "at": "太原郡",
+          "text": "太原郡 被围，本季无产出（存粮尚可支 2 季）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "yuanshao",
+          "text": "国库 16313 金（本季入 1701，军费 896）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "gongsunzan",
+          "text": "国库 16734 金（本季入 392，军费 15）"
+        },
+        {
+          "turn": 27,
+          "kind": "besieged",
+          "faction": "gongsundu",
+          "at": "东莱郡",
+          "text": "东莱郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "gongsundu",
+          "text": "国库 16656 金（本季入 1286，军费 88）"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost",
+          "faction": "yuanshu",
+          "text": "治所 陈国已失，全境政令不通，本季无产出"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "yuanshu",
+          "text": "国库 13037 金（本季入 150，军费 31）"
+        },
+        {
+          "turn": 27,
+          "kind": "besieged",
+          "faction": "yanbaihu",
+          "at": "沛国",
+          "text": "沛国 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 27,
+          "kind": "supply-cut",
+          "faction": "yanbaihu",
+          "text": "琅邪国 补给断绝，本季无产出"
+        },
+        {
+          "turn": 27,
+          "kind": "besieged",
+          "faction": "yanbaihu",
+          "at": "九江郡",
+          "text": "九江郡 被围，本季无产出（存粮尚可支 4 季）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "yanbaihu",
+          "text": "国库 28400 金（本季入 1208，军费 97）"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost",
+          "faction": "liubiao",
+          "text": "治所 南郡已失，全境政令不通，本季无产出"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "liubiao",
+          "text": "国库 24905 金（本季入 150，军费 225）"
+        },
+        {
+          "turn": 27,
+          "kind": "besieged",
+          "faction": "liuzhang",
+          "at": "京兆尹",
+          "text": "京兆尹 被围，本季无产出（存粮尚可支 1 季）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "liuzhang",
+          "text": "国库 14703 金（本季入 1843，军费 1495）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "songjian",
+          "text": "国库 11022 金（本季入 724，军费 78）"
+        },
+        {
+          "turn": 27,
+          "kind": "treasury",
+          "faction": "nanzhongyi",
+          "text": "国库 28658 金（本季入 1804，军费 254）"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost-low",
+          "faction": "liubiao",
+          "text": "治所已失，围 京兆尹 之师存粮仅余 2 季"
+        },
+        {
+          "turn": 27,
+          "kind": "supply-cut-low",
+          "faction": "yanbaihu",
+          "text": "后路断绝，围 东莱郡 之师存粮仅余 1 季"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost-low",
+          "faction": "liubiao",
+          "text": "治所已失，围 南海郡 之师存粮仅余 2 季"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost-low",
+          "faction": "liubiao",
+          "text": "治所已失，围 九江郡 之师存粮仅余 2 季"
+        },
+        {
+          "turn": 27,
+          "kind": "capital-lost-low",
+          "faction": "yuanshu",
+          "text": "治所已失，围 沛国 之师存粮仅余 2 季"
+        }
+      ]
+    }
+  ],
+  "inputChecks": [
+    {
+      "turn": 24,
+      "seat": "liuzhang",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "report",
+        "candidates"
+      ],
+      "bytes": 49092
+    },
+    {
+      "turn": 24,
+      "seat": "yuanshao",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "report",
+        "candidates"
+      ],
+      "bytes": 50106
+    },
+    {
+      "turn": 25,
+      "seat": "liuzhang",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "droppedLastSeason",
+        "report",
+        "candidates"
+      ],
+      "bytes": 49393
+    },
+    {
+      "turn": 25,
+      "seat": "yuanshao",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "report",
+        "candidates"
+      ],
+      "bytes": 50675
+    },
+    {
+      "turn": 26,
+      "seat": "liuzhang",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "report",
+        "candidates"
+      ],
+      "bytes": 50131
+    },
+    {
+      "turn": 26,
+      "seat": "yuanshao",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "droppedLastSeason",
+        "report",
+        "candidates"
+      ],
+      "bytes": 51313
+    },
+    {
+      "turn": 27,
+      "seat": "liuzhang",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "report",
+        "candidates"
+      ],
+      "bytes": 50475
+    },
+    {
+      "turn": 27,
+      "seat": "yuanshao",
+      "priorPlanPresent": true,
+      "observationKeys": [
+        "version",
+        "seat",
+        "clock",
+        "treasury",
+        "budget",
+        "standing",
+        "court",
+        "brief",
+        "mine",
+        "armies",
+        "treaties",
+        "plan",
+        "droppedLastSeason",
+        "report",
+        "candidates"
+      ],
+      "bytes": 50733
+    }
+  ],
+  "fromTurn": 24,
+  "modelOf": {
+    "yuanshao": "z-ai/glm-5.3-flash",
+    "liuzhang": "openai/gpt-5-nano"
+  },
+  "before": [
+    {
+      "id": "yuanshao",
+      "lands": 22,
+      "zhou": 2,
+      "gold": 13741
+    },
+    {
+      "id": "liuzhang",
+      "lands": 16,
+      "zhou": 1,
+      "gold": 13839
+    },
+    {
+      "id": "nanzhongyi",
+      "lands": 12,
+      "zhou": 1,
+      "gold": 22841
+    },
+    {
+      "id": "lijue",
+      "lands": 11,
+      "zhou": 0,
+      "gold": 11867
+    },
+    {
+      "id": "yanbaihu",
+      "lands": 10,
+      "zhou": 2,
+      "gold": 23829
+    },
+    {
+      "id": "liubiao",
+      "lands": 9,
+      "zhou": 1,
+      "gold": 22179
+    },
+    {
+      "id": "gongsundu",
+      "lands": 7,
+      "zhou": 1,
+      "gold": 11949
+    },
+    {
+      "id": "yuanshu",
+      "lands": 4,
+      "zhou": 0,
+      "gold": 11504
+    },
+    {
+      "id": "gongsunzan",
+      "lands": 3,
+      "zhou": 0,
+      "gold": 15437
+    },
+    {
+      "id": "lubu",
+      "lands": 3,
+      "zhou": 0,
+      "gold": 5766
+    },
+    {
+      "id": "baibo",
+      "lands": 2,
+      "zhou": 0,
+      "gold": 7002
+    },
+    {
+      "id": "songjian",
+      "lands": 2,
+      "zhou": 0,
+      "gold": 8766
+    }
+  ],
+  "prices": {
+    "z-ai/glm-5.3-flash": {
+      "prompt": "0.00000015",
+      "completion": "0.0000005",
+      "input_cache_read": "0.00000003"
+    },
+    "openai/gpt-5-nano": {
+      "prompt": "0.00000005",
+      "completion": "0.0000004",
+      "web_search": "0.01",
+      "input_cache_read": "0.000000005"
+    }
+  },
+  "stop": "four-seasons-complete"
+}

@@ -1,0 +1,648 @@
+{
+  "runtimeSha256": "37a356d0a4389ebcd83dfebc28436539921afa80102d0fde042f67668b2daf67",
+  "sourceSha256": "aaad521bf59ba9c40b568a6592a1672b82322262179a8425b8bf87abbd3b07f9",
+  "paidRequests": 0,
+  "mode": "archived-response-replay",
+  "cases": [
+    {
+      "case": "capital",
+      "model": "openai/gpt-5-nano",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "scout:东海郡",
+          "label": "刺探东海郡（现 1296–2333（未探·第 3/9 档），本季余 3 次）",
+          "status": "admitted"
+        },
+        {
+          "key": "muster:广陵郡:广陵郡+下邳国",
+          "label": "于广陵郡 集结",
+          "status": "admitted"
+        },
+        {
+          "key": "campaign:广陵郡>东海郡:allout",
+          "label": "自广陵郡 出兵至东海郡（倾国）",
+          "status": "admitted"
+        },
+        {
+          "key": "build:彭城国:farmstead",
+          "label": "彭城国 兴建屯田（140 金）（地可垦，并惠及相邻己方郡）",
+          "status": "admitted"
+        },
+        {
+          "key": "build:广陵郡:saltern",
+          "label": "广陵郡 兴建盐场（200 金）（此地有盐，别处建不得）",
+          "status": "dropped",
+          "reason": "该郡本季令数已满"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 2,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        ],
+        "admitted": [
+          "scout:东海郡",
+          "muster:广陵郡:广陵郡+下邳国",
+          "campaign:广陵郡>东海郡:allout",
+          "build:彭城国:farmstead"
+        ],
+        "dropped": [
+          {
+            "key": "build:广陵郡:saltern",
+            "why": "该郡本季令数已满"
+          }
+        ]
+      },
+      "observationTokens": [
+        8160,
+        8959
+      ]
+    },
+    {
+      "case": "capital",
+      "model": "google/gemini-2.5-flash-lite",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "relocate:广陵郡",
+          "label": "迁治至广陵郡",
+          "status": "admitted"
+        },
+        {
+          "key": "campaign:广陵郡>东海郡:main",
+          "label": "自广陵郡 出兵至东海郡（主力）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:彭城国:soothe",
+          "label": "彭城国 行安民（民心告急）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:琅邪国:soothe",
+          "label": "琅邪国 行安民（民心告急）",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:guanyu",
+          "label": "调 关羽 驻 下邳国（临敌，现 1 将；统90 武96 政58 魅82 水战）｜自 广陵郡",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:zhangfei",
+          "label": "调 张飞 驻 下邳国（临敌，现 1 将；统84 武95 政40 魅62 山地）｜自 广陵郡",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:广陵郡:forge",
+          "label": "广陵郡 行治械（270 金）（器械仅「无械」）",
+          "status": "dropped",
+          "reason": "该郡本季令数已满"
+        },
+        {
+          "key": "appoint:琅邪国:liubei",
+          "label": "调 刘备 驻 琅邪国（临敌，现 1 将；统76 武70 政74 魅97 说客）｜自 彭城国｜太守政 70→74",
+          "status": "dropped",
+          "reason": "余 0 令，需 1"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 2,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        ],
+        "admitted": [
+          "relocate:广陵郡",
+          "campaign:广陵郡>东海郡:main",
+          "govern:彭城国:soothe",
+          "govern:琅邪国:soothe",
+          "appoint:下邳国:guanyu",
+          "appoint:下邳国:zhangfei"
+        ],
+        "dropped": [
+          {
+            "key": "govern:广陵郡:forge",
+            "why": "该郡本季令数已满"
+          },
+          {
+            "key": "appoint:琅邪国:liubei",
+            "why": "余 0 令，需 1"
+          }
+        ]
+      },
+      "observationTokens": [
+        8160,
+        8715
+      ]
+    },
+    {
+      "case": "capital",
+      "model": "openai/gpt-5-mini",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "relocate:彭城国",
+          "label": "迁治至彭城国",
+          "status": "admitted"
+        },
+        {
+          "key": "withdraw:liubei:1:东海郡>东莱郡",
+          "label": "自东莱郡撤军",
+          "status": "admitted"
+        },
+        {
+          "key": "muster:下邳国:下邳国+彭城国+广陵郡",
+          "label": "于下邳国 集结",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:guanyu",
+          "label": "调 关羽 驻 下邳国（临敌，现 1 将；统90 武96 政58 魅82 水战）｜自 广陵郡",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:下邳国:levy",
+          "label": "下邳国 行募兵（66 金）（临敌且兵少）",
+          "status": "admitted"
+        },
+        {
+          "key": "scout:东海郡",
+          "label": "刺探东海郡（现 1296–2333（未探·第 3/9 档），本季余 3 次）",
+          "status": "admitted"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 2,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        ],
+        "admitted": [
+          "relocate:彭城国",
+          "withdraw:liubei:1:东海郡>东莱郡",
+          "muster:下邳国:下邳国+彭城国+广陵郡",
+          "appoint:下邳国:guanyu",
+          "govern:下邳国:levy",
+          "scout:东海郡"
+        ],
+        "dropped": []
+      },
+      "observationTokens": [
+        8160,
+        7887
+      ]
+    },
+    {
+      "case": "multifront",
+      "model": "openai/gpt-5-nano",
+      "checks": [
+        {
+          "code": "target-owned",
+          "text": "决策时目标辽西郡已属我方，请核对进攻目标与完成条件。"
+        },
+        {
+          "code": "plan-warning",
+          "text": "复核沿用上季文字，请结合实际变化检查"
+        },
+        {
+          "code": "orders-dropped",
+          "text": "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "campaign:辽西郡>辽东属国:main",
+          "label": "自辽西郡 出兵至辽东属国（主力）",
+          "status": "admitted"
+        },
+        {
+          "key": "suade:supuyan",
+          "label": "招降 苏仆延（于辽西郡｜统50 武62 智30 政24 魅44｜成功 53%，不成则不屈永殁）",
+          "status": "admitted"
+        },
+        {
+          "key": "campaign:辽西郡>辽东属国:allout",
+          "label": "自辽西郡 出兵至辽东属国（倾国）",
+          "status": "dropped",
+          "reason": "命令冲突：同一兵源、目标或对象本季已安排"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "决策时目标辽西郡已属我方，请核对进攻目标与完成条件。",
+          "复核沿用上季文字，请结合实际变化检查",
+          "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        ],
+        "admitted": [
+          "campaign:辽西郡>辽东属国:main",
+          "suade:supuyan"
+        ],
+        "dropped": [
+          {
+            "key": "campaign:辽西郡>辽东属国:allout",
+            "why": "命令冲突：同一兵源、目标或对象本季已安排"
+          }
+        ]
+      },
+      "observationTokens": [
+        7872,
+        7645
+      ]
+    },
+    {
+      "case": "multifront",
+      "model": "google/gemini-2.5-flash-lite",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        },
+        {
+          "code": "orders-dropped",
+          "text": "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "relief:东莱郡>东莱郡",
+          "label": "东莱郡 出城解围",
+          "status": "admitted"
+        },
+        {
+          "key": "relief:东海郡>东海郡",
+          "label": "东海郡 出城解围",
+          "status": "admitted"
+        },
+        {
+          "key": "suade:supuyan",
+          "label": "招降 苏仆延（于辽西郡｜统50 武62 智30 政24 魅44｜成功 53%，不成则不屈永殁）",
+          "status": "admitted"
+        },
+        {
+          "key": "suade:tadun",
+          "label": "招降 蹋顿（于辽西郡｜统74 武76 智54 政48 魅76｜籍贯辽西郡在我手，+20%｜成功 49%，不成则不屈永殁）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:辽东郡:levy",
+          "label": "辽东郡 行募兵（23 金）（临敌且兵少）",
+          "status": "admitted"
+        },
+        {
+          "key": "campaign:东莱郡>北海国:main",
+          "label": "自东莱郡 出兵至北海国（主力）",
+          "status": "dropped",
+          "reason": "余 1 令，需 2"
+        },
+        {
+          "key": "govern:辽西郡:soothe",
+          "label": "辽西郡 行安民（民心告急）",
+          "status": "dropped",
+          "reason": "余 0 令，需 1"
+        },
+        {
+          "key": "govern:东莱郡:stock",
+          "label": "东莱郡 行屯粮（48 金）（被围，存粮仅 4 季）",
+          "status": "dropped",
+          "reason": "余 0 令，需 1"
+        },
+        {
+          "key": "govern:东海郡:stock",
+          "label": "东海郡 行屯粮（48 金）（被围，存粮仅 4 季）",
+          "status": "dropped",
+          "reason": "余 0 令，需 1"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。",
+          "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        ],
+        "admitted": [
+          "relief:东莱郡>东莱郡",
+          "relief:东海郡>东海郡",
+          "suade:supuyan",
+          "suade:tadun",
+          "govern:辽东郡:levy"
+        ],
+        "dropped": [
+          {
+            "key": "campaign:东莱郡>北海国:main",
+            "why": "余 1 令，需 2"
+          },
+          {
+            "key": "govern:辽西郡:soothe",
+            "why": "余 0 令，需 1"
+          },
+          {
+            "key": "govern:东莱郡:stock",
+            "why": "余 0 令，需 1"
+          },
+          {
+            "key": "govern:东海郡:stock",
+            "why": "余 0 令，需 1"
+          }
+        ]
+      },
+      "observationTokens": [
+        7872,
+        4913
+      ]
+    },
+    {
+      "case": "multifront",
+      "model": "openai/gpt-5-mini",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        },
+        {
+          "code": "orders-dropped",
+          "text": "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "campaign:东莱郡>北海国:main",
+          "label": "自东莱郡 出兵至北海国（主力）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:东海郡:stock",
+          "label": "东海郡 行屯粮（48 金）（被围，存粮仅 4 季）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:东莱郡:stock",
+          "label": "东莱郡 行屯粮（48 金）（被围，存粮仅 4 季）",
+          "status": "admitted"
+        },
+        {
+          "key": "suade:tadun",
+          "label": "招降 蹋顿（于辽西郡｜统74 武76 智54 政48 魅76｜籍贯辽西郡在我手，+20%｜成功 49%，不成则不屈永殁）",
+          "status": "admitted"
+        },
+        {
+          "key": "scout:下邳国",
+          "label": "刺探下邳国（现 2333–4199（未探·第 4/9 档），本季余 3 次）",
+          "status": "admitted"
+        },
+        {
+          "key": "muster:东海郡:东海郡+东莱郡",
+          "label": "于东海郡 集结",
+          "status": "dropped",
+          "reason": "来源郡 东莱郡 本季令数已满"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。",
+          "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        ],
+        "admitted": [
+          "campaign:东莱郡>北海国:main",
+          "govern:东海郡:stock",
+          "govern:东莱郡:stock",
+          "suade:tadun",
+          "scout:下邳国"
+        ],
+        "dropped": [
+          {
+            "key": "muster:东海郡:东海郡+东莱郡",
+            "why": "来源郡 东莱郡 本季令数已满"
+          }
+        ]
+      },
+      "observationTokens": [
+        7872,
+        8280
+      ]
+    },
+    {
+      "case": "siege",
+      "model": "openai/gpt-5-nano",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        },
+        {
+          "code": "orders-dropped",
+          "text": "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "build:下邳国:granary",
+          "label": "下邳国 兴建仓廪（120 金）（临敌之郡）",
+          "status": "admitted"
+        },
+        {
+          "key": "build:下邳国:ironworks",
+          "label": "下邳国 兴建铁官（240 金）（此地有铁，别处建不得）",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:chenqun_lb",
+          "label": "调 陈群 驻 下邳国（临敌，现 1 将；统40 武20 政88 魅78 治民）｜太守政 64→88",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:yuanshu",
+          "label": "调 袁术 驻 下邳国（临敌，现 1 将；统52 武48 政40 魅62）｜自 九江郡｜在野征辟",
+          "status": "admitted"
+        },
+        {
+          "key": "build:下邳国:office",
+          "label": "下邳国 兴建官府（200 金）（该郡每季可下的令 +1）",
+          "status": "dropped",
+          "reason": "该郡本季令数已满"
+        },
+        {
+          "key": "campaign:下邳国>东海郡:main",
+          "label": "自下邳国 出兵至东海郡（主力）",
+          "status": "dropped",
+          "reason": "起点郡本季令数已满"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。",
+          "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        ],
+        "admitted": [
+          "build:下邳国:granary",
+          "build:下邳国:ironworks",
+          "appoint:下邳国:chenqun_lb",
+          "appoint:下邳国:yuanshu"
+        ],
+        "dropped": [
+          {
+            "key": "build:下邳国:office",
+            "why": "该郡本季令数已满"
+          },
+          {
+            "key": "campaign:下邳国>东海郡:main",
+            "why": "起点郡本季令数已满"
+          }
+        ]
+      },
+      "observationTokens": [
+        7233,
+        8685
+      ]
+    },
+    {
+      "case": "siege",
+      "model": "google/gemini-2.5-flash-lite",
+      "checks": [
+        {
+          "code": "target-owned",
+          "text": "决策时目标下邳国已属我方，请核对进攻目标与完成条件。"
+        },
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        },
+        {
+          "code": "orders-dropped",
+          "text": "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "relief:九江郡>下邳国",
+          "label": "自九江郡 出兵至下邳国（倾国）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:九江郡:wall",
+          "label": "九江郡 行修城（56 金）（临敌且城防薄）",
+          "status": "admitted"
+        },
+        {
+          "key": "govern:彭城国:soothe",
+          "label": "彭城国 行安民（民心告急）",
+          "status": "admitted"
+        },
+        {
+          "key": "scout:广陵郡",
+          "label": "刺探广陵郡（现 1296–2333（未探·第 3/9 档），本季余 3 次）",
+          "status": "admitted"
+        },
+        {
+          "key": "scout:庐江郡",
+          "label": "刺探庐江郡（现 2333–4199（未探·第 4/9 档），本季余 3 次）",
+          "status": "admitted"
+        },
+        {
+          "key": "relief:下邳国>下邳国",
+          "label": "下邳国 出城解围",
+          "status": "dropped",
+          "reason": "命令冲突：同一兵源、目标或对象本季已安排"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "决策时目标下邳国已属我方，请核对进攻目标与完成条件。",
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。",
+          "1 条出兵、迁治或兵力调动命令未获采纳，请按命令记录重新安排。"
+        ],
+        "admitted": [
+          "relief:九江郡>下邳国",
+          "govern:九江郡:wall",
+          "govern:彭城国:soothe",
+          "scout:广陵郡",
+          "scout:庐江郡"
+        ],
+        "dropped": [
+          {
+            "key": "relief:下邳国>下邳国",
+            "why": "命令冲突：同一兵源、目标或对象本季已安排"
+          }
+        ]
+      },
+      "observationTokens": [
+        7233,
+        6581
+      ]
+    },
+    {
+      "case": "siege",
+      "model": "openai/gpt-5-mini",
+      "checks": [
+        {
+          "code": "status-stale",
+          "text": "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        }
+      ],
+      "commands": [
+        {
+          "key": "relief:九江郡>下邳国",
+          "label": "自九江郡 出兵至下邳国（倾国）",
+          "status": "admitted"
+        },
+        {
+          "key": "withdraw:liubei:1:东海郡>东莱郡",
+          "label": "自东莱郡撤军",
+          "status": "admitted"
+        },
+        {
+          "key": "withdraw:liubei:2:彭城国>任城国",
+          "label": "自任城国撤军",
+          "status": "admitted"
+        },
+        {
+          "key": "muster:九江郡:九江郡+下邳国+彭城国",
+          "label": "于九江郡 集结",
+          "status": "admitted"
+        },
+        {
+          "key": "appoint:下邳国:chenqun_lb",
+          "label": "调 陈群 驻 下邳国（临敌，现 1 将；统40 武20 政88 魅78 治民）｜太守政 64→88",
+          "status": "admitted"
+        }
+      ],
+      "nextFeedback": {
+        "turn": 3,
+        "checks": [
+          "主要目标或攻守方向已改变，计划状态仍写“继续”，请复核。"
+        ],
+        "admitted": [
+          "relief:九江郡>下邳国",
+          "withdraw:liubei:1:东海郡>东莱郡",
+          "withdraw:liubei:2:彭城国>任城国",
+          "muster:九江郡:九江郡+下邳国+彭城国",
+          "appoint:下邳国:chenqun_lb"
+        ],
+        "dropped": []
+      },
+      "observationTokens": [
+        7233,
+        6574
+      ]
+    }
+  ],
+  "completed": true
+}

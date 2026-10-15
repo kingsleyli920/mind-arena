@@ -8,13 +8,13 @@ Mind Arena 是一个网页三国战略游戏，同时用作比较不同大语言
 | 层 | 选型 | 说明 |
 | --- | --- | --- |
 | 应用 | React 19 + vinext（Vite 上的 Next.js） | 部署到 Cloudflare Workers |
-| 地图渲染 | PixiJS v8 + 多级瓦片 | 底图离线渲染成瓦片，标注为实时 UI 层 |
+| 地图渲染 | `/play` 使用 DOM / Canvas / SVG，`/game` 使用 PixiJS v8 | 多级底图瓦片，标注为实时 UI 层 |
 | 引擎 | TypeScript 纯函数 | observe / listActions / validate / resolve / replay 五段式 |
 | 内容 | JSON 内容包 | 规则即数据，见下 |
 | 数据构建 | Node + sharp 脚本 | `tools/`，全部可重复运行 |
 
 **已作废的决策**：早期文档写「Godot 4.7 为主要游玩表面，不得用 DOM/SVG 渲染战役地图」。
-实际选型是 React + PixiJS，理由见 `RESEARCH-2026-08-31.md` 第七节。
+当前游玩入口是 React `/play`；早期 PixiJS 查看器保留在 `/game`。
 
 ## 规则即数据
 
@@ -54,7 +54,7 @@ Mind Arena 是一个网页三国战略游戏，同时用作比较不同大语言
 | 文件 | 内容 | 来源 |
 | --- | --- | --- |
 | `commanderies.json` | 105 郡国：郡治、户口、属县、坐标、可信度 | 《后汉书·郡国志》原文解析 |
-| `officers.json` | 578 名武将：字、籍贯、生卒、194 年归属、史料出处 | 《三国志》《后汉书》列传 |
+| `officers.json` | 808 名武将：字、籍贯、生卒、194 年归属、史料出处；开局按可用性筛选 | 《三国志》《后汉书》列传 |
 | `scenario-194.json` | 31 势力对 105 郡国的归属，每条带史料依据 | 史料考订 |
 | `strategic-nodes.json` | 61 个关隘、道、渡口、港口、仓城、古战场 | 史料考订 |
 | `hydrology.json` | 水系，黄河为东汉故道（王景治河后） | Natural Earth + 历史河道复原 |
@@ -137,7 +137,7 @@ ref 是 null。改用回调 ref 之后，静止探针的对齐偏差是 0/0。
 
 模型只在「意图层」决策，执行交给确定性求解器：
 
-1. `observe` — 分层观测，硬 token 预算，规则摘要走 KV 缓存不重发
+1. `observe` — 分层观测与候选，规则摘要放在稳定的 system 前缀；缓存取决于提供方
 2. `listActions` — 引擎预筛出具体候选，模型做选择题而非自由填参
 3. `validate` — 拒绝非法动作，模型不能改写事实
 4. `resolve` — 确定性裁决。**唯一随机源是开局种子**，
@@ -146,6 +146,86 @@ ref 是 null。改用回调 ref 之后，静止探针的对齐偏差是 0/0。
 
 裁决必须确定：裁判若有方差，选手的优劣就被淹没了。
 （反面参照：HiStrategy 用 LLM 做世界模拟，见 `research/GAMEPLAY-MOD-ECOSYSTEM.md`）
+
+### 对局结束与测试预算
+
+`GameState.endCondition` 区分 `unification` 与 `season-limit`。玩家界面只开启
+统一局；引擎 `createGame` 的默认值仍是固定长度，兼容原有评测。
+统一判据保持控制 11 州或只剩一个有效势力。`seasonsPerGame` 在统一局只参与
+纪元节奏，玩家对局沿用原 64 季节奏。模型观测的 `clock.totalTurns` 为 `null`。
+测试工具显式限制循环次数并记录 `test-budget-paused`，不修改游戏的 `finished`。
+
+玩家机器人走 `decideForPlay`：以目的流为基础，优先处理紧张的国库，避免
+反复调将、同将重复调动和超预算建设，治所失守时提高迁治优先级。
+`decide` / `pick` 保留原五种评测画像。`economy.ts` 提供含屯田减免的军费单源，
+结算、玩家界面、模型观测和机器人共用。
+
+### 游玩会话
+
+`lib/game/session.ts` 管理 `PlaySession` 和每季推进。`human` 为玩家席位，
+为空时纯观战；`modelOf` 为逐势力模型分配，其余势力由规则机器人控制。
+观察视角独立于控制者，不影响谁下令。
+
+模型席位分别持有方略和上季丢令反馈。调用额度在请求前预留落盘，模型响应
+经过同一套准入后，与玩家、机器人命令一起交给 `resolve`。日志游标停在
+上季结算前的末尾，下一季才能收到刚发生的战报。
+
+`save.ts` 版本 11 保存游戏和会话；刷新恢复为暂停。浏览器代理对请求次数、
+输出和超时加上限，CLI 评测仍可显式使用自己的预算。界面可见的失败不会
+被机器人命令替代。长局与有限模型验收见 `PLAYTEST-2026-09-28.md`。
+
+### 2.2 战略收尾
+
+`transfer` 在两个相邻己方郡之间调兵，双方各占一条郡令。结算先扣除所有
+出发兵力，再统一入城，同季收到的兵不能再次转运。候选只列朝边境移动的
+路线；人类、机器人和模型共用候选与校验。
+
+`submissionTerms` 集中维护归降门槛。控制 7 州后，疆域达到邻敌的两倍即可
+尝试劝降，不再受敌方至多 8 郡的早期限制；仍按民心、实力差和种子掷点，
+拒绝后冷却两季。归降转移军团、俘虏、待任武将和国库，并取消旧势力的后续命令。
+
+围攻前瞻与结算共用封锁判据，折损后按剩余守军扣粮；未到城下的已探目标使用
+观测兵力上界和满仓估计，不能读取隐藏余粮。预测会标明次季增援条件，且不计
+守方反应、行军和欠饷。军费不足时先限制自动补兵，避免新募守军挤占现有军队军饷。
+
+验收与已知限制见 [本轮完成报告](STRATEGY-FINISH-2026-09-28.md)。
+
+### 2.3 命令预留与跨季计划
+
+`engine/order-budget.ts` 的 `OrderBudget` 共用于玩家候选预览、模型准入、
+机器人和真实结算。它保存本季已采纳命令并预留额度、国库和建筑槽位，检查
+同源征伐、重复目标、武将调任、撤围与增兵、调兵与出征之间的冲突。
+`allocateTransfers` 共用于容量预检和真实调兵分配。命令是否合法与战斗能否获胜分开处理。
+
+`strategy-plan.ts` 定义结构化计划、兼容历史文字计划的解析、格式化和事实反馈。
+`observe` 把上季计划、当季可见事实和战报传给模型；`session` 保存返回计划，
+无效计划保留旧值。`StrategyPlanView` 在会话面板展示计划，并把 AI 判断与事实分开。
+
+prompt 版本 1.18.0，observation 1.4.0，pack 2.3.0，save 11。JSON Schema 保留候选 enum，
+应用解析控制命令数量与字段长度，避免复杂 schema 被提供方拒绝。
+有界场景工具为 `tools/strategy-cases.mjs`，默认零模型费用；结果与限制见
+[战略计划验收](STRATEGY-PLANS-2026-09-28.md)。
+
+### 结算事实复盘
+
+`engine/season-outcome.ts` 对照季初季末状态，记录各方净得失郡和国库变化，
+由 `resolve` 写入 `GameState.lastOutcome`。`outcomeFor` 只返回指定席位、
+当前上一季的摘要；`observe.report.changes` 与 `SeasonReviewView` 共用它，
+避免丢城事件被天下战报截断。治所名与 `seat.capitalHeld` 分开，明确是否仍掌握治所。
+
+`modelDecide` 对完全相同的复核文字提示沿用，保留响应，不增加模型调用。
+这是可核查的反馈与提示，不是对自然语言计划的完整事实审查。验证和局限见
+[复盘事实与势力诊断](STRATEGY-REVIEW-2026-09-28.md)。
+
+`game/decision-review.ts` 统一生成决策时的事实提示和命令准入收据，写入可选的
+`ModelTurnRecord.review`。`session` 取同席上一季记录，`observe.decisionLastSeason`
+再次校验席位与季号，向模型回传已采纳 key、拒绝原因及提示；有收据时替代旧的丢令摘要。
+目标归属、目标或攻守方向变化只触发提示，不改 AI 原文和引擎裁决。
+`DecisionReviewView` 在实际结算摘要旁显示记录，明确采纳不等于行动成功。
+新字段不改变 GameState，旧版 11 存档继续有效；协议为 prompt 1.19.0 / observation 1.5.0。
+
+2026-09-29 后续：prompt 1.21.0 / observation 1.6.0。`planReset` 只在旧计划为进攻、目标现属己方且未受围时由当前公开事实生成；下一季请求将旧 `plan` 置 null，旧计划仍留在 session 记录中。防守或被围目标不重置。详见[实测](DECISION-GUIDANCE-2026-09-29.md)。
+免费回放与真实页面证据见[计划与命令核对](DECISION-REVIEW-2026-09-28.md)。
 
 ## 授权边界
 

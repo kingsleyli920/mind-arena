@@ -8,6 +8,7 @@
 // 变松。《三国志》系列同样把地名放在 UI 层。这里标注是屏幕恒定字号，
 // 按缩放分级显示，每次视口变化在屏幕空间做贪心避让。
 
+import type { TerritoryGrid } from "@/lib/game/territory.ts";
 import { useEffect, useRef, useState } from "react";
 import type { Container, Graphics, Sprite, Text } from "pixi.js";
 
@@ -154,9 +155,9 @@ export function InkMapViewer() {
       // 两页共用一条疆域真相——此前底图是地形加权 chamfer、前端是欧氏最近邻，
       // 两套并存迟早对不上。
       try {
-        const tg = await fetch("/game/territory-grid.json").then((r) => r.json());
-        const { cols, rows, none } = tg.meta as { cols: number; rows: number; none: number };
-        const bin = atob(tg.grid as string);
+        const tg = await fetch("/game/territory-grid.json").then((r) => r.json() as Promise<TerritoryGrid>);
+        const { cols, rows, none } = tg.meta;
+        const bin = atob(tg.grid);
         const cv = document.createElement("canvas");
         cv.width = cols; cv.height = rows;
         const ctx = cv.getContext("2d");
@@ -171,7 +172,7 @@ export function InkMapViewer() {
             const n = m ? parseInt(m[1], 16) : 0x7a7266;
             rgbOf.set(f.id, [(n >> 16) & 255, (n >> 8) & 255, n & 255]);
           }
-          const order = tg.order as string[];
+          const order = tg.order;
           for (let i = 0; i < bin.length; i += 1) {
             const k = bin.charCodeAt(i);
             const o = i * 4;

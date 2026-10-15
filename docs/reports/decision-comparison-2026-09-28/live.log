@@ -1,0 +1,15 @@
+{"case":"capital","model":"bot","budget":{"calls":0,"attempts":0,"heldUsd":0,"reportedUsd":0}}
+{"case":"capital","model":"hold","budget":{"calls":0,"attempts":0,"heldUsd":0,"reportedUsd":0}}
+{"case":"capital","model":"openai/gpt-5-nano","admitted":4,"cost":0.00178515,"budget":{"calls":1,"attempts":2,"heldUsd":0.00787535,"reportedUsd":0.00178515}}
+{"case":"capital","model":"google/gemini-2.5-flash-lite","admitted":6,"cost":0.0025166466666666667,"budget":{"calls":2,"attempts":3,"heldUsd":0.010391996666666667,"reportedUsd":0.004301796666666666}}
+{"case":"capital","model":"openai/gpt-5-mini","admitted":6,"cost":0.00688975,"budget":{"calls":3,"attempts":5,"heldUsd":0.047732746666666666,"reportedUsd":0.011191546666666666}}
+{"case":"multifront","model":"bot","budget":{"calls":3,"attempts":5,"heldUsd":0.047732746666666666,"reportedUsd":0.011191546666666666}}
+{"case":"multifront","model":"hold","budget":{"calls":3,"attempts":5,"heldUsd":0.047732746666666666,"reportedUsd":0.011191546666666666}}
+{"case":"multifront","model":"openai/gpt-5-nano","admitted":2,"cost":0.0015488,"budget":{"calls":4,"attempts":7,"heldUsd":0.05534414666666666,"reportedUsd":0.012740346666666666}}
+{"case":"multifront","model":"google/gemini-2.5-flash-lite","admitted":5,"cost":0.00157383,"budget":{"calls":5,"attempts":8,"heldUsd":0.05691797666666667,"reportedUsd":0.014314176666666666}}
+{"case":"multifront","model":"openai/gpt-5-mini","admitted":5,"cost":0.009184,"budget":{"calls":6,"attempts":10,"heldUsd":0.09641497666666665,"reportedUsd":0.023498176666666665}}
+{"case":"siege","model":"bot","budget":{"calls":6,"attempts":10,"heldUsd":0.09641497666666665,"reportedUsd":0.023498176666666665}}
+{"case":"siege","model":"hold","budget":{"calls":6,"attempts":10,"heldUsd":0.09641497666666665,"reportedUsd":0.023498176666666665}}
+{"case":"siege","model":"openai/gpt-5-nano","admitted":4,"cost":0.0018093,"budget":{"calls":7,"attempts":11,"heldUsd":0.09822427666666665,"reportedUsd":0.025307476666666665}}
+{"case":"siege","model":"google/gemini-2.5-flash-lite","admitted":5,"cost":0.00156073,"budget":{"calls":8,"attempts":12,"heldUsd":0.09978500666666665,"reportedUsd":0.026868206666666665}}
+{"case":"siege","model":"openai/gpt-5-mini","admitted":5,"cost":0.0078585,"budget":{"calls":9,"attempts":13,"heldUsd":0.10764350666666664,"reportedUsd":0.03472670666666666}}

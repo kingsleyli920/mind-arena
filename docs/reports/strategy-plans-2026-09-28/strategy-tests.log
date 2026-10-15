@@ -1,0 +1,17 @@
+(node:96672) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 同源多档征伐在准入和结算都只允许一条；玩家预览立即反馈 (38.94575ms)
+✔ 撤围与增兵互斥；同一武将不能调往两郡 (5.659958ms)
+✔ 累计国库和建筑槽位预留，接受的建设不会到结算时才缺钱 (5.489291ms)
+✔ 结构化计划完整解析，坏计划不会覆盖合法旧计划 (43.591333ms)
+✔ 目标反馈跟随事实变化，不读取敌方隐藏守军或存粮 (0.935ms)
+✔ 跨提供方 schema 简化后，应用仍限制命令数与计划长度 (0.146959ms)
+✔ 结构化计划实际进入下一季请求并可存档恢复，失败时不丢记忆 (85.583208ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 328.834625

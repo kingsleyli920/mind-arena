@@ -1,0 +1,119 @@
+[
+  {
+    "run": "cases-live",
+    "calls": 3,
+    "reservedUsd": 0.04160559999999999,
+    "reportedUsd": 0.0038438500000000002,
+    "failures": [
+      {
+        "case": "treasury",
+        "model": "google/gemini-2.5-flash-lite",
+        "record": {
+          "turn": 0,
+          "seat": "lubu",
+          "model": "google/gemini-2.5-flash-lite",
+          "promptVersion": "1.17.0",
+          "obsChars": 10865,
+          "obsTokens": 7340,
+          "candidates": 60,
+          "picks": [],
+          "admission": {
+            "admitted": [],
+            "dropped": [],
+            "spent": 0,
+            "illegalRate": 0,
+            "mojibake": 0
+          },
+          "usage": null,
+          "structured": false,
+          "rung": null,
+          "maxTokens": 0,
+          "starved": 0,
+          "finishReason": null,
+          "attempts": 2,
+          "elapsedMs": 4633,
+          "failureKind": "model",
+          "failure": "OpenRouter 调用失败：{\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Request contains an invalid argument.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\"\\n  }\\n}\\n\",\"provider_name\":\"Google\",\"is_byok\":false,\"provider_error_code\":\"400\",\"previous_errors\":[{\"code\":400,\"message\":\"Provider returned error\",\"provider_name\":\"Google\",\"raw\":\"{\\n  \\\"e"
+        }
+      }
+    ]
+  },
+  {
+    "run": "cases-repaired",
+    "calls": 4,
+    "reservedUsd": 0.05908239999999999,
+    "reportedUsd": 0.0038438500000000002,
+    "failures": [
+      {
+        "case": "treasury",
+        "model": "google/gemini-2.5-flash-lite",
+        "record": {
+          "turn": 0,
+          "seat": "lubu",
+          "model": "google/gemini-2.5-flash-lite",
+          "promptVersion": "1.17.0",
+          "obsChars": 10865,
+          "obsTokens": 7340,
+          "candidates": 60,
+          "picks": [],
+          "admission": {
+            "admitted": [],
+            "dropped": [],
+            "spent": 0,
+            "illegalRate": 0,
+            "mojibake": 0
+          },
+          "usage": null,
+          "structured": false,
+          "rung": null,
+          "maxTokens": 0,
+          "starved": 0,
+          "finishReason": null,
+          "attempts": 2,
+          "elapsedMs": 3221,
+          "failureKind": "model",
+          "failure": "OpenRouter 调用失败：{\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Request contains an invalid argument.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\"\\n  }\\n}\\n\",\"provider_name\":\"Google\",\"is_byok\":false,\"provider_error_code\":\"400\",\"previous_errors\":[{\"code\":400,\"message\":\"Provider returned error\",\"provider_name\":\"Google\",\"raw\":\"{\\n  \\\"e"
+        }
+      }
+    ]
+  },
+  {
+    "run": "cases-final",
+    "calls": 13,
+    "reservedUsd": 0.19593339999999998,
+    "reportedUsd": 0.01981007,
+    "failures": [
+      {
+        "case": "multifront",
+        "model": "google/gemini-2.5-flash-lite",
+        "record": {
+          "turn": 4,
+          "seat": "gongsundu",
+          "model": "google/gemini-2.5-flash-lite",
+          "promptVersion": "1.17.0",
+          "obsChars": 9562,
+          "obsTokens": 6709,
+          "candidates": 47,
+          "picks": [],
+          "admission": {
+            "admitted": [],
+            "dropped": [],
+            "spent": 0,
+            "illegalRate": 0,
+            "mojibake": 0
+          },
+          "usage": null,
+          "structured": false,
+          "rung": null,
+          "maxTokens": 0,
+          "starved": 0,
+          "finishReason": null,
+          "attempts": 0,
+          "elapsedMs": 0,
+          "failureKind": "harness",
+          "failure": "预留费用触顶，停止"
+        }
+      }
+    ]
+  }
+]

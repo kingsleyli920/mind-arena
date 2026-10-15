@@ -947,3 +947,36 @@
 /* 据点的归属环。据点有主之后「这个关在谁手里」是图上第一等的信息——
    它决定从这条路打过去，守方还有没有关隘之利 */
 .map-vec svg .hold-ring { opacity: 0.85; }
+
+/* 开局控制者配置与观战，共用现有宣纸色与容器布局。 */
+.match-setup { margin: 1.4rem clamp(1rem, 3vw, 2.4rem); padding: 1.2rem; border: 1px solid var(--rule); background: #fbf8f1; }
+.match-setup h2, .seat-heading { font-size: 1.2rem; }
+.seat-heading { margin: 1.4rem clamp(1rem, 3vw, 2.4rem); }
+.setup-options { display: flex; flex-wrap: wrap; gap: 1rem; }
+.setup-options label, .session-panel label { display: grid; gap: .4rem; font-size: .85rem; }
+.match-setup select, .session-panel select { min-width: 0; max-width: 100%; font: inherit; color: var(--ink); background: #fffdf8; border: 1px solid var(--rule); padding: .5rem; }
+.match-setup p { font-size: .9rem; line-height: 1.7; }
+.controller-list { max-height: 26rem; overflow: auto; border-block: 1px solid var(--rule); }
+.controller-row { display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(8rem, 10rem) minmax(12rem, 2fr); gap: .7rem; align-items: center; padding: .65rem; border-bottom: 1px solid var(--rule); }
+.controller-row small { margin-left: .7rem; color: var(--ink-soft); }
+.setup-launch { display: flex; align-items: center; gap: 2rem; justify-content: space-between; }
+.setup-launch small { display: block; color: var(--ink-soft); }
+.setup-launch .go { min-width: 9rem; width: auto; padding: .8rem 1.4rem; }
+.seat-grid button[aria-pressed="true"] { outline: 2px solid var(--seal); }
+.session-panel { background: #fbf8f1; border: 1px solid var(--rule); padding: .8rem; margin-bottom: .8rem; font-size: .82rem; }
+.session-panel p { line-height: 1.6; margin: .5rem 0; overflow-wrap: anywhere; }
+.session-panel summary { cursor: pointer; padding: .5rem 0; }
+.session-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .65rem; }
+.session-actions button { background: var(--paper); border: 1px solid var(--rule); color: var(--ink); font: inherit; padding: .55rem .8rem; cursor: pointer; }
+.session-actions button:disabled { opacity: .5; cursor: default; }
+.session-roster { list-style: none; padding: 0; max-height: 18rem; overflow: auto; }
+.session-roster li { padding: .5rem 0; border-bottom: 1px solid var(--rule); }
+.session-roster span, .decision-record small { display: block; color: var(--ink-soft); overflow-wrap: anywhere; }
+.decision-record { padding-block: .65rem; border-top: 1px solid var(--rule); }
+.observer-note { font-size: .85rem; color: var(--ink-soft); line-height: 1.8; padding: .8rem; }
+.match-setup :focus-visible, .session-panel :focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
+@media (max-width: 850px) {
+  .controller-row { grid-template-columns: minmax(8rem, 1fr) minmax(8rem, 1fr); }
+  .controller-row select:last-child:not(:nth-child(2)) { grid-column: 1 / -1; }
+  .setup-launch { flex-direction: column; gap: .4rem; align-items: stretch; }
+}

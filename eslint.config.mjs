@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "worker/runtime.d.ts", // Wrangler 自动生成的运行时声明
   ]),
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

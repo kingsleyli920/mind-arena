@@ -1,0 +1,15 @@
+✔ 费用闸门在调用前拒绝超限；失败请求不能释放未知费用 (1.04275ms)
+✔ 成功响应只释放已知余量，保留此前尝试，不能重复退款 (0.151958ms)
+(node:43452) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 目标归属与状态提示只核对结构化事实，不把守城误判为应完成 (3.00625ms)
+✔ 准入收据保留同 key 的采纳与重复拒绝，不将两者合并 (5.493166ms)
+✔ 提示与完整收据经过存档进入下一季请求；旧档无字段可继续，坏记录拒绝 (171.644375ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 309.834333

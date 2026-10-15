@@ -8,19 +8,22 @@
 // 疆域不烤进底图。底图是中性地形（tools/render-terrain-map.mjs FACTIONS=0），
 // 归属由 territory-grid 逐格查表后按当前局势实时着色——烤进去的疆域
 // 一开打就不对了。
+import type { TerritoryGrid as Territory } from "@/lib/game/territory.ts";
+import { upkeepFor } from "@/lib/game/engine/economy.ts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fitLabel, textWidth, type Box } from "./label-fit.ts";
-import { buildGraph, listActions, validate, POLICY_CN, type Graph }
+import { buildGraph, listActions, POLICY_CN, type Graph }
   from "@/lib/game/engine/actions.ts";
-import { decide, PROFILES, type Profile } from "@/lib/game/engine/bot.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "@/lib/game/engine/intel.ts";
 import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
-import { modelDecide, type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
+import { type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
 import { ProxyLlmClient } from "@/lib/arena/llm/proxy-client.ts";
-import { VERIFIED_MODELS, VERIFIED_IDS } from "@/lib/arena/verified-models.ts";
+import { SessionPanel } from "./SessionPanel.tsx";
+import { MatchSetup, type ModelRow } from "./MatchSetup.tsx";
+import { advanceSeason, budgetMessage, modelSeats, newSession } from "@/lib/game/session.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "./Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
@@ -30,12 +33,12 @@ import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
   type SavedGame } from "@/lib/game/save.ts";
 import { loadParams, marchSeasons, provCapOf, type EngineParams }
   from "@/lib/game/engine/params.ts";
-import { createGame, refreshAp } from "@/lib/game/engine/setup.ts";
-import { resolve, supplyReach } from "@/lib/game/engine/resolve.ts";
+import { createGame } from "@/lib/game/engine/setup.ts";
+import { supplyReach } from "@/lib/game/engine/resolve.ts";
 import { buildGeography, briefFor, standingOf, GRADE_CN, GRADE_RANK, GRADE_CUTS, ABS_CUTS,
          type Geography }
   from "@/lib/game/engine/victory.ts";
-import type { Action, Candidate, GameState, Grade, Order } from "@/lib/game/engine/types.ts";
+import type { Action, Candidate, GameState, Grade } from "@/lib/game/engine/types.ts";
 import { cmp } from "@/lib/game/engine/cmp";
 
 /**
@@ -137,6 +140,7 @@ function titleOf(
     case "campaign":
       return a.from === a.target ? `${a.from} 出城迎战` : `自${a.from} 征 ${a.target}`;
     case "withdraw": return "自围城撤兵";
+    case "transfer": return `自${a.from} 调兵至 ${a.to}`;
     case "muster": return `于${a.at} 集结`;
     case "govern": return `${a.at} ${POLICY_CN[a.policy] ?? a.policy}`;
     case "array": return `${a.at} 改${FORMATION_CN[a.to]}阵`;
@@ -151,35 +155,9 @@ function titleOf(
   }
 }
 
-/** OpenRouter 模型列表的一行。价格是「每 token 美元」的字符串 */
-type ModelRow = {
-  id: string; name: string; contextLength: number;
-  promptPrice: string; completionPrice: string; structuredOutput: boolean;
-};
-
-/**
- * 默认模型选一个**免费且实测跑得通**的。
- *
- * 免费不是为了省钱，是为了「打开就能试」：付费模型在账户余额为负时一律拒绝，
- * 而第一次点「让对手用大模型」的人如果直接撞上一条报错，
- * 他不会知道该去充值还是该改配置。
- *
- * 具体选哪个是实测出来的，不是挑的。拿真实观测（袁绍开局，system 6969 字、
- * user 13119 字、候选 60 条、带 enum 的 json_schema）把 18 个免费模型全跑一遍，
- * 只有 5 个能回出可解析且合法的决策：
- *   ✓ nemotron-3-super-120b-a12b   58.5s  推理 4085  挑 12 全合法  ← 用这个
- *   ✓ dots-3-note-preview          64.8s  推理 5374  挑  9 全合法
- *   ✓ minimax-m2.7                 85.0s  推理 4396  挑  4 全合法
- *   ✓ nemotron-3-nano-omni         99.2s  推理 4397  挑  1
- *   ✓ minimax-m3                  131.5s  finish=length，挑 7
- * 其余或 429/403，或把 8000 出参全烧在推理上被截断。
- * 尤其 nemotron-3-ultra-550b（曾经的默认）：7244 tok 推理、finish=length，
- * 一季要重试三次、拖十分钟——「参数量最大」和「能用」是两回事。
- */
-const DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-
 /** 一次调用的花费（美元）。价格是每 token 的字符串，缓存命中部分仍按入参计价 */
 function costOf(r: ModelTurnRecord, price: Map<string, ModelRow>): number {
+  if (r.usage?.cost != null) return r.usage.cost;
   const m = price.get(r.model);
   if (!m || !r.usage) return 0;
   return r.usage.prompt * Number(m.promptPrice || 0)
@@ -252,10 +230,7 @@ type Bundle = {
   troopTypes: unknown; resources: unknown; provinceSeats: unknown;
   officers: unknown[]; pack: unknown;
 };
-type Territory = {
-  meta: { west: number; north: number; cellSize: number; cols: number; rows: number; none: number };
-  order: string[]; grid: string;
-};
+
 
 /** 实走路径：在高程栅格上算出的折线，经过挂在该边上的关。见 tools/route-roads.mjs */
 type RoadFile = { step: number; roads: Array<{
@@ -686,9 +661,6 @@ function WashDefs() {
   );
 }
 
-/** 席位轮转出机器人画像。确定：同一局同一势力恒为同一画像 */
-const PROFILE_KEYS = Object.keys(PROFILES) as Profile[];
-
 export function PlayClient() {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [terr, setTerr] = useState<{ meta: Territory["meta"]; idx: Uint8Array; order: string[] } | null>(null);
@@ -747,33 +719,22 @@ export function PlayClient() {
   // ── 模型执子 ──────────────────────────────────────────────────
   // 席位 → 模型 id。不在表里的势力仍由机器人执子。
   // 三十一家全用模型是不现实的：一季就是三十一次调用，等一分钟看一季
-  const [modelOf, setModelOf] = useState<Record<string, string>>({});
+  const [session, setSession] = useState(() => newSession());
+  const { modelOf, records } = session;
+  const spectator = session.human === null;
+  const [autoPlay, setAutoPlay] = useState(false);
+  const advancing = useRef(false);
+  const [turnError, setTurnError] = useState<string | null>(null);
   const [models, setModels] = useState<ModelRow[]>([]);
-  const [modelPick, setModelPick] = useState(DEFAULT_MODEL);
-  const [modelSeats, setModelSeats] = useState(0);
   const [thinking, setThinking] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  // 逐次调用的记录。花了多少钱、哪一席没答上来、降到了哪一档，
-  // 都从这里读——不留记录就只能看到「这季对手好像没动」
-  const [records, setRecords] = useState<ModelTurnRecord[]>([]);
-  const [since, setSince] = useState(0);
-  // 各模型席位跨季的方略。模型自己写，下季原样回传——这是它唯一的记忆。
-  // 没有它，模型每季都在从零重想，只能做一季就见效的事
-  const [plans, setPlans] = useState<Record<string, string>>({});
-  /** 各模型席位上季被丢掉的令。回授给下一季，见 observe 的 droppedLastSeason */
-  const [drops, setDrops] = useState<Record<string,
-    Array<{ key: string; reason: string; detail?: string }>>>({});
   const [modelErr, setModelErr] = useState<string | null>(null);
   /**
    * 本局季数。默认取内容包的 16——那是**评测口径**（一局 16 次调用，
    * 48 局才付得起）。作为游戏它偏短：十六季刚把内政理顺就结束了，
    * 而史上 194 到三分天下用了二十六年。长局才够得着超/霸/王三档
    */
-  const [seasons, setSeasons] = useState<number | null>(null);
-  // 推理档必须是**显式**选择。不控这一项，各家默认给的测试时算力相差几十倍，
-  // 比的就不是策略能力；而在对局界面里它还直接决定一季要等多久。
-  // 默认「低」：一季等一分钟以内，且评测跑用的也是这一档，两边可比
-  const [effort, setEffort] = useState<"low" | "medium" | "high">("low");
+
 
   /**
    * 把日志文本里的势力 id 换成中文名。
@@ -900,27 +861,30 @@ export function PlayClient() {
     return () => { alive = false; };
   }, []);
 
-  // 每次状态推进就落盘。存的是 GameState 与席位，派生量一概不存——
-  // 候选表、简报、镜头都能重算，存进去只会多一份会过期的副本
-  useEffect(() => {
-    if (!engine || !game || !seat) return;
-    // 打完、被灭、归隐都没什么可继续的
-    if (game.finished || game.factions[seat]?.eliminated
-        || game.factions[seat]?.retired) { clearSave(); return; }
-    saveGame({
+  const persist = useCallback((nextGame: GameState, nextSession = session) => {
+    if (!engine || !seat) return false;
+    return saveGame({
       packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount,
         (engine.pack as { constants?: Record<string, unknown> }).constants),
-      seat, game, picked,
+      seat, game: nextGame, picked, session: nextSession,
     });
-  }, [engine, game, seat, picked]);
+  }, [engine, seat, picked, session]);
+
+  useEffect(() => {
+    if (!game || !seat) return;
+    const timer = window.setTimeout(() => {
+      if (!persist(game)) setTurnError("本地存档写入失败；模型调用已受阻，请检查浏览器存储空间。");
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [game, seat, persist]);
 
   // 模型列表按需拉。开局页一进来就拉等于替所有人付一次外部请求，
   // 而绝大多数人不会开这个面板
   const loadModels = useCallback(() => {
     if (models.length) return;
     fetch("/api/openrouter/models")
-      .then((r) => r.json())
-      .then((d: { data?: ModelRow[]; error?: string }) => {
+      .then((r) => r.json() as Promise<{ data?: ModelRow[]; error?: string }>)
+      .then((d) => {
         setModels(d.data ?? []);
         if (d.error) setModelErr(d.error);
         else if (!d.data?.length) setModelErr("模型列表为空 —— 多半是没配 OPENROUTER_API_KEY");
@@ -928,7 +892,8 @@ export function PlayClient() {
       .catch((e: Error) => setModelErr(`取模型列表失败：${e.message}`));
   }, [models.length]);
 
-  const start = useCallback((factionId: string) => {
+  const start = useCallback(() => {
+    const factionId = session.human ?? "caocao";
     if (!engine) return;
     const s = createGame(engine.data, {
       seed: `play-${factionId}-${Math.floor(Date.now() / 1000)}`,
@@ -936,25 +901,18 @@ export function PlayClient() {
       // 传通行图才建得起据点表：据点归它所在之郡的主人，
       // 而「在哪条边上、算哪个郡境内」只有通行图知道
       graph: engine.G,
-      seasons: seasons ?? engine.P.seasonsPerGame,
+      seasons: 64, // 沿用原64季局的纪元节奏，统一局不会在此季终止。
+      endCondition: "unification",
     }, engine.P);
     clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [], delta: {}, battles: [] }); setFlips([]);
-    setRecords([]); setThinking({}); setSince(0); setPlans({});
-    // 模型派给「除你之外郡数最多的 N 家」。派给最弱的几家没有意义：
-    // 一郡小势力十六季里多半只在修城，看不出模型强弱
-    setModelOf(Object.fromEntries(
-      Object.values(s.factions)
-        .filter((f) => f.id !== factionId && !f.eliminated)
-        .sort((a, b) => b.startCommanderies - a.startCommanderies)
-        .slice(0, modelSeats)
-        .map((f) => [f.id, modelPick]),
-    ));
+    setSession({ ...session, callsUsed: 0, plans: {}, drops: {}, records: [], since: 0 });
+    setThinking({}); setAutoPlay(false); setTurnError(null); setPinned(null);
     // 开局把镜头放到自己治所上，而不是让人先在全图里找自己
     const cap = s.factions[factionId]?.capital;
     const p = cap ? engine.points.find((c) => c.id === cap) : null;
     setView(p ? centerOn(p.longitude, p.latitude, Math.max(4, minK), MAP) : fitAll(minK));
-  }, [engine, modelSeats, modelPick, seasons, minK]);
+  }, [engine, session, minK]);
 
   const candidates: Candidate[] = useMemo(() => {
     if (!engine || !game || !seat) return [];
@@ -968,127 +926,113 @@ export function PlayClient() {
   // 649 条里有 106 条（16%）被引擎静默丢弃，屏幕上零提示
   const adm = useMemo(() => {
     if (!engine || !game || !seat) return null;
-    return admit(game, seat, picked, candidates, engine.G, engine.roster);
+    return admit(game, seat, picked, candidates, engine.G, engine.roster, undefined, engine.P);
   }, [engine, game, seat, picked, candidates]);
   const spent = adm?.spent ?? 0;
 
   const submit = useCallback(async () => {
-    if (!engine || !game || !seat || busy) return;
-    setBusy(true);
-    const orders: Order[] = admit(game, seat, picked, candidates,
-      engine.G, engine.roster).orders;
-
-    const ids = Object.keys(game.factions).sort();
-    const alive = (f: string) => !game.factions[f].eliminated && !game.factions[f].retired;
-    const byModel = ids.filter((f) => f !== seat && alive(f) && modelOf[f]);
-
-    // 模型席位并发请求。逐个串行会让一季等上几分钟——
-    // 五席并发时的墙钟时间等于最慢的那一席，而不是五席之和
-    const deps = {
-      client: new ProxyLlmClient(),
-      pack: engine.pack, g: engine.G, P: engine.P,
-      roster: engine.roster, geo: engine.geo,
-      nameOf: (id: string) => engine.nameOf.get(id) ?? id,
-    };
-    setThinking(Object.fromEntries(byModel.map((f) => [f, "思考中"])));
-    const done = await Promise.all(byModel.map(async (f) => {
-      try {
-        const { orders: os, record } = await modelDecide(game, f, since,
-          { ...deps, model: modelOf[f], reasoning: { effort } },
-          plans[f] ?? null, drops[f] ?? []);
-        // 答不上来的那一季不该把记忆抹掉，所以只在给出新方略时更新
-        if (record.plan) setPlans((p) => ({ ...p, [f]: record.plan! }));
-        // 被丢的令回授给下一季：与方略同理，不回授模型就每季重犯
-        setDrops((d) => ({ ...d, [f]: record.admission?.dropped ?? [] }));
-        setThinking((t) => ({ ...t,
-          [f]: record.failure ? `失败：${record.failure}` : `${os.length} 令` }));
-        return { f, os, record };
-      } catch (e) {
-        // 抛到这里的是代理层的错（没配密钥、网络断了）。
-        // 这一席退回机器人，但**必须说出来**：静默退回会让人以为模型在下棋，
-        // 而实际上他看到的是机器人的手笔
-        setThinking((t) => ({ ...t, [f]: `失败：${(e as Error).message}` }));
-        return { f, os: null, record: null };
+    if (!engine || !game || !seat || advancing.current || game.finished) return;
+    const budget = budgetMessage(game, session);
+    if (budget) { setAutoPlay(false); setTurnError(budget); return; }
+    advancing.current = true;
+    setBusy(true); setTurnError(null);
+    const modeled = modelSeats(game, session);
+    setThinking(Object.fromEntries(modeled.map((f) => [f, "思考中"])));
+    try {
+      const humanOrders = spectator ? [] : admit(game, seat, picked, candidates,
+        engine.G, engine.roster, undefined, engine.P).orders;
+      const result = await advanceSeason(game, session, humanOrders, {
+        client: new ProxyLlmClient(), pack: engine.pack, g: engine.G, P: engine.P,
+        roster: engine.roster, geo: engine.geo,
+        nameOf: (id) => engine.nameOf.get(id) ?? id,
+      }, (reserved) => {
+        if (modeled.length && !persist(game, reserved)) throw new Error("无法保存调用额度，本季未调用模型。");
+        setSession(reserved);
+      }, (f, record) => {
+        setThinking((t) => ({ ...t, [f]: record.failure ? `失败：${record.failure}` : `${record.admission.admitted.length} 令` }));
+      });
+      const r = { state: result.game };
+      setSession(result.session);
+      if (result.session.records.slice(session.records.length).some((record) => record.failure)) {
+        setAutoPlay(false);
+        setTurnError("本季有模型未能下令，已暂停自动推进。可查看决策记录后手动继续。");
       }
-    }));
-    for (const d of done) {
-      if (d.record) setRecords((r) => [...r, d.record!]);
-      if (d.os && d.os.length) orders.push(...d.os);
+      const before = game.log.length;
+      // resolve 走的是深拷贝，所以逐郡比对 owner 是有效差分
+      setFlips(Object.values(r.state.commanderies)
+        .filter((c) => c.owner !== game.commanderies[c.id]?.owner)
+        .filter((c) => c.owner === seat || game.commanderies[c.id]?.owner === seat)
+        .map((c) => ({ id: c.id, gained: c.owner === seat, turn: r.state.turn })));
+      // 一季全图能产生上百条事件，绝大多数是边地势力的补给消息。
+      // 全铺出来等于把自己这一季的战况埋掉——只留我方的，与天下大事
+      // 可见性由引擎定义（intel.ts 的 PUBLIC_EVENTS），不在这里另判一套——
+      // 界面与模型观测若各判各的，人看到的和模型看到的就不是同一场战争
+      const fresh = visibleLog(r.state, seat, before);
+      // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
+      // 补给消息埋掉——那是最该第一眼看到的东西
+      // 各家本季的郡数增减：与 setFlips 同一套口径（结算前后归属对比），
+      // 只是不限于己方
+      const delta: Record<string, number> = {};
+      for (const c of Object.values(r.state.commanderies)) {
+        const was = game.commanderies[c.id]?.owner ?? null;
+        if (c.owner === was) continue;
+        if (c.owner) delta[c.owner] = (delta[c.owner] ?? 0) + 1;
+        if (was) delta[was] = (delta[was] ?? 0) - 1;
+      }
+      // 上一季的战事所在。只收「打过」的那几类：破城由易主的朱墨环画，
+      // 这里画的是**打了但城没换手**的那些——强攻未克、野战、被围、解围。
+      // 图上此前只看得见结果（谁的地盘变了），看不见过程（哪儿在打）
+      const FIGHT = new Set(["siege-hold", "field-win", "field-fail", "besieged",
+                             "siege-lift", "relief"]);
+      const seenAt = new Set<string>();
+      const battles: Array<{ id: string; kind: string; mine: boolean }> = [];
+      for (const e of fresh) {
+        if (!e.at || !FIGHT.has(e.kind) || seenAt.has(e.at)) continue;
+        seenAt.add(e.at);
+        battles.push({ id: e.at, kind: e.kind, mine: e.faction === seat });
+      }
+      setFlash({
+        delta, battles,
+        mine: fresh.filter((e) => e.faction === seat).map((e) => cnText(e.text)),
+        // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
+        // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
+        // 实测天下大事一季数十条，其中八成是 AI 之间的缔盟绝盟
+        world: (() => {
+          const RANK: Record<string, number> = {
+            eliminated: 0, "siege-win": 1, "officer-captured": 2, retire: 2, epoch: 3,
+          };
+          const rows = fresh.filter((e) => e.faction !== seat && PUBLIC_EVENTS.has(e.kind));
+          const isDip = (k: string) => k === "ally" || k === "ally-break";
+          const big = rows.filter((e) => !isDip(e.kind))
+            .sort((a, b) => (RANK[a.kind] ?? 9) - (RANK[b.kind] ?? 9))
+            .slice(0, 10)
+            .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cnText(e.text)}`);
+          // 外交折成一行：它占了八成条数，却极少影响本季的决策
+          const dip = rows.filter((e) => isDip(e.kind));
+          if (dip.length) {
+            const form = dip.filter((e) => e.kind === "ally").length;
+            big.push(`本季天下另有 ${form} 起结盟、${dip.length - form} 起绝盟`);
+          }
+          return big;
+        })(),
+      });
+      setGame(r.state);
+      setPicked([]);
+      if (r.state.finished) setAutoPlay(false);
+    } catch (e) {
+      setTurnError(e instanceof Error ? e.message : String(e));
+      setAutoPlay(false);
+    } finally {
+      advancing.current = false;
+      setBusy(false);
     }
-    // 模型没给出任何令的席位也算「本季不下令」，与评测口径一致——
-    // 不替它跑一遍机器人。替它兜底会把模型的失误洗掉，那就测不出东西了
-    const modeled = new Set(byModel);
+  }, [engine, game, seat, candidates, picked, cnText, session, spectator, persist]);
 
-    for (const [i, f] of ids.entries()) {
-      if (f === seat || modeled.has(f) || !alive(f)) continue;
-      orders.push(...decide(game, f, engine.G, PROFILE_KEYS[i % PROFILE_KEYS.length],
-        undefined, engine.roster, engine.P, engine.geo));
-    }
-    const before = game.log.length;
-    const r = resolve(game, orders, engine.G, engine.P, engine.roster, engine.geo);
-    // resolve 走的是深拷贝，所以逐郡比对 owner 是有效差分
-    setFlips(Object.values(r.state.commanderies)
-      .filter((c) => c.owner !== game.commanderies[c.id]?.owner)
-      .filter((c) => c.owner === seat || game.commanderies[c.id]?.owner === seat)
-      .map((c) => ({ id: c.id, gained: c.owner === seat, turn: r.state.turn })));
-    // 一季全图能产生上百条事件，绝大多数是边地势力的补给消息。
-    // 全铺出来等于把自己这一季的战况埋掉——只留我方的，与天下大事
-    // 可见性由引擎定义（intel.ts 的 PUBLIC_EVENTS），不在这里另判一套——
-    // 界面与模型观测若各判各的，人看到的和模型看到的就不是同一场战争
-    const fresh = visibleLog(r.state, seat, before);
-    // 我方与天下分栏。混在一起时，自己这一季打成什么样会被三十家的
-    // 补给消息埋掉——那是最该第一眼看到的东西
-    // 各家本季的郡数增减：与 setFlips 同一套口径（结算前后归属对比），
-    // 只是不限于己方
-    const delta: Record<string, number> = {};
-    for (const c of Object.values(r.state.commanderies)) {
-      const was = game.commanderies[c.id]?.owner ?? null;
-      if (c.owner === was) continue;
-      if (c.owner) delta[c.owner] = (delta[c.owner] ?? 0) + 1;
-      if (was) delta[was] = (delta[was] ?? 0) - 1;
-    }
-    // 上一季的战事所在。只收「打过」的那几类：破城由易主的朱墨环画，
-    // 这里画的是**打了但城没换手**的那些——强攻未克、野战、被围、解围。
-    // 图上此前只看得见结果（谁的地盘变了），看不见过程（哪儿在打）
-    const FIGHT = new Set(["siege-hold", "field-win", "field-fail", "besieged",
-                           "siege-lift", "relief"]);
-    const seenAt = new Set<string>();
-    const battles: Array<{ id: string; kind: string; mine: boolean }> = [];
-    for (const e of fresh) {
-      if (!e.at || !FIGHT.has(e.kind) || seenAt.has(e.at)) continue;
-      seenAt.add(e.at);
-      battles.push({ id: e.at, kind: e.kind, mine: e.faction === seat });
-    }
-    setFlash({
-      delta, battles,
-      mine: fresh.filter((e) => e.faction === seat).map((e) => cnText(e.text)),
-      // 按重要性取，不按时间取。此前是 slice(-24)——取的是日志数组的尾部，
-      // 谁被灭了、哪座城易主，完全看它在数组里的位置碰不碰运气。
-      // 实测天下大事一季数十条，其中八成是 AI 之间的缔盟绝盟
-      world: (() => {
-        const RANK: Record<string, number> = {
-          eliminated: 0, "siege-win": 1, "officer-captured": 2, retire: 2, epoch: 3,
-        };
-        const rows = fresh.filter((e) => e.faction !== seat && PUBLIC_EVENTS.has(e.kind));
-        const isDip = (k: string) => k === "ally" || k === "ally-break";
-        const big = rows.filter((e) => !isDip(e.kind))
-          .sort((a, b) => (RANK[a.kind] ?? 9) - (RANK[b.kind] ?? 9))
-          .slice(0, 10)
-          .map((e) => `${e.faction ? `${engine.nameOf.get(e.faction) ?? e.faction}：` : ""}${cnText(e.text)}`);
-        // 外交折成一行：它占了八成条数，却极少影响本季的决策
-        const dip = rows.filter((e) => isDip(e.kind));
-        if (dip.length) {
-          const form = dip.filter((e) => e.kind === "ally").length;
-          big.push(`本季天下另有 ${form} 起结盟、${dip.length - form} 起绝盟`);
-        }
-        return big;
-      })(),
-    });
-    setGame(r.state.finished ? r.state : refreshAp(r.state, engine.P));
-    setPicked([]);
-    setSince(r.state.log.length);
-    setBusy(false);
-  }, [engine, game, seat, candidates, picked, cnText, modelOf, since, busy, effort, plans, drops]);
+  useEffect(() => {
+    if (!autoPlay || busy || !spectator || !game || game.finished) return;
+    const timer = window.setTimeout(() => { void submit(); }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [autoPlay, busy, spectator, game, submit]);
 
   // ── 疆域绘制 ────────────────────────────────────────────────────
   // 两道工序，仿传世舆图：先以低分辨率格网软填色域（放大时自带晕开的边），
@@ -1675,7 +1619,7 @@ export function PlayClient() {
   //     没有一场发生在它们旁边。它们是「这里打过一仗」，不是「这里能打一仗」。
   //     数据留着（史料是好的），图上不画
   const nodeMarks = useMemo(() => (lod === 0 || !engine ? [] : engine.nodes)
-    .filter((n) => n.kind !== "battlefield" && engine.G.sites.has(n.id))
+    .filter((n) => n.kind !== "battlefield" && engine?.G.sites.has(n.id))
     .map((n) => ({
       n, x: (n.longitude - MAP.west) * MAP.ppd, y: (MAP.north - n.latitude) * MAP.ppd,
       r: 12 / view.k ** 0.82,
@@ -1755,105 +1699,22 @@ export function PlayClient() {
         <header className="play-head">
           <h1>汉末沙盘</h1>
           <p>兴平元年·一九四{"\u3000"}择一席入局。
-            <b>谁先一统天下谁赢</b>；打满 {seasons ?? engine.P.seasonsPerGame} 季仍未定于一，
-            则按<b>相对开局的增量</b>定档——守成不得分；多据一个州治入乙（立足），
-            多控一整州入甲（成势），多控两州入超。</p>
+            <b>谁先一统天下谁赢</b>。控制 {engine.P.unifyZhou} 州，或成为最后一个有效势力，即可统一。
+            对局没有季数上限，可随时暂停、存档后继续。</p>
         </header>
         <details className="primer-fold">
           <summary>怎么玩<i>没玩过先看这个</i></summary>
           <Primer P={engine.P} />
         </details>
 
-        {/* 局长。默认 16 季是评测口径，作为游戏偏短 */}
         <details className="primer-fold model-fold">
-          <summary>这一局打多久<i>{seasons ?? engine.P.seasonsPerGame} 季</i></summary>
+          <summary>这一局打多久<i>直到统一</i></summary>
           <div className="model-setup">
-            <p>默认 <b>{engine.P.seasonsPerGame} 季（四年）</b>是<b>评测口径</b>——
-              一局十六次模型调用，四十八局才付得起，而定档按相对开局的增量判，
-              四年里多拿一两个州是合理量级。</p>
-            <p>作为游戏它偏短：刚把内政理顺、器械造好，局就结束了；
-              史上从 194 到三分天下用了二十六年。长局才够得着
-              <b>超 / 霸 / 王</b>三档——增量判据到甲就封顶，
-              六十季里控了八个州判据照样只给甲，后半局每一次胜利都不再有回报。</p>
-            <label>
-              <span>局长</span>
-              <select value={seasons ?? engine.P.seasonsPerGame}
-                onChange={(e) => setSeasons(Number(e.target.value))}>
-                <option value={16}>16 季 · 四年（评测口径，一局约十分钟）</option>
-                <option value={32}>32 季 · 八年</option>
-                <option value={64}>64 季 · 十六年（够打出霸业）</option>
-                <option value={104}>104 季 · 廿六年（至三分天下）</option>
-              </select>
-            </label>
-            <p className="warn-note">纪元时限按局长等分，所以长局的三个纪元也会拉长
-              ——「早取无主之地」的时间价值不会因为局长而失效。</p>
+            <p>天下尚未统一，对局就继续。你可以暂停观战、保存进度，下次接着玩。</p>
+            <p>AI 模型达到调用额度时会暂停；增加额度或切换机器人后可以继续，不会按季数判定胜负。</p>
           </div>
         </details>
 
-        {/* 让对手由大模型执子。默认关（0 家）——一季就是 N 次调用，
-            要等，也要花钱；这件事必须是显式选择，不能默认替人开销 */}
-        <details className="primer-fold model-fold"
-          onToggle={(e) => { if ((e.currentTarget as HTMLDetailsElement).open) loadModels(); }}>
-          <summary>让对手由大模型执子<i>{modelSeats ? `${modelSeats} 家` : "默认关"}</i></summary>
-          <div className="model-setup">
-            <p>选中的模型会替<b>除你之外郡数最多的 N 家</b>执子，其余仍由机器人。
-              它读到的与你读到的是同一份观测（同样的迷雾、同样的候选），
-              下的令也走同一道准入——所以它的胜负是可比的。</p>
-            <label>
-              <span>模型</span>
-              {/* 验过的排在最前，并把实扣写出来。选择器里有四百多个模型，
-                  而实测「便宜档」里至少一半根本产不出正文（见 EVAL 第 27 条）——
-                  按人气平铺等于让人从四百个里盲选。
-                  不给未验模型估价：价目表在重推理模型上低估十倍 */}
-              <select value={modelPick} onChange={(e) => setModelPick(e.target.value)}>
-                <optgroup label="实测跑过整局">
-                  {VERIFIED_MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {`${m.label}\u3000约 $${m.usdPerGame.toFixed(2)}/局`
-                       + `\u3000${m.note.split("；")[0]}`}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="免费">
-                  <option value={DEFAULT_MODEL}>{DEFAULT_MODEL}（免费；出参多半烧在推理上，会慢）</option>
-                </optgroup>
-                <optgroup label="其余（未验过，价目表在重推理模型上会低估十倍）">
-                  {models
-                    .filter((m) => m.id !== DEFAULT_MODEL && !VERIFIED_IDS.has(m.id))
-                    .map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}{m.structuredOutput ? "" : "（无结构化输出）"}
-                        {`　入 $${(Number(m.promptPrice) * 1e6).toFixed(2)}`
-                         + ` 出 $${(Number(m.completionPrice) * 1e6).toFixed(2)}/M`}
-                      </option>
-                    ))}
-                </optgroup>
-              </select>
-            </label>
-            <label>
-              <span>由模型执子的家数</span>
-              <select value={modelSeats} onChange={(e) => setModelSeats(Number(e.target.value))}>
-                {[0, 1, 2, 3, 5].map((n) => (
-                  <option key={n} value={n}>{n === 0 ? "不用模型（全机器人）" : `最强的 ${n} 家`}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>推理档</span>
-              <select value={effort}
-                onChange={(e) => setEffort(e.target.value as "low" | "medium" | "high")}>
-                <option value="low">低（一季等得起，与评测跑同档）</option>
-                <option value="medium">中</option>
-                <option value="high">高（更强，但一季可能等几分钟）</option>
-              </select>
-            </label>
-            {modelSeats > 0 && (
-              <p className="warn-note">一季要等这 {modelSeats} 家里最慢的那一个答完。
-                付费模型按 token 计价，局内会实时报累计花费。</p>
-            )}
-            {modelErr && <p className="warn-note">{modelErr}</p>}
-          </div>
-        </details>
         {resume && (() => {
           // 显式给「继续 / 重开」，不自动恢复：自动恢复会让「我想重开一局」
           // 变成一件要先找按钮的事
@@ -1863,9 +1724,9 @@ export function PlayClient() {
           return (
             <div className="resume">
               <div>
-                <b>上次那局还没打完</b>
-                <span>{engine.nameOf.get(resume.seat) ?? resume.seat}
-                  {"\u3000"}第 {resume.game.turn + 1}/{resume.game.seasonsPerGame ?? engine.P.seasonsPerGame} 季
+                <b>{resume.game.finished ? "查看上局结果" : "继续上次对局"}</b>
+                <span>{resume.session.human === null ? "观战 · " : ""}{engine.nameOf.get(resume.seat) ?? resume.seat}
+                  {"\u3000"}第 {resume.game.finished ? resume.game.turn : resume.game.turn + 1} 季
                   {"\u3000"}{owned} 郡（开局 {f?.startCommanderies ?? "?"}）
                   {"\u3000"}{GRADE_CN[f?.bestGrade ?? "ding"]} 档</span>
               </div>
@@ -1874,7 +1735,7 @@ export function PlayClient() {
                 setFlash({ mine: [], world: [], delta: {}, battles: [] }); setFlips([]);
                 // since 决定模型看到的战报从哪一条起。读档不重置它会从 0 起算，
                 // 于是模型收到整局的日志——观测直接撑爆 token 预算
-                setSince(resume.game.log.length); setRecords([]); setThinking({});
+                setSession(resume.session); setThinking({}); setAutoPlay(false); setTurnError(null);
                 const cap = resume.game.factions[resume.seat]?.capital;
                 const p = cap ? engine.points.find((c) => c.id === cap) : null;
                 setSmooth(true);
@@ -1887,11 +1748,19 @@ export function PlayClient() {
             </div>
           );
         })()}
+        <MatchSetup session={session} onChange={setSession}
+          seats={seats.map(({ f, n }) => ({ id: f.id, name: engine.nameOf.get(f.id) ?? f.id, lands: n }))}
+          models={models} onLoadModels={loadModels} error={modelErr}
+          onStart={start} />
         <WashDefs />
+        <h2 className="seat-heading">势力背景 · 点击选择你要执掌的一方</h2>
         <ul className="seat-grid">
           {seats.map(({ f, n, st }) => (
             <li key={f.id}>
-              <button onClick={() => start(f.id)} style={{ "--c": engine.colorOf.get(f.id) } as React.CSSProperties}>
+              <button onClick={() => {
+                const modelOf = { ...session.modelOf }; delete modelOf[f.id];
+                setSession({ ...session, human: f.id, modelOf });
+              }} aria-pressed={session.human === f.id} style={{ "--c": engine.colorOf.get(f.id) } as React.CSSProperties}>
                 {/* 城印：与图上是同一幅画、同一套色。选席页此前是一张纯表格，
                     与那张舆图之间没有任何视觉关系——点进去才知道自己接的是什么 */}
                 <SeatSigil color={engine.colorOf.get(f.id) ?? "#7a7266"} id={f.id}
@@ -2323,15 +2192,10 @@ export function PlayClient() {
   const rank = { at: Math.max(1, byLand.findIndex((x) => x.id === seat) + 1),
                  of: byLand.length };
 
-  // 收尾的三种情形：十六季打满、被灭光、主动归隐。后两种此前不收尾，
-  // 玩家得对着空候选把剩下的季数一季季点完
-  const over = game.finished || me.eliminated || me.retired;
-  // 下季要交的军费：全部兵力 × 每兵每季。金看不见就没法做「这季省着点」的决策
-  const upkeep = Math.round(
-    (Object.values(game.commanderies).filter((c) => c.owner === seat)
-      .reduce((n, c) => n + c.garrison, 0)
-     + game.armies.filter((a) => a.faction === seat).reduce((n, a) => n + a.troops, 0))
-    * engine.P.goldUpkeepPerTroop);
+  // 天下统一结束整局；玩家覆灭或归隐后可转为观战。
+  const over = game.finished || (!spectator && (me.eliminated || me.retired));
+  // 当前兵力的军费包含屯田减免，和模型观测、结算使用同一公式。
+  const upkeep = upkeepFor(game, seat, engine.P);
 
   const brief = briefFor(game, engine.geo, seat, engine.G.adj, (id) => engine.nameOf.get(id) ?? id);
 
@@ -2369,9 +2233,7 @@ export function PlayClient() {
     for (const c of Object.values(game.commanderies)) {
       if (c.owner) now[c.owner] = (now[c.owner] ?? 0) + 1;
     }
-    // 本季增减取 flash.delta。**不能在这里现算**：since 在结算时就被推到了
-    // 日志末尾，render 时再 slice(since) 只会得到空——实测第一版就是这样，
-    // 表出来了而增减一个都不显示
+    // 郡数增减取结算前后归属的差值，不从事件文本反推。
     const delta = flash.delta;
     const rows = Object.entries(now)
       .filter(([f]) => !game.factions[f]?.eliminated)
@@ -2404,7 +2266,7 @@ export function PlayClient() {
     // 提示条还在说「还有 2 条不耗令的候选」——那是在骗玩家去点一条必被拒的令。
     // 判据与卡片上的禁用态同源（同一个 validate、同一个 adm.state）
     if (!adm) return true;
-    return !validate(adm.state, { faction: seat, action: c.action }, engine.G, undefined, engine.roster);
+    return !adm.check(c.action);
   });
 
   /**
@@ -2489,13 +2351,11 @@ export function PlayClient() {
   return (
     <main className="play">
       <header className="play-head play-bar" ref={barRef}>
-        {/* 局终之后 turn 已经推到 seasonsPerGame，再加一就成了「第 17/16 季」——
-            而同一屏的终局块自己写着「16 季年表」，两个数字互相打架。夹住上限 */}
         <span className="era">{game.year} 年 · {SEASON_CN[game.season]}{"\u3000"}
-          第 {Math.min(game.turn + 1, game.seasonsPerGame)}/{game.seasonsPerGame} 季{"\u3000"}
+          第 {game.finished ? game.turn : game.turn + 1} 季{"\u3000"}
           纪元 {game.epoch}</span>
         <span className="who" style={{ "--c": engine.colorOf.get(seat) } as React.CSSProperties}>
-          {engine.nameOf.get(seat)}
+          {spectator ? "观战 · " : ""}{engine.nameOf.get(seat)}
         </span>
         <span className="ap">令数 {me.ap - spent}/{me.ap}
           {engine.P.goldOn && <>{"\u3000"}国库 {Math.round(me.gold)} 金
@@ -2518,7 +2378,7 @@ export function PlayClient() {
           同一句话——那是回声不是信息。常驻一条，并把出路一起给出来 */}
       {/* 没有危局时，提示还剩多少不耗令的候选。两者不并排——
           真出了危局，别的都不要紧 */}
-      {!crisis && freeLeft.length > 0 && (
+      {!spectator && !crisis && freeLeft.length > 0 && (
         <div className="crisis tip" role="status">
           <b>提示</b>
           <span>
@@ -2534,7 +2394,7 @@ export function PlayClient() {
           {game.turn === 0 && <i>开局全境未探，攻城预告只会是「未知」；刺探不要钱。</i>}
         </div>
       )}
-      {crisis && (
+      {!spectator && crisis && (
         <div className={`crisis ${crisis.level}`} role="status">
           <b>{crisis.level === "grave" ? "危局" : "警"}</b>
           <span>{crisis.text}</span>
@@ -2574,8 +2434,8 @@ export function PlayClient() {
             const failed = records.filter((r) => r.failure).length;
             return (
               <em>
-                {records.length} 次调用
-                {spentUsd > 0 && `｜累计 $${spentUsd.toFixed(4)}`}
+                {records.length} 条已结算决策
+                {spentUsd > 0 && `｜已记录费用约 $${spentUsd.toFixed(4)}`}
                 {failed > 0 && `｜失败 ${failed}`}
               </em>
             );
@@ -3208,6 +3068,16 @@ export function PlayClient() {
         </section>
 
         <aside className="panel">
+          <SessionPanel game={game} session={session}
+            onChange={(next) => { setSession(next); setAutoPlay(false); setTurnError(null); }}
+            names={engine.nameOf} seat={seat} busy={busy} autoPlay={autoPlay}
+            onAutoPlay={setAutoPlay} onAdvance={() => { void submit(); }} error={turnError}
+            onView={(id) => {
+              setSeat(id); setPicked([]); setPinned(null); setFocus(null);
+              setFlash({ mine: [], world: [], delta: {}, battles: [] });
+              const cap = game.factions[id]?.capital;
+              if (cap) centerOnId(cap);
+            }} />
           {/* 状态条常驻，逐州明细折叠。简报此前是 530px 的文字墙，
               占了面板 57% 的高度，而真正要操作的候选被挤到 200px 的窗口里 */}
           <div className="status">
@@ -3227,7 +3097,7 @@ export function PlayClient() {
               能不能出兵——这几项摊在一张表里，比在地图上找快得多。
               点一行即定位地图并筛出该郡的候选 */}
           <details className="mine-fold">
-            <summary>我的郡国<i>{myLands.length}</i></summary>
+            <summary>{spectator ? "所观势力郡国" : "我的郡国"}<i>{myLands.length}</i></summary>
             <table className="lands">
               <thead>
                 {/* 与观测的 mine 段对账加出来的四列：粮、种、械、建。
@@ -3267,7 +3137,7 @@ export function PlayClient() {
             <div className="flash" role="status" aria-live="polite">
               {flash.mine.length > 0 && (
                 <>
-                  <h3>上季战报<i>我方</i></h3>
+                  <h3>上季战报<i>{spectator ? "上季观察势力" : "我方"}</i></h3>
                   <ul className="mine">{flash.mine.map((x, i) => <li key={i}>{x}</li>)}</ul>
                 </>
               )}
@@ -3347,16 +3217,16 @@ export function PlayClient() {
                 {!me.eliminated && <u>天下第 {rank.at}/{rank.of}</u>}</h2>
               {game.winner === seat && (
                 <p className="over-lead">控 {standing.controlledZhou} 州，
-                  于 {game.year} 年 · {SEASON_CN[game.season]}（第 {game.turn}/{game.seasonsPerGame} 季）
+                  于 {game.year} 年 · {SEASON_CN[game.season]}（第 {game.turn} 季）
                   戡定天下。汉末群雄至此而终。</p>
               )}
               {game.winner && game.winner !== seat && (
                 <p className="over-lead">{engine.nameOf.get(game.winner) ?? game.winner}
-                  于第 {game.turn}/{game.seasonsPerGame} 季戡定天下，本局提前结束。</p>
+                  于第 {game.turn} 季戡定天下，本局结束。</p>
               )}
               {me.eliminated && (
                 <p className="over-lead">尽失疆土，止于 {game.year} 年 · {SEASON_CN[game.season]}
-                  （第 {game.turn}/{game.seasonsPerGame} 季）。
+                  （第 {game.turn} 季）。
                   档位仍按本局曾达到过的最高档记——打下来过的，不因后来失守而作废。</p>
               )}
               {/* 只报一个档位等于不报。玩家要知道的是「我把局面推进了多少」，
@@ -3375,13 +3245,13 @@ export function PlayClient() {
               {/* 年表：十六季不该只剩一个档位。哪一季拿下了什么、哪一季被围、
                   哪一季折了名将——这些是这一局唯一留得下来的东西 */}
               <details className="over-fold" open>
-                <summary>{game.seasonsPerGame} 季年表<i>{chronicle.length} 事</i></summary>
+                <summary>{game.turn} 季年表<i>{chronicle.length} 事</i></summary>
                 <ol className="chron">
                   {chronicle.map((e, i) => (
                     <li key={i}><b>{e.when}</b>
                       <span>{e.text}{e.n > 1 ? `（连 ${e.n} 季）` : ""}</span></li>
                   ))}
-                  {!chronicle.length && <li><span>十六季平静无事。</span></li>}
+                  {!chronicle.length && <li><span>尚无大事记。</span></li>}
                 </ol>
               </details>
 
@@ -3402,7 +3272,10 @@ export function PlayClient() {
               <p className="over-note">档位按本局曾达到过的最高档记，判的是相对开局的增量——
                 守成不得分。天下排名按终局郡数，仅供参照，不进计分。</p>
               <div className="over-acts">
-                <button onClick={() => { clearSave(); setGame(null); setSeat(null); }}>再来一局</button>
+                {!game.finished && !spectator && <button onClick={() => {
+                  setSession({ ...session, human: null }); setPicked([]);
+                }}>转为观战</button>}
+                <button onClick={() => { clearSave(); setResume(null); setGame(null); setSeat(null); setAutoPlay(false); setTurnError(null); }}>再来一局</button>
                 <button className="ghost" onClick={() => {
                   // 把这一局抄成一段纯文本，方便贴出去。replay 尚未做界面，
                   // 但至少让人能把自己那一局带走
@@ -3423,6 +3296,11 @@ export function PlayClient() {
                   window.setTimeout(() => setCopied(false), 2000);
                 }}>{copied ? "已复制" : "抄一份战绩"}</button>
               </div>
+            </div>
+          ) : spectator ? (
+            <div className="observer-note">
+              <p>当前观察：{engine.nameOf.get(seat)}。地图与情报按此势力视角显示，所有势力由各自的控制者下令。</p>
+              <p>可在上方逐季推进或自动观战；切换观察势力不改变控制权。</p>
             </div>
           ) : (
             <>
@@ -3455,8 +3333,7 @@ export function PlayClient() {
                       // 能不能再选这一条：令数够，且在「已选那些之后」引擎仍认它
                       const why = on || !adm ? null
                         : c.cost > me.ap - spent ? `令数不足（余 ${me.ap - spent}，需 ${c.cost}）`
-                        : validate(adm.state, { faction: seat, action: c.action },
-                                   engine.G, undefined, engine.roster);
+                        : adm.check(c.action);
                       const afford = on || !why;
                       return (
                         <label key={c.key} className={`act${on ? " on" : ""}${afford ? "" : " off"}`}
@@ -3547,7 +3424,7 @@ export function PlayClient() {
                 ))}
                 {!candidates.length && <p className="play-note">本季无可行之事。</p>}
               </div>
-              <button className="go" onClick={submit} disabled={!picked.length || busy}>
+              <button className="go" onClick={submit} disabled={busy || Boolean(budgetMessage(game, session))}>
                 {busy
                   ? <>模型思考中 · {Object.values(thinking).filter((x) => x === "思考中").length} 席未答</>
                   : <>封令结算 · {picked.length} 条 · 耗 {spent}/{me.ap} 令</>}

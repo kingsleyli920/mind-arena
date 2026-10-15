@@ -1,0 +1,2095 @@
+[
+  {
+    "id": "yuanshao",
+    "profile": "purpose",
+    "ap": 10,
+    "gold": 0,
+    "lands": 25,
+    "supplied": 24,
+    "garrison": 264456,
+    "armies": 0,
+    "candidates": {
+      "ally": 5,
+      "appoint": 8,
+      "array": 4,
+      "campaign": 13,
+      "govern": 12,
+      "muster": 6,
+      "scout": 5,
+      "seize": 6,
+      "suade": 1
+    },
+    "orders": [
+      {
+        "type": "appoint",
+        "officer": "yanliang",
+        "at": "济南国"
+      },
+      {
+        "type": "appoint",
+        "officer": "yuantan",
+        "at": "济南国"
+      },
+      {
+        "type": "appoint",
+        "officer": "gaogan",
+        "at": "清河国"
+      },
+      {
+        "type": "appoint",
+        "officer": "zanghong",
+        "at": "清河国"
+      },
+      {
+        "type": "appoint",
+        "officer": "shenpei",
+        "at": "玄菟郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "zhanghe",
+        "at": "玄菟郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "quyi",
+        "at": "魏郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "yuanshao",
+        "at": "魏郡"
+      },
+      {
+        "type": "govern",
+        "at": "代郡",
+        "policy": "farm"
+      },
+      {
+        "type": "govern",
+        "at": "勃海郡",
+        "policy": "farm"
+      },
+      {
+        "type": "scout",
+        "at": "乐浪郡"
+      },
+      {
+        "type": "scout",
+        "at": "济北国"
+      },
+      {
+        "type": "scout",
+        "at": "西河郡"
+      }
+    ],
+    "campaigns": [
+      {
+        "key": "campaign:上党郡>河东郡:allout",
+        "from": "上党郡",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵方圆对鱼鳞（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:上党郡>河东郡:main",
+        "from": "上党郡",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵方圆对鱼鳞（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:右北平郡>东莱郡:allout",
+        "from": "右北平郡",
+        "target": "东莱郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 3,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "破城",
+          "fog": "scouted",
+          "text": "缺口 3 对可防守 2→破城｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:右北平郡>东莱郡:main",
+        "from": "右北平郡",
+        "target": "东莱郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 3,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "破城",
+          "fog": "scouted",
+          "text": "缺口 3 对可防守 2→破城｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:太原郡>雁门郡:allout",
+        "from": "太原郡",
+        "target": "雁门郡",
+        "targetOwner": "xianbei",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 2,
+          "holdHi": 9,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 2–9→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "xianbei",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:太原郡>雁门郡:main",
+        "from": "太原郡",
+        "target": "雁门郡",
+        "targetOwner": "xianbei",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 2,
+          "holdHi": 9,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 2–9→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "xianbei",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:常山国>雁门郡:allout",
+        "from": "常山国",
+        "target": "雁门郡",
+        "targetOwner": "xianbei",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 2,
+          "holdLo": 2,
+          "holdHi": 9,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0–2 对可防守 2–9→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "xianbei",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:常山国>雁门郡:main",
+        "from": "常山国",
+        "target": "雁门郡",
+        "targetOwner": "xianbei",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 2,
+          "holdHi": 9,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 2–9→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "xianbei",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:济南国>济北国:allout",
+        "from": "济南国",
+        "target": "济北国",
+        "targetOwner": "caocao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 2,
+          "holdHi": 10,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 2–10→不破"
+        },
+        "gain": {
+          "zhou": "兖州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "caocao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:济南国>济北国:main",
+        "from": "济南国",
+        "target": "济北国",
+        "targetOwner": "caocao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 2,
+          "holdHi": 10,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 2–10→不破"
+        },
+        "gain": {
+          "zhou": "兖州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "caocao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:辽东属国>东莱郡:allout",
+        "from": "辽东属国",
+        "target": "东莱郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 2,
+          "breachHi": 3,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "未知",
+          "fog": "scouted",
+          "text": "缺口 2–3 对可防守 2→未知｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:辽东属国>东莱郡:main",
+        "from": "辽东属国",
+        "target": "东莱郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 1,
+          "breachHi": 2,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 1–2 对可防守 2→不破｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:辽东属国>辽西郡:allout",
+        "from": "辽东属国",
+        "target": "辽西郡",
+        "targetOwner": "gongsunzan",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 1–8→不破"
+        },
+        "gain": {
+          "zhou": "幽州",
+          "needBefore": -3,
+          "needAfter": -4,
+          "isSeat": false,
+          "owner": "gongsunzan",
+          "isCapital": false,
+          "upgrade": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "liubiao",
+    "profile": "opportunist",
+    "ap": 9,
+    "gold": 0,
+    "lands": 22,
+    "supplied": 19,
+    "garrison": 216586,
+    "armies": 0,
+    "candidates": {
+      "ally": 4,
+      "appoint": 8,
+      "array": 2,
+      "campaign": 13,
+      "govern": 12,
+      "muster": 6,
+      "passage": 1,
+      "scout": 3,
+      "seize": 11
+    },
+    "orders": [
+      {
+        "type": "govern",
+        "at": "九真郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "会稽郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "南海郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "南郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "合浦郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "日南郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "桂阳郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "武陵郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "永昌郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "scout",
+        "at": "东海郡"
+      },
+      {
+        "type": "scout",
+        "at": "丹阳郡"
+      },
+      {
+        "type": "scout",
+        "at": "吴郡"
+      }
+    ],
+    "campaigns": [
+      {
+        "key": "campaign:会稽郡>东海郡:allout",
+        "from": "会稽郡",
+        "target": "东海郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 4,
+          "breachHi": 4,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "破城",
+          "fog": "scouted",
+          "text": "缺口 4 对可防守 2→破城"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": true,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:会稽郡>东海郡:main",
+        "from": "会稽郡",
+        "target": "东海郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 4,
+          "holdLo": 2,
+          "holdHi": 2,
+          "verdict": "破城",
+          "fog": "scouted",
+          "text": "缺口 3–4 对可防守 2→破城"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": true,
+          "owner": "lukang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:会稽郡>吴郡:allout",
+        "from": "会稽郡",
+        "target": "吴郡",
+        "targetOwner": "yanbaihu",
+        "forecast": {
+          "breachLo": 2,
+          "breachHi": 5,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 2–5 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "yanbaihu",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:会稽郡>吴郡:main",
+        "from": "会稽郡",
+        "target": "吴郡",
+        "targetOwner": "yanbaihu",
+        "forecast": {
+          "breachLo": 1,
+          "breachHi": 5,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 1–5 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "yanbaihu",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:会稽郡>广陵郡:allout",
+        "from": "会稽郡",
+        "target": "广陵郡",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 4,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 4→不破"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:会稽郡>广陵郡:main",
+        "from": "会稽郡",
+        "target": "广陵郡",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 4,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 4→不破"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:河内郡>东郡:allout",
+        "from": "河内郡",
+        "target": "东郡",
+        "targetOwner": "caocao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "兖州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "caocao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:河内郡>东郡:main",
+        "from": "河内郡",
+        "target": "东郡",
+        "targetOwner": "caocao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "兖州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "caocao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:河南尹>弘农郡:allout",
+        "from": "河南尹",
+        "target": "弘农郡",
+        "targetOwner": "mateng",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "mateng",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:河南尹>弘农郡:main",
+        "from": "河南尹",
+        "target": "弘农郡",
+        "targetOwner": "mateng",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "mateng",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:豫章郡>庐江郡:allout",
+        "from": "豫章郡",
+        "target": "庐江郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 1,
+          "holdLo": 5,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0–1 对可防守 5–6→不破"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:豫章郡>庐江郡:main",
+        "from": "豫章郡",
+        "target": "庐江郡",
+        "targetOwner": "lukang",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5–6→不破"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "lukang",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:颍川郡>南阳郡:allout",
+        "from": "颍川郡",
+        "target": "南阳郡",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5–6→不破"
+        },
+        "gain": {
+          "zhou": "荆州",
+          "needBefore": -2,
+          "needAfter": -3,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "mateng",
+    "profile": "purpose",
+    "ap": 8,
+    "gold": 21901,
+    "lands": 12,
+    "supplied": 12,
+    "garrison": 217505,
+    "armies": 0,
+    "candidates": {
+      "ally": 3,
+      "appoint": 8,
+      "build": 4,
+      "campaign": 10,
+      "govern": 5,
+      "invest": 1,
+      "muster": 6,
+      "scout": 3,
+      "seize": 12,
+      "suade": 3
+    },
+    "orders": [
+      {
+        "type": "govern",
+        "at": "武都郡",
+        "policy": "soothe"
+      },
+      {
+        "type": "appoint",
+        "officer": "mateng",
+        "at": "左冯翊"
+      },
+      {
+        "type": "appoint",
+        "officer": "pangde",
+        "at": "左冯翊"
+      },
+      {
+        "type": "appoint",
+        "officer": "madai",
+        "at": "武都郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "zhaoang",
+        "at": "武都郡"
+      },
+      {
+        "type": "govern",
+        "at": "左冯翊",
+        "policy": "wall"
+      },
+      {
+        "type": "govern",
+        "at": "弘农郡",
+        "policy": "wall"
+      },
+      {
+        "type": "govern",
+        "at": "汉中郡",
+        "policy": "wall"
+      },
+      {
+        "type": "scout",
+        "at": "南阳郡"
+      },
+      {
+        "type": "scout",
+        "at": "广汉属国"
+      },
+      {
+        "type": "scout",
+        "at": "河东郡"
+      }
+    ],
+    "campaigns": [
+      {
+        "key": "campaign:左冯翊>河东郡:allout",
+        "from": "左冯翊",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 12,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 4–12→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:左冯翊>河东郡:main",
+        "from": "左冯翊",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 12,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 4–12→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:弘农郡>河南尹:allout",
+        "from": "弘农郡",
+        "target": "河南尹",
+        "targetOwner": "liubiao",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 4,
+          "holdLo": 4,
+          "holdHi": 4,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 3–4 对可防守 4→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "liubiao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:弘农郡>河南尹:main",
+        "from": "弘农郡",
+        "target": "河南尹",
+        "targetOwner": "liubiao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 4,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 4→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 0,
+          "needAfter": -1,
+          "isSeat": false,
+          "owner": "liubiao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:武都郡>广汉属国:allout",
+        "from": "武都郡",
+        "target": "广汉属国",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 5,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 3–5 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:武都郡>广汉属国:main",
+        "from": "武都郡",
+        "target": "广汉属国",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 5,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 3–5 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:汉中郡>巴郡:allout",
+        "from": "汉中郡",
+        "target": "巴郡",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 8,
+          "holdHi": 8,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 8→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:汉中郡>巴郡:main",
+        "from": "汉中郡",
+        "target": "巴郡",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 8,
+          "holdHi": 8,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 8→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:汉中郡>广汉郡:allout",
+        "from": "汉中郡",
+        "target": "广汉郡",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 6,
+          "breachHi": 6,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 6 对可防守 6→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:汉中郡>广汉郡:main",
+        "from": "汉中郡",
+        "target": "广汉郡",
+        "targetOwner": "liuzhang",
+        "forecast": {
+          "breachLo": 5,
+          "breachHi": 6,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 5–6 对可防守 6→不破｜阵鹤翼对方圆（克，+1 缺口）"
+        },
+        "gain": {
+          "zhou": "益州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "liuzhang",
+          "isCapital": false,
+          "upgrade": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "xianbei",
+    "profile": "balanced",
+    "ap": 8,
+    "gold": 27127,
+    "lands": 10,
+    "supplied": 10,
+    "garrison": 100334,
+    "armies": 0,
+    "candidates": {
+      "ally": 2,
+      "appoint": 6,
+      "array": 1,
+      "build": 4,
+      "campaign": 14,
+      "govern": 6,
+      "muster": 6,
+      "scout": 1,
+      "seize": 1,
+      "suade": 2
+    },
+    "orders": [
+      {
+        "type": "govern",
+        "at": "张掖居延属国",
+        "policy": "soothe"
+      },
+      {
+        "type": "appoint",
+        "officer": "budugen",
+        "at": "云中郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "kebineng",
+        "at": "云中郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "fuluohan",
+        "at": "西河郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "suli",
+        "at": "西河郡"
+      },
+      {
+        "type": "govern",
+        "at": "张掖属国",
+        "policy": "soothe"
+      },
+      {
+        "type": "govern",
+        "at": "张掖郡",
+        "policy": "forge"
+      },
+      {
+        "type": "govern",
+        "at": "武威郡",
+        "policy": "farm"
+      },
+      {
+        "type": "scout",
+        "at": "河东郡"
+      }
+    ],
+    "campaigns": [
+      {
+        "key": "campaign:定襄郡>代郡:allout",
+        "from": "定襄郡",
+        "target": "代郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 3,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0–3 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "幽州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:定襄郡>代郡:main",
+        "from": "定襄郡",
+        "target": "代郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "幽州",
+          "needBefore": 6,
+          "needAfter": 5,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:张掖居延属国>敦煌郡:allout",
+        "from": "张掖居延属国",
+        "target": "敦煌郡",
+        "targetOwner": null,
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 7,
+          "holdHi": 7,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 7→不破"
+        },
+        "gain": {
+          "zhou": "凉州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": null,
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:张掖居延属国>敦煌郡:main",
+        "from": "张掖居延属国",
+        "target": "敦煌郡",
+        "targetOwner": null,
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 7,
+          "holdHi": 7,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 7→不破"
+        },
+        "gain": {
+          "zhou": "凉州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": null,
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:张掖郡>酒泉郡:allout",
+        "from": "张掖郡",
+        "target": "酒泉郡",
+        "targetOwner": null,
+        "forecast": {
+          "breachLo": 4,
+          "breachHi": 4,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 4 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "凉州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": null,
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:张掖郡>酒泉郡:main",
+        "from": "张掖郡",
+        "target": "酒泉郡",
+        "targetOwner": null,
+        "forecast": {
+          "breachLo": 4,
+          "breachHi": 4,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 4 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "凉州",
+          "needBefore": 3,
+          "needAfter": 2,
+          "isSeat": false,
+          "owner": null,
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:西河郡>河东郡:allout",
+        "from": "西河郡",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 12,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 4–12→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:西河郡>河东郡:main",
+        "from": "西河郡",
+        "target": "河东郡",
+        "targetOwner": "baibo",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 12,
+          "verdict": "不破",
+          "fog": "tier",
+          "text": "缺口 0 对可防守 4–12→不破"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "baibo",
+          "isCapital": true,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:雁门郡>中山国:allout",
+        "from": "雁门郡",
+        "target": "中山国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:雁门郡>中山国:main",
+        "from": "雁门郡",
+        "target": "中山国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:雁门郡>太原郡:allout",
+        "from": "雁门郡",
+        "target": "太原郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": -1,
+          "needAfter": -2,
+          "isSeat": true,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": "yi"
+        }
+      },
+      {
+        "key": "campaign:雁门郡>太原郡:main",
+        "from": "雁门郡",
+        "target": "太原郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 3,
+          "holdHi": 3,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 3→不破"
+        },
+        "gain": {
+          "zhou": "并州",
+          "needBefore": -1,
+          "needAfter": -2,
+          "isSeat": true,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": "yi"
+        }
+      },
+      {
+        "key": "campaign:雁门郡>常山国:allout",
+        "from": "雁门郡",
+        "target": "常山国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:雁门郡>常山国:main",
+        "from": "雁门郡",
+        "target": "常山国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破｜阵鱼鳞对方圆（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "caocao",
+    "profile": "balanced",
+    "ap": 7,
+    "gold": 54598,
+    "lands": 8,
+    "supplied": 8,
+    "garrison": 101100,
+    "armies": 0,
+    "candidates": {
+      "ally": 5,
+      "appoint": 8,
+      "array": 1,
+      "build": 4,
+      "campaign": 21,
+      "govern": 8,
+      "muster": 6,
+      "scout": 3,
+      "seize": 4
+    },
+    "orders": [
+      {
+        "type": "appoint",
+        "officer": "xiahouyuan",
+        "at": "东平国"
+      },
+      {
+        "type": "appoint",
+        "officer": "zhuling_lb",
+        "at": "东平国"
+      },
+      {
+        "type": "appoint",
+        "officer": "chengyu",
+        "at": "东郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "xiahoudun",
+        "at": "东郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "caochun",
+        "at": "山阳郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "yujin",
+        "at": "山阳郡"
+      },
+      {
+        "type": "appoint",
+        "officer": "caocao",
+        "at": "济阴郡"
+      },
+      {
+        "type": "scout",
+        "at": "下邳国"
+      },
+      {
+        "type": "scout",
+        "at": "九江郡"
+      },
+      {
+        "type": "scout",
+        "at": "沛国"
+      }
+    ],
+    "campaigns": [
+      {
+        "key": "campaign:东郡>河内郡:allout",
+        "from": "东郡",
+        "target": "河内郡",
+        "targetOwner": "liubiao",
+        "forecast": {
+          "breachLo": 2,
+          "breachHi": 3,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 2–3 对可防守 6→不破｜阵方圆对鹤翼（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "liubiao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:东郡>河内郡:main",
+        "from": "东郡",
+        "target": "河内郡",
+        "targetOwner": "liubiao",
+        "forecast": {
+          "breachLo": 1,
+          "breachHi": 2,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 1–2 对可防守 6→不破｜阵方圆对鹤翼（被克，-1 缺口）"
+        },
+        "gain": {
+          "zhou": "司隶",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "liubiao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:东郡>清河国:allout",
+        "from": "东郡",
+        "target": "清河国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:东郡>清河国:main",
+        "from": "东郡",
+        "target": "清河国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:东郡>魏郡:allout",
+        "from": "东郡",
+        "target": "魏郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": true,
+          "owner": "yuanshao",
+          "isCapital": true,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:东郡>魏郡:main",
+        "from": "东郡",
+        "target": "魏郡",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "冀州",
+          "needBefore": 5,
+          "needAfter": 4,
+          "isSeat": true,
+          "owner": "yuanshao",
+          "isCapital": true,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:任城国>鲁国:allout",
+        "from": "任城国",
+        "target": "鲁国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 2,
+          "holdLo": 5,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0–2 对可防守 5–6→不破"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:任城国>鲁国:main",
+        "from": "任城国",
+        "target": "鲁国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 1,
+          "holdLo": 5,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0–1 对可防守 5–6→不破"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:彭城国>九江郡:allout",
+        "from": "彭城国",
+        "target": "九江郡",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 5,
+          "breachHi": 7,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 5–7 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": true,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:彭城国>九江郡:main",
+        "from": "彭城国",
+        "target": "九江郡",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 4,
+          "breachHi": 7,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 4–7 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "扬州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": true,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:彭城国>梁国:allout",
+        "from": "彭城国",
+        "target": "梁国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 4,
+          "breachHi": 5,
+          "holdLo": 7,
+          "holdHi": 7,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 4–5 对可防守 7→不破"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:彭城国>梁国:main",
+        "from": "彭城国",
+        "target": "梁国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 3,
+          "breachHi": 4,
+          "holdLo": 7,
+          "holdHi": 7,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 3–4 对可防守 7→不破"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:彭城国>沛国:allout",
+        "from": "彭城国",
+        "target": "沛国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 5,
+          "breachHi": 7,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 5–7 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": true,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:彭城国>沛国:main",
+        "from": "彭城国",
+        "target": "沛国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 5,
+          "breachHi": 7,
+          "holdLo": 1,
+          "holdHi": 8,
+          "verdict": "未知",
+          "fog": "tier",
+          "text": "缺口 5–7 对可防守 1–8→未知"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": true,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": "chao"
+        }
+      },
+      {
+        "key": "campaign:泰山郡>乐安国:allout",
+        "from": "泰山郡",
+        "target": "乐安国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 4–5→不破"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:泰山郡>乐安国:main",
+        "from": "泰山郡",
+        "target": "乐安国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 4,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 4–5→不破"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:泰山郡>琅邪国:allout",
+        "from": "泰山郡",
+        "target": "琅邪国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 2,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0–2 对可防守 6→不破"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:泰山郡>琅邪国:main",
+        "from": "泰山郡",
+        "target": "琅邪国",
+        "targetOwner": "liuchong",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 6,
+          "holdHi": 6,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 6→不破"
+        },
+        "gain": {
+          "zhou": "徐州",
+          "needBefore": 2,
+          "needAfter": 1,
+          "isSeat": false,
+          "owner": "liuchong",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:济北国>济南国:allout",
+        "from": "济北国",
+        "target": "济南国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:济北国>济南国:main",
+        "from": "济北国",
+        "target": "济南国",
+        "targetOwner": "yuanshao",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "青州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshao",
+          "isCapital": false,
+          "upgrade": null
+        }
+      },
+      {
+        "key": "campaign:济阴郡>汝南郡:allout",
+        "from": "济阴郡",
+        "target": "汝南郡",
+        "targetOwner": "yuanshu",
+        "forecast": {
+          "breachLo": 0,
+          "breachHi": 0,
+          "holdLo": 5,
+          "holdHi": 5,
+          "verdict": "不破",
+          "fog": "scouted",
+          "text": "缺口 0 对可防守 5→不破"
+        },
+        "gain": {
+          "zhou": "豫州",
+          "needBefore": 4,
+          "needAfter": 3,
+          "isSeat": false,
+          "owner": "yuanshu",
+          "isCapital": true,
+          "upgrade": null
+        }
+      }
+    ]
+  }
+]

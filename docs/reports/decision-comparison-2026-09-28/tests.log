@@ -1,0 +1,38 @@
+✔ 费用闸门在调用前拒绝超限；失败请求不能释放未知费用 (1.109625ms)
+✔ 成功响应只释放已知余量，保留此前尝试，不能重复退款 (0.15025ms)
+(node:71240) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 结算摘要取季初季末净变化，包含无主归附和大批劝降，不改原状态 (3.308541ms)
+✔ 自然对局失去沛国即使被天下战报截断，下一季仍收到完整净得失 (117.55925ms)
+✔ 摘要只发送本方账本，不把其他势力的国库与全体摘要带入观测 (2.650958ms)
+✔ 重复复核会提示，真实摘要进入下一次模型调用且存档可恢复 (86.928083ms)
+(node:71241) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 纯机器人观战会为观察势力下令，且不消耗模型额度 (76.7725ms)
+✔ 两模型独立决策和跨季记忆；额度不够时整季不发请求 (90.234417ms)
+✔ 玩家命令只用于玩家席位，模型和机器人不能接管玩家 (37.104125ms)
+✔ 存档恢复控制者、方略、丢令、记录和已预留额度，拒绝旧规则 (1.706458ms)
+✔ 输出硬上限不会被已学习预算或饥饿重试突破 (11.577375ms)
+✔ 结构化输出降档也不能超过两次请求 (0.322917ms)
+✔ 额度无法落盘时，不发出任何模型请求 (0.548125ms)
+✔ 统一局跨过评测季数仍可续玩；季数预算只暂停，存档保留结束模式 (328.819708ms)
+✔ 统一局只在胜利条件达成时结束；评测局仍按指定季数结束 (34.744542ms)
+✔ 模型看到真实结束模式和屯田减免后的军费 (1.836417ms)
+✔ 统一的两条胜利路径独立成立：控制11州，或最后一个有效势力 (8.007375ms)
+(node:71242) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 同源多档征伐在准入和结算都只允许一条；玩家预览立即反馈 (39.180417ms)
+✔ 撤围与增兵互斥；同一武将不能调往两郡 (5.839625ms)
+✔ 累计国库和建筑槽位预留，接受的建设不会到结算时才缺钱 (5.69525ms)
+✔ 结构化计划完整解析，坏计划不会覆盖合法旧计划 (40.671666ms)
+✔ 目标反馈跟随事实变化，不读取敌方隐藏守军或存粮 (0.62ms)
+✔ 跨提供方 schema 简化后，应用仍限制命令数与计划长度 (0.126708ms)
+✔ 结构化计划实际进入下一季请求并可存档恢复，失败时不丢记忆 (87.04225ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 733.054125

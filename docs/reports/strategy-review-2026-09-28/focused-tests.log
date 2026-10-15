@@ -1,0 +1,14 @@
+(node:78898) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 结算摘要取季初季末净变化，包含无主归附和大批劝降，不改原状态 (3.461916ms)
+✔ 自然对局失去沛国即使被天下战报截断，下一季仍收到完整净得失 (120.015916ms)
+✔ 摘要只发送本方账本，不把其他势力的国库与全体摘要带入观测 (2.789584ms)
+✔ 重复复核会提示，真实摘要进入下一次模型调用且存档可恢复 (86.897916ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 349.387792

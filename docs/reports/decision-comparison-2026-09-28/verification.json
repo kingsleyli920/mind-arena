@@ -1,0 +1,115 @@
+{
+  "verifiedAt": "2026-09-29T01:27:10.525Z",
+  "scope": "固定自然局面+人工冲突旧计划；每模型单步，后两季免费机器人接手。模型可靠性未获普遍保证。",
+  "sourceIdentity": {
+    "sourceSha256": "8ba25f8e90f74915b22117d4f05f5eed6509d70afc8e74acdca8c346f4be5f44",
+    "runtimeSha256": "37a356d0a4389ebcd83dfebc28436539921afa80102d0fde042f67668b2daf67"
+  },
+  "live": {
+    "responses": 9,
+    "attempts": 13,
+    "admitted": 42,
+    "dropped": 12,
+    "postAdmissionRejected": 0,
+    "reportedUsd": 0.03472670666666666,
+    "heldUsd": 0.10764350666666664,
+    "limitUsd": 0.2
+  },
+  "models": {
+    "openai/gpt-5-nano": {
+      "decisions": 3,
+      "admitted": 10,
+      "dropped": 4,
+      "reportedUsd": 0.00514325,
+      "repeatWarnings": 1,
+      "planStates": [
+        "continue",
+        "continue",
+        "continue"
+      ],
+      "reviewTruncations": 0
+    },
+    "google/gemini-2.5-flash-lite": {
+      "decisions": 3,
+      "admitted": 16,
+      "dropped": 7,
+      "reportedUsd": 0.005651206666666667,
+      "repeatWarnings": 0,
+      "planStates": [
+        "continue",
+        "continue",
+        "continue"
+      ],
+      "reviewTruncations": 2
+    },
+    "openai/gpt-5-mini": {
+      "decisions": 3,
+      "admitted": 16,
+      "dropped": 1,
+      "reportedUsd": 0.023932249999999995,
+      "repeatWarnings": 0,
+      "planStates": [
+        "continue",
+        "continue",
+        "continue"
+      ],
+      "reviewTruncations": 0
+    }
+  },
+  "replay": {
+    "verified": true,
+    "realResponsesReplayed": 9,
+    "settlementFrames": 45,
+    "newPaidCalls": 0,
+    "budget": {
+      "calls": 9,
+      "attempts": 13,
+      "heldUsd": 0.10764350666666664,
+      "reportedUsd": 0.03472670666666666
+    }
+  },
+  "checks": {
+    "focusedTests": {
+      "passed": 24,
+      "failed": 0
+    },
+    "targetedLint": "passed",
+    "diffCheck": "passed",
+    "free": {
+      "branches": 6,
+      "frames": 18,
+      "calls": 0
+    },
+    "duplicateOutput": "EEXIST; original report unchanged",
+    "tamperedTreasury": "offline replay rejected modified gold with AssertionError; no credentials used"
+  },
+  "limitations": [
+    "每模型每局面一次，未估计胜率或长期统一能力",
+    "历史局面非对称；同一局面输入严格相同，未跨更多势力轮换",
+    "三个模型 low 档不代表等量推理；OpenAI无temperature，Google有temperature",
+    "费用是提供方回报合计，失败降档尝试有预留，非账户账单审计"
+  ],
+  "artifacts": {
+    "live.json": "f2d28c17d90fd38eaf3b5a2d66b2c2cba1678fa08c5f8b9c195516c8ed1e752f",
+    "free.json": "efb9ce9f09975b6201157929411edcfa14ec483e3656f0cb790b20e89a10d9f2",
+    "replay.log": "0707ba25784d7dd8929b0b45753e6613d59cd3ce99473888acc6efcb1ecd06cd",
+    "tests.log": "4ade12638217b048c0186eee5599700e4d1a8148e60e7baf07f3cee83ceff1dc",
+    "live.log": "0a2d511a9da387c085bdcc2979e5dac327d62c353987452ba4089b3a50de7afc",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sources": {
+    "tools/decision-compare.mjs": "54b4ccaebe5925181d2eada9962c64354e4fb06b1eac0618b48f40f4056a819c",
+    "tools/verify-decision-comparison.mjs": "1d54e15536e36cf7ba15bc84c4fcddfce48a900c7d354fd06d8098241950f3dc",
+    "tools/lib/comparison-budget.mjs": "16f70b132520e3f226cf7d7da8a7c1ea716c0e2ae0f23b61bbf69ad7a09bef51",
+    "tests/comparison-budget.test.mjs": "5bc013c8cea1dbcac1ceb95406cc79ff6b088998c3f5b614ee6d7a4b81f0cecf",
+    "tools/lib/strategy-context.mjs": "9fdb63c0a686ce662ba97021dc8c6c46724353e14d7c043e35d534e18c52a1ce",
+    "lib/game/session.ts": "3696de754f81b93fafb2b065fc7e4b7fd56acd33fa14c524d1d875bc2ce0e7a3",
+    "lib/game/strategy-plan.ts": "de26de47ea2a7113ae55ff9ef005927c7956d094219c03f24d6328f266043385",
+    "lib/arena/seat/model-seat.ts": "2ea88784300ab85485b54623740be56df4e15f2e93b0506e8875c3d330dbe12e",
+    "lib/arena/seat/admit.ts": "12aa30ba6f11c3c3d2bf4debf3673132567a63e8e6fb00b5dc5edc9027b5ec04",
+    "lib/arena/seat/prompt.ts": "5069f78b485ebd8971cdf8c47d73344b54d2eb77b77b480f184fd55a6934ef45",
+    "lib/arena/seat/parse.ts": "1cb1072c281ddc25c3ed866aa00ab13d1d479d721dd16122e6aeb97dac4f42bf",
+    "lib/arena/llm/client.ts": "9d31ab1dfcae2e51969554f305673f4dc44608d2638e0018bdf1d8b45b97888a",
+    "docs/DECISION-COMPARISON-2026-09-28.md": "1d4687b230676c1f481a906abf5eb35e09a5d3ea5e4e248cd24c620fd22c159b"
+  }
+}

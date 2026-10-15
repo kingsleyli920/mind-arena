@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-28",
+  "runtimeSha256": "050516591bbb3fef3dbdd7da449a2adec75e78a99b2dc06c61bafe32946bb10a",
+  "sourceSha256": "a3e7d50efada2a5abc81d5aae9c20396c1e52ea9a44de9638af2281093f49dbc",
+  "checks": {
+    "typecheck": {
+      "exitCode": 0
+    },
+    "tests": {
+      "exitCode": 0,
+      "passed": 189
+    },
+    "lint": {
+      "exitCode": 0,
+      "warnings": 0
+    },
+    "build": {
+      "exitCode": 0,
+      "warnings": [
+        "dependency deprecation",
+        "large chunks",
+        "vinext route classification"
+      ]
+    },
+    "selfplay": {
+      "exitCode": 0,
+      "games": 100,
+      "gatesPassed": 4
+    },
+    "observationBudget": {
+      "exitCode": 0,
+      "seatSeasons": 384,
+      "peakEstimatedObservationTokens": 9567
+    }
+  },
+  "browser": {
+    "boundary": "real browser UI, localhost:4178/play",
+    "actions": [
+      "select pure observation",
+      "start match",
+      "start autoplay",
+      "observe natural ending",
+      "reload",
+      "continue saved match"
+    ],
+    "displayedSeason": 25,
+    "winner": "袁绍",
+    "victoryLog": "天下一统（控11州）",
+    "finalMessage": "袁绍 于第 25 季戡定天下，本局结束。",
+    "afterReload": "same ending; advance and autoplay disabled; paused",
+    "modelSeats": 0,
+    "modelDecisionsUsed": 0,
+    "consoleErrors": 0,
+    "stateInjected": false
+  },
+  "liveCostCaveat": "Reported final-response cost is $0.013219045; failed/retried attempts may have additional unreported charges. First GLM retry cause was not retained. CLI timeout 180s/attempt, browser timeout 90s/attempt."
+}

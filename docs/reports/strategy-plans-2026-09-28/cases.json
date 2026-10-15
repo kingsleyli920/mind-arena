@@ -1,0 +1,5507 @@
+{
+  "runtimeSha256": "37a356d0a4389ebcd83dfebc28436539921afa80102d0fde042f67668b2daf67",
+  "sourceSha256": "d1a08111d5d6f8a29e680003949e1d2f1a856d113566e0b6242c530375ea6a12",
+  "pack": "2.3.0",
+  "live": true,
+  "limits": {
+    "decisions": 14,
+    "attempts": 2,
+    "maxRequests": 28,
+    "maxTokens": 8000,
+    "maxInputBytes": 70000,
+    "reservedUsd": 0.2,
+    "timeoutMs": 90000
+  },
+  "calls": 14,
+  "reservedUsd": 0.21303599999999998,
+  "reportedUsd": 0.02218085,
+  "cases": [
+    {
+      "id": "treasury",
+      "turn": 0,
+      "seat": "lubu",
+      "lands": 6,
+      "gold": 600,
+      "upkeep": 312,
+      "attacking": 0,
+      "defending": 0,
+      "stateSha256": "4a88a1ede5dd2c46e6f2a072aab00d96044ebf017bc6f686d4b192e7a89b6b27"
+    },
+    {
+      "id": "siege",
+      "turn": 2,
+      "seat": "lubu",
+      "lands": 5,
+      "gold": 1233,
+      "upkeep": 262,
+      "attacking": 2,
+      "defending": 0,
+      "stateSha256": "587e8fa6c7512a4406a3fb6894ce17f04ba98a4b4b291cde20f8264c56a911d1"
+    },
+    {
+      "id": "multifront",
+      "turn": 3,
+      "seat": "gongsundu",
+      "lands": 6,
+      "gold": 1976,
+      "upkeep": 78,
+      "attacking": 1,
+      "defending": 2,
+      "stateSha256": "0cbed1e2f75155c98e0d64711d7e05a07ff1bf29012944ea9ca290141acbc52d"
+    }
+  ],
+  "runs": [
+    {
+      "case": "treasury",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 986
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：彭城国 约 3705±8%（已探）、梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、东郡 安民 心1→2、任城国 安民 心1→2、山阳郡 安民 心1→2、济北国 安民 心1→2、陈留郡 安民 心2→3"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：曹性 驻 任城国、潘璋 驻 东平国、魏续 驻 任城国、臧霸 驻 东平国、张辽 驻 山阳郡"
+            },
+            {
+              "turn": 0,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "东郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 986 金（本季入 822，军费 296）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 1,
+            "gold": 1233
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：泰山郡 约 722±8%（已探）、济南国 约 5401±8%（已探）、济阴郡 约 6355±8%（已探）"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：曹性 驻 东郡（自 任城国）、高顺 驻 陈留郡、吕布 驻 济北国（自 东郡）、潘璋 驻 山阳郡（自 东平国）"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "强攻 梁国 未克，折损后余 2017 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "强攻 河内郡 未克，折损后余 1786 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "河内郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "东平国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "任城国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "济北国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1233 金（本季入 509，军费 262）"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut-low",
+              "faction": "lubu",
+              "text": "后路断绝，围 梁国 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [],
+      "reused": true
+    },
+    {
+      "case": "treasury",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "record": {
+            "turn": 0,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 10865,
+            "obsTokens": 7340,
+            "candidates": 60,
+            "picks": [
+              "campaign:东平国>泰山郡:main",
+              "campaign:东郡>魏郡:main",
+              "appoint:山阳郡:lubu",
+              "scout:彭城国",
+              "scout:梁国",
+              "scout:河内郡",
+              "govern:东平国:soothe",
+              "govern:山阳郡:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东平国>泰山郡:main",
+                "campaign:东郡>魏郡:main",
+                "appoint:山阳郡:lubu",
+                "scout:彭城国",
+                "scout:梁国",
+                "scout:河内郡",
+                "govern:东平国:soothe",
+                "govern:山阳郡:soothe"
+              ],
+              "dropped": [],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 19149,
+              "completion": 2458,
+              "cached": 0,
+              "reasoning": 2048,
+              "cost": 0.00194065
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 21367,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642476-3FNW6IcQV8uSbM9TLCv3",
+            "reason": "优先通过两路征伐提升州治与势力矩，同时用吕布驻山阳巩固前线并通过民心安抚稳固控制区，刺探缩小未知区间，免费动作尽量放在情报与安民上，确保下季有更明确的可执行目标",
+            "plan": {
+              "objective": "通过本季征伐与安民提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+              "target": null,
+              "stance": "develop",
+              "preparation": "待征伐前的兵力核算与装备配置就绪，先通过刺探收集关键城池的防守区间信息，确保后续攻城策略可落地",
+              "abortWhen": "如遇对方势力联手或关键城池防守异常强大，立即转向稳固内政与情报以等待有利时机",
+              "status": "continue",
+              "review": "本季通过两路征伐和山阳前线驻守得到初步扩张，民心与情报目标初步达成，后续需关注被围城及治所供给情况，适时调整攻防节奏与内政优先级"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 7,
+            "zhou": 1,
+            "gold": 1056
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：彭城国 约 3705±8%（已探）、梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、山阳郡 安民 心1→2"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 山阳郡（自 东郡）"
+            },
+            {
+              "turn": 0,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 2218,
+                "缺口": 3,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "无主将",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "魏郡",
+              "text": "强攻 魏郡 未克，折损后余 1725 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 5,
+                "主将": "陈宫（统率58）",
+                "守将": "审配（统率74、守城适性），副将 袁绍",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1056 金（本季入 766，军费 310）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "record": {
+            "turn": 1,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 11858,
+            "obsTokens": 8298,
+            "candidates": 60,
+            "picks": [
+              "appoint:东平国:gaoshun",
+              "appoint:东郡:lubu",
+              "array:东郡:scale",
+              "scout:乐安国",
+              "scout:北海国",
+              "scout:济阴郡",
+              "govern:东平国:soothe",
+              "govern:任城国:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:东平国:gaoshun",
+                "appoint:东郡:lubu",
+                "array:东郡:scale",
+                "scout:乐安国",
+                "scout:北海国",
+                "scout:济阴郡",
+                "govern:东平国:soothe",
+                "govern:任城国:soothe"
+              ],
+              "dropped": [],
+              "spent": 4,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 19928,
+              "completion": 2267,
+              "cached": 0,
+              "reasoning": 1920,
+              "cost": 0.0019032
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 16806,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642497-ymgPiiqlmCslnxGviVnA",
+            "reason": "本季以扩大控制与稳固民心为优先，利用低成本与免费行动进行情报收集、部队再配置与民心安抚，同时通过对东郡的阵型与屯田等手段为后续攻势做准备。",
+            "plan": {
+              "objective": "阶段目标：通过征伐与内政提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成兵力核算并对东郡进行阵型与治安调研，优先刺探关键城池的防守区间信息；同时小幅调任以增强前线掌控与后方支援能力",
+              "abortWhen": "遇到对手联手或关键城池防守异常强大，立即转向稳固内政与情报等待有利时机",
+              "status": "continue",
+              "review": "本季通过低成本的调动与刺探获取初步情报，民心有所提升，后续需要关注被围城及治所供给，调整攻防节奏与内政优先级以确保持续扩张"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 7,
+            "zhou": 1,
+            "gold": 1505
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：乐安国 约 5569±8%（已探）、北海国 约 10375±8%（已探）、济阴郡 约 6355±8%（已探）"
+            },
+            {
+              "turn": 1,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心2→3、任城国 安民 心1→2"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 东平国、吕布 驻 东郡（自 山阳郡）"
+            },
+            {
+              "turn": 1,
+              "kind": "array",
+              "faction": "lubu",
+              "text": "改阵：东郡 方圆→鱼鳞"
+            },
+            {
+              "turn": 1,
+              "kind": "besieged",
+              "faction": "lubu",
+              "at": "山阳郡",
+              "text": "山阳郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1505 金（本季入 743，军费 294）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 0,
+          "bytes": 51366,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 1,
+          "bytes": 53574,
+          "priorPlan": {
+            "objective": "通过本季征伐与安民提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+            "target": null,
+            "stance": "develop",
+            "preparation": "待征伐前的兵力核算与装备配置就绪，先通过刺探收集关键城池的防守区间信息，确保后续攻城策略可落地",
+            "abortWhen": "如遇对方势力联手或关键城池防守异常强大，立即转向稳固内政与情报以等待有利时机",
+            "status": "continue",
+            "review": "本季通过两路征伐和山阳前线驻守得到初步扩张，民心与情报目标初步达成，后续需关注被围城及治所供给情况，适时调整攻防节奏与内政优先级"
+          },
+          "feedback": null,
+          "dropped": []
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "treasury",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "record": {
+            "turn": 0,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 10865,
+            "obsTokens": 7340,
+            "candidates": 60,
+            "picks": [
+              "appoint:山阳郡:lubu",
+              "campaign:东郡>河内郡:main",
+              "campaign:东郡>魏郡:main",
+              "govern:东郡:soothe",
+              "govern:山阳郡:soothe",
+              "govern:陈留郡:soothe",
+              "scout:河内郡",
+              "scout:梁国",
+              "scout:济阴郡"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:山阳郡:lubu",
+                "campaign:东郡>河内郡:main",
+                "govern:东郡:soothe",
+                "govern:山阳郡:soothe",
+                "govern:陈留郡:soothe",
+                "scout:河内郡",
+                "scout:梁国",
+                "scout:济阴郡"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:东郡>魏郡:main",
+                  "reason": "rejected",
+                  "detail": "命令冲突：同一兵源、目标或对象本季已安排"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.1111111111111111
+            },
+            "usage": {
+              "prompt": 16870,
+              "completion": 2064,
+              "cached": 10413,
+              "reasoning": 1597,
+              "cost": 0.00157543
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7520,
+            "provider": "Google",
+            "generationId": "gen-1790642731-ZWnTwM33wvhRUswhN1pk",
+            "reason": "本季集中兵力，以主力攻击敌方治所河内郡和冀州治所魏郡，同时侦察关键目标，并安抚民心。",
+            "plan": {
+              "objective": "夺取河内郡和魏郡，提升档位，并为后续扩张奠定基础。",
+              "target": null,
+              "stance": "attack",
+              "preparation": "集结主力部队，并侦察敌方关键郡国，确保攻势顺利。",
+              "abortWhen": "若攻击河内郡或魏郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+              "status": "continue",
+              "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。曹操控制我方首都东郡，并与我方在兖州接壤，构成直接威胁。袁绍占据冀州和青州，实力强大。刘备控制徐州和豫州部分地区。当前首要任务是扩张疆域，提升档位。选择攻击河内郡（司隶治所，由李傕控制）和魏郡（冀州治所，由袁绍控制）是提升档位（丙档和乙档）的最直接途径。调任吕布至山"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 1054
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）、济阴郡 约 6562±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东郡 安民 心1→2、山阳郡 安民 心1→2、陈留郡 安民 心2→3"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 山阳郡（自 东郡）"
+            },
+            {
+              "turn": 0,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "强攻 河内郡 未克，折损后余 1725 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "陈宫（统率58）",
+                "守将": "张杨（统率60），副将 穆顺、杨丑",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1054 金（本季入 768，军费 314）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "record": {
+            "turn": 1,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11702,
+            "obsTokens": 8176,
+            "candidates": 59,
+            "picks": [
+              "withdraw:lubu:0:东郡>河内郡",
+              "appoint:东郡:zangba",
+              "appoint:东郡:panzhang",
+              "appoint:东平国:zhangliao",
+              "appoint:济北国:gaoshun",
+              "campaign:山阳郡>济阴郡:main",
+              "govern:东郡:soothe",
+              "govern:东平国:soothe",
+              "govern:任城国:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "withdraw:lubu:0:东郡>河内郡",
+                "appoint:东郡:zangba",
+                "appoint:东郡:panzhang",
+                "appoint:东平国:zhangliao",
+                "appoint:济北国:gaoshun",
+                "campaign:山阳郡>济阴郡:main",
+                "govern:东郡:soothe",
+                "govern:东平国:soothe",
+                "govern:任城国:soothe"
+              ],
+              "dropped": [],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 17443,
+              "completion": 2020,
+              "cached": 10413,
+              "reasoning": 1597,
+              "cost": 0.00161513
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7829,
+            "provider": "Google",
+            "generationId": "gen-1790642738-fwJxIJdU8WdiSHOYMbFT",
+            "reason": "撤回河内郡围城部队，集结主力攻击兖州敌治所济阴郡，同时加强边境防御并安抚民心。",
+            "plan": {
+              "objective": "夺取济阴郡，巩固兖州控制，提升档位至丙档，并为后续扩张奠定基础。",
+              "target": "济阴郡",
+              "stance": "attack",
+              "preparation": "集结山阳郡主力部队，并调任将领至边境郡国，确保攻势顺利，同时通过安抚政策稳定后方。",
+              "abortWhen": "若攻击济阴郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+              "status": "continue",
+              "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。河内郡围城未果，部队损失不大，可撤回整编。济阴郡是兖州敌治所，且由吕布亲自坐镇的山阳郡可直接攻击，是提升档位（丙档）的最佳选择。同时，东郡作为首都，需要加强防御和安抚民心。调任将领至边境郡国，以应对潜在的曹操进攻。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 1,
+            "gold": 1321
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、东郡 安民 心2→3、任城国 安民 心1→2"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国、潘璋 驻 东郡、臧霸 驻 东郡、张辽 驻 东平国"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-lift",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 河内郡 撤围，携 1466 人退回 东郡"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "强攻 济阴郡 未克，折损后余 2004 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 4,
+                "主将": "吕布（统率82、武力100摧锋）",
+                "守将": "曹仁（统率83、守城适性），副将 曹操、夏侯渊",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "东平国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "任城国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "济北国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1321 金（本季入 542，军费 275）"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut-low",
+              "faction": "lubu",
+              "text": "后路断绝，围 济阴郡 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 0,
+          "bytes": 51274,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 1,
+          "bytes": 53151,
+          "priorPlan": {
+            "objective": "夺取河内郡和魏郡，提升档位，并为后续扩张奠定基础。",
+            "target": null,
+            "stance": "attack",
+            "preparation": "集结主力部队，并侦察敌方关键郡国，确保攻势顺利。",
+            "abortWhen": "若攻击河内郡或魏郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+            "status": "continue",
+            "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。曹操控制我方首都东郡，并与我方在兖州接壤，构成直接威胁。袁绍占据冀州和青州，实力强大。刘备控制徐州和豫州部分地区。当前首要任务是扩张疆域，提升档位。选择攻击河内郡（司隶治所，由李傕控制）和魏郡（冀州治所，由袁绍控制）是提升档位（丙档和乙档）的最直接途径。调任吕布至山"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 6,
+            "treasury": 1054,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "campaign:东郡>魏郡:main",
+              "why": "命令冲突：同一兵源、目标或对象本季已安排"
+            }
+          ]
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "siege",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 1154
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：山阳郡 约 2496±8%（已探）、清河国 约 10069±8%（已探）、陈国 约 2589±8%（已探）"
+            },
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：昌豨 驻 济北国、高顺 驻 东平国（自 陈留郡）、侯成 驻 济北国、宋宪 驻 任城国、孙观 驻 东平国、吴敦 驻 任城国"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 3109 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 3109,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 3386,
+                "缺口": 5,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "高顺（统率74、攻城适性），副将 臧霸、孙观",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "强攻 济阴郡 未克，折损后余 3003 人转为围困",
+              "attribution": {
+                "缺口": 2,
+                "可防守": 4,
+                "主将": "张邈（统率50），副将 张超",
+                "守将": "曹仁（统率83、守城适性），副将 夏侯渊",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1154 金（本季入 150，军费 229）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 济阴郡 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1139
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "迁治于 东平国，下季生效"
+            },
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：上党郡 约 2734±8%（已探）、东郡 约 4159±8%（已探）、乐安国 约 5423±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 泰山郡（自 东平国）、张杨 驻 泰山郡（自 河内郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 济阴郡 城下，共 6027 人"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "彭城国",
+              "text": "强攻 彭城国 未克，折损后余 735 人转为围困",
+              "attribution": {
+                "缺口": 3,
+                "可防守": 3,
+                "主将": "魏续（统率54），副将 宋宪、吴敦",
+                "守将": "刘备（统率76），副将 黄盖、张纮",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 3 季，余 1562 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "济阴郡 乐进、夏侯渊、于禁 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "自 陈留郡 取 济阴郡（原属 caocao）",
+              "attribution": {
+                "投入": 6027,
+                "缺口": 5,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "张邈（统率50），副将 张超",
+                "守将": "夏侯渊（统率82），副将 于禁、乐进",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1139 金（本季入 150，军费 165）"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-scatter",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师粮尽溃散"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 彭城国 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [],
+      "reused": true
+    },
+    {
+      "case": "siege",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "record": {
+            "turn": 2,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 12116,
+            "obsTokens": 8398,
+            "candidates": 60,
+            "picks": [
+              "campaign:东郡>河内郡:main",
+              "appoint:东郡:lubu",
+              "build:东郡:granary",
+              "build:东郡:market",
+              "build:东郡:office",
+              "scout:山阳郡",
+              "scout:陈国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东郡>河内郡:main",
+                "appoint:东郡:lubu",
+                "build:东郡:granary",
+                "scout:山阳郡",
+                "scout:陈国"
+              ],
+              "dropped": [
+                {
+                  "key": "build:东郡:market",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                },
+                {
+                  "key": "build:东郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 4,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 20011,
+              "completion": 1918,
+              "cached": 0,
+              "reasoning": 1536,
+              "cost": 0.00176775
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 13478,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642746-1WpBrHRdZLo39xjNuoRq",
+            "reason": "优先稳固东郡经济与后勤，同时对河内郡施以主力推进以扩大势力范围，并通过两次刺探获取关键情报以降低未知风险。三处建筑提升产出与治理，吕布落驻东郡以增强外防与出征能力，刺探补充情报以指引下一步行动。",
+            "plan": {
+              "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+              "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+              "status": "continue",
+              "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1011
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：山阳郡 约 2496±8%（已探）、陈国 约 2589±8%（已探）"
+            },
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 东郡（自 济北国）"
+            },
+            {
+              "turn": 2,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "东郡 建成仓廪（−120 金）"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 3109 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 3109,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1011 金（本季入 150，军费 252）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 12163,
+            "obsTokens": 8485,
+            "candidates": 60,
+            "picks": [
+              "scout:东郡",
+              "scout:河东郡",
+              "scout:河南尹",
+              "appoint:济北国:gaoshun",
+              "appoint:济北国:zangba",
+              "build:陈留郡:farmstead",
+              "build:陈留郡:granary",
+              "build:陈留郡:office",
+              "campaign:东平国>泰山郡:allout"
+            ],
+            "admission": {
+              "admitted": [
+                "scout:东郡",
+                "scout:河东郡",
+                "scout:河南尹",
+                "appoint:济北国:gaoshun",
+                "appoint:济北国:zangba",
+                "build:陈留郡:farmstead",
+                "build:陈留郡:granary",
+                "campaign:东平国>泰山郡:allout"
+              ],
+              "dropped": [
+                {
+                  "key": "build:陈留郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.1111111111111111
+            },
+            "usage": {
+              "prompt": 19977,
+              "completion": 1738,
+              "cached": 0,
+              "reasoning": 1344,
+              "cost": 0.00169405
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 16123,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642760-lOryuwjbdF6KFXkmNMoe",
+            "reason": "在本季内用可用的 AP 优先扩张兖州与周边，先刺探缩小未知区间，再通过调动与兴建提升长期产出与治理，最后以东平国对泰山郡的主力倾国行动快速打开局面，形成持久压力与信息优势。",
+            "plan": {
+              "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+              "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+              "status": "continue",
+              "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 744
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：东郡 约 4159±8%（已探）、河东郡 约 1704±8%（已探）、河南尹 约 3761±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国（自 陈留郡）、臧霸 驻 济北国（自 东平国）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "陈留郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "陈留郡 建成仓廪（−120 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 2878,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "无主将",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 744 金（本季入 150，军费 157）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 2,
+          "bytes": 53701,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 3,
+          "bytes": 53827,
+          "priorPlan": {
+            "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+            "target": null,
+            "stance": "develop",
+            "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+            "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+            "status": "continue",
+            "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 1011,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "build:东郡:market",
+              "why": "该郡本季令数已满"
+            },
+            {
+              "key": "build:东郡:office",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "siege",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "record": {
+            "turn": 2,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 12116,
+            "obsTokens": 8398,
+            "candidates": 60,
+            "picks": [
+              "appoint:东郡:lubu",
+              "appoint:东郡:zangba",
+              "appoint:东平国:gaoshun",
+              "campaign:东郡>河内郡:main",
+              "campaign:东郡>济阴郡:main",
+              "muster:东郡:东郡+陈留郡",
+              "govern:东郡:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:东郡:lubu",
+                "appoint:东郡:zangba",
+                "appoint:东平国:gaoshun",
+                "campaign:东郡>河内郡:main",
+                "muster:东郡:东郡+陈留郡"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:东郡>济阴郡:main",
+                  "reason": "rejected",
+                  "detail": "命令冲突：同一兵源、目标或对象本季已安排"
+                },
+                {
+                  "key": "govern:东郡:soothe",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 17749,
+              "completion": 2261,
+              "cached": 10413,
+              "reasoning": 1596,
+              "cost": 0.00174213
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 8371,
+            "provider": "Google",
+            "generationId": "gen-1790642776-b4adkRR3ZAPJ6V30Csnu",
+            "reason": "吕布军团围攻河内郡和梁国，但东平、任城、济北三郡补给已断，且围城军团粮草仅余两季。本季首要任务是解决补给线问题，同时为后续进攻做准备。调动吕布和臧霸至东郡，高顺至东平国，以加强前线和后方防守。主力军团继续围攻河内郡，并尝试进攻济阴郡，同时在东郡集结兵力，并对东郡进行安民，以稳定局势。",
+            "plan": {
+              "objective": "稳定兖州局势，解决补给线问题，并为下一步扩张奠定基础。具体目标是：1. 恢复东平国、任城国、济北国的补给连通；2. 确保围攻河内郡和梁国的军团有足够的粮草和兵力",
+              "target": null,
+              "stance": "attack",
+              "preparation": "本季将调动核心将领吕布、臧霸至东郡，高顺至东平国，以加强防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡。在东郡集结兵力，并对东郡进行安民。若能成功解决补给线问题并巩固防守，下季将考虑向曹操或袁绍",
+              "abortWhen": "若围攻河内郡和济阴郡的军团遭遇重大损失，或东郡集结的兵力不足以应对潜在威胁，则立即停止进攻，转为固守并优先解决补给线问题。",
+              "status": "continue",
+              "review": "上季报告显示，东平国、任城国、济北国三郡补给已断，围攻梁国和河内郡的军团粮草仅余两季，形势严峻。本季首要任务是解决补给线问题。通过调动吕布、臧霸、高顺等将领，加强关键区域的防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡，以期打开局面。在东郡集结兵力，并对东郡进行安民，以稳定后方。此策略旨在稳固现有领土，解决燃眉之"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1132
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 东平国（自 陈留郡）、吕布 驻 东郡（自 济北国）、臧霸 驻 东郡（自 东平国）"
+            },
+            {
+              "turn": 2,
+              "kind": "muster",
+              "faction": "lubu",
+              "text": "于 东郡 集结 5403 人待命"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 7189 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 7189,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1132 金（本季入 150，军费 251）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11004,
+            "obsTokens": 7758,
+            "candidates": 60,
+            "picks": [
+              "relocate:河内郡",
+              "govern:河内郡:soothe",
+              "campaign:河内郡>东郡:main",
+              "relief:东平国>任城国",
+              "govern:东平国:soothe",
+              "govern:任城国:stock",
+              "appoint:济北国:gaoshun",
+              "appoint:济北国:zhangyang",
+              "govern:济北国:soothe",
+              "appoint:陈留郡:songxian",
+              "appoint:陈留郡:wudun",
+              "govern:陈留郡:forge"
+            ],
+            "admission": {
+              "admitted": [
+                "relocate:河内郡",
+                "govern:河内郡:soothe",
+                "relief:东平国>任城国",
+                "govern:东平国:soothe",
+                "govern:任城国:stock",
+                "appoint:济北国:gaoshun",
+                "appoint:济北国:zhangyang",
+                "appoint:陈留郡:songxian",
+                "appoint:陈留郡:wudun"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:河内郡>东郡:main",
+                  "reason": "rejected",
+                  "detail": "起点郡本季令数已满"
+                },
+                {
+                  "key": "govern:济北国:soothe",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "govern:陈留郡:forge",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                }
+              ],
+              "spent": 8,
+              "mojibake": 0,
+              "illegalRate": 0.25
+            },
+            "usage": {
+              "prompt": 17023,
+              "completion": 2131,
+              "cached": 10413,
+              "reasoning": 1598,
+              "cost": 0.00161753
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7977,
+            "provider": "Google",
+            "generationId": "gen-1790642785-TW2Hud5cON0iSKfmc57A",
+            "reason": "首要任务是夺回失陷的治所东郡，恢复全境补给线。同时，解除任城国之围，并稳定兖州三郡的局势，为后续反攻积蓄力量。",
+            "plan": {
+              "objective": "夺回东郡，恢复全境补给；解除任城国之围；稳定东平、任城、济北三郡的补给与民心。",
+              "target": "东郡",
+              "stance": "attack",
+              "preparation": "调动吕布、臧霸至河内郡，集结主力进攻东郡。高顺、张杨调往济北国加强防守。东平国、任城国、济北国进行安民与屯粮，解除任城国之围。",
+              "abortWhen": "若进攻东郡的部队遭遇重大损失，或无法在两季内恢复东郡的补给连通，则立即放弃进攻，转为固守河内郡，并优先解决兖州三郡的补给问题。",
+              "status": "continue",
+              "review": "本季形势极为严峻，治所东郡已失，全境补给断绝，任城国被围，东平国、济北国、河内郡亦补给中断。首要目标是夺回东郡以恢复补给线。派遣主力从河内郡进攻东郡，并调动将领加强济北国防守。同时，解除任城国之围，并对东平、任城、济北进行内政建设，稳定局势。此策略旨在先解决生存危机，再图发展。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 4,
+            "zhou": 0,
+            "gold": 1027
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "迁治于 河内郡，下季生效"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心2→3、任城国 屯粮（已至上限） −48 金、河内郡 安民 心2→3"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国（自 东平国）、宋宪 驻 陈留郡、吴敦 驻 陈留郡、张杨 驻 济北国（自 河内郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "lubu",
+              "at": "任城国",
+              "text": "任城国 城下野战，破 liubei 围城之师",
+              "attribution": {
+                "我军": 3386,
+                "敌军": 1323,
+                "战力比": 2.25,
+                "围城季": 1,
+                "结果": "溃退",
+                "我将": "东平国守将（统率52）",
+                "敌将": "刘备（统率76），副将 张纮、简雍",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "plain"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "relief",
+              "faction": "lubu",
+              "text": "任城国 解围，2878 人入城"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 3 季，余 1562 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1027 金（本季入 150，军费 207）"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-scatter",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师粮尽溃散"
+            },
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "治所已迁至 河内郡"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 2,
+          "bytes": 53701,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 3,
+          "bytes": 52072,
+          "priorPlan": {
+            "objective": "稳定兖州局势，解决补给线问题，并为下一步扩张奠定基础。具体目标是：1. 恢复东平国、任城国、济北国的补给连通；2. 确保围攻河内郡和梁国的军团有足够的粮草和兵力",
+            "target": null,
+            "stance": "attack",
+            "preparation": "本季将调动核心将领吕布、臧霸至东郡，高顺至东平国，以加强防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡。在东郡集结兵力，并对东郡进行安民。若能成功解决补给线问题并巩固防守，下季将考虑向曹操或袁绍",
+            "abortWhen": "若围攻河内郡和济阴郡的军团遭遇重大损失，或东郡集结的兵力不足以应对潜在威胁，则立即停止进攻，转为固守并优先解决补给线问题。",
+            "status": "continue",
+            "review": "上季报告显示，东平国、任城国、济北国三郡补给已断，围攻梁国和河内郡的军团粮草仅余两季，形势严峻。本季首要任务是解决补给线问题。通过调动吕布、臧霸、高顺等将领，加强关键区域的防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡，以期打开局面。在东郡集结兵力，并对东郡进行安民，以稳定后方。此策略旨在稳固现有领土，解决燃眉之"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 1132,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "campaign:东郡>济阴郡:main",
+              "why": "命令冲突：同一兵源、目标或对象本季已安排"
+            },
+            {
+              "key": "govern:东郡:soothe",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "multifront",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 6,
+            "zhou": 0,
+            "gold": 2700
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）、九江郡 约 3428±8%（已探）、会稽郡 约 10301±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "gongsundu",
+              "text": "内政：东海郡 屯粮（已至上限） −48 金"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙恭 驻 东海郡（自 东莱郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东莱郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 城下野战，破 liubei 围城之师",
+              "attribution": {
+                "我军": 2125,
+                "敌军": 1899,
+                "战力比": 1.38,
+                "围城季": 1,
+                "结果": "后撤",
+                "我将": "程普（统率78、水战适性），副将 公孙恭",
+                "敌将": "陈登（统率76），副将 糜芳、糜竺",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "river"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "relief",
+              "faction": "gongsundu",
+              "text": "东莱郡 解围，1594 人入城"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "gongsundu",
+              "text": "增兵 北海国 城下，共 2777 人"
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 2777,
+                "缺口": 5,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2700 金（本季入 969，军费 57）"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 7,
+            "zhou": 0,
+            "gold": 3593
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：泰山郡 约 3216±8%（已探）、琅邪国 约 1404±8%（已探）、齐国 约 6349±8%（已探）"
+            },
+            {
+              "turn": 4,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙度 驻 北海国（自 东莱郡）、公孙康 驻 北海国（自 东莱郡）、管宁 驻 辽西郡、郑玄 驻 辽东郡"
+            },
+            {
+              "turn": 4,
+              "kind": "transfer",
+              "faction": "gongsundu",
+              "text": "自 乐浪郡 调兵 541 人至 东莱郡"
+            },
+            {
+              "turn": 4,
+              "kind": "march-out",
+              "faction": "gongsundu",
+              "text": "2114 人自 东莱郡 发向 辽东属国，道远，1 季方至"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "右北平郡",
+              "text": "自 北海国 取 右北平郡（原属 gongsunzan）",
+              "attribution": {
+                "投入": 1324,
+                "缺口": 3,
+                "可防守": 0,
+                "城防": 20,
+                "地形": "river",
+                "主将": "公孙度（统率72、水战适性），副将 公孙康",
+                "守将": "右北平郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×0.96",
+                "阵": "方圆对鱼鳞（克，+1 缺口）",
+                "敌军": "骑兵守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "isolated",
+              "faction": "gongsundu",
+              "text": "辽东属国 四邻皆我所有，孤悬无援，城中存粮尚可支 1 季"
+            },
+            {
+              "turn": 4,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 3593 金（本季入 965，军费 72）"
+            }
+          ]
+        }
+      ],
+      "inputs": [],
+      "reused": true
+    },
+    {
+      "case": "multifront",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "gongsundu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 11293,
+            "obsTokens": 8087,
+            "candidates": 54,
+            "picks": [
+              "campaign:东海郡>广陵郡:main",
+              "build:东海郡:ironworks",
+              "build:东海郡:office",
+              "scout:下邳国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东海郡>广陵郡:main",
+                "build:东海郡:ironworks",
+                "scout:下邳国"
+              ],
+              "dropped": [
+                {
+                  "key": "build:东海郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 3,
+              "mojibake": 0,
+              "illegalRate": 0.25
+            },
+            "usage": {
+              "prompt": 19910,
+              "completion": 1988,
+              "cached": 0,
+              "reasoning": 1664,
+              "cost": 0.0017907
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 15549,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642793-8kUpyDlG1HbbR5eQc4pJ",
+            "reason": "本季优先从东海郡扩大控制并提升产出与治理能力，先行打下广陵郡以实现控州目标，同时通过铁官/官府建设增强后续作战与财政能力，探取下邳国以补充情报与可能的后续攻势。",
+            "plan": {
+              "objective": "在东海郡上打下广陵郡以实现再取2郡控州治，逐步扩大控制区并提升地方产出与治理能力",
+              "target": null,
+              "stance": "develop",
+              "preparation": "优先完成铁官与官府建设以提升产出与屯田收益；利用探察巩固情报，确保后续攻势的信息基础",
+              "abortWhen": "若本季无法在广陵郡取得有效进展且敌情突变，则改为优先下邳国或会稽郡的攻势，并调整内政与情报优先级",
+              "status": "continue",
+              "review": "当前计划以东海郡为核心，优先建设与情报提升再推进广陵郡的实战目标，确保在不超出本季令数与资源的前提下增强后续阶段的统一进程"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 2406
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东海郡 建成铁官（−240 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "广陵郡 城下野战，破 yanbaihu 围城之师",
+              "attribution": {
+                "我军": 1461,
+                "敌军": 1552,
+                "战力比": 1.68,
+                "围城季": 0,
+                "结果": "溃退",
+                "我将": "程普（统率78）",
+                "敌将": "严舆（统率44），副将 钱铜、邹他",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "plain"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "围 北海国 第 2 季，余 1294 人转为围困",
+              "attribution": {
+                "缺口": 3,
+                "可防守": 3,
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "强攻 广陵郡 未克，折损后余 807 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "程普（统率78）",
+                "守将": "广陵郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 3 季）"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2406 金（本季入 740，军费 70）"
+            },
+            {
+              "turn": 3,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 广陵郡 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "record": {
+            "turn": 4,
+            "seat": "gongsundu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 9075,
+            "obsTokens": 6372,
+            "candidates": 40,
+            "picks": [
+              "campaign:东莱郡>东海郡:allout",
+              "campaign:辽东郡>辽东属国:allout",
+              "transfer:乐浪郡>辽东郡",
+              "transfer:乐浪郡>东莱郡",
+              "build:辽东郡:granary",
+              "build:乐浪郡:office",
+              "build:东莱郡:farmstead"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东莱郡>东海郡:allout",
+                "campaign:辽东郡>辽东属国:allout",
+                "transfer:乐浪郡>辽东郡",
+                "build:乐浪郡:office",
+                "build:东莱郡:farmstead"
+              ],
+              "dropped": [
+                {
+                  "key": "transfer:乐浪郡>东莱郡",
+                  "reason": "rejected",
+                  "detail": "调兵兵力或目的地容量已被其他命令预留"
+                },
+                {
+                  "key": "build:辽东郡:granary",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 17922,
+              "completion": 1798,
+              "cached": 0,
+              "reasoning": 1408,
+              "cost": 0.0016153
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 11141,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642808-BOfFFEd2AVR3NBUrTeDy",
+            "reason": "本季优先扩大核心战线与巩固前线后方，利用两路攻势并通过调兵和兴建提升后续产出与补给能力，确保资源在攻防拉扯中扩张并避免周边断供。",
+            "plan": {
+              "objective": "通过东莱郡与辽东郡两路攻势，尽快削弱对手核心防线并取得对东海与辽东属国的控制权，逐步扩大州治与生产能力",
+              "target": null,
+              "stance": "develop",
+              "preparation": "优先完成铁官与官府建设以提升产出、屯田收益和国库安全；使用刺探获取情报并以免费调动确保前线兵力衔接",
+              "abortWhen": "若本季无法在广陵郡等目标取得明显进展且局势恶化，则改为优先巩固北线并调整内政与情报优先级",
+              "status": "continue",
+              "review": "通过多线推进与资源分配，期望在本季完成对辽东属国与东海郡的攻防态势，同时确保补给线不断，避免断供导致全局崩溃"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 7,
+            "zhou": 0,
+            "gold": 2818
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东莱郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 4,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "乐浪郡 建成官府（−200 金）"
+            },
+            {
+              "turn": 4,
+              "kind": "transfer",
+              "faction": "gongsundu",
+              "text": "自 乐浪郡 调兵 541 人至 辽东郡"
+            },
+            {
+              "turn": 4,
+              "kind": "field-fail",
+              "faction": "gongsundu",
+              "at": "东海郡",
+              "text": "东海郡 城下野战大败，未能解围",
+              "attribution": {
+                "我军": 980,
+                "敌军": 2202,
+                "战力比": 0.2,
+                "围城季": 0,
+                "结果": "大败",
+                "我将": "公孙康（统率72），副将 公孙恭",
+                "敌将": "吕范（统率76、水战适性），副将 韩当",
+                "我兵种": "步卒",
+                "敌兵种": "水军",
+                "地形": "river"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 1294,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 40,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "广陵郡 曹豹、樊能、于麋 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "自 东海郡 取 广陵郡（原属 liuyao）",
+              "attribution": {
+                "投入": 807,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 30,
+                "地形": "plain",
+                "主将": "程普（统率78）",
+                "守将": "曹豹（统率50），副将 樊能、于麋",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "辽东属国 难楼 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "辽东属国",
+              "text": "自 辽东郡 取 辽东属国（原属 wuhuan）",
+              "attribution": {
+                "投入": 1615,
+                "缺口": 5,
+                "可防守": 1,
+                "城防": 41,
+                "地形": "plain",
+                "主将": "无主将",
+                "守将": "难楼（统率50）",
+                "围城季": 0,
+                "我军": "骑兵×1.55",
+                "阵": "鱼鳞对鱼鳞",
+                "敌军": "骑兵守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut",
+              "faction": "gongsundu",
+              "text": "广陵郡 补给断绝，本季无产出"
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut",
+              "faction": "gongsundu",
+              "text": "北海国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2818 金（本季入 800，军费 48）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 3,
+          "bytes": 52910,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 4,
+          "bytes": 48512,
+          "priorPlan": {
+            "objective": "在东海郡上打下广陵郡以实现再取2郡控州治，逐步扩大控制区并提升地方产出与治理能力",
+            "target": null,
+            "stance": "develop",
+            "preparation": "优先完成铁官与官府建设以提升产出与屯田收益；利用探察巩固情报，确保后续攻势的信息基础",
+            "abortWhen": "若本季无法在广陵郡取得有效进展且敌情突变，则改为优先下邳国或会稽郡的攻势，并调整内政与情报优先级",
+            "status": "continue",
+            "review": "当前计划以东海郡为核心，优先建设与情报提升再推进广陵郡的实战目标，确保在不超出本季令数与资源的前提下增强后续阶段的统一进程"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 2406,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "build:东海郡:office",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "multifront",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "gongsundu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11293,
+            "obsTokens": 8087,
+            "candidates": 54,
+            "picks": [
+              "campaign:东莱郡>北海国:main",
+              "campaign:东海郡>下邳国:main",
+              "govern:东海郡:stock",
+              "govern:东莱郡:stock",
+              "appoint:东海郡:gongsunkang",
+              "appoint:东海郡:gongsungong",
+              "suade:supuyan",
+              "suade:tadun",
+              "scout:广陵郡",
+              "scout:九江郡",
+              "scout:下邳国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东莱郡>北海国:main",
+                "campaign:东海郡>下邳国:main",
+                "govern:东海郡:stock",
+                "govern:东莱郡:stock",
+                "appoint:东海郡:gongsunkang",
+                "scout:广陵郡",
+                "scout:九江郡",
+                "scout:下邳国"
+              ],
+              "dropped": [
+                {
+                  "key": "appoint:东海郡:gongsungong",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "suade:supuyan",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "suade:tadun",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                }
+              ],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0.2727272727272727
+            },
+            "usage": {
+              "prompt": 17442,
+              "completion": 2010,
+              "cached": 0,
+              "reasoning": 1598,
+              "cost": 0.0025482
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 8469,
+            "provider": "Google",
+            "generationId": "gen-1790642820-0K5a53AEpda9bkPX0vMi",
+            "reason": "集中兵力攻取北海国，同时对下邳国施压，并为后续攻势做好准备。",
+            "plan": {
+              "objective": "本季攻克北海国，并对下邳国形成有效威胁，同时侦察扬州和徐州的关键目标。",
+              "target": "北海国",
+              "stance": "attack",
+              "preparation": "集结主力于东莱郡，准备攻打北海国。侦察广陵、九江、下邳，为下一步行动提供情报。",
+              "abortWhen": "若北海国守军远超预期，或东莱郡的补给线受到严重威胁。",
+              "status": "continue",
+              "review": "上季东莱郡围攻北海国，虽未破城，但已大幅削弱守军，本季主力进攻有望破城。东海郡的部队已抵达，可用于牵制下邳国守军，并伺机夺取徐州治所。侦察扬州和徐州的关键郡国，为后续扩张做准备。目前我方兵力尚可，但需警惕刘备和袁绍的潜在反击。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 6,
+            "zhou": 0,
+            "gold": 2691
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）、九江郡 约 3428±8%（已探）、广陵郡 约 1484±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "gongsundu",
+              "text": "内政：东海郡 屯粮（已至上限） −48 金、东莱郡 屯粮（已至上限） −48 金"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙康 驻 东海郡（自 东莱郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "gongsundu",
+              "text": "增兵 北海国 城下，共 2368 人"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "下邳国",
+              "text": "强攻 下邳国 未克，折损后余 950 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "程普（统率78），副将 公孙康",
+                "守将": "袁术（统率52），副将 陈珪、陈群",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 2368,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2691 金（本季入 871，军费 60）"
+            },
+            {
+              "turn": 3,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 下邳国 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "record": {
+            "turn": 4,
+            "seat": "gongsundu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 9562,
+            "obsTokens": 6709,
+            "candidates": 47,
+            "picks": [
+              "campaign:辽东郡>辽东属国:main",
+              "govern:北海国:soothe",
+              "govern:东莱郡:wall",
+              "govern:辽西郡:soothe",
+              "suade:supuyan",
+              "suade:tadun",
+              "scout:泰山郡",
+              "scout:琅邪国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:辽东郡>辽东属国:main",
+                "govern:北海国:soothe",
+                "govern:东莱郡:wall",
+                "govern:辽西郡:soothe",
+                "suade:supuyan",
+                "suade:tadun",
+                "scout:泰山郡",
+                "scout:琅邪国"
+              ],
+              "dropped": [],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 15982,
+              "completion": 2105,
+              "cached": 10413,
+              "reasoning": 1599,
+              "cost": 0.00237078
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 8677,
+            "provider": "Google",
+            "generationId": "gen-1790642962-2gWpdMb9OWOO9PxVHtrE",
+            "reason": "本季目标是巩固幽州北部，收复失地，并为下一步扩张奠定基础。主力将用于攻取辽东属国，同时加强边境郡国的防御与民心，并尝试招降敌将以削弱对手。",
+            "plan": {
+              "objective": "本季攻占辽东属国，巩固幽州北部边境，并尝试招降苏仆延和蹋顿。同时，侦察泰山郡和琅邪国，为后续进攻徐州和兖州做准备。",
+              "target": "辽东属国",
+              "stance": "attack",
+              "preparation": "主力部队已集结在辽东郡，准备进攻辽东属国。已下令安抚北海国和辽西郡，并加固东莱郡城防。计划招降苏仆延和蹋顿，若成功将极大增强我方实力。侦察泰山和琅邪以获取敌方情报。",
+              "abortWhen": "若进攻辽东属国遭遇远超预期的抵抗，或招降苏仆延/蹋顿失败且其逃脱，或我方边境郡国（如东莱郡）受到严重威胁。",
+              "status": "continue",
+              "review": "上季虽然丢失了东海郡，但成功攻占了北海国，并对下邳国形成了围困。本季首要任务是巩固幽州北部，收复辽东属国（敌方守军薄弱，有破城可能）。同时，辽西郡的苏仆延和蹋顿即将到期，必须尝试招降。东莱郡因补给线问题产出归零，需加强防御。侦察泰山和琅邪是为后续向徐州和兖州扩张做准备。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 7,
+            "zhou": 0,
+            "gold": 3522
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "suade",
+              "faction": "gongsundu",
+              "text": "招降 苏仆延 不成，其人不屈",
+              "attribution": {
+                "成功率": 53,
+                "掷点": 56
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "suade",
+              "faction": "gongsundu",
+              "text": "招降 蹋顿 不成，其人不屈",
+              "attribution": {
+                "成功率": 49,
+                "掷点": 66
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：泰山郡 约 3216±8%（已探）、琅邪国 约 1404±8%（已探）"
+            },
+            {
+              "turn": 4,
+              "kind": "govern",
+              "faction": "gongsundu",
+              "text": "内政：东莱郡 修城 防50→58 −56 金、北海国 安民 心1→2、辽西郡 安民 心2→3"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "下邳国",
+              "text": "围 下邳国 第 2 季，余 836 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "程普（统率78），副将 公孙康",
+                "守将": "袁术（统率52），副将 陈珪、陈群",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "辽东属国 难楼 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "辽东属国",
+              "text": "自 辽东郡 取 辽东属国（原属 wuhuan）",
+              "attribution": {
+                "投入": 812,
+                "缺口": 4,
+                "可防守": 1,
+                "城防": 41,
+                "地形": "plain",
+                "主将": "无主将",
+                "守将": "难楼（统率50）",
+                "围城季": 0,
+                "我军": "骑兵×1.55",
+                "阵": "鱼鳞对鱼鳞",
+                "敌军": "骑兵守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 3 季）"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 3522 金（本季入 948，军费 61）"
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 下邳国 之师存粮仅余 1 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 3,
+          "bytes": 52910,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 4,
+          "bytes": 49417,
+          "priorPlan": {
+            "objective": "本季攻克北海国，并对下邳国形成有效威胁，同时侦察扬州和徐州的关键目标。",
+            "target": "北海国",
+            "stance": "attack",
+            "preparation": "集结主力于东莱郡，准备攻打北海国。侦察广陵、九江、下邳，为下一步行动提供情报。",
+            "abortWhen": "若北海国守军远超预期，或东莱郡的补给线受到严重威胁。",
+            "status": "continue",
+            "review": "上季东莱郡围攻北海国，虽未破城，但已大幅削弱守军，本季主力进攻有望破城。东海郡的部队已抵达，可用于牵制下邳国守军，并伺机夺取徐州治所。侦察扬州和徐州的关键郡国，为后续扩张做准备。目前我方兵力尚可，但需警惕刘备和袁绍的潜在反击。"
+          },
+          "feedback": {
+            "target": "北海国",
+            "lands": 6,
+            "treasury": 2691,
+            "owner": "gongsundu",
+            "ownership": "own",
+            "ownGarrison": 1999,
+            "underSiege": false,
+            "ownArmies": []
+          },
+          "dropped": [
+            {
+              "key": "appoint:东海郡:gongsungong",
+              "why": "令数不够（余 0 令，需 1）"
+            },
+            {
+              "key": "suade:supuyan",
+              "why": "令数不够（余 0 令，需 1）"
+            },
+            {
+              "key": "suade:tadun",
+              "why": "令数不够（余 0 令，需 1）"
+            }
+          ]
+        }
+      ],
+      "replayedSeasons": 1
+    }
+  ],
+  "previousRuns": [
+    {
+      "case": "treasury",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 986
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：彭城国 约 3705±8%（已探）、梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、东郡 安民 心1→2、任城国 安民 心1→2、山阳郡 安民 心1→2、济北国 安民 心1→2、陈留郡 安民 心2→3"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：曹性 驻 任城国、潘璋 驻 东平国、魏续 驻 任城国、臧霸 驻 东平国、张辽 驻 山阳郡"
+            },
+            {
+              "turn": 0,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "东郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 986 金（本季入 822，军费 296）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 1,
+            "gold": 1233
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：泰山郡 约 722±8%（已探）、济南国 约 5401±8%（已探）、济阴郡 约 6355±8%（已探）"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：曹性 驻 东郡（自 任城国）、高顺 驻 陈留郡、吕布 驻 济北国（自 东郡）、潘璋 驻 山阳郡（自 东平国）"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "强攻 梁国 未克，折损后余 2017 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "强攻 河内郡 未克，折损后余 1786 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "河内郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "东平国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "任城国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "济北国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1233 金（本季入 509，军费 262）"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut-low",
+              "faction": "lubu",
+              "text": "后路断绝，围 梁国 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [],
+      "reused": true
+    },
+    {
+      "case": "treasury",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "record": {
+            "turn": 0,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 10865,
+            "obsTokens": 7340,
+            "candidates": 60,
+            "picks": [
+              "campaign:东平国>泰山郡:main",
+              "campaign:东郡>魏郡:main",
+              "appoint:山阳郡:lubu",
+              "scout:彭城国",
+              "scout:梁国",
+              "scout:河内郡",
+              "govern:东平国:soothe",
+              "govern:山阳郡:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东平国>泰山郡:main",
+                "campaign:东郡>魏郡:main",
+                "appoint:山阳郡:lubu",
+                "scout:彭城国",
+                "scout:梁国",
+                "scout:河内郡",
+                "govern:东平国:soothe",
+                "govern:山阳郡:soothe"
+              ],
+              "dropped": [],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 19149,
+              "completion": 2458,
+              "cached": 0,
+              "reasoning": 2048,
+              "cost": 0.00194065
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 21367,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642476-3FNW6IcQV8uSbM9TLCv3",
+            "reason": "优先通过两路征伐提升州治与势力矩，同时用吕布驻山阳巩固前线并通过民心安抚稳固控制区，刺探缩小未知区间，免费动作尽量放在情报与安民上，确保下季有更明确的可执行目标",
+            "plan": {
+              "objective": "通过本季征伐与安民提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+              "target": null,
+              "stance": "develop",
+              "preparation": "待征伐前的兵力核算与装备配置就绪，先通过刺探收集关键城池的防守区间信息，确保后续攻城策略可落地",
+              "abortWhen": "如遇对方势力联手或关键城池防守异常强大，立即转向稳固内政与情报以等待有利时机",
+              "status": "continue",
+              "review": "本季通过两路征伐和山阳前线驻守得到初步扩张，民心与情报目标初步达成，后续需关注被围城及治所供给情况，适时调整攻防节奏与内政优先级"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 7,
+            "zhou": 1,
+            "gold": 1056
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：彭城国 约 3705±8%（已探）、梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、山阳郡 安民 心1→2"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 山阳郡（自 东郡）"
+            },
+            {
+              "turn": 0,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 2218,
+                "缺口": 3,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "无主将",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "魏郡",
+              "text": "强攻 魏郡 未克，折损后余 1725 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 5,
+                "主将": "陈宫（统率58）",
+                "守将": "审配（统率74、守城适性），副将 袁绍",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1056 金（本季入 766，军费 310）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "record": {
+            "turn": 1,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 11858,
+            "obsTokens": 8298,
+            "candidates": 60,
+            "picks": [
+              "appoint:东平国:gaoshun",
+              "appoint:东郡:lubu",
+              "array:东郡:scale",
+              "scout:乐安国",
+              "scout:北海国",
+              "scout:济阴郡",
+              "govern:东平国:soothe",
+              "govern:任城国:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:东平国:gaoshun",
+                "appoint:东郡:lubu",
+                "array:东郡:scale",
+                "scout:乐安国",
+                "scout:北海国",
+                "scout:济阴郡",
+                "govern:东平国:soothe",
+                "govern:任城国:soothe"
+              ],
+              "dropped": [],
+              "spent": 4,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 19928,
+              "completion": 2267,
+              "cached": 0,
+              "reasoning": 1920,
+              "cost": 0.0019032
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 16806,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642497-ymgPiiqlmCslnxGviVnA",
+            "reason": "本季以扩大控制与稳固民心为优先，利用低成本与免费行动进行情报收集、部队再配置与民心安抚，同时通过对东郡的阵型与屯田等手段为后续攻势做准备。",
+            "plan": {
+              "objective": "阶段目标：通过征伐与内政提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成兵力核算并对东郡进行阵型与治安调研，优先刺探关键城池的防守区间信息；同时小幅调任以增强前线掌控与后方支援能力",
+              "abortWhen": "遇到对手联手或关键城池防守异常强大，立即转向稳固内政与情报等待有利时机",
+              "status": "continue",
+              "review": "本季通过低成本的调动与刺探获取初步情报，民心有所提升，后续需要关注被围城及治所供给，调整攻防节奏与内政优先级以确保持续扩张"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 7,
+            "zhou": 1,
+            "gold": 1505
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：乐安国 约 5569±8%（已探）、北海国 约 10375±8%（已探）、济阴郡 约 6355±8%（已探）"
+            },
+            {
+              "turn": 1,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心2→3、任城国 安民 心1→2"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 东平国、吕布 驻 东郡（自 山阳郡）"
+            },
+            {
+              "turn": 1,
+              "kind": "array",
+              "faction": "lubu",
+              "text": "改阵：东郡 方圆→鱼鳞"
+            },
+            {
+              "turn": 1,
+              "kind": "besieged",
+              "faction": "lubu",
+              "at": "山阳郡",
+              "text": "山阳郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1505 金（本季入 743，军费 294）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 0,
+          "bytes": 51366,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 1,
+          "bytes": 53574,
+          "priorPlan": {
+            "objective": "通过本季征伐与安民提升州治与民心，扩大控制面积，缩小对手势力区间，为长期统一建立基础",
+            "target": null,
+            "stance": "develop",
+            "preparation": "待征伐前的兵力核算与装备配置就绪，先通过刺探收集关键城池的防守区间信息，确保后续攻城策略可落地",
+            "abortWhen": "如遇对方势力联手或关键城池防守异常强大，立即转向稳固内政与情报以等待有利时机",
+            "status": "continue",
+            "review": "本季通过两路征伐和山阳前线驻守得到初步扩张，民心与情报目标初步达成，后续需关注被围城及治所供给情况，适时调整攻防节奏与内政优先级"
+          },
+          "feedback": null,
+          "dropped": []
+        }
+      ],
+      "reused": true
+    },
+    {
+      "case": "treasury",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "lubu",
+        "lands": 6,
+        "zhou": 1,
+        "gold": 600
+      },
+      "frames": [
+        {
+          "turn": 1,
+          "record": {
+            "turn": 0,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 10865,
+            "obsTokens": 7340,
+            "candidates": 60,
+            "picks": [
+              "appoint:山阳郡:lubu",
+              "campaign:东郡>河内郡:main",
+              "campaign:东郡>魏郡:main",
+              "govern:东郡:soothe",
+              "govern:山阳郡:soothe",
+              "govern:陈留郡:soothe",
+              "scout:河内郡",
+              "scout:梁国",
+              "scout:济阴郡"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:山阳郡:lubu",
+                "campaign:东郡>河内郡:main",
+                "govern:东郡:soothe",
+                "govern:山阳郡:soothe",
+                "govern:陈留郡:soothe",
+                "scout:河内郡",
+                "scout:梁国",
+                "scout:济阴郡"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:东郡>魏郡:main",
+                  "reason": "rejected",
+                  "detail": "命令冲突：同一兵源、目标或对象本季已安排"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.1111111111111111
+            },
+            "usage": {
+              "prompt": 16870,
+              "completion": 2064,
+              "cached": 10413,
+              "reasoning": 1597,
+              "cost": 0.00157543
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7520,
+            "provider": "Google",
+            "generationId": "gen-1790642731-ZWnTwM33wvhRUswhN1pk",
+            "reason": "本季集中兵力，以主力攻击敌方治所河内郡和冀州治所魏郡，同时侦察关键目标，并安抚民心。",
+            "plan": {
+              "objective": "夺取河内郡和魏郡，提升档位，并为后续扩张奠定基础。",
+              "target": null,
+              "stance": "attack",
+              "preparation": "集结主力部队，并侦察敌方关键郡国，确保攻势顺利。",
+              "abortWhen": "若攻击河内郡或魏郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+              "status": "continue",
+              "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。曹操控制我方首都东郡，并与我方在兖州接壤，构成直接威胁。袁绍占据冀州和青州，实力强大。刘备控制徐州和豫州部分地区。当前首要任务是扩张疆域，提升档位。选择攻击河内郡（司隶治所，由李傕控制）和魏郡（冀州治所，由袁绍控制）是提升档位（丙档和乙档）的最直接途径。调任吕布至山"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 1054
+          },
+          "events": [
+            {
+              "turn": 0,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：梁国 约 4618±8%（已探）、河内郡 约 4583±8%（已探）、济阴郡 约 6562±8%（已探）"
+            },
+            {
+              "turn": 0,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东郡 安民 心1→2、山阳郡 安民 心1→2、陈留郡 安民 心2→3"
+            },
+            {
+              "turn": 0,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 山阳郡（自 东郡）"
+            },
+            {
+              "turn": 0,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "强攻 河内郡 未克，折损后余 1725 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "陈宫（统率58）",
+                "守将": "张杨（统率60），副将 穆顺、杨丑",
+                "围城季": 0,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 0,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1054 金（本季入 768，军费 314）"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "record": {
+            "turn": 1,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11702,
+            "obsTokens": 8176,
+            "candidates": 59,
+            "picks": [
+              "withdraw:lubu:0:东郡>河内郡",
+              "appoint:东郡:zangba",
+              "appoint:东郡:panzhang",
+              "appoint:东平国:zhangliao",
+              "appoint:济北国:gaoshun",
+              "campaign:山阳郡>济阴郡:main",
+              "govern:东郡:soothe",
+              "govern:东平国:soothe",
+              "govern:任城国:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "withdraw:lubu:0:东郡>河内郡",
+                "appoint:东郡:zangba",
+                "appoint:东郡:panzhang",
+                "appoint:东平国:zhangliao",
+                "appoint:济北国:gaoshun",
+                "campaign:山阳郡>济阴郡:main",
+                "govern:东郡:soothe",
+                "govern:东平国:soothe",
+                "govern:任城国:soothe"
+              ],
+              "dropped": [],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0
+            },
+            "usage": {
+              "prompt": 17443,
+              "completion": 2020,
+              "cached": 10413,
+              "reasoning": 1597,
+              "cost": 0.00161513
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7829,
+            "provider": "Google",
+            "generationId": "gen-1790642738-fwJxIJdU8WdiSHOYMbFT",
+            "reason": "撤回河内郡围城部队，集结主力攻击兖州敌治所济阴郡，同时加强边境防御并安抚民心。",
+            "plan": {
+              "objective": "夺取济阴郡，巩固兖州控制，提升档位至丙档，并为后续扩张奠定基础。",
+              "target": "济阴郡",
+              "stance": "attack",
+              "preparation": "集结山阳郡主力部队，并调任将领至边境郡国，确保攻势顺利，同时通过安抚政策稳定后方。",
+              "abortWhen": "若攻击济阴郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+              "status": "continue",
+              "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。河内郡围城未果，部队损失不大，可撤回整编。济阴郡是兖州敌治所，且由吕布亲自坐镇的山阳郡可直接攻击，是提升档位（丙档）的最佳选择。同时，东郡作为首都，需要加强防御和安抚民心。调任将领至边境郡国，以应对潜在的曹操进攻。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 1,
+            "gold": 1321
+          },
+          "events": [
+            {
+              "turn": 1,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心1→2、东郡 安民 心2→3、任城国 安民 心1→2"
+            },
+            {
+              "turn": 1,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国、潘璋 驻 东郡、臧霸 驻 东郡、张辽 驻 东平国"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-lift",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 河内郡 撤围，携 1466 人退回 东郡"
+            },
+            {
+              "turn": 1,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "强攻 济阴郡 未克，折损后余 2004 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 4,
+                "主将": "吕布（统率82、武力100摧锋）",
+                "守将": "曹仁（统率83、守城适性），副将 曹操、夏侯渊",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "东平国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "任城国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut",
+              "faction": "lubu",
+              "text": "济北国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 1,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1321 金（本季入 542，军费 275）"
+            },
+            {
+              "turn": 1,
+              "kind": "supply-cut-low",
+              "faction": "lubu",
+              "text": "后路断绝，围 济阴郡 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 0,
+          "bytes": 51274,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 1,
+          "bytes": 53151,
+          "priorPlan": {
+            "objective": "夺取河内郡和魏郡，提升档位，并为后续扩张奠定基础。",
+            "target": null,
+            "stance": "attack",
+            "preparation": "集结主力部队，并侦察敌方关键郡国，确保攻势顺利。",
+            "abortWhen": "若攻击河内郡或魏郡的战损过大，或侦察结果显示敌方实力远超预期，则考虑调整策略。",
+            "status": "continue",
+            "review": "本季开局，我方控制兖州大部分地区，但实力尚弱（丁档）。曹操控制我方首都东郡，并与我方在兖州接壤，构成直接威胁。袁绍占据冀州和青州，实力强大。刘备控制徐州和豫州部分地区。当前首要任务是扩张疆域，提升档位。选择攻击河内郡（司隶治所，由李傕控制）和魏郡（冀州治所，由袁绍控制）是提升档位（丙档和乙档）的最直接途径。调任吕布至山"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 6,
+            "treasury": 1054,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "campaign:东郡>魏郡:main",
+              "why": "命令冲突：同一兵源、目标或对象本季已安排"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "siege",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 6,
+            "zhou": 1,
+            "gold": 1154
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：山阳郡 约 2496±8%（已探）、清河国 约 10069±8%（已探）、陈国 约 2589±8%（已探）"
+            },
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：昌豨 驻 济北国、高顺 驻 东平国（自 陈留郡）、侯成 驻 济北国、宋宪 驻 任城国、孙观 驻 东平国、吴敦 驻 任城国"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 3109 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 3109,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 3386,
+                "缺口": 5,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "高顺（统率74、攻城适性），副将 臧霸、孙观",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "强攻 济阴郡 未克，折损后余 3003 人转为围困",
+              "attribution": {
+                "缺口": 2,
+                "可防守": 4,
+                "主将": "张邈（统率50），副将 张超",
+                "守将": "曹仁（统率83、守城适性），副将 夏侯渊",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1154 金（本季入 150，军费 229）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 济阴郡 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1139
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "迁治于 东平国，下季生效"
+            },
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：上党郡 约 2734±8%（已探）、东郡 约 4159±8%（已探）、乐安国 约 5423±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 泰山郡（自 东平国）、张杨 驻 泰山郡（自 河内郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 济阴郡 城下，共 6027 人"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "彭城国",
+              "text": "强攻 彭城国 未克，折损后余 735 人转为围困",
+              "attribution": {
+                "缺口": 3,
+                "可防守": 3,
+                "主将": "魏续（统率54），副将 宋宪、吴敦",
+                "守将": "刘备（统率76），副将 黄盖、张纮",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 3 季，余 1562 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "济阴郡 乐进、夏侯渊、于禁 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "济阴郡",
+              "text": "自 陈留郡 取 济阴郡（原属 caocao）",
+              "attribution": {
+                "投入": 6027,
+                "缺口": 5,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "张邈（统率50），副将 张超",
+                "守将": "夏侯渊（统率82），副将 于禁、乐进",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1139 金（本季入 150，军费 165）"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-scatter",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师粮尽溃散"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 彭城国 之师存粮仅余 2 季"
+            }
+          ]
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "case": "siege",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "record": {
+            "turn": 2,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 12116,
+            "obsTokens": 8398,
+            "candidates": 60,
+            "picks": [
+              "campaign:东郡>河内郡:main",
+              "appoint:东郡:lubu",
+              "build:东郡:granary",
+              "build:东郡:market",
+              "build:东郡:office",
+              "scout:山阳郡",
+              "scout:陈国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东郡>河内郡:main",
+                "appoint:东郡:lubu",
+                "build:东郡:granary",
+                "scout:山阳郡",
+                "scout:陈国"
+              ],
+              "dropped": [
+                {
+                  "key": "build:东郡:market",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                },
+                {
+                  "key": "build:东郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 4,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 20011,
+              "completion": 1918,
+              "cached": 0,
+              "reasoning": 1536,
+              "cost": 0.00176775
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 13478,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642746-1WpBrHRdZLo39xjNuoRq",
+            "reason": "优先稳固东郡经济与后勤，同时对河内郡施以主力推进以扩大势力范围，并通过两次刺探获取关键情报以降低未知风险。三处建筑提升产出与治理，吕布落驻东郡以增强外防与出征能力，刺探补充情报以指引下一步行动。",
+            "plan": {
+              "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+              "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+              "status": "continue",
+              "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1011
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：山阳郡 约 2496±8%（已探）、陈国 约 2589±8%（已探）"
+            },
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：吕布 驻 东郡（自 济北国）"
+            },
+            {
+              "turn": 2,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "东郡 建成仓廪（−120 金）"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 3109 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 3109,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1011 金（本季入 150，军费 252）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "lubu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 12163,
+            "obsTokens": 8485,
+            "candidates": 60,
+            "picks": [
+              "scout:东郡",
+              "scout:河东郡",
+              "scout:河南尹",
+              "appoint:济北国:gaoshun",
+              "appoint:济北国:zangba",
+              "build:陈留郡:farmstead",
+              "build:陈留郡:granary",
+              "build:陈留郡:office",
+              "campaign:东平国>泰山郡:allout"
+            ],
+            "admission": {
+              "admitted": [
+                "scout:东郡",
+                "scout:河东郡",
+                "scout:河南尹",
+                "appoint:济北国:gaoshun",
+                "appoint:济北国:zangba",
+                "build:陈留郡:farmstead",
+                "build:陈留郡:granary",
+                "campaign:东平国>泰山郡:allout"
+              ],
+              "dropped": [
+                {
+                  "key": "build:陈留郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.1111111111111111
+            },
+            "usage": {
+              "prompt": 19977,
+              "completion": 1738,
+              "cached": 0,
+              "reasoning": 1344,
+              "cost": 0.00169405
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 2,
+            "elapsedMs": 16123,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642760-lOryuwjbdF6KFXkmNMoe",
+            "reason": "在本季内用可用的 AP 优先扩张兖州与周边，先刺探缩小未知区间，再通过调动与兴建提升长期产出与治理，最后以东平国对泰山郡的主力倾国行动快速打开局面，形成持久压力与信息优势。",
+            "plan": {
+              "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+              "target": null,
+              "stance": "develop",
+              "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+              "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+              "status": "continue",
+              "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 744
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "lubu",
+              "text": "刺探回报：东郡 约 4159±8%（已探）、河东郡 约 1704±8%（已探）、河南尹 约 3761±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国（自 陈留郡）、臧霸 驻 济北国（自 东平国）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "陈留郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "lubu",
+              "text": "陈留郡 建成仓廪（−120 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "泰山郡",
+              "text": "自 东平国 取 泰山郡（无主）",
+              "attribution": {
+                "投入": 2878,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 35,
+                "地形": "hill",
+                "主将": "无主将",
+                "守将": "泰山郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 744 金（本季入 150，军费 157）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 2,
+          "bytes": 53701,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 3,
+          "bytes": 53827,
+          "priorPlan": {
+            "objective": "在不超过本季AP的前提下，扩大在兖州及邻近州的控制与影响力，优先打通河内郡与巩固东郡。",
+            "target": null,
+            "stance": "develop",
+            "preparation": "完成对山阳郡和陈国的刺探以缩小对手阵势未知区间；在东郡布置基本工业与官府以提升长期产出和治理能力",
+            "abortWhen": "若对河内郡的攻势在本季确认不可行且损失过大，立即调整为稳固东郡与周边势力的防守与缓解民心压力",
+            "status": "continue",
+            "review": "当前通过对东郡的建设与对河内郡的主力推进，可在后续季数逐步扩大疆域与资源，维持对周边的压制与信息优势。"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 1011,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "build:东郡:market",
+              "why": "该郡本季令数已满"
+            },
+            {
+              "key": "build:东郡:office",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "siege",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "lubu",
+        "lands": 5,
+        "zhou": 1,
+        "gold": 1233
+      },
+      "frames": [
+        {
+          "turn": 3,
+          "record": {
+            "turn": 2,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 12116,
+            "obsTokens": 8398,
+            "candidates": 60,
+            "picks": [
+              "appoint:东郡:lubu",
+              "appoint:东郡:zangba",
+              "appoint:东平国:gaoshun",
+              "campaign:东郡>河内郡:main",
+              "campaign:东郡>济阴郡:main",
+              "muster:东郡:东郡+陈留郡",
+              "govern:东郡:soothe"
+            ],
+            "admission": {
+              "admitted": [
+                "appoint:东郡:lubu",
+                "appoint:东郡:zangba",
+                "appoint:东平国:gaoshun",
+                "campaign:东郡>河内郡:main",
+                "muster:东郡:东郡+陈留郡"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:东郡>济阴郡:main",
+                  "reason": "rejected",
+                  "detail": "命令冲突：同一兵源、目标或对象本季已安排"
+                },
+                {
+                  "key": "govern:东郡:soothe",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 6,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 17749,
+              "completion": 2261,
+              "cached": 10413,
+              "reasoning": 1596,
+              "cost": 0.00174213
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 8371,
+            "provider": "Google",
+            "generationId": "gen-1790642776-b4adkRR3ZAPJ6V30Csnu",
+            "reason": "吕布军团围攻河内郡和梁国，但东平、任城、济北三郡补给已断，且围城军团粮草仅余两季。本季首要任务是解决补给线问题，同时为后续进攻做准备。调动吕布和臧霸至东郡，高顺至东平国，以加强前线和后方防守。主力军团继续围攻河内郡，并尝试进攻济阴郡，同时在东郡集结兵力，并对东郡进行安民，以稳定局势。",
+            "plan": {
+              "objective": "稳定兖州局势，解决补给线问题，并为下一步扩张奠定基础。具体目标是：1. 恢复东平国、任城国、济北国的补给连通；2. 确保围攻河内郡和梁国的军团有足够的粮草和兵力",
+              "target": null,
+              "stance": "attack",
+              "preparation": "本季将调动核心将领吕布、臧霸至东郡，高顺至东平国，以加强防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡。在东郡集结兵力，并对东郡进行安民。若能成功解决补给线问题并巩固防守，下季将考虑向曹操或袁绍",
+              "abortWhen": "若围攻河内郡和济阴郡的军团遭遇重大损失，或东郡集结的兵力不足以应对潜在威胁，则立即停止进攻，转为固守并优先解决补给线问题。",
+              "status": "continue",
+              "review": "上季报告显示，东平国、任城国、济北国三郡补给已断，围攻梁国和河内郡的军团粮草仅余两季，形势严峻。本季首要任务是解决补给线问题。通过调动吕布、臧霸、高顺等将领，加强关键区域的防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡，以期打开局面。在东郡集结兵力，并对东郡进行安民，以稳定后方。此策略旨在稳固现有领土，解决燃眉之"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 1132
+          },
+          "events": [
+            {
+              "turn": 2,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 东平国（自 陈留郡）、吕布 驻 东郡（自 济北国）、臧霸 驻 东郡（自 东平国）"
+            },
+            {
+              "turn": 2,
+              "kind": "muster",
+              "faction": "lubu",
+              "text": "于 东郡 集结 5403 人待命"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-reinforce",
+              "faction": "lubu",
+              "text": "增兵 河内郡 城下，共 7189 人"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 2 季，余 1775 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "officer-captured",
+              "faction": "lubu",
+              "text": "河内郡 董昭、司马朗 被俘"
+            },
+            {
+              "turn": 2,
+              "kind": "siege-win",
+              "faction": "lubu",
+              "at": "河内郡",
+              "text": "自 东郡 取 河内郡（原属 zhangyang）",
+              "attribution": {
+                "投入": 7189,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 48,
+                "地形": "river",
+                "主将": "曹性（统率52），副将 陈宫",
+                "守将": "董昭（统率52），副将 司马朗",
+                "围城季": 1,
+                "我军": "步卒×0.80",
+                "阵": "方圆对鹤翼（被克，−1 缺口）",
+                "敌军": "弓弩守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 2,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1132 金（本季入 150，军费 251）"
+            },
+            {
+              "turn": 2,
+              "kind": "capital-lost-low",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师存粮仅余 1 季"
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "lubu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11004,
+            "obsTokens": 7758,
+            "candidates": 60,
+            "picks": [
+              "relocate:河内郡",
+              "govern:河内郡:soothe",
+              "campaign:河内郡>东郡:main",
+              "relief:东平国>任城国",
+              "govern:东平国:soothe",
+              "govern:任城国:stock",
+              "appoint:济北国:gaoshun",
+              "appoint:济北国:zhangyang",
+              "govern:济北国:soothe",
+              "appoint:陈留郡:songxian",
+              "appoint:陈留郡:wudun",
+              "govern:陈留郡:forge"
+            ],
+            "admission": {
+              "admitted": [
+                "relocate:河内郡",
+                "govern:河内郡:soothe",
+                "relief:东平国>任城国",
+                "govern:东平国:soothe",
+                "govern:任城国:stock",
+                "appoint:济北国:gaoshun",
+                "appoint:济北国:zhangyang",
+                "appoint:陈留郡:songxian",
+                "appoint:陈留郡:wudun"
+              ],
+              "dropped": [
+                {
+                  "key": "campaign:河内郡>东郡:main",
+                  "reason": "rejected",
+                  "detail": "起点郡本季令数已满"
+                },
+                {
+                  "key": "govern:济北国:soothe",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "govern:陈留郡:forge",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                }
+              ],
+              "spent": 8,
+              "mojibake": 0,
+              "illegalRate": 0.25
+            },
+            "usage": {
+              "prompt": 17023,
+              "completion": 2131,
+              "cached": 10413,
+              "reasoning": 1598,
+              "cost": 0.00161753
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 7977,
+            "provider": "Google",
+            "generationId": "gen-1790642785-TW2Hud5cON0iSKfmc57A",
+            "reason": "首要任务是夺回失陷的治所东郡，恢复全境补给线。同时，解除任城国之围，并稳定兖州三郡的局势，为后续反攻积蓄力量。",
+            "plan": {
+              "objective": "夺回东郡，恢复全境补给；解除任城国之围；稳定东平、任城、济北三郡的补给与民心。",
+              "target": "东郡",
+              "stance": "attack",
+              "preparation": "调动吕布、臧霸至河内郡，集结主力进攻东郡。高顺、张杨调往济北国加强防守。东平国、任城国、济北国进行安民与屯粮，解除任城国之围。",
+              "abortWhen": "若进攻东郡的部队遭遇重大损失，或无法在两季内恢复东郡的补给连通，则立即放弃进攻，转为固守河内郡，并优先解决兖州三郡的补给问题。",
+              "status": "continue",
+              "review": "本季形势极为严峻，治所东郡已失，全境补给断绝，任城国被围，东平国、济北国、河内郡亦补给中断。首要目标是夺回东郡以恢复补给线。派遣主力从河内郡进攻东郡，并调动将领加强济北国防守。同时，解除任城国之围，并对东平、任城、济北进行内政建设，稳定局势。此策略旨在先解决生存危机，再图发展。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "lubu",
+            "lands": 4,
+            "zhou": 0,
+            "gold": 1027
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "迁治于 河内郡，下季生效"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "lubu",
+              "text": "内政：东平国 安民 心2→3、任城国 屯粮（已至上限） −48 金、河内郡 安民 心2→3"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "lubu",
+              "text": "任命：高顺 驻 济北国（自 东平国）、宋宪 驻 陈留郡、吴敦 驻 陈留郡、张杨 驻 济北国（自 河内郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "lubu",
+              "at": "任城国",
+              "text": "任城国 城下野战，破 liubei 围城之师",
+              "attribution": {
+                "我军": 3386,
+                "敌军": 1323,
+                "战力比": 2.25,
+                "围城季": 1,
+                "结果": "溃退",
+                "我将": "东平国守将（统率52）",
+                "敌将": "刘备（统率76），副将 张纮、简雍",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "plain"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "relief",
+              "faction": "lubu",
+              "text": "任城国 解围，2878 人入城"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "lubu",
+              "at": "梁国",
+              "text": "围 梁国 第 3 季，余 1562 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "张辽（统率88、攻城适性），副将 潘璋",
+                "守将": "梁国守将（统率52）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost",
+              "faction": "lubu",
+              "text": "治所 东郡已失，全境政令不通，本季无产出"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "lubu",
+              "text": "国库 1027 金（本季入 150，军费 207）"
+            },
+            {
+              "turn": 3,
+              "kind": "capital-lost-scatter",
+              "faction": "lubu",
+              "text": "治所已失，围 梁国 之师粮尽溃散"
+            },
+            {
+              "turn": 3,
+              "kind": "relocate",
+              "faction": "lubu",
+              "text": "治所已迁至 河内郡"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 2,
+          "bytes": 53701,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 3,
+          "bytes": 52072,
+          "priorPlan": {
+            "objective": "稳定兖州局势，解决补给线问题，并为下一步扩张奠定基础。具体目标是：1. 恢复东平国、任城国、济北国的补给连通；2. 确保围攻河内郡和梁国的军团有足够的粮草和兵力",
+            "target": null,
+            "stance": "attack",
+            "preparation": "本季将调动核心将领吕布、臧霸至东郡，高顺至东平国，以加强防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡。在东郡集结兵力，并对东郡进行安民。若能成功解决补给线问题并巩固防守，下季将考虑向曹操或袁绍",
+            "abortWhen": "若围攻河内郡和济阴郡的军团遭遇重大损失，或东郡集结的兵力不足以应对潜在威胁，则立即停止进攻，转为固守并优先解决补给线问题。",
+            "status": "continue",
+            "review": "上季报告显示，东平国、任城国、济北国三郡补给已断，围攻梁国和河内郡的军团粮草仅余两季，形势严峻。本季首要任务是解决补给线问题。通过调动吕布、臧霸、高顺等将领，加强关键区域的防守和指挥。主力军团继续围攻河内郡，并尝试进攻济阴郡，以期打开局面。在东郡集结兵力，并对东郡进行安民，以稳定后方。此策略旨在稳固现有领土，解决燃眉之"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 1132,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "campaign:东郡>济阴郡:main",
+              "why": "命令冲突：同一兵源、目标或对象本季已安排"
+            },
+            {
+              "key": "govern:东郡:soothe",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "multifront",
+      "model": "bot",
+      "provider": null,
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 6,
+            "zhou": 0,
+            "gold": 2700
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）、九江郡 约 3428±8%（已探）、会稽郡 约 10301±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "gongsundu",
+              "text": "内政：东海郡 屯粮（已至上限） −48 金"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙恭 驻 东海郡（自 东莱郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东莱郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 城下野战，破 liubei 围城之师",
+              "attribution": {
+                "我军": 2125,
+                "敌军": 1899,
+                "战力比": 1.38,
+                "围城季": 1,
+                "结果": "后撤",
+                "我将": "程普（统率78、水战适性），副将 公孙恭",
+                "敌将": "陈登（统率76），副将 糜芳、糜竺",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "river"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "relief",
+              "faction": "gongsundu",
+              "text": "东莱郡 解围，1594 人入城"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "gongsundu",
+              "text": "增兵 北海国 城下，共 2777 人"
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 2777,
+                "缺口": 5,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2700 金（本季入 969，军费 57）"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 7,
+            "zhou": 0,
+            "gold": 3593
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：泰山郡 约 3216±8%（已探）、琅邪国 约 1404±8%（已探）、齐国 约 6349±8%（已探）"
+            },
+            {
+              "turn": 4,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙度 驻 北海国（自 东莱郡）、公孙康 驻 北海国（自 东莱郡）、管宁 驻 辽西郡、郑玄 驻 辽东郡"
+            },
+            {
+              "turn": 4,
+              "kind": "transfer",
+              "faction": "gongsundu",
+              "text": "自 乐浪郡 调兵 541 人至 东莱郡"
+            },
+            {
+              "turn": 4,
+              "kind": "march-out",
+              "faction": "gongsundu",
+              "text": "2114 人自 东莱郡 发向 辽东属国，道远，1 季方至"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "右北平郡",
+              "text": "自 北海国 取 右北平郡（原属 gongsunzan）",
+              "attribution": {
+                "投入": 1324,
+                "缺口": 3,
+                "可防守": 0,
+                "城防": 20,
+                "地形": "river",
+                "主将": "公孙度（统率72、水战适性），副将 公孙康",
+                "守将": "右北平郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×0.96",
+                "阵": "方圆对鱼鳞（克，+1 缺口）",
+                "敌军": "骑兵守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "isolated",
+              "faction": "gongsundu",
+              "text": "辽东属国 四邻皆我所有，孤悬无援，城中存粮尚可支 1 季"
+            },
+            {
+              "turn": 4,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 3593 金（本季入 965，军费 72）"
+            }
+          ]
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "case": "multifront",
+      "model": "openai/gpt-5-nano",
+      "provider": "OpenAI",
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "gongsundu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 11293,
+            "obsTokens": 8087,
+            "candidates": 54,
+            "picks": [
+              "campaign:东海郡>广陵郡:main",
+              "build:东海郡:ironworks",
+              "build:东海郡:office",
+              "scout:下邳国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东海郡>广陵郡:main",
+                "build:东海郡:ironworks",
+                "scout:下邳国"
+              ],
+              "dropped": [
+                {
+                  "key": "build:东海郡:office",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 3,
+              "mojibake": 0,
+              "illegalRate": 0.25
+            },
+            "usage": {
+              "prompt": 19910,
+              "completion": 1988,
+              "cached": 0,
+              "reasoning": 1664,
+              "cost": 0.0017907
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 15549,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642793-8kUpyDlG1HbbR5eQc4pJ",
+            "reason": "本季优先从东海郡扩大控制并提升产出与治理能力，先行打下广陵郡以实现控州目标，同时通过铁官/官府建设增强后续作战与财政能力，探取下邳国以补充情报与可能的后续攻势。",
+            "plan": {
+              "objective": "在东海郡上打下广陵郡以实现再取2郡控州治，逐步扩大控制区并提升地方产出与治理能力",
+              "target": null,
+              "stance": "develop",
+              "preparation": "优先完成铁官与官府建设以提升产出与屯田收益；利用探察巩固情报，确保后续攻势的信息基础",
+              "abortWhen": "若本季无法在广陵郡取得有效进展且敌情突变，则改为优先下邳国或会稽郡的攻势，并调整内政与情报优先级",
+              "status": "continue",
+              "review": "当前计划以东海郡为核心，优先建设与情报提升再推进广陵郡的实战目标，确保在不超出本季令数与资源的前提下增强后续阶段的统一进程"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 5,
+            "zhou": 0,
+            "gold": 2406
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东海郡 建成铁官（−240 金）"
+            },
+            {
+              "turn": 3,
+              "kind": "field-win",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "广陵郡 城下野战，破 yanbaihu 围城之师",
+              "attribution": {
+                "我军": 1461,
+                "敌军": 1552,
+                "战力比": 1.68,
+                "围城季": 0,
+                "结果": "溃退",
+                "我将": "程普（统率78）",
+                "敌将": "严舆（统率44），副将 钱铜、邹他",
+                "我兵种": "步卒",
+                "敌兵种": "步卒",
+                "地形": "plain"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "围 北海国 第 2 季，余 1294 人转为围困",
+              "attribution": {
+                "缺口": 3,
+                "可防守": 3,
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "强攻 广陵郡 未克，折损后余 807 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "程普（统率78）",
+                "守将": "广陵郡守将（统率52）",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 3 季）"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2406 金（本季入 740，军费 70）"
+            },
+            {
+              "turn": 3,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 广陵郡 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "record": {
+            "turn": 4,
+            "seat": "gongsundu",
+            "model": "openai/gpt-5-nano",
+            "promptVersion": "1.17.0",
+            "obsChars": 9075,
+            "obsTokens": 6372,
+            "candidates": 40,
+            "picks": [
+              "campaign:东莱郡>东海郡:allout",
+              "campaign:辽东郡>辽东属国:allout",
+              "transfer:乐浪郡>辽东郡",
+              "transfer:乐浪郡>东莱郡",
+              "build:辽东郡:granary",
+              "build:乐浪郡:office",
+              "build:东莱郡:farmstead"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东莱郡>东海郡:allout",
+                "campaign:辽东郡>辽东属国:allout",
+                "transfer:乐浪郡>辽东郡",
+                "build:乐浪郡:office",
+                "build:东莱郡:farmstead"
+              ],
+              "dropped": [
+                {
+                  "key": "transfer:乐浪郡>东莱郡",
+                  "reason": "rejected",
+                  "detail": "调兵兵力或目的地容量已被其他命令预留"
+                },
+                {
+                  "key": "build:辽东郡:granary",
+                  "reason": "rejected",
+                  "detail": "该郡本季令数已满"
+                }
+              ],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0.2857142857142857
+            },
+            "usage": {
+              "prompt": 17922,
+              "completion": 1798,
+              "cached": 0,
+              "reasoning": 1408,
+              "cost": 0.0016153
+            },
+            "structured": true,
+            "rung": "schema-notemp",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 11141,
+            "provider": "OpenAI",
+            "generationId": "gen-1790642808-BOfFFEd2AVR3NBUrTeDy",
+            "reason": "本季优先扩大核心战线与巩固前线后方，利用两路攻势并通过调兵和兴建提升后续产出与补给能力，确保资源在攻防拉扯中扩张并避免周边断供。",
+            "plan": {
+              "objective": "通过东莱郡与辽东郡两路攻势，尽快削弱对手核心防线并取得对东海与辽东属国的控制权，逐步扩大州治与生产能力",
+              "target": null,
+              "stance": "develop",
+              "preparation": "优先完成铁官与官府建设以提升产出、屯田收益和国库安全；使用刺探获取情报并以免费调动确保前线兵力衔接",
+              "abortWhen": "若本季无法在广陵郡等目标取得明显进展且局势恶化，则改为优先巩固北线并调整内政与情报优先级",
+              "status": "continue",
+              "review": "通过多线推进与资源分配，期望在本季完成对辽东属国与东海郡的攻防态势，同时确保补给线不断，避免断供导致全局崩溃"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 7,
+            "zhou": 0,
+            "gold": 2818
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "东莱郡 建成屯田（−140 金）"
+            },
+            {
+              "turn": 4,
+              "kind": "build",
+              "faction": "gongsundu",
+              "text": "乐浪郡 建成官府（−200 金）"
+            },
+            {
+              "turn": 4,
+              "kind": "transfer",
+              "faction": "gongsundu",
+              "text": "自 乐浪郡 调兵 541 人至 辽东郡"
+            },
+            {
+              "turn": 4,
+              "kind": "field-fail",
+              "faction": "gongsundu",
+              "at": "东海郡",
+              "text": "东海郡 城下野战大败，未能解围",
+              "attribution": {
+                "我军": 980,
+                "敌军": 2202,
+                "战力比": 0.2,
+                "围城季": 0,
+                "结果": "大败",
+                "我将": "公孙康（统率72），副将 公孙恭",
+                "敌将": "吕范（统率76、水战适性），副将 韩当",
+                "我兵种": "步卒",
+                "敌兵种": "水军",
+                "地形": "river"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 1294,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 40,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 2,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "广陵郡 曹豹、樊能、于麋 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "广陵郡",
+              "text": "自 东海郡 取 广陵郡（原属 liuyao）",
+              "attribution": {
+                "投入": 807,
+                "缺口": 4,
+                "可防守": 2,
+                "城防": 30,
+                "地形": "plain",
+                "主将": "程普（统率78）",
+                "守将": "曹豹（统率50），副将 樊能、于麋",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "辽东属国 难楼 被俘"
+            },
+            {
+              "turn": 4,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "辽东属国",
+              "text": "自 辽东郡 取 辽东属国（原属 wuhuan）",
+              "attribution": {
+                "投入": 1615,
+                "缺口": 5,
+                "可防守": 1,
+                "城防": 41,
+                "地形": "plain",
+                "主将": "无主将",
+                "守将": "难楼（统率50）",
+                "围城季": 0,
+                "我军": "骑兵×1.55",
+                "阵": "鱼鳞对鱼鳞",
+                "敌军": "骑兵守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut",
+              "faction": "gongsundu",
+              "text": "广陵郡 补给断绝，本季无产出"
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut",
+              "faction": "gongsundu",
+              "text": "北海国 补给断绝，本季无产出"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2818 金（本季入 800，军费 48）"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 3,
+          "bytes": 52910,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        },
+        {
+          "turn": 4,
+          "bytes": 48512,
+          "priorPlan": {
+            "objective": "在东海郡上打下广陵郡以实现再取2郡控州治，逐步扩大控制区并提升地方产出与治理能力",
+            "target": null,
+            "stance": "develop",
+            "preparation": "优先完成铁官与官府建设以提升产出与屯田收益；利用探察巩固情报，确保后续攻势的信息基础",
+            "abortWhen": "若本季无法在广陵郡取得有效进展且敌情突变，则改为优先下邳国或会稽郡的攻势，并调整内政与情报优先级",
+            "status": "continue",
+            "review": "当前计划以东海郡为核心，优先建设与情报提升再推进广陵郡的实战目标，确保在不超出本季令数与资源的前提下增强后续阶段的统一进程"
+          },
+          "feedback": {
+            "target": null,
+            "lands": 5,
+            "treasury": 2406,
+            "ownership": "global"
+          },
+          "dropped": [
+            {
+              "key": "build:东海郡:office",
+              "why": "该郡本季令数已满"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "multifront",
+      "model": "google/gemini-2.5-flash-lite",
+      "provider": "Google",
+      "before": {
+        "id": "gongsundu",
+        "lands": 6,
+        "zhou": 0,
+        "gold": 1976
+      },
+      "frames": [
+        {
+          "turn": 4,
+          "record": {
+            "turn": 3,
+            "seat": "gongsundu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 11293,
+            "obsTokens": 8087,
+            "candidates": 54,
+            "picks": [
+              "campaign:东莱郡>北海国:main",
+              "campaign:东海郡>下邳国:main",
+              "govern:东海郡:stock",
+              "govern:东莱郡:stock",
+              "appoint:东海郡:gongsunkang",
+              "appoint:东海郡:gongsungong",
+              "suade:supuyan",
+              "suade:tadun",
+              "scout:广陵郡",
+              "scout:九江郡",
+              "scout:下邳国"
+            ],
+            "admission": {
+              "admitted": [
+                "campaign:东莱郡>北海国:main",
+                "campaign:东海郡>下邳国:main",
+                "govern:东海郡:stock",
+                "govern:东莱郡:stock",
+                "appoint:东海郡:gongsunkang",
+                "scout:广陵郡",
+                "scout:九江郡",
+                "scout:下邳国"
+              ],
+              "dropped": [
+                {
+                  "key": "appoint:东海郡:gongsungong",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "suade:supuyan",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                },
+                {
+                  "key": "suade:tadun",
+                  "reason": "over-budget",
+                  "detail": "余 0 令，需 1"
+                }
+              ],
+              "spent": 7,
+              "mojibake": 0,
+              "illegalRate": 0.2727272727272727
+            },
+            "usage": {
+              "prompt": 17442,
+              "completion": 2010,
+              "cached": 0,
+              "reasoning": 1598,
+              "cost": 0.0025482
+            },
+            "structured": true,
+            "rung": "schema",
+            "maxTokens": 8000,
+            "starved": 0,
+            "finishReason": "stop",
+            "attempts": 1,
+            "elapsedMs": 8469,
+            "provider": "Google",
+            "generationId": "gen-1790642820-0K5a53AEpda9bkPX0vMi",
+            "reason": "集中兵力攻取北海国，同时对下邳国施压，并为后续攻势做好准备。",
+            "plan": {
+              "objective": "本季攻克北海国，并对下邳国形成有效威胁，同时侦察扬州和徐州的关键目标。",
+              "target": "北海国",
+              "stance": "attack",
+              "preparation": "集结主力于东莱郡，准备攻打北海国。侦察广陵、九江、下邳，为下一步行动提供情报。",
+              "abortWhen": "若北海国守军远超预期，或东莱郡的补给线受到严重威胁。",
+              "status": "continue",
+              "review": "上季东莱郡围攻北海国，虽未破城，但已大幅削弱守军，本季主力进攻有望破城。东海郡的部队已抵达，可用于牵制下邳国守军，并伺机夺取徐州治所。侦察扬州和徐州的关键郡国，为后续扩张做准备。目前我方兵力尚可，但需警惕刘备和袁绍的潜在反击。"
+            }
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 6,
+            "zhou": 0,
+            "gold": 2691
+          },
+          "events": [
+            {
+              "turn": 3,
+              "kind": "scout",
+              "faction": "gongsundu",
+              "text": "刺探回报：下邳国 约 3418±8%（已探）、九江郡 约 3428±8%（已探）、广陵郡 约 1484±8%（已探）"
+            },
+            {
+              "turn": 3,
+              "kind": "govern",
+              "faction": "gongsundu",
+              "text": "内政：东海郡 屯粮（已至上限） −48 金、东莱郡 屯粮（已至上限） −48 金"
+            },
+            {
+              "turn": 3,
+              "kind": "appoint",
+              "faction": "gongsundu",
+              "text": "任命：公孙康 驻 东海郡（自 东莱郡）"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-reinforce",
+              "faction": "gongsundu",
+              "text": "增兵 北海国 城下，共 2368 人"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "下邳国",
+              "text": "强攻 下邳国 未克，折损后余 950 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 3,
+                "主将": "程普（统率78），副将 公孙康",
+                "守将": "袁术（统率52），副将 陈珪、陈群",
+                "围城季": 0,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "officer-captured",
+              "faction": "gongsundu",
+              "text": "北海国 孙邵 被俘"
+            },
+            {
+              "turn": 3,
+              "kind": "siege-win",
+              "faction": "gongsundu",
+              "at": "北海国",
+              "text": "自 东莱郡 取 北海国（原属 kongrong）",
+              "attribution": {
+                "投入": 2368,
+                "缺口": 4,
+                "可防守": 3,
+                "城防": 45,
+                "地形": "plain",
+                "主将": "公孙度（统率72），副将 公孙渊",
+                "守将": "孙邵（统率40）",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "步卒守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 3,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 4 季）"
+            },
+            {
+              "turn": 3,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 2691 金（本季入 871，军费 60）"
+            },
+            {
+              "turn": 3,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 下邳国 之师存粮仅余 2 季"
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "record": {
+            "turn": 4,
+            "seat": "gongsundu",
+            "model": "google/gemini-2.5-flash-lite",
+            "promptVersion": "1.17.0",
+            "obsChars": 9562,
+            "obsTokens": 6709,
+            "candidates": 47,
+            "picks": [],
+            "admission": {
+              "admitted": [],
+              "dropped": [],
+              "spent": 0,
+              "illegalRate": 0,
+              "mojibake": 0
+            },
+            "usage": null,
+            "structured": false,
+            "rung": null,
+            "maxTokens": 0,
+            "starved": 0,
+            "finishReason": null,
+            "attempts": 0,
+            "elapsedMs": 0,
+            "failureKind": "harness",
+            "failure": "预留费用触顶，停止"
+          },
+          "rejected": [],
+          "after": {
+            "id": "gongsundu",
+            "lands": 6,
+            "zhou": 0,
+            "gold": 3500
+          },
+          "events": [
+            {
+              "turn": 4,
+              "kind": "siege-hold",
+              "faction": "gongsundu",
+              "at": "下邳国",
+              "text": "围 下邳国 第 2 季，余 836 人转为围困",
+              "attribution": {
+                "缺口": 0,
+                "可防守": 2,
+                "主将": "程普（统率78），副将 公孙康",
+                "守将": "袁术（统率52），副将 陈珪、陈群",
+                "围城季": 1,
+                "我军": "步卒×1.00",
+                "阵": "方圆对方圆",
+                "敌军": "水军守",
+                "器械": "none"
+              }
+            },
+            {
+              "turn": 4,
+              "kind": "besieged",
+              "faction": "gongsundu",
+              "at": "东莱郡",
+              "text": "东莱郡 被围，本季无产出（存粮尚可支 3 季）"
+            },
+            {
+              "turn": 4,
+              "kind": "treasury",
+              "faction": "gongsundu",
+              "text": "国库 3500 金（本季入 871，军费 62）"
+            },
+            {
+              "turn": 4,
+              "kind": "supply-cut-low",
+              "faction": "gongsundu",
+              "text": "后路断绝，围 下邳国 之师存粮仅余 1 季"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "turn": 3,
+          "bytes": 52910,
+          "priorPlan": null,
+          "feedback": null,
+          "dropped": []
+        }
+      ]
+    }
+  ],
+  "prices": {
+    "openai/gpt-5-nano": {
+      "input": 5e-8,
+      "output": 4e-7
+    },
+    "google/gemini-2.5-flash-lite": {
+      "input": 1e-7,
+      "output": 4e-7
+    }
+  },
+  "releasedUsd": 0.06685255,
+  "completed": true,
+  "heldUsd": 0.14618345
+}

@@ -1,0 +1,116 @@
+{
+  "runtimeSha256": "37a356d0a4389ebcd83dfebc28436539921afa80102d0fde042f67668b2daf67",
+  "sourceSha256": "8ba25f8e90f74915b22117d4f05f5eed6509d70afc8e74acdca8c346f4be5f44",
+  "calls": 0,
+  "seasons": 8,
+  "losses": 94,
+  "missingFromText": 6,
+  "missingFromChanges": 0,
+  "examples": [
+    {
+      "turn": 2,
+      "faction": "liubei",
+      "absentFromText": [
+        "沛国"
+      ],
+      "changes": {
+        "turn": 1,
+        "gained": [],
+        "lost": [
+          "东海郡",
+          "沛国"
+        ],
+        "goldDelta": -195
+      }
+    },
+    {
+      "turn": 3,
+      "faction": "liubei",
+      "absentFromText": [
+        "琅邪国"
+      ],
+      "changes": {
+        "turn": 2,
+        "gained": [
+          "九江郡"
+        ],
+        "lost": [
+          "广陵郡",
+          "琅邪国"
+        ],
+        "goldDelta": 52
+      }
+    },
+    {
+      "turn": 3,
+      "faction": "liuzhang",
+      "absentFromText": [
+        "犍为属国"
+      ],
+      "changes": {
+        "turn": 2,
+        "gained": [],
+        "lost": [
+          "犍为属国"
+        ],
+        "goldDelta": 190
+      }
+    },
+    {
+      "turn": 4,
+      "faction": "lubu",
+      "absentFromText": [
+        "任城国"
+      ],
+      "changes": {
+        "turn": 3,
+        "gained": [
+          "济阴郡"
+        ],
+        "lost": [
+          "东平国",
+          "任城国"
+        ],
+        "goldDelta": -15
+      }
+    },
+    {
+      "turn": 8,
+      "faction": "yuanshao",
+      "absentFromText": [
+        "太原郡"
+      ],
+      "changes": {
+        "turn": 7,
+        "gained": [
+          "任城国",
+          "济北国"
+        ],
+        "lost": [
+          "上谷郡",
+          "太原郡"
+        ],
+        "goldDelta": 684
+      }
+    },
+    {
+      "turn": 8,
+      "faction": "gongsunzan",
+      "absentFromText": [
+        "定襄郡"
+      ],
+      "changes": {
+        "turn": 7,
+        "gained": [
+          "上谷郡",
+          "北海国",
+          "太原郡"
+        ],
+        "lost": [
+          "定襄郡"
+        ],
+        "goldDelta": 1133
+      }
+    }
+  ]
+}

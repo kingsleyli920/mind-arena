@@ -1,0 +1,60 @@
+{
+  "pack": "2.3.0",
+  "prompt": "1.18.0",
+  "observation": "1.4.0",
+  "save": 11,
+  "scenarioDecisions": 12,
+  "scenarioAttempts": 14,
+  "admitted": 76,
+  "dropped": 18,
+  "engineRejections": 0,
+  "repeatWarnings": 2,
+  "scenarioReportedUsd": 0.020493896666666664,
+  "scenarioHeldUsd": 0.11072449666666663,
+  "scenarioLimitUsd": 0.2,
+  "browser": {
+    "model": "google/gemini-2.5-flash-lite",
+    "seat": "liubei",
+    "seasons": 2,
+    "decisions": 2,
+    "attempts": 2,
+    "admitted": 22,
+    "dropped": 0,
+    "reportedUsdApprox": 0.0033,
+    "latestLost": [
+      "沛国"
+    ],
+    "latestGoldDelta": -182,
+    "capitalHeld": true,
+    "capital": "东海郡",
+    "restoredAfterReload": true,
+    "allowance": "2/4",
+    "paused": true,
+    "consoleErrors": 0,
+    "visual": "已检查实际结算复盘截图，文字正常换行且未遮挡地图"
+  },
+  "engineering": {
+    "testsPassed": 200,
+    "testsFailed": 0,
+    "typecheck": true,
+    "lint": true,
+    "build": true,
+    "observationSeatSeasons": 333,
+    "observationPeakEstimatedTokens": 9834,
+    "unificationPriorRunsIdentical": true
+  },
+  "sourceHashes": {
+    "lib/game/engine/season-outcome.ts": "fe4e5f67421a4ca97c03cc36d98078e416fb3bd6e62b1f9d13b7fa21362351b5",
+    "lib/game/engine/observe.ts": "19c857365d78512cc719a123d4a6aaeac3d21671abb05575ec7cdf85a852500a",
+    "lib/game/engine/resolve.ts": "d6949ff62bf1a190b8edc8b16e58b077f30022e687c9f5c56c7014c262325b28",
+    "lib/game/engine/types.ts": "f350c5bfa814f3e3d6955b071d15239b582e8c4915b6f340d0672572afc7e0cb",
+    "lib/arena/seat/prompt.ts": "5069f78b485ebd8971cdf8c47d73344b54d2eb77b77b480f184fd55a6934ef45",
+    "lib/arena/seat/model-seat.ts": "2ea88784300ab85485b54623740be56df4e15f2e93b0506e8875c3d330dbe12e",
+    "lib/game/save.ts": "080388d3ecdcc124d75add6ceb8cf583e0db26989bae3b2179580964c7d464df",
+    "app/play/SeasonReviewView.tsx": "c32401164aef027d6327b9bc2379cfe020a41c9decd756d60ef8ba70b100b007",
+    "app/play/SessionPanel.tsx": "8b5019a64bd016bc44f049782fb2920a7091079170489ead751a286a9a7d49f7",
+    "tools/feedback-audit.mjs": "29a38e1356ee73e5da06503b38f8085d2173f138484802419a9a4885f28aa524",
+    "tools/balance-audit.mjs": "ed4bd4463c9bf706113bc34edd919e6c5c901729fa31101105ad019bf29d11ed",
+    "tools/strategy-cases.mjs": "6267872f351380f5bd1bcafda88fe95b4eaaffe0b6e1c244440ff43a1315b898"
+  }
+}
