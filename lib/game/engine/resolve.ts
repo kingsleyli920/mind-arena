@@ -1,3 +1,6 @@
+import { OrderBudget, allocateTransfers } from "./order-budget.ts";
+import { summarizeSeason } from "./season-outcome.ts";
+import { besiegedBy } from "./siege.ts";
 // 确定性同时裁决。
 //
 // 两条硬性要求，都会被测试逐条检验：
@@ -8,9 +11,10 @@
 //   1. 先 canonicalOrder 规范化排序，再按阶段推进，不依赖提交顺序
 //   2. 所有随机取数都带完整坐标（含事件序号），序号来自规范化后的位次
 //   3. 同一目标被多方同时进攻时，用确定性规则裁决先后，而非数组顺序
+import { upkeepFor } from "./economy.ts";
 import { roll } from "./rng.ts";
 import { canonicalOrder, orderCost, governPrice, BUILD_CN, GEAR_CN, KIND_CN, POLICY_CN, type Graph,
-  type Rules, DEFAULT_RULES, validate, orderSites, submitChance } from "./actions.ts";
+  type Rules, DEFAULT_RULES, orderSites, submitChance, submissionTerms } from "./actions.ts";
 import { observedGarrison } from "./intel.ts";
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
   FORMATION_CN, unitPower, unitGuard,
@@ -108,44 +112,6 @@ function provGainOf(s: GameState, c: CommanderyState, g: Graph, P: EngineParams)
 /** 已经站到城下的围城军（在途的不算）。凡是「城下有没有兵」的判据都走这个 */
 const atWalls = (a: Army): boolean => !!a.target && a.marchLeft <= 0;
 
-/**
- * 这座城本季是不是被**有效围困**。
- *
- * 判据不是「有没有敌军指着它」，是围城军兵力够不够。此前不问兵力，
- * 于是一支六百人的军团就能把两万守军的大郡产出锁死，代价只有一次首攻折损——
- * 顿兵封锁比攻城划算得多，而那正是这套规则最不想鼓励的打法。
- *
- * 比值取野战的相持比 0.8：那是这个引擎里既有的「打不动但缠得住」的刻度。
- * 比的是**裸守军**，不含地形守备加成——守方的地利用在打，不该再用来抗饿。
- */
-function besiegedBy(s: GameState, id: CommanderyId, byOthersThan: FactionId | null,
-                    P: EngineParams, g?: Graph): boolean {
-  const c = s.commanderies[id];
-  if (!c) return false;
-  let force = 0;
-  const who = new Map<FactionId, number>();
-  for (const a of s.armies) {
-    if (a.target !== id || !atWalls(a)) continue;   // 还在路上的不算围
-    if (byOthersThan !== null && a.faction === byOthersThan) continue;
-    force += a.troops;
-    who.set(a.faction, (who.get(a.faction) ?? 0) + a.troops);
-  }
-  if (force === 0) return false;
-  if (force >= c.garrison * P.siegeGripRatio) return true;
-  // 合围：兵力不够，但这座城的邻郡半数以上已在围城方手中——四面都是他的地，
-  // 城里出不来、外面进不去，不必再问他带了多少人。
-  // 只看兵力比是错的：首攻失手折 35%，于是本来与守军相当的部队打完就掉到 0.65 倍，
-  // 围不住了，守方一兵不损、存粮不减，僵在那儿。实测 33% 的围城军卡在这一条
-  if (!g || !P.siegeEncircle) return false;
-  const nbs = (g.adj.get(id) ?? []).map((e) => s.commanderies[e.to]).filter((x) => !!x);
-  if (!nbs.length) return false;
-  for (const [f] of who) {
-    const held = nbs.filter((n) => n.owner === f).length;
-    if (held * 2 > nbs.length) return true;
-  }
-  return false;
-}
-
 function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId }, troops: number): void {
   if (troops <= 0) return;
   const besieged = (id: CommanderyId) =>
@@ -157,6 +123,9 @@ function returnHome(s: GameState, army: { faction: FactionId; home: CommanderyId
     .sort((a, b) => cmp(a.id, b.id))[0];
   if (fallback) fallback.garrison += troops;
 }
+
+
+
 
 /**
  * 背盟：盟约到期前撕毁，或攻打盟友。
@@ -332,8 +301,9 @@ export function resolve(
   // 逐条校验并扣令。校验用的是**推进中的状态**，因此同一势力
   // 超额下令会被后面的条目自然拒绝，无需额外配额账本。
   const accepted: Order[] = [];
+  const reservation = new OrderBudget(prev, g, roster, P, rules, geo);
   for (const o of queue) {
-    const reason = validate(s, o, g, rules, roster, P);
+    const reason = reservation.take(o);
     if (reason) { rejected.push({ order: o, reason }); continue; }
     const a = o.action;
     // 计费口径只有 actions.ts 的 orderCost 一份。此前这里各写了一遍三元表达式，
@@ -387,6 +357,7 @@ export function resolve(
     (id && roster?.byId.get(id)?.name) || id || "无";
 
   for (const o of accepted) {
+    if (s.factions[o.faction].eliminated) continue;
     const a = o.action;
     if (a.type === "scout") {
       (s.intel[o.faction] ??= {})[a.at] = s.turn + P.intelValidSeasons;
@@ -399,10 +370,10 @@ export function resolve(
       const mineN = Object.values(s.commanderies).filter((c) => c.owner === o.faction).length;
       const theirs = Object.values(s.commanderies).filter((c) => c.owner === a.to);
       // 结算处与候选必须同一套判据，否则界面放行的令会被引擎悄悄吃掉
-      if (tgt && !tgt.eliminated && theirs.length
-          && standingOf(s, geo, o.faction).controlledZhou >= P.submitMinZhou) {
+      const terms = geo ? submissionTerms(s, o.faction, a.to, g, P, geo) : null;
+      if (tgt && terms) {
         const morale = theirs.reduce((n, c) => n + c.moraleTier, 0) / theirs.length;
-        const p = submitChance(P, mineN, theirs.length, morale);
+        const p = submitChance(P, mineN, theirs.length, morale, terms.ratio);
         const r = roll({ seed: s.seed, year: s.year, season: s.season,
                          faction: o.faction, event: `submit:${a.to}`, seq: 0 });
         if (r < p) {
@@ -413,6 +384,7 @@ export function resolve(
             if (theirs.some((c) => c.id === at)) s.stations[oid] = at;
           }
           for (const army of s.armies) if (army.faction === a.to) army.faction = o.faction;
+          for (const captive of s.captives) if (captive.by === a.to) captive.by = o.faction;
           s.factions[o.faction].gold += tgt.gold;
           // 归降来的郡算不算「夺自他方」：算。丙档要的是「必须进攻才能拿」，
           // 而劝降只在把对方打到只剩一两郡之后才够得着，那本来就是打出来的
@@ -475,6 +447,11 @@ export function resolve(
       receipt(o.faction).appoint.push(
         `${officerName(a.officer)} 驻 ${a.at}${from && from !== a.at ? `（自 ${from}）` : ""}`);
     }
+  }
+
+  // 归降退出的一方不再执行预先提交的后续命令，避免易帜后又凭旧令夺回领土。
+  for (let i = accepted.length - 1; i >= 0; i--) {
+    if (s.factions[accepted[i].faction].eliminated) accepted.splice(i, 1);
   }
 
   // ── 阶段二：内政 ──────────────────────────────────────────────────
@@ -616,6 +593,18 @@ export function resolve(
       }
       log(s, { kind: "retire", faction: o.faction, text: "归隐，弃治所外全部郡国" });
     }
+  }
+
+  // 调兵同时扣减、同时到达。接收的兵不能在同季经第二条命令再转运。
+  const transfers = allocateTransfers(s, accepted, P);
+  for (const { order, troops } of transfers) {
+    const a = order.action;
+    if (a.type !== "transfer" || troops <= 0) continue;
+    s.commanderies[a.from].garrison -= troops;
+    log(s, { kind: "transfer", faction: order.faction, text: `自 ${a.from} 调兵 ${troops} 人至 ${a.to}` });
+  }
+  for (const { order, troops } of transfers) {
+    if (order.action.type === "transfer") s.commanderies[order.action.to].garrison += troops;
   }
 
   // ── 阶段四：集结 ──────────────────────────────────────────────────
@@ -1132,6 +1121,7 @@ export function resolve(
   for (const f of Object.values(s.factions)) {
     if (f.eliminated) continue;
     const goldRows: number[] = [];
+    const growth = new Map<CommanderyId, number>();
     const reach = supplyReach(s, g, f.id);
     // 治所已失时 supplyReach 返回空集：全境不可达。但那不是「补给线被切断」，
     // 是一个不可逆的状态——实测断供里 63% 是这一种，且其中 66.8% 随即被灭，
@@ -1192,6 +1182,7 @@ export function resolve(
       }
       const gov = roster ? governEffect(governorOf(s, roster, c.id, P), P) : null;
       const factor = P.moraleBase + c.moraleTier / P.moraleDivisor;
+      const beforeRecruit = c.garrison;
       c.garrison = Math.min(
         // 校场增戍；屯田是八种里唯一有减项的——军屯拿戍兵去种地，
         // 《置屯田令》「定国之术，在于强兵足食」，兵与食本就在抢同一批人
@@ -1200,6 +1191,7 @@ export function resolve(
           * (c.buildings.includes("farmstead") ? P.farmsteadDrillMul : 1)
           * (cutHalf ? P.officeCutYield : 1)),
         P.garrisonCap);
+      growth.set(c.id, c.garrison - beforeRecruit);
       // 金与兵同源同条件：补给通畅、未被围的郡才产出。
       // 金按**产出档**算而非原始户数——户数跨度 42–528551（一万两千倍），
       // 而产出档本身就是 log10(户数)（实测相关 0.95），已把户口编码进去了
@@ -1248,6 +1240,25 @@ export function resolve(
         + `\n    合计入 ${income.toFixed(0)} 金`);
     }
 
+    // 自动补兵不能先扩到养不起、再把已在前线的老兵一并逃散。
+    // 当季收入先保障现有兵力，只用余款支付新增守军的军费；手动募兵仍由玩家承担代价。
+    if (P.goldOn) {
+      const funds = Math.min(P.goldCap, f.gold + Math.round(income));
+      const fullCost = upkeepFor(s, f.id, P);
+      const growthCost = [...growth].reduce((sum, [id, n]) => sum + n * P.goldUpkeepPerTroop
+        * (s.commanderies[id].buildings.includes("farmstead") ? P.farmsteadUpkeepCut : 1), 0);
+      if (fullCost > funds && growthCost > 0) {
+        const keep = Math.max(0, 1 - (fullCost - funds) / growthCost);
+        let delayed = 0;
+        for (const [id, n] of growth) {
+          const lost = n - Math.floor(n * keep);
+          s.commanderies[id].garrison -= lost; delayed += lost;
+        }
+        if (delayed) log(s, { kind: "recruit-limited", faction: f.id,
+          text: `军费优先保障现有兵力，本季暂缓补充 ${delayed} 名守军` });
+      }
+    }
+
     const myArmies = s.armies.filter((x) => x.faction === f.id);
     const myLands = Object.values(s.commanderies).filter((c) => c.owner === f.id);
     const troops = myArmies.reduce((n, a) => n + a.troops, 0)
@@ -1257,15 +1268,12 @@ export function resolve(
     // 而它对着的是这个引擎里最痛的那处：实测袁绍终局十八万兵、国库归零、
     // 一季两次「军费不继，某某人逃亡」。
     // 计费的兵按郡分开算：军团按全额（在外无田可耕），守军看它所在郡有没有屯田
-    const billable = myArmies.reduce((n, a) => n + a.troops, 0)
-      + myLands.reduce((n, c) => n + c.garrison
-          * (c.buildings.includes("farmstead") ? P.farmsteadUpkeepCut : 1), 0);
-    const upkeep = P.goldOn ? Math.round(billable * P.goldUpkeepPerTroop) : 0;
+    const upkeep = upkeepFor(s, f.id, P);
     if (P.goldOn) {
       tr(f.id, `  【军费】守军 ${fmt0(myLands.reduce((n, c) => n + c.garrison, 0))}`
         + ` + 军团 ${fmt0(myArmies.reduce((n, a) => n + a.troops, 0))}`
-        + ` = ${fmt0(troops)} 人（屯田折抵后计费 ${fmt0(billable)}）`
-        + ` × ${P.goldUpkeepPerTroop} = ${upkeep} 金`
+        + ` = ${fmt0(troops)} 人（已计屯田减免）`
+        + `，军费 ${upkeep} 金（每兵 ${P.goldUpkeepPerTroop}，屯田折扣已计入）`
         + `\u3000国库 ${Math.round(f.gold)} → ${Math.round(Math.min(P.goldCap, f.gold + Math.round(income)) - upkeep)}`);
     }
     f.gold = Math.min(P.goldCap, f.gold + Math.round(income));
@@ -1508,7 +1516,8 @@ export function resolve(
                text: `天下一统（控 ${standingOf(s, geo, champ).controlledZhou} 州）` });
     }
   }
-  if (s.turn >= s.seasonsPerGame) s.finished = true;
+  if (s.endCondition === "season-limit" && s.turn >= s.seasonsPerGame) s.finished = true;
 
+  s.lastOutcome = summarizeSeason(prev, s);
   return { state: s, rejected };
 }

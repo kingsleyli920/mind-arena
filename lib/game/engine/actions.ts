@@ -8,7 +8,7 @@ import { recruitable, retinueAt, stationedAt, troopCap, isFiller, governorOf,
   type OfficerRef, type Roster }
   from "./officers.ts";
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
-import { forecastCampaign, forecastField, forecastReinforce, projectSiege }
+import { forecastCampaign, forecastField, forecastReinforce, projectSiege, projectCampaign }
   from "./forecast.ts";
 import { formationEdge, FORMATION_CN } from "./combat.ts";
 import { suadeChance } from "./officers.ts";
@@ -197,12 +197,28 @@ const remainingAp = (s: GameState, f: FactionId) => s.factions[f]?.ap ?? 0;
  * 夹在 [0.05, 0.9]：留 5% 是不让「必不成功」，压到 9 成是不让它变成必然，
  * 否则一到门槛就自动过户，劝降就不是决策了
  */
+/** 归降的统一门槛：候选、准入与结算使用相同条件。 */
+export function submissionTerms(s: GameState, faction: FactionId, target: FactionId,
+  g: Graph, P: EngineParams, geo: Geography): { ratio: number; mine: number; theirs: number } | null {
+  if (faction === target || !s.factions[target] || s.factions[target].eliminated
+      || s.factions[target].retired || s.turn < submitBanUntil(s, target)) return null;
+  const own = Object.values(s.commanderies).filter((c) => c.owner === faction);
+  const theirs = Object.values(s.commanderies).filter((c) => c.owner === target).length;
+  if (!theirs || !own.some((c) => (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner === target))) return null;
+  const zhou = standingOf(s, geo, faction).controlledZhou;
+  const hegemony = zhou >= P.submitHegemonyZhou;
+  const ratio = hegemony ? P.submitHegemonyRatio : P.submitRatio;
+  if (zhou < P.submitMinZhou || (!hegemony && theirs > P.submitMaxCommanderies)
+      || own.length < theirs * ratio) return null;
+  return { ratio, mine: own.length, theirs };
+}
+
 export function submitChance(
-  P: EngineParams, mine: number, theirs: number, morale: number,
+  P: EngineParams, mine: number, theirs: number, morale: number, threshold = P.submitRatio,
 ): number {
   const ratio = theirs > 0 ? mine / theirs : P.submitRatio;
   const p = P.submitBase - morale * P.submitPerMorale
-    + Math.max(0, ratio - P.submitRatio) * P.submitPerRatio;
+    + Math.max(0, ratio - threshold) * P.submitPerRatio;
   return Math.max(0.05, Math.min(0.9, p));
 }
 
@@ -218,9 +234,44 @@ export function submitBanUntil(s: GameState, target: FactionId): number {
   return 0;
 }
 
+/** 后方到最近边境的己方道路跳数。用于列出可执行的逐郡调兵路线。 */
+export function frontDistances(s: GameState, g: Graph, f: FactionId): Map<string, number> {
+  const distances = new Map<string, number>();
+  const queue: string[] = [];
+  for (const c of Object.values(s.commanderies)) {
+    if (c.owner === f && (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f)) {
+      distances.set(c.id, 0); queue.push(c.id);
+    }
+  }
+  for (let i = 0; i < queue.length; i++) {
+    for (const e of g.adj.get(queue[i]) ?? []) {
+      if (s.commanderies[e.to]?.owner !== f || distances.has(e.to)) continue;
+      distances.set(e.to, distances.get(queue[i])! + 1); queue.push(e.to);
+    }
+  }
+  return distances;
+}
+
+/** 调兵保留至少一半守军，并且不能超过目的地驻军上限。 */
+/** 是否能把后方或统兵负担较小处的将领集中到前线；边际比较避免次季原路调回。 */
+export function reinforcesFront(s: GameState, g: Graph, f: FactionId,
+  from: CommanderyId, to: CommanderyId, sourceCount: number, targetCount: number): boolean {
+  const front = (id: CommanderyId) => (g.adj.get(id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
+  if (!front(to) || sourceCount <= 0) return false;
+  if (!front(from)) return true;
+  return s.commanderies[to].garrison / (targetCount + 1)
+    > s.commanderies[from].garrison / sourceCount;
+}
+
+export function transferAmount(s: GameState, from: CommanderyId, to: CommanderyId, P: EngineParams): number {
+  return Math.max(0, Math.min(Math.floor((s.commanderies[from]?.garrison ?? 0) * P.musterTake),
+    P.garrisonCap - (s.commanderies[to]?.garrison ?? P.garrisonCap)));
+}
+
 export function orderSites(a: Action): CommanderyId[] {
   return a.type === "campaign" ? [a.from]
     : a.type === "muster" ? [...a.from]
+    : a.type === "transfer" ? [a.from, a.to]
     : a.type === "govern" || a.type === "array" || a.type === "build" ? [a.at]
     : a.type === "relocate" ? [a.to]
     : [];
@@ -381,9 +432,21 @@ export function listActions(
     for (const [tid, e] of fr.best) {
       routes.push([tid, e]);
       const a = fr.alt.get(tid);
-      if (a && a.from !== e.from
+      if (s.endCondition === "unification") {
+        // 同样快的路也可能由完全不同的编制出兵，保留实际战力最强的方向。
+        const strongest = (g.adj.get(tid) ?? []).filter((edge) => s.commanderies[edge.to]?.owner === f)
+          .map((edge) => {
+            const src = s.commanderies[edge.to];
+            const corps = retinueAt(s, roster, src.id, P);
+            const force = Math.min(src.garrison * P.strengthRatio.allout,
+              troopCap(corps, P) * (src.buildings.includes("stud") ? P.studTroopMul : 1));
+            return { edge, power: force * attackRetinue(corps, P, edge.terrain).attackMul };
+          }).sort((x, y) => y.power - x.power || cmp(x.edge.to, y.edge.to))[0];
+        if (strongest && strongest.edge.to !== e.from) routes.push([tid,
+          { ...strongest.edge, from: strongest.edge.to }]);
+      } else if (a && a.from !== e.from
           && marchSeasons(a.cost, false, P) !== marchSeasons(e.cost, false, P)) {
-        routes.push([tid, a]);       // 只在**行军季数真的不同**时才多列一条
+        routes.push([tid, a]);
       }
     }
     const targets = routes
@@ -429,9 +492,14 @@ export function listActions(
       // 「豫州 共 6 郡，我 3，无主 3｜再取 1 郡即控制」，候选表里却没有梁国，
       // 模型于是把令花在反复刺探上（86 条），确认一件它改不了的事。
       // 简报与候选表在对模型说两套话，这不是这套评测想测的维度
-      .filter((x) => canOrder(x.e.from)
-        && (x.ratio > 0.35 || (geo ? gainOf(s, geo, f, x.tid)?.upgrade != null : false)))
-      .sort((a, b) => b.ratio - a.ratio || cmp(a.tid, b.tid))
+      .filter((x) => s.commanderies[x.e.from]?.owner === f && canOrder(x.e.from)
+        && (x.ratio > 0.35 || s.armies.some((a) => a.faction === f && a.target === x.tid)
+          || (geo ? gainOf(s, geo, f, x.tid)?.upgrade != null : false)))
+      .sort((a, b) => {
+        const ongoing = (id: string) => s.endCondition === "unification"
+          && s.armies.some((army) => army.faction === f && army.target === id) ? 1 : 0;
+        return ongoing(b.tid) - ongoing(a.tid) || b.ratio - a.ratio || cmp(a.tid, b.tid);
+      })
       .slice(0, rules.perTypeCap);
 
     for (const { tid, e, seen } of targets) {
@@ -567,12 +635,18 @@ export function listActions(
               type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
               strength, siegeGear: src0.gear,
             }, g, P, roster, send);
+        const projected = projectCampaign(s, f, {
+          type: "campaign", from: e.from, target: tid, strength,
+          commander: lead?.id ?? null, siegeGear: src0.gear,
+        }, send, g, P, roster);
         out.push({
           key: `campaign:${e.from}>${tid}:${strength}`,
           action: { type: "campaign", target: tid, from: e.from, commander: lead?.id ?? null,
                     strength, siegeGear: src0.gear },
           cost: rules.campaignAp,
           forecast: fc ?? undefined,
+          mobilization: { troops: send, left },
+          project: projected ? { seasons: projected.seasons, reinforcement: projected.reinforcement } : undefined,
           field: ffc ? { ratioLo: ffc.ratioLo, ratioHi: ffc.ratioHi,
                          verdict: ffc.verdict, text: ffc.text } : undefined,
           gain: gn,
@@ -588,6 +662,7 @@ export function listActions(
                + `；${P.terrainName[e.terrain] ?? e.terrain}${gateNote}${leadNote}`
                + `${ffc ? `｜先野战：${ffc.text}` : fc ? `｜${fc.text}` : ""}`
                + `${bareNote}${coalition}${marchNote}${resNote}${unitNote}${armyNote}${siegeNote}`
+               + `${projected && projected.seasons !== null && projected.seasons > 0 ? `｜守方不变${projected.reinforcement ? `且次轮增兵${projected.reinforcement}人` : ""}时再围${projected.seasons}季可破（不计行军/欠饷）` : ""}`
                + `${gn ? gainNote(gn) : ""}${betrayNote}`,
         });
       }
@@ -731,6 +806,23 @@ export function listActions(
         label: `于${at}集结，自${take.join("、")}抽调约 ${total} 人`,
       });
     }
+  }
+
+  // ── 调兵：由后方沿己方道路逐郡支援边境，围城不能绕过粮道限制 ─────
+  if (ap >= rules.normalAp) {
+    const distance = frontDistances(s, g, f);
+    const routes = mine.flatMap((src) => (g.adj.get(src.id) ?? []).flatMap((e) => {
+      if (s.commanderies[e.to]?.owner !== f || !canOrder(src.id) || !canOrder(e.to)
+          || besiegedNow(s, src.id, f) || besiegedNow(s, e.to, f)) return [];
+      const fromDistance = distance.get(src.id) ?? Infinity, toDistance = distance.get(e.to) ?? Infinity;
+      if (fromDistance <= toDistance) return [];
+      const troops = transferAmount(s, src.id, e.to, P);
+      return troops >= P.siegeMinTroops ? [{ from: src.id, to: e.to, troops, toDistance }] : [];
+    })).sort((a, b) => a.toDistance - b.toDistance || b.troops - a.troops || cmp(a.from, b.from) || cmp(a.to, b.to))
+      .slice(0, Math.min(6, rules.perTypeCap));
+    for (const r of routes) out.push({ key: `transfer:${r.from}>${r.to}`,
+      action: { type: "transfer", from: r.from, to: r.to }, cost: rules.normalAp,
+      label: `自${r.from}调兵${r.troops}人至${r.to}（保留至少半数守军，${r.toDistance === 0 ? "支援边境" : "向边境转运"}）` });
   }
 
   // ── 治：每郡只给最该做的那一项，不把四个方针全铺开 ──────────────────
@@ -992,61 +1084,17 @@ export function listActions(
     }
   }
 
-  // ── 劝降势力：接壤、弱小、且被自己碾压时才给 ────────────────────────
-  //
-  // 门槛定得严（对方 ≤2 郡且自己是其 6 倍以上），是为了让它只在
-  // 「对方已近覆亡」时出现。放宽就是一台滚雪球放大器：它会把评测最看重的
-  // 「开局↔得分相关系数」推高，而那正是测得出模型强弱的前提。
-  //
-  // 没有这一条天下就收不拢：实测长局终局是「两强 + 长尾」，
-  // 四局合计 32 家以整整一个郡活到最后，硬打打不动
-  //
-  // 判据看的是**劝降方够不够强**，不是对方有多小。曹操建安二十年能收汉中，
-  // 是因为他已据有大半个北方；兴平元年谁也做不到。这一条同时挡住了两件事：
-  //   一、开局就小的席位被规则直接判死——只看绝对大小时，曹操（开局一郡）
-  //       第一季就符合「弱小」，实测出局率从 45% 飙到 92%、
-  //       策略差异从 48.9 塌到 22.2；
-  //   二、16 季评测被污染——十六季里没有势力控得到三州，
-  //       所以评测口径完全不受影响，而长局的霸主够得着
-  //
-  // 门槛用**州数**而不是郡数：郡数 20 在十六季里就够得着（实测曹操出局率
-  // 45%→67%），而「据三州之地」是霸主的量级，短局里到不了
-  const myZhou = geo ? standingOf(s, geo, f).controlledZhou : 0;
-  if (ap >= rules.normalAp && myZhou >= P.submitMinZhou) {
-    const mineCount = mine.length;
-    const owned = new Set(mine.map((c) => c.id));
-    const foes = new Map<FactionId, { n: number; morale: number }>();
-    for (const c of Object.values(s.commanderies)) {
-      if (!c.owner || c.owner === f) continue;
-      const cur = foes.get(c.owner) ?? { n: 0, morale: 0 };
-      cur.n += 1; cur.morale += c.moraleTier;
-      foes.set(c.owner, cur);
-    }
-    const adjacent = new Set<FactionId>();
-    for (const id of owned) {
-      for (const e of g.adj.get(id) ?? []) {
-        const o2 = s.commanderies[e.to]?.owner;
-        if (o2 && o2 !== f) adjacent.add(o2);
-      }
-    }
-    const cands2 = [...foes]
-      .filter(([id, v]) => adjacent.has(id)
-        && !s.factions[id]?.eliminated && !s.factions[id]?.retired
-        && v.n <= P.submitMaxCommanderies
-        && mineCount >= v.n * P.submitRatio
-        && s.turn >= (submitBanUntil(s, id) ?? 0))
-      .sort((a, b) => a[1].n - b[1].n || cmp(a[0], b[0]))
-      .slice(0, rules.perTypeCap);
-    for (const [id, v] of cands2) {
-      const pct = Math.round(submitChance(P, mineCount, v.n, v.morale / v.n) * 100);
-      out.push({
-        key: `submit:${id}`,
-        action: { type: "submit", to: id },
-        cost: rules.normalAp,
-        label: `劝降${nameOf(id)}（其 ${v.n} 郡，我 ${mineCount} 郡；`
-             + `其民心均 ${(v.morale / v.n).toFixed(1)} 档`
-             + `｜成功 ${pct}%，成则疆土武将尽归我；不成则两季内不再受劝）`,
-      });
+  // ── 劝降势力：初期收小势力，霸业形成后可作区域归降 ──────────────
+  if (ap >= rules.normalAp && geo) {
+    for (const id of Object.keys(s.factions).sort(cmp)) {
+      const terms = submissionTerms(s, f, id, g, P, geo);
+      if (!terms) continue;
+      const theirs = Object.values(s.commanderies).filter((c) => c.owner === id);
+      const morale = theirs.reduce((sum, c) => sum + c.moraleTier, 0) / theirs.length;
+      const pct = Math.round(submitChance(P, terms.mine, terms.theirs, morale, terms.ratio) * 100);
+      out.push({ key: `submit:${id}`, action: { type: "submit", to: id }, cost: rules.normalAp,
+        label: `劝降${nameOf(id)}（其 ${terms.theirs} 郡，我 ${terms.mine} 郡；`
+          + `其民心均 ${morale.toFixed(1)} 档｜成功 ${pct}%，成则疆土武将尽归我；不成则两季内不再受劝）` });
     }
   }
 
@@ -1205,7 +1253,9 @@ export function listActions(
           // 纵有十万戍兵也只出得动一支偏师
           const have = stationedAt(s, roster, c.id).length;
           return { c, front, fit, have,
-                   weight: c.yieldTier * 10 + (front ? 25 : 0) + (P.retinueCap - have) * 20 };
+                   weight: s.endCondition === "unification"
+                     ? (front ? 100 : 0) + Math.min(P.retinueCap, c.garrison / P.troopsPerOfficer) * 20 - have * 20
+                     : c.yieldTier * 10 + (front ? 25 : 0) + (P.retinueCap - have) * 20 };
         })
         .sort((a, b) => b.weight - a.weight || cmp(a.c.id, b.c.id))
         .slice(0, 4);
@@ -1224,7 +1274,9 @@ export function listActions(
           // 实测机器人让同五个人来回搬了十一季，黄忠的轨迹是
           // 南阳→长沙→桂阳→江夏→零陵→京兆→南海→京兆→长沙…
           // 有了这条，反向那一步下季就不再是候选，震荡自然消失
-          return stationedAt(s, roster, at).length > have;
+          const sourceCount = stationedAt(s, roster, at).length;
+          return (s.endCondition === "unification"
+            && reinforcesFront(s, g, f, at, c.id, sourceCount, have)) || sourceCount > have;
         }).sort((x, y) => fit(y) - fit(x) || cmp(x.id, y.id));
         const best = vi === 0 ? ranked.slice(0, 2)
           : ranked.filter((o) => !shown.has(o.id)).slice(0, 2);
@@ -1326,7 +1378,7 @@ export function listActions(
 /** 校验一条命令是否合法。返回 null 表示合法，否则给出拒绝理由 */
 export function validate(
   s: GameState, o: Order, g: Graph, rules: Rules = DEFAULT_RULES,
-  roster: Roster | null = null, P: EngineParams | null = null,
+  roster: Roster | null = null, P: EngineParams | null = null, geo: Geography | null = null,
 ): string | null {
   const f = s.factions[o.faction];
   if (!f) return "未知势力";
@@ -1374,6 +1426,14 @@ export function validate(
       if (!edge) return "目标与起点不邻接";
       if (!quota(a.from)) return "起点郡本季令数已满";
       return null;
+    }
+    case "transfer": {
+      if (!P) return "缺少调兵规则";
+      if (!own(a.from) || !own(a.to)) return "调兵两端须属己方";
+      if (!(g.adj.get(a.from) ?? []).some((e) => e.to === a.to)) return "调兵只可沿相邻己方道路";
+      if (besiegedNow(s, a.from, o.faction) || besiegedNow(s, a.to, o.faction)) return "被围城池不可调兵";
+      if (!quota(a.from) || !quota(a.to)) return "调兵郡本季令数已满";
+      return transferAmount(s, a.from, a.to, P) > 0 ? null : "无可调兵力或目的地已满";
     }
     case "muster": {
       if (!own(a.at)) return "集结地非己方所有";
@@ -1469,6 +1529,7 @@ export function validate(
       const tgt = s.factions[a.to];
       if (!tgt || tgt.eliminated || tgt.retired) return "该势力已不在场";
       if (a.to === o.faction) return "不能劝降自己";
+      if (P && geo && !submissionTerms(s, o.faction, a.to, g, P, geo)) return "未满足归降实力、州数或接壤条件";
       if (s.turn < (submitBanUntil(s, a.to) ?? 0)) return "该势力新近拒降，暂不再受劝";
       return null;
     }
@@ -1510,7 +1571,7 @@ export function validate(
 export function canonicalOrder(orders: readonly Order[]): Order[] {
   const phase = (t: Action["type"]) =>
     ({ scout: 0, suade: 1, appoint: 1, array: 2, govern: 2, build: 2, relocate: 2, passage: 3,
-       ally: 4, submit: 4, invest: 4, muster: 5, withdraw: 6, seize: 6.5, campaign: 7,
+       ally: 4, submit: 4, invest: 4, transfer: 4.5, muster: 5, withdraw: 6, seize: 6.5, campaign: 7,
        retire: 8 })[t] ?? 9;
   return [...orders].sort((x, y) =>
     phase(x.action.type) - phase(y.action.type)

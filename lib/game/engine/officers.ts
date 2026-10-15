@@ -176,15 +176,28 @@ export function retinueAt(
  * 「占了颍川才用得上荀彧」——这给争夺人才郡一个理由，而不是开局分完拉倒。
  */
 export function recruitable(s: GameState, r: Roster, f: FactionId): OfficerRef[] {
-  const out: OfficerRef[] = [];
+  const available = new Map<OfficerId, OfficerRef>();
   // 本方武将一律可调——「已在任」不再是排除条件，因为现在人人都有驻地，
   // 按旧规则可调的人恒为空集。调任的本体就是把人从一个郡挪到另一个郡：
   // 「把关羽调到江夏」此前根本无法表达
   const away = new Set<OfficerId>();
   for (const a of s.armies) for (const oid of a.retinue) away.add(oid);
-  for (const o of r.byFaction.get(f) ?? []) {
-    // 随军在外的不能调——他正在城下围着
-    if (!away.has(o.id) && !s.capturedOfficers.includes(o.id)) out.push(o);
+  const captured = new Set(s.capturedOfficers);
+  const usable = (id: OfficerId) => !away.has(id) && !captured.has(id);
+  // 驻地所有者是收编后的当前归属；名册 faction 只表示开局归属。
+  for (const [id, at] of Object.entries(s.stations)) {
+    const o = r.byId.get(id);
+    if (o && s.commanderies[at]?.owner === f && usable(id)) available.set(id, o);
+  }
+  // 势力整体归降时，尚未任职的人也随之归属新主；允许多次归降链。
+  for (const [original, members] of r.byFaction) {
+    let owner = original;
+    const seen = new Set<FactionId>();
+    while (s.factions[owner]?.submittedTo && !seen.has(owner)) {
+      seen.add(owner); owner = s.factions[owner].submittedTo!;
+    }
+    if (owner !== f) continue;
+    for (const o of members) if (!s.stations[o.id] && usable(o.id)) available.set(o.id, o);
   }
   const busy = postedOfficers(s);
   const pool = new Set(s.recruitPool);
@@ -194,10 +207,10 @@ export function recruitable(s: GameState, r: Roster, f: FactionId): OfficerRef[]
       // 在野者还需落在本局抽定的名单里——同一剧本换个 seed，可用的人才就不同。
       // 这是内容包声明的开局唯一随机源
       if (!pool.has(o.id)) continue;
-      if (!busy.has(o.id) && !s.capturedOfficers.includes(o.id)) out.push(o);
+      if (!busy.has(o.id) && usable(o.id)) available.set(o.id, o);
     }
   }
-  return out.sort((a, b) => cmp(a.id, b.id));
+  return [...available.values()].sort((a, b) => cmp(a.id, b.id));
 }
 
 // ── 五维折算成战斗与内政系数 ────────────────────────────────────────

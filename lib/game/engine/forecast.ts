@@ -1,3 +1,4 @@
+import { besiegedBy } from "./siege.ts";
 // 攻城预告：把「打不打得下」按**观测量**算给对局方看。
 //
 // 为什么必须有这一层：候选标签此前写的是 `比 ${src.garrison / 敌守军}`，
@@ -12,9 +13,9 @@
 import { breachCount, fieldOutcome, formationEdge, formAtkBonus, formDefBonus,
          FORMATION_CN, unitPower, unitGuard, siegeBreachDelta } from "./combat.ts";
 import { garrisonBand, observedFormation, tierOf } from "./intel.ts";
-import { attackRetinue, defendRetinue, retinueAt, type Roster } from "./officers.ts";
+import { attackRetinue, defendRetinue, retinueAt, troopCap, type Roster } from "./officers.ts";
 import type { Graph } from "./actions.ts";
-import type { EngineParams } from "./params.ts";
+import { provCapOf, siegeEat, type EngineParams } from "./params.ts";
 import type { Action, Army, CommanderyId, FactionId, GameState } from "./types.ts";
 
 export interface SiegeForecast {
@@ -126,11 +127,11 @@ export function forecastSiege(
  * 且逐字调用同一个 breachCount，不可能与结算说两套话。
  *
  * 取战力浮动的下界（与 forecastSiege 的判词同口径）：报「保守估计还要几季」，
- * 真实浮动只会更早破，不会更晚。
+ * 不计守方新命令、援军、行军和欠饷；局势改变时需重新估计。
  */
 export function projectSiege(
   s: GameState, viewer: FactionId, army: Army,
-  g: Graph, P: EngineParams, roster: Roster | null,
+  g: Graph, P: EngineParams, roster: Roster | null, reinforcement = 0,
 ): { seasons: number | null; text: string } | null {
   const tgt0 = army.target ? s.commanderies[army.target] : null;
   const src = s.commanderies[army.home];
@@ -162,6 +163,7 @@ export function projectSiege(
   let prov = tgt0.provisions;
   let ss = army.siegeSeasons;
   for (let n = 0; ; n += 1) {
+    if (n === 1) troops += reinforcement;
     const bonus = (atk?.breachBonus ?? 0) + siegeBreachDelta(ss, P) + formEdge
       + formAtkBonus(P, src.formation);
     const r = breachCount(P, troops * (1 - P.jitter) * mul, garrison * guard,
@@ -170,24 +172,21 @@ export function projectSiege(
       return { seasons: n,
                text: n === 0 ? "本季即破" : `照此耗法还要 ${n} 季可破` };
     }
-    // 守方那只钟：城中存粮每季 −1，归零则不战自下。围城由**先响的那只**结束，
-    // 所以前瞻必须同时推两只——只推强攻那只，会把「打不动但围得死」报成「围不下来」。
-    //
-    // **但要围得住才扣粮**：兵力不足守军的 siegeGripRatio 倍就断不了粮道。
-    // 不查这一条的话前瞻会报一个虚的「再围 N 季粮尽」，而实际上守方一粒米都不少——
-    // 那正是「围了半天围不下来」的来源之一
-    if (troops >= garrison * P.siegeGripRatio) {
-      if (prov - 1 <= 0) {
-        return { seasons: n, text: n === 0 ? "本季城中粮尽，可不战而下" : `再围 ${n} 季城中粮尽` };
-      }
-      prov -= 1;
-    }
     // 首季是强攻，此后转围困——两档折损不同，外推必须跟着分
     troops = Math.round(troops * (1 - (ss === 0 ? P.failLossRatio : P.siegeAttackerLoss)));
     garrison = Math.max(P.siegeGarrisonFloor,
                         Math.round(garrison * (1 - P.siegeDefenderLoss)));
     defense = Math.max(P.siegeDefenseFloor, defense - P.siegeDefenseErosion);
     ss += 1;
+    // 与结算同序：折损后判断封锁，按剩余守军规模扣粮；合围也能截粮。
+    const target = { ...tgt0, garrison, defense, provisions: prov };
+    const projected = { ...s, commanderies: { ...s.commanderies, [target.id]: target },
+      armies: [{ ...army, troops, marchLeft: 0, siegeSeasons: ss }] };
+    if (besiegedBy(projected, target.id, target.owner, P, g)) {
+      prov -= siegeEat(target, P);
+      if (prov <= 0) return { seasons: n,
+        text: n === 0 ? "本季城中粮尽，可不战而下" : `再围 ${n} 季城中粮尽` };
+    }
     if (ss >= P.siegeMaxSeasons || troops < P.siegeMinTroops) {
       return { seasons: null,
                text: ss >= P.siegeMaxSeasons
@@ -195,6 +194,37 @@ export function projectSiege(
                  : `再围 ${n + 1} 季残兵不足 ${P.siegeMinTroops}，围不下去` };
     }
   }
+}
+
+/** 已侦察目标的跨季围攻预估；未探城池不读取隐藏守军与城防。守方反应仍可能改变结果。 */
+export function projectCampaign(
+  s: GameState, viewer: FactionId, a: Extract<Action, { type: "campaign" }>,
+  troops: number, g: Graph, P: EngineParams, roster: Roster | null,
+): { seasons: number | null; text: string; reinforcement?: number } | null {
+  const src = s.commanderies[a.from];
+  if (!src) return null;
+  const own = s.armies.find((army) => army.target === a.target && army.faction === viewer);
+  const band = garrisonBand(s, viewer, a.target, P);
+  if (!own && (!band.scouted || s.armies.some((army) => army.target === a.target))) return null;
+  const corps = roster ? retinueAt(s, roster, a.from, P) : [];
+  // 未到城下时守军只知观测区间；粮储按满仓估计，避免使用隐藏余粮。
+  const projectedState = own ? s : { ...s, commanderies: { ...s.commanderies,
+    [a.target]: { ...s.commanderies[a.target], garrison: band.hi,
+      provisions: provCapOf(s.commanderies[a.target], P) } } };
+  const army: Army = own ? { ...own, troops: own.troops + troops } : {
+    id: "projection", faction: viewer, commander: a.commander, retinue: corps.map((o) => o.id),
+    troops, at: a.target, target: a.target, home: a.from, posture: a.strength,
+    gear: a.siegeGear, unit: src.unit, marchLeft: 0, siegeSeasons: 0, idleSeasons: 0, supply: 0,
+  };
+  const first = projectSiege(projectedState, viewer, army, g, P, roster);
+  if (first?.seasons !== null) return first;
+  // 首批够不到统兵上限之外的兵力，但后续可以再增援。明确展示这个条件，
+  // 不把尚未发出的第二道令算成已经到场的兵，也不使用未来征募收入。
+  const reinforcement = Math.min(Math.floor(Math.max(0, src.garrison - troops) * P.strengthRatio[a.strength]),
+    troopCap(corps, P) * (src.buildings.includes("stud") ? P.studTroopMul : 1));
+  if (reinforcement < P.siegeMinTroops) return first;
+  const next = projectSiege(projectedState, viewer, army, g, P, roster, reinforcement);
+  return next?.seasons !== null && next ? { ...next, reinforcement } : first;
 }
 
 export function forecastReinforce(

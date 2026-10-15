@@ -1,3 +1,6 @@
+import { type Plan, planFeedback, planReset } from "../strategy-plan.ts";
+import { previousDecision, type DecisionReview } from "../decision-review.ts";
+import { outcomeFor } from "./season-outcome.ts";
 // 观测：某一席位这一季能看到的全部东西。
 //
 // 这是模型与引擎之间唯一的信息通道。三条硬约束：
@@ -9,6 +12,7 @@
 //    且含全图真实守军、他方内政、他方情报表。
 // 3. **只由白名单构成。** 新增字段要显式加进来，不能靠「过滤掉几个」——
 //    过滤法在字段增长时必然漏。
+import { upkeepFor } from "./economy.ts";
 import { listActions, type Graph, type Rules } from "./actions.ts";
 import { visibleLog } from "./intel.ts";
 import { forecastSiege } from "./forecast.ts";
@@ -23,7 +27,7 @@ import { briefFor, standingOf, epochLimitFor, GRADE_CN, type Geography } from ".
 import type { Candidate, FactionId, GameState } from "./types.ts";
 import { cmp } from "./cmp.ts";
 
-export const OBSERVATION_VERSION = "1.3.0";
+export const OBSERVATION_VERSION = "1.7.0";
 
 export interface ObsCandidate {
   key: string;
@@ -41,10 +45,11 @@ export interface ObsCandidate {
 export interface Observation {
   version: string;
   /** 我是谁 */
-  seat: { faction: FactionId; name: string; capital: string | null };
+  seat: { faction: FactionId; name: string; capital: string | null; capitalHeld: boolean };
   /** 时钟。不含 seed */
   clock: {
-    year: number; season: number; turn: number; totalTurns: number;
+    year: number; season: number; turn: number; totalTurns: number | null;
+    endCondition: GameState["endCondition"];
     /**
      * 纪元。此前只发一个光秃秃的序号，而序号本身不含任何可据以决策的信息。
      *
@@ -167,16 +172,19 @@ export interface Observation {
   /** 现行盟约 */
   treaties: Array<{ with: FactionId; from: number; until: number }>;
   /** 上季战报：我方全部 + 天下大事 */
-  report: { mine: string[]; world: string[] };
+  report: { mine: string[]; world: string[]; changes?: NonNullable<ReturnType<typeof outcomeFor>> };
   /**
    * **我上季写下的跨季方略**。这是对局方唯一的记忆。
    *
    * 每次决策本来是无状态的：观测里全是「此刻的状态」，没有一条是
    * 「我上季打算干什么」——于是每季都在从零重想一遍，
    * 无法执行跨十几季的战役。而长局要打出统一，恰恰要求连续几十季朝一个方向使劲。
-   * null 表示开局，或上一季没写
+   * null 表示开局、上一季没写，或旧阶段已被客观事实重置。
    */
-  plan: string | null;
+  plan: Plan | null;
+  planFeedback?: ReturnType<typeof planFeedback>;
+  /** 旧目标已由归属或上季净失证明失效时，提示模型重定目标。 */
+  planReset?: NonNullable<ReturnType<typeof planReset>>;
   /**
    * 上季**被丢掉的令**：选了但没执行的那几条，附原因。
    *
@@ -189,6 +197,8 @@ export interface Observation {
    * 空数组时不发：绝大多数季是干净的，逐季声明「本季没有被丢的令」纯属浪费
    */
   droppedLastSeason?: Array<{ key: string; why: string }>;
+  /** 上季决策时的提示与命令准入结果；实际战果仍看 report.changes。 */
+  decisionLastSeason?: NonNullable<ReturnType<typeof previousDecision>>;
   /** 本季候选。模型只能从这里选，按 key 引用 */
   candidates: ObsCandidate[];
 }
@@ -247,10 +257,11 @@ export function observe(
     nameOf?: (id: FactionId) => string; rules?: Rules; since?: number;
     /** 天下大事最多留几条 */
     worldCap?: number;
-    /** 上季该席位自己写下的跨季方略。原样回传，是它唯一的记忆 */
-    plan?: string | null;
+    /** 上季该席位自己写下的跨季方略；失效时只在观测中置空，原文仍在记录里。 */
+    plan?: Plan | null;
     /** 上季被丢掉的令。见 Observation.droppedLastSeason */
     dropped?: Array<{ key: string; reason: string; detail?: string }>;
+    previousReview?: DecisionReview | null;
   } = {},
 ): Observation {
   const nameOf = opts.nameOf ?? ((id: FactionId) => id);
@@ -258,9 +269,15 @@ export function observe(
   const st = standingOf(s, geo, faction);
   const cands = listActions(s, faction, g, P, opts.rules, roster, nameOf, geo);
   const log = visibleLog(s, faction, opts.since ?? 0);
+  const changes = outcomeFor(s, faction);
+  const worldCap = Math.max(0, opts.worldCap ?? 10);
   // 补给连通分量：从治所出发，沿己方与借道盟友的郡国算。
   // 治所失守则整幅皆断——那是全图杠杆最高的一击
   const reach = supplyReach(s, g, faction);
+  const lastDecision = previousDecision(s, faction, opts.previousReview);
+  const priorPlan = opts.plan ?? null;
+  const priorTarget = planFeedback(s, faction, priorPlan);
+  const reset = planReset(s, faction, priorPlan);
 
   const mine = Object.values(s.commanderies)
     .filter((c) => c.owner === faction)
@@ -305,13 +322,13 @@ export function observe(
 
   return {
     version: OBSERVATION_VERSION,
-    seat: { faction, name: nameOf(faction), capital: f?.capital ?? null },
+    seat: { faction, name: nameOf(faction), capital: f?.capital ?? null,
+      capitalHeld: Boolean(f?.capital && s.commanderies[f.capital]?.owner === faction) },
     clock: {
       year: s.year, season: s.season, turn: s.turn,
-      // 本局季数，不是内容包里的默认值。局长做成每局属性之后这里没跟着改，
-      // 于是打 104 季的局也告诉模型「共 16 季」——它按四年的时间尺度做决策，
-      // 而实际有二十六年。一份 24 季实录里模型看到的 totalTurns 就是 16
-      totalTurns: s.seasonsPerGame,
+      // 统一局无终限；不能把纪元节奏当成模型的决策期限。
+      totalTurns: s.endCondition === "unification" ? null : s.seasonsPerGame,
+      endCondition: s.endCondition,
       epoch: s.epoch, epochOf: P.epochCount,
       epochEndsBy: Math.max(0, epochLimitFor(s, P) - (s.turn - s.epochStart)),
       neutralWall: P.neutralWall[s.epoch] ?? 0,
@@ -321,12 +338,8 @@ export function observe(
     },
     treasury: {
       gold: Math.round(f?.gold ?? 0),
-      // 下季要交的军费：全部兵力 × 每兵每季
-      upkeep: Math.round(
-        (Object.values(s.commanderies).filter((c) => c.owner === faction)
-          .reduce((n, c) => n + c.garrison, 0)
-         + s.armies.filter((a) => a.faction === faction)
-          .reduce((n, a) => n + a.troops, 0)) * P.goldUpkeepPerTroop),
+      // 当前兵力对应的军费，包含屯田减免；实际账单随季内兵力变化。
+      upkeep: upkeepFor(s, faction, P),
     },
     budget: {
       ap: f?.ap ?? 0, carried: f?.carried ?? 0, carryCap: P.carryCap,
@@ -360,10 +373,13 @@ export function observe(
     treaties: s.treaties
       .filter((t) => t.a === faction || t.b === faction)
       .map((t) => ({ with: t.a === faction ? t.b : t.a, from: t.from, until: t.until })),
-    plan: opts?.plan ?? null,
+    plan: reset ? null : priorPlan,
+    ...(priorTarget ? { planFeedback: priorTarget } : {}),
+    ...(reset ? { planReset: reset } : {}),
     // 至多报五条：重犯的往往是同一类，前几条足以说明问题，
     // 而观测预算是按席·季结算的
-    ...(opts?.dropped?.length
+    ...(lastDecision ? { decisionLastSeason: lastDecision } : {}),
+    ...(!lastDecision && opts?.dropped?.length
       ? { droppedLastSeason: opts.dropped.slice(0, 5).map((d) => ({
           key: d.key,
           why: d.reason === "duplicate" ? "同一条选了两遍"
@@ -373,6 +389,7 @@ export function observe(
         })) }
       : {}),
     report: {
+      ...(changes ? { changes } : {}),
       // 攻城的**缺口对可防守**要跟着战报回来。这两个数就在事件的 attribution 上，
       // 此前只抄 text 就把它丢了——而围城是唯一一类跨季、可逐季加码的决策，
       // 「加码还是撤」全靠它。实录里袁绍看到的是「强攻广陵郡未克，转为围困」，
@@ -397,9 +414,9 @@ export function observe(
       // 从 14 收到 10：续围前瞻进候选之后，刘璋末季顶到 10126/10000。
       // 那批新增的是决策内容（撤还是围下去，从此有数可判），按本段开头
       // 立的规矩，该让的是战报不是候选
-      world: log.filter((e) => e.faction !== faction)
+      world: worldCap > 0 ? log.filter((e) => e.faction !== faction)
         .map((e) => `${e.faction ? `${nameOf(e.faction)}：` : ""}${e.text}`)
-        .slice(-(opts.worldCap ?? 10)),
+        .slice(-worldCap) : [],
     },
     candidates: cands.map((c) => ({
       key: c.key, cost: c.cost, label: c.label,

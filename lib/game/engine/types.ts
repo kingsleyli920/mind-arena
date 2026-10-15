@@ -270,6 +270,18 @@ export interface GameEvent {
   attribution?: Record<string, number | string>;
 }
 
+export interface FactionOutcome {
+  gained: CommanderyId[];
+  lost: CommanderyId[];
+  goldDelta: number;
+}
+
+export interface SeasonOutcome {
+  /** 已结算的绝对季号，从 0 起。仅记录本季净变化。 */
+  turn: number;
+  factions: Record<FactionId, FactionOutcome>;
+}
+
 export interface GameState {
   seed: string;
   year: number;
@@ -277,17 +289,15 @@ export interface GameState {
   season: number;
   /** 绝对季号，从 0 起。用于盟约到期等比较 */
   turn: number;
+  /** 最近一季的真实结算摘要，不受文字战报截断影响。开局尚无摘要。 */
+  lastOutcome?: SeasonOutcome;
   epoch: number;
   /** 本纪元自第几季起。纪元推进是双触发，不写死在固定季号上 */
   epochStart: number;
-  /**
-   * **本局**季数。写在状态上而不是只读 EngineParams，是因为评测与对局
-   * 要的长度根本不同：评测要短而固定（一局 16 季 = 16 次调用，48 局才付得起，
-   * 且定档按增量判，四年里多拿一两个州是合理量级）；而作为游戏，
-   * 十六季刚把内政理顺就结束了——史上 194 到三分天下用了二十六年。
-   * 两件事共用一个常数，必然有一边被将就
-   */
+  /** 评测局的季数上限；统一局中只用于确定纪元节奏。 */
   seasonsPerGame: number;
+  /** 正常游戏以统一结束；固定季数只供可比的评测使用。 */
+  endCondition: "unification" | "season-limit";
   commanderies: Record<CommanderyId, CommanderyState>;
   factions: Record<FactionId, FactionState>;
   armies: Army[];
@@ -346,6 +356,7 @@ export type Action =
   | { type: "seize"; node: string; from: CommanderyId }
   | { type: "govern"; at: CommanderyId;
       policy: "farm" | "levy" | "wall" | "soothe" | "forge" | "stock" }
+  | { type: "transfer"; from: CommanderyId; to: CommanderyId }
   | { type: "build"; at: CommanderyId; kind: Building }
   | { type: "invest"; zhou: string; to: FactionId }
   | { type: "appoint"; officer: OfficerId; at: CommanderyId }
@@ -394,6 +405,8 @@ export interface Candidate {
    * 攻城预告。结构化字段，供机器人与模型共用——
    * 此前机器人是从 label 里抠正则拿数的，标签一改就静默读错。
    */
+  /** 本令出兵与出兵后留守，均为己方已知数据。 */
+  mobilization?: { troops: number; left: number };
   forecast?: {
     breachLo: number; breachHi: number; holdLo: number; holdHi: number;
     verdict: "破城" | "不破" | "未知"; fog: "own" | "scouted" | "tier";
@@ -407,7 +420,7 @@ export interface Candidate {
    * 从不问围城是不是快赢了。实测 61 次撤围里 20 次撤的是本季必破的城，
    * 而向前推 162 支围城军有 109 支（67%）在上限内可破
    */
-  project?: { seasons: number | null };
+  project?: { seasons: number | null; reinforcement?: number };
   /**
    * 授官候选：凭这个号能传檄收几郡。
    *

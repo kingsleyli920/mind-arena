@@ -89,6 +89,7 @@ export interface EngineParams {
   /** 劝降方自身的控制州数门槛。看的是「自己够不够强」而不是「对方有多小」 */
   submitMinZhou: number;
   submitRatio: number;
+  submitHegemonyZhou: number; submitHegemonyRatio: number;
   submitBase: number;
   submitPerMorale: number;
   submitPerRatio: number;
@@ -312,6 +313,8 @@ export function loadParams(pack: RawPack): EngineParams {
     submitMaxCommanderies: g("归降", "门槛_目标郡数"),
     submitMinZhou: g("归降", "门槛_劝降方州数"),
     submitRatio: g("归降", "门槛_实力倍数"),
+    submitHegemonyZhou: g("归降", "霸业_劝降方州数"),
+    submitHegemonyRatio: g("归降", "霸业_实力倍数"),
     submitBase: g("归降", "基础成功率"),
     submitPerMorale: g("归降", "民心每档折减"),
     submitPerRatio: g("归降", "倍数加成"),

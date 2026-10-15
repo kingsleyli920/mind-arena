@@ -1773,7 +1773,8 @@ test("存粮上限：候选与结算必须用同一个数，否则有仓廪的�
   c.provisions = provisionsCap(c.yieldTier, P);      // 只按基础上限算「满」
   s.factions[me].gold = 9999;
   assert.ok(provCapOf(c, P) > c.provisions, "加了仓廪与方圆却没抬高上限");
-  const keys = listActions(s, me, G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+  // 本测试检验存粮上限公式；放宽总候选预算，避免把全局轮转截断误当作公式错误。
+  const keys = listActions(s, me, G, P, { ...DEFAULT_RULES, totalCap: 256 }, ROSTER, undefined, GEO)
     .filter((x) => x.key === `govern:${c.id}:stock`);
   assert.equal(keys.length, 1,
     `${c.id} 存粮 ${c.provisions}/${provCapOf(c, P)}，候选里却没有屯粮`);
