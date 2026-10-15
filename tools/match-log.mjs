@@ -1,3 +1,4 @@
+import { formatPlan } from "../lib/game/strategy-plan.ts";
 // 对局实录：把一整局逐季摊开写，看得见「模型看到什么、想了什么、下了什么令、
 // 结果如何、天下如何变」。
 //
@@ -188,6 +189,7 @@ async function main() {
   say("");
 
   let since = 0, plan = null, spentUsd = 0, calls = 0, halted = null;
+  let review = null;
   // ── 游戏外元数据 ────────────────────────────────────────────────
   // 与游戏内信息分开记：token 与钱不是这一局里发生的事，
   // 它们是「我们花了多少代价去问模型」的账，两者混在一起谁也看不清
@@ -286,8 +288,9 @@ async function main() {
     say("");
     let picks = [], reason = "", rec = null, t0 = Date.now();
     if (deps) {
-      const out = await modelDecide(s, SEAT, since, deps, plan);
+      const out = await modelDecide(s, SEAT, since, deps, plan, [], review);
       rec = out.record;
+      review = rec.review ?? null;
       picks = rec.picks ?? [];
       reason = rec.reason ?? "";
       if (rec.plan) plan = rec.plan;
@@ -307,7 +310,7 @@ async function main() {
         maxTokens: rec.maxTokens, finish: rec.finishReason,
         provider: rec.provider, generationId: rec.generationId,
         picks: rec.picks?.length ?? 0, admitted: 0, spent: 0, illegalRate: 0,
-        failure: rec.failure ?? null, failureKind: rec.failureKind ?? null,
+        failure: rec.failure ?? null, failureKind: rec.failureKind ?? null, review: rec.review,
       });
     } else {
       const variant = AGENT.split(":")[1] ?? "balanced";
@@ -319,10 +322,10 @@ async function main() {
       reason = `机器人画像 ${variant}`;
       say(`机器人 \`${AGENT}\`\u3000用时 ${Date.now() - t0}ms`);
     }
-    if (plan) say(`\n**跨季方略**\u3000${plan}`);
+    if (plan) say(`\n**跨季方略**\u3000${formatPlan(plan)}`);
     if (reason) say(`\n**本季意图**\u3000${reason}`);
 
-    const adm = admit(s, SEAT, picks, cands, G, ROSTER);
+    const adm = admit(s, SEAT, picks, cands, G, ROSTER, undefined, P);
     if (meta.length && meta[meta.length - 1].turn === turn + 1) {
       Object.assign(meta[meta.length - 1], { admitted: adm.admitted.length,
         spent: adm.spent, ap: s.factions[SEAT].ap, illegalRate: adm.illegalRate,

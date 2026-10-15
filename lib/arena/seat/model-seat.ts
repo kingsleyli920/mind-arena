@@ -1,3 +1,5 @@
+import { type Plan } from "../../game/strategy-plan.ts";
+import { reviewDecision, type DecisionReview } from "../../game/decision-review.ts";
 // 模型席位：观测 → 提示词 → 调用 → 解析 → 准入。
 //
 // 任何一步失败都要**记下来并降级**，而不是让整局崩掉：评测跑一次几十局，
@@ -9,7 +11,7 @@ import type { Roster } from "../../game/engine/officers.ts";
 import type { EngineParams } from "../../game/engine/params.ts";
 import type { Geography } from "../../game/engine/victory.ts";
 import type { FactionId, GameState, Order } from "../../game/engine/types.ts";
-import type { LlmClient, Rung } from "../llm/client.ts";
+import type { ChatRequest, LlmClient, Rung } from "../llm/client.ts";
 import type { Failure, FailureKind } from "../llm/errors.ts";
 import { admit, type Admission } from "./admit.ts";
 import { decisionSchema, parseDecision } from "./parse.ts";
@@ -30,9 +32,15 @@ export interface ModelTurnRecord {
   obsTokens: number;
   candidates: number;
   picks: string[];
+  /** 首选被拒时才尝试的备选，保持模型原顺序。 */
+  backups?: string[];
+  backupsUsed?: string[];
   reason?: string;
   /** 模型本季写下的跨季方略。下一季原样回传给它 —— 这是它唯一的记忆 */
-  plan?: string;
+  plan?: Plan;
+  planWarning?: string;
+  /** 决策时的客观提示与准入收据；采纳不代表行动成功。 */
+  review?: DecisionReview;
   admission: Pick<Admission, "admitted" | "dropped" | "spent" | "illegalRate" | "mojibake">;
   usage: { prompt: number; completion: number; cached: number; reasoning: number;
            /** 提供方回报的真实扣费（美元）。价目表重算会少算，见 client.ts */
@@ -100,6 +108,7 @@ const BUCKET: Record<FailureKind, FailureBucket> = {
 };
 
 export interface ModelSeatDeps {
+  limits?: Pick<ChatRequest, "maxTokens" | "maxTokensLimit" | "maxAttempts" | "timeoutMs">;
   client: LlmClient;
   model: string;
   pack: unknown;
@@ -121,18 +130,19 @@ export interface ModelSeatDeps {
 export async function modelDecide(
   s: GameState, faction: FactionId, since: number, deps: ModelSeatDeps,
   /** 该席位上季写下的跨季方略。不给则本季无记忆 */
-  plan: string | null = null,
+  plan: Plan | null = null,
   /**
    * 该席位上季被丢掉的令。与方略同理：不回授的话，模型每季重犯同一个错
    * 而收不到任何信号——实测非法率 7.6–9.4%，全是「合起来不合法」那一类
    */
   dropped: Array<{ key: string; reason: string; detail?: string }> = [],
+  previousReview: DecisionReview | null = null,
 ): Promise<{ orders: Order[]; record: ModelTurnRecord }> {
   const rules = deps.rules ?? DEFAULT_RULES;
   const cands = listActions(s, faction, deps.g, deps.P, rules, deps.roster,
     deps.nameOf, deps.geo);
   const o = observe(s, faction, deps.g, deps.P, deps.roster, deps.geo,
-    { nameOf: deps.nameOf, rules, since, plan, dropped });
+    { nameOf: deps.nameOf, rules, since, plan, dropped, previousReview });
   const user = renderUser(o);
 
   const base: ModelTurnRecord = {
@@ -146,6 +156,7 @@ export async function modelDecide(
 
   try {
     const res = await deps.client.chat({
+      ...deps.limits,
       model: deps.model,
       system: renderSystem(deps.pack),
       user,
@@ -178,13 +189,25 @@ export async function modelDecide(
     if (!dec) {
       // 解析不出记为「无回应」，不是「什么都不做」——两者在评测里含义不同
       return { orders: [], record: { ...base, ...meta(res),
-        failureKind: "model", failure: "解析不出决策" } };
+        failureKind: res.finishReason === "length" ? "budget" : "model",
+        failure: res.finishReason === "length" ? "达到输出上限，决策未完成" : "解析不出决策" } };
     }
-    const a = admit(s, faction, dec.picks, cands, deps.g, deps.roster, rules);
+    const a = admit(s, faction, dec.picks, cands, deps.g, deps.roster, rules, deps.P,
+      dec.backups ?? []);
+    const planWarning = dec.plan === undefined
+      ? "本季计划缺失或格式无效，保留上季计划供下季复核"
+      : typeof dec.plan === "object" && plan && typeof plan === "object"
+        && dec.plan.review.trim() === plan.review.trim()
+        ? "复核沿用上季文字，请结合实际变化检查" : undefined;
     return {
       orders: a.orders,
       record: {
-        ...base, ...meta(res), picks: dec.picks, reason: dec.reason, plan: dec.plan,
+        ...base, ...meta(res), picks: dec.picks,
+        ...(dec.backups ? { backups: dec.backups, backupsUsed: a.backupsUsed } : {}),
+        reason: dec.reason, plan: dec.plan,
+        ...(planWarning ? { planWarning } : {}),
+        review: reviewDecision(s, faction, dec.plan, plan, cands, a, planWarning,
+          a.backupsUsed),
         admission: { admitted: a.admitted, dropped: a.dropped, spent: a.spent,
                      mojibake: a.mojibake,
                      illegalRate: a.illegalRate },
@@ -196,7 +219,9 @@ export async function modelDecide(
     //（它们在同一个 try 里）——把 harness 自己的 bug 算成「模型答不上来」，
     // 是这套管线出过两次的那类事故
     const kind: FailureBucket = f ? BUCKET[f.kind] : "harness";
-    return { orders: [], record: { ...base, failureKind: kind, failure: (e as Error).message } };
+    const detail = e as Error & { attempts?: number; elapsedMs?: number };
+    return { orders: [], record: { ...base, failureKind: kind, failure: detail.message,
+      attempts: detail.attempts ?? 0, elapsedMs: detail.elapsedMs ?? 0 } };
   }
 }
 

@@ -1,3 +1,4 @@
+import { formatPlan } from "../lib/game/strategy-plan.ts";
 // 把一份录像 JSON 打成一个自足的网页播放器。
 //
 // 「更好读」这件事，表格做不到——48 季 × 105 郡 × 三十家，
@@ -22,6 +23,11 @@ const TITLE = arg("title", "");
 if (!IN) { console.error("要 --in=<录像 json>"); process.exit(2); }
 
 const replay = JSON.parse(fs.readFileSync(IN, "utf8"));
+for (const frame of replay.frames ?? []) {
+  for (const seat of frame.seats ?? (frame.seat ? [frame.seat] : [])) {
+    if (seat.plan) seat.plan = formatPlan(seat.plan);
+  }
+}
 const terr = JSON.parse(fs.readFileSync("public/game/territory-grid.json", "utf8"));
 const base = fs.readFileSync("public/game/map/play-base.webp");
 

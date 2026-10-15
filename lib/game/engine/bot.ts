@@ -1,15 +1,18 @@
+import { OrderBudget } from "./order-budget.ts";
 // 确定性规则 AI。
 //
-// 用途不是"把游戏玩好"，而是**在接模型之前先把玩法的病暴露出来**。
-// 因此关键不在强，而在于：
+// decide / pick 保留五种评测画像；decideForPlay 在此基础上处理玩家长局的经济与调度。
+// 评测画像的约束：
 //   1. 完全确定 —— 同一状态必出同一决策，否则自对局的结论不可复现
 //   2. 策略画像必须真的不同 —— 若"苟活流"和"进攻流"打出同样的结果，
 //      要么是机器人没区分开，要么是玩法本身分不出高下。两者都必须查明
-import { listActions, orderSites, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
+import { upkeepFor } from "./economy.ts";
+import { listActions, frontDistances, reinforcesFront, type Graph, type Rules, DEFAULT_RULES } from "./actions.ts";
 import type { EngineParams } from "./params.ts";
-import type { Roster } from "./officers.ts";
+import { stationedAt, retinueAt, troopCap, type Roster } from "./officers.ts";
 import type { Geography } from "./victory.ts";
 import type { FactionId, GameState, Order } from "./types.ts";
+import { observedGarrison } from "./intel.ts";
 import { cmp } from "./cmp.ts";
 
 export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist" | "purpose";
@@ -83,6 +86,14 @@ export function decide(
   return pick(s, f, g, profile, rules, roster, P, geo).orders;
 }
 
+/** 玩家对局使用统一导向策略；评测的五种固定画像保持原口径。 */
+export function decideForPlay(
+  s: GameState, f: FactionId, g: Graph, rules: Rules = DEFAULT_RULES,
+  roster: Roster | null, P: EngineParams, geo: Geography | null = null,
+): Order[] {
+  return decideInner(s, f, g, "purpose", rules, roster, P, geo, true).orders;
+}
+
 /**
  * 同上，但把选中的**候选 key** 一并给出。
  *
@@ -103,6 +114,7 @@ function decideInner(
   roster: Roster | null, P: EngineParams,
   /** 地理。目的流没有它就退化成均衡流——候选上不会有 gain 可读 */
   geo: Geography | null = null,
+  campaignPlay = false,
 ): { orders: Order[]; picks: string[] } {
   // 「出兵后余兵低到什么程度算把城送出去」由规则推导，不拍系数：
   // 邻敌最多带走自己八成守军，而破开「城防 30 以上 + 基数」的两档可防守
@@ -116,6 +128,9 @@ function decideInner(
   const w = WEIGHTS[profile];
   const minMargin = MIN_MARGIN[profile];
 
+  const upkeep = upkeepFor(s, f, P);
+  const distances = campaignPlay ? frontDistances(s, g, f) : new Map<string, number>();
+  const cashTight = P.goldOn && s.factions[f].gold < upkeep * 2;
   const scored = cands.map((c) => {
     let score = w[c.action.type] ?? 0;
     // 外交这一层试过按「对象是谁、缔来干什么」打分，**量到更差，已退回**。
@@ -151,13 +166,16 @@ function decideInner(
       // 掏空老巢是所有画像共有的死法，不是某一流派的风格问题。
       // 四个画像都该有这条常识，否则测出来的不是策略差异，而是同一个失误——
       // 实测投机流曹操因此 10/10 全灭
+      const target = c.action.target;
       const from = s.commanderies[c.action.from];
       const m = /城中余 (\d+) 人/.exec(c.label);
-      const left = m ? Number(m[1]) : from?.garrison ?? 0;
+      const left = campaignPlay && c.mobilization ? c.mobilization.left
+        : m ? Number(m[1]) : from?.garrison ?? 0;
       const threat = Math.max(0, ...(g.adj.get(c.action.from) ?? [])
-        .filter((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== f)
-        .map((e) => s.commanderies[e.to].garrison));
-      if (threat > 0 && left < threat * safeRatio) return { c, score: -1e9 };
+        .filter((e) => s.commanderies[e.to]?.owner && s.commanderies[e.to].owner !== f
+          && (!campaignPlay || e.to !== target))
+        .map((e) => campaignPlay ? observedGarrison(s, f, e.to, P).value : s.commanderies[e.to].garrison));
+      if (!campaignPlay && threat > 0 && left < threat * safeRatio) return { c, score: -1e9 };
 
       // 城下有第三方围城军时，这一令结算的是野战——按 c.field 判，
       // 而不是按攻城的缺口数。此前这里只是「没有 forecast 就弃掉」，
@@ -176,8 +194,10 @@ function decideInner(
       const gate = profile === "purpose" && c.gain?.upgrade ? minMargin - 2 : minMargin;
       // 达不到该画像的出兵门槛就直接弃掉，而不是给低分——
       // 给低分会让它在无仗可打时仍被选中，那是「被迫送死」而非策略
-      if (margin < gate) return { c, score: -1e9 };
-      score += (margin - minMargin) * 4 + (fc.verdict === "破城" ? 6 : 0);
+      const canBesiege = campaignPlay && typeof c.project?.seasons === "number";
+      if (margin < gate && !canBesiege) return { c, score: -1e9 };
+      if (canBesiege && margin < gate) score += 18 - (c.project?.seasons ?? 0) * 2;
+      else score += (margin - minMargin) * 4 + (fc.verdict === "破城" ? 6 : 0);
       // 迷雾里的仗要打折：未探时城防与守将不明，区间宽得多
       if (fc.fog === "tier") score -= 3;
       // 投机流额外偏好无主之地：不树敌，扩张最快
@@ -303,6 +323,31 @@ function decideInner(
       const at = s.commanderies[(c.action as { at: string }).at];
       if (at && at.moraleTier <= 2) score += 5;            // 民心告急优先
     }
+    if (campaignPlay) {
+      const a = c.action;
+      // 统一导向基线不主动归隐；外交留给有明确共同目标的策略。
+      if (a.type === "retire" || a.type === "ally") return { c, score: -1e9 };
+      if (a.type === "campaign" && c.gain && c.gain.needBefore > 0) score += 30 / c.gain.needBefore;
+      if (a.type === "muster") {
+        const src = s.commanderies[a.at];
+        const cap = roster ? troopCap(retinueAt(s, roster, a.at, P), P)
+          * (src.buildings.includes("stud") ? P.studTroopMul : 1) : Infinity;
+        const hasFront = (g.adj.get(a.at) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
+        // 内陆待命军无移动命令；已经到统兵上限时再抽调也不能增加出征兵力。
+        if (!hasFront || src.garrison * P.strengthRatio.allout >= cap
+            || s.armies.some((army) => army.faction === f && army.at === a.at && !army.target)) {
+          return { c, score: -1e9 };
+        }
+      }
+      // 先保住收入，避免把全部令数花在调将后常年欠饷。
+      if (cashTight && a.type === "govern" && ["farm", "soothe"].includes(a.policy)) score += 18;
+      if (a.type === "build" && a.kind === "farmstead") score += cashTight ? 18 : 5;
+      if (a.type === "appoint" && c.post?.front) score += 10;
+      if (a.type === "submit") score += 40;
+      if (a.type === "transfer") score = distances.get(a.to) === 0 ? 16 : 10;
+      // 缺治所时全境断供，应先恢复行政中枢。
+      if (a.type === "relocate" && s.commanderies[s.factions[f].capital ?? ""]?.owner !== f) score += 30;
+    }
     return { c, score };
   })
     .filter((x) => x.score > -1e8)
@@ -312,26 +357,30 @@ function decideInner(
   // 按令数预算贪心取，免费动作不占预算但受 freeUses 限制
   const orders: Order[] = [];
   const picks: string[] = [];
-  let ap = s.factions[f]?.ap ?? 0;
-  const freeUsed: Record<string, number> = {};
-  const touched = new Map<string, number>();               // 郡 → 本季已下令数
-
+  const reservation = new OrderBudget(s, g, roster, P, rules, geo);
+  const stationCounts = new Map<string, number>();
+  if (campaignPlay && roster) for (const c of Object.values(s.commanderies)) {
+    if (c.owner === f) stationCounts.set(c.id, stationedAt(s, roster, c.id).length);
+  }
   for (const { c } of scored) {
     const a = c.action;
-    if (c.cost > ap) continue;
-    if (c.cost === 0) {
-      const cap = rules.freeUses[a.type] ?? Infinity;
-      if ((freeUsed[a.type] ?? 0) >= cap) continue;
-      freeUsed[a.type] = (freeUsed[a.type] ?? 0) + 1;
+    if (campaignPlay && a.type === "appoint") {
+      const have = stationCounts.get(a.at) ?? 0;
+      if (have >= P.retinueCap) continue;
+      if (c.post?.from) {
+        const improves = reinforcesFront(s, g, f, c.post.from, a.at,
+          stationCounts.get(c.post.from) ?? 0, have);
+        if (!improves && (stationCounts.get(c.post.from) ?? 0) <= have + 1) continue;
+        if ((stationCounts.get(c.post.from) ?? 0) <= 0) continue;
+      }
     }
-    // 本地模拟郡国令数配额，避免下出必被拒的命令
-    const ids = orderSites(a);
-    if (ids.some((id) => (touched.get(id) ?? s.commanderies[id]?.ordersThisSeason ?? 0)
-                         >= rules.perCommanderyOrders)) continue;
-    for (const id of ids) {
-      touched.set(id, (touched.get(id) ?? s.commanderies[id]?.ordersThisSeason ?? 0) + 1);
+    if (reservation.take({ faction: f, action: a })) continue;
+    if (campaignPlay) {
+      if (a.type === "appoint") {
+        stationCounts.set(a.at, (stationCounts.get(a.at) ?? 0) + 1);
+        if (c.post?.from) stationCounts.set(c.post.from, (stationCounts.get(c.post.from) ?? 0) - 1);
+      }
     }
-    ap -= c.cost;
     orders.push({ faction: f, action: a });
     picks.push(c.key);
   }

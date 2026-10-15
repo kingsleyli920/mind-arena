@@ -88,6 +88,9 @@ export interface ChatRequest {
   /** 结构化输出的 schema。不传则直接从 text 档起步 */
   schema?: { name: string; strict: boolean; schema: unknown };
   maxTokens?: number;
+  /** 本次请求的硬上限，包含学习到的预算及饥饿重试。 */
+  maxTokensLimit?: number;
+  maxAttempts?: number;
   temperature?: number;
   /**
    * 单次调用的超时。默认 300s——原值 180s 对慢提供方不够：
@@ -215,11 +218,12 @@ export class OpenRouterClient implements LlmClient {
     // 差的正是那一次被丢掉的请求。重试是 harness 自己的浪费，
     // 更应该算进账里——不然「加大出参预算」这类决定就是在拿看不见的钱做的
     let costAccum = 0;
-    const maxAttempts = this.opts.maxAttempts ?? 6;
+    const maxAttempts = Math.max(1, Math.min(req.maxAttempts ?? 6, this.opts.maxAttempts ?? 6));
+    const tokenLimit = Math.max(1, Math.min(req.maxTokensLimit ?? MAX_MAX_TOKENS, MAX_MAX_TOKENS));
     // 没给 schema 就直接从 text 档起步，不必把上面三档白试一遍
     let rungIdx = req.schema ? (learned.get(req.model) ?? 0) : LADDER.length - 1;
-    let budget = Math.max(req.maxTokens ?? DEFAULT_MAX_TOKENS,
-                          learnedBudget.get(req.model) ?? 0);
+    let budget = Math.min(tokenLimit, Math.max(req.maxTokens ?? DEFAULT_MAX_TOKENS,
+                          learnedBudget.get(req.model) ?? 0));
     let attempts = 0;
     let starved = 0;
     let last: Failure | null = null;
@@ -273,11 +277,11 @@ export class OpenRouterClient implements LlmClient {
         // 「无 finish_reason 但出参逼近上限」这条启发式仍要求 content 为空，
         // 否则一次正常收尾的长回答会被误判成饥饿
         if ((finishReason === "length" || (!content.trim() && completion >= budget * 0.95))
-            && starved < 2 && budget < MAX_MAX_TOKENS) {
+            && starved < 2 && budget < tokenLimit && attempts < maxAttempts) {
           starved += 1;
           last = { kind: "starved", status: 200,
                    message: `出参预算 ${budget} 被推理占满（reasoning ${reasoning}），已翻倍重试` };
-          budget = Math.min(budget * 2, MAX_MAX_TOKENS);
+          budget = Math.min(budget * 2, tokenLimit);
           // 记住：下一季直接从这个预算起步，不再白发一个注定被砍断的请求
           learnedBudget.set(req.model, Math.max(learnedBudget.get(req.model) ?? 0, budget));
           continue;

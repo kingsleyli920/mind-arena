@@ -27,12 +27,21 @@ export async function POST(request: Request) {
     }, { status: 503 });
   }
 
-  const b = (await request.json()) as Partial<ChatRequest>;
-  if (!b.model || typeof b.system !== "string" || typeof b.user !== "string") {
+  let b: Partial<ChatRequest>;
+  try { b = await request.json(); } catch {
+    return Response.json({ error: "需要 JSON 请求" }, { status: 400 });
+  }
+  if (!b || typeof b.model !== "string" || !b.model.trim()
+      || typeof b.system !== "string" || typeof b.user !== "string") {
     return Response.json({ error: "需要 model / system / user" }, { status: 400 });
   }
   if (b.system.length > MAX_SYSTEM || b.user.length > MAX_USER) {
     return Response.json({ error: "请求过大" }, { status: 413 });
+  }
+  for (const key of ["maxTokens", "maxTokensLimit", "maxAttempts", "timeoutMs"] as const) {
+    if (b[key] !== undefined && (!Number.isInteger(b[key]) || b[key]! <= 0)) {
+      return Response.json({ error: `${key} 必须为正整数` }, { status: 400 });
+    }
   }
 
   const client = new OpenRouterClient(apiKey, {
@@ -41,12 +50,17 @@ export async function POST(request: Request) {
   try {
     return Response.json(await client.chat({
       model: b.model, system: b.system, user: b.user,
-      schema: b.schema, maxTokens: b.maxTokens, temperature: b.temperature,
-      timeoutMs: b.timeoutMs, reasoning: b.reasoning,
+      schema: b.schema, maxTokens: Math.min(b.maxTokens ?? 8000, 16000), temperature: b.temperature,
+      maxTokensLimit: Math.min(b.maxTokensLimit ?? 8000, 16000),
+      maxAttempts: Math.min(b.maxAttempts ?? 2, 2),
+      timeoutMs: Math.min(b.timeoutMs ?? 90000, 90000), reasoning: b.reasoning,
+      provider: b.provider,
     }));
   } catch (e) {
     // 原样把错误文本带回去。调用方（model-seat）按它分桶：
     // 额度耗尽 / 基础设施 / 出参预算 / 模型答不上来 —— 四类的含义完全不同
-    return Response.json({ error: (e as Error).message }, { status: 502 });
+    const err = e as Error & { failure?: unknown; attempts?: number; elapsedMs?: number };
+    return Response.json({ error: err.message, failure: err.failure,
+      attempts: err.attempts, elapsedMs: err.elapsedMs }, { status: 502 });
   }
 }

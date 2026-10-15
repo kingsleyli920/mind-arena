@@ -28,6 +28,7 @@ import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
 import { GRADE_SCORE } from "../lib/arena/scoring.ts";
 import { PROMPT_VERSION } from "../lib/arena/seat/prompt.ts";
+import { formatPlan } from "../lib/game/strategy-plan.ts";
 import { roll } from "../lib/game/engine/rng.ts";
 import { buildIndex, captureFrame, attachOutcome, REPLAY_VERSION }
   from "../lib/game/replay.ts";
@@ -103,6 +104,7 @@ const SEASON_CN = ["", "春", "夏", "秋", "冬"];
 
 let s = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
 const plans = new Map(), spent = new Map(), calls = new Map(), meta = [];
+const reviews = new Map();
 let since = 0;
 
 say(`# 混战实录\u3000${[...seatOf].map(([k, v]) => `${nameOf(k)}(${v.split("/").pop()})`).join(" vs ")}`);
@@ -145,7 +147,8 @@ while (!s.finished) {
     .filter((f) => !s.factions[f].eliminated && !s.factions[f].retired);
   const done = await Promise.all(modelSeats.map(async (f) => {
     const out = await modelDecide(s, f, since, { ...depsBase, model: seatOf.get(f) },
-      plans.get(f) ?? null);
+      plans.get(f) ?? null, [], reviews.get(f) ?? null);
+    reviews.set(f, out.record.review ?? null);
     if (out.record.plan) plans.set(f, out.record.plan);
     if (typeof out.record.usage?.cost === "number") {
       spent.set(f, (spent.get(f) ?? 0) + out.record.usage.cost);
@@ -158,7 +161,7 @@ while (!s.finished) {
       rung: out.record.rung, provider: out.record.provider,
       picks: out.record.picks?.length ?? 0,
       admitted: out.record.admission.admitted.length, spent: out.record.admission.spent,
-      ap: s.factions[f].ap, failure: out.record.failure ?? null });
+      ap: s.factions[f].ap, failure: out.record.failure ?? null, review: out.record.review });
     return { f, out };
   }));
 
@@ -175,7 +178,7 @@ while (!s.finished) {
       + `\u3000${out.record.elapsedMs ? `用时 ${(out.record.elapsedMs / 1000).toFixed(1)}s` : ""}`
       + `${out.record.usage?.cost != null ? `\u3000$${out.record.usage.cost.toFixed(4)}` : ""}`);
     if (out.record.failure) say(`\n> ⚠ 无回应（${out.record.failureKind}）：${out.record.failure}`);
-    if (plans.get(f)) say(`\n**方略**\u3000${plans.get(f)}`);
+    if (plans.get(f)) say(`\n**方略**\u3000${formatPlan(plans.get(f))}`);
     if (out.record.reason) say(`\n**本季**\u3000${out.record.reason}`);
     say("");
     for (const k of out.record.admission.admitted) say(`- ✓ \`${k}\``);

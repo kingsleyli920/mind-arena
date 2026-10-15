@@ -1,3 +1,4 @@
+import { parsePlan, strategyPlanSchema, type Plan } from "../../game/strategy-plan.ts";
 // 模型输出的 schema 与宽容解析。
 //
 // 输出格式选「一季一次、给一串候选 key」而不是「逐令一次调用」：
@@ -11,6 +12,8 @@ import type { Candidate } from "../../game/engine/types.ts";
 export interface Decision {
   /** 本季要下的令，按 key 引用，顺序即优先级 */
   picks: string[];
+  /** 仅在首选被丢时按顺序补位；与首选总计最多 16 条。 */
+  backups?: string[];
   /** 一句话理由。用于审计，不进引擎 */
   reason?: string;
   /**
@@ -23,7 +26,7 @@ export interface Decision {
    * 做成模型自己写、而不是回放它上季的 reason：reason 讲的是这一季，
    * 方略讲的是这一阶段；由它自己决定什么值得记，比我们替它挑更准
    */
-  plan?: string;
+  plan?: Plan;
 }
 
 /**
@@ -61,21 +64,21 @@ export function decisionSchemaForKeys(keys: readonly string[], keyEnum = true) {
     schema: {
       type: "object",
       additionalProperties: false,
-      required: ["picks", "reason", "plan"],
+      required: ["picks", "backups", "reason", "plan"],
       properties: {
         picks: {
           type: "array",
-          maxItems: 16,
+          // 长中文 enum × maxItems 会使部分提供方的约束状态数超限。
+          // 保留 enum 保证地址合法；应用解析仍硬限 16 条，输出 token 另有上限。
           items: keyEnum ? { type: "string", enum: [...keys] } : { type: "string" },
           description: "本季要下的令，按候选 key 逐字引用；顺序即优先级，令数不足时先保前面的",
         },
+        // 备选不用重复整份动态 enum：会把 schema 和提供方约束状态放大一倍。
+        // 应用层仍用候选表与 OrderBudget 逐条核验，最多读取剩余的 16 个位置。
+        backups: { type: "array", items: { type: "string" },
+          description: "首选被拒时才依次尝试的候选 key；列真正不同的可接受动作，勿重复首选或同一兵源" },
         reason: { type: "string", description: "一句话说明本季的意图" },
-        plan: {
-          type: "string",
-          description: "跨季方略：这一阶段要达成什么、下几季朝哪个方向使劲。"
-            + "下一季会把这句话原样还给你——这是你唯一的记忆，"
-            + "没有它你每季都在从零重想。方向变了就改写它，没变就原样抄回来",
-        },
+        plan: strategyPlanSchema,
       },
     },
   };
@@ -95,9 +98,12 @@ export function parseDecision(content: string): Decision | null {
   const text = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
   const tryParse = (src: string): Decision | null => {
     try {
-      const v = JSON.parse(src) as { picks?: unknown; reason?: unknown; plan?: unknown };
+      const v = JSON.parse(src) as { picks?: unknown; backups?: unknown; reason?: unknown; plan?: unknown };
       if (!Array.isArray(v.picks)) return null;
       const picks = v.picks.filter((x): x is string => typeof x === "string").slice(0, 16);
+      const backups = Array.isArray(v.backups)
+        ? v.backups.filter((x): x is string => typeof x === "string").slice(0, 16 - picks.length)
+        : undefined;
       // plan 必须读回来，否则跨季记忆整条链是断的：schema 里要它、提示词讲了它、
       // 观测里留了位置、eval-run 与对局界面都在传它——唯独这里没接，
       // 于是模型每季写下的方略被直接扔掉，观测里的 plan 恒为 null。
@@ -105,8 +111,9 @@ export function parseDecision(content: string): Decision | null {
       // 功能全链路都在，只差解析这一步，而单测只测了 picks 与 reason
       return {
         picks,
+        ...(backups ? { backups } : {}),
         reason: typeof v.reason === "string" ? v.reason.slice(0, 400) : undefined,
-        plan: typeof v.plan === "string" ? v.plan.slice(0, 600) : undefined,
+        plan: parsePlan(v.plan),
       };
     } catch { return null; }
   };

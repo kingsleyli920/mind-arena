@@ -57,7 +57,7 @@ test("准入：逐条丢弃非法项，不作废整回合", () => {
     paid[0].key,                       // 重复
     paid[1].key,                       // 合法
   ];
-  const a = admit(s, "yuanshao", picks, cs, G, ROSTER, DEFAULT_RULES);
+  const a = admit(s, "yuanshao", picks, cs, G, ROSTER, DEFAULT_RULES, P);
   assert.equal(a.admitted.length, 2, "合法的两条该被采纳");
   assert.deepEqual(a.dropped.map((d) => d.reason).sort(), ["duplicate", "unknown-key"]);
   assert.ok(a.illegalRate > 0 && a.illegalRate < 1);
@@ -69,7 +69,7 @@ test("准入：超预算的按提交顺序截断，前面的保住", () => {
   const paid = cs.filter((c) => c.cost > 0);
   const budget = s.factions.caocao.ap;
   // 故意提交远超预算的一串
-  const a = admit(s, "caocao", paid.map((c) => c.key), cs, G, ROSTER, DEFAULT_RULES);
+  const a = admit(s, "caocao", paid.map((c) => c.key), cs, G, ROSTER, DEFAULT_RULES, P);
   assert.ok(a.spent <= budget, `花了 ${a.spent} 令，预算只有 ${budget}`);
   assert.ok(a.dropped.some((d) => d.reason === "over-budget" || d.reason === "rejected"));
   // 采纳的必须是提交顺序的前缀（跳过被拒的），不是随机挑
@@ -86,7 +86,7 @@ test("准入：产出的命令 resolve 不会因令数不足而拒", () => {
       if (s.factions[f].eliminated || s.factions[f].retired) continue;
       const cs = listActions(s, f, G, P, DEFAULT_RULES, ROSTER);
       const dec = stubDecide(s, f, cs, "random-legal");
-      orders.push(...admit(s, f, dec.picks, cs, G, ROSTER, DEFAULT_RULES).orders);
+      orders.push(...admit(s, f, dec.picks, cs, G, ROSTER, DEFAULT_RULES, P).orders);
     }
     const r = resolve(s, orders, G, P, ROSTER, GEO);
     const apRejects = r.rejected.filter((x) => x.reason.startsWith("令数不足"));
@@ -115,7 +115,7 @@ test("输出协议：默认把「只能从候选里选」提到解码层", () =>
   // plan 也必填：它是模型唯一的跨季记忆（观测里全是「此刻的状态」，
   // 没有一条是「我上季打算干什么」）。设成选填，模型多半就不写了，
   // 而没有它就执行不了跨十几季的战役
-  assert.deepEqual(off.schema.required, ["picks", "reason", "plan"]);
+  assert.deepEqual(off.schema.required, ["picks", "backups", "reason", "plan"]);
   assert.ok(off.schema.properties.plan, "schema 里没有跨季方略字段");
 });
 
@@ -151,7 +151,7 @@ test("整局：桩席位能打完 16 季，观测不泄 seed，非法输入不�
         peakObs = Math.max(peakObs, json.length);
       }
       const dec = stubDecide(s, f, cs, kind);
-      orders.push(...admit(s, f, dec.picks, cs, G, ROSTER, DEFAULT_RULES).orders);
+      orders.push(...admit(s, f, dec.picks, cs, G, ROSTER, DEFAULT_RULES, P).orders);
     }
     since = s.log.length;
     s = refreshAp(resolve(s, orders, G, P, ROSTER, GEO).state, P);
@@ -226,15 +226,15 @@ test("界面的准入判据与引擎一致：按它贪心勾选，引擎不应�
           // 照界面的做法：逐条问 admit 还能不能加，能就加
           const keys = [];
           for (const c of cs) {
-            const probe = admit(s, f, [...keys, c.key], cs, G, ROSTER, DEFAULT_RULES);
+            const probe = admit(s, f, [...keys, c.key], cs, G, ROSTER, DEFAULT_RULES, P);
             if (probe.admitted.includes(c.key)) keys.push(c.key);
           }
-          const a = admit(s, f, keys, cs, G, ROSTER, DEFAULT_RULES);
+          const a = admit(s, f, keys, cs, G, ROSTER, DEFAULT_RULES, P);
           picked += a.admitted.length;
           orders.push(...a.orders);
         } else {
           orders.push(...admit(s, f, stubDecide(s, f, cs, "random-legal").picks, cs,
-            G, ROSTER, DEFAULT_RULES).orders);
+            G, ROSTER, DEFAULT_RULES, P).orders);
         }
       }
       const r = resolve(s, orders, G, P, ROSTER, GEO);
@@ -290,7 +290,7 @@ test("即便关掉 enum，编造的 key 仍被 admit 逐条丢弃", () => {
   // 解码层不再强制「只能从候选里选」，那条约束退回 admit()。
   // 它必须只丢非法的那条，不能作废整回合——一条错不该让整季空过
   const a = admit(s, "yuanshao", ["campaign:不存在的郡>也不存在:main", real],
-                  cands, G, ROSTER, DEFAULT_RULES);
+                  cands, G, ROSTER, DEFAULT_RULES, P);
   assert.deepEqual(a.dropped.map((d) => d.reason), ["unknown-key"]);
   assert.equal(a.admitted.length, 1, "合法的那条也被牵连丢掉了");
   assert.ok(a.illegalRate > 0, "illegalRate 没记上 —— 关掉 enum 后全靠它兜底");
@@ -308,7 +308,7 @@ test("机器人基线走的是与模型同一条路：picks → admit → orders
     for (const k of p.picks) assert.ok(known.has(k), `${profile} 选了候选表外的 ${k}`);
     assert.equal(p.picks.length, p.orders.length, `${profile} 的 picks 与 orders 数量不符`);
     // 走一遍准入必须一条不掉：机器人自己已经模拟过令数与郡国配额
-    const a = admit(s, "yuanshao", p.picks, cands, G, ROSTER, DEFAULT_RULES);
+    const a = admit(s, "yuanshao", p.picks, cands, G, ROSTER, DEFAULT_RULES, P);
     assert.equal(a.dropped.length, 0,
       `${profile} 被准入层丢了 ${a.dropped.map((d) => d.reason).join()} —— 基线不该有非法令`);
     assert.equal(a.orders.length, p.orders.length);
