@@ -30,6 +30,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 但样例必须入库：开源之后，没有它别人不知道要配什么。
+# 它只有占位符，没有真值
+!.env.local.example
 
 # vercel
 .vercel
@@ -42,9 +45,6 @@ yarn-error.log*
 # 皴法提取用的参考画作（可用 tools/fetch-refs.mjs 重新下载）
 /refs/
 
-# 地形源图（45MB / 180MB，由 tools/render-terrain-map.mjs 重新生成；运行时用 tiles/）
-public/game/map/han-terrain.png
-public/game/map/han-terrain-4x.png
 tsconfig.tsbuildinfo
 .tmp-preview/
 
@@ -57,3 +57,16 @@ eval-out/
 *.png
 !public/**/*.png
 !refs/**
+
+# 地图构建的中间产物。**必须排在 `!public/**/*.png` 之后**——
+# 那条否定是为了保住 glyphs/ 里的城印，但它把下面这两张也一并反选了回来，
+# 于是 172MB 的那张一直在库里，而 GitHub 单文件上限是 100MB：带着它推不上去。
+#
+#   refs/dem-raster.raw (283MB，不入库)
+#     → map:base4x → han-terrain-4x.png (172MB)
+#         → map:tiles → tiles/ (13MB)    ← 运行时要的是这个
+#         → map:play  → play-base.webp   ← 和这个
+#
+# 要重新生成地图：下载 DEM 后跑 npm run map:all
+/public/game/map/han-terrain.png
+/public/game/map/han-terrain-4x.png

@@ -1,27 +1,37 @@
-# Mind Arena · 智弈场
+# Mind Arena · 汉末沙盘
 
-A Three Kingdoms strategy game where each faction can be controlled by a
-human, a rule-based bot, or a separately chosen AI model. Play one faction or
-watch a mixed-controller match on the 194 warlord map. The evaluation tools
-share the game engine and decision protocol.
+A Three Kingdoms grand-strategy game on the 194 CE warlord map, where every
+faction can be driven by a human, a rule-based bot, or a separately chosen AI
+model. The same engine and decision protocol back both play and model evaluation.
 
-## Prerequisites
+游戏与全部界面为中文；文档亦为中文。
 
-- Node.js `>=22.13.0`
-
-## Quick Start
+## 跑起来（零配置）
 
 ```bash
+git clone <repo> && cd mind-arena
 npm install
-npm run dev
-npm run build
+npm run dev          # 打开 http://localhost:3000/play
 ```
 
-To let in-game factions call real OpenRouter models, copy `.env.local.example`
-to `.env.local`, set `OPENROUTER_API_KEY`, and restart the dev server. The key is
-read only by server routes and is never exposed through a `NEXT_PUBLIC_*` value.
+**不需要任何环境变量、不需要数据库、不需要云账号。** 所有对手默认是内置机器人，
+开一局、玩一局、读档续盘全部在本地完成，一分钱不花。地图、城印、武将数据都已
+随仓库发布（约 17 MB），clone 下来即可用。
 
-This starter does not use `wrangler.jsonc`.
+需要 Node.js `>=22.13.0`。
+
+## 想让某一方由真的大模型执子（可选）
+
+```bash
+cp .env.local.example .env.local   # 填入你自己的 OPENROUTER_API_KEY
+npm run dev
+```
+
+密钥只被服务端路由读取，**不会以 `NEXT_PUBLIC_*` 的形式进到浏览器**。
+在开局配置里给任意势力单独选一个模型即可，别的势力仍可以是机器人或你自己。
+默认模型是免费档，但可用性取决于供应方。
+
+`.env.local` 已在 `.gitignore` 里；仓库里只有 `.env.local.example`，它只有占位符。
 
 ## Current focus
 
@@ -39,8 +49,10 @@ How to run an evaluation — and the measured constraints that bound it — is i
 
 ## Useful Commands
 
+玩游戏只需要 `npm run dev`。下面其余的都是开发与评测用的。
+
 - `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
+- `npm run build`: verify the production build
 - `npm run typecheck`: check TypeScript without emitting files
 - `npm run types:worker`: regenerate Cloudflare runtime types from the build's
   Wrangler config; run `npm run build` first when refreshing these types
@@ -156,7 +168,6 @@ records the stalemates that led to these changes.
   and fixed. `tools/build-adjacency.mjs` now fails rather than writing a map that
   drops a required corridor.
 - Desktop only.
-- No repository or public deploy yet.
 
 Evaluation tooling (`npm run eval`, `npm run eval:suite`) does drive real models
 and needs the key above. See [docs/EVAL.md](docs/EVAL.md) for the measured
@@ -164,3 +175,37 @@ constraints that bound it — including the two ways a leaderboard can silently
 become a lie.
 
 The current pack is 2.3.0 and save format is 11; older saves require a new match.
+
+## 重新生成地图（可选，大多数人用不到）
+
+仓库里**已经带了成品地图**：941 块瓦片、55 个城印、通行代价场、道路与
+疆域栅格，合计约 17 MB，clone 下来直接能用。只有想改地图本身的人才需要下面这些。
+
+`npm run map:all` 会从高程数据重新渲染整条链：
+
+```
+refs/dem-raster.raw  (283 MB，不入库，需自行下载)
+  → npm run map:base4x → han-terrain-4x.png (172 MB，中间产物，不入库)
+      → npm run map:tiles → public/game/map/tiles/    ← 运行时用这个
+      → npm run map:play  → public/game/map/play-base.webp
+```
+
+那两个大文件**刻意不入库**：`han-terrain-4x.png` 单个 172 MB，超过 GitHub
+单文件 100 MB 的上限，带着它仓库根本推不上去；而运行时一个字节都用不到它。
+
+高程数据来自 [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)
+（terrarium 格式，公有领域），`refs/dem-raster.json` 里记着取的是哪个范围。
+
+另有两条独立于地形的：`npm run map:cost` 重算通行代价场（决定哪儿走得通、
+关隘扼守多少价值），`npm run map:cost:report` 打印它的验收报告。
+
+## 许可证与数据出处
+
+代码按 [MIT](LICENSE) 发布。
+
+打包进来的史料与地理数据全部是**公有领域或开放数据**——《三国志》《后汉书》
+《续汉书·郡国志》等古籍，AWS Terrain Tiles 的高程，Natural Earth 的海岸线与
+水系。郡治与据点坐标由现代地名反查得出，逐条标注了 certainty 与史料依据。
+
+项目**刻意回避了带非商业条款的数据集**：CHGIS / 复旦 TGAZ 是 CC BY-NC，
+只在研究阶段用来校对过坐标，没有任何数据打包进来。详见 [LICENSE](LICENSE)。
