@@ -208,6 +208,12 @@ test("冻结闸：胜负数值的指纹未变", () => {
   assert.equal(log[log.length - 1]["版本"], pack.version,
     `改动记载末尾是 ${log[log.length - 1]["版本"]}，而 pack.version 是 ${pack.version}`
     + " —— 升版本必须同时记一条：改了什么、为什么、后果");
+  // README 末尾那句「当前规则包 x.y.z」也会掉队，而它是**仓库首页**上的话。
+  // 闸管得住包内（指纹、版本、记载三者互钉），管不到包外抄了一份版本号的地方。
+  // 实测漏过一次：包已是 2.4.0，README 还写着 2.3.0，经历了两次升版都没人发现
+  const readme = fs.readFileSync("README.md", "utf8");
+  assert.ok(readme.includes(`当前规则包 ${pack.version}`),
+    `README 没写着「当前规则包 ${pack.version}」——升版本时它也要跟着改`);
 });
 
 // ── 通行图也要冻 ────────────────────────────────────────────────────

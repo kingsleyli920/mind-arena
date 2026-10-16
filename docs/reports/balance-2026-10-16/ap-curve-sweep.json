@@ -1,0 +1,422 @@
+[
+  {
+    "cfg": {
+      "exp": 0.5,
+      "cap": 12,
+      "base": 5
+    },
+    "res": [
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 23,
+        "lead": "yuanshao",
+        "n": 74,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 21,
+        "lead": "yuanshao",
+        "n": 84,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 47,
+        "lead": "yuanshao",
+        "n": 89,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 33,
+        "lead": "yuanshao",
+        "n": 83,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 30,
+        "lead": "yuanshao",
+        "n": 72,
+        "alive": 4
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 27,
+        "lead": "yuanshao",
+        "n": 94,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 21,
+        "lead": "yuanshao",
+        "n": 84,
+        "alive": 3
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "yuanshao",
+        "n": 28,
+        "alive": 7
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 39,
+        "lead": "yuanshao",
+        "n": 79,
+        "alive": 4
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 27,
+        "lead": "yuanshao",
+        "n": 90,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 29,
+        "lead": "yuanshao",
+        "n": 93,
+        "alive": 2
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "yuanshao",
+        "n": 43,
+        "alive": 5
+      }
+    ]
+  },
+  {
+    "cfg": {
+      "exp": 0.5,
+      "cap": 9,
+      "base": 5
+    },
+    "res": [
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 24,
+        "lead": "yuanshao",
+        "n": 71,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 21,
+        "lead": "yuanshao",
+        "n": 83,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 42,
+        "lead": "yuanshao",
+        "n": 94,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 34,
+        "lead": "yuanshao",
+        "n": 103,
+        "alive": 1
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 30,
+        "lead": "yuanshao",
+        "n": 79,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 30,
+        "lead": "yuanshao",
+        "n": 93,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 30,
+        "lead": "yuanshao",
+        "n": 104,
+        "alive": 1
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 31,
+        "lead": "yuanshao",
+        "n": 92,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 34,
+        "lead": "yuanshao",
+        "n": 93,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 23,
+        "lead": "yuanshao",
+        "n": 82,
+        "alive": 5
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 28,
+        "lead": "yuanshao",
+        "n": 84,
+        "alive": 2
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "yuanshao",
+        "n": 25,
+        "alive": 8
+      }
+    ]
+  },
+  {
+    "cfg": {
+      "exp": 0.35,
+      "cap": 12,
+      "base": 5
+    },
+    "res": [
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 32,
+        "lead": "yuanshao",
+        "n": 104,
+        "alive": 1
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 52,
+        "lead": "yuanshao",
+        "n": 88,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 42,
+        "lead": "yuanshao",
+        "n": 78,
+        "alive": 3
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "liubiao",
+        "n": 18,
+        "alive": 8
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 33,
+        "lead": "yuanshao",
+        "n": 87,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 31,
+        "lead": "yuanshao",
+        "n": 104,
+        "alive": 1
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "yuanshao",
+        "n": 45,
+        "alive": 4
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 42,
+        "lead": "yuanshao",
+        "n": 88,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 26,
+        "lead": "yuanshao",
+        "n": 80,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 56,
+        "lead": "yuanshao",
+        "n": 82,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 41,
+        "lead": "yuanshao",
+        "n": 85,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 40,
+        "lead": "yuanshao",
+        "n": 93,
+        "alive": 2
+      }
+    ]
+  },
+  {
+    "cfg": {
+      "exp": 0.35,
+      "cap": 9,
+      "base": 5
+    },
+    "res": [
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 32,
+        "lead": "yuanshao",
+        "n": 104,
+        "alive": 1
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 52,
+        "lead": "yuanshao",
+        "n": 88,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 42,
+        "lead": "yuanshao",
+        "n": 78,
+        "alive": 3
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "liubiao",
+        "n": 18,
+        "alive": 8
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 33,
+        "lead": "yuanshao",
+        "n": 87,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 31,
+        "lead": "yuanshao",
+        "n": 104,
+        "alive": 1
+      },
+      {
+        "finished": false,
+        "winner": null,
+        "turns": 64,
+        "lead": "yuanshao",
+        "n": 45,
+        "alive": 4
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 42,
+        "lead": "yuanshao",
+        "n": 88,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 26,
+        "lead": "yuanshao",
+        "n": 80,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 56,
+        "lead": "yuanshao",
+        "n": 82,
+        "alive": 3
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 41,
+        "lead": "yuanshao",
+        "n": 85,
+        "alive": 2
+      },
+      {
+        "finished": true,
+        "winner": "yuanshao",
+        "turns": 40,
+        "lead": "yuanshao",
+        "n": 93,
+        "alive": 2
+      }
+    ]
+  }
+]

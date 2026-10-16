@@ -1,0 +1,778 @@
+[
+  {
+    "seed": 0,
+    "winner": "yuanshao",
+    "turns": 36,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 15,
+        "siege-starve": 1
+      },
+      {
+        "t": 4,
+        "siege-win": 19,
+        "siege-starve": 1
+      },
+      {
+        "t": 5,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 6,
+        "siege-win": 15,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 11,
+        "siege-starve": 2
+      },
+      {
+        "t": 8,
+        "siege-win": 12
+      },
+      {
+        "t": 9,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 10,
+        "siege-win": 9
+      },
+      {
+        "t": 11,
+        "siege-win": 10,
+        "siege-starve": 2
+      },
+      {
+        "t": 12,
+        "siege-starve": 1,
+        "siege-win": 8,
+        "isolated-submit": 1
+      },
+      {
+        "t": 13,
+        "siege-win": 7,
+        "isolated-submit": 1
+      },
+      {
+        "t": 14,
+        "siege-win": 8,
+        "siege-starve": 2
+      },
+      {
+        "t": 15,
+        "siege-win": 3
+      },
+      {
+        "t": 16,
+        "siege-win": 6
+      },
+      {
+        "t": 17,
+        "siege-win": 4,
+        "isolated-submit": 1
+      },
+      {
+        "t": 18,
+        "siege-win": 3
+      },
+      {
+        "t": 19,
+        "siege-win": 10
+      },
+      {
+        "t": 20,
+        "siege-starve": 2,
+        "siege-win": 2
+      },
+      {
+        "t": 21,
+        "siege-win": 5,
+        "siege-starve": 1
+      },
+      {
+        "t": 22,
+        "siege-starve": 1,
+        "siege-win": 3
+      },
+      {
+        "t": 23,
+        "siege-starve": 1,
+        "siege-win": 2
+      },
+      {
+        "t": 24,
+        "siege-win": 3
+      },
+      {
+        "t": 25,
+        "siege-win": 1,
+        "siege-starve": 1
+      },
+      {
+        "t": 26,
+        "siege-win": 4
+      },
+      {
+        "t": 27,
+        "siege-win": 4
+      },
+      {
+        "t": 28,
+        "siege-win": 4,
+        "siege-starve": 1
+      },
+      {
+        "t": 29,
+        "siege-win": 4
+      },
+      {
+        "t": 30,
+        "siege-win": 3,
+        "siege-starve": 2
+      },
+      {
+        "t": 31,
+        "siege-win": 2,
+        "siege-starve": 1
+      },
+      {
+        "t": 32,
+        "siege-win": 1,
+        "siege-starve": 1
+      },
+      {
+        "t": 33,
+        "siege-starve": 2,
+        "siege-win": 3,
+        "isolated-submit": 1
+      },
+      {
+        "t": 34,
+        "siege-win": 6
+      },
+      {
+        "t": 35,
+        "siege-starve": 1
+      },
+      {
+        "t": 36,
+        "siege-win": 1
+      }
+    ]
+  },
+  {
+    "seed": 1,
+    "winner": "yuanshao",
+    "turns": 26,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 14,
+        "siege-starve": 1
+      },
+      {
+        "t": 4,
+        "siege-win": 19,
+        "siege-starve": 1
+      },
+      {
+        "t": 5,
+        "siege-win": 11,
+        "siege-starve": 2
+      },
+      {
+        "t": 6,
+        "siege-win": 16,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 8,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 9,
+        "siege-win": 11
+      },
+      {
+        "t": 10,
+        "siege-win": 10
+      },
+      {
+        "t": 11,
+        "siege-win": 14,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 12,
+        "siege-win": 11,
+        "isolated-submit": 1
+      },
+      {
+        "t": 13,
+        "siege-starve": 2,
+        "siege-win": 8,
+        "isolated-submit": 1
+      },
+      {
+        "t": 14,
+        "siege-win": 7
+      },
+      {
+        "t": 15,
+        "siege-win": 9,
+        "isolated-submit": 1
+      },
+      {
+        "t": 16,
+        "siege-win": 12
+      },
+      {
+        "t": 17,
+        "siege-win": 7,
+        "siege-starve": 1,
+        "isolated-submit": 2
+      },
+      {
+        "t": 18,
+        "siege-win": 3,
+        "siege-starve": 2
+      },
+      {
+        "t": 19,
+        "siege-win": 9
+      },
+      {
+        "t": 20,
+        "siege-win": 6
+      },
+      {
+        "t": 21,
+        "siege-win": 6
+      },
+      {
+        "t": 22,
+        "siege-starve": 1,
+        "siege-win": 2
+      },
+      {
+        "t": 23,
+        "siege-win": 2
+      },
+      {
+        "t": 24,
+        "siege-starve": 1,
+        "siege-win": 1
+      },
+      {
+        "t": 25,
+        "siege-win": 2
+      },
+      {
+        "t": 26,
+        "siege-win": 1
+      }
+    ]
+  },
+  {
+    "seed": 2,
+    "winner": "yuanshao",
+    "turns": 23,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 15,
+        "siege-starve": 1
+      },
+      {
+        "t": 4,
+        "siege-win": 17
+      },
+      {
+        "t": 5,
+        "siege-win": 14
+      },
+      {
+        "t": 6,
+        "siege-win": 13,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 17,
+        "siege-starve": 4
+      },
+      {
+        "t": 8,
+        "siege-win": 7,
+        "siege-starve": 2
+      },
+      {
+        "t": 9,
+        "siege-win": 14
+      },
+      {
+        "t": 10,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 11,
+        "siege-win": 9
+      },
+      {
+        "t": 12,
+        "siege-win": 8
+      },
+      {
+        "t": 13,
+        "siege-win": 8,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 14,
+        "siege-win": 9
+      },
+      {
+        "t": 15,
+        "siege-win": 5,
+        "isolated-submit": 2
+      },
+      {
+        "t": 16,
+        "siege-win": 11
+      },
+      {
+        "t": 17,
+        "siege-win": 6,
+        "siege-starve": 1
+      },
+      {
+        "t": 18,
+        "siege-win": 5,
+        "siege-starve": 1
+      },
+      {
+        "t": 19,
+        "siege-win": 3,
+        "siege-starve": 1
+      },
+      {
+        "t": 20,
+        "siege-win": 1
+      },
+      {
+        "t": 21,
+        "siege-win": 1
+      },
+      {
+        "t": 22,
+        "siege-win": 4,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 23,
+        "siege-win": 2
+      }
+    ]
+  },
+  {
+    "seed": 3,
+    "winner": "yuanshao",
+    "turns": 27,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 15,
+        "siege-starve": 1
+      },
+      {
+        "t": 4,
+        "siege-win": 21,
+        "siege-starve": 1
+      },
+      {
+        "t": 5,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 6,
+        "siege-win": 13,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 8,
+        "siege-starve": 1
+      },
+      {
+        "t": 8,
+        "siege-win": 11,
+        "siege-starve": 2
+      },
+      {
+        "t": 9,
+        "siege-starve": 1,
+        "siege-win": 9
+      },
+      {
+        "t": 10,
+        "siege-win": 12,
+        "siege-starve": 1
+      },
+      {
+        "t": 11,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 12,
+        "siege-win": 9,
+        "siege-starve": 1
+      },
+      {
+        "t": 13,
+        "siege-win": 14
+      },
+      {
+        "t": 14,
+        "siege-win": 13,
+        "siege-starve": 1
+      },
+      {
+        "t": 15,
+        "siege-win": 9,
+        "siege-starve": 1
+      },
+      {
+        "t": 16,
+        "siege-win": 11,
+        "isolated-submit": 1
+      },
+      {
+        "t": 17,
+        "siege-win": 5
+      },
+      {
+        "t": 18,
+        "siege-win": 6,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 19,
+        "siege-win": 7,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 20,
+        "siege-win": 1,
+        "siege-starve": 1
+      },
+      {
+        "t": 21,
+        "siege-win": 3,
+        "siege-starve": 1
+      },
+      {
+        "t": 22
+      },
+      {
+        "t": 23,
+        "siege-starve": 1,
+        "siege-win": 1
+      },
+      {
+        "t": 24,
+        "siege-win": 1
+      },
+      {
+        "t": 25,
+        "siege-win": 1
+      },
+      {
+        "t": 26,
+        "siege-win": 2
+      },
+      {
+        "t": 27,
+        "siege-win": 3,
+        "isolated-submit": 1
+      }
+    ]
+  },
+  {
+    "seed": 4,
+    "winner": "yuanshao",
+    "turns": 23,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 16
+      },
+      {
+        "t": 4,
+        "siege-win": 21
+      },
+      {
+        "t": 5,
+        "siege-starve": 1,
+        "siege-win": 4
+      },
+      {
+        "t": 6,
+        "siege-win": 20,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 7,
+        "siege-starve": 2
+      },
+      {
+        "t": 8,
+        "siege-win": 11
+      },
+      {
+        "t": 9,
+        "siege-win": 14,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 10,
+        "siege-starve": 2,
+        "siege-win": 6
+      },
+      {
+        "t": 11,
+        "siege-win": 7
+      },
+      {
+        "t": 12,
+        "siege-starve": 2,
+        "siege-win": 8
+      },
+      {
+        "t": 13,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 14,
+        "siege-win": 10,
+        "isolated-submit": 1
+      },
+      {
+        "t": 15,
+        "siege-win": 5,
+        "siege-starve": 1
+      },
+      {
+        "t": 16,
+        "siege-win": 12,
+        "siege-starve": 1
+      },
+      {
+        "t": 17,
+        "siege-win": 6
+      },
+      {
+        "t": 18,
+        "siege-win": 7,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      },
+      {
+        "t": 19,
+        "siege-win": 10
+      },
+      {
+        "t": 20,
+        "siege-win": 7
+      },
+      {
+        "t": 21,
+        "siege-win": 3,
+        "isolated-submit": 1
+      },
+      {
+        "t": 22,
+        "siege-win": 3
+      },
+      {
+        "t": 23,
+        "siege-win": 1
+      }
+    ]
+  },
+  {
+    "seed": 5,
+    "winner": "yuanshao",
+    "turns": 22,
+    "perTurn": [
+      {
+        "t": 1
+      },
+      {
+        "t": 2,
+        "siege-win": 11,
+        "siege-starve": 1
+      },
+      {
+        "t": 3,
+        "siege-win": 16,
+        "siege-starve": 1
+      },
+      {
+        "t": 4,
+        "siege-win": 21,
+        "siege-starve": 1
+      },
+      {
+        "t": 5,
+        "siege-win": 10,
+        "siege-starve": 1
+      },
+      {
+        "t": 6,
+        "siege-win": 15,
+        "siege-starve": 1
+      },
+      {
+        "t": 7,
+        "siege-win": 13,
+        "siege-starve": 2
+      },
+      {
+        "t": 8,
+        "siege-win": 10
+      },
+      {
+        "t": 9,
+        "siege-win": 8,
+        "siege-starve": 2
+      },
+      {
+        "t": 10,
+        "siege-win": 10,
+        "siege-starve": 3
+      },
+      {
+        "t": 11,
+        "siege-win": 4,
+        "siege-starve": 3
+      },
+      {
+        "t": 12,
+        "siege-win": 8,
+        "siege-starve": 1
+      },
+      {
+        "t": 13,
+        "siege-win": 8,
+        "siege-starve": 1
+      },
+      {
+        "t": 14,
+        "siege-win": 12,
+        "siege-starve": 1
+      },
+      {
+        "t": 15,
+        "siege-win": 7
+      },
+      {
+        "t": 16,
+        "siege-win": 4,
+        "siege-starve": 2,
+        "isolated-submit": 1
+      },
+      {
+        "t": 17,
+        "siege-win": 6,
+        "isolated-submit": 1
+      },
+      {
+        "t": 18,
+        "siege-win": 6
+      },
+      {
+        "t": 19,
+        "siege-win": 2,
+        "isolated-submit": 1
+      },
+      {
+        "t": 20,
+        "siege-win": 4,
+        "siege-starve": 1
+      },
+      {
+        "t": 21,
+        "siege-win": 2,
+        "isolated-submit": 1
+      },
+      {
+        "t": 22,
+        "siege-win": 1,
+        "siege-starve": 1,
+        "isolated-submit": 1
+      }
+    ]
+  }
+]

@@ -1,0 +1,2459 @@
+[
+  {
+    "seed": "strategy-session-0",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 36,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 385,
+      "govern": 308,
+      "appoint": 350,
+      "build": 140,
+      "transfer": 176,
+      "muster": 21,
+      "seize-win": 4,
+      "isolated": 47,
+      "supply-cut": 189,
+      "treasury": 485,
+      "march-out": 76,
+      "field-fail": 38,
+      "siege-hold": 200,
+      "siege-win": 220,
+      "officer-captured": 129,
+      "siege-abort": 69,
+      "siege-starve": 27,
+      "besieged": 120,
+      "capital-lost": 70,
+      "capital-lost-low": 44,
+      "supply-cut-low": 72,
+      "eliminated": 20,
+      "march-arrive": 76,
+      "suade": 47,
+      "relocate": 72,
+      "array": 7,
+      "siege-lift": 11,
+      "siege-reinforce": 86,
+      "unpaid": 1,
+      "epoch": 2,
+      "campaign-void": 13,
+      "capital-lost-scatter": 5,
+      "field-win": 98,
+      "relief": 94,
+      "muster-return": 9,
+      "supply-cut-scatter": 5,
+      "sway-submit": 2,
+      "isolated-submit": 4,
+      "coalition": 4,
+      "ally-break": 6,
+      "submit-refuse": 13,
+      "submitted": 7,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 12,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 27
+          },
+          {
+            "id": "liuzhang",
+            "lands": 15
+          },
+          {
+            "id": "liubiao",
+            "lands": 12
+          }
+        ],
+        "armies": 5
+      },
+      {
+        "turn": 32,
+        "alive": 6,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 53
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 36,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 85
+          },
+          {
+            "id": "liubiao",
+            "lands": 10
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 7
+          }
+        ],
+        "armies": 2
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-1",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 26,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 344,
+      "govern": 301,
+      "appoint": 299,
+      "build": 141,
+      "transfer": 122,
+      "muster": 9,
+      "seize-win": 3,
+      "isolated": 36,
+      "supply-cut": 219,
+      "treasury": 426,
+      "march-out": 57,
+      "field-fail": 46,
+      "siege-hold": 144,
+      "siege-win": 212,
+      "officer-captured": 119,
+      "siege-abort": 45,
+      "siege-starve": 16,
+      "besieged": 74,
+      "capital-lost": 94,
+      "capital-lost-low": 53,
+      "supply-cut-low": 42,
+      "eliminated": 18,
+      "march-arrive": 55,
+      "suade": 46,
+      "relocate": 94,
+      "array": 4,
+      "siege-lift": 9,
+      "siege-reinforce": 86,
+      "field-win": 42,
+      "epoch": 2,
+      "campaign-void": 8,
+      "capital-lost-scatter": 3,
+      "muster-return": 5,
+      "relief": 35,
+      "supply-cut-scatter": 3,
+      "isolated-submit": 6,
+      "coalition": 2,
+      "ally-break": 9,
+      "submitted": 9,
+      "submit-refuse": 5,
+      "sway-submit": 1,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 14,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 22
+          },
+          {
+            "id": "liuzhang",
+            "lands": 13
+          },
+          {
+            "id": "liubiao",
+            "lands": 12
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 26,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 89
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 9
+          },
+          {
+            "id": "songjian",
+            "lands": 3
+          }
+        ],
+        "armies": 4
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-2",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 23,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 342,
+      "govern": 287,
+      "appoint": 272,
+      "build": 134,
+      "transfer": 103,
+      "muster": 3,
+      "seize-win": 4,
+      "isolated": 22,
+      "supply-cut": 263,
+      "treasury": 403,
+      "march-out": 45,
+      "field-fail": 47,
+      "siege-hold": 119,
+      "siege-win": 190,
+      "officer-captured": 111,
+      "siege-abort": 31,
+      "siege-starve": 15,
+      "besieged": 55,
+      "capital-lost": 87,
+      "capital-lost-low": 31,
+      "supply-cut-low": 32,
+      "eliminated": 13,
+      "march-arrive": 44,
+      "suade": 53,
+      "relocate": 87,
+      "array": 10,
+      "invest": 1,
+      "siege-lift": 14,
+      "siege-reinforce": 62,
+      "unpaid": 1,
+      "epoch": 2,
+      "field-win": 45,
+      "relief": 35,
+      "capital-lost-scatter": 3,
+      "campaign-void": 11,
+      "sway-submit": 3,
+      "isolated-submit": 4,
+      "coalition": 1,
+      "submitted": 15,
+      "submit-refuse": 2,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 17,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 27
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "liubiao",
+            "lands": 12
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 23,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 92
+          },
+          {
+            "id": "liubiao",
+            "lands": 10
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-3",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 27,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 340,
+      "govern": 301,
+      "appoint": 273,
+      "build": 153,
+      "transfer": 77,
+      "muster": 8,
+      "seize-win": 3,
+      "isolated": 41,
+      "supply-cut": 220,
+      "treasury": 423,
+      "march-out": 63,
+      "field-fail": 40,
+      "siege-hold": 140,
+      "siege-win": 207,
+      "officer-captured": 113,
+      "siege-abort": 33,
+      "siege-starve": 19,
+      "besieged": 69,
+      "capital-lost": 94,
+      "capital-lost-low": 48,
+      "supply-cut-low": 32,
+      "eliminated": 17,
+      "march-arrive": 63,
+      "suade": 49,
+      "relocate": 94,
+      "array": 5,
+      "siege-lift": 18,
+      "siege-reinforce": 80,
+      "field-win": 39,
+      "epoch": 2,
+      "capital-lost-scatter": 5,
+      "relief": 28,
+      "campaign-void": 5,
+      "supply-cut-scatter": 2,
+      "sway-submit": 2,
+      "coalition": 2,
+      "ally-break": 5,
+      "isolated-submit": 4,
+      "submitted": 11,
+      "submit-refuse": 7,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 29
+          },
+          {
+            "id": "liubiao",
+            "lands": 16
+          },
+          {
+            "id": "liuzhang",
+            "lands": 16
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 27,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 83
+          },
+          {
+            "id": "liuzhang",
+            "lands": 20
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 2
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-4",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 23,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 359,
+      "govern": 334,
+      "appoint": 291,
+      "build": 159,
+      "transfer": 94,
+      "muster": 10,
+      "seize-win": 3,
+      "isolated": 20,
+      "supply-cut": 187,
+      "treasury": 446,
+      "march-out": 55,
+      "field-fail": 61,
+      "siege-hold": 134,
+      "siege-win": 200,
+      "officer-captured": 115,
+      "siege-abort": 34,
+      "siege-starve": 14,
+      "besieged": 72,
+      "capital-lost": 85,
+      "capital-lost-low": 37,
+      "supply-cut-low": 31,
+      "eliminated": 17,
+      "march-arrive": 55,
+      "suade": 45,
+      "relocate": 86,
+      "siege-lift": 18,
+      "siege-reinforce": 94,
+      "unpaid": 1,
+      "epoch": 2,
+      "field-win": 36,
+      "relief": 33,
+      "capital-lost-scatter": 2,
+      "muster-return": 3,
+      "array": 8,
+      "invest": 13,
+      "campaign-void": 10,
+      "isolated-submit": 4,
+      "coalition": 2,
+      "ally-break": 7,
+      "passage": 1,
+      "supply-cut-scatter": 2,
+      "sway-submit": 2,
+      "submitted": 8,
+      "submit-refuse": 5,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 16,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 25
+          },
+          {
+            "id": "liuzhang",
+            "lands": 14
+          },
+          {
+            "id": "liubiao",
+            "lands": 9
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 23,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 81
+          },
+          {
+            "id": "liubiao",
+            "lands": 9
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 7
+          }
+        ],
+        "armies": 3
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-5",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 22,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 297,
+      "govern": 240,
+      "appoint": 259,
+      "build": 123,
+      "transfer": 79,
+      "muster": 7,
+      "seize-win": 3,
+      "isolated": 35,
+      "supply-cut": 196,
+      "treasury": 355,
+      "march-out": 52,
+      "field-fail": 35,
+      "siege-hold": 132,
+      "siege-win": 178,
+      "officer-captured": 110,
+      "siege-abort": 21,
+      "siege-starve": 22,
+      "besieged": 64,
+      "capital-lost": 76,
+      "capital-lost-low": 53,
+      "supply-cut-low": 33,
+      "eliminated": 19,
+      "march-arrive": 51,
+      "suade": 36,
+      "relocate": 76,
+      "array": 4,
+      "siege-lift": 9,
+      "siege-reinforce": 76,
+      "field-win": 36,
+      "epoch": 2,
+      "capital-lost-scatter": 5,
+      "muster-return": 4,
+      "relief": 30,
+      "campaign-void": 5,
+      "sway-submit": 1,
+      "coalition": 2,
+      "ally-break": 4,
+      "supply-cut-scatter": 3,
+      "isolated-submit": 5,
+      "submitted": 8,
+      "submit-refuse": 5,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 12,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 28
+          },
+          {
+            "id": "liubiao",
+            "lands": 16
+          },
+          {
+            "id": "liuzhang",
+            "lands": 12
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 22,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 82
+          },
+          {
+            "id": "liuzhang",
+            "lands": 13
+          },
+          {
+            "id": "lijue",
+            "lands": 7
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-6",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 16,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 261,
+      "govern": 227,
+      "appoint": 231,
+      "build": 129,
+      "transfer": 48,
+      "muster": 6,
+      "seize-win": 3,
+      "isolated": 19,
+      "supply-cut": 116,
+      "treasury": 313,
+      "march-out": 42,
+      "field-fail": 33,
+      "siege-hold": 96,
+      "siege-win": 152,
+      "officer-captured": 91,
+      "siege-abort": 16,
+      "siege-starve": 7,
+      "besieged": 39,
+      "capital-lost": 84,
+      "capital-lost-low": 47,
+      "supply-cut-low": 20,
+      "eliminated": 13,
+      "march-arrive": 42,
+      "suade": 41,
+      "relocate": 84,
+      "array": 4,
+      "siege-lift": 18,
+      "siege-reinforce": 60,
+      "field-win": 18,
+      "relief": 13,
+      "unpaid": 1,
+      "epoch": 2,
+      "campaign-void": 8,
+      "capital-lost-scatter": 3,
+      "muster-return": 2,
+      "invest": 2,
+      "coalition": 2,
+      "ally-break": 5,
+      "submit-refuse": 4,
+      "submitted": 13,
+      "sway-submit": 1,
+      "isolated-submit": 1,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 83
+          },
+          {
+            "id": "liubiao",
+            "lands": 11
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 8
+          }
+        ],
+        "armies": 4
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-7",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 30,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 367,
+      "govern": 312,
+      "appoint": 318,
+      "build": 148,
+      "transfer": 107,
+      "muster": 8,
+      "seize-win": 3,
+      "isolated": 50,
+      "supply-cut": 310,
+      "treasury": 463,
+      "march-out": 80,
+      "field-fail": 30,
+      "siege-hold": 138,
+      "siege-win": 232,
+      "officer-captured": 127,
+      "siege-abort": 41,
+      "siege-starve": 18,
+      "besieged": 64,
+      "capital-lost": 91,
+      "capital-lost-low": 54,
+      "supply-cut-low": 33,
+      "eliminated": 18,
+      "march-arrive": 80,
+      "suade": 46,
+      "relocate": 92,
+      "siege-lift": 13,
+      "siege-reinforce": 87,
+      "field-win": 58,
+      "epoch": 2,
+      "capital-lost-scatter": 9,
+      "campaign-void": 8,
+      "relief": 49,
+      "array": 5,
+      "muster-return": 3,
+      "coalition": 3,
+      "passage": 1,
+      "ally-break": 10,
+      "isolated-submit": 3,
+      "sway-submit": 1,
+      "supply-cut-scatter": 1,
+      "submitted": 9,
+      "submit-refuse": 5,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 14,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 31
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          },
+          {
+            "id": "liuzhang",
+            "lands": 12
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 30,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 77
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 6
+          }
+        ],
+        "armies": 0
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-8",
+    "finished": false,
+    "stopReason": "test-budget-paused",
+    "turns": 64,
+    "winner": null,
+    "calls": 0,
+    "events": {
+      "scout": 580,
+      "govern": 443,
+      "appoint": 449,
+      "build": 170,
+      "transfer": 440,
+      "muster": 16,
+      "seize-win": 3,
+      "isolated": 70,
+      "supply-cut": 350,
+      "treasury": 707,
+      "march-out": 112,
+      "field-fail": 58,
+      "siege-hold": 338,
+      "siege-win": 382,
+      "officer-captured": 155,
+      "siege-abort": 52,
+      "siege-starve": 36,
+      "besieged": 210,
+      "capital-lost": 105,
+      "capital-lost-low": 78,
+      "supply-cut-low": 115,
+      "eliminated": 24,
+      "march-arrive": 111,
+      "suade": 37,
+      "relocate": 106,
+      "array": 9,
+      "siege-lift": 28,
+      "siege-reinforce": 189,
+      "unpaid": 1,
+      "epoch": 2,
+      "capital-lost-scatter": 6,
+      "field-win": 122,
+      "relief": 118,
+      "campaign-void": 10,
+      "muster-return": 5,
+      "supply-cut-scatter": 8,
+      "isolated-submit": 9,
+      "sway-submit": 2,
+      "coalition": 3,
+      "ally-break": 20,
+      "coalition-end": 1,
+      "submitted": 1,
+      "submit-refuse": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 23
+          },
+          {
+            "id": "liuzhang",
+            "lands": 15
+          },
+          {
+            "id": "liubiao",
+            "lands": 14
+          }
+        ],
+        "armies": 14
+      },
+      {
+        "turn": 32,
+        "alive": 7,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 32
+          },
+          {
+            "id": "liubiao",
+            "lands": 20
+          },
+          {
+            "id": "liuzhang",
+            "lands": 19
+          }
+        ],
+        "armies": 9
+      },
+      {
+        "turn": 48,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 34
+          },
+          {
+            "id": "liubiao",
+            "lands": 25
+          },
+          {
+            "id": "liuzhang",
+            "lands": 20
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 64,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 28
+          },
+          {
+            "id": "liubiao",
+            "lands": 27
+          },
+          {
+            "id": "liuzhang",
+            "lands": 24
+          }
+        ],
+        "armies": 3
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-9",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 22,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 302,
+      "govern": 281,
+      "appoint": 267,
+      "build": 133,
+      "transfer": 82,
+      "muster": 9,
+      "seize-win": 3,
+      "isolated": 20,
+      "supply-cut": 219,
+      "treasury": 387,
+      "march-out": 53,
+      "field-fail": 45,
+      "siege-hold": 130,
+      "siege-win": 169,
+      "officer-captured": 99,
+      "siege-abort": 39,
+      "siege-starve": 14,
+      "besieged": 55,
+      "capital-lost": 70,
+      "capital-lost-low": 39,
+      "supply-cut-low": 32,
+      "eliminated": 16,
+      "march-arrive": 52,
+      "suade": 37,
+      "relocate": 70,
+      "siege-lift": 17,
+      "siege-reinforce": 68,
+      "field-win": 46,
+      "epoch": 2,
+      "campaign-void": 12,
+      "capital-lost-scatter": 2,
+      "muster-return": 3,
+      "relief": 36,
+      "array": 2,
+      "coalition": 2,
+      "ally-break": 6,
+      "isolated-submit": 2,
+      "supply-cut-scatter": 3,
+      "sway-submit": 2,
+      "submitted": 10,
+      "submit-refuse": 2,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 29
+          },
+          {
+            "id": "liuzhang",
+            "lands": 15
+          },
+          {
+            "id": "liubiao",
+            "lands": 14
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 22,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 81
+          },
+          {
+            "id": "liubiao",
+            "lands": 12
+          },
+          {
+            "id": "songjian",
+            "lands": 5
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-10",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 44,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 435,
+      "govern": 349,
+      "appoint": 379,
+      "build": 164,
+      "transfer": 187,
+      "muster": 6,
+      "seize-win": 3,
+      "isolated": 58,
+      "supply-cut": 178,
+      "treasury": 527,
+      "march-out": 106,
+      "field-fail": 45,
+      "siege-hold": 202,
+      "siege-win": 265,
+      "officer-captured": 143,
+      "siege-abort": 48,
+      "siege-starve": 23,
+      "besieged": 113,
+      "capital-lost": 114,
+      "capital-lost-low": 69,
+      "supply-cut-low": 51,
+      "eliminated": 18,
+      "march-arrive": 106,
+      "suade": 52,
+      "relocate": 115,
+      "array": 7,
+      "siege-lift": 21,
+      "siege-reinforce": 127,
+      "field-win": 77,
+      "unpaid": 1,
+      "epoch": 2,
+      "capital-lost-scatter": 3,
+      "relief": 69,
+      "campaign-void": 15,
+      "sway-submit": 2,
+      "coalition": 5,
+      "passage": 1,
+      "ally-break": 12,
+      "isolated-submit": 5,
+      "muster-return": 2,
+      "supply-cut-scatter": 4,
+      "coalition-end": 1,
+      "submit-refuse": 9,
+      "submitted": 10,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 26
+          },
+          {
+            "id": "liubiao",
+            "lands": 13
+          },
+          {
+            "id": "liuzhang",
+            "lands": 13
+          }
+        ],
+        "armies": 5
+      },
+      {
+        "turn": 32,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 58
+          },
+          {
+            "id": "liubiao",
+            "lands": 18
+          },
+          {
+            "id": "liuzhang",
+            "lands": 13
+          }
+        ],
+        "armies": 3
+      },
+      {
+        "turn": 44,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 93
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 12
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 2
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-11",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 32,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 411,
+      "govern": 365,
+      "appoint": 355,
+      "build": 145,
+      "transfer": 156,
+      "muster": 12,
+      "seize-win": 3,
+      "isolated": 33,
+      "supply-cut": 340,
+      "treasury": 517,
+      "march-out": 61,
+      "field-fail": 54,
+      "siege-hold": 178,
+      "siege-win": 234,
+      "officer-captured": 135,
+      "siege-abort": 42,
+      "siege-starve": 18,
+      "besieged": 98,
+      "capital-lost": 85,
+      "capital-lost-low": 46,
+      "supply-cut-low": 48,
+      "eliminated": 18,
+      "march-arrive": 61,
+      "suade": 50,
+      "relocate": 85,
+      "array": 14,
+      "siege-lift": 20,
+      "siege-reinforce": 98,
+      "field-win": 62,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 43,
+      "capital-lost-scatter": 2,
+      "campaign-void": 12,
+      "supply-cut-scatter": 5,
+      "muster-return": 5,
+      "sway-submit": 1,
+      "coalition": 3,
+      "ally-break": 16,
+      "isolated-submit": 2,
+      "submit-refuse": 6,
+      "submitted": 9,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 24
+          },
+          {
+            "id": "liuzhang",
+            "lands": 17
+          },
+          {
+            "id": "liubiao",
+            "lands": 11
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 32,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 91
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 9
+          },
+          {
+            "id": "songjian",
+            "lands": 2
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-12",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 21,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 285,
+      "govern": 263,
+      "appoint": 244,
+      "build": 134,
+      "transfer": 77,
+      "muster": 4,
+      "seize-win": 3,
+      "isolated": 29,
+      "supply-cut": 121,
+      "treasury": 363,
+      "march-out": 50,
+      "field-fail": 37,
+      "siege-hold": 129,
+      "siege-win": 168,
+      "officer-captured": 103,
+      "siege-abort": 33,
+      "siege-starve": 16,
+      "besieged": 67,
+      "capital-lost": 75,
+      "capital-lost-low": 43,
+      "supply-cut-low": 29,
+      "eliminated": 16,
+      "march-arrive": 50,
+      "suade": 38,
+      "relocate": 75,
+      "siege-lift": 15,
+      "siege-reinforce": 75,
+      "unpaid": 1,
+      "epoch": 2,
+      "field-win": 31,
+      "capital-lost-scatter": 2,
+      "muster-return": 2,
+      "relief": 28,
+      "campaign-void": 6,
+      "array": 9,
+      "coalition": 2,
+      "ally-break": 7,
+      "supply-cut-scatter": 2,
+      "isolated-submit": 3,
+      "submit-refuse": 4,
+      "submitted": 10,
+      "sway-submit": 1,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 9,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 45
+          },
+          {
+            "id": "liuzhang",
+            "lands": 17
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 21,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 79
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 4
+          }
+        ],
+        "armies": 0
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-13",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 43,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 438,
+      "govern": 365,
+      "appoint": 376,
+      "build": 150,
+      "transfer": 188,
+      "muster": 13,
+      "seize-win": 3,
+      "isolated": 75,
+      "supply-cut": 284,
+      "treasury": 545,
+      "march-out": 86,
+      "field-fail": 54,
+      "siege-hold": 206,
+      "siege-win": 280,
+      "officer-captured": 148,
+      "siege-abort": 56,
+      "siege-starve": 21,
+      "besieged": 109,
+      "capital-lost": 89,
+      "capital-lost-low": 67,
+      "supply-cut-low": 61,
+      "eliminated": 22,
+      "march-arrive": 86,
+      "suade": 44,
+      "relocate": 90,
+      "siege-lift": 20,
+      "siege-reinforce": 109,
+      "field-win": 79,
+      "epoch": 2,
+      "capital-lost-scatter": 5,
+      "muster-return": 3,
+      "relief": 70,
+      "campaign-void": 12,
+      "array": 8,
+      "isolated-submit": 11,
+      "supply-cut-scatter": 8,
+      "sway-submit": 2,
+      "coalition": 3,
+      "ally-break": 9,
+      "submit-refuse": 3,
+      "submitted": 7,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 13,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 23
+          },
+          {
+            "id": "liubiao",
+            "lands": 17
+          },
+          {
+            "id": "liuzhang",
+            "lands": 16
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 32,
+        "alive": 5,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 42
+          },
+          {
+            "id": "liuzhang",
+            "lands": 23
+          },
+          {
+            "id": "liubiao",
+            "lands": 19
+          }
+        ],
+        "armies": 4
+      },
+      {
+        "turn": 43,
+        "alive": 1,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 104
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          },
+          {
+            "id": "zhangji",
+            "lands": 0
+          }
+        ],
+        "armies": 0
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-14",
+    "finished": false,
+    "stopReason": "test-budget-paused",
+    "turns": 64,
+    "winner": null,
+    "calls": 0,
+    "events": {
+      "scout": 606,
+      "govern": 482,
+      "appoint": 528,
+      "build": 159,
+      "transfer": 418,
+      "muster": 10,
+      "seize-win": 3,
+      "isolated": 71,
+      "supply-cut": 354,
+      "treasury": 738,
+      "march-out": 98,
+      "field-fail": 73,
+      "siege-hold": 346,
+      "siege-win": 389,
+      "officer-captured": 169,
+      "siege-abort": 81,
+      "siege-starve": 49,
+      "besieged": 197,
+      "capital-lost": 94,
+      "capital-lost-low": 73,
+      "supply-cut-low": 72,
+      "eliminated": 22,
+      "march-arrive": 98,
+      "suade": 52,
+      "relocate": 94,
+      "siege-lift": 34,
+      "siege-reinforce": 165,
+      "field-win": 156,
+      "unpaid": 4,
+      "epoch": 2,
+      "relief": 140,
+      "capital-lost-scatter": 3,
+      "supply-cut-scatter": 4,
+      "muster-return": 2,
+      "campaign-void": 16,
+      "coalition": 7,
+      "ally-break": 22,
+      "isolated-submit": 5,
+      "coalition-end": 2,
+      "array": 2,
+      "sway-submit": 1,
+      "submitted": 4,
+      "recruit-limited": 3,
+      "submit-refuse": 2
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 12,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 25
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "gongsunzan",
+            "lands": 13
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 32,
+        "alive": 10,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 27
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "liubiao",
+            "lands": 16
+          }
+        ],
+        "armies": 10
+      },
+      {
+        "turn": 48,
+        "alive": 7,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 32
+          },
+          {
+            "id": "liuzhang",
+            "lands": 20
+          },
+          {
+            "id": "qianghu",
+            "lands": 15
+          }
+        ],
+        "armies": 4
+      },
+      {
+        "turn": 64,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 67
+          },
+          {
+            "id": "liuzhang",
+            "lands": 19
+          },
+          {
+            "id": "qianghu",
+            "lands": 16
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-15",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 32,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 365,
+      "govern": 298,
+      "appoint": 315,
+      "build": 136,
+      "transfer": 135,
+      "muster": 11,
+      "seize-win": 3,
+      "isolated": 31,
+      "supply-cut": 253,
+      "treasury": 444,
+      "march-out": 50,
+      "field-fail": 59,
+      "siege-hold": 186,
+      "siege-win": 197,
+      "officer-captured": 112,
+      "siege-abort": 35,
+      "siege-starve": 15,
+      "besieged": 100,
+      "capital-lost": 67,
+      "capital-lost-low": 41,
+      "supply-cut-low": 47,
+      "eliminated": 15,
+      "march-arrive": 50,
+      "suade": 29,
+      "relocate": 68,
+      "array": 6,
+      "siege-lift": 20,
+      "siege-reinforce": 106,
+      "field-win": 45,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 37,
+      "capital-lost-scatter": 6,
+      "campaign-void": 11,
+      "supply-cut-scatter": 3,
+      "muster-return": 6,
+      "isolated-submit": 3,
+      "sway-submit": 2,
+      "coalition": 3,
+      "invest": 2,
+      "ally-break": 7,
+      "submit-refuse": 8,
+      "submitted": 14,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 11,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 37
+          },
+          {
+            "id": "liuzhang",
+            "lands": 15
+          },
+          {
+            "id": "yanbaihu",
+            "lands": 11
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 32,
+        "alive": 1,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 103
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          },
+          {
+            "id": "zhangji",
+            "lands": 0
+          }
+        ],
+        "armies": 0
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-16",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 32,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 373,
+      "govern": 310,
+      "appoint": 325,
+      "build": 133,
+      "transfer": 106,
+      "muster": 9,
+      "seize-win": 3,
+      "isolated": 45,
+      "supply-cut": 334,
+      "treasury": 454,
+      "march-out": 63,
+      "field-fail": 46,
+      "siege-hold": 164,
+      "siege-win": 227,
+      "officer-captured": 125,
+      "siege-abort": 52,
+      "siege-starve": 16,
+      "besieged": 96,
+      "capital-lost": 87,
+      "capital-lost-low": 57,
+      "supply-cut-low": 39,
+      "eliminated": 20,
+      "march-arrive": 63,
+      "suade": 53,
+      "relocate": 87,
+      "array": 13,
+      "siege-lift": 17,
+      "siege-reinforce": 90,
+      "field-win": 51,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 48,
+      "campaign-void": 9,
+      "capital-lost-scatter": 5,
+      "isolated-submit": 7,
+      "muster-return": 2,
+      "coalition": 3,
+      "ally-break": 14,
+      "invest": 1,
+      "coalition-end": 1,
+      "submitted": 8,
+      "submit-refuse": 8,
+      "supply-cut-scatter": 1,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 13,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 25
+          },
+          {
+            "id": "liuzhang",
+            "lands": 19
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 10
+          }
+        ],
+        "armies": 3
+      },
+      {
+        "turn": 32,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 81
+          },
+          {
+            "id": "liuzhang",
+            "lands": 22
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-17",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 27,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 327,
+      "govern": 301,
+      "appoint": 275,
+      "build": 146,
+      "transfer": 97,
+      "muster": 5,
+      "seize-win": 4,
+      "isolated": 40,
+      "supply-cut": 196,
+      "treasury": 421,
+      "march-out": 47,
+      "field-fail": 45,
+      "siege-hold": 143,
+      "siege-win": 200,
+      "officer-captured": 116,
+      "siege-abort": 32,
+      "siege-starve": 18,
+      "besieged": 73,
+      "capital-lost": 78,
+      "capital-lost-low": 30,
+      "supply-cut-low": 37,
+      "eliminated": 16,
+      "march-arrive": 47,
+      "suade": 45,
+      "relocate": 77,
+      "array": 7,
+      "invest": 1,
+      "siege-lift": 16,
+      "siege-reinforce": 87,
+      "unpaid": 1,
+      "epoch": 2,
+      "capital-lost-scatter": 1,
+      "field-win": 40,
+      "relief": 35,
+      "campaign-void": 8,
+      "sway-submit": 1,
+      "muster-return": 2,
+      "coalition": 2,
+      "ally-break": 4,
+      "isolated-submit": 6,
+      "supply-cut-scatter": 1,
+      "submitted": 11,
+      "submit-refuse": 3,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 29
+          },
+          {
+            "id": "liuzhang",
+            "lands": 17
+          },
+          {
+            "id": "liubiao",
+            "lands": 12
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 27,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 95
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 6
+          },
+          {
+            "id": "songjian",
+            "lands": 2
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-18",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 47,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 529,
+      "govern": 419,
+      "appoint": 484,
+      "build": 154,
+      "transfer": 324,
+      "muster": 9,
+      "seize-win": 3,
+      "isolated": 42,
+      "supply-cut": 369,
+      "treasury": 634,
+      "march-out": 93,
+      "field-fail": 84,
+      "siege-hold": 254,
+      "siege-win": 300,
+      "officer-captured": 137,
+      "siege-abort": 52,
+      "siege-starve": 38,
+      "besieged": 141,
+      "capital-lost": 92,
+      "capital-lost-low": 44,
+      "supply-cut-low": 61,
+      "eliminated": 20,
+      "march-arrive": 93,
+      "suade": 40,
+      "relocate": 92,
+      "array": 10,
+      "siege-lift": 23,
+      "siege-reinforce": 148,
+      "field-win": 103,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 94,
+      "capital-lost-scatter": 3,
+      "isolated-submit": 7,
+      "campaign-void": 18,
+      "coalition": 5,
+      "ally-break": 19,
+      "muster-return": 3,
+      "supply-cut-scatter": 2,
+      "submitted": 8,
+      "submit-refuse": 5,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 13,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 21
+          },
+          {
+            "id": "liuzhang",
+            "lands": 14
+          },
+          {
+            "id": "gongsunzan",
+            "lands": 11
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 32,
+        "alive": 11,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 29
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "yanbaihu",
+            "lands": 10
+          }
+        ],
+        "armies": 11
+      },
+      {
+        "turn": 47,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 88
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 15
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 0
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-19",
+    "finished": false,
+    "stopReason": "test-budget-paused",
+    "turns": 64,
+    "winner": null,
+    "calls": 0,
+    "events": {
+      "scout": 655,
+      "govern": 520,
+      "appoint": 535,
+      "build": 156,
+      "transfer": 418,
+      "muster": 13,
+      "seize-win": 3,
+      "isolated": 54,
+      "supply-cut": 460,
+      "treasury": 791,
+      "march-out": 96,
+      "field-fail": 81,
+      "siege-hold": 361,
+      "siege-win": 370,
+      "officer-captured": 162,
+      "siege-abort": 81,
+      "siege-starve": 50,
+      "besieged": 213,
+      "capital-lost": 92,
+      "capital-lost-low": 69,
+      "supply-cut-low": 72,
+      "eliminated": 22,
+      "march-arrive": 95,
+      "suade": 43,
+      "relocate": 92,
+      "array": 11,
+      "siege-lift": 30,
+      "siege-reinforce": 184,
+      "field-win": 155,
+      "unpaid": 5,
+      "epoch": 2,
+      "relief": 141,
+      "capital-lost-scatter": 5,
+      "campaign-void": 21,
+      "muster-return": 5,
+      "isolated-submit": 6,
+      "supply-cut-scatter": 5,
+      "submit-refuse": 4,
+      "recruit-limited": 5,
+      "submitted": 2,
+      "coalition": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 14,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 23
+          },
+          {
+            "id": "liuzhang",
+            "lands": 19
+          },
+          {
+            "id": "liubiao",
+            "lands": 11
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 32,
+        "alive": 10,
+        "largest": [
+          {
+            "id": "liuzhang",
+            "lands": 25
+          },
+          {
+            "id": "yuanshao",
+            "lands": 22
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          }
+        ],
+        "armies": 9
+      },
+      {
+        "turn": 48,
+        "alive": 9,
+        "largest": [
+          {
+            "id": "liubiao",
+            "lands": 23
+          },
+          {
+            "id": "liuzhang",
+            "lands": 22
+          },
+          {
+            "id": "yuanshao",
+            "lands": 16
+          }
+        ],
+        "armies": 10
+      },
+      {
+        "turn": 64,
+        "alive": 6,
+        "largest": [
+          {
+            "id": "liubiao",
+            "lands": 34
+          },
+          {
+            "id": "liuzhang",
+            "lands": 21
+          },
+          {
+            "id": "yuanshao",
+            "lands": 19
+          }
+        ],
+        "armies": 4
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-20",
+    "finished": false,
+    "stopReason": "test-budget-paused",
+    "turns": 64,
+    "winner": null,
+    "calls": 0,
+    "events": {
+      "scout": 522,
+      "govern": 414,
+      "appoint": 432,
+      "build": 160,
+      "transfer": 398,
+      "muster": 9,
+      "seize-win": 3,
+      "isolated": 61,
+      "supply-cut": 442,
+      "treasury": 645,
+      "march-out": 104,
+      "field-fail": 57,
+      "siege-hold": 275,
+      "siege-win": 345,
+      "officer-captured": 174,
+      "siege-abort": 51,
+      "siege-starve": 28,
+      "besieged": 136,
+      "capital-lost": 101,
+      "capital-lost-low": 52,
+      "supply-cut-low": 72,
+      "eliminated": 21,
+      "march-arrive": 103,
+      "suade": 54,
+      "relocate": 102,
+      "array": 7,
+      "siege-lift": 15,
+      "siege-reinforce": 168,
+      "field-win": 102,
+      "epoch": 2,
+      "capital-lost-scatter": 3,
+      "muster-return": 4,
+      "relief": 91,
+      "supply-cut-scatter": 3,
+      "isolated-submit": 10,
+      "sway-submit": 2,
+      "submitted": 5,
+      "submit-refuse": 3,
+      "campaign-void": 3,
+      "coalition": 5,
+      "ally-break": 12,
+      "recruit-limited": 4,
+      "unpaid": 3
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 15,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 22
+          },
+          {
+            "id": "yuanshu",
+            "lands": 16
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 32,
+        "alive": 7,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 37
+          },
+          {
+            "id": "yuanshu",
+            "lands": 24
+          },
+          {
+            "id": "liuzhang",
+            "lands": 16
+          }
+        ],
+        "armies": 8
+      },
+      {
+        "turn": 48,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 50
+          },
+          {
+            "id": "liuzhang",
+            "lands": 23
+          },
+          {
+            "id": "yuanshu",
+            "lands": 18
+          }
+        ],
+        "armies": 7
+      },
+      {
+        "turn": 64,
+        "alive": 4,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 53
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 18
+          },
+          {
+            "id": "liuzhang",
+            "lands": 17
+          }
+        ],
+        "armies": 7
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-21",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 28,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 382,
+      "govern": 341,
+      "appoint": 313,
+      "build": 149,
+      "transfer": 124,
+      "muster": 5,
+      "seize-win": 3,
+      "isolated": 50,
+      "supply-cut": 273,
+      "treasury": 468,
+      "march-out": 78,
+      "field-fail": 55,
+      "siege-hold": 144,
+      "siege-win": 236,
+      "officer-captured": 123,
+      "siege-abort": 39,
+      "siege-starve": 17,
+      "besieged": 77,
+      "capital-lost": 92,
+      "capital-lost-low": 45,
+      "supply-cut-low": 34,
+      "eliminated": 18,
+      "march-arrive": 77,
+      "suade": 57,
+      "relocate": 95,
+      "siege-lift": 20,
+      "siege-reinforce": 106,
+      "field-win": 51,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 42,
+      "capital-lost-scatter": 2,
+      "array": 3,
+      "campaign-void": 8,
+      "isolated-submit": 8,
+      "coalition": 3,
+      "ally-break": 10,
+      "muster-return": 1,
+      "coalition-end": 1,
+      "submitted": 9,
+      "submit-refuse": 7,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 13,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 27
+          },
+          {
+            "id": "liuzhang",
+            "lands": 17
+          },
+          {
+            "id": "liubiao",
+            "lands": 9
+          }
+        ],
+        "armies": 6
+      },
+      {
+        "turn": 28,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 92
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 9
+          },
+          {
+            "id": "songjian",
+            "lands": 2
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-22",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 39,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 407,
+      "govern": 341,
+      "appoint": 366,
+      "build": 139,
+      "transfer": 263,
+      "muster": 9,
+      "seize-win": 4,
+      "isolated": 53,
+      "supply-cut": 310,
+      "treasury": 516,
+      "march-out": 62,
+      "field-fail": 62,
+      "siege-hold": 206,
+      "siege-win": 269,
+      "officer-captured": 138,
+      "siege-abort": 65,
+      "siege-starve": 28,
+      "besieged": 114,
+      "capital-lost": 56,
+      "capital-lost-low": 33,
+      "supply-cut-low": 55,
+      "eliminated": 18,
+      "march-arrive": 62,
+      "suade": 44,
+      "relocate": 56,
+      "array": 5,
+      "siege-lift": 14,
+      "siege-reinforce": 120,
+      "field-win": 74,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 64,
+      "campaign-void": 10,
+      "capital-lost-scatter": 3,
+      "invest": 3,
+      "muster-return": 3,
+      "supply-cut-scatter": 1,
+      "sway-submit": 2,
+      "isolated-submit": 7,
+      "coalition": 4,
+      "ally-break": 8,
+      "submit-refuse": 7,
+      "submitted": 9,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 14,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 24
+          },
+          {
+            "id": "liuzhang",
+            "lands": 16
+          },
+          {
+            "id": "liubiao",
+            "lands": 13
+          }
+        ],
+        "armies": 5
+      },
+      {
+        "turn": 32,
+        "alive": 7,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 40
+          },
+          {
+            "id": "liuzhang",
+            "lands": 18
+          },
+          {
+            "id": "liubiao",
+            "lands": 15
+          }
+        ],
+        "armies": 3
+      },
+      {
+        "turn": 39,
+        "alive": 3,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 90
+          },
+          {
+            "id": "gongsundu",
+            "lands": 12
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 2
+          }
+        ],
+        "armies": 3
+      }
+    ]
+  },
+  {
+    "seed": "strategy-session-23",
+    "finished": true,
+    "stopReason": "unification",
+    "turns": 28,
+    "winner": "yuanshao",
+    "calls": 0,
+    "events": {
+      "scout": 335,
+      "govern": 271,
+      "appoint": 294,
+      "build": 126,
+      "transfer": 121,
+      "muster": 11,
+      "seize-win": 3,
+      "isolated": 46,
+      "supply-cut": 193,
+      "treasury": 410,
+      "march-out": 49,
+      "field-fail": 39,
+      "siege-hold": 169,
+      "siege-win": 202,
+      "officer-captured": 113,
+      "siege-abort": 25,
+      "siege-starve": 16,
+      "besieged": 100,
+      "capital-lost": 73,
+      "capital-lost-low": 55,
+      "supply-cut-low": 44,
+      "eliminated": 19,
+      "march-arrive": 49,
+      "suade": 43,
+      "relocate": 73,
+      "array": 5,
+      "siege-lift": 14,
+      "siege-reinforce": 97,
+      "field-win": 44,
+      "unpaid": 1,
+      "epoch": 2,
+      "relief": 40,
+      "campaign-void": 10,
+      "capital-lost-scatter": 4,
+      "muster-return": 5,
+      "isolated-submit": 10,
+      "supply-cut-scatter": 3,
+      "coalition": 3,
+      "ally-break": 6,
+      "sway-submit": 1,
+      "submitted": 9,
+      "submit-refuse": 5,
+      "unified": 1
+    },
+    "quarters": [
+      {
+        "turn": 16,
+        "alive": 13,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 24
+          },
+          {
+            "id": "liuzhang",
+            "lands": 15
+          },
+          {
+            "id": "gongsunzan",
+            "lands": 12
+          }
+        ],
+        "armies": 5
+      },
+      {
+        "turn": 28,
+        "alive": 2,
+        "largest": [
+          {
+            "id": "yuanshao",
+            "lands": 98
+          },
+          {
+            "id": "nanzhongyi",
+            "lands": 6
+          },
+          {
+            "id": "lijue",
+            "lands": 0
+          }
+        ],
+        "armies": 1
+      }
+    ]
+  }
+]

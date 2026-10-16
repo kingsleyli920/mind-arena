@@ -1,0 +1,57 @@
+{
+  "yuanshao": {
+    "seasons": 85,
+    "ap": 822,
+    "used": 932,
+    "byAct": {
+      "[object Object]": 932
+    },
+    "lands": 2403,
+    "gold": 1674107,
+    "fronts": 469
+  },
+  "liuzhang": {
+    "seasons": 84,
+    "ap": 696,
+    "used": 794,
+    "byAct": {
+      "[object Object]": 794
+    },
+    "lands": 1124,
+    "gold": 622933,
+    "fronts": 370
+  },
+  "liubiao": {
+    "seasons": 84,
+    "ap": 654,
+    "used": 750,
+    "byAct": {
+      "[object Object]": 750
+    },
+    "lands": 882,
+    "gold": 1018744,
+    "fronts": 444
+  },
+  "caocao": {
+    "seasons": 39,
+    "ap": 273,
+    "used": 259,
+    "byAct": {
+      "[object Object]": 259
+    },
+    "lands": 75,
+    "gold": 66020,
+    "fronts": 123
+  },
+  "lubu": {
+    "seasons": 62,
+    "ap": 437,
+    "used": 555,
+    "byAct": {
+      "[object Object]": 555
+    },
+    "lands": 365,
+    "gold": 195709,
+    "fronts": 379
+  }
+}
