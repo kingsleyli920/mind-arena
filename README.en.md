@@ -189,6 +189,10 @@ Stated up front, so you don't assume it is already solved:
   same seeds, `glm-5.3-flash` driving Cao Cao over 64-season games **unified the realm
   4/4** (84–94 commanderies, 11 provinces), while the strongest bot profile went **0/6**
   across six seeds (17–25 commanderies). Model-side spend was $0.4775 actually charged.
+  But what the gap means is smaller than it looks at first: classifying the decisions
+  line by line, that control profile **spends sixty percent of its orders shuffling
+  officers, campaigns are only 1–2%, and musters and seizes are zero outright** — it is
+  not playing badly, it barely plays.
   n=4, one model, one control profile — see point 39 of
   [docs/EVAL.en.md](docs/EVAL.en.md).
   Under the sixteen-season evaluation setting the four gates pass
@@ -274,4 +278,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@e3dc96b5b66a -->
+<!-- translated-from: README.md@d9149887a394 -->

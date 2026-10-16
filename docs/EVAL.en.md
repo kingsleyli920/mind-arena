@@ -2254,8 +2254,46 @@ difference on three seeds chosen in advance plus a six-seed bot baseline.
   and the reasoning share — that result was never in this document at all. Section
   numbers recalled from memory go wrong, so this states the setup instead of a number.)
 
+### The third limit, and it weakens the sentence above: the control group barely plays
+
+After classifying both sides' decisions line by line (counted off the `N. ✓` lines in
+the match logs — 1632 of them for the model across three games, 2362 for the bot):
+
+| | Campaign | Seize | Muster | Transfer | Persuade to submit | Reassignment | Internal affairs | Scout |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| model | **7.0–7.8%** | 3.2–4.5% | 9.8–12.1% | 4.1–5.6% | 6.7–7.8% | 15–18% | 23–26% | 11–12% |
+| `bot:purpose` | **0.9–1.9%** | **0%** | 0–0.1% | **0%** | **0%** | **52–60%** | 12–17% | **24%** |
+
+The bot spends sixty percent of its orders on **reassigning officers** (a free order —
+this document has already recorded that it maxes out free reassignments) and
+twenty-four percent on scouting; campaigns are only 1–2%, while muster, transfer, seize
+and persuade-to-submit are **all zero**. Across more than twenty-three hundred
+decisions there were seven real campaigns.
+
+So the sentence "the model beat the strongest bot profile" needs qualifying:
+`bot:purpose` is the strongest profile **by score** in the six-seat rotation (250 points
+playing Cao Cao in the sixteen-season eval, against balanced's 138), but over a
+64-season game on this seat it degenerates into shuffling officers and scouting.
+**This control is not "a model beating a baseline that plays"; it is "a model played a
+full game, and here no bot profile plays one at all."** The gap itself is real; what
+the gap means is smaller than it looks at first.
+
+That is exactly the reason to use a bot as the baseline, and exactly its cost: fixed
+behaviour, reproducible, free — but it is a reference point only on **the actions it
+actually takes**. To measure "plays well", the reference has to be another agent that
+plays, which costs money, and point 1 of this document's 48-game floor applies to it
+just the same.
+
+(Incidentally: I got this table wrong once. The first version scored the bot's
+campaigns at **0.0%** — the regex also dropped 征辟 (recruiting a masterless officer,
+which the bot did 133 times) as something outside campaigns, and the effect was to make
+the conclusion look more absolute than it was. **The error ran in the direction that
+made my own conclusion stronger**, which is the kind of error that most deserves
+checking on the spot. That is the fourth probe written wrong today, and the fourth one
+caught by suspecting the measurement before the data.)
+
 The raw data is in
 [reports/scenario-200-2026-10-16/caocao-64season-pairs.json](reports/scenario-200-2026-10-16/caocao-64season-pairs.json)
 (Chinese).
 
-<!-- translated-from: EVAL.md@db9de61a8da1 -->
+<!-- translated-from: EVAL.md@66c387eed2e4 -->
