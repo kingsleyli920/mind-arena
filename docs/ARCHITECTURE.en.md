@@ -49,7 +49,7 @@ human**. Every difference that comes out of that gets turned into a gate
 
 | Gate | What it catches |
 |---|---|
-| No numeric constant in the pack may go unread | The pack says something the engine does not read — **that is lying to the model**. It once caught "the iron office keeps siege engines in standing supply" when the engine in fact only lowered the tier by one |
+| No numeric constant in the pack may go unread | The pack says something the engine does not read — **that is lying to the model**. It once caught "the ironworks keeps siege engines in standing supply" when the engine in fact only lowered the tier by one |
 | No pricing may exist in two places | Order-budget pricing is written both in the pack and in `DEFAULT_RULES`; they agree for now, but nothing stops them diverging |
 | Provisions cap: candidate and resolution use the same number | Candidates used `provisionsCap` and resolution used `provCapOf`, so a city with a granary could never be filled |
 | The commandery table must line up with the observation's `mine` section | The model can see provisions / siege engines / unit types / buildings and the human cannot — the two are fighting different wars |

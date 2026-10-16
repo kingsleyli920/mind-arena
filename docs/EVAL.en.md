@@ -2166,5 +2166,33 @@ The raw data is in [reports/scenario-200-2026-10-16/](reports/scenario-200-2026-
 (Chinese): the two model runs keep their per-season records (they cost money and are
 not regenerable), while the four bot runs keep only the seize tallies (deterministic,
 free to re-run).
+### One more property of the scenario: Jian'an 5 cannot afford its own army at the start
 
-<!-- translated-from: EVAL.md@dfbfedeb1708 -->
+Ran into this while watching a replay — season one's settlement contained
+「军费不继（需 1685 金，兵 147751），2149 人逃亡」 (upkeep unmet: 1685 gold needed
+against 147751 troops; 2149 deserted). Looked into it: not a bug, but this scenario's
+real opening position.
+
+| First-season net cash with not one order issued | 194 | Jian'an 5 |
+|---|---|---|
+| The two largest | Liu Biao **+53**, Yuan Shao **+50** | Cao Cao **−382**, Yuan Shao **−201** |
+
+**Every large faction in 194 opens cash-positive, and both protagonists of Jian'an 5
+open cash-negative.** The starting treasury of 600 was calibrated on 194, and the
+Jian'an 5 factions are a great deal larger — upkeep rises with troop numbers, while
+income decays per commandery (see `constants.金.为何递减`).
+
+But it pulls through: across the first 12 seasons of bot play there were **zero unpaid
+upkeep events**; Cao Cao's treasury bottoms out at 257 in season 2, is back to 963 by
+season 5 and 6354 by season 12; Yuan Shao bottoms out at 381. The trough is seasons two
+and three, and it turns positive from season five.
+
+So those desertions were caused by **that bot profile going off to build a saltern
+(盐场) and an ironworks (铁官) while still in the trough** — a strategic mistake the game
+ought to punish, not a defect in the scenario. **No change was made.** There are two
+uses in recording it: one, so that the next person who sees desertions knows where they
+come from; two, because this is precisely the Guandu situation — short supply was Cao
+Cao's problem in that campaign to begin with, and the engine puts it on the board in
+season one.
+
+<!-- translated-from: EVAL.md@1caca592b7eb -->
