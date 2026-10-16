@@ -21,6 +21,7 @@ import { listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, PROFILES } from "../lib/game/engine/bot.ts";
 import { stationedAt, isFiller } from "../lib/game/engine/officers.ts";
 import { loadWorld, POOLS, SEAT_SETS, seatsFor } from "./lib/world.mjs";
+import { emptySeasons } from "./lib/empty-seasons.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { standingOf, epochLimitFor, GRADE_CN }
@@ -518,7 +519,16 @@ async function main() {
     say(`| 出参预算翻倍 | ${meta.filter((m) => m.maxTokens > 8000).length} 季 |`);
     say(`| 非法率 | ${(meta.reduce((a, m) => a + (m.illegalRate ?? 0), 0) / Math.max(1, meta.length) * 100).toFixed(1)}% |`);
     say(`| 令数用率 | ${(meta.reduce((a, m) => a + (m.spent ?? 0), 0) / Math.max(1, meta.reduce((a, m) => a + (m.ap ?? 0), 0)) * 100).toFixed(0)}% |`);
+    // 空手季单列一行——判据与为什么见 tools/lib/empty-seasons.mjs
+    const { list: empty, warn } = emptySeasons(meta);
+    say(`| 空手季 | ${empty.length ? `${empty.length}/${meta.length} 季（第 ${empty.map((m) => m.turn).join("、")} 季有候选而一条未挑）` : "无"} |`);
     say("");
+    if (warn) {
+      say(`> ⚠ 四分之一以上的季节没有下令。**这一局不宜当作「这个模型怎么打」来读**`
+        + `——先看逐季表里那几季的出参与推理 token：若推理吃满了预算，测到的是`
+        + `它在 32k 内想不完，不是它的策略。`);
+      say("");
+    }
     say(`<details><summary>逐季元数据 ${meta.length} 行</summary>\n`);
     say(`| 季 | 用时s | 入参 | 缓存 | 出参 | 推理 | 实扣$ | 档位 | 尝试 | 候选 | 可破 | 挑 | 采纳 | 耗令 |`);
     say(`|---|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
