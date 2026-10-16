@@ -1,0 +1,105 @@
+{
+ "_note": "取据点行为对照。同剧本同种子同席位，各 6 局 × 16 季 = 96 次决策。机器人四份的原始 jsonl 不入库：确定性，SCENARIO=200 npm run eval -- --agent=bot:<画像> --games=6 --out=<路径> 即可重跑。",
+ "arms": [
+  {
+   "agent": "model:z-ai/glm-5.3-flash",
+   "decisions": 96,
+   "seizes": 25,
+   "distinctSites": 21,
+   "guanduLine": 3,
+   "guanduSites": {
+    "黎阳仓": 1,
+    "黎阳津": 1,
+    "延津": 1
+   },
+   "allSites": {
+    "han-jin": 2,
+    "jiang-jin": 2,
+    "xiakou": 2,
+    "baqiu": 2,
+    "liyang-cang": 1,
+    "liyang-jin": 1,
+    "jiang-guan": 1,
+    "hu-guan": 1,
+    "chibi": 1,
+    "niuzhu": 1,
+    "yan-jin": 1,
+    "yanmen-guan": 1,
+    "ruxu-kou": 1,
+    "wulin": 1,
+    "micang-dao": 1,
+    "jiameng-guan": 1,
+    "jianmen-guan": 1,
+    "yangping-guan": 1,
+    "tong-guan": 1,
+    "ziwu-dao": 1,
+    "hepu": 1
+   }
+  },
+  {
+   "agent": "model:deepseek/deepseek-v4.1-flash",
+   "decisions": 96,
+   "seizes": 13,
+   "distinctSites": 11,
+   "guanduLine": 3,
+   "guanduSites": {
+    "黎阳仓": 1,
+    "黎阳津": 1,
+    "延津": 1
+   },
+   "allSites": {
+    "han-jin": 2,
+    "xiakou": 2,
+    "liyang-cang": 1,
+    "liyang-jin": 1,
+    "tianjing-guan": 1,
+    "jiang-jin": 1,
+    "hengjiang-jin": 1,
+    "hu-guan": 1,
+    "yan-jin": 1,
+    "micang-dao": 1,
+    "tangluo-dao": 1
+   }
+  },
+  {
+   "agent": "bot:balanced",
+   "decisions": 96,
+   "seizes": 0,
+   "distinctSites": 0,
+   "guanduLine": 0,
+   "guanduSites": {},
+   "allSites": {}
+  },
+  {
+   "agent": "bot:purpose",
+   "decisions": 96,
+   "seizes": 0,
+   "distinctSites": 0,
+   "guanduLine": 0,
+   "guanduSites": {},
+   "allSites": {}
+  },
+  {
+   "agent": "bot:aggressive",
+   "decisions": 96,
+   "seizes": 1,
+   "distinctSites": 1,
+   "guanduLine": 0,
+   "guanduSites": {},
+   "allSites": {
+    "ziwu-dao": 1
+   }
+  },
+  {
+   "agent": "bot:opportunist",
+   "decisions": 96,
+   "seizes": 1,
+   "distinctSites": 1,
+   "guanduLine": 0,
+   "guanduSites": {},
+   "allSites": {
+    "ziwu-dao": 1
+   }
+  }
+ ]
+}

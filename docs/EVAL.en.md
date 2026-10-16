@@ -2067,4 +2067,87 @@ down to 5–16 seconds. It is recorded here because **a cheap-tier model's reaso
 budget has to be tuned, and leaving it untuned burns wall clock and money together** —
 and the failure classifier records it as a model failure, which it is not.
 
-<!-- translated-from: EVAL.md@cf1b0336b8d6 -->
+## 38. Models go for the opponent's grain depot and the bots never do — and I overshot by fivefold for it
+
+Point 37 left an open case at its end: Jian'an 5 brings in the whole geography of the
+Guandu campaign (Guandu (官渡) and Yanjin (延津) are fords, Wuchao (乌巢) and the Liyang
+Granary (黎阳仓) are grain depots), the engine has the `seize` action too, and across
+twelve games the bots never used it once. So **will a model use it**?
+
+### The comparison
+
+Same scenario, same seeds (`eval-0..5`), same six seats, same sixteen seasons, 96
+decisions each:
+
+| Agent | Seizes | Distinct strongholds | On the Guandu line |
+|---|---:|---:|---|
+| `model:z-ai/glm-5.3-flash` | **25** | 21 | **3**: Liyang Granary, Liyang Ford (黎阳津), Yanjin |
+| `model:deepseek/deepseek-v4.1-flash` | **13** | 11 | **3**: Liyang Granary, Liyang Ford, Yanjin |
+| `bot:balanced` | 0 | 0 | 0 |
+| `bot:purpose` | 0 | 0 | 0 |
+| `bot:aggressive` | 1 | 1 | 0 |
+| `bot:opportunist` | 1 | 1 | 0 |
+
+Across 384 decisions the four profiles seized a stronghold twice in total, and zero
+times on the Guandu line. **The two models independently went for the same three
+points.** This is the largest behavioural difference between model and baseline this
+repo has measured to date — not a matter of scoring higher or lower, but **a whole
+class of action the baseline does not touch at all**.
+
+The reason the model gave itself (glm, verbatim from season 1):
+
+> 先取黎阳仓（夺自袁绍，**锁定丙档并扼袁绍南下车道**）
+> (take the Liyang Granary first — seized from Yuan Shao, **locking in Grade C and
+> choking Yuan Shao's route south**)
+
+The second clause is read off the candidate label 「扼 魏郡、河内郡、陈留郡 之路」
+("commands the road to Wei, Henei and Chenliu Commandery") and then connected back to
+strategy.
+
+The bots not using it is not a fault: they score a stronghold by the road it commands,
+and the two on the Guandu line sit astride the one line where two large armies are
+already facing each other head-on, so that weight cannot outweigh attacking a
+commandery outright. **This is precisely why the baseline should be a bot and not a
+model** — the baseline's job is to provide a reference point with fixed behaviour, not
+to play well.
+
+### The cost: I got the budget wrong by a factor of five
+
+About $0.3–0.5 was what I said; **$2.33 was actually charged** (glm $0.29 + deepseek
+$2.04).
+
+`tools/model-survey.mjs` prices from the assumption "8k output tokens per game
+(reasoning included)", and quoted $0.84 for 48 games of deepseek-v4.1-flash. In the
+real run it **burned roughly 14,000 reasoning tokens per call**, 240,000 output tokens
+per game — thirty times that assumption — and `--reasoning=low` did not stop it.
+Reasoning usage is in neither the price list nor the endpoint statistics, so **it
+cannot be estimated in advance**.
+
+So the guard moved in-flight instead: `eval-run --max-usd=N` stops the run on the spot
+once the cumulative actual charge goes over the cap (exit code 4). The note on that
+column of the survey now says explicitly that it **can only be read as a lower bound**.
+The right procedure before opening a board is to run two games, look at what was
+actually charged, and extrapolate from that.
+
+### Incidentally: a mistyped id was once recorded as "this model scores zero"
+
+The earliest attempt used `deepseek/deepseek-v4-flash-latest`, and OpenRouter returned
+a 400, "is not a valid model ID". The harness classified 96/96 seat-seasons as
+**"model (couldn't answer)"** and produced a report reading "mean score 0.0".
+
+Point 6 of this document, "Harness failures must not be charged to the model", is about
+exactly this, and this one leaked straight through it: `errors.ts` mapped
+400/404/422 to degradable across the board, and from there to model ("if it is still
+not accepted after dropping through all four rungs, the only thing left is to count it
+as unable to answer"). For an ordinary 400 that is correct — dropping a rung may well
+get it through; but "this model does not exist" will never get through, however far it
+drops. A new `config` bucket is filed under harness and halts in place (exit code 3).
+Nothing was charged that time (400s are not billed), but **a false leaderboard costs
+more than the money does**.
+
+The raw data is in [reports/scenario-200-2026-10-16/](reports/scenario-200-2026-10-16/)
+(Chinese): the two model runs keep their per-season records (they cost money and are
+not regenerable), while the four bot runs keep only the seize tallies (deterministic,
+free to re-run).
+
+<!-- translated-from: EVAL.md@39824ccbd22a -->
