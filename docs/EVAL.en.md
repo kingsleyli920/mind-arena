@@ -2391,4 +2391,62 @@ An eight-cent probe could have stopped this — the data was all printed in the 
 the time (`failures budget×2`, `order-budget utilisation 38%`). It did not stop it because
 I read only the price and whether it ran at all.
 
-<!-- translated-from: EVAL.md@31eb36f2645d -->
+
+### The replication works, and what it replicates is a different way of playing
+
+`deepseek/deepseek-v4-flash` as Cao Cao, Jian'an 5, 64 seasons, on the same three seeds.
+
+| Seed | `bot:purpose` | `glm-5.3-flash` | `deepseek-v4-flash` |
+|---|---|---|---|
+| cc-1 | 21 commanderies / 3 provinces, Yi | 84 / 11, **★unified** (59 seasons) | 94 / 12, **★unified** (49 seasons) |
+| cc-2 | 19 / 3, Bing | 90 / 11, **★unified** (44 seasons) | 104 / 13, **★unified** (44 seasons) |
+| cc-3 | 23 / 3, Yi | 94 / 11, **★unified** (45 seasons) | 31 / 4, Chao (ran the full 64, first of 11 survivors) |
+
+All three runs are clean: no failures, 98–99% order-budget utilisation, **zero blank
+seasons**, 1.7–2.7% illegal. $1.125 charged in total ($0.3711 + $0.3159 + $0.4380), a
+per-season mean of $0.0068–0.0076.
+
+The criterion was fixed before the runs started: **at least two of three unified, with
+blank seasons ≤10%**. It is met. So "a model playing Cao Cao wins where the bot cannot"
+is no longer a statement about one model: a second model, from a different lab and a
+different provider, unified 2 of 3 on the same seeds, while the strongest bot profile
+unified 0 of 6.
+
+### But it is not a copy of glm, and the difference is large enough to say separately
+
+Counting admitted orders **per season** (the two differ in game length, so percentages
+would mislead):
+
+| | orders/season | campaign | muster | relief | seize | scout |
+|---|---:|---:|---:|---:|---:|---:|
+| `bot:purpose` (cc-3) | 12.4 | 0.23 | **0.00** | 0.25 | **0.00** | 3.00 |
+| `glm-5.3-flash` | 10.5–10.6 | **0.78–0.84** | **0.98–1.23** | 0.16–0.47 | 0.39–0.52 | 1.18–1.34 |
+| `deepseek-v4-flash` | 12.2–12.4 | 0.28–0.50 | **0.05–0.16** | 0.13–0.27 | 0.33–0.43 | 2.45–2.59 |
+
+On two of those axes deepseek sits **closer to the bot than to glm**: it campaigns at
+roughly half glm's rate and almost never musters (glm does so about once a season). It
+spends its orders on scouting (2.5 a season against the bot's 3.0 and glm's 1.2) and on
+governance, and it uses its budget more fully (99% against 96%, nearly two more orders a
+season).
+
+**And it still won two games.** That overturns a convenient explanation: it is not simply
+"the model wins because it attacks and the bot does not" — deepseek does not attack much
+either, it just does something else right. These three games cannot say what.
+
+The game it did not win (cc-3) happens to be the one where its campaign rate was lowest:
+**0.28 a season, barely above the bot's 0.23**, where glm on the same seed was 0.84. Three
+points cannot establish a cause, but the direction is consistent.
+
+### This weakens two statements in the section above
+
+- That section said "the control group barely plays, so the gap means less than it first
+  appears". It now needs a second clause: **playing little can still win**. "Barely plays"
+  does not explain why every bot loses, or deepseek would lose too.
+- Its n=4 was one model. It is now two models and six games (glm 3/3 plus deepseek 2/3),
+  but still **one seat, one scenario, one control profile**. What it shows is that on this
+  particular seat a model wins where a bot does not — not that models beat bots.
+
+Raw data and per-season records are in
+[reports/scenario-200-2026-10-16/](reports/scenario-200-2026-10-16/) (Chinese).
+
+<!-- translated-from: EVAL.md@c136885fd3dd -->
