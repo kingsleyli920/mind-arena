@@ -64,3 +64,32 @@ for (const { year, data } of scenarios) {
       + " —— 开局没有武将，等于没有统兵上限、没有太守加成，是个哑的席位");
   });
 }
+
+// ── 纪年也要跟着剧本 ────────────────────────────────────────────────
+//
+// 实测漏过一次：createGame 的 year 默认写死 194，而所有工具都不传。
+// 后果不只是战报上的字——observe() 把 year 放进观测（clock.year），
+// 于是模型执建安五年的席位却被告知现在是 194 年，而它据此判断谁该在场、
+// 哪些事已经发生。match-log 的实录头当时就印着「194 年·春」。
+test("剧本×纪年：开局年份取自剧本，不是写死的 194", async () => {
+  const { createGame } = await import("../lib/game/engine/setup.ts");
+  const { buildGraph } = await import("../lib/game/engine/actions.ts");
+  const { buildGeography } = await import("../lib/game/engine/victory.ts");
+  const { loadParams } = await import("../lib/game/engine/params.ts");
+  const { observe } = await import("../lib/game/engine/observe.ts");
+  for (const f of fs.readdirSync("public/game")) {
+    const m = /^runtime-(\d+)\.json$/.exec(f);
+    if (!m) continue;
+    const b = JSON.parse(fs.readFileSync(`public/game/${f}`, "utf8"));
+    const P = loadParams(b.pack), g = buildGraph(b.adjacency);
+    const geo = buildGeography(b.commanderies, b.provinceSeats);
+    const s = createGame(b, { seed: "year", geo, graph: g, seasons: 16, endCondition: "season-limit" }, P);
+    assert.equal(s.year, b.scenario.meta.year,
+      `${f}：开局纪年是 ${s.year}，而剧本写的是 ${b.scenario.meta.year}`);
+    // 观测里那一份也要对——模型读的是它，不是 GameState
+    const seat = Object.values(s.commanderies).find((c) => c.owner)?.owner;
+    const o = observe(s, seat, g, P, null, geo, {});
+    assert.equal(o.clock.year, b.scenario.meta.year,
+      `${f}：观测里的纪年是 ${o.clock.year}，模型会据此判断谁该在场`);
+  }
+});

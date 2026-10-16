@@ -926,9 +926,6 @@ export function PlayClient() {
       graph: engine.G,
       seasons: 64, // 沿用原64季局的纪元节奏，统一局不会在此季终止。
       endCondition: "unification",
-      // 纪年取自剧本。不传的话 createGame 默认 194——建安五年的局顶栏会写着
-      // 「194 年 春」，而战报、纪元、武将生卒的叙述全挂在这个年份上
-      year: (engine.data as { scenario?: { meta?: { year?: number } } }).scenario?.meta?.year,
     }, engine.P);
     clearSave(); setResume(null);
     setSeat(factionId); setGame(s); setPicked([]); setFlash({ mine: [], world: [], delta: {}, battles: [] }); setFlips([]);

@@ -14,9 +14,12 @@ export interface SetupData {
     id: string; name: string; factionId: string | null; control: string | null;
     yieldTier: number; garrison: number; moraleTier: number; defense: number;
   }> };
-  scenario: { factions: Array<{ id: string; name: string; seat?: string;
-                               /** 朝廷明授的州牧号。自领自立者不记——见剧本生成器的口径注 */
-                               governorship?: string }> };
+  scenario: {
+    /** 剧本的纪年与切片。没有则按兴平元年算——见下面 year 的取法 */
+    meta?: { year?: number; month?: number; era?: string; label?: string };
+    factions: Array<{ id: string; name: string; seat?: string;
+                      /** 朝廷明授的州牧号。自领自立者不记——见剧本生成器的口径注 */
+                      governorship?: string }> };
   commanderies: Array<{ id: string; name: string }>;
   troopTypes: { commanderies: Array<{ id: string; unit: string }> };
   resources: { commanderies: Array<{ id: string } & Record<string, unknown>> };
@@ -132,7 +135,12 @@ export function createGame(data: SetupData, opts: SetupOptions, P: EngineParams)
   const state: GameState = {
     stations: {},
     seed: opts.seed,
-    year: opts.year ?? 194,
+    // 纪年**从剧本取**，不写死。写死 194 的后果不只是战报上的字：
+    // observe() 把 year 放进观测（observe.ts 的 clock.year），于是模型
+    // 执建安五年的席位却被告知现在是 194 年——而它据此判断谁该在场、
+    // 哪些事已经发生。实测 match-log 的实录头就印着「194 年·春」而那是
+    // 建安五年的局。opts.year 仍可覆盖，给只验某一条规则的测试用
+    year: opts.year ?? data.scenario?.meta?.year ?? 194,
     season: 1,
     turn: 0,
     epoch: 1,
