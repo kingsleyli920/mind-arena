@@ -19,26 +19,64 @@ import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { decide, PROFILES } from "../lib/game/engine/bot.ts";
 
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
+/**
+ * 读**运行时数据包**，不读 lib/game/data 的散件。
+ *
+ * 原先是逐个散件读的，那在只有一个剧本时等价，现在不是了：规则包里天子
+ * 所在之郡、武将归属这两样都要按剧本年解析，而解析发生在打包时
+ *（见 tools/build-runtime-bundle.mjs）。继续读散件就会拿 194 年的归属
+ * 去跑建安五年——那正是本轮刚修掉的洞。顺带消掉一处旧分歧：
+ * 它此前用的是未裁剪的 officers.json，而浏览器吃的是裁过的包。
+ */
+const SCENARIO = process.env.SCENARIO ?? "194";
+const BUNDLE = `public/game/runtime-${SCENARIO}.json`;
+if (!fs.existsSync(BUNDLE)) {
+  console.error(`没有 ${BUNDLE} —— 先跑 node tools/build-runtime-bundle.mjs ${SCENARIO}`);
+  process.exit(1);
+}
+const B = JSON.parse(fs.readFileSync(BUNDLE, "utf8"));
 const DATA = {
-  commanderyState: read("commandery-state.json"),
-  scenario: read("scenario-194.json"),
-  commanderies: read("commanderies.json"),
-  troopTypes: read("troop-types.json"), resources: read("resources.json"),
+  commanderyState: B.commanderyState,
+  scenario: B.scenario,
+  commanderies: B.commanderies,
+  troopTypes: B.troopTypes, resources: B.resources,
 };
-const G = buildGraph(read("adjacency.json"));
-const P = loadParams(JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")));
+const G = buildGraph(B.adjacency);
+const P = loadParams(B.pack);
 const ROSTER = buildRoster(
-  read("officers.json"),
-  read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])),
+  B.officers,
+  { officers: B.officers.map((o) => ({ id: o.id, available: true })) },
+  new Map(B.commanderies.map((c) => [c.name, c.id])),
 );
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+const GEO = buildGeography(B.commanderies, B.provinceSeats);
 const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]));
 
 const GAMES = Number(process.env.GAMES ?? 100);
-/** 席位轮换：每局给六大势力换一遍画像，避免"画像与开局绑定"混淆结论 */
-const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
+/**
+ * 席位轮换：每局给六家换一遍画像，避免「画像与开局绑定」混淆结论。
+ *
+ * 这是一份**精选**名单，不是「最大的六家」——曹操在 194 年只有一个郡，
+ * 之所以在里面正因为那是最难的席位，验收闸 D 的「一郡开局不必然出局」
+ * 就钉在他身上。换剧本要另选一份，不能照搬：袁术死于建安四年、吕布灭于
+ * 建安三年，拿 194 的名单去跑建安五年会得到两个空席位和一份虚假的报告。
+ */
+const SEAT_SETS = {
+  // 最强 / 最难 / 两家据险自守 / 两家中等
+  194: ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"],
+  // 官渡两强 + 夹在曹操腹地的刘备（本剧本最难的席位）+ 江东 + 荆益
+  200: ["caocao", "yuanshao", "liubei", "sunce", "liubiao", "liuzhang"],
+};
+const SEATS = SEAT_SETS[SCENARIO];
+if (!SEATS) {
+  console.error(`没有 ${SCENARIO} 剧本的席位名单——加剧本时要在 SEAT_SETS 里选六家，`
+    + "理由写在注释里。照搬别年的名单会得到空席位和一份虚假的报告。");
+  process.exit(1);
+}
+const missing = SEATS.filter((f) => !DATA.scenario.factions.some((x) => x.id === f));
+if (missing.length) {
+  console.error(`席位名单里有 ${SCENARIO} 剧本没有的势力：${missing.join("、")}`);
+  process.exit(1);
+}
 // 默认四画像，与历次验收同口径。PROFILES=5 时把目的流一并放进轮换，
 // 用来看「看不看目的」这一条本身值多少分——均衡流与目的流权重表同底，
 // 差别只在读不读 gain，所以两者同场的分差可直接归因
@@ -197,11 +235,25 @@ console.log(`  六大席位均分：${SEATS.map((s) => `${(NAME[s] ?? s).slice(0
 const passD = rhoScore < 0.9;
 console.log(`  ${passD ? "✓" : "✗"} 判据：得分 ρ < 0.9（得分完全由开局决定则测不出模型强弱）\n`);
 
-// ── 曹操专项：1 郡开局是否必然出局 ──────────────────────────────────
-const cc = results.map((r) => r.factions.caocao);
-console.log(`【曹操专项】1 郡 6576 兵开局`);
-console.log(`  出局 ${cc.filter((f) => f.eliminated).length}/${cc.length}   ` +
+// ── 最难席位专项：开局最小的那一家是否必然出局 ──────────────────────
+//
+// 原先写死成「曹操专项：1 郡 6576 兵开局」——那是 194 年的事实写进了工具。
+// 建安五年的曹操开局二十四郡，这行字会原样打出「1 郡 6576 兵」，而数字是
+// 另一家的，读报告的人无从发现。改成**由数据选**：轮换席位里开局最小的那家。
+const hardest = SEATS
+  .map((f) => ({ f, n: DATA.commanderyState.commanderies.filter((c) => c.factionId === f).length,
+                 g: DATA.commanderyState.commanderies.filter((c) => c.factionId === f)
+                      .reduce((a, c) => a + c.garrison, 0) }))
+  .sort((a, b) => a.n - b.n || a.g - b.g)[0];
+const cc = results.map((r) => r.factions[hardest.f]);
+const ccOut = cc.filter((f) => f.eliminated).length;
+console.log(`【最难席位专项】${NAME[hardest.f]}：${hardest.n} 郡 ${hardest.g} 兵开局`);
+console.log(`  出局 ${ccOut}/${cc.length}   ` +
   `均终 ${avg(cc, "end").toFixed(2)} 郡   最好 ${Math.max(...cc.map((f) => f.end))} 郡`);
+// 判据只报不闸：出局率高说明这个席位难，而「难」与「不可用」之间那条线
+// 要看档位分布（全丁档才是测不出东西），不能单看出局率
+console.log(`  ${ccOut * 2 < cc.length ? "·" : "⚠"} 出局率 ${(ccOut * 100 / cc.length).toFixed(0)}%`
+  + `${ccOut * 2 < cc.length ? "" : " —— 过半出局，这个席位的得分接近随机，评测上区分度有限"}`);
 
 const pass = [passA, passB, passC, passD].filter(Boolean).length;
 console.log(`\n═══ ${pass}/4 项验收通过 ═══`);

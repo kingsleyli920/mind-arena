@@ -171,6 +171,14 @@
     1,
     "建安四年华歆举郡降，南昌未经大兵"
    ],
+   "南郡": [
+    1.2,
+    "襄阳为刘表治所。关中「人民流入荆州者十万余家」（《卫觊传》），关西兖豫学士归者盖有千数（《后汉书·刘表传》），所归在南郡、南阳一带；本年荆南三郡叛，兵力益集于襄阳"
+   ],
+   "江夏郡": [
+    1.15,
+    "黄祖为刘表股肱，屯沙羡以扼江路，舟师甚盛——孙氏三世攻之（坚死于此，策、权屡攻）至建安十三年乃下"
+   ],
    "长沙郡": [
     0.8,
     "张羡举三郡叛刘表，表遣兵攻之连年不下（《桓阶传》），临湘方在围中"
@@ -1139,15 +1147,15 @@
    "control": "firm",
    "households140": 162570,
    "population140": 747604,
-   "warDamage": 1.05,
-   "warBasis": "刘表保境十年，地方数千里带甲十余万，关西兖豫学士归者千数（《刘表传》）",
-   "householdsEff": 170699,
-   "populationEff": 784984,
+   "warDamage": 1.2,
+   "warBasis": "襄阳为刘表治所。关中「人民流入荆州者十万余家」（《卫觊传》），关西兖豫学士归者盖有千数（《后汉书·刘表传》），所归在南郡、南阳一带；本年荆南三郡叛，兵力益集于襄阳",
+   "householdsEff": 195084,
+   "populationEff": 897125,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 8,
-   "garrison": 15700,
-   "garrisonTier": 8,
+   "garrison": 17943,
+   "garrisonTier": 9,
    "moraleTier": 5,
    "defense": 70,
    "degree": 4
@@ -1161,15 +1169,15 @@
    "control": "firm",
    "households140": 58434,
    "population140": 265464,
-   "warDamage": 1.05,
-   "warBasis": "刘表保境十年，地方数千里带甲十余万，关西兖豫学士归者千数（《刘表传》）",
-   "householdsEff": 61356,
-   "populationEff": 278737,
+   "warDamage": 1.15,
+   "warBasis": "黄祖为刘表股肱，屯沙羡以扼江路，舟师甚盛——孙氏三世攻之（坚死于此，策、权屡攻）至建安十三年乃下",
+   "householdsEff": 67199,
+   "populationEff": 305284,
    "terrainFactor": 0.996,
    "dominantTerrain": "plain",
    "yieldTier": 7,
-   "garrison": 5575,
-   "garrisonTier": 5,
+   "garrison": 6106,
+   "garrisonTier": 6,
    "moraleTier": 5,
    "defense": 65,
    "degree": 6
