@@ -24,11 +24,28 @@ if (!files.length) {
 
 // 列头用中文。英文 key 排成一行谁都会看串——我就把「调任 3.31」读成了
 // 「改阵 3.31」，还据此在文档里写下一句错的结论
-const TYPES = ["campaign", "muster", "govern", "build", "scout", "appoint",
-               "array", "ally", "relief", "invest", "submit", "suade"];
-const TYPE_CN = { campaign: "出征", muster: "集结", govern: "内政", build: "营建",
-                  scout: "刺探", appoint: "调任", array: "改阵", ally: "结盟",
-                  relief: "赈济", invest: "授官", submit: "归降", suade: "招降" };
+/**
+ * 动作分类**从内容包取**，不在这里手抄。
+ *
+ * 原先是写死的十二项，而引擎有十六种——relocate / passage / retire /
+ * seize / transfer 五类从来没进过这张表。于是「每席·季的动作构成」里
+ * 取据点与调兵是看不见的：实测两个模型分别做了 25 次与 13 次取据点，
+ * 表上一个字都没有。合计那一列数的是全部 picks，列只数认得的那些，
+ * 两者的差额要把列加起来才看得出来（实测 8.05 对 8.70）。
+ *
+ * 加一个动作而忘了加列，是不会报错的——所以干脆别留手抄的那份。
+ */
+const PACK = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+/**
+ * 候选 key 的前缀**不等于** action.id。赴援的 key 是 `relief:…` 而它的
+ * action.type 是 campaign——那是征伐的一种写法（打正在围城的敌军），
+ * 包里不会有、也不该有一条叫 relief 的动作。
+ * 所以分类取「包里的 ∪ 数据里真出现过的」：前者保证加了动作不会漏列，
+ * 后者保证这种候选写法不会静默消失。两头都堵上，没有谁能悄悄不见。
+ */
+const PACK_TYPES = PACK.actions.map((a) => a.id);
+const KEY_CN = { relief: "赴援" };   // 不是 action，是候选写法
+const TYPE_CN = { ...Object.fromEntries(PACK.actions.map((a) => [a.id, a.name])), ...KEY_CN };
 const pad = (s, n) => String(s).padEnd(n - (String(s).match(/[一-鿿（）]/g)?.length ?? 0));
 const num = (v, n = 6, d = 2) => v.toFixed(d).padStart(n);
 
@@ -74,6 +91,9 @@ for (const { tag, d } of runs) {
   if (n) console.log(`  ⚠ ${tag}：${n}/${(d.records ?? []).length} 季因提供方报错一条令都没下，`
     + "已剔出下面所有按季平均的分母");
 }
+const SEEN = new Set(runs.flatMap(({ d }) => (d.records ?? [])
+  .flatMap((r) => (r.picks ?? []).map((k) => k.split(":")[0]))));
+const TYPES = [...new Set([...PACK_TYPES, ...SEEN])];
 const shown = TYPES.filter((t) => runs.some(({ d }) =>
   (d.records ?? []).some((r) => (r.picks ?? []).some((p) => p.startsWith(`${t}:`)))));
 console.log(pad("对局方", 22) + "  合计" + shown.map((t) => pad(TYPE_CN[t] ?? t, 7).padStart(7)).join(""));

@@ -267,6 +267,6 @@ The project **deliberately avoids datasets carrying a non-commercial clause**: C
 Fudan TGAZ are CC BY-NC, used only during research to cross-check coordinates, with no
 data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
-Current rule pack 2.5.0, save format 12; old saves require starting a new game.
+Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@8ca0a55ada3d -->
+<!-- translated-from: README.md@298262a4aae5 -->

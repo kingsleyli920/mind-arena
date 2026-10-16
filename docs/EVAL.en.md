@@ -1095,6 +1095,23 @@ maxes out free reassignment (3.31/season), while both models put their budget in
 internal affairs (2.9–3.4) and persuading cities to submit (0.5–0.6), and the bot almost
 never persuades anyone to submit.
 
+> **Addendum (2026-10-16): that table was itself five columns short at the time.**
+> `eval-dissect`'s action taxonomy was a hand-copied list of twelve, while the engine
+> has seventeen — relocate (迁治), passage (借道), retire (归隐), seize (取据点) and
+> transfer (调兵) had never made it into the table.
+> The "total" column counts all picks while the columns count only the ones it
+> recognises, so the two do not reconcile, and the gap is only visible if you add the
+> columns up yourself (measured: 8.05 against 8.70). It only came to light while
+> reading this table for the Jian'an 5 run: the models had seized a stronghold 25
+> times and the table said nothing about it at all.
+>
+> The taxonomy now takes the union of "what is in the rule pack" and "what actually
+> appears in the data" — the first so that adding an action cannot drop a column, the
+> second so that a candidate spelling like `relief:` (relief, whose `action.type` is
+> in fact `campaign`) cannot vanish silently. **The two lessons in this one section
+> are the same disease**: last time a column was read one position off, this time the
+> column was not there at all, and neither of them raises an error.
+
 #### By seat
 
 | Seat | glm commandery gain | deepseek commandery gain | bot commandery gain |
@@ -2150,4 +2167,4 @@ The raw data is in [reports/scenario-200-2026-10-16/](reports/scenario-200-2026-
 not regenerable), while the four bot runs keep only the seize tallies (deterministic,
 free to re-run).
 
-<!-- translated-from: EVAL.md@39824ccbd22a -->
+<!-- translated-from: EVAL.md@dfbfedeb1708 -->

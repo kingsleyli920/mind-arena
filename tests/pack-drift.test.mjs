@@ -238,13 +238,13 @@ test("冻结闸：胜负数值的指纹未变", () => {
   // 改规则数值时，把下面两行更新成新指纹，**同时**：
   //   一、升 pack.version（0.2.0 → 1.0.0 是冻结那一次）
   //   二、重跑机器人基线，并在 docs/EVAL.md 里说明新旧榜不可比
-  const WANT = {"count":304,"hash":"g2hcrkrvytig"};
+  const WANT = {"count":305,"hash":"35t92rq29av0"};
   assert.equal(fp.count, WANT.count,
     `胜负数值的条数变了（${WANT.count} → ${fp.count}）——加/删了一个数`);
   assert.equal(fp.hash, WANT.hash,
     "胜负数值变了。这不是禁止，是提醒：升 pack.version、重跑基线、"
     + "并在 EVAL 里写明新旧榜不可比。确认之后把本测试里的指纹更新掉");
-  assert.equal(pack.version, "2.5.0", "冻结版本号");
+  assert.equal(pack.version, "2.6.0", "冻结版本号");
   // 版本号升了、改动记载没跟上，是这套冻结流程最容易漏的一步——
   // 闸只钉了版本号与指纹，谁都不会注意到记载停在上一版。
   // 实测漏过一次：version 已是 2.3.0，而记载末尾还是 2.2.0，
@@ -285,6 +285,35 @@ test("通行图的形状被钉住", () => {
   assert.equal(sig, "1a47c8a48981",
     "通行图指纹（from/to/地形/代价）。改动了就更新这个值，"
     + "并且**必须先跑一遍 npm run selfplay**——四道闸与 ρ 都得过");
+});
+
+// ── 引擎能下的令，包里必须有 ────────────────────────────────────────
+//
+// 「规则即数据」在常数上是钉住的（缺一项即启动报错），但在**动作**上不是：
+// 引擎的 Order 联合类型里有 17 种，而包里长期只有 16 条——withdraw（撤围）
+// 从来没进过包。后果不是报错，是**规则摘要里讲不到它**：模型拿得到
+// `withdraw:` 这个 key，却读不到它会发生什么。实测两个模型共选了 4 次。
+//
+// 这条闸比对的是 types.ts 的联合类型与包里的 actions[].id。前者是声明式的，
+// 正则读得出来；读歪了会让这条闸变空，所以同时断言它至少认出 15 种。
+test("规则即数据：引擎能下的每一种令，包里都要有条目", () => {
+  const src = fs.readFileSync("lib/game/engine/types.ts", "utf8");
+  // 联合类型叫 Action（Order 是包着它的那个 interface），且中间夹着多行注释，
+  // 所以按「声明起点 → 下一个顶层 export」取区间，不能按空行切
+  const from = src.indexOf("export type Action =");
+  assert.ok(from > 0, "types.ts 里找不到 `export type Action =` —— 这条闸的锚点没了");
+  const end = src.indexOf("\nexport ", from + 10);
+  const engine = new Set([...src.slice(from, end).matchAll(/\|\s*\{\s*type:\s*"([a-z]+)"/g)]
+    .map((m) => m[1]));
+  assert.ok(engine.size >= 15,
+    `只从 types.ts 认出 ${engine.size} 种 action type —— 正则多半读歪了，这条闸会变空`);
+  const inPack = new Set(pack.actions.map((a) => a.id));
+  const missing = [...engine].filter((t) => !inPack.has(t)).sort();
+  const extra = [...inPack].filter((t) => !engine.has(t)).sort();
+  assert.deepEqual(missing, [],
+    `引擎能下而包里没有：${missing.join("、")} —— 模型拿得到 key 却读不到规则`);
+  assert.deepEqual(extra, [],
+    `包里有而引擎下不出来：${extra.join("、")} —— 规则摘要在教一个不存在的令`);
 });
 
 // ── 每个剧本的规则摘要里，朝廷只能有一个 ────────────────────────────
