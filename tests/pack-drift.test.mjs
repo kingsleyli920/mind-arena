@@ -103,27 +103,39 @@ test("包：界面读的运行时包必须与内容包同源", () => {
 // 它们之所以没有更多，只因正始那一代卒于 249、距 194 年 55 年，
 // 刚好越过「卒年差值 ≤50」那条线——**侥幸不是判据**。
 // 这条闸钉的是「证据不得被忽略」，不是钉人数：加剧本时人数必然变，而这条不变。
-test("名册：本传自记「本年未生／尚幼」的人不得入册", () => {
-  const YEAR = 194, ADULT = 16;
+test("名册：本传自记「本年未生／尚幼」的人不得入册", async () => {
+  const { adultFrom } = await import("../tools/lib/officer-slice.mjs");
+  const YEAR = 194;
   const full = JSON.parse(fs.readFileSync("lib/game/data/officers.json", "utf8"));
   const by = new Map(full.map((o) => [o.id, o]));
   const avail = JSON.parse(
     fs.readFileSync(`lib/game/data/officer-availability-${YEAR}.json`, "utf8"));
-  const TOO = /本年[^。；]{0,8}?(未生|尚幼|当尚幼|幼)/;
   const bad = [];
   for (const a of avail.officers) {
     if (!a.available) continue;
     const o = by.get(a.id);
     if (!o || o.birthYear) continue;          // 有生年则以生年为准，note 是次级证据
-    const m = TOO.exec(o.historicalNote ?? "");
-    if (!m) continue;
-    // 「未生」→ 生年 >194；只写「尚幼」→ 生年 >194−16。可登场最早年份 = 下界+1+16
-    const bound = m[0].includes("未生") ? YEAR : YEAR - ADULT;
-    if (YEAR < bound + 1 + ADULT) bad.push(`${o.name}（${m[0]}）`);
+    const y = adultFrom(o.historicalNote);
+    if (y && YEAR < y.from) bad.push(`${o.name}（${y.phrase}）`);
   }
   assert.deepEqual(bad, [],
     `这些人本传自记未成年，却在 ${YEAR} 年名册里：${bad.join("、")}`
-    + " —— 见 tools/build-officer-availability.mjs 的 ADULT_FROM");
+    + " —— 见 tools/lib/officer-slice.mjs 的 adultFrom");
+});
+
+// 卒月也要闸：年初切片的剧本靠它才有颜良、文丑、沮授、淳于琼、孙策，
+// 而写了 deathMonth 却没写出处，等于凭空给一个人续命
+test("名册：卒年等于切片年而补了月份的，必须附出处", () => {
+  const full = JSON.parse(fs.readFileSync("lib/game/data/officers.json", "utf8"));
+  const bad = full.filter((o) => o.deathMonth != null
+    && !(typeof o.deathMonthBasis === "string" && o.deathMonthBasis.length > 20));
+  assert.deepEqual(bad.map((o) => o.name), [],
+    "这些人有 deathMonth 而无 deathMonthBasis —— 推定的月份尤其要写明是推定");
+  for (const o of full) {
+    if (o.deathMonth == null) continue;
+    assert.ok(o.deathYear != null, `${o.name} 有卒月而无卒年`);
+    assert.ok(o.deathMonth >= 1 && o.deathMonth <= 12, `${o.name} 的卒月 ${o.deathMonth} 不在 1–12`);
+  }
 });
 
 test("包：写给模型的数必须与引擎实际用的一致", () => {

@@ -1,5 +1,7 @@
 {
  "year": 194,
+ "month": 12,
+ "slice": "194 年 12 月",
  "rule": "生年优先；无生年则以 affiliation194 为直证；再无则卒年距本年 >50 判为未成年；皆无则不登场",
  "caveat": "卒年规则会误伤长寿者——甘宁 194 年已在益州，因生卒年俱无而判为不登场。此为已知假阴性，逐条修正需补生年，见各条 basis。",
  "available": 445,
@@ -128,7 +130,7 @@
    "id": "dongzhuo",
    "name": "董卓",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "duyu",
@@ -242,7 +244,7 @@
    "id": "huaxiong",
    "name": "华雄",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "jiangqin",
@@ -368,7 +370,7 @@
    "id": "luzhi",
    "name": "卢植",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "lvmeng",
@@ -632,7 +634,7 @@
    "id": "zhangjiao",
    "name": "张角",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "zhangliao",
@@ -830,7 +832,7 @@
    "id": "dingyuan",
    "name": "丁原",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "dongcheng",
@@ -896,7 +898,7 @@
    "id": "guanping",
    "name": "关平",
    "available": false,
-   "basis": "affiliation194=liubei，然本传记「本年当尚幼」，生年 >178，194 年未满 16"
+   "basis": "affiliation194=liubei，然本传记「本年当尚幼，随父在徐州」，生年 >178，194 年未满 16"
   },
   {
    "id": "guanqiujian",
@@ -920,13 +922,13 @@
    "id": "hanfu",
    "name": "韩馥",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "hejin",
    "name": "何进",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "heqi",
@@ -1040,7 +1042,7 @@
    "id": "liuyan_yz",
    "name": "刘焉",
    "available": false,
-   "basis": "无生年；卒 194，卒于本年，本年已故"
+   "basis": "无生年；卒 194，卒于本年（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "liuyao",
@@ -1058,7 +1060,7 @@
    "id": "liuyu",
    "name": "刘虞",
    "available": false,
-   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+   "basis": "无生年；卒 193，早于本年 1 年，本切片时已故"
   },
   {
    "id": "liyan",
@@ -1268,7 +1270,7 @@
    "id": "xurong",
    "name": "徐荣",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "xushao",
@@ -1346,7 +1348,7 @@
    "id": "zhangrang",
    "name": "张让",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "zhangyan",
@@ -1388,7 +1390,7 @@
    "id": "zhugedan",
    "name": "诸葛诞",
    "available": false,
-   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
+   "basis": "无生年；本传记「本年尚幼或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhuhuan",
@@ -1436,7 +1438,7 @@
    "id": "caosong",
    "name": "曹嵩",
    "available": false,
-   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+   "basis": "无生年；卒 193，早于本年 1 年，本切片时已故"
   },
   {
    "id": "caoteng",
@@ -1466,7 +1468,7 @@
    "id": "chengyuanzhi",
    "name": "程远志",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "chenjiao",
@@ -1502,7 +1504,7 @@
    "id": "dengmao",
    "name": "邓茂",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "donghe",
@@ -1568,7 +1570,7 @@
    "id": "fuxie",
    "name": "傅燮",
    "available": false,
-   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+   "basis": "无生年；卒 187，早于本年 7 年，本切片时已故"
   },
   {
    "id": "gaixun",
@@ -1622,13 +1624,13 @@
    "id": "hetaihou",
    "name": "何太后",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "heyan",
    "name": "何晏",
    "available": false,
-   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
+   "basis": "无生年；本传记「本年未生或初生」，生年 >194，194 年未满 16"
   },
   {
    "id": "huangchengyan",
@@ -1670,7 +1672,7 @@
    "id": "jianshuo",
    "name": "蹇硕",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "kongxiu",
@@ -1712,7 +1714,7 @@
    "id": "lisu",
    "name": "李肃",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "liubei_gan",
@@ -1736,7 +1738,7 @@
    "id": "liudai",
    "name": "刘岱",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "liufang",
@@ -1808,7 +1810,7 @@
    "id": "niufu",
    "name": "牛辅",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "panjun",
@@ -1832,7 +1834,7 @@
    "id": "qiaomao",
    "name": "桥瑁",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "qiaoxuan",
@@ -1850,7 +1852,7 @@
    "id": "qiuliju",
    "name": "丘力居",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "quancong",
@@ -1868,7 +1870,7 @@
    "id": "shibao",
    "name": "石苞",
    "available": false,
-   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
+   "basis": "无生年；本传记「本年未生或尚幼」，生年 >194，194 年未满 16"
   },
   {
    "id": "shihuan",
@@ -1964,7 +1966,7 @@
    "id": "wangkuang",
    "name": "王匡",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "wanglei",
@@ -2018,7 +2020,7 @@
    "id": "wufu",
    "name": "伍孚",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "wuguotai",
@@ -2216,7 +2218,7 @@
    "id": "zhangbao_hj",
    "name": "张宝",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "zhangchao",
@@ -2228,7 +2230,7 @@
    "id": "zhangchun",
    "name": "张纯",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "zhangji",
@@ -2252,7 +2254,7 @@
    "id": "zhangliang_hj",
    "name": "张梁",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "zhangnan",
@@ -2330,13 +2332,13 @@
    "id": "zhaozhong",
    "name": "赵忠",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "zhengtai",
    "name": "郑泰",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "zhugejun",
@@ -2408,19 +2410,19 @@
    "id": "beigongboyu",
    "name": "北宫伯玉",
    "available": false,
-   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+   "basis": "无生年；卒 187，早于本年 7 年，本切片时已故"
   },
   {
    "id": "bianzhang",
    "name": "边章",
    "available": false,
-   "basis": "无生年；卒 186，早于本年 8 年，本年已故"
+   "basis": "无生年；卒 186，早于本年 8 年，本切片时已故"
   },
   {
    "id": "boci",
    "name": "波才",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "budugen",
@@ -2504,7 +2506,7 @@
    "id": "dongyue",
    "name": "董越",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "duqiong",
@@ -2564,7 +2566,7 @@
    "id": "gengwu",
    "name": "耿武",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "gongsunfan",
@@ -2588,7 +2590,7 @@
    "id": "gongsunyue",
    "name": "公孙越",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "guanjing",
@@ -2636,7 +2638,7 @@
    "id": "hexuan",
    "name": "何颙",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "hezong",
@@ -2726,7 +2728,7 @@
    "id": "kongzhou",
    "name": "孔伷",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "laigong",
@@ -2780,7 +2782,7 @@
    "id": "liubao",
    "name": "刘豹",
    "available": false,
-   "basis": "affiliation194=xiongnu，然本传记「本年未生」，生年 >194，194 年未满 16"
+   "basis": "affiliation194=xiongnu，然本传记「本年未生或尚幼」，生年 >194，194 年未满 16"
   },
   {
    "id": "liuchan_lz",
@@ -2834,7 +2836,7 @@
    "id": "liwenhou",
    "name": "李文侯",
    "available": false,
-   "basis": "无生年；卒 187，早于本年 7 年，本年已故"
+   "basis": "无生年；卒 187，早于本年 7 年，本切片时已故"
   },
   {
    "id": "lixiu",
@@ -2876,7 +2878,7 @@
    "id": "lvyi",
    "name": "吕乂",
    "available": false,
-   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
+   "basis": "无生年；本传记「本年未生或尚幼」，生年 >194，194 年未满 16"
   },
   {
    "id": "matie",
@@ -3122,7 +3124,7 @@
    "id": "wangrui",
    "name": "王睿",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "wangshang",
@@ -3152,7 +3154,7 @@
    "id": "weizi",
    "name": "卫兹",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "wenhui",
@@ -3326,7 +3328,7 @@
    "id": "yudu",
    "name": "于毒",
    "available": false,
-   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+   "basis": "无生年；卒 193，早于本年 1 年，本切片时已故"
   },
   {
    "id": "yumi",
@@ -3344,7 +3346,7 @@
    "id": "zhangheng_wdm",
    "name": "张衡",
    "available": false,
-   "basis": "无生年；卒 179，早于本年 15 年，本年已故"
+   "basis": "无生年；卒 179，早于本年 15 年，本切片时已故"
   },
   {
    "id": "zhangju",
@@ -3356,7 +3358,7 @@
    "id": "zhangmancheng",
    "name": "张曼成",
    "available": false,
-   "basis": "无生年；卒 184，早于本年 10 年，本年已故"
+   "basis": "无生年；卒 184，早于本年 10 年，本切片时已故"
   },
   {
    "id": "zhangsu",
@@ -3368,13 +3370,13 @@
    "id": "zhangwen_han",
    "name": "张温",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "zhangxiu_wdm",
    "name": "张修",
    "available": false,
-   "basis": "无生年；卒 191，早于本年 3 年，本年已故"
+   "basis": "无生年；卒 191，早于本年 3 年，本切片时已故"
   },
   {
    "id": "zhangxun",
@@ -3392,7 +3394,7 @@
    "id": "zhangzi",
    "name": "张咨",
    "available": false,
-   "basis": "无生年；卒 190，早于本年 4 年，本年已故"
+   "basis": "无生年；卒 190，早于本年 4 年，本切片时已故"
   },
   {
    "id": "zhaoang",
@@ -3458,7 +3460,7 @@
    "id": "zoudan",
    "name": "邹丹",
    "available": false,
-   "basis": "无生年；卒 194，卒于本年，本年已故"
+   "basis": "无生年；卒 194，卒于本年（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "zoutuo",
@@ -3488,13 +3490,13 @@
    "id": "bianrang",
    "name": "边让",
    "available": false,
-   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+   "basis": "无生年；卒 193，早于本年 1 年，本切片时已故"
   },
   {
    "id": "biguai",
    "name": "毕轨",
    "available": false,
-   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
+   "basis": "无生年；本传记「本年幼或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "bulianshi",
@@ -3512,7 +3514,7 @@
    "id": "caode",
    "name": "曹德",
    "available": false,
-   "basis": "无生年；卒 193，早于本年 1 年，本年已故"
+   "basis": "无生年；卒 193，早于本年 1 年，本切片时已故"
   },
   {
    "id": "caohong_taoqian",
@@ -3572,7 +3574,7 @@
    "id": "dengyang",
    "name": "邓飏",
    "available": false,
-   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
+   "basis": "无生年；本传记「本年幼或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "dingfuren",
@@ -3584,13 +3586,13 @@
    "id": "dingmi",
    "name": "丁谧",
    "available": false,
-   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
+   "basis": "无生年；本传记「本年幼或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "dingyi_jingli",
    "name": "丁廙",
    "available": false,
-   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
+   "basis": "无生年；本传记「本年幼或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "dingyi_zhengli",
@@ -3602,7 +3604,7 @@
    "id": "dongbai",
    "name": "董白",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "dongfu",
@@ -3614,7 +3616,7 @@
    "id": "dongtaihou",
    "name": "董太后",
    "available": false,
-   "basis": "无生年；卒 189，早于本年 5 年，本年已故"
+   "basis": "无生年；卒 189，早于本年 5 年，本切片时已故"
   },
   {
    "id": "dongtuna",
@@ -3806,7 +3808,7 @@
    "id": "huangfuguiqi",
    "name": "皇甫规妻",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "huangfuli",
@@ -3854,7 +3856,7 @@
    "id": "jiafan_liaodong",
    "name": "贾范",
    "available": false,
-   "basis": "无生年；本传记「本年当未生」，生年 >194，194 年未满 16"
+   "basis": "无生年；本传记「本年当未生或幼」，生年 >194，194 年未满 16"
   },
   {
    "id": "jiangbin",
@@ -3962,13 +3964,13 @@
    "id": "liudan",
    "name": "刘诞",
    "available": false,
-   "basis": "affiliation194=lijue，然卒 194，本年岁末已故"
+   "basis": "affiliation194=lijue，然卒 194（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "liufan",
    "name": "刘范",
    "available": false,
-   "basis": "affiliation194=lijue，然卒 194，本年岁末已故"
+   "basis": "affiliation194=lijue，然卒 194（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "liufuren_yuanshao",
@@ -4112,7 +4114,7 @@
    "id": "maridi",
    "name": "马日磾",
    "available": false,
-   "basis": "affiliation194=lijue，然卒 194，本年岁末已故"
+   "basis": "affiliation194=lijue，然卒 194（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "mengyou",
@@ -4376,7 +4378,7 @@
    "id": "wangfang_dz",
    "name": "王方",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "wangfuren_hedadai",
@@ -4412,7 +4414,7 @@
    "id": "wangrong_meiren",
    "name": "王荣",
    "available": false,
-   "basis": "无生年；卒 181，早于本年 13 年，本年已故"
+   "basis": "无生年；卒 181，早于本年 13 年，本切片时已故"
   },
   {
    "id": "wangshi_yz",
@@ -4598,7 +4600,7 @@
    "id": "yangang_gsz",
    "name": "严纲",
    "available": false,
-   "basis": "无生年；卒 192，早于本年 2 年，本年已故"
+   "basis": "无生年；卒 192，早于本年 2 年，本切片时已故"
   },
   {
    "id": "yanghuiyu",
@@ -4778,7 +4780,7 @@
    "id": "zhaoyu",
    "name": "赵昱",
    "available": false,
-   "basis": "无生年；卒 194，卒于本年，本年已故"
+   "basis": "无生年；卒 194，卒于本年（月份失载，作正月计），本切片时已故"
   },
   {
    "id": "zhaozhi",
