@@ -18,13 +18,38 @@ const load = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
 const base = load(baseFile);
 const key = (r) => `${r.seed}|${r.seat}`;
 
+/**
+ * 95% 区间的乘数。**按 n 取 Student t，不是恒取 1.96。**
+ *
+ * 原先写死 z=1.96，那是 n→∞ 的值。小样本下区间会被压窄，于是**多判显著**：
+ * 实测 n=6 时正确的乘数是 t(5)=2.571，差 31%——一份 6 局的跑里，
+ * glm 的州进度 +97.3 ±81.4 判成「显著」，按 t 算是 ±106.8，并不显著。
+ * 这个仓库给排行榜定的下界是 48 局，那里 1.96 够用；而对照实验常常只有几局，
+ * 偏偏是那几局最容易被这个乘数骗。
+ *
+ * 表取双尾 95% 的常用自由度，其余按 Peiser 近似（n 大时本就趋近 1.96）。
+ */
+const T95 = { 1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365,
+  8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179, 15: 2.131, 20: 2.086,
+  25: 2.060, 30: 2.042, 40: 2.021, 60: 2.000, 120: 1.980 };
+function t95(df) {
+  if (df < 1) return Infinity;
+  if (T95[df]) return T95[df];
+  const keys = Object.keys(T95).map(Number).sort((a, b) => a - b);
+  const hi = keys.find((k) => k > df);
+  if (hi === undefined) return 1.96;
+  const lo = [...keys].reverse().find((k) => k < df);
+  // 相邻两档线性插值；两档之间最多差 0.05，对判据够用
+  return T95[lo] + (T95[hi] - T95[lo]) * ((df - lo) / (hi - lo));
+}
+
 /** 配对差 + 95% 区间 + 平局数 */
 function paired(rows, baseMap, metric) {
   const d = rows.filter((r) => baseMap.has(key(r))).map((r) => metric(r) - baseMap.get(key(r)));
   const n = d.length;
   const mu = d.reduce((a, b) => a + b, 0) / n;
   const sd = Math.sqrt(d.reduce((a, b) => a + (b - mu) ** 2, 0) / Math.max(1, n - 1));
-  const ci = 1.96 * sd / Math.sqrt(n);
+  const ci = t95(n - 1) * sd / Math.sqrt(n);
   return { n, mu, ci, sig: Math.abs(mu) > ci, ties: d.filter((x) => x === 0).length };
 }
 
