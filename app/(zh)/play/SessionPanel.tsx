@@ -3,10 +3,14 @@ import type { GameState } from "@/lib/game/engine/types.ts";
 import { StrategyPlanView } from "./StrategyPlanView";
 import { SeasonReviewView } from "./SeasonReviewView";
 import { DecisionReviewView } from "./DecisionReviewView";
+import { TYPE_CN } from "./panels.ts";
 
-const actionNames: Record<string, string> = { campaign: "征伐", relief: "解围", appoint: "调任",
-  build: "建设", govern: "内政", scout: "刺探", transfer: "调兵", muster: "集结", withdraw: "撤围",
-  seize: "夺据点", submit: "劝降", suade: "招降", array: "改阵", ally: "外交", relocate: "迁治" };
+/*
+ * 动作名**不在这里**。这里原先自己写了一份，和 panels.ts 的 TYPE_CN 三处不一样：
+ * relief 作「解围」（那边与引擎的候选标签、eval-dissect 都是「赴援」）、
+ * build 作「建设」（那边是「兴建」）、seize 作「夺据点」（那边是「取据点」）。
+ * 一比四，这一份是孤例——而两份表改一份另一份不会报错。
+ */
 const dropReasons: Record<string, string> = { duplicate: "重复选择同一命令", "unknown-key": "未识别的候选命令",
   "over-budget": "行动点不足", rejected: "命令未通过校验" };
 
@@ -76,7 +80,7 @@ export function SessionPanel({ game, session, onChange, names, seat, onView, bus
           <SeasonReviewView game={game} faction={r.seat} />
           {!r.review && r.planWarning && <p className="warn-note">{r.planWarning}</p>}
           {!r.review && r.admission.dropped.length > 0 && <ul>{r.admission.dropped.map((d, i) =>
-            <li key={i}>{d.label ?? actionNames[d.key.split(":")[0]] ?? "命令"}：{d.detail ?? dropReasons[d.reason] ?? "未通过校验"}</li>)}</ul>}
+            <li key={i}>{d.label ?? TYPE_CN[d.key.split(":")[0]] ?? "命令"}：{d.detail ?? dropReasons[d.reason] ?? "未通过校验"}</li>)}</ul>}
         </article>)}
       </details>}
     </section>

@@ -75,6 +75,34 @@ test("标签表：界面不许自己写一份已有正本的表", () => {
     + "  删掉副本，从正本导入");
 });
 
+test("标签表：界面之间也不许互抄", () => {
+  // 上一条只拿**引擎**的表当正本，于是两个界面文件互抄它一句话都不说。
+  // 实测漏过：SessionPanel 自己写了一份动作名，与 panels.ts 的 TYPE_CN 三处不一样
+  //（relief 解围/赴援、build 建设/兴建、seize 夺据点/取据点），一比四，而引擎里
+  // 没有一张「动作显示名」的正本可比，所以上一条闸怎么都逮不到。
+  const tables = [];
+  for (const { f, src } of UI) {
+    for (const m of src.matchAll(/(?:const|let)\s+([A-Za-z_]+)[^=]*=\s*\{([^}]*)\}/g)) {
+      const vals = [...m[2].matchAll(/"([^"]*[\u4e00-\u9fff][^"]*)"/g)].map((x) => x[1]);
+      if (vals.length >= 4) tables.push({ f, name: m[1], vals: new Set(vals) });
+    }
+  }
+  const hit = [];
+  for (let i = 0; i < tables.length; i++) {
+    for (let j = i + 1; j < tables.length; j++) {
+      const a = tables[i], b = tables[j];
+      if (a.f === b.f) continue;
+      const shared = [...a.vals].filter((v) => b.vals.has(v));
+      if (shared.length >= 3) {
+        hit.push(`${a.f} 的 ${a.name} 与 ${b.f} 的 ${b.name} 共有 ${shared.length} 个值`);
+      }
+    }
+  }
+  assert.deepEqual(hit, [],
+    `两个界面文件各写了一份同样的表：\n  ${hit.join("\n  ")}\n`
+    + "  留一份，另一份导入它");
+});
+
 test("标签表：兵种名出自内容包，界面不许写死", () => {
   const P = loadParams(pack);
   const names = pack.units.map((u) => u.name);
