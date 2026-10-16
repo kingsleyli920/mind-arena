@@ -184,7 +184,7 @@ test("势力配色：任意两家可分，接壤的更要分得开", async () =>
 test("渲染端不得二次提纯势力色", () => {
   // 注释里可以提它（讲清为什么去掉了），代码里不行——先剥注释再查
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
-  for (const f of ["app/play/PlayClient.tsx", "tools/build-replay-page.mjs"]) {
+  for (const f of ["app/(zh)/play/PlayClient.tsx", "tools/build-replay-page.mjs"]) {
     const src = strip(fs.readFileSync(f, "utf8"));
     assert.equal(/vivid\s*\(/.test(src), false,
       `${f} 又出现了 vivid()：势力色应直接取 scenario 里的最终显示色`);

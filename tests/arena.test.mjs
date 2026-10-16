@@ -547,7 +547,7 @@ test("规则摘要里的定档门槛与引擎一致", () => {
 //
 // 撞了就等于图上两支不同势力的兵长得一模一样，而颜色本来就分不清三十一家。
 test("势力的一字缩写：全部互不相同", async () => {
-  const { factionAbbr } = await import("../app/play/faction-abbr.ts");
+  const { factionAbbr } = await import("../app/(zh)/play/faction-abbr.ts");
   const b = JSON.parse(fs.readFileSync("public/game/runtime-194.json", "utf8"));
   const seen = new Map();
   for (const f of b.scenario.factions) {

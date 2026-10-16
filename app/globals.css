@@ -43,6 +43,15 @@ nav { display: flex; gap: 36px; font-size: 13px; }
 nav a { position: relative; }
 nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -6px; height: 1px; background: var(--ink); transition: right .2s ease; }
 nav a:hover::after { right: 0; }
+/* 语言开关。做成与导航同一行、靠右，并加一条竖线把它与栏目分开——
+   它换的是整站语言，不是跳到另一个栏目 */
+nav .lang-switch {
+  margin-left: 6px; padding-left: 22px;
+  border-left: 1px solid var(--line);
+  font: 600 12px/1 var(--font-geist-mono), monospace;
+  letter-spacing: .06em;
+}
+
 .build-chip { justify-self: end; display: inline-flex; align-items: center; gap: 9px; font: 600 11px/1 var(--font-geist-mono), monospace; letter-spacing: .08em; text-transform: uppercase; }
 .build-chip i { width: 8px; height: 8px; border-radius: 50%; background: #35b96b; box-shadow: 0 0 0 4px rgba(53,185,107,.12); }
 

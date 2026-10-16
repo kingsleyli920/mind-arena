@@ -2,7 +2,7 @@
 // 写错一个不等号不会报错，只会让某一类标签悄悄不避让——那正是关津此前的情形
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { overlaps, fitLabel, textWidth } from "../app/play/label-fit.ts";
+import { overlaps, fitLabel, textWidth } from "../app/(zh)/play/label-fit.ts";
 
 test("相交判定：边贴边不算相交", () => {
   assert.equal(overlaps([0, 0, 10, 10], [10, 0, 10, 10]), false, "右边贴左边");

@@ -1,3 +1,6 @@
+// 注意这里**用相对路径，不用 `@/` 别名**：这个文件被 tests/engine.test.mjs 直接
+// 导入，而 `node --test` 不认 tsconfig 的 paths（实测 ERR_MODULE_NOT_FOUND：
+// Cannot find package '@/lib'）。app/ 下凡是被 node 测试直接导入的文件都如此。
 // 「离下一档还差多少」——界面上两处都用它。
 //
 // 单独成文件是为了让测试能读到（PlayClient.tsx 带 JSX，测试里 import 不进来）。
@@ -6,8 +9,8 @@
 // 「已至甲档，本剧本的顶」（甲早已不是顶，上面还有超/霸/王），状态栏在甲档上
 // 说「再多控 1 州 → 甲」，乙档那段用的是旧甲门槛 2 州。而全部测试是绿的，
 // 因为没有一条测试读过它们。
-import { GRADE_CUTS } from "../../lib/game/engine/victory.ts";
-import type { Grade } from "../../lib/game/engine/types.ts";
+import { GRADE_CUTS } from "../../../lib/game/engine/victory.ts";
+import type { Grade } from "../../../lib/game/engine/types.ts";
 
 /**
  * 离下一档还差多少——**从 GRADE_CUTS 算，不写死**。

@@ -11,7 +11,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { idRe } from "../app/play/id-regex.ts";
+import { idRe } from "../app/(zh)/play/id-regex.ts";
 
 /** 真实的 194 势力 id */
 const NAMES = (() => {

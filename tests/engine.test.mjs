@@ -12,7 +12,7 @@ import { retinueAt, stationedAt, isFiller, attackRetinue, suadeChance }
   from "../lib/game/engine/officers.ts";
 import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
-import { PANEL_ORDER, TYPE_CN } from "../app/play/panels.ts";
+import { PANEL_ORDER, TYPE_CN } from "../app/(zh)/play/panels.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams, marchSeasons, provisionsCap, provCapOf, siegeEat, siegeHoldSeasons }
   from "../lib/game/engine/params.ts";
@@ -477,7 +477,7 @@ test("图上符号：界面的变体表与真渲出来的对得上，且每一�
   //   → manifest.json（渲出来的实况）
   //   → 界面的 GLYPH_N（贴图时按它取模）
   const manifest = JSON.parse(fs.readFileSync("public/game/glyphs/manifest.json", "utf8"));
-  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  const client = fs.readFileSync("app/(zh)/play/PlayClient.tsx", "utf8");
   const block = /const GLYPH_N: Record<string, number> = \{([^}]+)\}/.exec(client);
   assert.ok(block, "界面里找不到 GLYPH_N —— 贴图的变体数没有出处");
   const declared = {};
@@ -1883,7 +1883,7 @@ test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不
   // 而界面那张「我的郡国」表只有兵产心防阵将——人少看四样，
   // 其中「粮」还是围城那只钟（被围每季 −1，归零则不战自下）。
   const obs = fs.readFileSync("lib/game/engine/observe.ts", "utf8");
-  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  const client = fs.readFileSync("app/(zh)/play/PlayClient.tsx", "utf8");
   const i = client.indexOf('className="lands"');
   const head = client.slice(i, client.indexOf("</thead>", i));
   for (const [field, col] of [["provisions", "粮"], ["gear", "械"],
@@ -1897,7 +1897,7 @@ test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不
 test("候选标签里的 markdown 不许漏到界面上", () => {
   // 标签同时给模型与界面看：** 是给模型的强调（如「**天下共讨之**」），
   // 界面直出就是一对星号。界面那边剥掉，这条钉住「剥的规则还在」
-  const client = fs.readFileSync("app/play/PlayClient.tsx", "utf8");
+  const client = fs.readFileSync("app/(zh)/play/PlayClient.tsx", "utf8");
   assert.ok(/c\.label\.replace\(/.test(client),
     "界面渲染候选标签时没有剥掉 markdown 强调");
   // 图例是纯 JSX 文本，那儿写 ** 会原样显示
@@ -2637,7 +2637,7 @@ test("定档：一个州治算半个州，门槛落在 16 季够得着的区间"
 // 这件事曾在状态栏与终局各硬编码一遍，改门槛之后三处同时说错话，
 // 而全部测试是绿的——因为没有一条测试读过它们。现在有了。
 test("界面的『离下一档还差多少』从 GRADE_CUTS 算，不写死", async () => {
-  const { nextGrade } = await import("../app/play/grade-gap.ts");
+  const { nextGrade } = await import("../app/(zh)/play/grade-gap.ts");
   // 州分 0：先够丙/乙的门槛
   const a = nextGrade(0, 0);
   assert.equal(a.grade, "yi");
