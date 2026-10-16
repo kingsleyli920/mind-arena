@@ -1,6 +1,8 @@
 import board from "@/public/game/leaderboard.json";
 import history from "@/public/game/history.json";
 import pack from "@/lib/game/content/pack-194.json";
+import { ruleFingerprint } from "@/lib/game/content/fingerprint";
+import { boardStale, versionsSince } from "@/lib/arena/board-stale";
 import "./board.css";
 
 export const metadata = { title: "汉末沙盘 · 排行榜" };
@@ -51,6 +53,13 @@ export default function BoardPage() {
   const scenarioName = (board as { scenario?: string }).scenario ?? "兴平元年 · 群雄割据";
   const models = board.rows.filter((r) => r.kind === "model");
   const seats = Object.keys(board.rows[0]?.bySeat ?? {});
+  // 过期判定与「其间升过哪几版」都在 lib/arena/board-stale.ts，那里有闸
+  const boardFp = (board as { packFingerprint?: string | null }).packFingerprint ?? null;
+  const nowFp = ruleFingerprint(pack);
+  const stale = boardStale(board, pack);
+  // 其间升过哪几版。原先是手写的一句「改过通行图、据点、调兵与组合命令预留」，
+  // 那句话每升一版就旧一点，而包里本来就逐版记着
+  const since = versionsSince(board, pack._frozen?.["改动记载"] ?? []);
   return (
     <main className="board-page">
       <header className="board-head">
@@ -61,26 +70,36 @@ export default function BoardPage() {
         <h1>汉末沙盘 · 排行榜</h1>
         {/*
          * 榜是在某一版规则下跑出来的，而规则还在动。两者一旦分家，
-         * 这一页上的每个数都不再对应任何一局现在能打出来的棋——
-         * 而页面原先不说这件事（versionSkewNote 是空的）。
+         * 这一页上的每个数都不再对应任何一局现在能打出来的棋。
          *
-         * 所以让它**自己检测**：拿榜里记的规则包版本比当前的，不一致就横幅置顶。
-         * 写死一句话只能挡住这一次；下次规则再升，这条横幅会自己出现。
+         * 判据用**指纹**，不用版本号。这不是偏好，是 fingerprint.ts 开头那段
+         * 论证的直接后果：版本号是人写的标签，两个方向都会错——有人只升版本
+         * 没动数值，它会把「其实一样」判成不可比；有人改了数值忘了升版本，
+         * 它又会把「其实不一样」判成可比。榜里早就盖了 packFingerprint，
+         * 而这一页原先拿 packVersion 在比，正是它自己的模块说不该用的那把尺。
+         * 旧榜没盖指纹（是后加的），那时才退回版本号。
          */}
-        {board.packVersion !== pack.version ? (
+        {stale ? (
           <p className="stale">
             <b>这份榜已经过期。</b>
-            它是在内容包 <code>{board.packVersion}</code> 下跑出来的，
-            而当前引擎是 <code>{pack.version}</code>。
-            其间改过通行图、据点、调兵与组合命令预留——
-            <b>下面的分数不对应任何一局现在能打出来的棋</b>，
+            它是在内容包 <code>{board.packVersion}</code>
+            {boardFp ? <>（指纹 <code>{boardFp}</code>）</> : null} 下跑出来的，
+            而当前引擎是 <code>{pack.version}</code>
+            （指纹 <code>{nowFp.hash}</code>）。
+            {since.length ? (
+              <> 其间升过 {since.length} 版：{since.join("、")}。</>
+            ) : null}
+            <b> 下面的分数不对应任何一局现在能打出来的棋</b>，
             仅作历史留存，不可与新结果比较。
           </p>
         ) : null}
         <p>
           {board.rows.length} 个对局方 × {board.rows[0]?.games ?? 0} 局，
           同一批开局种子、同一批对手、席位轮换，每局 {board.seasons} 季。
-          规则冻结于内容包 {board.frozen ? "1.0.0" : board.packVersion}
+          {/* 这里原先写死「1.0.0」：只要 frozen 非空就印 1.0.0，不管这份榜
+              到底跑在哪一版。于是同一屏上，横幅说「内容包 0.2.0/1.0.0」，
+              这一行说「冻结于 1.0.0」，两句话指同一份榜而数字不一样 */}
+          规则包 {board.packVersion}
           {board.git ? <code> {board.git}</code> : null}。
           实扣合计 ${board.totalUsd}。
         </p>
