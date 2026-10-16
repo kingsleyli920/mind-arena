@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { DICTS, LOCALES, DEFAULT_LOCALE, holesIn, translate, withLocale, localeFromPath }
   from "../lib/i18n/index.ts";
+import { splitMarks, marksIn, marksBalanced } from "../lib/i18n/marks.ts";
 
 test("目录：两份 key 集合必须一一对应", () => {
   const zh = Object.keys(DICTS.zh).sort();
@@ -86,6 +87,63 @@ test("路径：英文在 /en 下，中文不带前缀", () => {
   assert.equal(DEFAULT_LOCALE, "zh");
 });
 
+test("强调标记：两边都要成对，不许落单", () => {
+  // `**` 落单不会报错，页面上就多出两个星号——而译者最容易漏掉收尾那一对
+  const bad = [];
+  for (const loc of LOCALES) {
+    for (const [k, v] of Object.entries(DICTS[loc])) {
+      if (!marksBalanced(v)) bad.push(`${loc} 的 ${k}：${v.slice(0, 50)}`);
+    }
+  }
+  assert.deepEqual(bad, [], `强调标记落单：\n  ${bad.join("\n  ")}`);
+});
+
+test("强调标记：中文有强调的，英文不该一处都没有", () => {
+  // 数量可以不同（中英的强调位置本来就不一样），但「中文标了英文一处没标」
+  // 多半是译的时候把标记吃掉了
+  const bad = [];
+  for (const [k, v] of Object.entries(DICTS.zh)) {
+    const a = marksIn(v), b = marksIn(DICTS.en[k] ?? "");
+    if (a > 0 && b === 0) bad.push(`${k}：中文 ${a} 处强调，英文 0 处`);
+  }
+  assert.deepEqual(bad, [], `英文把强调吃掉了：\n  ${bad.join("\n  ")}`);
+});
+
+test("强调标记：切段切对，且切完能拼回原文", () => {
+  assert.deepEqual(splitMarks("没有标记"), [{ text: "没有标记", bold: false }]);
+  assert.deepEqual(splitMarks("前**中**后"), [
+    { text: "前", bold: false }, { text: "中", bold: true }, { text: "后", bold: false },
+  ]);
+  // 开头与结尾就是强调时不许切出空段——空段会在页面上变成一个空的 <b>
+  assert.deepEqual(splitMarks("**整句**"), [{ text: "整句", bold: true }]);
+  // 切完拼回去必须等于去掉标记的原文。这条比逐段比更抓得住边界错
+  for (const probe of ["a**b**c", "**a**b", "a**b**", "**a****b**", "纯文本", ""]) {
+    const joined = splitMarks(probe).map((x) => x.text).join("");
+    assert.equal(joined, probe.replaceAll("**", ""), probe);
+  }
+  // 落单的星号不当标记，原样留着（成对与否由上一条闸拦，这里只保证不炸）
+  assert.equal(splitMarks("落单 ** 星号").map((x) => x.text).join(""), "落单 ** 星号");
+  assert.equal(marksBalanced("落单 ** 星号"), false);
+  assert.equal(marksBalanced("成对 **的** 标记"), true);
+});
+
+test("档位名：中文那份必须逐字等于引擎的 GRADE_CN", async () => {
+  // 目录里的 grade.* 是**显示名**，引擎的 GRADE_CN 是 id。两者今天相同，
+  // 而「相同」必须被钉住——否则哪天引擎改了档位名，榜上与规则速览会各说各的，
+  // 且只在中文版上出错（英文那份本来就不同，看不出来）
+  const { GRADE_CN } = await import("../lib/game/engine/victory.ts");
+  for (const [g, cn] of Object.entries(GRADE_CN)) {
+    assert.equal(DICTS.zh[`grade.${g}`], cn,
+      `grade.${g} 的中文显示名与引擎的 GRADE_CN 对不上`);
+  }
+  // 反方向：目录里不许有引擎不认的档位
+  for (const k of Object.keys(DICTS.zh)) {
+    if (!k.startsWith("grade.")) continue;
+    const g = k.slice("grade.".length);
+    assert.ok(g in GRADE_CN, `目录里有引擎不认的档位 ${g}`);
+  }
+});
+
 // ── 棘轮：迁完的文件不许再写裸中文 ─────────────────────────────────
 //
 // 名单只增不减。迁一个文件就往里加一个——回潮立刻红，而「还剩多少」
@@ -100,6 +158,7 @@ const MIGRATED = [
   "app/_shared/BoardView.tsx",
   "app/(zh)/board/page.tsx",
   "app/(en)/en/board/page.tsx",
+  "app/_shared/Primer.tsx",
 ];
 
 /**
@@ -110,6 +169,7 @@ const USES_CATALOGUE = [
   "app/_shared/HomeView.tsx",
   "app/_shared/ArenaLab.tsx",
   "app/_shared/BoardView.tsx",
+  "app/_shared/Primer.tsx",
 ];
 
 /** 去掉注释后，还剩的中文字面量与 JSX 文本 */

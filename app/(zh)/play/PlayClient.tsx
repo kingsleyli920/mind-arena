@@ -26,7 +26,7 @@ import { SessionPanel } from "./SessionPanel.tsx";
 import { MatchSetup, type ModelRow } from "./MatchSetup.tsx";
 import { advanceSeason, budgetMessage, modelSeats, newSession } from "@/lib/game/session.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
-import { Primer } from "./Primer.tsx";
+import { Primer } from "../../_shared/Primer.tsx";
 import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
 import { nextGrade } from "./grade-gap.ts";
 import { factionAbbr } from "./faction-abbr.ts";

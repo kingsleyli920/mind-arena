@@ -194,27 +194,24 @@ export const en: Dict = {
     + "(eliminations in brackets).",
 
   "board.history.h": "History",
-  "board.history.note": "Change a rule number and the two boards on either side become {b}. So history is not "
+  "board.history.note": "Change a rule number and the two boards on either side become **incomparable**. So history is not "
     + "one line but a series of eras: within an era (same fingerprint over the rule numbers) the boards connect; "
     + "across eras each must be read on its own.",
-  "board.history.note.b": "incomparable",
   "board.history.era": "Rule era",
   "board.history.now": "current (frozen)",
   "board.history.dead": "retired",
   "board.history.col.board": "Board",
   "board.history.col.date": "Date",
   "board.history.col.git": "Commit",
-  "board.history.dim": "Earlier boards are not here, for two reasons. One: their arms ran on {b} of the rules "
+  "board.history.dim": "Earlier boards are not here, for two reasons. One: their arms ran on **different eras** of the rules "
     + "(the rules were still moving), so such a board is incomparable with itself. Two: some directories hold "
     + "several snapshots of a single run — that is a working directory, not a board. The build tool refuses "
     + "both on the spot.",
-  "board.history.dim.b": "different eras",
 
   "board.caveats.h": "Before reading this board",
   "board.caveat.ci.b": "A ranking without intervals is not a ranking.",
   "board.caveat.ci": "The rows marked · under \u201cvs baseline ±95%\u201d have a confidence interval that covers "
-    + "zero, which means {b} — not \u201cslightly ahead\u201d.",
-  "board.caveat.ci.b2": "they cannot be told apart",
+    + "zero, which means **they cannot be told apart** — not \u201cslightly ahead\u201d.",
   "board.caveat.n.b": "48 games is the resolution floor.",
   "board.caveat.n": "A real gap of about 20 points measurably needs ≥48 games to clear the interval. Shorter runs "
     + "can exercise the pipeline and show the illegal rate, but their ranking is not a conclusion.",
@@ -232,4 +229,123 @@ export const en: Dict = {
   "board.foot.map": "See the map",
   "board.back": "Home",
   "board.zhonly": "The sandbox itself is Chinese-only for now: the rules digest, the candidate list and the battle report are assembled by the engine at runtime, and that layer has no English yet \u2014 part of it never will, since what the model reads must stay Chinese or old and new leaderboards stop being comparable.",
+
+  // ── rules primer (the “how to play” panel) ─────────────────────
+  // Every number comes from EngineParams as a {param} — **never copied into the
+  // copy itself**, or this page would be describing the rules of three months ago.
+  "primer.win.h": "How you win",
+  "primer.win.lead": "After sixteen seasons the grade is set by the **gain over your opening "
+    + "position**, and **holding what you had scores nothing** \u2014 nursing the family estate "
+    + "to the end is a Ding.",
+  "primer.win.jia": "2 more provinces, or 1 more province and 2 more province seats",
+  "primer.win.yi": "1 more province, or 1 more province seat",
+  "primer.win.bing": "More commanderies than at the start, at least one of them taken from another faction",
+  "primer.win.ding": "None of the above",
+  "primer.win.note": "\u201cControlling a province\u201d means holding more than half of its "
+    + "commanderies. Ten scattered commanderies are worth less than one completed province \u2014 "
+    + "the sidebar\u2019s province progress spells out how many you still need in each.",
+
+  "primer.ap.h": "How much one season buys",
+  "primer.ap.lead": "Orders are granted each season by territory; at most {carry} carry over, "
+    + "the rest expire. A single commandery takes at most {per} orders a season.",
+  "primer.ap.campaign": "Campaign / relief",
+  "primer.ap.normal": "Governance / muster / diplomacy / passage",
+  "primer.ap.scout": "Scout",
+  "primer.ap.scout.v": "**free**, {n} per season",
+  "primer.ap.appoint": "Appoint",
+  "primer.ap.appoint.v": "a first posting is **free** ({n} per season); moving someone already "
+    + "in post costs **{ap} orders**",
+  "primer.ap.unit": "**{n} orders**",
+
+  "primer.siege.h": "A siege turns on breaches, not on the troop ratio",
+  "primer.siege.lead": "The troop ratio does not decide it directly. The engine turns "
+    + "\u201cmy strength ÷ theirs\u201d into a number of **breaches** off a ladder, then compares it "
+    + "with the defender\u2019s **holds** \u2014 **the wall falls only when breaches strictly exceed holds**.",
+  "primer.siege.hold": "Holds = {base} + defence/{per} + a garrison-size band + the defending "
+    + "officer\u2019s bonus. So repairing walls is not busywork, and an empty city may not hold "
+    + "however many troops are inside.",
+  "primer.siege.gear": "Siege gear (ram, mound) adds breaches directly, halved at a gate; a "
+    + "commander with might ≥ {might} breaks the line in person and adds one too. Breaches are "
+    + "small integers \u2014 one more is worth about thirty percent more troops.",
+  "primer.siege.floor": "But none of this **tears open a gap that was never there**: below the "
+    + "ladder\u2019s lowest rung the breach count is flatly 0. Gear and formation only widen an "
+    + "advantage you already have.",
+  "primer.siege.rung": "from {ratio}: {n} breaches",
+
+  "primer.form.h": "Formation: one breach flips nearly half of all sieges",
+  "primer.form.lead": "Formation belongs to the **commandery**, not to the sortie: **an attack "
+    + "uses the formation of the commandery it set out from, a defence that of the commandery "
+    + "under attack**. The three cycle: **Fish-Scale beats Crane-Wing, Crane-Wing beats Square, "
+    + "Square beats Fish-Scale**. The favoured side gains {n} breaches, the other loses {n}.",
+  "primer.form.why": "Why breaches rather than raw strength: the test is a coarse integer ladder, "
+    + "and a ±20% multiplier often fails to move it at all. Measured, the margin of "
+    + "\u201cbreaches − holds\u201d lands on **0 or 1 in 43.1% of cases** \u2014 so ±1 breach flips "
+    + "nearly half of all sieges.",
+  "primer.form.fog": "An enemy\u2019s formation is as hidden as their walls: **you see it only once "
+    + "scouted**. Unseen, the forecast folds all three possibilities into its range and the verdict "
+    + "widens accordingly \u2014 which is precisely what scouting buys. **Changing formation** is its "
+    + "own order, and the engine offers it only when the enemy facing you has the formation that "
+    + "beats yours, naming which one would turn it round.",
+
+  "primer.fog.h": "What you see of the enemy carries error",
+  "primer.fog.own": "Your own",
+  "primer.fog.own.v": "true values",
+  "primer.fog.scouted": "Scouted",
+  "primer.fog.scouted.v": "a point estimate within ±{pct}%, good for {seasons} seasons",
+  "primer.fog.unseen": "Unscouted",
+  "primer.fog.unseen.v": "only which band it falls in ({tiers} bands, each {ratio}× apart)",
+  "primer.fog.ally": "Reported by an ally",
+  "primer.fog.ally.v": "what an ally passes on is also only scout-grade, not the true value",
+  "primer.fog.note": "Scouting is free. Unscouted, neither the walls (20\u2013100) nor the defender\u2019s "
+    + "bonus is known and the verdict is usually \u201cunknown\u201d \u2014 which is not the engine "
+    + "failing to work it out, it is you not having looked.",
+
+  "primer.officer.h": "Officers are not decoration",
+  "primer.officer.lead": "Officers are stationed in commanderies. A sortie takes that commandery\u2019s "
+    + "officers along, up to {cap}: the commander at full value, deputies at {weight}.",
+  "primer.officer.cap": "**Troops you can send = officers along × {per}.** A commandery with no "
+    + "notable officer can field only a token force however large its garrison \u2014 that is what an "
+    + "empty \u201cofficers\u201d column means in the commandery table.",
+  "primer.officer.captive": "When a city falls, **every officer inside is taken**, and is out of "
+    + "this game. Posting a great name to a key position is a bet with a price.",
+
+  "primer.suade.h": "After the wall falls: persuasion",
+  "primer.suade.captive": "When a city falls **every officer inside is taken** \u2014 not only the "
+    + "defending commander. That is what makes posting a great name a real bet.",
+  "primer.suade.rate": "The attacker then has {window} seasons to spend a **persuade** order and "
+    + "win them over; after that the chance is gone. The rate is {base} − mean of the five stats × "
+    + "{per} (+{home} more if you hold their home commandery): an ordinary officer sits around a "
+    + "third, while **a famous one averaging 90 is barely one in twenty**. Winning the siege is not "
+    + "a free Guan Yu.",
+  "primer.suade.fail": "If persuasion fails, **they refuse and leave for good**; the order is spent "
+    + "either way. Officers set the ceiling on a sortie (officers along × {per}), so recruiting and "
+    + "repairing walls compete for the same season\u2019s orders.",
+
+  "primer.supply.h": "Supply lines and alliances",
+  "primer.supply.lead": "At the end of each season connectivity is computed outward from your seat. "
+    + "A commandery that is cut off **produces nothing**, and an army in the field **disperses next "
+    + "season** \u2014 so cutting the supply line behind an army is a real tactic, and losing the seat "
+    + "starves everything at once.",
+  "primer.supply.ally": "An alliance buys intelligence and passage, **not immunity**. You may attack "
+    + "an ally, but that is betrayal: morale drops by {morale} across your whole territory and you "
+    + "may form no alliance for {ban} seasons. An alliance that simply expires returns to neutral "
+    + "and is not betrayal.",
+
+  "primer.sim.h": "Everything resolves at once",
+  "primer.sim.lead": "All orders settle simultaneously and the order they were given does not change "
+    + "the outcome. While you march on a city someone else may besiege it the same season \u2014 and "
+    + "then it is a field battle, not a siege. The candidate list forecasts what can be forecast, but "
+    + "nobody can predict a collision within the same season, and that cuts both ways.",
+  // Grade names. 甲乙丙丁 are the Heavenly Stems used as ordinal marks \u2014 they are
+  // literally the Chinese A/B/C/D, so that is what they become here. The three grades
+  // above A are words, not marks (\u8d85 \u201csurpassing\u201d, \u9738 \u201chegemon\u201d,
+  // \u738b \u201cking\u201d), so they are translated rather than lettered: a reader needs to
+  // see that the ladder keeps going up past A.
+  "grade.ding": "D",
+  "grade.bing": "C",
+  "grade.yi": "B",
+  "grade.jia": "A",
+  "grade.chao": "Ascendant",
+  "grade.ba": "Hegemon",
+  "grade.wang": "King",
 };

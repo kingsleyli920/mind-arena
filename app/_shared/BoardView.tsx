@@ -3,9 +3,9 @@ import history from "@/public/game/history.json";
 import pack from "@/lib/game/content/pack-194.json";
 import { ruleFingerprint } from "@/lib/game/content/fingerprint";
 import { boardStale, versionsSince, changeLogOf } from "@/lib/arena/board-stale";
-import { GRADE_CN } from "@/lib/game/engine/victory";
 import type { Grade } from "@/lib/game/engine/types";
 import { makeT, withLocale, type Locale, type T } from "@/lib/i18n";
+import { rich } from "@/lib/i18n/rich";
 import "./board.css";
 
 /*
@@ -17,18 +17,6 @@ import "./board.css";
 // 标成 Grade[] 而不是 string[]：这样档位名写错了是编译期报错，不是页面上一个空格
 const ORDER: Grade[] = ["chao", "jia", "yi", "bing", "ding"];
 
-/**
- * 一句话中间要加粗一截时用它：文案里留一个 `{b}` 洞，强调的那段单独一条 key。
- *
- * 为什么不把 `<b>` 写进文案里：那样目录里就混进了 HTML，译者得懂标签，
- * 而且标签一旦进了字符串，哪天要换成别的元素就得改两种语言的文案。
- * 中英的强调位置不同（中文「前后两份榜就**不可比**」，英文强调落在句末），
- * 所以洞的位置由各自的文案自己定。
- */
-function part(text: string, bold: string) {
-  const [before, after = ""] = text.split("{b}");
-  return <>{before}<b>{bold}</b>{after}</>;
-}
 
 type Diff = { mu: number; ci: number; sig: boolean; n: number } | null;
 
@@ -172,7 +160,7 @@ export function BoardView({ locale }: { locale: Locale }) {
                 <td className="dist">
                   {ORDER.filter((g) => (r.grades as Record<string, number>)[g]).map((g) => (
                     <span key={g} className={`g g-${g}`}>
-                      {GRADE_CN[g]}{(r.grades as Record<string, number>)[g]}
+                      {t(`grade.${g}`)}{(r.grades as Record<string, number>)[g]}
                     </span>
                   ))}
                 </td>
@@ -259,7 +247,7 @@ export function BoardView({ locale }: { locale: Locale }) {
       <section className="history">
         <h2>{t("board.history.h")}</h2>
         <p className="note">
-          {part(t("board.history.note"), t("board.history.note.b"))}
+          {rich(t("board.history.note"))}
         </p>
         {history.eras.map((era) => (
           <div key={era.fingerprint} className={era.fingerprint === history.current ? "rule-era now" : "rule-era"}>
@@ -294,7 +282,7 @@ export function BoardView({ locale }: { locale: Locale }) {
           </div>
         ))}
         <p className="note dim">
-          {part(t("board.history.dim"), t("board.history.dim.b"))}
+          {rich(t("board.history.dim"))}
         </p>
       </section>
 
@@ -304,7 +292,7 @@ export function BoardView({ locale }: { locale: Locale }) {
         <h2>{t("board.caveats.h")}</h2>
         <ul>
           <li><b>{t("board.caveat.ci.b")}</b>
-            {part(t("board.caveat.ci"), t("board.caveat.ci.b2"))}</li>
+            {rich(t("board.caveat.ci"))}</li>
           <li><b>{t("board.caveat.n.b")}</b>{t("board.caveat.n")}</li>
           <li><b>{t("board.caveat.illegal.b")}</b>{t("board.caveat.illegal")}</li>
           <li><b>{t("board.caveat.ver.b")}</b>{t("board.caveat.ver")}</li>
