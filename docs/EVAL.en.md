@@ -2023,6 +2023,39 @@ from the **best-ever grade**, and the console had only that one column. The tabl
 this document have always carried two, "best-ever / final-standing grade"; the console
 was printing one column short, and it has been added.
 
+### The baseline: 48 games, free, and it proves the two scenarios are not on the same ruler
+
+A model's score only means anything against a reference point, and the lower bound point
+1 of this document gives is 48 games. Filling that in:
+
+| Scenario · profile | Mean score | Eliminated | Mean score by seat |
+|---|---:|---:|---|
+| Jian'an 5 · balanced | 200.0 | 0/48 | Sun Ce 312　Liu Bei 262　Yuan Shao 162　Zhang Lu 162　Liu Zhang 162　**Cao Cao 138** |
+| Jian'an 5 · purpose | 208.3 | 0/48 | Sun Ce 312　Liu Bei 262　Cao Cao 250　Yuan Shao 212　Liu Zhang 200　**Zhang Lu 12** |
+| Xingping 1 · balanced | 158.3 | 1/48 | Liu Biao 300　Yuan Shao 250　Cao Cao 125　Yuan Shu 125　Liu Zhang 100　Lü Bu 50 |
+
+Three things:
+
+**1. The same agent is 42 points apart across the two scenarios (200.0 against 158.3).**
+Grades are assigned on the increment relative to the opening, and the Jian'an 5 seats
+have more room to grow. **The scores from the two scenarios are not on the same ruler** —
+250 points on Jian'an 5 and 250 points on Xingping 1 (兴平元年) are not the same thing.
+Boards must therefore be kept separate by scenario, and that is now gated
+(`build-leaderboard.mjs` refuses to produce a board when the arms disagree on scenario).
+
+**2. Cao Cao is the hardest seat in Jian'an 5** (138 on balanced, the lowest of the six;
+he collapsed in six of his eight games, and his territory is still shrinking).
+Historically he was the side under pressure, and for evaluation purposes "the
+protagonist's seat is the hard one" is exactly what you want.
+
+**3. Swap the profile and one seat can move by more than tenfold.** Zhang Lu scores 162
+on balanced and **12** on purpose; Cao Cao goes the other way, 138 → 250. This is
+precisely what profile rotation exists to expose — **a ranking without rotation measures
+the pairing of profile and opening, not the strength of the agent.**
+
+The raw data is in [reports/scenario-200-2026-10-16/](reports/scenario-200-2026-10-16/)
+(Chinese).
+
 ### The reasoning budget blew up the first time
 
 The earliest smoke run (with no `--reasoning` set) produced this in its very first
@@ -2034,4 +2067,4 @@ down to 5–16 seconds. It is recorded here because **a cheap-tier model's reaso
 budget has to be tuned, and leaving it untuned burns wall clock and money together** —
 and the failure classifier records it as a model failure, which it is not.
 
-<!-- translated-from: EVAL.md@726520bce38a -->
+<!-- translated-from: EVAL.md@cf1b0336b8d6 -->
