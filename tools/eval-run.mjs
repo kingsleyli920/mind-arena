@@ -215,6 +215,16 @@ if (RESUME) {
     + `本次只跑缺的 ${GAMES - prior.results.length} 局\n`);
 }
 let spent = 0;
+/**
+ * 花费上限，超了就地停跑。`--max-usd=2`，不传则不设限。
+ *
+ * 立这道闸是因为一次 20 倍的超支：tools/model-survey.mjs 按「一局出参 8k tok」
+ * 估价，给 deepseek-v4.1-flash 报的是 48 局 $0.84；实跑六局**实扣 $2.038**，
+ * 因为它每次调用烧掉约 1.4 万推理 token，一局出参 24 万——是估价假设的三十倍。
+ * 估价公式先天看不见推理用量，而它正是用来决定「这张榜花得起花不起」的。
+ * 事前估不准，那就事中拦住。
+ */
+const MAX_USD = Number(arg("max-usd", "0")) || 0;
 let halted = null;
 
 async function playGame(gi) {
@@ -249,6 +259,12 @@ async function playGame(gi) {
         // 实扣逐次累加，供预算闸门判断。取不到就不加——宁可闸门失灵报得少，
         // 也不要拿一个估算值去冒充实扣
         if (typeof record.usage?.cost === "number") spent += record.usage.cost;
+        if (MAX_USD && spent > MAX_USD) {
+          console.error(`\n✗ 花费已达 $${spent.toFixed(4)}，超过 --max-usd=${MAX_USD}，就地停跑。`);
+          console.error(`  已跑 ${records.length} 席·季。事前估价看不见推理用量，`
+            + "这道闸拦的就是那个差额——不是模型的问题，也不是结果不可用，是没跑完。");
+          process.exit(4);
+        }
         mine = {
           turn: s.turn, seat: f, obsTokens: record.obsTokens,
           candidates: record.candidates,

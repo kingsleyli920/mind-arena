@@ -35,7 +35,15 @@ const MAX = Number(arg("max", "2.5"));
 const ONE = arg("id", "");
 
 // 一局的实测口径：入约 96k tok、出约 8k tok（含推理）；
-// 提供方自报的实扣约为价目表的 2 倍，故乘 2 留余量。与 eval-suite 同一套系数
+// 提供方自报的实扣约为价目表的 2 倍，故乘 2 留余量。与 eval-suite 同一套系数。
+//
+// **这一列对推理吃得凶的模型会低估一个数量级，而它看不出来。**
+// 实测：deepseek/deepseek-v4.1-flash 这里报 48 局 $0.84，而六局实扣 $2.038
+// ——折合 48 局约 $16，差二十倍。原因是它每次调用烧约 1.4 万推理 token，
+// 一局出参 24 万，是上面那个 8k 假设的三十倍。推理用量既不在价目表里，
+// 也不在端点统计里，事前无从得知。
+// 所以：**这一列只能当下限读**，真要开榜先用 `--max-usd` 设一道事中的闸
+//（见 tools/eval-run.mjs），或者先跑两局看实扣再外推。
 const PER_GAME_IN = 96_000, PER_GAME_OUT = 8_000, MARKUP = 2, GAMES = 48;
 const cost48 = (p) => (PER_GAME_IN * +p.prompt + PER_GAME_OUT * +p.completion) * MARKUP * GAMES;
 
