@@ -169,6 +169,9 @@ const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"
 const out = {
   packVersion: versions.join("/"),
   packFingerprint: fps[0] ?? null,
+  // 哪个剧本。页面原先把「兴平元年 · 一九四」写死在标题旁，有了第二个剧本
+  // 之后那就成了一句可能为假的话——而读者无从分辨
+  scenario: eras.length === 1 ? eras[0] : null,
   // 版本号不一致却仍出榜时，理由跟着数据走，页面上必须显示
   versionSkewNote: versions.length > 1 ? skew : null,
   frozen: pack._frozen ?? null,

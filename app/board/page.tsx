@@ -25,12 +25,18 @@ function Delta({ d }: { d: Diff }) {
 }
 
 export default function BoardPage() {
+  // 旧榜没有 scenario（是加第二个剧本那天才盖进去的），退回原值。
+  // 类型从 JSON 推出来，所以这里显式读一次
+  const scenarioName = (board as { scenario?: string }).scenario ?? "兴平元年 · 群雄割据";
   const models = board.rows.filter((r) => r.kind === "model");
   const seats = Object.keys(board.rows[0]?.bySeat ?? {});
   return (
     <main className="board-page">
       <header className="board-head">
-        <span className="era">兴平元年 · 一九四</span>
+        {/* 剧本名从榜数据里读。原先写死「兴平元年 · 一九四」，
+            有了第二个剧本之后那就成了一句可能为假的话，而读者无从分辨。
+            旧榜没有这一项（是加剧本那天才盖进去的），退回原值 */}
+        <span className="era">{scenarioName}</span>
         <h1>汉末沙盘 · 排行榜</h1>
         {/*
          * 榜是在某一版规则下跑出来的，而规则还在动。两者一旦分家，
