@@ -103,6 +103,7 @@ const BUCKET: Record<FailureKind, FailureBucket> = {
   infra: "infra",
   retryable: "infra",
   starved: "budget",
+  config: "harness",     // 模型 id 不存在——配置错，与模型能力无关
   degradable: "model",   // 四档都降完仍不被接受，只能算它答不上来
   fatal: "harness",      // 说不清的一律先算我们自己的
 };

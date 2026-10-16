@@ -307,6 +307,15 @@ async function playGame(gi) {
       console.error("  这与模型能力无关。充值后重跑，本次结果不可用。");
       process.exit(3);
     }
+    // 模型 id 不存在，同样就地停跑：每一季都会以同样的方式失败，继续跑只是
+    // 把同一个配置错重复 96 次，然后出一份「均分 0.0」的报告。实测撞过——
+    // `deepseek/deepseek-v4-flash-latest` 不是有效 id，六局跑完才看出来
+    if (mine?.failureKind === "harness" && /not a valid model|no endpoints found|model not found|unknown model/i.test(mine.failure ?? "")) {
+      console.error(`\n✗ 模型 id 不存在，第 ${gi + 1} 局第 ${s.turn + 1} 季停跑。`);
+      console.error(`  ${mine.failure}`);
+      console.error("  这是配置错，不是模型答不上来。`npm run models` 可查当前可用的 id。");
+      process.exit(3);
+    }
     if (mine) {
       turns.push(mine);
       // 逐季心跳。此前进度只在整局跑完时打一次，而一局是 16 次调用——
