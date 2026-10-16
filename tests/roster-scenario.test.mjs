@@ -93,3 +93,30 @@ test("剧本×纪年：开局年份取自剧本，不是写死的 194", async ()
       `${f}：观测里的纪年是 ${o.clock.year}，模型会据此判断谁该在场`);
   }
 });
+
+// ── 地图标注也要跟着剧本 ────────────────────────────────────────────
+//
+// /game 那一页的底图两个剧本共用，而叠在上面的势力归属不共用。原先整页写死
+// 兴平元年——加了建安五年之后，页头说「两剧本共用此图」而右栏仍只列 194 的
+// 三十一家。标注数据现在每个剧本一份，这条闸钉住它们与剧本对得上。
+test("剧本×地图标注：每个剧本的标注文件都在，且势力数对得上", () => {
+  const fsx = fs;
+  for (const f of fsx.readdirSync("lib/game/data")) {
+    const m = /^scenario-(\d+)\.json$/.exec(f);
+    if (!m) continue;
+    const year = m[1];
+    const path = `public/game/data/map-labels${year === "194" ? "" : `-${year}`}.json`;
+    assert.ok(fsx.existsSync(path),
+      `没有 ${path} —— 跑 node tools/build-map-labels.mjs ${year}`);
+    const labels = JSON.parse(fsx.readFileSync(path, "utf8"));
+    const sc = JSON.parse(fsx.readFileSync(`lib/game/data/${f}`, "utf8"));
+    assert.equal(labels.scenario, year, `${path} 标的剧本是 ${labels.scenario}`);
+    assert.equal(labels.era, sc.meta.label, `${path} 的 era 与剧本的 label 不一致`);
+    assert.equal(labels.factions.length, sc.factions.length,
+      `${path} 有 ${labels.factions.length} 家而剧本有 ${sc.factions.length} 家`);
+    // 底图坐标系必须与瓦片清单一致，否则标注整体偏移且不会报错
+    const mf = JSON.parse(fsx.readFileSync("public/game/map/tiles/manifest.json", "utf8"));
+    assert.equal(labels.baseWidth, mf.baseWidth, `${path} 的底图宽与瓦片清单对不上`);
+    assert.equal(labels.baseHeight, mf.baseHeight, `${path} 的底图高与瓦片清单对不上`);
+  }
+});

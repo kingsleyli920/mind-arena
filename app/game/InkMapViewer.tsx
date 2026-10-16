@@ -30,6 +30,8 @@ type Faction = { id: string; name: string; color?: string; seat?: string; situat
 type LabelData = {
   geo: { west: number; east: number; south: number; north: number };
   baseWidth: number; baseHeight: number;
+  /** 剧本名，由 tools/build-map-labels.mjs 从剧本的 meta.label 带出来 */
+  era?: string | null;
   factions: Faction[];
   zhou: Array<{ name: string; lon: number; lat: number }>;
   labels: Label[];
@@ -52,6 +54,18 @@ const KIND_LABEL: Record<string, string> = {
   port: "港口", depot: "仓城", battlefield: "古战场",
 };
 
+/**
+ * 这一页画的是地图，而势力归属那一层是**某个剧本的**。地图两个剧本共用，
+ * 叠在上面的色块与右栏的势力表不共用——原先整页写死兴平元年，加了建安五年
+ * 之后，页头说「两剧本共用此图」而右栏仍只列 194 的三十一家，自相矛盾。
+ * 与 /play 同一个口径：?scenario= 决定读哪一份标注，默认兴平元年。
+ */
+const SCENARIO = (() => {
+  if (typeof window === "undefined") return "194";
+  const v = new URLSearchParams(window.location.search).get("scenario");
+  return v && /^\d{3,4}$/.test(v) ? v : "194";
+})();
+
 export function InkMapViewer() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState("正在载入沙盘…");
@@ -59,6 +73,8 @@ export function InkMapViewer() {
   const [scaleLabel, setScaleLabel] = useState("");
   const [shown, setShown] = useState("");
   const [factions, setFactions] = useState<Array<Faction & { count: number }>>([]);
+  // 旧的标注文件没有 era（是加第二个剧本那天才带上的），退回原值
+  const [era, setEra] = useState("兴平元年");
   const [picked, setPicked] = useState<string | null>(null);
   // Pixi 循环里读的是 ref，避免每次选中都重建整个应用
   const pickedRef = useRef<string | null>(null);
@@ -72,7 +88,8 @@ export function InkMapViewer() {
       const PIXI = await import("pixi.js");
       const [manifest, data] = await Promise.all([
         fetch(`${TILES}/manifest.json`).then((r) => r.json() as Promise<Manifest>),
-        fetch("/game/data/map-labels.json").then((r) => r.json() as Promise<LabelData>),
+        fetch(`/game/data/map-labels${SCENARIO === "194" ? "" : `-${SCENARIO}`}.json`)
+          .then((r) => r.json() as Promise<LabelData>),
       ]);
       if (disposed) return;
       const host = hostRef.current;
@@ -200,6 +217,7 @@ export function InkMapViewer() {
         for (const l of data.labels) {
           if (l.kind === "commandery" && l.factionId) cnt.set(l.factionId, (cnt.get(l.factionId) ?? 0) + 1);
         }
+        setEra(data.era ?? "兴平元年");
         setFactions(data.factions
           .map((f) => ({ ...f, count: cnt.get(f.id) ?? 0 }))
           .sort((a, b) => b.count - a.count));
@@ -425,7 +443,7 @@ export function InkMapViewer() {
           </p>
           <dl>
             {hover.factionName ? (
-              <div><dt>兴平元年</dt><dd>{hover.factionName}
+              <div><dt>{era}</dt><dd>{hover.factionName}
                 <span className="ctrl">
                   {hover.control === "firm" ? "实控" : hover.control === "contested" ? "争夺中" : "名义"}
                 </span></dd></div>
@@ -442,7 +460,7 @@ export function InkMapViewer() {
       <div className="ink-map-hint">拖动平移 · 滚轮缩放 · 放大显示更多关津</div>
       <aside className="faction-panel">
         <header>
-          兴平元年 · {factions.length} 势力
+          {era} · {factions.length} 势力
           {picked ? <button type="button" onClick={() => { setPicked(null); pickedRef.current = null; relayoutRef.current(); }}>取消</button> : null}
         </header>
         <ul>

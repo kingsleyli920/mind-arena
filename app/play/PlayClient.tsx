@@ -2188,7 +2188,12 @@ export function PlayClient() {
   // 一局十六季，只报一个档位等于什么都没留下
   const BIG = new Set(["siege-win", "siege-lift", "siege-abort", "officer-captured",
     "besieged", "capital-lost", "field-win", "field-fail", "relief", "retire", "eliminated"]);
-  const when = (t: number) => `${Math.floor(t / 4) + 194} · ${SEASON_CN[(t % 4) + 1]}`;
+  // 年表的纪年**从剧本取**。此前写死 +194，于是建安五年的局打完之后，
+  // 年表从「194 · 春」数起——而顶栏、战报、武将生卒全是 200 年。
+  // 这一处最晚才会被发现：它只在终局那一屏出现
+  const baseYear = (engine.data as { scenario?: { meta?: { year?: number } } })
+    .scenario?.meta?.year ?? 194;
+  const when = (t: number) => `${Math.floor(t / 4) + baseYear} · ${SEASON_CN[(t % 4) + 1]}`;
   // 连续同文合并。治所失守之后「全境政令不通」会逐季重复，
   // 一个第 9 季覆灭的局面里这一句能占掉年表的一半——那不是年表，是回声
   const chronicle: Array<{ when: string; text: string; from: number; to: number; n: number }> = [];

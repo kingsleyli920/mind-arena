@@ -623,7 +623,6 @@ const readJSON = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, "utf8"
 const commanderies = readJSON("lib/game/data/commanderies.json") ?? [];
 const scenario = readJSON("lib/game/data/scenario-194.json");
 const hydro = readJSON("lib/game/data/hydrology.json");
-const nodes = readJSON("lib/game/data/strategic-nodes.json");
 
 // ── 势力疆域：按郡治做最近邻划分，只染陆地，且限定影响半径 ────────────
 if (scenario && process.env.FACTIONS !== "0") {
@@ -825,49 +824,16 @@ if (hydro && process.env.RIVERS !== "0") {
 await sharp(rgb, { raw: { width: W, height: H, channels: 3 } })
   .png({ compressionLevel: 9 }).toFile(OUT);
 
+// 标注数据（郡国、据点、州名、某剧本的势力归属）拆到 tools/build-map-labels.mjs 了。
+// 它与底图无关，却原先嵌在这里——于是「换个剧本重算一遍势力归属」这件本该
+// 一秒钟的事，代价是重烤整张图（283MB 的 DEM，几分钟）。
+// 这里仍顺手生成 194 那一份，省得改完底图忘了重算；别的剧本自己跑那个工具。
 if (process.env.LABELS !== "0") {
-  const labels = [];
-  for (const c of commanderies) {
-    const own = scenario?.ownership?.[c.name];
-    const pop = c.population ?? 0;
-    labels.push({
-      id: c.name, kind: "commandery", name: c.name.replace(/[郡国]$/, ""), fullName: c.name,
-      lon: c.longitude, lat: c.latitude, zhou: c.zhou, seat: c.seat,
-      modernReference: c.modernReference, counties: c.counties, population: c.population,
-      // rank 决定在哪一级缩放开始显示：0 最先出现
-      rank: pop > 1_500_000 ? 0 : pop > 800_000 ? 1 : pop > 300_000 ? 2 : 3,
-      factionId: own?.factionId ?? null, factionName: own?.factionName ?? null,
-      control: own?.control ?? null, basis: own?.basis ?? null,
-    });
-  }
-  for (const n of nodes?.nodes ?? []) {
-    labels.push({
-      id: n.id, kind: n.kind, name: n.name, fullName: n.name,
-      lon: n.longitude, lat: n.latitude,
-      modernReference: n.modernReference, note: n.historicalNote,
-      nearestCommandery: n.nearestCommandery, certainty: n.certainty,
-      // 关隘比渡口重要，先显示
-      rank: n.kind === "gate" ? 2 : n.kind === "pass" ? 3 : n.kind === "depot" ? 3 : 4,
-    });
-  }
-  const zhouPts = {};
-  for (const c of commanderies) (zhouPts[c.zhou] ??= []).push([c.longitude, c.latitude]);
-  const zhou = Object.entries(zhouPts).map(([name, pts]) => ({
-    name,
-    lon: pts.reduce((a, p) => a + p[0], 0) / pts.length,
-    lat: pts.reduce((a, p) => a + p[1], 0) / pts.length,
-  }));
-
-  const out = {
-    geo: { west: W_DEG, east: E_DEG, south: S_DEG, north: N_DEG },
-    baseWidth: W, baseHeight: H,
-    factions: (scenario?.factions ?? []).map((f) => ({ id: f.id, name: f.name, color: f.color, seat: f.seat, situation: f.situation })),
-    zhou, labels,
-  };
+  const { buildLabels } = await import("./build-map-labels.mjs");
+  const out = buildLabels("194");
   fs.writeFileSync("public/game/data/map-labels.json", JSON.stringify(out));
-  const byRank = {};
-  for (const l of labels) byRank[l.rank] = (byRank[l.rank] ?? 0) + 1;
-  console.log(`标注数据 ${labels.length} 条（分级 ${Object.entries(byRank).map(([k, v]) => `${k}:${v}`).join(" ")}）+ ${zhou.length} 州 → public/game/data/map-labels.json`);
+  console.log(`标注数据 ${out.labels.length} 条 + ${out.zhou.length} 州 → public/game/data/map-labels.json`);
+  console.log("  别的剧本：node tools/build-map-labels.mjs 200");
 }
 console.log(`→ ${OUT}`);
 
