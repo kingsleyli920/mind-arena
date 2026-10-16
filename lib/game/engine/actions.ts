@@ -7,6 +7,7 @@
 import { recruitable, retinueAt, stationedAt, troopCap, isFiller, governorOf,
   type OfficerRef, type Roster }
   from "./officers.ts";
+import { APT, hasApt } from "./aptitude.ts";
 import { observedGarrison, observedFormation, tierOf } from "./intel.ts";
 import { forecastCampaign, forecastField, forecastReinforce, projectSiege, projectCampaign }
   from "./forecast.ts";
@@ -1260,8 +1261,8 @@ export function listActions(
           const front = (g.adj.get(c.id) ?? []).some((e) => s.commanderies[e.to]?.owner !== f);
           // 临敌郡看统率武力，后方郡看政治魅力——同一个人在两种郡上价值不同
           const fit = (o: OfficerRef) => front
-            ? o.leadership * 2 + o.might + (o.aptitudes.includes("守城") ? 30 : 0)
-            : o.politics * 2 + o.charisma + (o.aptitudes.includes("治民") ? 30 : 0);
+            ? o.leadership * 2 + o.might + (hasApt(o, APT.defend) ? 30 : 0)
+            : o.politics * 2 + o.charisma + (hasApt(o, APT.govern) ? 30 : 0);
           // 名将越少越该补人：兵力上限直接由驻将数定，零名将的前线郡
           // 纵有十万戍兵也只出得动一支偏师
           const have = stationedAt(s, roster, c.id).length;

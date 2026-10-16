@@ -22,6 +22,8 @@
 //   魅力 → 该郡民心
 //   适性 → 地形与攻守的额外系数
 import { roll } from "./rng.ts";
+import { APT, APTITUDE_CN, TERRAIN_APTITUDE, hasApt, terrainAptitudeBonus }
+  from "./aptitude.ts";
 import type { EngineParams } from "./params.ts";
 import type { CommanderyId, FactionId, GameState, OfficerId } from "./types.ts";
 import { cmp } from "./cmp.ts";
@@ -240,21 +242,17 @@ export const NO_OFFICER: OfficerEffect = {
 };
 const none = (role: string): OfficerEffect => ({ ...NO_OFFICER, note: `无${role}` });
 
-/** 适性与地形的对应。攻城/守城适性不看地形，单列 */
-const TERRAIN_APTITUDE: Record<string, string> = {
-  mountain: "山地", hill: "山地", river: "水战",
-};
 
 export function attackEffect(o: OfficerRef | null, P: EngineParams, terrain: string): OfficerEffect {
   if (!o) return none("主将");
   const parts: string[] = [];
   let mul = 1 + (o.leadership - P.officerBase) / P.leadershipAttackDivisor;
   parts.push(`统率${o.leadership}`);
-  const apt = TERRAIN_APTITUDE[terrain];
-  if (apt && o.aptitudes.includes(apt)) { mul += P.aptitudeTerrainBonus; parts.push(`${apt}适性`); }
+  const t = terrainAptitudeBonus(o, terrain, P);
+  if (t.note) { mul += t.mul; parts.push(t.note); }
   let breach = 0;
   if (o.might >= P.mightBreachThreshold) { breach += P.mightBreach; parts.push(`武力${o.might}摧锋`); }
-  if (o.aptitudes.includes("攻城")) { breach += P.siegeAptitudeBreach; parts.push("攻城适性"); }
+  if (hasApt(o, APT.siege)) { breach += P.siegeAptitudeBreach; parts.push(`${APTITUDE_CN[APT.siege]}适性`); }
   return { ...NO_OFFICER, attackMul: mul, breachBonus: breach, note: `${o.name}（${parts.join("、")}）` };
 }
 
@@ -262,19 +260,19 @@ export function defendEffect(o: OfficerRef | null, P: EngineParams): OfficerEffe
   if (!o) return none("守将");
   const parts = [`统率${o.leadership}`];
   let hold = Math.floor(Math.max(0, o.leadership - P.officerBase) / P.leadershipDefenseStep);
-  if (o.aptitudes.includes("守城")) { hold += P.holdAptitudeBonus; parts.push("守城适性"); }
+  if (hasApt(o, APT.defend)) { hold += P.holdAptitudeBonus; parts.push(`${APTITUDE_CN[APT.defend]}适性`); }
   return { ...NO_OFFICER, holdBonus: hold, note: `${o.name}（${parts.join("、")}）` };
 }
 
 /** 出征时的排位分。主将取最高，其余为副将 */
 const attackScore = (o: OfficerRef, terrain: string) =>
   o.leadership + o.might / 2
-  + (TERRAIN_APTITUDE[terrain] && o.aptitudes.includes(TERRAIN_APTITUDE[terrain]) ? 20 : 0)
-  + (o.aptitudes.includes("攻城") ? 10 : 0);
+  + (TERRAIN_APTITUDE[terrain] && hasApt(o, TERRAIN_APTITUDE[terrain]!) ? 20 : 0)
+  + (hasApt(o, APT.siege) ? 10 : 0);
 
 /** 守城时的排位分 */
 const defendScore = (o: OfficerRef) =>
-  o.leadership + (o.aptitudes.includes("守城") ? 20 : 0);
+  o.leadership + (hasApt(o, APT.defend) ? 20 : 0);
 
 /**
  * 一支出征部队的合并效果：主将全额，副将各按 deputyWeight 折算后累加。
@@ -338,7 +336,7 @@ export function troopCap(officers: readonly OfficerRef[], P: EngineParams): numb
 export function governEffect(o: OfficerRef | null, P: EngineParams): OfficerEffect {
   if (!o) return none("太守");
   let mul = 1 + (o.politics - P.officerBase) / P.politicsYieldDivisor;
-  if (o.aptitudes.includes("治民")) mul += P.civilAptitudeBonus;
+  if (hasApt(o, APT.govern)) mul += P.civilAptitudeBonus;
   const morale = o.charisma >= P.charismaMoraleThreshold ? 1 : 0;
   return { ...NO_OFFICER, yieldMul: mul, moraleGain: morale,
            note: `${o.name}（政治${o.politics} 魅力${o.charisma}）` };

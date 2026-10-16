@@ -36,7 +36,7 @@ import { loadParams, marchSeasons, provCapOf, type EngineParams }
   from "@/lib/game/engine/params.ts";
 import { createGame } from "@/lib/game/engine/setup.ts";
 import { supplyReach } from "@/lib/game/engine/resolve.ts";
-import { buildGeography, briefFor, standingOf, GRADE_CN, GRADE_RANK, GRADE_CUTS, ABS_CUTS,
+import { buildGeography, briefFor, standingOf, GRADE_CN, GRADE_RANK, GRADE_CUTS, ABS_CUTS, UNOWNED_CN,
          type Geography }
   from "@/lib/game/engine/victory.ts";
 import type { Action, Candidate, GameState, Grade } from "@/lib/game/engine/types.ts";
@@ -2420,7 +2420,7 @@ export function PlayClient() {
           {game.commanderies[engine.P.courtSeat]?.owner === seat
             ? <>{"\u3000"}<i className="titles">挟天子</i></>
             : <>{"\u3000"}<i className="titles dim">朝廷在 {
-                engine.nameOf.get(game.commanderies[engine.P.courtSeat]?.owner ?? "") ?? "无主"
+                engine.nameOf.get(game.commanderies[engine.P.courtSeat]?.owner ?? "") ?? UNOWNED_CN
               }</i></>}</span>
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
           aria-expanded={showPrimer}>规则</button>
@@ -3094,7 +3094,7 @@ export function PlayClient() {
             <div className="tip">
               <b>{focus}</b>
               <span>{game.commanderies[focus].owner
-                ? engine.nameOf.get(game.commanderies[focus].owner!) : "无主"}</span>
+                ? engine.nameOf.get(game.commanderies[focus].owner!) : UNOWNED_CN}</span>
               {/* 悬停详情同样受迷雾约束。直接显示 garrison 真值，
                   等于把鼠标当成开天眼——刺探就白做了 */}
               <span>戍兵 {observedGarrison(game, seat, focus, engine.P).text}</span>

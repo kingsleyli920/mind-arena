@@ -186,6 +186,14 @@ export function gradeOf(st: Standing, start: StartStanding): Grade {
 
 export const GRADE_RANK: Record<Grade, number> =
   { ding: 0, bing: 1, yi: 2, jia: 3, chao: 4, ba: 5, wang: 6 };
+/**
+ * 「没有主人」的显示名。
+ *
+ * 单给一个常量，是因为这个词此前同时在当**逻辑值**用：`owner ?? "无主"` 之后
+ * 再 `=== "无主"` 判等。那是 docs/I18N-PLAN.md 阶段 0 点名的「既是逻辑又是显示」
+ * 那一类——判等那一侧要的是哨兵（现在是 null），显示那一侧要的是这两个字。
+ */
+export const UNOWNED_CN = "无主";
 /** 档位的中文名。jia/yi/bing/ding 是固定的音写，不是可调数值，故不入内容包 */
 export const GRADE_CN: Record<Grade, string> =
   { jia: "甲", yi: "乙", bing: "丙", ding: "丁", chao: "超", ba: "霸", wang: "王" };
@@ -298,12 +306,20 @@ export function briefFor(
     if (!adj && mine === 0 && vacant === 0) continue;
     const need = Math.floor(members.length / 2) + 1 - mine;
     const seat = geo.zhouSeat.get(z);
-    const seatWho = seat ? s.commanderies[seat]?.owner ?? "无主" : "?";
+    // 哨兵用 null，不用「无主」这两个字。
+    //
+    // 原先是 `owner ?? "无主"`，下一行再拿 `seatWho === "无主"` 判——
+    // 同一个中文串既当逻辑值又当显示名，是 docs/I18N-PLAN.md 阶段 0 点名的那一类：
+    // 显示那一侧一旦要说别的语言，判等就跟着断，而**不会报错**，只会少一个分支。
+    const seatWho: FactionId | null | undefined =
+      seat ? s.commanderies[seat]?.owner ?? null : undefined;
     rows.push(
-      `  ${z}：共 ${members.length} 郡，我 ${mine}，无主 ${vacant}`
+      `  ${z}：共 ${members.length} 郡，我 ${mine}，${UNOWNED_CN} ${vacant}`
       + `${others.size ? `，他方 ${[...others].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${who(k)} ${v}`).join("、")}` : ""}`
       + `｜${need <= 0 ? "已控制" : `再取 ${need} 郡即控制`}`
-      + `｜州治 ${seat}（${seatWho === f ? "在我手" : seatWho === "无主" ? "无主" : who(seatWho)}）`,
+      + `｜州治 ${seat}（${seatWho === f ? "在我手"
+        : seatWho === null ? UNOWNED_CN
+        : seatWho === undefined ? "?" : who(seatWho)}）`,
     );
   }
   if (rows.length) lines.push("【各州】", ...rows);
