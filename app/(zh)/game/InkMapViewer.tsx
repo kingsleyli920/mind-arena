@@ -11,6 +11,7 @@
 import type { TerritoryGrid } from "@/lib/game/territory.ts";
 import { useEffect, useRef, useState } from "react";
 import type { Container, Graphics, Sprite, Text } from "pixi.js";
+import { KIND_CN } from "@/lib/game/engine/actions.ts";
 
 type Level = { z: number; width: number; height: number; cols: number; rows: number };
 type Manifest = {
@@ -49,10 +50,14 @@ function rankBudget(scale: number, fit: number): number {
   return 4;
 }
 
-const KIND_LABEL: Record<string, string> = {
-  commandery: "郡国", gate: "关隘", pass: "道", ford: "渡口",
-  port: "港口", depot: "仓城", battlefield: "古战场",
-};
+/**
+ * 据点名从引擎的 KIND_CN 来，这里只补一个它没有的 `commandery`。
+ *
+ * 原先这里自己写了一份，而且**抄歪了三个值**：地图上管谷道叫「道」、港叫「港口」、
+ * 仓叫「仓城」，而候选表、战报、以及模型读到的候选标签里是「谷道/港/仓」。
+ * 同一个东西，产品里两个名字，两边都跑得好好的——对局页还有第三个（「粮仓」）。
+ */
+const KIND_LABEL: Record<string, string> = { commandery: "郡国", ...KIND_CN };
 
 /**
  * 这一页画的是地图，而势力归属那一层是**某个剧本的**。地图两个剧本共用，

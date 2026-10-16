@@ -14,7 +14,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { BUILD_CN, RESOURCE_CN, GEAR_CN, POSTURE_CN, BUILD_NEEDS } from "../lib/game/engine/actions.ts";
+import { BUILD_CN, RESOURCE_CN, GEAR_CN, POSTURE_CN, BUILD_NEEDS, KIND_CN, POLICY_CN }
+  from "../lib/game/engine/actions.ts";
 import { GRADE_CN } from "../lib/game/engine/victory.ts";
 import { FORMATION_CN, unitName } from "../lib/game/engine/combat.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
@@ -48,16 +49,22 @@ test("标签表：界面不许再出现 *_CN2 这类副本", () => {
 });
 
 test("标签表：界面不许自己写一份已有正本的表", () => {
-  // 按**内容**比，不按名字比：有人换个名字抄一遍，上一条闸就哑了
-  const owned = { BUILD_CN, RESOURCE_CN, GEAR_CN, GRADE_CN, FORMATION_CN };
+  // 按**内容**比，不按名字比。
+  //
+  // 第一版还留了个名字过滤（只查 `*_CN`），当场漏掉一个：InkMapViewer 的
+  // `KIND_LABEL` 抄的是 KIND_CN，而且抄歪了三个值——地图上管谷道叫「道」、
+  // 港叫「港口」、仓叫「仓城」，候选表与战报里却是「谷道/港/仓」。
+  // 同一个东西，产品里两个名字，两边都跑得好好的。
+  // 所以现在**不看变量叫什么**，只看它的值像不像哪张正本。
+  const owned = { BUILD_CN, RESOURCE_CN, GEAR_CN, GRADE_CN, FORMATION_CN, KIND_CN, POLICY_CN };
   const hit = [];
   for (const { f, src } of UI) {
-    for (const [name, table] of Object.entries(owned)) {
-      const vals = Object.values(table);
-      // 一份表里至少有三个值同时出现在同一个对象字面量里，就当是抄的
-      for (const m of src.matchAll(/(?:const|let)\s+([A-Za-z_]+)[^=]*=\s*\{([^}]*)\}/g)) {
-        if (m[1].endsWith("_CN") === false && !/_CN\d?$/.test(m[1])) continue;
-        const inside = m[2];
+    for (const m of src.matchAll(/(?:const|let)\s+([A-Za-z_]+)[^=]*=\s*\{([^}]*)\}/g)) {
+      const inside = m[2];
+      for (const [name, table] of Object.entries(owned)) {
+        const vals = Object.values(table);
+        // 三个值撞上就算抄——两个可能是巧合（「港」「仓」这种常用字），
+        // 三个不会是
         const n = vals.filter((v) => inside.includes(`"${v}"`)).length;
         if (n >= 3) hit.push(`${f}  ${m[1]} 重复了 ${name} 的 ${n} 个值`);
       }

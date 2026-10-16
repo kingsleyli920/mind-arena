@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fitLabel, textWidth, type Box } from "./label-fit.ts";
 import { idRe } from "./id-regex.ts";
 import { buildGraph, listActions, POLICY_CN, POSTURE_CN, BUILD_CN, RESOURCE_CN, GEAR_CN,
-  type Graph } from "@/lib/game/engine/actions.ts";
+  KIND_CN, type Graph } from "@/lib/game/engine/actions.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "@/lib/game/engine/intel.ts";
@@ -474,9 +474,12 @@ function variantOf(id: string, kind: string): number {
   return h % n;
 }
 
-const NODE_CN: Record<string, string> = {
-  gate: "关隘", pass: "谷道", ford: "渡口", port: "港口", depot: "粮仓", battlefield: "古战场",
-};
+/*
+ * 据点名**不在这里**。原先这里写着一份，port 作「港口」、depot 作「粮仓」，
+ * 而引擎的 KIND_CN 是「港」「仓」，地图页又是第三套（「港口」「仓城」）。
+ * 同一个据点三个名字，而候选表与战报用的是引擎那套——于是玩家在图例上读到
+ * 「粮仓」，在候选里读到「仓」。现在一律从 KIND_CN 来。
+ */
 
 /**
  * 关津港仓的图元。走过两版都被指出「粗糙」：
@@ -3080,7 +3083,7 @@ export function PlayClient() {
           {nodeTip && !focus && !armyTip && (
             <div className="tip">
               <b>{nodeTip.name}</b>
-              <span>{NODE_CN[nodeTip.kind] ?? nodeTip.kind}
+              <span>{KIND_CN[nodeTip.kind] ?? nodeTip.kind}
                 {nodeTip.at ? `\u3000近${nodeTip.at}` : ""}</span>
               {/* 数值取自内容包的 terrain 表，别在这里另写一份——两份必然漂移 */}
               <span>{nodeTip.kind === "port" || nodeTip.kind === "ford"
