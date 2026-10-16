@@ -286,3 +286,31 @@ test("通行图的形状被钉住", () => {
     "通行图指纹（from/to/地形/代价）。改动了就更新这个值，"
     + "并且**必须先跑一遍 npm run selfplay**——四道闸与 ρ 都得过");
 });
+
+// ── 每个剧本的规则摘要里，朝廷只能有一个 ────────────────────────────
+//
+// 天子在哪个郡是**剧本事实**，由 tools/build-runtime-bundle.mjs 在打包时
+// 按剧本改写进包。实测漏过一处：改写只覆盖了授官令的 preconditions[0]，
+// 而 summary 里那句「须持朝廷（据京兆尹）」原样留着——于是建安五年的摘要
+// 同时告诉模型「朝廷所在=颍川郡」和「须持朝廷（据京兆尹）」，两个郡。
+//
+// 模型读的是摘要。教它一套、引擎跑另一套，不会报错，只会让它一直去打错的郡。
+test("剧本×摘要：授官令提到的朝廷所在只能是本剧本那一个", async () => {
+  const names = new Set(JSON.parse(fs.readFileSync("lib/game/data/commanderies.json", "utf8"))
+    .map((c) => c.name));
+  for (const f of fs.readdirSync("public/game")) {
+    const m = /^runtime-(\d+)\.json$/.exec(f);
+    if (!m) continue;
+    const b = JSON.parse(fs.readFileSync(`public/game/${f}`, "utf8"));
+    const seat = b.pack.constants["名器"]["朝廷所在"];
+    assert.ok(names.has(seat), `${f}：朝廷所在「${seat}」不是郡国`);
+    assert.equal(seat, b.scenario.meta.courtSeat,
+      `${f}：包里的朝廷所在与剧本申报的不一致`);
+    const invest = b.pack.actions.find((a) => a.id === "invest");
+    const text = [invest.summary, ...invest.preconditions, ...invest.effects].join("　");
+    const mentioned = [...names].filter((n) => text.includes(n));
+    assert.deepEqual(mentioned, [seat],
+      `${f} 的授官令里提到了 ${mentioned.join("、")}，而本剧本的朝廷在 ${seat}`
+      + " —— 模型会同时读到两个郡");
+  }
+});

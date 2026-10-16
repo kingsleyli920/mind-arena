@@ -97,10 +97,23 @@ const bundle = {
       throw new Error(`courtSeat「${seat}」不是 commanderies.json 里的郡国`);
     }
     pack.scenario = scenario.meta.label;
+    const was = pack.constants["名器"]["朝廷所在"];
     pack.constants["名器"]["朝廷所在"] = seat;
     const invest = pack.actions.find((a) => a.id === "invest");
     if (!invest) throw new Error("规则包里找不到授官令（invest）");
-    invest.preconditions[0] = `须据${seat}（朝廷所在）`;
+    // **授官令的每一处都要改，不能只改前置。** 此前只改了 preconditions[0]，
+    // 而 summary 里那句「须持朝廷（据京兆尹）」原样留着——于是建安五年的
+    // 规则摘要同时告诉模型「朝廷所在=颍川郡」和「须持朝廷（据京兆尹）」，
+    // 两个郡。这正是本仓库「四方对账」要拦的那类事，而它藏在一个字符串里。
+    const swap = (t) => (typeof t === "string" ? t.split(was).join(seat) : t);
+    invest.summary = swap(invest.summary);
+    invest.preconditions = invest.preconditions.map(swap);
+    invest.effects = invest.effects.map(swap);
+    // 改完再查一遍：摘要会进模型提示词，漏一处就是教模型一套、引擎跑另一套
+    const leftover = JSON.stringify({ s: invest.summary, p: invest.preconditions, e: invest.effects });
+    if (seat !== was && leftover.includes(was)) {
+      throw new Error(`授官令里还留着「${was}」而本剧本的朝廷在${seat}：${leftover}`);
+    }
     return pack;
   })(),
 };
