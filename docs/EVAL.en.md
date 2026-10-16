@@ -1937,4 +1937,101 @@ sixteen-season eval (ρ, the four gates and the per-seat figures are all bit-for
 and it is wired up data-driven (`联军.可复发`; turn it off and the old behaviour returns).
 **But it does not solve faction imbalance, and the criterion originally set was not met.**
 
-<!-- translated-from: EVAL.md@935feef55621 -->
+## 37. The first model run on the Jian'an 5 scenario: $0.2887, and the five holes it hit
+
+After adding the second scenario (Jian'an 5 · the eve of Guandu (建安五年·官渡前夕), the
+first month of 200 CE, twenty factions), the evaluation pipeline was walked end to end
+again. **Validate with the free bots before you run it** — that rule earned its keep
+once more today: five of the six holes were turned up by the bot runs, and only one of
+them needed money to become visible.
+
+### What the free run turned up
+
+| Hole | Symptom | The actual cause |
+|---|---|---|
+| eval-run default seats | Line 336, `Cannot read properties of undefined (reading 'bestGrade')` | The default seats are the six factions from 194, and Yuan Shu (袁术) and Lü Bu (吕布) are no longer around in Jian'an 5. The error site is three hundred lines from the cause |
+| Officer allegiance | Sun Ce's (孙策) faction opens with **not a single officer** | The field name `affiliation194` carries the year in it. Measured: 77 people with no lord, and Sun Ce himself still filed under Yuan Shu, dead a year by then |
+| Era dating | The record header printed 「第 1/16 季　194 年·春」 (season 1/16, 194, spring) on a game that was Jian'an 5 | `createGame`'s `year` defaults to a hard-coded 194, and **the observation carries clock.year** — the model uses it to judge who ought to be on the board |
+| Rules digest | The digest said both 「朝廷所在=颍川郡」 (court located in Yingchuan commandery) and 「须持朝廷（据京兆尹）」 (must hold the court, which sits at Jingzhao) | The packing step rewrites the commandery holding the Emperor per scenario, but it only covered the `preconditions` of the office-granting order and missed the summary |
+| Draw pool | Ma Teng (马腾) and Lu Kang (陆康) **were never once drawn** | melee and match-log each keep their own copy of the pool, and both misspell the ids as `maten` / `luking`; the filter drops them silently, on a "does this faction exist" check |
+
+A gate was added for every one of them; see `tests/roster-scenario.test.mjs` and
+`tests/pack-drift.test.mjs`.
+**What the five have in common**: none of them raises an error, none of them shows
+itself until the day you add a second scenario, and the symptom sits hundreds of lines
+away from the cause. With only one scenario they do not exist.
+
+### The run that cost money
+
+`z-ai/glm-5.3-flash`, six games (one per seat, so the quota comes out even), sixteen
+seasons, `--reasoning=low`, **$0.2887 actually charged**, 96 calls and 0 failures.
+
+| Seat | Best-ever/final grade | Score | End/start commanderies | Illegal rate | Observation peak |
+|---|---|---:|---|---:|---:|
+| Cao Cao | Grade B / Grade D | 200 | 31/24 | 8% | 9605 |
+| Yuan Shao | Grade C / — | 100 | 21/19 | 1% | 9204 |
+| Liu Bei | Grade A / Grade D | 300 | 1/3 | 11% | 8080 |
+| Sun Ce | Ascendant / — | 400 | 14/5 | 6% | 8543 |
+| Zhang Lu | Grade B / — | 200 | 5/1 | 4% | 6977 |
+| Liu Zhang | Grade A / Grade D | 300 | 17/9 | 9% | 8982 |
+
+Mean score 250.0, illegal rate 6.3%, order-budget utilisation 88%. On the same batch of
+seeds (`eval-0..5`) the `bot:balanced` baseline is **200.0**.
+
+**This is not "the model beat the bot".** Six games, where the lower bound this repo
+sets is 48 games; three of the seats collapsed (final grade D), and grade and score are
+counted from the best-ever grade. A 50-point gap in the mean amounts to three of the six
+games each coming out one grade higher — at n=6 that falls inside the noise.
+There is exactly one thing that can be said:
+**the pipeline runs end to end, the observation peak of 9605 tok is inside the
+ten-thousand gate, and not one call failed.**
+
+### Elsewhere: the bots never once used the Guandu stronghold play
+
+Jian'an 5 brings in the entire geography of the Guandu campaign — Guandu (官渡) and
+Yanjin (延津) are fords, Wuchao (乌巢) and the Liyang Granary (黎阳仓) are grain depots —
+and the engine already has `seize`: you can take a stronghold without taking its
+commandery (garrison 1600, troop ratio needed 1.5). Cao Cao has seven seize candidates
+in the very first season, and among them **taking the Liyang Granary from Dong
+Commandery (东郡)** is precisely Yuan Shao's forward grain depot; Yuan Shao's mirror of
+it is taking Yanjin from Wei Commandery (魏郡), where Wen Chou (文丑) fell.
+
+Measured over 12 games × 16 seasons, the bots seized a stronghold 29 times, and the
+targets were Chaisang (柴桑), Hepu (合浦) and Panyu (番禺) — **all southern ports, and
+not once anywhere on the Guandu line** (the same in the 194 scenario: Hengjiang Ford
+(横江津), Niuzhu (牛渚), Ruxu Mouth (濡须口)).
+
+The mechanic is not broken. In the bot's scoring a stronghold is worth only the road it
+commands, and the two on the Guandu line sit astride the one line where two large armies
+are already facing each other head-on, so that weight cannot outweigh attacking a
+commandery outright. **This is exactly the kind of place where a model could open a gap
+on the bot**: whether it goes for the opponent's grain depot, which the baseline never
+does. It is recorded here so that next time there is a model run, we know what to look
+for.
+
+(Wuchao and Guandu itself are hosted in Chenliu Commandery (陈留郡), and Chenliu is
+surrounded on every side by Cao Cao, so nobody can take them at the start — the front
+has to move up first. That follows necessarily from "the commandery is the atom"; it is
+not a gap.)
+
+### Incidentally: the console table had been lying all along
+
+Liu Bei's row used to print 「甲 300 分　终郡 1/3」 (Grade A, 300 points, ended holding
+1 of 3 commanderies) — top grade while losing ground, which leaves a reader no option
+but to suspect the scoring is broken. The cause is that grade and score are counted
+from the **best-ever grade**, and the console had only that one column. The tables in
+this document have always carried two, "best-ever / final-standing grade"; the console
+was printing one column short, and it has been added.
+
+### The reasoning budget blew up the first time
+
+The earliest smoke run (with no `--reasoning` set) produced this in its very first
+season:
+`✗ 无内容（finish=length，出参预算 32000，推理占 32000）`
+(no content; finish=length, output budget 32000, of which reasoning took 32000) —
+three attempts, 241 seconds spent. With `--reasoning=low` added, each decision came
+down to 5–16 seconds. It is recorded here because **a cheap-tier model's reasoning
+budget has to be tuned, and leaving it untuned burns wall clock and money together** —
+and the failure classifier records it as a model failure, which it is not.
+
+<!-- translated-from: EVAL.md@726520bce38a -->
