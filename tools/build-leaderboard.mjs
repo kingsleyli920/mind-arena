@@ -60,10 +60,21 @@ if (!runs.length) { console.error(`${dir} 里没有结果文件`); process.exit(
 // 那种情况只能靠 --skew 显式放行，且必须写明理由——理由会跟着数据进页面。
 const fps = [...new Set(runs.map(eraOf).filter(Boolean))];
 const versions = [...new Set(runs.map((r) => r.stamp?.packVersion ?? "?"))];
+// **剧本也要对齐。** 指纹只盖规则数值，而两个剧本共用同一套规则——
+// 兴平元年与建安五年的指纹逐位相同，于是一份榜可以把两个剧本的对局
+// 排进同一张表而无人察觉：曹操在 194 年开局一个郡、在建安五年开局
+// 二十四个郡，同一个席位名下是两件完全不同的事。
+// 这是「一份榜会以哪几种方式悄悄变成谎话」的第三种，加剧本那天才出现
+const eras = [...new Set(runs.map((r) => r.stamp?.packScenario).filter(Boolean))];
 const skewArg = process.argv.find((a) => a.startsWith("--skew="));
 const skew = skewArg ? skewArg.slice(7) : null;
 if (fps.length > 1) {
   console.error(`✗ 这些臂跑在不同的规则数值上（指纹 ${fps.join("、")}）。不可并排读。`);
+  process.exit(3);
+}
+if (eras.length > 1) {
+  console.error(`✗ 这些臂跑在不同的剧本上（${eras.join("、")}）。不可并排读——`
+    + "同一个席位在两个剧本里是两件事（曹操 194 年开局一郡，建安五年开局二十四郡）。");
   process.exit(3);
 }
 // 指纹一致时，版本号不一致是无关紧要的——那只说明标签滞后。
@@ -188,9 +199,12 @@ const boardId = idArg ? idArg.slice(5) : path.basename(dir.replace(/\/$/, ""));
 const when = new Date(Math.max(...files.map((f) => fs.statSync(path.join(dir, f)).mtimeMs)))
   .toISOString().slice(0, 10);
 const hist = fs.existsSync(HIST) ? JSON.parse(fs.readFileSync(HIST, "utf8")) : { eras: [] };
-const eraKey = fps.length === 1 ? fps[0] : "mixed";
+// 代的键要把剧本带上：指纹相同而剧本不同的两份榜，仍然不是同一代
+const eraKey = (fps.length === 1 ? fps[0] : "mixed")
+  + (eras.length === 1 ? `@${eras[0]}` : "");
 const entry = {
   id: boardId, date: when, git: out.git, packVersion: out.packVersion,
+  scenario: eras.length === 1 ? eras[0] : null,
   // 各臂跑在不同规则上的榜要标出来，它内部就不可比，更不能与别人比
   mixed: fps.length > 1 ? fps : null,
   rows: rows.map((r) => ({ id: r.id, kind: r.kind, games: r.games, board: r.board, cont: r.cont })),
