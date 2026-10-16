@@ -3,7 +3,7 @@ import type { GameState } from "@/lib/game/engine/types.ts";
 import { StrategyPlanView } from "./StrategyPlanView";
 import { SeasonReviewView } from "./SeasonReviewView";
 import { DecisionReviewView } from "./DecisionReviewView";
-import { TYPE_CN } from "./panels.ts";
+import { makeT, type Locale } from "@/lib/i18n";
 
 /*
  * 动作名**不在这里**。这里原先自己写了一份，和 panels.ts 的 TYPE_CN 三处不一样：
@@ -11,16 +11,16 @@ import { TYPE_CN } from "./panels.ts";
  * build 作「建设」（那边是「兴建」）、seize 作「夺据点」（那边是「取据点」）。
  * 一比四，这一份是孤例——而两份表改一份另一份不会报错。
  */
-const dropReasons: Record<string, string> = { duplicate: "重复选择同一命令", "unknown-key": "未识别的候选命令",
-  "over-budget": "行动点不足", rejected: "命令未通过校验" };
+/* 丢弃原因与动作名都从文案目录取：`drop.<reason>` 与 `action.<type>` */
 
 export function SessionPanel({ game, session, onChange, names, seat, onView, busy,
-  autoPlay, onAutoPlay, onAdvance, error }: {
+  autoPlay, onAutoPlay, onAdvance, error, locale = "zh" }: {
   game: GameState; session: PlaySession; onChange: (s: PlaySession) => void;
   names: Map<string, string>; seat: string; onView: (id: string) => void;
   busy: boolean; autoPlay: boolean; onAutoPlay: (v: boolean) => void;
-  onAdvance: () => void; error: string | null;
+  onAdvance: () => void; error: string | null; locale?: Locale;
 }) {
+  const t = makeT(locale);
   const spectator = session.human === null;
   const budget = budgetMessage(game, session);
   const models = Object.entries(session.modelOf);
@@ -28,59 +28,70 @@ export function SessionPanel({ game, session, onChange, names, seat, onView, bus
   const knownCost = session.records.reduce((sum, r) => sum + (r.usage?.cost ?? 0), 0);
   const unknownCost = session.callsUsed - session.records.filter((r) => r.usage?.cost != null).length;
   return (
-    <section className="session-panel" aria-label="对局控制">
+    <section className="session-panel" aria-label={t("panel.aria")}>
       {spectator && <>
-        <label>观察势力
+        <label>{t("panel.watch.seat")}
           <select value={seat} disabled={busy} onChange={(e) => onView(e.target.value)}>
             {Object.values(game.factions).map((f) => <option key={f.id} value={f.id}>
-              {names.get(f.id) ?? f.id}{f.eliminated ? "（已覆灭）" : f.retired ? "（已退出）" : ""}
+              {names.get(f.id) ?? f.id}
+              {f.eliminated ? t("panel.seat.dead") : f.retired ? t("panel.seat.retired") : ""}
             </option>)}
           </select>
         </label>
         <div className="session-actions">
-          <button onClick={onAdvance} disabled={busy || autoPlay || game.finished || Boolean(budget)}>推进一季</button>
+          <button onClick={onAdvance} disabled={busy || autoPlay || game.finished || Boolean(budget)}>{t("panel.advance")}</button>
           <button onClick={() => onAutoPlay(!autoPlay)}
             disabled={game.finished || (!autoPlay && (busy || Boolean(budget)))}>
-            {autoPlay ? "暂停观战" : "自动观战"}
+            {t(autoPlay ? "panel.auto.off" : "panel.auto.on")}
           </button>
         </div>
-        <p role="status">{busy ? "本季正在结算；暂停会在本季完成后生效。" : autoPlay ? "自动推进中" : "已暂停"}</p>
+        <p role="status">
+          {t(busy ? "panel.status.busy" : autoPlay ? "panel.status.auto" : "panel.status.idle")}</p>
       </>}
-      <p>{models.length} 个模型席位 · 已用 {session.callsUsed}/{session.callLimit} 次决策</p>
-      {session.callsUsed > 0 && <p>已回报费用 ${knownCost.toFixed(4)}
-        {unknownCost > 0 && `；另有 ${unknownCost} 次费用未确认（含中断或失败），总额可能更高。`}</p>}
-      {session.records.some((r) => r.attempts > 1) && <p>发生过重试；超时尝试可能未回报费用，完整扣费以提供方账单为准。</p>}
+      <p>{t("panel.calls", { models: models.length,
+        used: session.callsUsed, limit: session.callLimit })}</p>
+      {session.callsUsed > 0 && <p>{t("panel.cost", { usd: knownCost.toFixed(4) })}
+        {unknownCost > 0 && t("panel.cost.unknown", { n: unknownCost })}</p>}
+      {session.records.some((r) => r.attempts > 1) && <p>{t("panel.retried")}</p>}
       {(error || budget) && <p className="warn-note" role="alert">{error ?? budget}</p>}
       {budget && !busy && !game.finished && <div className="session-actions">
         <button disabled={session.callLimit >= 4096}
-          onClick={() => onChange({ ...session, callLimit: Math.min(4096, session.callLimit + 16) })}>增加 16 次额度</button>
-        <button onClick={() => onChange({ ...session, modelOf: {} })}>改为全机器人继续</button>
+          onClick={() => onChange({ ...session, callLimit: Math.min(4096, session.callLimit + 16) })}>
+          {t("panel.quota.add")}</button>
+        <button onClick={() => onChange({ ...session, modelOf: {} })}>{t("panel.quota.bots")}</button>
       </div>}
       <details>
-        <summary>控制者与跨季方略</summary>
+        <summary>{t("panel.roster")}</summary>
         <ul className="session-roster">
           {Object.values(game.factions).map((f) => <li key={f.id}>
             <b>{names.get(f.id) ?? f.id}</b>
-            <span>{session.human === f.id ? "玩家" : session.modelOf[f.id] ?? "规则机器人"}</span>
+            <span>{session.human === f.id ? t("panel.role.human")
+              : session.modelOf[f.id] ?? t("panel.role.bot")}</span>
             {session.plans[f.id] && <StrategyPlanView plan={session.plans[f.id]} game={game} faction={f.id} />}
           </li>)}
         </ul>
       </details>
       {latest.length > 0 && <details open>
-        <summary>上季 AI 决策 · {latest.length} 席</summary>
+        <summary>{t("panel.last", { n: latest.length })}</summary>
         {latest.map((r) => <article className="decision-record" key={`${r.turn}-${r.seat}`}>
           <b>{names.get(r.seat) ?? r.seat}</b><small>{r.model}</small>
-          <p>{r.failure ?? r.reason ?? "未提供决策说明"}</p>
-          <p>采纳 {r.admission.admitted.length} 条，丢弃 {r.admission.dropped.length} 条
-            {r.backupsUsed?.length ? `，其中备选补入 ${r.backupsUsed.length} 条` : ""}</p>
-          <p>{r.attempts} 次请求 · {(r.elapsedMs / 1000).toFixed(1)} 秒 · 输出上限 {r.maxTokens}
-            {r.usage?.cost != null ? ` · 实扣 $${r.usage.cost.toFixed(6)}` : " · 费用未确认"}</p>
+          <p>{r.failure ?? r.reason ?? t("panel.no.reason")}</p>
+          <p>{t("panel.adopted", { ok: r.admission.admitted.length, drop: r.admission.dropped.length })}
+            {r.backupsUsed?.length ? t("panel.backups", { n: r.backupsUsed.length }) : ""}</p>
+          <p>{t("panel.calls.detail", { attempts: r.attempts,
+            secs: (r.elapsedMs / 1000).toFixed(1), max: r.maxTokens })}
+            {r.usage?.cost != null
+              ? t("panel.charged", { usd: r.usage.cost.toFixed(6) })
+              : t("panel.charge.unknown")}</p>
           {r.plan && <StrategyPlanView plan={r.plan} faction={r.seat} />}
           {r.review && <DecisionReviewView review={r.review} />}
           <SeasonReviewView game={game} faction={r.seat} />
           {!r.review && r.planWarning && <p className="warn-note">{r.planWarning}</p>}
           {!r.review && r.admission.dropped.length > 0 && <ul>{r.admission.dropped.map((d, i) =>
-            <li key={i}>{d.label ?? TYPE_CN[d.key.split(":")[0]] ?? "命令"}：{d.detail ?? dropReasons[d.reason] ?? "未通过校验"}</li>)}</ul>}
+            <li key={i}>
+              {d.label ?? t(`action.${d.key.split(":")[0]}`) ?? t("panel.order")}
+              {locale === "zh" ? "：" : ": "}
+              {d.detail ?? t(`drop.${d.reason}`) ?? t("panel.drop.fallback")}</li>)}</ul>}
         </article>)}
       </details>}
     </section>

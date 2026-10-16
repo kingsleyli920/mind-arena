@@ -12,7 +12,8 @@ import { retinueAt, stationedAt, isFiller, attackRetinue, suadeChance }
   from "../lib/game/engine/officers.ts";
 import { fieldOutcome, formationEdge, FORMATION_CN } from "../lib/game/engine/combat.ts";
 import { observe } from "../lib/game/engine/observe.ts";
-import { PANEL_ORDER, TYPE_CN } from "../app/(zh)/play/panels.ts";
+import { PANEL_ORDER } from "../app/(zh)/play/panels.ts";
+import { DICTS } from "../lib/i18n/index.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams, marchSeasons, provisionsCap, provCapOf, siegeEat, siegeHoldSeasons }
   from "../lib/game/engine/params.ts";
@@ -510,7 +511,12 @@ test("界面的候选分组两张表都要覆盖每一类动作", () => {
   const keys = new Set([...ids, "relief"]);
   assert.ok(keys.size >= 9, `只有 ${keys.size} 类动作，样本不足以判定覆盖`);
   for (const k of keys) {
-    assert.ok(TYPE_CN[k], `分组「${k}」没有中文名 —— 界面会直接显示这个内部 id`);
+    // 中文名现在在文案目录里（`action.<key>`），而且**两种语言都要有**——
+    // 只有中文的话，英文界面上会直接露出这个内部 id
+    for (const loc of ["zh", "en"]) {
+      assert.ok(DICTS[loc][`action.${k}`],
+        `分组「${k}」在 ${loc} 目录里没有 action.${k} —— 界面会直接显示这个内部 id`);
+    }
     assert.ok(PANEL_ORDER.includes(k), `分组「${k}」不在面板顺序里 —— 会被排到末尾`);
   }
 });

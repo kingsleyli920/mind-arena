@@ -15,8 +15,13 @@
 export const PANEL_ORDER = ["relief", "withdraw", "campaign", "seize", "muster", "transfer", "govern", "build",
                             "submit", "suade", "array", "relocate", "appoint", "scout", "ally", "invest", "passage", "retire"];
 
-export const TYPE_CN: Record<string, string> = {
-  campaign: "征伐", relief: "赴援", withdraw: "撤围", seize: "取据点", muster: "集结", transfer: "调兵",
-  govern: "内政", build: "兴建", submit: "劝降", suade: "招降", array: "改阵", relocate: "迁治", appoint: "调任", scout: "刺探", ally: "外交", invest: "授官",
-  passage: "借道", retire: "归隐",
-};
+/*
+ * 分组的中文名**不在这里**，在 lib/i18n 的 `action.<key>`。
+ *
+ * 原先这里有一张 TYPE_CN，而界面要说第二种语言时它就得再抄一份——
+ * 而这张表的值本来就要随语言变，它不是 id。留在这里的 PANEL_ORDER 才是 id：
+ * 顺序与语言无关。
+ *
+ * 「每一类动作都要有界面名」那条闸没有消失，只是挪了个位置：
+ * 从「TYPE_CN 里有没有」变成「两份目录里有没有 action.<key>」。
+ */

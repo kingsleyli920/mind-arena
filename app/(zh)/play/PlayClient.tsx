@@ -27,7 +27,20 @@ import { MatchSetup, type ModelRow } from "./MatchSetup.tsx";
 import { advanceSeason, budgetMessage, modelSeats, newSession } from "@/lib/game/session.ts";
 import { GRADE_SCORE } from "@/lib/arena/scoring.ts";
 import { Primer } from "../../_shared/Primer.tsx";
-import { PANEL_ORDER, TYPE_CN } from "./panels.ts";
+import { PANEL_ORDER } from "./panels.ts";
+import { makeT } from "@/lib/i18n";
+
+/**
+ * 这一页**暂时钉死中文**。
+ *
+ * 动作名已经进了文案目录（`action.<key>`），所以这里得有个取文案的函数；但对局页
+ * 本身还没迁（候选表、战报、图例还有三百多条），现在就给它接语言开关，得到的是
+ * docs/I18N-PLAN.md 第七节说的那种半成品——按钮英文、屏幕三分之二中文，
+ * 比纯中文更难用，因为读者会以为自己能读懂。
+ *
+ * 迁完之后这一行换成从路由取 locale。在那之前它只是「别再抄一份动作名表」。
+ */
+const t = makeT("zh");
 import { nextGrade } from "./grade-gap.ts";
 import { factionAbbr } from "./faction-abbr.ts";
 import { save as saveGame, load as loadGame, clear as clearSave, packStamp,
@@ -2440,7 +2453,7 @@ export function PlayClient() {
             还有 {freeLeft.length} 条<b className="inline">不耗令</b>的候选
             {/* 按**候选 key 的前缀**取中文名，不按动作类型——
                 relief 与 withdraw 不是动作类型，是引擎派生的键（见 panels.ts） */}
-            （{[...new Set(freeLeft.map((c) => TYPE_CN[c.key.split(":")[0]] ?? c.key.split(":")[0]))]
+            （{[...new Set(freeLeft.map((c) => t(`action.${c.key.split(":")[0]}`)))]
               .join("、")}）
             ——它们不占本季令数。
           </span>
@@ -3370,7 +3383,7 @@ export function PlayClient() {
                   .map(([cls, list]) => (
                   <details key={cls} open={cls === "relief"}>
                     <summary>
-                      {TYPE_CN[cls] ?? cls}
+                      {t(`action.${cls}`)}
                       <i>{cls === "campaign" && onlyWinnable
                         ? `${list.filter((c) => c.forecast?.verdict !== "不破").length}/${list.length}`
                         : list.length}</i>

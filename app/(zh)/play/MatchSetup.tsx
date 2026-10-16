@@ -1,22 +1,28 @@
 import type { PlaySession } from "@/lib/game/session.ts";
 import { VERIFIED_MODELS } from "@/lib/arena/verified-models.ts";
+import { makeT, type Locale } from "@/lib/i18n";
 
 export type ModelRow = { id: string; name: string; contextLength: number;
   promptPrice: string; completionPrice: string; structuredOutput: boolean };
 export const DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
 export type SetupSeat = { id: string; name: string; lands: number };
 
-export function MatchSetup({ session, onChange, seats, models, onLoadModels, error, onStart }: {
+export function MatchSetup({ session, onChange, seats, models, onLoadModels, error, onStart,
+  locale = "zh" }: {
   session: PlaySession; onChange: (session: PlaySession) => void;
   seats: SetupSeat[]; models: ModelRow[]; onLoadModels: () => void;
-  error: string | null; onStart: () => void;
+  error: string | null; onStart: () => void; locale?: Locale;
 }) {
+  const t = makeT(locale);
   const count = Object.keys(session.modelOf).length;
   const names = new Map<string, string>([
-    [DEFAULT_MODEL, "Nemotron Super（免费，响应可能较慢）"],
-    ...VERIFIED_MODELS.map((m): [string, string] => [m.id, `${m.label}（历史实测）`]),
-    ...models.map((m): [string, string] => [m.id,
-      `${m.name} · 入 $${(Number(m.promptPrice) * 1e6).toFixed(2)} / 出 $${(Number(m.completionPrice) * 1e6).toFixed(2)} 每百万 token`]),
+    [DEFAULT_MODEL, t("setup.model.free")],
+    ...VERIFIED_MODELS.map((m): [string, string] => [m.id, t("setup.model.verified", { label: m.label })]),
+    ...models.map((m): [string, string] => [m.id, t("setup.model.price", {
+      name: m.name,
+      in: (Number(m.promptPrice) * 1e6).toFixed(2),
+      out: (Number(m.completionPrice) * 1e6).toFixed(2),
+    })]),
   ]);
   for (const id of Object.values(session.modelOf)) if (!names.has(id)) names.set(id, id);
   function control(id: string, kind: string) {
@@ -27,63 +33,72 @@ export function MatchSetup({ session, onChange, seats, models, onLoadModels, err
       human: kind === "human" ? id : session.human === id ? null : session.human });
   }
   return (
-    <section className="match-setup" aria-label="对局配置">
-      <h2>谁来执掌天下</h2>
+    <section className="match-setup" aria-label={t("setup.aria")}>
+      <h2>{t("setup.h")}</h2>
       <div className="setup-options">
-        <label>参与方式
+        <label>{t("setup.join")}
           <select value={session.human ? "play" : "watch"} onChange={(e) => {
             const human = e.target.value === "watch" ? null : "caocao";
             const modelOf = { ...session.modelOf };
             if (human) delete modelOf[human];
             onChange({ ...session, human, modelOf });
           }}>
-            <option value="play">我控制一方</option>
-            <option value="watch">纯观战</option>
+            <option value="play">{t("setup.join.play")}</option>
+            <option value="watch">{t("setup.join.watch")}</option>
           </select>
         </label>
-        <label>本局模型决策上限
+        <label>{t("setup.limit")}
           <select value={session.callLimit} onChange={(e) => onChange({ ...session, callLimit: Number(e.target.value) })}>
-            {[4, 16, 32, 64, 128, 256].map((n) => <option key={n} value={n}>{n} 次</option>)}
+            {[4, 16, 32, 64, 128, 256].map((n) =>
+              <option key={n} value={n}>{t("setup.limit.unit", { n })}</option>)}
           </select>
         </label>
-        <label>每次输出上限
+        <label>{t("setup.maxtok")}
           <select value={session.maxTokens} onChange={(e) => onChange({ ...session, maxTokens: Number(e.target.value) })}>
-            {[4000, 8000, 16000].map((n) => <option key={n} value={n}>{n} token（含推理）</option>)}
+            {[4000, 8000, 16000].map((n) =>
+              <option key={n} value={n}>{t("setup.maxtok.unit", { n })}</option>)}
           </select>
         </label>
-        <label>推理档
+        <label>{t("setup.effort")}
           <select value={session.effort} onChange={(e) => onChange({ ...session, effort: e.target.value as PlaySession["effort"] })}>
-            <option value="low">低</option><option value="medium">中</option><option value="high">高</option>
+            <option value="low">{t("setup.effort.low")}</option>
+            <option value="medium">{t("setup.effort.medium")}</option>
+            <option value="high">{t("setup.effort.high")}</option>
           </select>
         </label>
       </div>
-      <p>默认机器人，不调用模型。可给每个势力单独选择 AI；“由我控制”只占一席。</p>
+      <p>{t("setup.note")}</p>
       <div className="controller-list">
         {seats.map((f) => (
           <div className="controller-row" key={f.id}>
-            <span><b>{f.name}</b><small>{f.lands} 郡</small></span>
-            <select aria-label={`${f.name}控制者`}
+            <span><b>{f.name}</b><small>{t("setup.lands", { n: f.lands })}</small></span>
+            <select aria-label={t("setup.ctrl.aria", { name: f.name })}
               value={session.human === f.id ? "human" : session.modelOf[f.id] ? "model" : "bot"}
               onChange={(e) => control(f.id, e.target.value)}>
-              <option value="bot">规则机器人</option>
-              <option value="human">由我控制</option>
-              <option value="model">AI 模型</option>
+              <option value="bot">{t("setup.ctrl.bot")}</option>
+              <option value="human">{t("setup.ctrl.human")}</option>
+              <option value="model">{t("setup.ctrl.model")}</option>
             </select>
-            {session.modelOf[f.id] && <select aria-label={`${f.name}模型`} value={session.modelOf[f.id]}
+            {session.modelOf[f.id] && <select aria-label={t("setup.model.aria", { name: f.name })}
+              value={session.modelOf[f.id]}
               onChange={(e) => onChange({ ...session, modelOf: { ...session.modelOf, [f.id]: e.target.value } })}>
               {[...names].map(([id, name]) => <option key={id} value={id}>{name}</option>)}
             </select>}
           </div>
         ))}
       </div>
-      {error && <p role="status">模型目录暂不可用：{error}。可用已列出的模型或机器人。</p>}
+      {error && <p role="status">{t("setup.models.fail", { err: error })}</p>}
       <div className="setup-launch">
-        <p>{session.human ? `你将执掌${seats.find((f) => f.id === session.human)?.name ?? session.human}` : "你将观战，可随时切换观察势力"}。
-          {count ? ` ${count} 个模型席位，每季最多 ${count} 次决策。达到 ${session.callLimit} 次上限前暂停。`
-            : " 全部对手使用机器人，模型费用为零。"}
-          {count > 0 && <small>每次决策最多发起 2 个请求；输出不会自动超过所选上限。次数限制不等于美元限额，失败请求也可能计费。</small>}
+        <p>{session.human
+          ? t("setup.will.play", {
+              name: seats.find((f) => f.id === session.human)?.name ?? session.human })
+          : t("setup.will.watch")}{locale === "zh" ? "。" : "."}
+          {count ? t("setup.seats", { n: count, limit: session.callLimit })
+            : t("setup.seats.none")}
+          {count > 0 && <small>{t("setup.seats.fine")}</small>}
         </p>
-        <button className="go" onClick={onStart}>{session.human ? "开始对局" : "开始观战"}</button>
+        <button className="go" onClick={onStart}>
+          {t(session.human ? "setup.go.play" : "setup.go.watch")}</button>
       </div>
     </section>
   );
