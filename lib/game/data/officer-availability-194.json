@@ -2,7 +2,7 @@
  "year": 194,
  "rule": "生年优先；无生年则以 affiliation194 为直证；再无则卒年距本年 >50 判为未成年；皆无则不登场",
  "caveat": "卒年规则会误伤长寿者——甘宁 194 年已在益州，因生卒年俱无而判为不登场。此为已知假阴性，逐条修正需补生年，见各条 basis。",
- "available": 458,
+ "available": 445,
  "officers": [
   {
    "id": "caocao",
@@ -44,13 +44,13 @@
    "id": "caozhang",
    "name": "曹彰",
    "available": false,
-   "basis": "affiliation194=caocao，然本传记「本年尚幼」，未及从事"
+   "basis": "affiliation194=caocao，然本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "caozhen",
    "name": "曹真",
-   "available": true,
-   "basis": "无生年；卒 231，距本年 37 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "caozhi",
@@ -110,7 +110,7 @@
    "id": "dingfeng",
    "name": "丁奉",
    "available": false,
-   "basis": "无生年；卒 271，距本年 77 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "dongxi",
@@ -122,7 +122,7 @@
    "id": "dongyun",
    "name": "董允",
    "available": false,
-   "basis": "无生年；卒 246，距本年 52 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "dongzhuo",
@@ -146,7 +146,7 @@
    "id": "feiyi",
    "name": "费祎",
    "available": false,
-   "basis": "无生年；卒 253，距本年 59 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "ganning",
@@ -182,7 +182,7 @@
    "id": "guohuai",
    "name": "郭淮",
    "available": false,
-   "basis": "无生年；卒 255，距本年 61 年＞50，证据不足"
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "guojia",
@@ -254,7 +254,7 @@
    "id": "jiangwan",
    "name": "蒋琬",
    "available": false,
-   "basis": "无生年；卒 246，距本年 52 年＞50，证据不足"
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "jiangwei",
@@ -506,7 +506,7 @@
    "id": "wangping",
    "name": "王平",
    "available": false,
-   "basis": "无生年；卒 248，距本年 54 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "wangyun",
@@ -770,7 +770,7 @@
    "id": "caoshuang",
    "name": "曹爽",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "chendao",
@@ -800,7 +800,7 @@
    "id": "chentai",
    "name": "陈泰",
    "available": false,
-   "basis": "无生年；卒 260，距本年 66 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "chunyuqiong",
@@ -877,8 +877,8 @@
   {
    "id": "gongsunyuan",
    "name": "公孙渊",
-   "available": true,
-   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "guanlu",
@@ -896,13 +896,13 @@
    "id": "guanping",
    "name": "关平",
    "available": false,
-   "basis": "affiliation194=liubei，然本传记「本年当尚幼」，未及从事"
+   "basis": "affiliation194=liubei，然本传记「本年当尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "guanqiujian",
    "name": "毌丘俭",
    "available": false,
-   "basis": "无生年；卒 255，距本年 61 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "guansuo",
@@ -1027,8 +1027,8 @@
   {
    "id": "liufeng",
    "name": "刘封",
-   "available": true,
-   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "liuqi",
@@ -1232,7 +1232,7 @@
    "id": "wenqin",
    "name": "文钦",
    "available": false,
-   "basis": "无生年；卒 257，距本年 63 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "wufuren",
@@ -1243,8 +1243,8 @@
   {
    "id": "xiahoushang",
    "name": "夏侯尚",
-   "available": true,
-   "basis": "无生年；卒 226，距本年 32 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "xiahouxuan",
@@ -1292,7 +1292,7 @@
    "id": "yuanshang",
    "name": "袁尚",
    "available": false,
-   "basis": "affiliation194=yuanshao，然本传记「本年尚幼」，未及从事"
+   "basis": "affiliation194=yuanshao，然本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "yuantan",
@@ -1364,7 +1364,7 @@
    "id": "zhangyi_by",
    "name": "张翼",
    "available": false,
-   "basis": "无生年；卒 264，距本年 70 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhengxuan",
@@ -1388,7 +1388,7 @@
    "id": "zhugedan",
    "name": "诸葛诞",
    "available": false,
-   "basis": "无生年；卒 258，距本年 64 年＞50，证据不足"
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "zhuhuan",
@@ -1550,13 +1550,13 @@
    "id": "fuqian",
    "name": "傅佥",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "furong",
    "name": "傅肜",
-   "available": true,
-   "basis": "无生年；卒 222，距本年 28 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "fushou",
@@ -1628,7 +1628,7 @@
    "id": "heyan",
    "name": "何晏",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "huangchengyan",
@@ -1664,7 +1664,7 @@
    "id": "huzhi",
    "name": "胡质",
    "available": false,
-   "basis": "无生年；卒 250，距本年 56 年＞50，证据不足"
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "jianshuo",
@@ -1784,7 +1784,7 @@
    "id": "mazhong_shu",
    "name": "马忠",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "mazhong_wu",
@@ -1868,7 +1868,7 @@
    "id": "shibao",
    "name": "石苞",
    "available": false,
-   "basis": "无生年；卒 273，距本年 79 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "shihuan",
@@ -1952,7 +1952,7 @@
    "id": "wangchang",
    "name": "王昶",
    "available": false,
-   "basis": "无生年；卒 259，距本年 65 年＞50，证据不足"
+   "basis": "无生年；本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "wangfu_shu",
@@ -2059,8 +2059,8 @@
   {
    "id": "xiangchong",
    "name": "向宠",
-   "available": true,
-   "basis": "无生年；卒 240，距本年 46 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "xianyufu",
@@ -2084,7 +2084,7 @@
    "id": "xizheng",
    "name": "郤正",
    "available": false,
-   "basis": "无生年；卒 278，距本年 84 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "xuezong",
@@ -2264,7 +2264,7 @@
    "id": "zhangni",
    "name": "张嶷",
    "available": false,
-   "basis": "无生年；卒 254，距本年 60 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhangshiping",
@@ -2780,7 +2780,7 @@
    "id": "liubao",
    "name": "刘豹",
    "available": false,
-   "basis": "affiliation194=xiongnu，然本传记「本年未生」，未及从事"
+   "basis": "affiliation194=xiongnu，然本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "liuchan_lz",
@@ -2876,7 +2876,7 @@
    "id": "lvyi",
    "name": "吕乂",
    "available": false,
-   "basis": "无生年；卒 251，距本年 57 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "matie",
@@ -3080,7 +3080,7 @@
    "id": "sunkuang",
    "name": "孙匡",
    "available": false,
-   "basis": "affiliation194=yuanshu，然本传记「本年尚幼」，未及从事"
+   "basis": "affiliation194=yuanshu，然本传记「本年尚幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "sunshao",
@@ -3428,7 +3428,7 @@
    "id": "zhoutai_wei",
    "name": "州泰",
    "available": false,
-   "basis": "无生年；卒 261，距本年 67 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhouxin",
@@ -3494,7 +3494,7 @@
    "id": "biguai",
    "name": "毕轨",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "bulianshi",
@@ -3524,7 +3524,7 @@
    "id": "caojie_xian",
    "name": "曹节",
    "available": false,
-   "basis": "无生年；卒 260，距本年 66 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "cenhun",
@@ -3572,7 +3572,7 @@
    "id": "dengyang",
    "name": "邓飏",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "dingfuren",
@@ -3584,19 +3584,19 @@
    "id": "dingmi",
    "name": "丁谧",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "dingyi_jingli",
    "name": "丁廙",
-   "available": true,
-   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "dingyi_zhengli",
    "name": "丁仪",
-   "available": true,
-   "basis": "无生年；卒 220，距本年 26 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "dongbai",
@@ -3679,8 +3679,8 @@
   {
    "id": "gonglu",
    "name": "龚禄",
-   "available": true,
-   "basis": "无生年；卒 225，距本年 31 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "gongzhi",
@@ -3710,7 +3710,7 @@
    "id": "guohuanghou_mingyuan",
    "name": "郭皇后",
    "available": false,
-   "basis": "无生年；卒 264，距本年 70 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "guonvwang",
@@ -3800,7 +3800,7 @@
    "id": "huangchong",
    "name": "黄崇",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "huangfuguiqi",
@@ -3836,7 +3836,7 @@
    "id": "hufen",
    "name": "胡奋",
    "available": false,
-   "basis": "无生年；卒 288，距本年 94 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "huiqu",
@@ -3848,19 +3848,19 @@
    "id": "huzun",
    "name": "胡遵",
    "available": false,
-   "basis": "无生年；卒 256，距本年 62 年＞50，证据不足"
+   "basis": "无生年；本传记「本年当未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "jiafan_liaodong",
    "name": "贾范",
-   "available": true,
-   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年当未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "jiangbin",
    "name": "蒋斌",
    "available": false,
-   "basis": "无生年；卒 264，距本年 70 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "jikang",
@@ -3913,8 +3913,8 @@
   {
    "id": "lifu",
    "name": "李福",
-   "available": true,
-   "basis": "无生年；卒 238，距本年 44 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "limeng_dz",
@@ -3932,13 +3932,13 @@
    "id": "linghuyu",
    "name": "令狐愚",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "liqiu",
    "name": "李球",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "liren_yz",
@@ -3950,7 +3950,7 @@
    "id": "lisheng",
    "name": "李胜",
    "available": false,
-   "basis": "无生年；卒 249，距本年 55 年＞50，证据不足"
+   "basis": "无生年；本传记「本年幼」，生年 >178，194 年未满 16"
   },
   {
    "id": "litong",
@@ -4082,7 +4082,7 @@
    "id": "lvju",
    "name": "吕据",
    "available": false,
-   "basis": "无生年；卒 256，距本年 62 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "majun",
@@ -4105,8 +4105,8 @@
   {
    "id": "maohuanghou",
    "name": "毛皇后",
-   "available": true,
-   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "maridi",
@@ -4172,7 +4172,7 @@
    "id": "puyangxing",
    "name": "濮阳兴",
    "available": false,
-   "basis": "无生年；卒 264，距本年 70 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "qinlang",
@@ -4226,7 +4226,7 @@
    "id": "shiji_zhuji",
    "name": "施绩",
    "available": false,
-   "basis": "无生年；卒 270，距本年 76 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "shizhi",
@@ -4298,7 +4298,7 @@
    "id": "sunluyu",
    "name": "孙鲁育",
    "available": false,
-   "basis": "无生年；卒 255，距本年 61 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "sunqing_heishan",
@@ -4340,7 +4340,7 @@
    "id": "tengyin",
    "name": "滕胤",
    "available": false,
-   "basis": "无生年；卒 256，距本年 62 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "tianchou",
@@ -4358,7 +4358,7 @@
    "id": "wangchen_jin",
    "name": "王沈",
    "available": false,
-   "basis": "无生年；卒 266，距本年 72 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "wangdang_heishan",
@@ -4586,13 +4586,13 @@
    "id": "xunxu",
    "name": "荀勖",
    "available": false,
-   "basis": "无生年；卒 289，距本年 95 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "xunyi",
    "name": "荀顗",
    "available": false,
-   "basis": "无生年；卒 274，距本年 80 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "yangang_gsz",
@@ -4610,7 +4610,7 @@
    "id": "yangxi",
    "name": "杨戏",
    "available": false,
-   "basis": "无生年；卒 261，距本年 67 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "yangxiu",
@@ -4717,8 +4717,8 @@
   {
    "id": "zhanghou_jingai",
    "name": "敬哀皇后",
-   "available": true,
-   "basis": "无生年；卒 237，距本年 43 年，本年可为成人"
+   "available": false,
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhangjin_jiaozhou",
@@ -4736,13 +4736,13 @@
    "id": "zhangti",
    "name": "张悌",
    "available": false,
-   "basis": "无生年；卒 280，距本年 86 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhangzun",
    "name": "张遵",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhaoe",
@@ -4754,7 +4754,7 @@
    "id": "zhaoguang",
    "name": "赵广",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhaoqu",
@@ -4790,7 +4790,7 @@
    "id": "zhengchong",
    "name": "郑冲",
    "available": false,
-   "basis": "无生年；卒 274，距本年 80 年＞50，证据不足"
+   "basis": "无生年；本传记「本年年少或未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhenshi",
@@ -4802,13 +4802,13 @@
    "id": "zhonglimu",
    "name": "钟离牧",
    "available": false,
-   "basis": "无生年；卒 272，距本年 78 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhongyu",
    "name": "钟毓",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhouchu",
@@ -4826,7 +4826,7 @@
    "id": "zhugeshang",
    "name": "诸葛尚",
    "available": false,
-   "basis": "无生年；卒 263，距本年 69 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   },
   {
    "id": "zhugezhan",
@@ -4850,7 +4850,7 @@
    "id": "zhuyi_wu",
    "name": "朱异",
    "available": false,
-   "basis": "无生年；卒 257，距本年 63 年＞50，证据不足"
+   "basis": "无生年；本传记「本年未生」，生年 >194，194 年未满 16"
   }
  ]
 }

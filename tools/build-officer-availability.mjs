@@ -30,9 +30,26 @@ const LIFESPAN_GAP = 50;
 /**
  * 「本年尚幼」这类话是编者在 historicalNote 里自己下的否决证据。
  * 用正则读散文是脆的，所以下面会把命中的人逐个打出来——
- * 名单变了看得见，比一个悄悄变化的计数强
+ * 名单变了看得见，比一个悄悄变化的计数强。
+ *
+ * **记成生年下界，不记成布尔。** 这些 note 里的「本年」指的是 194 年——
+ * 全量数据是按兴平元年那个切片写的。写成布尔，换个年份的剧本就读错了：
+ * 「194 年未生」到 211 年才可能成年，而「194 年尚幼」只说明他那年不满 16，
+ * 到 195 年就已经可能及冠。两者差了十六年，不能混为一条。
+ *
+ * 下界取法：
+ *   含「未生」（含「幼或未生」「尚幼或未生」「年少或未生」）→ 生年 > 194
+ *   只写「尚幼」「幼」「当尚幼」                              → 生年 > 194 − 16 = 178
+ * 于是可登场的最早年份是「下界 + 17」。194 年两者都拦得住，而拦住的理由
+ * 第一次是**说得出口的**，不是靠卒年差值那个阈值碰巧够不着。
  */
-const TOO_YOUNG = /本年(未生|尚幼|当尚幼|幼)/;
+const TOO_YOUNG = /本年[^。；]{0,8}?(未生|尚幼|当尚幼|幼)/;
+const ADULT_FROM = (note) => {
+  const m = TOO_YOUNG.exec(note ?? "");
+  if (!m) return null;
+  const bound = m[0].includes("未生") ? 194 : 194 - ADULT;
+  return { phrase: m[0], bound, from: bound + 1 + ADULT };
+};
 
 const officers = JSON.parse(fs.readFileSync("lib/game/data/officers.json", "utf8"));
 const out = [];
@@ -48,21 +65,31 @@ for (const o of officers) {
     basis = `生 ${b}${d ? `–卒 ${d}` : ""}，${YEAR} 年${ok ? `年 ${YEAR - b}` : b > YEAR - ADULT ? `未满 ${ADULT}` : "已卒"}`;
   } else if (aff) {
     const dead = d && d <= YEAR;
-    const young = TOO_YOUNG.test(o.historicalNote ?? "");
+    const y = ADULT_FROM(o.historicalNote);
+    const young = y !== null && YEAR < y.from;
     ok = !dead && !young;
     basis = dead ? `affiliation194=${aff}，然卒 ${d}，本年岁末已故`
-      : young ? `affiliation194=${aff}，然本传记「${(o.historicalNote ?? "").match(TOO_YOUNG)[0]}」，未及从事`
+      : young ? `affiliation194=${aff}，然本传记「${y.phrase}」，生年 >${y.bound}，${YEAR} 年未满 ${ADULT}`
       : `《officers.json》affiliation194=${aff}，本年任职于此，为在场直证`;
     if (young) youngList.push(o.name);
   } else if (d) {
     // 两侧都要判：只判上界会把张梁（卒 184）这类本年已故者放进名册
     const gone = d <= YEAR;
-    ok = !gone && d - YEAR <= LIFESPAN_GAP;
+    // **这一支此前不认否决证据。** 它原本只比卒年差值，于是曹真、公孙渊、
+    // 傅肜、向宠这些本传明写「本年尚幼」「本年未生」的人照常入 194 年名册——
+    // 实测 12 人。他们之所以没全进来，只是因为正始那一代卒于 249、
+    // 距 194 年 55 > 50 刚好够不着；切到 200 年差值变 49，整批就都放行了。
+    // 侥幸不是判据，这里和「有归属」那一支认同一份证据
+    const y = ADULT_FROM(o.historicalNote);
+    const young = y !== null && YEAR < y.from;
+    ok = !gone && !young && d - YEAR <= LIFESPAN_GAP;
     // 「必未成年」是一句能被单条史料证伪的断言，而这里其实只是**证据不足**：
     // 孙资、向朗生年史无明文，卒年距本年远只说明我们不知道，不说明他年幼。
     // 语气写死会让读者以为已有判据，反而比「证据不足」更难被推翻
     basis = gone ? `无生年；卒 ${d}，${d === YEAR ? "卒于本年" : `早于本年 ${YEAR - d} 年`}，本年已故`
+      : young ? `无生年；本传记「${y.phrase}」，生年 >${y.bound}，${YEAR} 年未满 ${ADULT}`
       : `无生年；卒 ${d}，距本年 ${d - YEAR} 年${ok ? "，本年可为成人" : `＞${LIFESPAN_GAP}，证据不足`}`;
+    if (young) youngList.push(o.name);
   } else {
     ok = false;
     basis = "生卒年与本年归属俱无，无在场证据";

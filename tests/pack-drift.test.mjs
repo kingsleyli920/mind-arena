@@ -93,6 +93,39 @@ test("包：界面读的运行时包必须与内容包同源", () => {
     `运行时包里的郡国数${stale}`);
 });
 
+// ── 名册也要闸 ──────────────────────────────────────────────────────
+//
+// officers.json 的 historicalNote 里，编者会自己写下「本年未生」「本年尚幼」——
+// 那是**否决证据**，而不是花絮。判定器原先只在「有归属」那一支认它，
+// 「只有卒年」那一支单看卒年差值，于是曹真、公孙渊、傅肜、向宠、毛皇后、
+// 敬哀皇后这些明写着本年未生的人照常进了 194 年名册，实测 13 人。
+//
+// 它们之所以没有更多，只因正始那一代卒于 249、距 194 年 55 年，
+// 刚好越过「卒年差值 ≤50」那条线——**侥幸不是判据**。
+// 这条闸钉的是「证据不得被忽略」，不是钉人数：加剧本时人数必然变，而这条不变。
+test("名册：本传自记「本年未生／尚幼」的人不得入册", () => {
+  const YEAR = 194, ADULT = 16;
+  const full = JSON.parse(fs.readFileSync("lib/game/data/officers.json", "utf8"));
+  const by = new Map(full.map((o) => [o.id, o]));
+  const avail = JSON.parse(
+    fs.readFileSync(`lib/game/data/officer-availability-${YEAR}.json`, "utf8"));
+  const TOO = /本年[^。；]{0,8}?(未生|尚幼|当尚幼|幼)/;
+  const bad = [];
+  for (const a of avail.officers) {
+    if (!a.available) continue;
+    const o = by.get(a.id);
+    if (!o || o.birthYear) continue;          // 有生年则以生年为准，note 是次级证据
+    const m = TOO.exec(o.historicalNote ?? "");
+    if (!m) continue;
+    // 「未生」→ 生年 >194；只写「尚幼」→ 生年 >194−16。可登场最早年份 = 下界+1+16
+    const bound = m[0].includes("未生") ? YEAR : YEAR - ADULT;
+    if (YEAR < bound + 1 + ADULT) bad.push(`${o.name}（${m[0]}）`);
+  }
+  assert.deepEqual(bad, [],
+    `这些人本传自记未成年，却在 ${YEAR} 年名册里：${bad.join("、")}`
+    + " —— 见 tools/build-officer-availability.mjs 的 ADULT_FROM");
+});
+
 test("包：写给模型的数必须与引擎实际用的一致", () => {
   // 这条挡的是「规则摘要教模型一套、引擎跑另一套」。三处真实漂移：
   //   攻城节写「6 旬未破自动撤围」，而引擎读的是围城节的「上限季数 3」。
