@@ -17,7 +17,7 @@ import fs from "node:fs";
 import { execSync } from "node:child_process";
 import { listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, pick as botPick, PROFILES } from "../lib/game/engine/bot.ts";
-import { loadWorld } from "./lib/world.mjs";
+import { loadWorld, SEAT_SETS, seatsFor } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
 import { standingOf, gradeOf, zhouEquiv }
@@ -41,7 +41,6 @@ const OUT = arg("out", "");
 // --json=<file>：把整跑的结构化结果写出来，供 eval-suite 汇总。
 // 套件不复制这里的对局循环，只做编排与汇总——复制一份迟早与这里分家
 const JSON_OUT = arg("json", "");
-const SEATS = (arg("seats", "caocao,yuanshao,liubiao,liuzhang,yuanshu,lubu")).split(",");
 /** --seasons=<季数>：本局多长。不给则用内容包的 16（评测口径） */
 const SEASONS = Number(arg("seasons", "0")) || 0;
 /**
@@ -77,6 +76,15 @@ const PROVIDER = arg("provider", "");
 // 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
 const WORLD = loadWorld();
 const { pack, P, G, ROSTER, GEO, DATA } = WORLD;
+
+// 席位轮换名单。默认取本剧本那一份（tools/lib/world.mjs），不写死——
+// 原先默认是 194 那六家，拿去跑建安五年会在 s.factions[under] 上崩出
+// 一句 TypeError，而真正的原因是袁术与吕布在那年已经不在了。
+// --seats= 显式指定时同样校验：写错一个 id 要当场说清楚，不要等到 336 行
+const SEATS = arg("seats", "")
+  ? seatsFor(WORLD, { [WORLD.scenario]: arg("seats").split(",") }, "--seats 指定的席位")
+  : seatsFor(WORLD, SEAT_SETS, "轮换席位名单");
+
 const nameOf = (id) => WORLD.NAME[id] ?? id;
 
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
