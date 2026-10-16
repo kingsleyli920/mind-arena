@@ -70,3 +70,6 @@ eval-out/
 # 要重新生成地图：下载 DEM 后跑 npm run map:all
 /public/game/map/han-terrain.png
 /public/game/map/han-terrain-4x.png
+
+# 本地 agent 的配置与工作树，不进公开仓库
+.claude/

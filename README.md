@@ -1,10 +1,18 @@
 # Mind Arena · 汉末沙盘
 
-A Three Kingdoms grand-strategy game on the 194 CE warlord map, where every
-faction can be driven by a human, a rule-based bot, or a separately chosen AI
-model. The same engine and decision protocol back both play and model evaluation.
+**A Three Kingdoms grand-strategy game on the 194 CE map, where every faction can
+be driven by a human, a rule-based bot, or a separately chosen AI model.** The same
+engine and decision protocol back both play and model evaluation. The game, its
+interface and all documentation are in Chinese.
 
-游戏与全部界面为中文；文档亦为中文。
+---
+
+兴平元年（194 年），三十一家势力、一百零五个郡国。每一家都可以由你、由内置
+机器人、或者由**一个你单独指定的大模型**执子——它们下的是同一套令，走的是
+同一条裁决路径。
+
+这既是一个能玩的游戏，也是一套**用游戏评测大模型**的装置：同一个局面发给不同
+的模型，看它们各自怎么下令、怎么跨季修正、怎么在十六季里把一手牌打成什么样。
 
 ## 跑起来（零配置）
 
@@ -14,174 +22,115 @@ npm install
 npm run dev          # 打开 http://localhost:3000/play
 ```
 
-**不需要任何环境变量、不需要数据库、不需要云账号。** 所有对手默认是内置机器人，
-开一局、玩一局、读档续盘全部在本地完成，一分钱不花。地图、城印、武将数据都已
-随仓库发布（约 17 MB），clone 下来即可用。
+**不需要环境变量、不需要数据库、不需要云账号。** 所有对手默认是内置机器人，
+开局、对弈、存档续盘全在本地完成，一分钱不花。地图、城印、武将数据都已随仓库
+发布（约 22 MB），clone 下来即可用。
 
 需要 Node.js `>=22.13.0`。
 
-## 想让某一方由真的大模型执子（可选）
+## 让某一方由真的大模型执子（可选）
 
 ```bash
 cp .env.local.example .env.local   # 填入你自己的 OPENROUTER_API_KEY
 npm run dev
 ```
 
-密钥只被服务端路由读取，**不会以 `NEXT_PUBLIC_*` 的形式进到浏览器**。
-在开局配置里给任意势力单独选一个模型即可，别的势力仍可以是机器人或你自己。
-默认模型是免费档，但可用性取决于供应方。
+在开局配置里给任意势力单独挑一个模型，其余势力仍可以是机器人或你自己。
+密钥只被服务端路由读取，**不会以 `NEXT_PUBLIC_*` 的形式进到浏览器**；
+`.env.local` 在 `.gitignore` 里，仓库里只有占位符样例。
 
-`.env.local` 已在 `.gitignore` 里；仓库里只有 `.env.local.example`，它只有占位符。
+浏览器跑的是和评测工具**同一个** `modelDecide`——同一份观测、同一套准入、
+同一组失败分类，`/api/openrouter/chat` 只做服务端代理。
 
-## Current focus
+每局有决策次数额度与单次输出上限（含推理）。一季开始前若额度不够覆盖所有
+模型席位，会先暂停并问你是追加 16 次还是让机器人接手。**那是请求次数的闸，
+不是金额的闸**——面板会显示供应方报告的花费，并标出花费未知的那几次。
+模型失败时该席位**不下令**、明确记录、并停止自动推进；绝不悄悄回落到机器人。
 
-- strategic orders: territory, officers, supply, armies, construction and diplomacy
-- independent controllers and cross-season plans for each AI faction
-- playable and observable matches using the same rules
-- deterministic bot playtests before spending on model experiments
+## 怎么玩
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the match protocol,
-fairness modes, MVP boundaries, and open-source path. The researched historical
-and game-design baseline is in
-[docs/research/THREE_KINGDOMS_RESEARCH.md](docs/research/THREE_KINGDOMS_RESEARCH.md).
-How to run an evaluation — and the measured constraints that bound it — is in
-[docs/EVAL.md](docs/EVAL.md).
+选一席入局，或者选**纯观战**让所有势力自动行动。每季从引擎给出的候选里勾几条
+令，封令结算，看战报。
 
-## Useful Commands
+- **胜负**：控制 11 个州，或成为最后一个有效势力。玩家局**没有季数上限**，
+  可随时暂停、存档、续盘。（评测用的是另一套：固定 16 季，按相对开局的增量定档。）
+- **地图**：一百零五个郡国。缩小是势力图，放大到四倍是棋盘——城、路、路上的
+  关隘渡口、走在路上的部队、看得懂的围城。地色由**通行代价场**画出：
+  深色难走、黑色过不去，关与渡口就是墙上的豁口。
+- **据点**：关隘、谷道、渡口、港、仓都有主，可占可守可打。扼于某处的加成归
+  那处的主人——你据了关，守方就没有关隘之利。
+- **调兵**：相邻己方郡之间可以把守军运往前线，单季最多调出初始守军的一半。
+- 选席页有「怎么玩」，对局中顶栏有「规则」，都是同一份。
 
-玩游戏只需要 `npm run dev`。下面其余的都是开发与评测用的。
+进度存在 `localStorage`：待决的勾选、控制者分配、AI 的跨季计划、被拒的令、
+决策记录与已用额度都在内。**规则包或存档格式一变就拒绝读档，不做静默迁移**——
+悄悄读进来的旧档会在新规则下继续跑，而错得不响。
 
-- `npm run dev`: start local development
-- `npm run build`: verify the production build
-- `npm run typecheck`: check TypeScript without emitting files
-- `npm run types:worker`: regenerate Cloudflare runtime types from the build's
-  Wrangler config; run `npm run build` first when refreshing these types
-- `npm test`: run engine, model-client and session regression tests
-- `npm run lint`: run static checks
-- `npm run selfplay`: bot-only self-play plus the four gameplay acceptance gates
-- `npm run playtest`: three 64-season bot matches through the browser's session
-  logic, with zero model calls; optional output path: `npm run playtest -- /tmp/playtest.json`
-- `npm run obs:budget`: per-seat observation token gate (exits 1 when over)
-- `npm run eval`: run one agent (bot / stub / model) over N games
-- `npm run eval:suite`: run several agents over the same seeds and print a leaderboard
-- `npm run eval:dissect`: split one run open — by seat, action mix, dropped orders, AP usage
-- `npm run build:board`: compress a board's results into `public/game/leaderboard.json`
-  for the `/board` page. Refuses to mix arms whose rule fingerprints differ.
-- `npm run verdict`: check whether the coarse ruler (grades) and the continuous one
-  (territory progress) agree — same sign, same ranking, and the coarse one sensitive
-  enough on the strongest entrant.
-- `npm run models`: survey candidate opponents before opening a board — price per 48
-  games, whether any provider supports structured outputs, measured p50 throughput,
-  and which provider to pin. Reads pricing and endpoint stats only; costs nothing.
+## 设计上的几个决定
 
-## Playing it
+这些是这个项目和一般三国游戏不同的地方，也是它为什么能用来评测模型。
 
-Run `npm run dev` and open `/play`. Matches continue until unification. Assign
-each faction a bot, a model, or the single human seat. Models may differ by
-faction. All opponents default to bots, so opening and playing a bot match
-costs nothing.
+- **模型做的是选择题，不是填空题。** 引擎预筛出实际可行的候选，模型按 key 挑。
+  不这样的话行动空间会炸开，评出来的是「谁更会猜格式」。
+- **地图是一张代价场，不是一张图。** 「谁能打谁」由地形算出来——从 105 个治所
+  同时做 Dijkstra，辖境相接即为邻。不是谁事先画了线。
+- **规则即数据。** 全部战斗与结算常数收在 `lib/game/content/pack-194.json`，
+  缺任何一项即启动报错。改一个数，引擎、模型读到的规则摘要、观测、界面四处
+  必须同步——有测试钉住。
+- **冻结闸。** 规则数值有指纹；改动必须升版本、记一条「改了什么/为什么/后果」、
+  重跑免费基线。它已经抓出过三个真问题，包括一次版本号升了而记载没跟上。
+- **先用免费的验。** 玩法改动一律先跑机器人自对局（`npm run selfplay`，四道
+  验收闸），过了再谈模型。
 
-Choose **纯观战** to let every faction act automatically. Switch the observed
-faction, advance one season, or start/pause automatic advancement. The map uses
-the observed faction's intelligence; changing perspective never changes its
-controller. Pausing lets an already-started season finish. Player bots use a
-unification-oriented policy; the five fixed benchmark profiles remain separate.
+## 目前的边界
 
-Model decisions have a per-match allowance and a per-request output ceiling
-(including reasoning). Each decision makes at most two upstream attempts. A
-season pauses before calling any model if the allowance cannot cover all its
-active model seats. You can explicitly add 16 decisions or continue with bots.
-These are request limits, **not a dollar cap**. The panel shows reported charges
-and flags decisions whose costs are unknown. A failed model issues no orders,
-is recorded visibly, and stops automatic advancement.
+写在前面，免得你以为它已经解决了：
 
-There is no season limit in player matches. Controlling 11 provinces or being
-the last active faction wins. Test budgets pause an unfinished game; fixed-length
-benchmark matches retain their separate season-limit mode. Progress grades remain
-available throughout the match.
-Adjacent friendly cities can transfer garrison troops toward the front. Transfers
-reserve both cities' order capacity and cannot relay received troops again in the
-same season. At seven controlled provinces, a faction can also seek submission
-from an adjacent faction with at most half its territory, even if that faction
-has more than eight commanderies. Submission remains probabilistic, with a
-two-season refusal cooldown. Humans, bots and models share these rules.
-The seat-select page has a rules primer (怎么玩); the in-game header has the same
-panel behind 规则.
+- **模型能不能被纠正，仍然没有定论。** 决策复盘会把「下了什么令、哪条被丢了、
+  为什么」连同实际战果喂回下一季。一次[六决策的回执实测](docs/DECISION-CORRECTION-2026-09-28.md)
+  花了 $0.01073：Flash-Lite 认出了迁走的治所，Nano 仍然搞混目标与命令，
+  两边各丢三条令。[另一次跟进](docs/DECISION-GUIDANCE-2026-09-29.md)止住了
+  Nano 重复虚假目标，别的计划与命令错误照旧。
+- **势力不平衡。** 统一模式 6/6 自然收官（21–52 季），但**全是袁绍**。
+  不能据此宣称平衡。
+- [固定局面的模型对照](docs/DECISION-COMPARISON-2026-09-28.md)比了 nano、
+  Flash-Lite、mini 共九次决策：mini 被校验丢弃的令更少，但计划一致性仍未解决。
+  **那不是胜率排名。**
+- 县不是对局单位，地图的原子是郡。
+- 没有忠诚度模型，武将不会自己叛变。
+- 只有一个剧本（194 兴平元年）。
+- 仅桌面端。
 
-Progress is saved to `localStorage`, including pending human picks, controller
-assignments, AI plans, rejected orders, decision records and used allowance.
-Model calls reserve and save allowance before requests are sent. Reloading
-offers 继续 / 弃掉重开 and resumes paused. An interrupted in-flight season
-returns to the last settled state; its reserved allowance remains spent, and
-its responses may be unavailable. A save is
-dropped when the pack or state shape changes rather than migrated — the engine is
-still moving, and silently loading a stale save gives you a board whose rules no
-longer match.
+## 开发与评测
 
-AI plans now keep an objective, preparation, withdrawal conditions and an AI-written
-review across seasons. The panel shows that judgment alongside actual territory
-and treasury changes from the engine. Shared admission reserves money, troops and order capacity before execution.
+```bash
+npm test          # 211 条回归测试：引擎、模型客户端、会话
+npm run lint
+npm run typecheck
+npm run selfplay  # 机器人自对局 + 四道验收闸（免费）
+npm run playtest  # 三场 64 季长局，走浏览器同一条推进路径（免费）
+```
 
-## Current limits
+评测工具（会真的调模型，需要上面那个 key）：
 
-The [plan and order review](docs/DECISION-REVIEW-2026-09-28.md) now flags target
-ownership and stale plan status, shows accepted and rejected commands, and feeds
-the receipt into the next decision. These checks do not guarantee that a model
-will correct its strategy. Version 11 saves remain compatible.
+| 命令 | 做什么 |
+| --- | --- |
+| `npm run eval` | 一个对局方跑 N 局 |
+| `npm run eval:suite` | 几个对局方跑同一批 seed，出排行榜 |
+| `npm run eval:dissect` | 把一次运行拆开看：按席位、动作构成、被丢的令、令数用率 |
+| `npm run models` | 开榜前的供应方调研：每 48 局的价钱、是否支持结构化输出、实测吞吐 |
+| `npm run build:board` | 压成 `/board` 页要的榜单；**拒绝混合规则指纹不同的对局方** |
+| `npm run verdict` | 检查粗尺（档位）与连续尺（州进度）是否一致 |
+| `npm run obs:budget` | 逐席位的观测 token 闸（超了退出码 1） |
 
-A [six-decision receipt test](docs/DECISION-CORRECTION-2026-09-28.md) cost $0.01073.
-Flash-Lite recognized the relocated capital with the receipt, but Nano still
-confused targets and orders. Both conditions dropped three orders; reliable
-strategy correction remains unresolved.
+[docs/EVAL.md](docs/EVAL.md) 记着这套评测被什么约束着——包括**一份排行榜
+会以哪两种方式悄悄变成谎话**。[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+是对局协议与公平性模式。
 
-When a prior attack target is now owned and not under siege, the next model input
-retires that old plan and asks for a new objective. A one-decision [follow-up](docs/DECISION-GUIDANCE-2026-09-29.md)
-stopped Nano repeating the false target claim, while other plan and order errors
-remained. The original plan stays in the match record.
+## 重新生成地图（大多数人用不到）
 
-The latest [fixed-position model comparison](docs/DECISION-COMPARISON-2026-09-28.md)
-compares nano, Flash-Lite and mini in nine decisions. Mini lost fewer orders to
-validation, but plan consistency remains unresolved; this is not a win-rate ranking.
-
-For the latest season-review fixes, model checks and faction comparisons, see
-[the review report](docs/STRATEGY-REVIEW-2026-09-28.md). Shared order validation
-and structured plans are covered in [the plan report](docs/STRATEGY-PLANS-2026-09-28.md).
-The earlier [completion report](docs/STRATEGY-FINISH-2026-09-28.md) covers the 2.2 rules.
-The earlier [strategy validation report](docs/STRATEGY-VALIDATION-2026-09-28.md)
-records the stalemates that led to these changes.
-
-- **Model speed and availability vary.** Each faction has its own model selector.
-  The browser runs the same `modelDecide` the eval harness runs — same observation,
-  same admission, same failure buckets — with `/api/openrouter/chat` acting as a
-  server-side `LlmClient` proxy so the key never reaches the browser. Needs
-  `OPENROUTER_API_KEY` in `.env.local`. The default model is free, subject to
-  provider availability. Requests time out after 90 seconds per attempt;
-  browser requests never expand the selected output ceiling. Failures never silently fall back to the bot —
-  that seat simply issues no orders, and the status bar says why.
-- Counties (县) are not a play unit; the map's atom is the commandery (郡).
-- No loyalty model. Officers do not defect on their own. Captured officers can
-  be recruited within two seasons; whole-faction submission also transfers officers.
-- One scenario only (194 兴平元年). It has been audited across eight dimensions
-  (ownership, officer availability, province seats, population/garrison
-  derivation, adjacency, cross-file consistency, seat playability) with every
-  finding adversarially re-checked; see the `剧本核对` commit for what that found
-  and fixed. `tools/build-adjacency.mjs` now fails rather than writing a map that
-  drops a required corridor.
-- Desktop only.
-
-Evaluation tooling (`npm run eval`, `npm run eval:suite`) does drive real models
-and needs the key above. See [docs/EVAL.md](docs/EVAL.md) for the measured
-constraints that bound it — including the two ways a leaderboard can silently
-become a lie.
-
-The current pack is 2.3.0 and save format is 11; older saves require a new match.
-
-## 重新生成地图（可选，大多数人用不到）
-
-仓库里**已经带了成品地图**：941 块瓦片、55 个城印、通行代价场、道路与
-疆域栅格，合计约 17 MB，clone 下来直接能用。只有想改地图本身的人才需要下面这些。
-
-`npm run map:all` 会从高程数据重新渲染整条链：
+仓库里**已经带了成品**：941 块瓦片、55 个城印、通行代价场、道路与疆域栅格，
+约 22 MB，clone 下来直接能用。只有想改地图本身的人才需要下面这些。
 
 ```
 refs/dem-raster.raw  (283 MB，不入库，需自行下载)
@@ -192,20 +141,22 @@ refs/dem-raster.raw  (283 MB，不入库，需自行下载)
 
 那两个大文件**刻意不入库**：`han-terrain-4x.png` 单个 172 MB，超过 GitHub
 单文件 100 MB 的上限，带着它仓库根本推不上去；而运行时一个字节都用不到它。
+高程来自 [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)
+（terrarium，公有领域），取的范围记在 `refs/dem-raster.json`。
 
-高程数据来自 [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)
-（terrarium 格式，公有领域），`refs/dem-raster.json` 里记着取的是哪个范围。
-
-另有两条独立于地形的：`npm run map:cost` 重算通行代价场（决定哪儿走得通、
-关隘扼守多少价值），`npm run map:cost:report` 打印它的验收报告。
+`npm run map:all` 跑完整条链。另有两条独立于地形的：`npm run map:cost`
+重算通行代价场（决定哪儿走得通、关隘扼守多少价值），`npm run map:cost:report`
+打印它的验收报告。
 
 ## 许可证与数据出处
 
 代码按 [MIT](LICENSE) 发布。
 
 打包进来的史料与地理数据全部是**公有领域或开放数据**——《三国志》《后汉书》
-《续汉书·郡国志》等古籍，AWS Terrain Tiles 的高程，Natural Earth 的海岸线与
-水系。郡治与据点坐标由现代地名反查得出，逐条标注了 certainty 与史料依据。
+《续汉书·郡国志》等古籍，AWS Terrain Tiles 的高程，Natural Earth 的海岸线
+与水系。郡治与据点坐标由现代地名反查得出，逐条标注了 certainty 与史料依据。
 
 项目**刻意回避了带非商业条款的数据集**：CHGIS / 复旦 TGAZ 是 CC BY-NC，
 只在研究阶段用来校对过坐标，没有任何数据打包进来。详见 [LICENSE](LICENSE)。
+
+当前规则包 2.3.0，存档格式 11；旧存档需要重开一局。
