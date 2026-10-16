@@ -217,6 +217,23 @@ function endingGap(
 const GEAR_LABEL: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 
 
+/** 剧本目录的一行，来自 public/game/scenarios.json */
+type ScenarioRow = { id: string; year: number; era: string; label: string;
+                     factions: number; commanderies: number; blurb: string };
+
+/**
+ * 当前剧本。由 ?scenario= 决定，默认兴平元年。
+ *
+ * 放在模块级而不是 state：它决定**载入哪一份数据包**，而数据包只在挂载时取一次；
+ * 做成可变状态就要处理「换剧本时把整个引擎、存档、选席全重建一遍」，
+ * 而换剧本本来就该是换一局。切换器直接改 URL 重新载入，少一类状态就少一类错
+ */
+const SCENARIO = (() => {
+  if (typeof window === "undefined") return "194";
+  const v = new URLSearchParams(window.location.search).get("scenario");
+  return v && /^\d{3,4}$/.test(v) ? v : "194";
+})();
+
 type Bundle = {
   scenario: { factions: Array<{ id: string; name: string; color?: string; seat?: string;
                                courtesyName?: string; situation?: string }> };
@@ -689,6 +706,7 @@ export function PlayClient() {
   /** 载入时发现的旧存档。在选席页上给「继续上局」，而不是自动恢复——
       自动恢复会让「我想重开一局」变成一件要先找按钮的事 */
   const [resume, setResume] = useState<SavedGame | null>(null);
+  const [catalog, setCatalog] = useState<ScenarioRow[]>([]);
   /** 鼠标/键盘正指向的候选 key。用来在地图上画出「从哪打到哪」 */
   const [hoverKey, setHoverKey] = useState<string | null>(null);
 
@@ -809,13 +827,16 @@ export function PlayClient() {
     let alive = true;
     (async () => {
       try {
-        const [b, t, rd] = await Promise.all([
-          fetch("/game/runtime-194.json").then((r) => r.json() as Promise<Bundle>),
+        const [b, t, rd, cat] = await Promise.all([
+          fetch(`/game/runtime-${SCENARIO}.json`).then((r) => r.json() as Promise<Bundle>),
           fetch("/game/territory-grid.json").then((r) => r.json() as Promise<Territory>),
           // 实走路径。取不到就退回城心直连（旧行为），不让一份缺失的附加数据
           // 把整张图拖垮——它是「更好看」，不是「能不能玩」
           fetch("/game/roads.json").then((r) => (r.ok ? r.json() : null))
             .catch(() => null) as Promise<RoadFile | null>,
+          // 剧本目录。取不到就只当有当前这一个——少一个切换器不影响开局
+          fetch("/game/scenarios.json").then((r) => (r.ok ? r.json() : null))
+            .catch(() => null) as Promise<{ scenarios: ScenarioRow[] } | null>,
         ]);
         if (!alive) return;
         const P = loadParams(b.pack as never);
@@ -852,8 +873,9 @@ export function PlayClient() {
             resources: b.resources as never,
           },
         });
+        setCatalog(cat?.scenarios ?? []);
         setResume(loadGame(packStamp(P.seasonsPerGame, b.commanderies.length, P.epochCount,
-          (b.pack as { constants?: Record<string, unknown> }).constants)));
+          (b.pack as { constants?: Record<string, unknown> }).constants, SCENARIO)));
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : String(e));
       }
@@ -865,7 +887,7 @@ export function PlayClient() {
     if (!engine || !seat) return false;
     return saveGame({
       packStamp: packStamp(engine.P.seasonsPerGame, engine.points.length, engine.P.epochCount,
-        (engine.pack as { constants?: Record<string, unknown> }).constants),
+        (engine.pack as { constants?: Record<string, unknown> }).constants, SCENARIO),
       seat, game: nextGame, picked, session: nextSession,
     });
   }, [engine, seat, picked, session]);
@@ -1688,6 +1710,7 @@ export function PlayClient() {
 
   // ── 选席 ────────────────────────────────────────────────────────
   if (!game || !seat) {
+    const here = catalog.find((x) => x.id === SCENARIO);
     const probe = createGame(engine.data, { seed: "preview", roster: engine.roster,
       geo: engine.geo, graph: engine.G }, engine.P);
     const seats = Object.values(probe.factions)
@@ -1698,10 +1721,25 @@ export function PlayClient() {
       <main className="play">
         <header className="play-head">
           <h1>汉末沙盘</h1>
-          <p>兴平元年·一九四{"\u3000"}择一席入局。
+          <p>{here ? `${here.era}·${here.year}` : "兴平元年·一九四"}{"\u3000"}择一席入局。
             <b>谁先一统天下谁赢</b>。控制 {engine.P.unifyZhou} 州，或成为最后一个有效势力，即可统一。
             对局没有季数上限，可随时暂停、存档后继续。</p>
         </header>
+
+        {/* 剧本切换。换剧本是换一局，所以直接改 URL 重新载入——
+            留在页内切换就得把引擎、存档、选席全重建，而那正是出错的地方 */}
+        {catalog.length > 1 && (
+          <nav className="scenario-pick" aria-label="剧本">
+            {catalog.map((x) => (
+              <a key={x.id} href={`?scenario=${x.id}`}
+                 className={x.id === SCENARIO ? "on" : undefined}
+                 aria-current={x.id === SCENARIO ? "page" : undefined}>
+                <b>{x.label}</b>
+                <i>{x.year} 年{"\u3000"}{x.factions} 家{"\u3000"}{x.blurb}</i>
+              </a>
+            ))}
+          </nav>
+        )}
         <details className="primer-fold">
           <summary>怎么玩<i>没玩过先看这个</i></summary>
           <Primer P={engine.P} />

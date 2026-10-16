@@ -238,13 +238,13 @@ test("冻结闸：胜负数值的指纹未变", () => {
   // 改规则数值时，把下面两行更新成新指纹，**同时**：
   //   一、升 pack.version（0.2.0 → 1.0.0 是冻结那一次）
   //   二、重跑机器人基线，并在 docs/EVAL.md 里说明新旧榜不可比
-  const WANT = {"count":303,"hash":"6a8scjtd79j9"};
+  const WANT = {"count":304,"hash":"g2hcrkrvytig"};
   assert.equal(fp.count, WANT.count,
     `胜负数值的条数变了（${WANT.count} → ${fp.count}）——加/删了一个数`);
   assert.equal(fp.hash, WANT.hash,
     "胜负数值变了。这不是禁止，是提醒：升 pack.version、重跑基线、"
     + "并在 EVAL 里写明新旧榜不可比。确认之后把本测试里的指纹更新掉");
-  assert.equal(pack.version, "2.4.0", "冻结版本号");
+  assert.equal(pack.version, "2.5.0", "冻结版本号");
   // 版本号升了、改动记载没跟上，是这套冻结流程最容易漏的一步——
   // 闸只钉了版本号与指纹，谁都不会注意到记载停在上一版。
   // 实测漏过一次：version 已是 2.3.0，而记载末尾还是 2.2.0，

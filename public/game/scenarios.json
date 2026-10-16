@@ -1,0 +1,23 @@
+{
+ "_note": "可玩剧本目录，由 tools/build-runtime-bundle.mjs 扫出，勿手改。",
+ "scenarios": [
+  {
+   "id": "194",
+   "year": 194,
+   "era": "兴平元年",
+   "label": "兴平元年·群雄割据",
+   "factions": 31,
+   "commanderies": 105,
+   "blurb": "东汉末群雄割据剧本。"
+  },
+  {
+   "id": "200",
+   "year": 200,
+   "era": "建安五年",
+   "label": "建安五年·官渡前夕",
+   "factions": 20,
+   "commanderies": 105,
+   "blurb": "官渡前夕剧本。"
+  }
+ ]
+}

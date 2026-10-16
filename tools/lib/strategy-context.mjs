@@ -9,7 +9,10 @@ import { buildGeography, standingOf } from "../../lib/game/engine/victory.ts";
 import { loadParams } from "../../lib/game/engine/params.ts";
 import { supplyReach } from "../../lib/game/engine/resolve.ts";
 
-const raw = fs.readFileSync("public/game/runtime-194.json", "utf8");
+// 剧本由 SCENARIO 选（默认 194）。自对局与长局都要能指向另一份数据包，
+// 否则新剧本只能靠读文件猜，验不了。
+const SCENARIO = process.env.SCENARIO ?? "194";
+const raw = fs.readFileSync(`public/game/runtime-${SCENARIO}.json`, "utf8");
 const b = JSON.parse(raw), P = loadParams(b.pack), g = buildGraph(b.adjacency);
 const roster = buildRoster(b.officers,
   { officers: b.officers.map((o) => ({ id: o.id, available: true })) },

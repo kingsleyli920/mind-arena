@@ -523,6 +523,13 @@ test("界面的候选分组两张表都要覆盖每一类动作", () => {
 //（令数上限与指数、收入递减、每将统兵、集结郡数与跳数）没有一个能推动统一。
 
 /** 把 who 做成「已控 N 州」的霸主：把够多的郡划给它 */
+/**
+ * 把某家捏成霸主：占满若干个州，**并记上够数的克城**。
+ *
+ * 克城数那一条是后加的门槛（见内容包 constants.归降.门槛_为何要克城数）——
+ * 名分收得拢人是因为你已经打赢了，不是因为你地大。夹具只发地不发战功，
+ * 就捏不出一个够得着劝降的霸主，而那不是机制坏了，是夹具没把霸主捏全。
+ */
 function overlord(s, who, zhou = 4) {
   const byZhou = new Map();
   for (const c of Object.values(s.commanderies)) {
@@ -537,6 +544,7 @@ function overlord(s, who, zhou = 4) {
     done += 1;
   }
   s.factions[who].capital = Object.values(s.commanderies).find((c) => c.owner === who)?.id ?? null;
+  s.factions[who].conquests = Math.max(s.factions[who].conquests, P.submitMinConquests);
   return s;
 }
 
@@ -546,6 +554,23 @@ test("劝降：我方未控足够州数时，一条候选都不给", () => {
     .filter((c) => c.key.startsWith("submit:"));
   assert.equal(cs.length, 0,
     `开局袁绍只控 ${standingOf(s, GEO, "yuanshao").controlledZhou} 州，不该给劝降候选`);
+});
+
+// 州数够了而一仗没打，同样不给——这一条挡的是「开局即霸主」的剧本。
+// 建安五年的曹操开局即据司隶东部、兖、豫、徐四州，正好站在州数门槛上；
+// 没有这一关，实测他第一季就劝降刘备、刘表、孙策，第六季袁绍举二十四郡来降
+test("劝降：州数够了但一仗没打，也一条候选都不给", () => {
+  const s = overlord(fresh("conq"), "yuanshao", P.submitMinZhou);
+  s.factions.yuanshao.conquests = P.submitMinConquests - 1;
+  const cs = listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .filter((c) => c.key.startsWith("submit:"));
+  assert.equal(cs.length, 0,
+    `控 ${standingOf(s, GEO, "yuanshao").controlledZhou} 州而只克城 `
+    + `${s.factions.yuanshao.conquests}（门槛 ${P.submitMinConquests}），不该给劝降候选`);
+  s.factions.yuanshao.conquests = P.submitMinConquests;
+  assert.ok(listActions(s, "yuanshao", G, P, DEFAULT_RULES, ROSTER, undefined, GEO)
+    .some((c) => c.key.startsWith("submit:")),
+    "克城数一到门槛就该给候选 —— 否则是别的条件在拦，这条测试没测到东西");
 });
 
 test("劝降：16 季局里永不触发 —— 评测口径与「无此机制」逐位相同", () => {

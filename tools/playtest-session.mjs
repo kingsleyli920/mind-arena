@@ -8,7 +8,8 @@ import { buildGeography } from "../lib/game/engine/victory.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { advanceSeason, newSession } from "../lib/game/session.ts";
 
-const b = JSON.parse(fs.readFileSync("public/game/runtime-194.json", "utf8"));
+const SCENARIO = process.env.SCENARIO ?? "194";   // 剧本由 SCENARIO 选
+const b = JSON.parse(fs.readFileSync(`public/game/runtime-${SCENARIO}.json`, "utf8"));
 const P = loadParams(b.pack), g = buildGraph(b.adjacency);
 const roster = buildRoster(b.officers,
   { officers: b.officers.map((o) => ({ id: o.id, available: true })) },

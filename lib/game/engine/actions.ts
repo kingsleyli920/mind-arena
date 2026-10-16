@@ -208,6 +208,14 @@ export function submissionTerms(s: GameState, faction: FactionId, target: Factio
   const zhou = standingOf(s, geo, faction).controlledZhou;
   const hegemony = zhou >= P.submitHegemonyZhou;
   const ratio = hegemony ? P.submitHegemonyRatio : P.submitRatio;
+  // **须已克敌城若干座。** 州数只看「地有多大」，而名分收得拢人是因为
+  // 你已经打赢了——刘琮献荆州在曹操已下河北之后，不是因为他地大。
+  // 这一条不是锦上添花：建安五年剧本里曹操开局即据司隶东部、兖、豫、徐四州，
+  // 正好站在州数门槛上而一仗未打，实测第一季劝降刘备刘表孙策、第六季袁绍
+  // 举二十四郡来降，六季一统。州数门槛按兴平元年那张破碎的图标定，换一张
+  // 已整合的图就失效；克城数是**挣来的**，任何剧本开局都是零，没有这个毛病。
+  // 对兴平元年是空转：实测任何人首次控到四州时已克城二十座以上（门槛取 15）
+  if ((s.factions[faction]?.conquests ?? 0) < P.submitMinConquests) return null;
   if (zhou < P.submitMinZhou || (!hegemony && theirs > P.submitMaxCommanderies)
       || own.length < theirs * ratio) return null;
   return { ratio, mine: own.length, theirs };

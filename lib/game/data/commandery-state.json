@@ -1,5 +1,6 @@
 {
  "meta": {
+  "year": 194,
   "note": "194 年郡级初始状态。户口取《郡国志》永和五年（140）数字，按战乱衰减系数折算到 194 年。",
   "generatedFrom": "tools/build-commandery-state.mjs",
   "garrisonTiers": [
@@ -148,8 +149,8 @@
    "population140": 1010827,
    "warDamage": 0.2,
    "warBasis": "雒阳被焚最烈，本年境内空虚，天子东归尚须张杨输粮",
-   "households194": 41697,
-   "population194": 202165,
+   "householdsEff": 41697,
+   "populationEff": 202165,
    "terrainFactor": 0.931,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -157,7 +158,7 @@
    "garrisonTier": 5,
    "moraleTier": 1,
    "defense": 74,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "河内郡",
@@ -170,8 +171,8 @@
    "population140": 801558,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 47931,
-   "population194": 240467,
+   "householdsEff": 47931,
+   "populationEff": 240467,
    "terrainFactor": 0.949,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -179,7 +180,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 68,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "河东郡",
@@ -192,16 +193,16 @@
    "population140": 570803,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 28063,
-   "population194": 171241,
+   "householdsEff": 28063,
+   "populationEff": 171241,
    "terrainFactor": 0.805,
    "dominantTerrain": "hill",
    "yieldTier": 6,
    "garrison": 3425,
    "garrisonTier": 4,
    "moraleTier": 1,
-   "defense": 68,
-   "degree": 5
+   "defense": 60,
+   "degree": 6
   },
   {
    "id": "弘农郡",
@@ -214,8 +215,8 @@
    "population140": 199113,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 14045,
-   "population194": 59734,
+   "householdsEff": 14045,
+   "populationEff": 59734,
    "terrainFactor": 0.806,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -223,7 +224,7 @@
    "garrisonTier": 1,
    "moraleTier": 2,
    "defense": 63,
-   "degree": 5
+   "degree": 3
   },
   {
    "id": "京兆尹",
@@ -236,8 +237,8 @@
    "population140": 285574,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 15990,
-   "population194": 85672,
+   "householdsEff": 15990,
+   "populationEff": 85672,
    "terrainFactor": 0.76,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -245,7 +246,7 @@
    "garrisonTier": 2,
    "moraleTier": 2,
    "defense": 63,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "左冯翊",
@@ -258,8 +259,8 @@
    "population140": 145195,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 11127,
-   "population194": 43559,
+   "householdsEff": 11127,
+   "populationEff": 43559,
    "terrainFactor": 0.804,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -280,16 +281,16 @@
    "population140": 93091,
    "warDamage": 0.3,
    "warBasis": "董卓迁都焚雒阳，宫室居民荡尽，二百里内无烟火（《董卓传》）；三辅继以李傕郭汜相攻",
-   "households194": 2206,
-   "population194": 27927,
+   "householdsEff": 2206,
+   "populationEff": 27927,
    "terrainFactor": 0.726,
    "dominantTerrain": "hill",
    "yieldTier": 3,
    "garrison": 300,
    "garrisonTier": 0,
    "moraleTier": 1,
-   "defense": 45,
-   "degree": 4
+   "defense": 53,
+   "degree": 6
   },
   {
    "id": "颍川郡",
@@ -302,8 +303,8 @@
    "population140": 1436513,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 144892,
-   "population194": 790082,
+   "householdsEff": 144892,
+   "populationEff": 790082,
    "terrainFactor": 0.979,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -311,7 +312,7 @@
    "garrisonTier": 8,
    "moraleTier": 2,
    "defense": 78,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "汝南郡",
@@ -324,8 +325,8 @@
    "population140": 2100788,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 222446,
-   "population194": 1155433,
+   "householdsEff": 222446,
+   "populationEff": 1155433,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -333,7 +334,7 @@
    "garrisonTier": 10,
    "moraleTier": 2,
    "defense": 70,
-   "degree": 4
+   "degree": 7
   },
   {
    "id": "梁国",
@@ -346,8 +347,8 @@
    "population140": 431283,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 45815,
-   "population194": 237206,
+   "householdsEff": 45815,
+   "populationEff": 237206,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -355,7 +356,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 7
+   "degree": 6
   },
   {
    "id": "沛国",
@@ -368,8 +369,8 @@
    "population140": 251393,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 110272,
-   "population194": 138266,
+   "householdsEff": 110272,
+   "populationEff": 138266,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -377,7 +378,7 @@
    "garrisonTier": 3,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 5
+   "degree": 6
   },
   {
    "id": "陈国",
@@ -390,8 +391,8 @@
    "population140": 1547572,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 61959,
-   "population194": 851165,
+   "householdsEff": 61959,
+   "populationEff": 851165,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -399,7 +400,7 @@
    "garrisonTier": 8,
    "moraleTier": 3,
    "defense": 65,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "鲁国",
@@ -412,8 +413,8 @@
    "population140": 411590,
    "warDamage": 0.55,
    "warBasis": "颍川汝南为黄巾主战场，波才起于颍川；士民多流散荆州（《钟繇传》《杜袭传》）",
-   "households194": 43146,
-   "population194": 226375,
+   "householdsEff": 43146,
+   "populationEff": 226375,
    "terrainFactor": 0.998,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -421,7 +422,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "魏郡",
@@ -434,8 +435,8 @@
    "population140": 695606,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 77586,
-   "population194": 417364,
+   "householdsEff": 77586,
+   "populationEff": 417364,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -456,8 +457,8 @@
    "population140": 602096,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 65710,
-   "population194": 361258,
+   "householdsEff": 65710,
+   "populationEff": 361258,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -478,8 +479,8 @@
    "population140": 631184,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 58500,
-   "population194": 378710,
+   "householdsEff": 58500,
+   "populationEff": 378710,
    "terrainFactor": 0.972,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -487,7 +488,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 73,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "中山国",
@@ -500,8 +501,8 @@
    "population140": 658195,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 58447,
-   "population194": 394917,
+   "householdsEff": 58447,
+   "populationEff": 394917,
    "terrainFactor": 0.986,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -522,8 +523,8 @@
    "population140": 655118,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 54864,
-   "population194": 393071,
+   "householdsEff": 54864,
+   "populationEff": 393071,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -544,8 +545,8 @@
    "population140": 634421,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 56252,
-   "population194": 380653,
+   "householdsEff": 56252,
+   "populationEff": 380653,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -566,8 +567,8 @@
    "population140": 760418,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 74378,
-   "population194": 456251,
+   "householdsEff": 74378,
+   "populationEff": 456251,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -588,8 +589,8 @@
    "population140": 188381,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 19631,
-   "population194": 113029,
+   "householdsEff": 19631,
+   "populationEff": 113029,
    "terrainFactor": 0.97,
    "dominantTerrain": "plain",
    "yieldTier": 5,
@@ -597,7 +598,7 @@
    "garrisonTier": 3,
    "moraleTier": 2,
    "defense": 63,
-   "degree": 6
+   "degree": 4
   },
   {
    "id": "勃海郡",
@@ -610,8 +611,8 @@
    "population140": 1106500,
    "warDamage": 0.6,
    "warBasis": "张角起于钜鹿，冀州为黄巾腹心；后袁绍公孙瓒连年争河北",
-   "households194": 79433,
-   "population194": 663900,
+   "householdsEff": 79433,
+   "populationEff": 663900,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -632,8 +633,8 @@
    "population140": 869433,
    "warDamage": 0.45,
    "warBasis": "初平元年关东联军会盟酸枣，兵久屯食尽而散；后为吕布曹操争地",
-   "households194": 79888,
-   "population194": 391245,
+   "householdsEff": 79888,
+   "populationEff": 391245,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -641,7 +642,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "东郡",
@@ -654,8 +655,8 @@
    "population140": 603393,
    "warDamage": 0.4,
    "warBasis": "本年吕布张邈据濮阳，与曹操相持经年，兖州腹地尽为战场",
-   "households194": 54435,
-   "population194": 241357,
+   "householdsEff": 54435,
+   "populationEff": 241357,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -663,7 +664,7 @@
    "garrisonTier": 5,
    "moraleTier": 1,
    "defense": 65,
-   "degree": 7
+   "degree": 6
   },
   {
    "id": "东平国",
@@ -676,8 +677,8 @@
    "population140": 448270,
    "warDamage": 0.45,
    "warBasis": "黄巾初起即残兖州；本年吕布入兖，郡县皆应，曹操仅保三城，兼蝗旱大饥（《武帝纪》）",
-   "households194": 35555,
-   "population194": 201722,
+   "householdsEff": 35555,
+   "populationEff": 201722,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -685,7 +686,7 @@
    "garrisonTier": 5,
    "moraleTier": 1,
    "defense": 60,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "任城国",
@@ -698,8 +699,8 @@
    "population140": 194156,
    "warDamage": 0.45,
    "warBasis": "黄巾初起即残兖州；本年吕布入兖，郡县皆应，曹操仅保三城，兼蝗旱大饥（《武帝纪》）",
-   "households194": 16399,
-   "population194": 87370,
+   "householdsEff": 16399,
+   "populationEff": 87370,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 5,
@@ -720,8 +721,8 @@
    "population140": 437317,
    "warDamage": 0.45,
    "warBasis": "黄巾初起即残兖州；本年吕布入兖，郡县皆应，曹操仅保三城，兼蝗旱大饥（《武帝纪》）",
-   "households194": 4018,
-   "population194": 196793,
+   "householdsEff": 4018,
+   "populationEff": 196793,
    "terrainFactor": 0.972,
    "dominantTerrain": "plain",
    "yieldTier": 4,
@@ -742,8 +743,8 @@
    "population140": 235897,
    "warDamage": 0.45,
    "warBasis": "黄巾初起即残兖州；本年吕布入兖，郡县皆应，曹操仅保三城，兼蝗旱大饥（《武帝纪》）",
-   "households194": 20560,
-   "population194": 106154,
+   "householdsEff": 20560,
+   "populationEff": 106154,
    "terrainFactor": 0.986,
    "dominantTerrain": "plain",
    "yieldTier": 5,
@@ -751,7 +752,7 @@
    "garrisonTier": 3,
    "moraleTier": 1,
    "defense": 55,
-   "degree": 4
+   "degree": 3
   },
   {
    "id": "山阳郡",
@@ -764,8 +765,8 @@
    "population140": 606091,
    "warDamage": 0.45,
    "warBasis": "黄巾初起即残兖州；本年吕布入兖，郡县皆应，曹操仅保三城，兼蝗旱大饥（《武帝纪》）",
-   "households194": 49454,
-   "population194": 272741,
+   "householdsEff": 49454,
+   "populationEff": 272741,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -786,8 +787,8 @@
    "population140": 657554,
    "warDamage": 0.5,
    "warBasis": "曹操本年所保三城之一，得以幸免于全境沦陷",
-   "households194": 66858,
-   "population194": 328777,
+   "householdsEff": 66858,
+   "populationEff": 328777,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -808,8 +809,8 @@
    "population140": 706416,
    "warDamage": 0.45,
    "warBasis": "初平四年至本年曹操两次征陶谦，所过多所残戮（《武帝纪》裴注引《曹瞒传》）",
-   "households194": 66953,
-   "population194": 317887,
+   "householdsEff": 66953,
+   "populationEff": 317887,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -817,7 +818,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 71,
-   "degree": 4
+   "degree": 6
   },
   {
    "id": "琅邪国",
@@ -830,8 +831,8 @@
    "population140": 570967,
    "warDamage": 0.45,
    "warBasis": "初平四年至本年曹操两次征陶谦，所过多所残戮（《武帝纪》裴注引《曹瞒传》）",
-   "households194": 9362,
-   "population194": 256935,
+   "householdsEff": 9362,
+   "populationEff": 256935,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 5,
@@ -839,7 +840,7 @@
    "garrisonTier": 2,
    "moraleTier": 1,
    "defense": 55,
-   "degree": 6
+   "degree": 4
   },
   {
    "id": "彭城国",
@@ -852,8 +853,8 @@
    "population140": 493027,
    "warDamage": 0.35,
    "warBasis": "同上，彭城首当其冲，本条 basis 亦记「残破」",
-   "households194": 30159,
-   "population194": 172559,
+   "householdsEff": 30159,
+   "populationEff": 172559,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -861,7 +862,7 @@
    "garrisonTier": 4,
    "moraleTier": 1,
    "defense": 60,
-   "degree": 7
+   "degree": 6
   },
   {
    "id": "广陵郡",
@@ -874,8 +875,8 @@
    "population140": 410190,
    "warDamage": 0.7,
    "warBasis": "陈登治下相对完整，未及泗水沿岸之惨",
-   "households194": 58735,
-   "population194": 287133,
+   "householdsEff": 58735,
+   "populationEff": 287133,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -883,7 +884,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 4
+   "degree": 6
   },
   {
    "id": "下邳国",
@@ -896,8 +897,8 @@
    "population140": 611083,
    "warDamage": 0.4,
    "warBasis": "曹操征陶谦，坑杀男女数十万口于泗水，水为之不流（《陶谦传》裴注）",
-   "households194": 54556,
-   "population194": 244433,
+   "householdsEff": 54556,
+   "populationEff": 244433,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -905,7 +906,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 4
+   "degree": 5
   },
   {
    "id": "济南国",
@@ -918,8 +919,8 @@
    "population140": 453308,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 47126,
-   "population194": 271985,
+   "householdsEff": 47126,
+   "populationEff": 271985,
    "terrainFactor": 0.972,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -927,7 +928,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 5
+   "degree": 3
   },
   {
    "id": "平原郡",
@@ -940,8 +941,8 @@
    "population140": 1002658,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 93353,
-   "population194": 601595,
+   "householdsEff": 93353,
+   "populationEff": 601595,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -949,7 +950,7 @@
    "garrisonTier": 8,
    "moraleTier": 2,
    "defense": 65,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "乐安国",
@@ -962,8 +963,8 @@
    "population140": 424075,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 44640,
-   "population194": 254445,
+   "householdsEff": 44640,
+   "populationEff": 254445,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -971,7 +972,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "北海国",
@@ -984,8 +985,8 @@
    "population140": 853604,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 95185,
-   "population194": 512162,
+   "householdsEff": 95185,
+   "populationEff": 512162,
    "terrainFactor": 0.966,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -993,7 +994,7 @@
    "garrisonTier": 7,
    "moraleTier": 3,
    "defense": 65,
-   "degree": 4
+   "degree": 5
   },
   {
    "id": "东莱郡",
@@ -1006,8 +1007,8 @@
    "population140": 484393,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 62578,
-   "population194": 290636,
+   "householdsEff": 62578,
+   "populationEff": 290636,
    "terrainFactor": 0.469,
    "dominantTerrain": "sea",
    "yieldTier": 6,
@@ -1015,7 +1016,7 @@
    "garrisonTier": 5,
    "moraleTier": 2,
    "defense": 60,
-   "degree": 3
+   "degree": 5
   },
   {
    "id": "齐国",
@@ -1028,8 +1029,8 @@
    "population140": 491765,
    "warDamage": 0.6,
    "warBasis": "青州黄巾众百万，初平三年入兖州；本州户口耗减尤剧（《武帝纪》）",
-   "households194": 38649,
-   "population194": 295059,
+   "householdsEff": 38649,
+   "populationEff": 295059,
    "terrainFactor": 0.977,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -1037,7 +1038,7 @@
    "garrisonTier": 6,
    "moraleTier": 2,
    "defense": 66,
-   "degree": 4
+   "degree": 2
   },
   {
    "id": "南阳郡",
@@ -1050,8 +1051,8 @@
    "population140": 2439618,
    "warDamage": 0.55,
    "warBasis": "黄巾张曼成起于宛，孙坚破之；后袁术据南阳，「奢淫肆欲，征敛无度，士民苦之」（《袁术传》）",
-   "households194": 290703,
-   "population194": 1341790,
+   "householdsEff": 290703,
+   "populationEff": 1341790,
    "terrainFactor": 0.989,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1059,7 +1060,7 @@
    "garrisonTier": 10,
    "moraleTier": 2,
    "defense": 78,
-   "degree": 7
+   "degree": 8
   },
   {
    "id": "南郡",
@@ -1072,8 +1073,8 @@
    "population140": 747604,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 170699,
-   "population194": 784984,
+   "householdsEff": 170699,
+   "populationEff": 784984,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1094,8 +1095,8 @@
    "population140": 265464,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 61356,
-   "population194": 278737,
+   "householdsEff": 61356,
+   "populationEff": 278737,
    "terrainFactor": 0.996,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -1103,7 +1104,7 @@
    "garrisonTier": 5,
    "moraleTier": 5,
    "defense": 65,
-   "degree": 5
+   "degree": 6
   },
   {
    "id": "零陵郡",
@@ -1116,8 +1117,8 @@
    "population140": 1001578,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 222898,
-   "population194": 1051657,
+   "householdsEff": 222898,
+   "populationEff": 1051657,
    "terrainFactor": 0.945,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1125,7 +1126,7 @@
    "garrisonTier": 9,
    "moraleTier": 5,
    "defense": 70,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "桂阳郡",
@@ -1138,8 +1139,8 @@
    "population140": 501403,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 141780,
-   "population194": 526473,
+   "householdsEff": 141780,
+   "populationEff": 526473,
    "terrainFactor": 0.903,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1147,7 +1148,7 @@
    "garrisonTier": 7,
    "moraleTier": 5,
    "defense": 70,
-   "degree": 4
+   "degree": 5
   },
   {
    "id": "武陵郡",
@@ -1160,8 +1161,8 @@
    "population140": 250913,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 49006,
-   "population194": 263459,
+   "householdsEff": 49006,
+   "populationEff": 263459,
    "terrainFactor": 0.995,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -1169,7 +1170,7 @@
    "garrisonTier": 5,
    "moraleTier": 4,
    "defense": 60,
-   "degree": 3
+   "degree": 5
   },
   {
    "id": "长沙郡",
@@ -1182,8 +1183,8 @@
    "population140": 1059372,
    "warDamage": 1.05,
    "warBasis": "刘表单马入宜城，江南悉平，沃野千里士民殷富；关西兖豫学士归者盖有千数（《刘表传》）",
-   "households194": 268647,
-   "population194": 1112341,
+   "householdsEff": 268647,
+   "populationEff": 1112341,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1191,7 +1192,7 @@
    "garrisonTier": 10,
    "moraleTier": 4,
    "defense": 70,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "九江郡",
@@ -1204,8 +1205,8 @@
    "population140": 432426,
    "warDamage": 1,
    "warBasis": "江东未大乱，然袁术据淮南征敛无度，北部略损",
-   "households194": 89436,
-   "population194": 432426,
+   "householdsEff": 89436,
+   "populationEff": 432426,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -1213,7 +1214,7 @@
    "garrisonTier": 7,
    "moraleTier": 5,
    "defense": 65,
-   "degree": 3
+   "degree": 8
   },
   {
    "id": "丹阳郡",
@@ -1226,8 +1227,8 @@
    "population140": 630545,
    "warDamage": 1,
    "warBasis": "山越未平但郡治宛陵完整，丹阳兵为天下精兵之源",
-   "households194": 136518,
-   "population194": 630545,
+   "householdsEff": 136518,
+   "populationEff": 630545,
    "terrainFactor": 0.989,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1235,7 +1236,7 @@
    "garrisonTier": 8,
    "moraleTier": 4,
    "defense": 70,
-   "degree": 5
+   "degree": 6
   },
   {
    "id": "庐江郡",
@@ -1248,8 +1249,8 @@
    "population140": 424683,
    "warDamage": 1,
    "warBasis": "江东未大乱，然袁术据淮南征敛无度，北部略损",
-   "households194": 101392,
-   "population194": 424683,
+   "householdsEff": 101392,
+   "populationEff": 424683,
    "terrainFactor": 0.988,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -1257,7 +1258,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "会稽郡",
@@ -1270,8 +1271,8 @@
    "population140": 481196,
    "warDamage": 1.05,
    "warBasis": "江东最完之郡，王朗据之，未经大兵",
-   "households194": 129245,
-   "population194": 505256,
+   "householdsEff": 129245,
+   "populationEff": 505256,
    "terrainFactor": 0.95,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -1279,7 +1280,7 @@
    "garrisonTier": 7,
    "moraleTier": 5,
    "defense": 65,
-   "degree": 2
+   "degree": 5
   },
   {
    "id": "吴郡",
@@ -1292,8 +1293,8 @@
    "population140": 700782,
    "warDamage": 1,
    "warBasis": "江东未大乱，然袁术据淮南征敛无度，北部略损",
-   "households194": 164164,
-   "population194": 700782,
+   "householdsEff": 164164,
+   "populationEff": 700782,
    "terrainFactor": 0.867,
    "dominantTerrain": "plain",
    "yieldTier": 8,
@@ -1314,8 +1315,8 @@
    "population140": 1668906,
    "warDamage": 1,
    "warBasis": "江东未大乱，然袁术据淮南征敛无度，北部略损",
-   "households194": 406496,
-   "population194": 1668906,
+   "householdsEff": 406496,
+   "populationEff": 1668906,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 9,
@@ -1323,7 +1324,7 @@
    "garrisonTier": 11,
    "moraleTier": 3,
    "defense": 75,
-   "degree": 4
+   "degree": 6
   },
   {
    "id": "汉中郡",
@@ -1336,8 +1337,8 @@
    "population140": 267402,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 63078,
-   "population194": 294142,
+   "householdsEff": 63078,
+   "populationEff": 294142,
    "terrainFactor": 0.698,
    "dominantTerrain": "hill",
    "yieldTier": 6,
@@ -1345,7 +1346,7 @@
    "garrisonTier": 6,
    "moraleTier": 5,
    "defense": 68,
-   "degree": 6
+   "degree": 5
   },
   {
    "id": "巴郡",
@@ -1358,16 +1359,16 @@
    "population140": 1086049,
    "warDamage": 1.05,
    "warBasis": "米贼张鲁断道前，巴中尚通",
-   "households194": 326226,
-   "population194": 1140351,
+   "householdsEff": 326226,
+   "populationEff": 1140351,
    "terrainFactor": 0.912,
    "dominantTerrain": "plain",
    "yieldTier": 8,
    "garrison": 22807,
    "garrisonTier": 10,
    "moraleTier": 4,
-   "defense": 70,
-   "degree": 5
+   "defense": 78,
+   "degree": 4
   },
   {
    "id": "广汉郡",
@@ -1380,8 +1381,8 @@
    "population140": 509438,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 153852,
-   "population194": 560382,
+   "householdsEff": 153852,
+   "populationEff": 560382,
    "terrainFactor": 0.781,
    "dominantTerrain": "hill",
    "yieldTier": 7,
@@ -1402,8 +1403,8 @@
    "population140": 1350476,
    "warDamage": 1.15,
    "warBasis": "成都平原为流民主要归所，府库殷实",
-   "households194": 345520,
-   "population194": 1553047,
+   "householdsEff": 345520,
+   "populationEff": 1553047,
    "terrainFactor": 0.8,
    "dominantTerrain": "hill",
    "yieldTier": 8,
@@ -1411,7 +1412,7 @@
    "garrisonTier": 10,
    "moraleTier": 5,
    "defense": 70,
-   "degree": 4
+   "degree": 2
   },
   {
    "id": "犍为郡",
@@ -1424,8 +1425,8 @@
    "population140": 411378,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 151484,
-   "population194": 452516,
+   "householdsEff": 151484,
+   "populationEff": 452516,
    "terrainFactor": 0.8,
    "dominantTerrain": "hill",
    "yieldTier": 7,
@@ -1433,7 +1434,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 3
+   "degree": 5
   },
   {
    "id": "牂牁郡",
@@ -1446,8 +1447,8 @@
    "population140": 267253,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 34675,
-   "population194": 293978,
+   "householdsEff": 34675,
+   "populationEff": 293978,
    "terrainFactor": 0.788,
    "dominantTerrain": "hill",
    "yieldTier": 6,
@@ -1455,7 +1456,7 @@
    "garrisonTier": 5,
    "moraleTier": 4,
    "defense": 60,
-   "degree": 2
+   "degree": 4
   },
   {
    "id": "越巂郡",
@@ -1468,8 +1469,8 @@
    "population140": 623418,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 143132,
-   "population194": 685760,
+   "householdsEff": 143132,
+   "populationEff": 685760,
    "terrainFactor": 0.415,
    "dominantTerrain": "mountain",
    "yieldTier": 7,
@@ -1477,7 +1478,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 1
+   "degree": 2
   },
   {
    "id": "益州郡",
@@ -1490,8 +1491,8 @@
    "population140": 110802,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 31940,
-   "population194": 121882,
+   "householdsEff": 31940,
+   "populationEff": 121882,
    "terrainFactor": 0.45,
    "dominantTerrain": "mountain",
    "yieldTier": 5,
@@ -1499,7 +1500,7 @@
    "garrisonTier": 3,
    "moraleTier": 4,
    "defense": 55,
-   "degree": 2
+   "degree": 4
   },
   {
    "id": "永昌郡",
@@ -1512,8 +1513,8 @@
    "population140": 1897344,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 255087,
-   "population194": 2087078,
+   "householdsEff": 255087,
+   "populationEff": 2087078,
    "terrainFactor": 0.503,
    "dominantTerrain": "mountain",
    "yieldTier": 8,
@@ -1534,8 +1535,8 @@
    "population140": 205652,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 40821,
-   "population194": 226217,
+   "householdsEff": 40821,
+   "populationEff": 226217,
    "terrainFactor": 0.459,
    "dominantTerrain": "mountain",
    "yieldTier": 5,
@@ -1543,7 +1544,7 @@
    "garrisonTier": 4,
    "moraleTier": 4,
    "defense": 63,
-   "degree": 6
+   "degree": 2
   },
   {
    "id": "蜀郡属国",
@@ -1556,8 +1557,8 @@
    "population140": 475629,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 121000,
-   "population194": 523192,
+   "householdsEff": 121000,
+   "populationEff": 523192,
    "terrainFactor": 0.664,
    "dominantTerrain": "hill",
    "yieldTier": 7,
@@ -1565,7 +1566,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 5
+   "degree": 2
   },
   {
    "id": "犍为属国",
@@ -1578,8 +1579,8 @@
    "population140": 37187,
    "warDamage": 1.1,
    "warBasis": "刘焉据险自守，米贼断道，中国既乱，南阳三辅民数万户流入益州（《刘焉传》）",
-   "households194": 7710,
-   "population194": 40906,
+   "householdsEff": 7710,
+   "populationEff": 40906,
    "terrainFactor": 0.469,
    "dominantTerrain": "mountain",
    "yieldTier": 3,
@@ -1600,8 +1601,8 @@
    "population140": 29637,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 3095,
-   "population194": 16300,
+   "householdsEff": 3095,
+   "populationEff": 16300,
    "terrainFactor": 0.418,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -1609,7 +1610,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 40,
-   "degree": 4
+   "degree": 3
   },
   {
    "id": "汉阳郡",
@@ -1622,15 +1623,15 @@
    "population140": 130138,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 15083,
-   "population194": 71576,
+   "householdsEff": 15083,
+   "populationEff": 71576,
    "terrainFactor": 0.465,
    "dominantTerrain": "mountain",
    "yieldTier": 4,
    "garrison": 1262,
    "garrisonTier": 1,
    "moraleTier": 2,
-   "defense": 50,
+   "defense": 58,
    "degree": 5
   },
   {
@@ -1644,8 +1645,8 @@
    "population140": 81728,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 11056,
-   "population194": 44950,
+   "householdsEff": 11056,
+   "populationEff": 44950,
    "terrainFactor": 0.558,
    "dominantTerrain": "mountain",
    "yieldTier": 4,
@@ -1653,7 +1654,7 @@
    "garrisonTier": 0,
    "moraleTier": 3,
    "defense": 58,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "金城郡",
@@ -1666,8 +1667,8 @@
    "population140": 8947,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 2122,
-   "population194": 4921,
+   "householdsEff": 2122,
+   "populationEff": 4921,
    "terrainFactor": 0.45,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -1675,7 +1676,7 @@
    "garrisonTier": 0,
    "moraleTier": 3,
    "defense": 40,
-   "degree": 3
+   "degree": 1
   },
   {
    "id": "安定郡",
@@ -1688,15 +1689,15 @@
    "population140": 29060,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 3352,
-   "population194": 15983,
+   "householdsEff": 3352,
+   "populationEff": 15983,
    "terrainFactor": 0.701,
    "dominantTerrain": "hill",
    "yieldTier": 3,
    "garrison": 320,
    "garrisonTier": 0,
    "moraleTier": 2,
-   "defense": 45,
+   "defense": 53,
    "degree": 5
   },
   {
@@ -1710,8 +1711,8 @@
    "population140": 8637,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 1717,
-   "population194": 4750,
+   "householdsEff": 1717,
+   "populationEff": 4750,
    "terrainFactor": 0.732,
    "dominantTerrain": "hill",
    "yieldTier": 2,
@@ -1719,7 +1720,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 40,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "武威郡",
@@ -1732,8 +1733,8 @@
    "population140": 34226,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 23,
-   "population194": 18824,
+   "householdsEff": 23,
+   "populationEff": 18824,
    "terrainFactor": 0.432,
    "dominantTerrain": "mountain",
    "yieldTier": 1,
@@ -1754,8 +1755,8 @@
    "population140": 26040,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 3604,
-   "population194": 14322,
+   "householdsEff": 3604,
+   "populationEff": 14322,
    "terrainFactor": 0.441,
    "dominantTerrain": "mountain",
    "yieldTier": 3,
@@ -1776,8 +1777,8 @@
    "population140": 12842,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 1488,
-   "population194": 7063,
+   "householdsEff": 1488,
+   "populationEff": 7063,
    "terrainFactor": 0.545,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -1798,8 +1799,8 @@
    "population140": 29170,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 411,
-   "population194": 16044,
+   "householdsEff": 411,
+   "populationEff": 16044,
    "terrainFactor": 0.676,
    "dominantTerrain": "hill",
    "yieldTier": 1,
@@ -1807,7 +1808,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 35,
-   "degree": 1
+   "degree": 2
   },
   {
    "id": "张掖属国",
@@ -1820,8 +1821,8 @@
    "population140": 6952,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 2200,
-   "population194": 3824,
+   "householdsEff": 2200,
+   "populationEff": 3824,
    "terrainFactor": 0.439,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -1829,7 +1830,7 @@
    "garrisonTier": 0,
    "moraleTier": 3,
    "defense": 40,
-   "degree": 4
+   "degree": 3
   },
   {
    "id": "张掖居延属国",
@@ -1842,8 +1843,8 @@
    "population140": 4733,
    "warDamage": 0.55,
    "warBasis": "中平元年北宫伯玉之乱以来羌胡连兵十年，郡县多废（《董卓传》《皇甫嵩传》）",
-   "households194": 858,
-   "population194": 2603,
+   "householdsEff": 858,
+   "populationEff": 2603,
    "terrainFactor": 0.8,
    "dominantTerrain": "hill",
    "yieldTier": 2,
@@ -1851,7 +1852,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 40,
-   "degree": 3
+   "degree": 6
   },
   {
    "id": "上党郡",
@@ -1864,8 +1865,8 @@
    "population140": 127403,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 17044,
-   "population194": 82812,
+   "householdsEff": 17044,
+   "populationEff": 82812,
    "terrainFactor": 0.797,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -1873,7 +1874,7 @@
    "garrisonTier": 2,
    "moraleTier": 2,
    "defense": 63,
-   "degree": 7
+   "degree": 5
   },
   {
    "id": "太原郡",
@@ -1886,15 +1887,15 @@
    "population140": 200124,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 20086,
-   "population194": 130081,
+   "householdsEff": 20086,
+   "populationEff": 130081,
    "terrainFactor": 0.735,
    "dominantTerrain": "hill",
    "yieldTier": 5,
    "garrison": 2602,
    "garrisonTier": 3,
    "moraleTier": 2,
-   "defense": 69,
+   "defense": 61,
    "degree": 5
   },
   {
@@ -1908,8 +1909,8 @@
    "population140": 28599,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 3360,
-   "population194": 18589,
+   "householdsEff": 3360,
+   "populationEff": 18589,
    "terrainFactor": 0.8,
    "dominantTerrain": "hill",
    "yieldTier": 3,
@@ -1917,7 +1918,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 45,
-   "degree": 6
+   "degree": 3
   },
   {
    "id": "西河郡",
@@ -1930,8 +1931,8 @@
    "population140": 20838,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 3704,
-   "population194": 13545,
+   "householdsEff": 3704,
+   "populationEff": 13545,
    "terrainFactor": 0.701,
    "dominantTerrain": "hill",
    "yieldTier": 3,
@@ -1939,7 +1940,7 @@
    "garrisonTier": 0,
    "moraleTier": 3,
    "defense": 45,
-   "degree": 4
+   "degree": 3
   },
   {
    "id": "五原郡",
@@ -1952,8 +1953,8 @@
    "population140": 22957,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 3034,
-   "population194": 14922,
+   "householdsEff": 3034,
+   "populationEff": 14922,
    "terrainFactor": 0.707,
    "dominantTerrain": "hill",
    "yieldTier": 3,
@@ -1974,8 +1975,8 @@
    "population140": 26430,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 3478,
-   "population194": 17180,
+   "householdsEff": 3478,
+   "populationEff": 17180,
    "terrainFactor": 0.788,
    "dominantTerrain": "hill",
    "yieldTier": 3,
@@ -1983,7 +1984,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 45,
-   "degree": 4
+   "degree": 3
   },
   {
    "id": "定襄郡",
@@ -1996,8 +1997,8 @@
    "population140": 3571,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 2049,
-   "population194": 2321,
+   "householdsEff": 2049,
+   "populationEff": 2321,
    "terrainFactor": 0.583,
    "dominantTerrain": "mountain",
    "yieldTier": 2,
@@ -2018,8 +2019,8 @@
    "population140": 249000,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 20710,
-   "population194": 161850,
+   "householdsEff": 20710,
+   "populationEff": 161850,
    "terrainFactor": 0.692,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -2027,7 +2028,7 @@
    "garrisonTier": 3,
    "moraleTier": 2,
    "defense": 63,
-   "degree": 7
+   "degree": 6
   },
   {
    "id": "朔方郡",
@@ -2040,8 +2041,8 @@
    "population140": 7843,
    "warDamage": 0.65,
    "warBasis": "白波贼据河东太原，南匈奴叛，边郡内徙",
-   "households194": 1292,
-   "population194": 5098,
+   "householdsEff": 1292,
+   "populationEff": 5098,
    "terrainFactor": 0.769,
    "dominantTerrain": "hill",
    "yieldTier": 2,
@@ -2049,7 +2050,7 @@
    "garrisonTier": 0,
    "moraleTier": 2,
    "defense": 40,
-   "degree": 1
+   "degree": 3
   },
   {
    "id": "涿郡",
@@ -2062,8 +2063,8 @@
    "population140": 633754,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 76664,
-   "population194": 475316,
+   "householdsEff": 76664,
+   "populationEff": 475316,
    "terrainFactor": 0.963,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -2084,8 +2085,8 @@
    "population140": 280600,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 33413,
-   "population194": 210450,
+   "householdsEff": 33413,
+   "populationEff": 210450,
    "terrainFactor": 0.968,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -2106,8 +2107,8 @@
    "population140": 126188,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 15092,
-   "population194": 94641,
+   "householdsEff": 15092,
+   "populationEff": 94641,
    "terrainFactor": 0.707,
    "dominantTerrain": "hill",
    "yieldTier": 5,
@@ -2115,7 +2116,7 @@
    "garrisonTier": 2,
    "moraleTier": 3,
    "defense": 63,
-   "degree": 7
+   "degree": 6
   },
   {
    "id": "上谷郡",
@@ -2128,8 +2129,8 @@
    "population140": 51204,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 264,
-   "population194": 38403,
+   "householdsEff": 264,
+   "populationEff": 38403,
    "terrainFactor": 0.793,
    "dominantTerrain": "hill",
    "yieldTier": 1,
@@ -2150,8 +2151,8 @@
    "population140": 435740,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 51342,
-   "population194": 326805,
+   "householdsEff": 51342,
+   "populationEff": 326805,
    "terrainFactor": 0.915,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -2159,7 +2160,7 @@
    "garrisonTier": 6,
    "moraleTier": 3,
    "defense": 68,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "右北平郡",
@@ -2172,16 +2173,16 @@
    "population140": 53475,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 6878,
-   "population194": 40106,
+   "householdsEff": 6878,
+   "populationEff": 40106,
    "terrainFactor": 0.996,
    "dominantTerrain": "plain",
    "yieldTier": 4,
    "garrison": 802,
    "garrisonTier": 0,
    "moraleTier": 3,
-   "defense": 58,
-   "degree": 4
+   "defense": 50,
+   "degree": 8
   },
   {
    "id": "辽西郡",
@@ -2194,15 +2195,15 @@
    "population140": 81714,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 3113,
-   "population194": 61286,
+   "householdsEff": 3113,
+   "populationEff": 61286,
    "terrainFactor": 0.995,
    "dominantTerrain": "plain",
    "yieldTier": 3,
    "garrison": 558,
    "garrisonTier": 0,
    "moraleTier": 4,
-   "defense": 53,
+   "defense": 45,
    "degree": 3
   },
   {
@@ -2216,16 +2217,16 @@
    "population140": 81714,
    "warDamage": 1.1,
    "warBasis": "公孙度雄据海东，中原士人避难者众（《公孙度传》）",
-   "households194": 70574,
-   "population194": 89885,
+   "householdsEff": 70574,
+   "populationEff": 89885,
    "terrainFactor": 0.973,
    "dominantTerrain": "plain",
    "yieldTier": 7,
    "garrison": 1798,
    "garrisonTier": 2,
    "moraleTier": 5,
-   "defense": 65,
-   "degree": 4
+   "defense": 73,
+   "degree": 5
   },
   {
    "id": "玄菟郡",
@@ -2238,8 +2239,8 @@
    "population140": 43163,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 1196,
-   "population194": 32372,
+   "householdsEff": 1196,
+   "populationEff": 32372,
    "terrainFactor": 0.996,
    "dominantTerrain": "plain",
    "yieldTier": 2,
@@ -2247,7 +2248,7 @@
    "garrisonTier": 0,
    "moraleTier": 4,
    "defense": 40,
-   "degree": 3
+   "degree": 2
   },
   {
    "id": "乐浪郡",
@@ -2260,8 +2261,8 @@
    "population140": 257050,
    "warDamage": 0.8,
    "warBasis": "本条 basis 记「荒」，且远悬海外",
-   "households194": 49194,
-   "population194": 205640,
+   "householdsEff": 49194,
+   "populationEff": 205640,
    "terrainFactor": 0.936,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -2269,7 +2270,7 @@
    "garrisonTier": 5,
    "moraleTier": 4,
    "defense": 60,
-   "degree": 2
+   "degree": 3
   },
   {
    "id": "辽东属国",
@@ -2282,8 +2283,8 @@
    "population140": 12542,
    "warDamage": 0.75,
    "warBasis": "刘虞公孙瓒相攻，然幽州东部与辽东较完",
-   "households194": 1500,
-   "population194": 9407,
+   "householdsEff": 1500,
+   "populationEff": 9407,
    "terrainFactor": 0.991,
    "dominantTerrain": "plain",
    "yieldTier": 2,
@@ -2291,7 +2292,7 @@
    "garrisonTier": 0,
    "moraleTier": 4,
    "defense": 40,
-   "degree": 3
+   "degree": 4
   },
   {
    "id": "南海郡",
@@ -2304,8 +2305,8 @@
    "population140": 250282,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 75051,
-   "population194": 262796,
+   "householdsEff": 75051,
+   "populationEff": 262796,
    "terrainFactor": 0.85,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -2313,7 +2314,7 @@
    "garrisonTier": 5,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 2
+   "degree": 3
   },
   {
    "id": "苍梧郡",
@@ -2326,8 +2327,8 @@
    "population140": 466975,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 116965,
-   "population194": 490324,
+   "householdsEff": 116965,
+   "populationEff": 490324,
    "terrainFactor": 0.984,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -2335,7 +2336,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 5
+   "degree": 4
   },
   {
    "id": "郁林郡",
@@ -2348,8 +2349,8 @@
    "population140": 428970,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 107445,
-   "population194": 450419,
+   "householdsEff": 107445,
+   "populationEff": 450419,
    "terrainFactor": 0.973,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -2357,7 +2358,7 @@
    "garrisonTier": 7,
    "moraleTier": 4,
    "defense": 65,
-   "degree": 3
+   "degree": 2
   },
   {
    "id": "合浦郡",
@@ -2370,8 +2371,8 @@
    "population140": 86617,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 24277,
-   "population194": 90948,
+   "householdsEff": 24277,
+   "populationEff": 90948,
    "terrainFactor": 0.637,
    "dominantTerrain": "plain",
    "yieldTier": 5,
@@ -2379,7 +2380,7 @@
    "garrisonTier": 2,
    "moraleTier": 4,
    "defense": 55,
-   "degree": 3
+   "degree": 7
   },
   {
    "id": "交趾郡",
@@ -2392,8 +2393,8 @@
    "population140": 467964,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 117213,
-   "population194": 491362,
+   "householdsEff": 117213,
+   "populationEff": 491362,
    "terrainFactor": 0.998,
    "dominantTerrain": "plain",
    "yieldTier": 7,
@@ -2401,7 +2402,7 @@
    "garrisonTier": 7,
    "moraleTier": 5,
    "defense": 71,
-   "degree": 2
+   "degree": 4
   },
   {
    "id": "九真郡",
@@ -2414,8 +2415,8 @@
    "population140": 209894,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 48839,
-   "population194": 220389,
+   "householdsEff": 48839,
+   "populationEff": 220389,
    "terrainFactor": 0.768,
    "dominantTerrain": "plain",
    "yieldTier": 6,
@@ -2436,8 +2437,8 @@
    "population140": 100676,
    "warDamage": 1.05,
    "warBasis": "士燮兄弟并为列郡，雄长一州，中国士人往依避难者以百数（《士燮传》）",
-   "households194": 8676,
-   "population194": 105710,
+   "householdsEff": 8676,
+   "populationEff": 105710,
    "terrainFactor": 0.699,
    "dominantTerrain": "plain",
    "yieldTier": 4,
@@ -2445,7 +2446,7 @@
    "garrisonTier": 1,
    "moraleTier": 4,
    "defense": 50,
-   "degree": 1
+   "degree": 3
   }
  ]
 }

@@ -133,6 +133,10 @@ function lateSubmission() {
   for (const id of rest.slice(16)) s.commanderies[id].owner = 'yuanshao';
   s.factions.yuanshao.capital = [...owned][0];
   s.factions.liubiao.capital = rest[0];
+  // 霸主还得是**打出来的**：劝降另有一道克城数门槛（见内容包
+  // constants.归降.门槛_为何要克城数）。夹具只发地不发战功，就捏不出一个
+  // 够得着劝降的霸主——而那不是机制坏了，是夹具没把霸主捏全
+  s.factions.yuanshao.conquests = Math.max(s.factions.yuanshao.conquests, P.submitMinConquests);
   return s;
 }
 

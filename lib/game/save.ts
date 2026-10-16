@@ -16,7 +16,7 @@ const KEY = "mind-arena/play/v1";
  * 加字段（stations、allyBanUntil…）、改语义都算。
  * 旧档会被直接丢弃并提示重开，不做迁移。
  */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 export interface SavedGame {
   version: number;
@@ -46,8 +46,14 @@ export interface SavedGame {
 export function packStamp(
   seasonsPerGame: number, commanderies: number, epochs: number,
   constants?: Record<string, unknown>,
+  /**
+   * 剧本 id。**两个剧本共用同一套规则与同一张郡国表**，于是前四个参数
+   * 逐位相同——兴平元年的存档会被读进建安五年的局里，格局全不对而一声不响。
+   * 这正是这个戳当初要防的那类事，只是当时还只有一个剧本。
+   */
+  scenario?: string,
 ): string {
-  const base = `${seasonsPerGame}-${commanderies}-${epochs}`;
+  const base = `${seasonsPerGame}-${commanderies}-${epochs}${scenario ? `-${scenario}` : ""}`;
   if (!constants) return base;
   const nums: string[] = [];
   for (const [g, kv] of Object.entries(constants)) {

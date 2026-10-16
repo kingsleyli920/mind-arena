@@ -86,8 +86,13 @@ export interface EngineParams {
   suadeHomeBonus: number;
   /** 劝降势力：目标郡数上限、实力倍数门槛、基础成功率、民心折减、倍数加成 */
   submitMaxCommanderies: number;
-  /** 劝降方自身的控制州数门槛。看的是「自己够不够强」而不是「对方有多小」 */
+  /**
+   * 劝降方自身的门槛：控州数，以及**已克敌城数**。
+   * 看的是「自己够不够强」而不是「对方有多小」；而「够强」要打出来，
+   * 不能只看地有多大——克城数那一条就是为此而设，见内容包的「门槛_为何要克城数」。
+   */
   submitMinZhou: number;
+  submitMinConquests: number;
   submitRatio: number;
   submitHegemonyZhou: number; submitHegemonyRatio: number;
   submitBase: number;
@@ -314,6 +319,7 @@ export function loadParams(pack: RawPack): EngineParams {
     suadeHomeBonus: g("招降", "同乡加成"),
     submitMaxCommanderies: g("归降", "门槛_目标郡数"),
     submitMinZhou: g("归降", "门槛_劝降方州数"),
+    submitMinConquests: g("归降", "门槛_已克敌城"),
     submitRatio: g("归降", "门槛_实力倍数"),
     submitHegemonyZhou: g("归降", "霸业_劝降方州数"),
     submitHegemonyRatio: g("归降", "霸业_实力倍数"),

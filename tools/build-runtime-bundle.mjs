@@ -9,8 +9,21 @@ import { cmp } from "../lib/game/engine/cmp.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 
+// 剧本由年份选。默认 194——`node tools/build-runtime-bundle.mjs 200` 出另一份。
+const YEAR = Number(process.argv[2] ?? 194);
+
 const commanderies = read("commanderies.json");
-const availability = read("officer-availability-194.json");
+const scenario = read(`scenario-${YEAR}.json`);
+const availability = read(`officer-availability-${YEAR}.json`);
+// 在任表是按「年 + 月」算的（建安五年正月与岁末差着颜良文丑沮授淳于琼孙策），
+// 而它与剧本是两个文件、两次生成。切片对不上就等于名册错了一整台戏，
+// 所以在这里钉死——这正是本仓库「四方对账」里最容易漏的那一方
+if (availability.year !== scenario.meta.year || availability.month !== scenario.meta.month) {
+  throw new Error(
+    `在任表的切片是 ${availability.year} 年 ${availability.month} 月，`
+    + `而剧本是 ${scenario.meta.year} 年 ${scenario.meta.month} 月——`
+    + `重跑 node tools/build-officer-availability.mjs ${scenario.meta.year} ${scenario.meta.month}`);
+}
 const ok = new Set(availability.officers.filter((x) => x.available).map((x) => x.id));
 
 const officers = read("officers.json")
@@ -30,8 +43,8 @@ const officers = read("officers.json")
 const bundle = {
   _note: "浏览器端引擎的最小数据包，由 tools/build-runtime-bundle.mjs 生成，勿手改。"
        + "史料判据与考订过程留在 lib/game/data 的全量文件里。",
-  scenario: read("scenario-194.json"),   // 含各方本年局势，选席界面要用
-  commanderyState: read("commandery-state.json"),
+  scenario,                              // 含各方本年局势，选席界面要用
+  commanderyState: read(`commandery-state${YEAR === 194 ? "" : `-${YEAR}`}.json`),
   commanderies: commanderies.map((c) => ({
     id: c.id, name: c.name, zhou: c.zhou, seat: c.seat,
     longitude: c.longitude, latitude: c.latitude,
@@ -66,15 +79,53 @@ const bundle = {
     at: n.nearestCommandery ?? null,
   })),
   troopTypes: read("troop-types.json"), resources: read("resources.json"),
-  provinceSeats: read("province-seats-194.json"),
+  provinceSeats: read(`province-seats-${YEAR}.json`),
   // 名册与登场判定合成一张表，省掉一次交叉引用
   officers,
-  pack: JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8")),
+  // 规则包一份，剧本多份。包里有三处是**剧本事实**而非规则——天子所在之郡、
+  // 据此写成的授官前置条件、以及剧本标签。它们原本写死在 pack-194.json 里，
+  // 于是一份规则包只配得上一个剧本。这里按剧本申报的 courtSeat 改写，
+  // 规则数值一个不动（指纹只取数字，这三处都是字符串）。
+  pack: (() => {
+    const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
+    const seat = scenario.meta.courtSeat;
+    if (!seat) throw new Error(`scenario-${YEAR}.json 的 meta 没有 courtSeat——天子在哪个郡是剧本必须申报的`);
+    if (!commanderies.some((c) => c.name === seat)) {
+      throw new Error(`courtSeat「${seat}」不是 commanderies.json 里的郡国`);
+    }
+    pack.scenario = scenario.meta.label;
+    pack.constants["名器"]["朝廷所在"] = seat;
+    const invest = pack.actions.find((a) => a.id === "invest");
+    if (!invest) throw new Error("规则包里找不到授官令（invest）");
+    invest.preconditions[0] = `须据${seat}（朝廷所在）`;
+    return pack;
+  })(),
 };
 
 fs.mkdirSync("public/game", { recursive: true });
-const out = "public/game/runtime-194.json";
+const out = `public/game/runtime-${YEAR}.json`;
 fs.writeFileSync(out, JSON.stringify(bundle));
+// 剧本目录：扫一遍 lib/game/data/scenario-*.json，供选席页列出可玩的剧本。
+// 每建一份包都重扫全量，省得目录与实际有的包对不上
+{
+  const list = fs.readdirSync("lib/game/data")
+    .map((f) => /^scenario-(\d+)\.json$/.exec(f))
+    .filter(Boolean)
+    .map((m) => ({ id: m[1], meta: JSON.parse(fs.readFileSync(`lib/game/data/${m[0]}`, "utf8")).meta }))
+    .filter((x) => fs.existsSync(`public/game/runtime-${x.id}.json`))
+    .map((x) => ({
+      id: x.id, year: x.meta.year, era: x.meta.era, label: x.meta.label,
+      factions: x.meta.factionCount, commanderies: x.meta.commanderyCount,
+      // 选席页只要一句话，完整的切片说明留在 scenario-*.json 里
+      blurb: String(x.meta.note).split("。")[0] + "。",
+    }))
+    .sort((a, b) => a.year - b.year);
+  fs.writeFileSync("public/game/scenarios.json", JSON.stringify({
+    _note: "可玩剧本目录，由 tools/build-runtime-bundle.mjs 扫出，勿手改。",
+    scenarios: list,
+  }, null, 1));
+  console.log(`  剧本目录 ${list.map((x) => `${x.id}(${x.era})`).join(" ")}`);
+}
 const kb = (fs.statSync(out).size / 1024).toFixed(0);
 console.log(`→ ${out}  ${kb}KB`);
 console.log(`  郡国 ${bundle.commanderies.length}  势力 ${bundle.scenario.factions.length}`
