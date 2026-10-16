@@ -44,3 +44,19 @@ export function goneBy(o, year, month) {
   if (d !== year) return d < year;
   return (o.deathMonth ?? 1) <= month;
 }
+
+/**
+ * 某剧本年此人在谁手下。
+ *
+ * officers.json 的基准字段是 affiliation194——字段名就带着年份，因为它记的是
+ * **兴平元年**的归属，不是一生的主君（张辽此年属吕布、徐晃此年属杨奉）。
+ * 换个剧本年就要重判：建安五年里吕布、袁术、公孙瓒、刘繇、王朗、陆康、李傕、
+ * 张济、张杨都已不在，而程普韩当黄盖吕范孙贲连同**孙策本人**仍挂在袁术名下。
+ *
+ * 用 hasOwn 而不是 ??：`affiliation200: null` 要能表达「本年无主」（纪灵、陈兰、
+ * 白波诸帅这些人随旧主覆灭而去向失载），而 ?? 会把它悄悄退回 194 年的归属。
+ */
+export function affiliationIn(o, year) {
+  const key = `affiliation${year}`;
+  return Object.hasOwn(o, key) ? (o[key] ?? null) : (o.affiliation194 ?? null);
+}

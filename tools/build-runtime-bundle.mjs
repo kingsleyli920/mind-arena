@@ -6,6 +6,7 @@
 // 这里只留引擎真正读取的字段。
 import fs from "node:fs";
 import { cmp } from "../lib/game/engine/cmp.ts";
+import { affiliationIn } from "./lib/officer-slice.mjs";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 
@@ -33,7 +34,9 @@ const officers = read("officers.json")
   .map((o) => ({
     id: o.id, name: o.name,
     commandery: o.commandery ?? null,
-    affiliation194: o.affiliation194 ?? null,
+    // 归属**在打包时按剧本年解析**，引擎拿到的就是本年的主君。
+    // 放在这里而不是引擎里：一局只解析一次，而且 tools 与浏览器吃的是同一份包
+    affiliation: affiliationIn(o, YEAR),
     leadership: o.leadership, might: o.might, intellect: o.intellect,
     politics: o.politics, charisma: o.charisma,
     aptitudes: o.aptitudes ?? [],

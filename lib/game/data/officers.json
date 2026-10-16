@@ -345,6 +345,8 @@
   "origin": "幽州右北平郡土垠县",
   "commandery": "右北平郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚旧将，策渡江后从定三郡，为零陵太守（《程普传》）",
   "roles": [
    "军事",
    "骑将"
@@ -415,6 +417,8 @@
   "origin": "豫州颍川郡许昌县",
   "commandery": "颍川郡",
   "affiliation194": "liubei",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安三年吕布破后，曹操辟为司空西曹掾属（《陈群传》）。194 年为刘备别驾",
   "roles": [
    "内政",
    "谋略",
@@ -554,6 +558,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "lubu",
+  "affiliation200": null,
+  "affiliation200Basis": "元杂剧与演义所造，正史无此人；旧主吕布已灭，无可系属",
   "roles": [
    "后妃"
   ],
@@ -620,6 +626,8 @@
   "origin": "扬州会稽郡余姚县",
   "commandery": "会稽郡",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "策入会稽，袭迎于高迁亭，授门下贼曹（《董袭传》）",
   "roles": [
    "军事",
    "水军"
@@ -758,6 +766,8 @@
   "origin": "司隶右扶风郿县",
   "commandery": "右扶风",
   "affiliation194": null,
+  "affiliation200": "liuzhang",
+  "affiliation200Basis": "建安初与同郡孟达俱入蜀依刘璋，久之为新都令（《法正传》）",
   "roles": [
    "谋略"
   ],
@@ -827,6 +837,8 @@
   "origin": "益州巴郡临江县",
   "commandery": "巴郡",
   "affiliation194": null,
+  "affiliation200": "liubiao",
+  "affiliation200Basis": "兴平中反刘璋败走荆州，依刘表而不见进用，遂往依江夏黄祖（《甘宁传》）",
   "roles": [
    "军事",
    "水军",
@@ -1169,6 +1181,8 @@
   "origin": "幽州辽西郡令支县",
   "commandery": "辽西郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚旧将，从策征伐，为先登校尉（《韩当传》）",
   "roles": [
    "军事",
    "骑将",
@@ -1242,6 +1256,8 @@
   "origin": "荆州零陵郡泉陵县",
   "commandery": "零陵郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚旧将，策定江东，诸山越不宾者辄以盖为守长（《黄盖传》）",
   "roles": [
    "军事",
    "水军",
@@ -1379,6 +1395,8 @@
   "origin": "扬州九江郡寿春县",
   "commandery": "九江郡",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "策东渡时以袁术故吏从行，后为别部司马（《蒋钦传》）",
   "roles": [
    "军事",
    "水军"
@@ -1480,6 +1498,8 @@
   "origin": "凉州武威郡姑臧县",
   "commandery": "武威郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安四年十一月劝张绣归曹，与绣俱至，拜执金吾（《贾诩传》）。194 年在长安属李傕",
   "roles": [
    "谋略"
   ],
@@ -1550,6 +1570,8 @@
   "origin": "豫州鲁国",
   "commandery": "鲁国",
   "affiliation194": "kongrong",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "青州既失，征为将作大匠、迁少府，本年在许（《后汉书·孔融传》）",
   "roles": [
    "君主",
    "名士",
@@ -1864,6 +1886,8 @@
   "origin": "司隶河南尹雒阳",
   "commandery": "河南尹",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "汉献帝，建安元年都许，名器悉出曹操（《武帝纪》）",
   "roles": [
    "宗室"
   ],
@@ -2002,6 +2026,8 @@
   "origin": "扬州吴郡吴县",
   "commandery": "吴郡",
   "affiliation194": "lukang",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "陆康既死，陆氏在吴，本年十八；正式仕于孙权在建安八年，本年只记归属不记职任",
   "roles": [
    "军事",
    "谋略",
@@ -2217,6 +2243,8 @@
   "origin": "兖州山阳郡昌邑县",
   "commandery": "山阳郡",
   "affiliation194": null,
+  "affiliation200": "caocao",
+  "affiliation200Basis": "为许令、后汝南太守，治法严峻（《满宠传》）",
   "roles": [
    "军事",
    "内政"
@@ -2595,6 +2623,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "讨逆将军、吴侯，去岁破刘勋降华歆，江东六郡略定（《孙讨逆传》）。194 年记在袁术名下，术已于去岁死",
   "roles": [
    "君主",
    "军事",
@@ -2668,6 +2698,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "本年十九，为阳羡长、奉义校尉，在兄策麾下（《吴主传》）",
   "roles": [
    "君主",
    "内政",
@@ -2738,6 +2770,8 @@
   "origin": "青州东莱郡黄县",
   "commandery": "东莱郡",
   "affiliation194": "liuyao",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "建安四年策擒之于勇里，解缚授兵，为建昌都尉（《太史慈传》）。194 年依刘繇，繇已于建安二年死",
   "roles": [
    "军事",
    "水军"
@@ -2844,6 +2878,8 @@
   "origin": "徐州东海郡郯县",
   "commandery": "东海郡",
   "affiliation194": "wanglang",
+  "affiliation200": null,
+  "affiliation200Basis": "孙策破之于会稽，朗浮海至东冶；曹操表征，「自曲阿辗转江海，积年乃至」（《王朗传》），本年尚在道，无所属",
   "roles": [
    "君主",
    "内政",
@@ -3122,6 +3158,8 @@
   "origin": "豫州沛国谯县",
   "commandery": "沛国",
   "affiliation194": null,
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安初率宗族数千家归曹操，太祖曰「此吾樊哙也」（《许褚传》）",
   "roles": [
    "军事"
   ],
@@ -3155,6 +3193,8 @@
   "origin": "司隶河东郡杨县",
   "commandery": "河东郡",
   "affiliation194": "baibo",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安元年杨奉败后归曹，拜裨将军（《徐晃传》）。194 年属白波杨奉",
   "roles": [
    "军事"
   ],
@@ -3636,6 +3676,8 @@
   "origin": "并州雁门郡马邑县",
   "commandery": "雁门郡",
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安三年下邳城破，率众降，拜中郎将赐爵关内侯（《张辽传》）。194 年属吕布",
   "roles": [
    "军事",
    "骑将"
@@ -3779,6 +3821,8 @@
   "origin": "凉州武威郡祖厉县",
   "commandery": "武威郡",
   "affiliation194": "zhangji",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安四年十一月率众降，拜扬武将军，从征官渡（《武帝纪》《张绣传》）",
   "roles": [
    "军事",
    "骑将"
@@ -3814,6 +3858,8 @@
   "origin": "徐州彭城国",
   "commandery": "彭城国",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "策命为长史、抚军中郎将，文武之事一以委之（《张昭传》）",
   "roles": [
    "内政",
    "学者"
@@ -3919,6 +3965,8 @@
   "origin": "豫州颍川郡长社县",
   "commandery": "颍川郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安三年以侍中守司隶校尉、持节督关中诸军，镇长安（《钟繇传》）",
   "roles": [
    "内政",
    "谋略",
@@ -3956,6 +4004,8 @@
   "origin": "扬州九江郡下蔡县",
   "commandery": "九江郡",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "与蒋钦同时从策，宣城以十余人拒山贼数千救孙权（《周泰传》）",
   "roles": [
    "军事",
    "水军"
@@ -3990,6 +4040,8 @@
   "origin": "扬州庐江郡舒县",
   "commandery": "庐江郡",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "建安三年归策，授建威中郎将，与策共定江东（《周瑜传》）。194 年本传记其与策同年相友善而未仕，故原记无主",
   "roles": [
    "军事",
    "水军",
@@ -4460,6 +4512,8 @@
   "origin": "徐州下邳国淮浦县",
   "commandery": "下邳国",
   "affiliation194": "liubei",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "吕布既灭，曹操以登为广陵太守，加伏波将军；本年破孙策军于匡琦（《陈矫传》注引《先贤行状》）。194 年属刘备",
   "roles": [
    "内政",
    "谋略",
@@ -4806,6 +4860,8 @@
   "origin": "兖州济阴郡定陶县",
   "commandery": "济阴郡",
   "affiliation194": "zhangyang",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安元年赞迎天子都许，为洛阳令、徐州牧（《董昭传》）。194 年属张杨",
   "roles": [
    "谋略",
    "内政",
@@ -4842,6 +4898,8 @@
   "origin": "司隶京兆尹杜陵县",
   "commandery": "京兆尹",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "荀彧荐于太祖，为司空司直；建安七年乃为河东太守（《杜畿传》）",
   "roles": [
    "内政"
   ],
@@ -5610,6 +5668,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "袁术大将，术死于去岁，纪灵此后史无明文",
   "roles": [
    "军事"
   ],
@@ -5984,6 +6044,8 @@
   "origin": "扬州九江郡成德县",
   "commandery": "九江郡",
   "affiliation194": null,
+  "affiliation200": "caocao",
+  "affiliation200Basis": "以计斩郑宝并其众归庐江刘勋，勋败而随之奔曹操（《刘晔传》）",
   "roles": [
    "谋略"
   ],
@@ -6191,6 +6253,8 @@
   "origin": "豫州汝南郡细阳县",
   "commandery": "汝南郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "自寿春归策，典财计、督军，为桂阳太守（《吕范传》）",
   "roles": [
    "军事",
    "内政",
@@ -6294,6 +6358,8 @@
   "origin": "司隶右扶风",
   "commandery": "右扶风",
   "affiliation194": null,
+  "affiliation200": "liuzhang",
+  "affiliation200Basis": "与法正俱入蜀依刘璋（《法正传》）",
   "roles": [
    "军事"
   ],
@@ -7039,6 +7105,8 @@
   "origin": "扬州吴郡吴县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "策权之母，本年在吴",
   "roles": [
    "后妃"
   ],
@@ -7404,6 +7472,8 @@
   "origin": "扬州会稽郡余姚县",
   "commandery": "会稽郡",
   "affiliation194": "wanglang",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "王朗既败，策复命为会稽功曹，待以交友之礼（《虞翻传》）",
   "roles": [
    "学者",
    "军事",
@@ -7474,6 +7544,8 @@
   "origin": "兖州泰山郡华县",
   "commandery": "泰山郡",
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "吕布既败，霸等降，太祖以霸为琅邪相，割青徐二州委之（《臧霸传》）",
   "roles": [
    "军事",
    "豪族"
@@ -7538,6 +7610,8 @@
   "origin": "徐州广陵郡",
   "commandery": "广陵郡",
   "affiliation194": null,
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安四年孙策遣纮奉章至许，曹操留为侍御史（《张纮传》）——本年人在许，而心系江东",
   "roles": [
    "内政",
    "谋略",
@@ -8201,6 +8275,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "吕布部将，布灭后众降；本年所任失载，只记归属",
   "roles": [
    "军事"
   ],
@@ -8233,6 +8309,8 @@
   "origin": "兖州泰山郡",
   "commandery": "泰山郡",
   "affiliation194": "lubu",
+  "affiliation200": "liubei",
+  "affiliation200Basis": "《武帝纪》建安五年：「东海昌豨叛为备。」本年正月据东海应刘备，非复曹操所有",
   "roles": [
    "军事",
    "盗寇"
@@ -8593,6 +8671,8 @@
   "origin": "凉州武威郡姑臧县",
   "commandery": "武威郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安三年与裴茂等击破李傕传首许都，屯华阴奉朝命（《后汉书·董卓传》）",
   "roles": [
    "军事",
    "内政"
@@ -9257,6 +9337,8 @@
   "origin": "荆州长沙郡临湘县",
   "commandery": "长沙郡",
   "affiliation194": "liubiao",
+  "affiliation200": "zhangxian",
+  "affiliation200Basis": "说张羡以三郡叛表应曹公，正是此叛的首谋（《桓阶传》）",
   "roles": [
    "内政",
    "谋略"
@@ -9292,6 +9374,8 @@
   "origin": "凉州",
   "commandery": null,
   "affiliation194": "zhangji",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "张绣部将，随绣降",
   "roles": [
    "军事"
   ],
@@ -9624,6 +9708,8 @@
   "origin": "扬州吴郡余杭县",
   "commandery": "吴郡",
   "affiliation194": null,
+  "affiliation200": "sunce",
+  "affiliation200Basis": "轻侠有胆气，从策征伐常冠军先登（《凌统传》）",
   "roles": [
    "军事",
    "水军"
@@ -9895,6 +9981,8 @@
   "origin": "兖州济北国",
   "commandery": "济北国",
   "affiliation194": "yuanshu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安四年为孙策所破，奔曹操，拜平虏将军（《孙讨逆传》注引《江表传》）",
   "roles": [
    "军事"
   ],
@@ -10627,6 +10715,8 @@
   "origin": "青州北海国营陵县",
   "commandery": "北海国",
   "affiliation194": "kongrong",
+  "affiliation200": null,
+  "affiliation200Basis": "北海人，孔融去后南依刘繇；仕孙权在建安末，本年无所属",
   "roles": [
    "内政"
   ],
@@ -10727,6 +10817,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "与魏续侯成共缚陈宫、开门降曹（《吕布传》）",
   "roles": [
    "军事"
   ],
@@ -10759,6 +10851,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚从子，从策定江东，为豫章太守（《孙贲传》）",
   "roles": [
    "军事",
    "宗室"
@@ -10794,6 +10888,8 @@
   "origin": "兖州泰山郡",
   "commandery": "泰山郡",
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "随臧霸降，为北海相（《臧霸传》）",
   "roles": [
    "军事"
   ],
@@ -10826,6 +10922,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚三子，本年十七，在兄策麾下；后为丹阳太守",
   "roles": [
    "军事",
    "宗室"
@@ -10957,6 +11055,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "gongsunzan",
+  "affiliation200": null,
+  "affiliation200Basis": "公孙瓒所置青州刺史，为袁谭所逐；瓒死于去岁，楷此后失载",
   "roles": [
    "军事"
   ],
@@ -11152,6 +11252,8 @@
   "origin": "青州北海国营陵县",
   "commandery": "北海国",
   "affiliation194": "kongrong",
+  "affiliation200": "yuanshao",
+  "affiliation200Basis": "孔融去后为袁谭别驾，谭之治青州赖之（《王脩传》）",
   "roles": [
    "内政",
    "名士"
@@ -11251,6 +11353,8 @@
   "origin": "司隶河东郡安邑县",
   "commandery": "河东郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "为司空掾属，受遣镇关中，议置盐官以市犁牛给归民（《卫觊传》）",
   "roles": [
    "内政",
    "文学"
@@ -11286,6 +11390,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "kongrong",
+  "affiliation200": null,
+  "affiliation200Basis": "演义所造，正史无此人；旧主孔融已去青州",
   "roles": [
    "军事"
   ],
@@ -11413,6 +11519,8 @@
   "origin": "扬州吴郡吴县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚妻弟，策定江东后复为丹阳太守（《孙讨逆传》）",
   "roles": [
    "军事",
    "宗室"
@@ -11879,6 +11987,8 @@
   "origin": "扬州吴郡",
   "commandery": "吴郡",
   "affiliation194": "yanbaihu",
+  "affiliation200": null,
+  "affiliation200Basis": "吴会宗帅，为孙策所破，奔余杭许昭（《孙讨逆传》注引《吴录》）；本年无郡可据",
   "roles": [
    "豪族",
    "盗寇"
@@ -11912,6 +12022,8 @@
   "origin": "司隶弘农郡华阴县",
   "commandery": "弘农郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "汉太尉，随驾至许，本年在朝（《后汉书·杨彪传》）",
   "roles": [
    "名士",
    "内政"
@@ -12088,6 +12200,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "lubu",
+  "affiliation200": null,
+  "affiliation200Basis": "吕布妻，下邳破后送许，此后失载",
   "roles": [
    "后妃"
   ],
@@ -12120,6 +12234,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "袁术主簿，术死后失载",
   "roles": [
    "谋略",
    "内政"
@@ -12327,6 +12443,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "演义所造，正史无此人；旧主袁术已死",
   "roles": [
    "军事"
   ],
@@ -12602,6 +12720,8 @@
   "origin": "司隶左冯翊高陵县",
   "commandery": "左冯翊",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "佐钟繇镇关中，招怀羌胡（《张既传》）",
   "roles": [
    "内政",
    "谋略"
@@ -12875,6 +12995,8 @@
   "origin": "荆州南阳郡",
   "commandery": "南阳郡",
   "affiliation194": "liubiao",
+  "affiliation200": "zhangxian",
+  "affiliation200Basis": "长沙太守，举长沙、零陵、桂阳三郡叛刘表应曹公（《桓阶传》）。194 年属刘表",
   "roles": [
    "内政",
    "豪族"
@@ -13010,6 +13132,8 @@
   "origin": "司隶京兆尹长陵县",
   "commandery": "京兆尹",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "汉太仆，建安元年后在朝，次年卒，年九十余（《后汉书·赵岐传》）",
   "roles": [
    "名士",
    "学者",
@@ -13346,6 +13470,8 @@
   "origin": "扬州丹阳郡故鄣县",
   "commandery": "丹阳郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "劝策取江东，本年为吴郡太守（《朱治传》）",
   "roles": [
    "军事",
    "内政"
@@ -13414,6 +13540,8 @@
   "origin": "荆州南阳郡宛县",
   "commandery": "南阳郡",
   "affiliation194": "zhangji",
+  "affiliation200": null,
+  "affiliation200Basis": "张济妻，建安二年宛城事见《武帝纪》注引《魏略》；旧主张济已死",
   "roles": [
    "后妃"
   ],
@@ -13813,6 +13941,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "袁术将，术死后与雷薄据灊山为群盗，不属一方（《袁术传》）",
   "roles": [
    "军事",
    "盗寇"
@@ -13947,6 +14077,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "gongsunzan",
+  "affiliation200": null,
+  "affiliation200Basis": "公孙瓒所置兖州刺史，瓒败后失载",
   "roles": [
    "军事"
   ],
@@ -14205,6 +14337,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "liuyao",
+  "affiliation200": null,
+  "affiliation200Basis": "刘繇将，为孙策所破；此后失载",
   "roles": [
    "军事"
   ],
@@ -14441,6 +14575,8 @@
   "origin": "幽州辽西郡令支县",
   "commandery": "辽西郡",
   "affiliation194": "gongsunzan",
+  "affiliation200": null,
+  "affiliation200Basis": "公孙瓒从弟，勃海太守；瓒败后失载",
   "roles": [
    "军事",
    "宗室"
@@ -14876,6 +15012,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "盗布马归曹操，致下邳之陷（《吕布传》）",
   "roles": [
    "军事"
   ],
@@ -15009,6 +15147,8 @@
   "origin": "并州",
   "commandery": null,
   "affiliation194": "baibo",
+  "affiliation200": null,
+  "affiliation200Basis": "白波帅，奉帝东归后还河东，为怨家所杀；本年去向失载",
   "roles": [
    "军事",
    "盗寇"
@@ -15371,6 +15511,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "与陈兰同，据灊山为群盗，术穷归之而不受",
   "roles": [
    "军事",
    "盗寇"
@@ -15572,6 +15714,8 @@
   "origin": "并州",
   "commandery": null,
   "affiliation194": "baibo",
+  "affiliation200": null,
+  "affiliation200Basis": "白波帅，奉帝东归后还河东；此后失载",
   "roles": [
    "军事",
    "盗寇"
@@ -16074,6 +16218,8 @@
   "origin": "扬州吴郡吴县",
   "commandery": "吴郡",
   "affiliation194": "lukang",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "陆康族子，陆氏既归吴，系于孙氏",
   "roles": [
    "内政"
   ],
@@ -16374,6 +16520,8 @@
   "origin": "并州",
   "commandery": null,
   "affiliation194": "zhangyang",
+  "affiliation200": null,
+  "affiliation200Basis": "演义中为汉侍郎，与伏完谋诛曹操；正史无其事，旧主张杨已死",
   "roles": [
    "军事"
   ],
@@ -16580,6 +16728,8 @@
   "origin": "扬州吴郡",
   "commandery": "吴郡",
   "affiliation194": "yanbaihu",
+  "affiliation200": null,
+  "affiliation200Basis": "吴会宗帅，为孙策所破",
   "roles": [
    "豪族",
    "盗寇"
@@ -17215,6 +17365,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙贲弟，从策平江东，为庐陵太守（《孙辅传》）",
   "roles": [
    "军事",
    "宗室"
@@ -17250,6 +17402,8 @@
   "origin": "扬州吴郡吴县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙氏族人，策爱之赐姓孙，本年在策麾下（《孙韶传》注引《吴书》）",
   "roles": [
    "军事",
    "宗室"
@@ -17285,6 +17439,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚四子，本年当已及冠，在兄策麾下。生年失载，194 年本传记「尚幼」，只能定生年 >178",
   "roles": [
    "宗室"
   ],
@@ -17317,6 +17473,8 @@
   "origin": "青州北海国",
   "commandery": "北海国",
   "affiliation194": "kongrong",
+  "affiliation200": null,
+  "affiliation200Basis": "孔融功曹，融去后南渡；仕孙权在其后，本年无所属",
   "roles": [
    "内政"
   ],
@@ -17615,6 +17773,8 @@
   "origin": "凉州北地郡",
   "commandery": "北地郡",
   "affiliation194": "baibo",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "汉所署河东太守，奉许都正朔；建安七年杜畿代之（《杜畿传》）",
   "roles": [
    "内政"
   ],
@@ -17745,6 +17905,8 @@
   "origin": "兖州泰山郡",
   "commandery": "泰山郡",
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "随臧霸降，为利城太守（《臧霸传》）",
   "roles": [
    "军事"
   ],
@@ -17913,6 +18075,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "liuyao",
+  "affiliation200": null,
+  "affiliation200Basis": "刘繇所署彭城相，走保秣陵，为孙策所破；此后失载",
   "roles": [
    "军事"
   ],
@@ -18008,6 +18172,8 @@
   "origin": "扬州吴郡余杭县",
   "commandery": "吴郡",
   "affiliation194": "yanbaihu",
+  "affiliation200": null,
+  "affiliation200Basis": "故吴郡人，纳严白虎于余杭；不属一方",
   "roles": [
    "豪族"
   ],
@@ -18143,6 +18309,8 @@
   "origin": "凉州",
   "commandery": null,
   "affiliation194": "lijue",
+  "affiliation200": null,
+  "affiliation200Basis": "董卓故将，兴平二年与杨奉等奉帝东归，中途为李傕所败，奔荆州（《后汉书·董卓传》）；本年去向失载",
   "roles": [
    "军事"
   ],
@@ -18207,6 +18375,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "术死欲与张勋奔孙策，为刘勋所擒（《袁术传》）；此后失载",
   "roles": [
    "谋略"
   ],
@@ -18441,6 +18611,8 @@
   "origin": "扬州吴郡",
   "commandery": "吴郡",
   "affiliation194": "yanbaihu",
+  "affiliation200": null,
+  "affiliation200Basis": "严白虎弟，往就孙策请和，为策所杀",
   "roles": [
    "豪族"
   ],
@@ -18505,6 +18677,8 @@
   "origin": "兖州泰山郡",
   "commandery": "泰山郡",
   "affiliation194": "lubu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "随臧霸降，为东莞太守（《臧霸传》）",
   "roles": [
    "军事"
   ],
@@ -18601,6 +18775,8 @@
   "origin": "豫州汝南郡汝阳县",
   "commandery": "汝南郡",
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "术死后领其部曲奔庐江，为刘勋所并；此后失载",
   "roles": [
    "宗室",
    "内政"
@@ -18669,6 +18845,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "liuyao",
+  "affiliation200": null,
+  "affiliation200Basis": "刘繇将，为孙策所破；此后失载",
   "roles": [
    "军事"
   ],
@@ -18934,6 +19112,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "与杨弘同，术死后为刘勋所擒，此后失载",
   "roles": [
    "军事"
   ],
@@ -18967,6 +19147,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "liuyao",
+  "affiliation200": null,
+  "affiliation200Basis": "刘繇将，为孙策所破；此后失载",
   "roles": [
    "军事"
   ],
@@ -19102,6 +19284,8 @@
   "origin": "扬州会稽郡",
   "commandery": "会稽郡",
   "affiliation194": "wanglang",
+  "affiliation200": null,
+  "affiliation200Basis": "袁绍所署九江太守，为袁术孙坚所破；此后失载",
   "roles": [
    "军事"
   ],
@@ -19168,6 +19352,8 @@
   "origin": "扬州庐江郡舒县",
   "commandery": "庐江郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "周瑜从父，袁术所署丹阳太守，术召还寿春；术死后周氏在江东，系于孙策。本年所任失载，故只记归属",
   "roles": [
    "内政"
   ],
@@ -19393,6 +19579,8 @@
   "origin": "扬州吴郡",
   "commandery": "吴郡",
   "affiliation194": "yanbaihu",
+  "affiliation200": null,
+  "affiliation200Basis": "吴会宗帅，为孙策所破",
   "roles": [
    "豪族",
    "盗寇"
@@ -20633,6 +20821,8 @@
   "origin": "凉州安定郡朝那县",
   "commandery": "安定郡",
   "affiliation194": "lijue",
+  "affiliation200": null,
+  "affiliation200Basis": "皇甫嵩从子，李傕郭汜相攻时奉使和解不成而逃去；此后失载",
   "roles": [
    "外交"
   ],
@@ -20737,6 +20927,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "袁术所置扬州刺史，术败后失载",
   "roles": [
    "内政"
   ],
@@ -21139,6 +21331,8 @@
   "origin": "荆州江夏郡平春县",
   "commandery": "江夏郡",
   "affiliation194": null,
+  "affiliation200": "caocao",
+  "affiliation200Basis": "建安初率众归曹操，为振威中将军、阳安都尉；官渡时绍遣人招之，通拒而不受（《李通传》）",
   "roles": [
    "军事"
   ],
@@ -21797,6 +21991,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "zhangyang",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "张杨所置河内太守；建安四年曹操遣董昭单身入城说之，与薛洪举众降，封列侯（《武帝纪》《董昭传》）",
   "roles": [
    "内政"
   ],
@@ -22134,6 +22330,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "yuanshu",
+  "affiliation200": null,
+  "affiliation200Basis": "袁术部下，术败后失载",
   "roles": [
    "内政"
   ],
@@ -22704,6 +22902,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "gongsunzan",
+  "affiliation200": null,
+  "affiliation200Basis": "本刘虞旧将，虞死降公孙瓒，兴平二年为瓒将万余人攻鲜于辅；瓒已于去岁灭，本年去向失载（《田畴传》裴注）",
   "roles": [
    "军事"
   ],
@@ -23249,6 +23449,8 @@
   "origin": null,
   "commandery": null,
   "affiliation194": "zhangyang",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "与缪尚共守射犬，为董昭所说而降曹操，封列侯（《武帝纪》《张杨传》）",
   "roles": [
    "内政"
   ],
@@ -23270,6 +23472,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "徐琨之女，本年当在吴；后为孙权所纳",
   "roles": [
    "后妃"
   ],
@@ -23312,6 +23516,8 @@
   "origin": "扬州吴郡富春县",
   "commandery": "吴郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "孙坚之甥，从策渡江破樊能，后为丹阳太守（《妃嫔传》注引《志林》）",
   "roles": [
    "军事",
    "水军"
@@ -23656,6 +23862,8 @@
   "origin": "豫州汝南郡汝阳县",
   "commandery": "汝南郡",
   "affiliation194": "yuanshu",
+  "affiliation200": "sunce",
+  "affiliation200Basis": "袁术之女，术败后归吴（《妃嫔传》）",
   "roles": [
    "后妃"
   ],
@@ -23676,6 +23884,8 @@
   "origin": "豫州陈国扶乐县",
   "commandery": "陈国",
   "affiliation194": "yuanshu",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "吕布既破，归曹操为沛南部都尉、后迁郎中令（《袁涣传》）",
   "roles": [
    "内政",
    "名士"
@@ -24016,6 +24226,8 @@
   "origin": "益州蜀郡成都县",
   "commandery": "蜀郡",
   "affiliation194": "lijue",
+  "affiliation200": "caocao",
+  "affiliation200Basis": "汉司徒录尚书事，在许（《后汉书·献帝纪》）",
   "roles": [
    "内政"
   ],

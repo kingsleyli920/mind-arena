@@ -48,6 +48,9 @@ export interface Roster {
 
 interface RawOfficer {
   id: string; name: string; commandery?: string | null;
+  /** 本剧本年的归属，由 tools/build-runtime-bundle.mjs 按年份解析后写进数据包 */
+  affiliation?: string | null;
+  /** 兴平元年的归属。数据包里已没有这一项，留着是为了直接吃 officers.json 的那些工具 */
   affiliation194?: string | null;
   leadership?: number; might?: number; intellect?: number;
   politics?: number; charisma?: number; aptitudes?: string[];
@@ -74,7 +77,7 @@ export function buildRoster(
     if (five.some((v) => typeof v !== "number")) continue;
     const ref: OfficerRef = {
       id: o.id, name: o.name,
-      faction: o.affiliation194 ?? null,
+      faction: o.affiliation ?? o.affiliation194 ?? null,
       home: (o.commandery && commanderyNameToId.get(o.commandery)) || null,
       leadership: o.leadership!, might: o.might!, intellect: o.intellect!,
       politics: o.politics!, charisma: o.charisma!,
