@@ -141,4 +141,95 @@ export const en: Dict = {
   "lab.prepared.same": "Same position / same action budget",
   "lab.prepared.replay": "Decisions, validation and settlement all go into the replay",
   "lab.prepared.launch": "Enter the playable sandbox",
+
+  // ── leaderboard ─────────────────────────────────────────────────
+  "board.title": "Han Sandbox · Leaderboard",
+  "board.era.fallback": "Xingping 1 · The Warlords",
+  "board.stale.lead": "This board is out of date.",
+  "board.stale.from": "It was run under content pack {version}",
+  "board.stale.fp": " (fingerprint {fp})",
+  "board.stale.now": ", while the current engine is {version} (fingerprint {fp}).",
+  "board.stale.since": " {n} versions have shipped since: {list}.",
+  "board.stale.tail": " The scores below correspond to no game anyone can play today",
+  "board.stale.tail2": "; they are kept as history and must not be compared with new results.",
+  "board.sub": "{arms} contenders × {games} games, the same opening seeds, the same opponents, "
+    + "seats rotated, {seasons} seasons each. Content pack {version}",
+  "board.sub.spend": ". ${usd} actually charged in total.",
+
+  "board.col.who": "Contender",
+  "board.col.board": "Board score",
+  "board.col.delta": "vs baseline ±95%",
+  "board.col.cont": "Province progress",
+  "board.col.growth": "Territory ×",
+  "board.col.elim": "Eliminated",
+  "board.col.illegal": "Illegal rate",
+  "board.col.usd": "Charged / game",
+  "board.col.dist": "Grade spread",
+  "board.tag.bot": "bot",
+  "board.tag.base": "baseline",
+  "board.tag.nosig": "The confidence interval covers zero — they cannot be told apart",
+  "board.blank": "blank {pct}%",
+  "board.blank.tip": "{blank}/{turns} seat-seasons had candidates on the table and picked no order — "
+    + "a column that neither the illegal rate nor the board score can show",
+
+  "board.rulers.h": "Three rulers",
+  "board.rulers.board": "Grade points plus continuous progress within the grade. Ranking uses this. "
+    + "The grade is still the headline: a lower grade never beats a higher one.",
+  "board.rulers.cont": "Each province counts as \u201cmy commanderies ÷ what a majority needs\u201d, capped at 1, "
+    + "plus half a province seat, taken as the gain over the opening. Continuous and the most sensitive, "
+    + "but it **cannot separate two bots**: their territory is nearly identical and the difference lies in "
+    + "which valuable commanderies cross the line — exactly what the grade measures and this does not see.",
+  "board.rulers.growth": "Final commanderies ÷ opening commanderies. The most intuitive, and not part of "
+    + "the ranking: holding more ground is not the same as building power.",
+  "board.rulers.table": "Paired difference vs baseline",
+  "board.rulers.grade": "Grade points",
+  "board.rulers.verdict": "All three rulers give ",
+  "board.rulers.verdict.same": "exactly the same order",
+  "board.rulers.verdict.tail": "The weakest one misses significance on the coarsest ruler (grade points) — "
+    + "that is its effect being small, not the ruler being blind: all three agree on direction and order.",
+
+  "board.seats.h": "By seat",
+  "board.seats.note": "Mixing strong and weak seats into one mean is exactly where \u201cis this model just bad "
+    + "everywhere?\u201d gets answered wrongly. The table below is each seat's commandery gain "
+    + "(eliminations in brackets).",
+
+  "board.history.h": "History",
+  "board.history.note": "Change a rule number and the two boards on either side become {b}. So history is not "
+    + "one line but a series of eras: within an era (same fingerprint over the rule numbers) the boards connect; "
+    + "across eras each must be read on its own.",
+  "board.history.note.b": "incomparable",
+  "board.history.era": "Rule era",
+  "board.history.now": "current (frozen)",
+  "board.history.dead": "retired",
+  "board.history.col.board": "Board",
+  "board.history.col.date": "Date",
+  "board.history.col.git": "Commit",
+  "board.history.dim": "Earlier boards are not here, for two reasons. One: their arms ran on {b} of the rules "
+    + "(the rules were still moving), so such a board is incomparable with itself. Two: some directories hold "
+    + "several snapshots of a single run — that is a working directory, not a board. The build tool refuses "
+    + "both on the spot.",
+  "board.history.dim.b": "different eras",
+
+  "board.caveats.h": "Before reading this board",
+  "board.caveat.ci.b": "A ranking without intervals is not a ranking.",
+  "board.caveat.ci": "The rows marked · under \u201cvs baseline ±95%\u201d have a confidence interval that covers "
+    + "zero, which means {b} — not \u201cslightly ahead\u201d.",
+  "board.caveat.ci.b2": "they cannot be told apart",
+  "board.caveat.n.b": "48 games is the resolution floor.",
+  "board.caveat.n": "A real gap of about 20 points measurably needs ≥48 games to clear the interval. Shorter runs "
+    + "can exercise the pipeline and show the illegal rate, but their ranking is not a conclusion.",
+  "board.caveat.illegal.b": "The illegal rate is not \u201cwrong answers\u201d.",
+  "board.caveat.illegal": "It is the \u201ceach order is legal on its own but together they exceed this season's "
+    + "order budget\u201d kind, which the admission layer drops. A dropped order is an order never given.",
+  "board.caveat.ver.b": "Boards from different versions cannot be read side by side.",
+  "board.caveat.ver": "Change a rule number and old and new boards stop being comparable — the pack version and "
+    + "commit at the top of this page are there for exactly this.",
+  "board.caveat.skew.b": "One exception on this board: ",
+  "board.caveat.usd.b": "The money is what was charged, not an estimate.",
+  "board.caveat.usd": "Price tables underestimate heavy-reasoning models tenfold — one model was estimated at "
+    + "$1.61 and actually charged $16.64.",
+  "board.foot.play": "Take a seat yourself",
+  "board.foot.map": "See the map",
+  "board.back": "Home",
+  "board.zhonly": "The sandbox itself is Chinese-only for now: the rules digest, the candidate list and the battle report are assembled by the engine at runtime, and that layer has no English yet \u2014 part of it never will, since what the model reads must stay Chinese or old and new leaderboards stop being comparable.",
 };

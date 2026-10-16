@@ -14,6 +14,17 @@ export type BoardStamp = {
 
 type LogEntry = { 版本?: string };
 
+/**
+ * 内容包的改动记载。**中文键名留在这里**，不散到界面上去。
+ *
+ * 包里的键本来就是中文（见 docs/I18N-PLAN.md 第三节：id 留在中文），而界面代码
+ * 一旦直接写 `pack._frozen["改动记载"]`，「界面里不许有裸中文」那条棘轮就分不清
+ * 这是没译的文案还是数据键——于是要么给它开白名单（闸从此松一寸），
+ * 要么把键收到懂它的模块里（这里）。选后者。
+ */
+export const changeLogOf = (pack: { _frozen?: Record<string, unknown> }): LogEntry[] =>
+  (pack._frozen?.["改动记载"] as LogEntry[] | undefined) ?? [];
+
 /** "2.6.0" → 2006000，可比大小。段数不足或非数字按 0 计 */
 export const verNum = (v: string) =>
   v.split(".").map(Number).reduce((a, n) => a * 1000 + (Number.isFinite(n) ? n : 0), 0);

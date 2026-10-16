@@ -127,3 +127,17 @@ table.board td.who .blank {
   letter-spacing: .02em;
   vertical-align: 1px;
 }
+
+/* 顶栏：剧本名在左，回首页与语言开关在右 */
+.board-top { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+.board-links { display: inline-flex; gap: 18px; font-size: 12px; }
+.board-links a { color: #a08f68; }
+.board-links a:hover { color: #e8dfc7; }
+.board-links .lang-switch { padding-left: 18px; border-left: 1px solid #3a3226; }
+
+/* 英文版的「沙盘还是中文」提示。写成一段正文而不是脚注——
+   让读者在点进去之前看见，而不是点进去之后才明白 */
+.caveats .foot.zhonly {
+  margin-top: 10px; max-width: 62em;
+  font-size: 12.5px; line-height: 1.85; color: #9c9078;
+}

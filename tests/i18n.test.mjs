@@ -97,6 +97,9 @@ const MIGRATED = [
   "app/(en)/layout.tsx",
   "app/(zh)/page.tsx",
   "app/(en)/en/page.tsx",
+  "app/_shared/BoardView.tsx",
+  "app/(zh)/board/page.tsx",
+  "app/(en)/en/board/page.tsx",
 ];
 
 /**
@@ -106,6 +109,7 @@ const MIGRATED = [
 const USES_CATALOGUE = [
   "app/_shared/HomeView.tsx",
   "app/_shared/ArenaLab.tsx",
+  "app/_shared/BoardView.tsx",
 ];
 
 /** 去掉注释后，还剩的中文字面量与 JSX 文本 */
@@ -133,7 +137,9 @@ test("棘轮：迁完的文件里不许再出现裸中文", () => {
   }
   assert.deepEqual(bad, [],
     `这些文件已经迁完了，又写回中文：\n  ${bad.join("\n  ")}\n`
-    + "  文案进 lib/i18n/zh.ts 与 en.ts，组件里用 t('key')");
+    + "  文案进 lib/i18n/zh.ts 与 en.ts，组件里用 t('key')。\n"
+    + "  若那是**数据键**（内容包的键名本来就是中文），别开白名单——"
+    + "把它收进懂它的那个 lib 模块里，像 lib/arena/board-stale.ts 的 changeLogOf");
 });
 
 test("棘轮：名单里的文件确实在用目录", () => {
