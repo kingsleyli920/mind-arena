@@ -77,7 +77,7 @@ test("包：界面读的运行时包必须与内容包同源", () => {
   assert.deepEqual(runtime.pack, pack, `运行时包里的内容包${stale}`);
   for (const [key, file] of [
     ["scenario", "scenario-194.json"],
-    ["commanderyState", "commandery-state.json"],
+    ["commanderyState", "commandery-state-194.json"],
     ["adjacency", "adjacency.json"],
     ["troopTypes", "troop-types.json"],
     ["resources", "resources.json"],

@@ -59,7 +59,7 @@ Three pitfalls hit along the way, all now written into the script's comments:
 
 ### M0.2 Commandery-level initial state ✅ done
 
-`tools/build-commandery-state.mjs` → `lib/game/data/commandery-state.json`
+`tools/build-commandery-state.mjs` → `lib/game/data/commandery-state-194.json`
 5/5 spot checks passing.
 
 **Key finding: the household figures in 《郡国志》 (the *Treatise on Commanderies and Kingdoms*) are the numbers for the fifth year of Yonghe (永和五年, 140), while the scenario is set in 194.**
@@ -451,4 +451,4 @@ do not go further** — if the gameplay's diseases are not cured at this step, e
   What differs from the original intent is that no artwork is being done: get the mechanism standing first, the look is a reskin
 - Battle-technique chains: the schema keeps the two fields `precondition`/`effect` right now, implementation deferred
 
-<!-- translated-from: PLAN.md@e2f87a12c8e1 -->
+<!-- translated-from: PLAN.md@c551e96fe0b9 -->

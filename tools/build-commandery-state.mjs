@@ -275,7 +275,9 @@ for (const [name, fn, why] of checks) {
 }
 console.log(`  ${pass}/${checks.length} 通过`);
 
-const OUT = `${D}/commandery-state${YEAR === 194 ? "" : `-${YEAR}`}.json`;
+// 每个剧本一份，一律带年份。原先 194 那份不带后缀，而别的都带——
+// 一个暗示「这份是共享的」的名字，而它其实是 194 专有的
+const OUT = `${D}/commandery-state-${YEAR}.json`;
 fs.writeFileSync(OUT, JSON.stringify({
   meta: {
     year: YEAR,

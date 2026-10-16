@@ -94,7 +94,7 @@ test("排序不得依赖宿主地区：篡改 localeCompare 也不改变局面",
 
   const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
   const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-  const DATA = { commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
+  const DATA = { commanderyState: read("commandery-state-194.json"), scenario: read("scenario-194.json"),
                  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json") };
   const G = buildGraph(read("adjacency.json"));
   const P = loadParams(pack);

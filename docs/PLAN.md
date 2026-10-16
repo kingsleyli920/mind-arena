@@ -59,7 +59,7 @@
 
 ### M0.2 郡级初始状态 ✅ 已完成
 
-`tools/build-commandery-state.mjs` → `lib/game/data/commandery-state.json`
+`tools/build-commandery-state.mjs` → `lib/game/data/commandery-state-194.json`
 5/5 定点验收通过。
 
 **关键发现：《郡国志》户口是永和五年（140）的数字，剧本却是 194 年。**

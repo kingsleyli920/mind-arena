@@ -12,7 +12,7 @@ import { decide } from "../lib/game/engine/bot.ts";
 
 const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
 const DATA = {
-  commanderyState: read("commandery-state.json"),
+  commanderyState: read("commandery-state-194.json"),
   scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"),
   troopTypes: read("troop-types.json"),

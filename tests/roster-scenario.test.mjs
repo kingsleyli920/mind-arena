@@ -120,3 +120,32 @@ test("剧本×地图标注：每个剧本的标注文件都在，且势力数对
     assert.equal(labels.baseHeight, mf.baseHeight, `${path} 的底图高与瓦片清单对不上`);
   }
 });
+
+// ── 占位势力按 id 认，而它真正的特征是「没有治所」 ──────────────────
+//
+// setup.ts 的 PLACEHOLDER_FACTIONS 是写死的 `new Set(["wuzhu"])`。
+// 「无主」不是势力：它要是被当成势力，会拿到令数、会被算补给连通
+//（十几个散落各处的郡自然全部断供）、还会出现在缔盟候选里。
+//
+// 但 id 只是巧合——真正的识别特征是 seat 为空。换个剧本把占位叫成别的名字，
+// 它就会变成一个有令数、会结盟、占着十个郡的真势力，而且**一声不响**。
+// 这条闸两个方向都钉：没治所的必须在那个集合里，在集合里的也必须没治所。
+test("剧本×占位势力：没有治所的势力必须被当成占位，反之亦然", () => {
+  const src = fs.readFileSync("lib/game/engine/setup.ts", "utf8");
+  const m = /const PLACEHOLDER_FACTIONS = new Set\(\[([^\]]*)\]\)/.exec(src);
+  assert.ok(m, "setup.ts 里找不到 PLACEHOLDER_FACTIONS —— 这条闸的锚点没了");
+  const declared = new Set([...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]));
+  assert.ok(declared.size > 0, "PLACEHOLDER_FACTIONS 是空的");
+
+  for (const f of fs.readdirSync("lib/game/data")) {
+    const y = /^scenario-(\d+)\.json$/.exec(f);
+    if (!y) continue;
+    const sc = JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
+    const noSeat = sc.factions.filter((x) => !x.seat).map((x) => x.id).sort();
+    const placeheld = sc.factions.filter((x) => declared.has(x.id)).map((x) => x.id).sort();
+    assert.deepEqual(noSeat, placeheld,
+      `${f}：没治所的是 ${noSeat.join("、") || "（无）"}，`
+      + `而被当成占位的是 ${placeheld.join("、") || "（无）"}。`
+      + "不一致意味着某一方被错当成势力——它会拿到令数、被算补给、进缔盟候选，而不会报错");
+  }
+});

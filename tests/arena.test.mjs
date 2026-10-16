@@ -33,7 +33,7 @@ const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.j
 const NAMES = new Map(read("scenario-194.json").factions.map((f) => [f.id, f.name]));
 const G = buildGraph(read("adjacency.json"));
 const DATA = {
-  commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
+  commanderyState: read("commandery-state-194.json"), scenario: read("scenario-194.json"),
   commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
 };
 const fresh = (seed = "arena") => createGame(DATA, { seed, roster: ROSTER, geo: GEO }, P);
