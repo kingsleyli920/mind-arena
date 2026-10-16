@@ -1,5 +1,6 @@
 import board from "@/public/game/leaderboard.json";
 import history from "@/public/game/history.json";
+import pack from "@/lib/game/content/pack-194.json";
 import "./board.css";
 
 export const metadata = { title: "汉末沙盘 · 排行榜" };
@@ -31,6 +32,24 @@ export default function BoardPage() {
       <header className="board-head">
         <span className="era">兴平元年 · 一九四</span>
         <h1>汉末沙盘 · 排行榜</h1>
+        {/*
+         * 榜是在某一版规则下跑出来的，而规则还在动。两者一旦分家，
+         * 这一页上的每个数都不再对应任何一局现在能打出来的棋——
+         * 而页面原先不说这件事（versionSkewNote 是空的）。
+         *
+         * 所以让它**自己检测**：拿榜里记的规则包版本比当前的，不一致就横幅置顶。
+         * 写死一句话只能挡住这一次；下次规则再升，这条横幅会自己出现。
+         */}
+        {board.packVersion !== pack.version ? (
+          <p className="stale">
+            <b>这份榜已经过期。</b>
+            它是在内容包 <code>{board.packVersion}</code> 下跑出来的，
+            而当前引擎是 <code>{pack.version}</code>。
+            其间改过通行图、据点、调兵与组合命令预留——
+            <b>下面的分数不对应任何一局现在能打出来的棋</b>，
+            仅作历史留存，不可与新结果比较。
+          </p>
+        ) : null}
         <p>
           {board.rows.length} 个对局方 × {board.rows[0]?.games ?? 0} 局，
           同一批开局种子、同一批对手、席位轮换，每局 {board.seasons} 季。

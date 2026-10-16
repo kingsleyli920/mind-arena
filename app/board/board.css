@@ -87,3 +87,29 @@ table.rulers-table th.who, table.rulers-table td.who { text-align: left; min-wid
 .rule-era h3 i { font-style: normal; color: #7d735d; }
 .rule-era table.board td.botcell { color: #7d735d; }
 .rule-era table.board td code { color: #8f866f; font-size: 11px; }
+
+/* 过期横幅。榜与规则一旦分家，这一页上每个数都不再对应任何一局现在能打出来的棋，
+   那不是一条「例外」小字能承担的话——所以它压在标题之下、表格之上。
+
+   **颜色要用这一页自己的那套**：这页是深色底（#16130e），
+   第一版照着对局页写了 `color: var(--ink, #2e2a24)`，而这里没有 --ink，
+   兜底成近黑，于是整段正文压在黑底上看不见——只剩下两个 code 和一个红 b 浮在那儿 */
+.board-head .stale {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border: 1px solid #8c3b2f;
+  border-inline-start-width: 4px;
+  background: rgba(140, 59, 47, 0.14);
+  color: #e8dfc7;
+  font-size: 12.5px;
+  line-height: 1.9;
+  max-width: 62em;
+}
+.board-head .stale b { color: #e0806f; font-weight: 600; }
+.board-head .stale code {
+  color: #f0c98a;
+  font-size: 11.5px;
+  padding: 1px 5px;
+  background: rgba(240, 201, 138, 0.12);
+  border-radius: 2px;
+}
