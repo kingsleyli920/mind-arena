@@ -1418,7 +1418,23 @@ export function resolve(
       .filter(([k]) => k !== f.id).map(([, v]) => v));
     const dominant = mine_ >= Object.keys(s.commanderies).length * P.coalitionShare
       && mine_ >= runner * P.coalitionLead;
-    if (dominant && P.coalitionBreak && !f.coalitionAgainst) {
+    // **可复发**：禁盟期满而他仍然独大，就再起一次。
+    //
+    // 原先的守卫是 `!f.coalitionAgainst`——一个置位就不再清的布尔量，
+    // 于是联军一局只响一次。那在十六季局里够用（机器人峰值 13–16 郡，
+    // 根本够不着 21 郡的门槛，整局一次都不触发）；可统一模式取消季数上限之后，
+    // 袁绍第 14–16 季越过门槛、联军响一次、八季后失效，而他那时才刚过半程，
+    // 最终滚到 58 郡。实测 **24 局统一全部由袁绍拿下**。
+    //
+    // 这与围城那条是同一个病：一条按十六季标定的机制，被放进它没有设计过的
+    // 无限局里。改成可复发，霸者就得**持续**付这个代价，而不是交一次过路费。
+    //
+    // 门槛与效果都不动——那是另一根管子，而设计注记里写明了为何是绝盟
+    // 而不是数值惩罚。这里只改「响几次」。
+    // 可否复发由包里的 联军.可复发 决定——关掉它就退回一局只响一次的老行为
+    const spent = P.coalitionRepeat ? s.turn < f.allyBanUntil : f.coalitionAgainst;
+    if (dominant && P.coalitionBreak && !spent) {
+      const again = f.coalitionAgainst;
       f.coalitionAgainst = true;
       const gone = s.treaties.filter((t) => t.a === f.id || t.b === f.id);
       s.treaties = s.treaties.filter((t) => t.a !== f.id && t.b !== f.id);
@@ -1439,9 +1455,16 @@ export function resolve(
         }
       }
       log(s, { kind: "coalition", faction: f.id,
-               text: `${f.id} 独据 ${mine_} 郡（次强 ${runner}），天下共讨之：`
+               text: `${f.id} 独据 ${mine_} 郡（次强 ${runner}），天下${again ? "再" : ""}共讨之：`
                    + `旧盟 ${gone.length} 约尽废，${P.coalitionBanSeasons} 季内无人肯与之盟；`
                    + `接壤 ${border.length} 家结为联军（新盟 ${pacts} 约）` });
+    } else if (P.coalitionRepeat && !dominant && s.turn >= f.allyBanUntil && f.coalitionAgainst) {
+      // 缩回门槛之下、且禁盟期已过，就不再是众矢之的。
+      // 不清的话「霸者」是个有进无出的标签，而机器人的择敌加成与候选标签
+      // 都读这个旗——那会让一家缩水之后仍被当成头号目标
+      f.coalitionAgainst = false;
+      log(s, { kind: "coalition-end", faction: f.id,
+               text: `${f.id} 已退至 ${mine_} 郡（次强 ${runner}），不再为众矢之的` });
     }
   }
 

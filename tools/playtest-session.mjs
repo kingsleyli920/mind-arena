@@ -1,4 +1,5 @@
 // 与浏览器同一条推进路径。默认三场 64 季，全机器人、零模型调用。
+// GAMES=20 可加大样本——免费，用来看势力平衡这类需要统计量的问题。
 import fs from "node:fs";
 import { createGame } from "../lib/game/engine/setup.ts";
 import { buildGraph } from "../lib/game/engine/actions.ts";
@@ -15,7 +16,8 @@ const roster = buildRoster(b.officers,
 const geo = buildGeography(b.commanderies, b.provinceSeats);
 const client = { chat() { throw new Error("机器人长局不得调用模型"); } };
 const reports = [];
-for (let i = 0; i < 3; i++) {
+const GAMES = Number(process.env.GAMES ?? 3);
+for (let i = 0; i < GAMES; i++) {
   const seed = `strategy-session-${i}`;
   let game = createGame(b, { seed, roster, geo, graph: g, seasons: 64, endCondition: "unification" }, P);
   let session = newSession(null); session.callLimit = 0;
