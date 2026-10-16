@@ -443,12 +443,18 @@ console.log(`对局方 ${AGENT}\u3000${GAMES} 局\u3000席位轮换 ${SEATS.leng
       + "名次会被多跑的那一席带偏——**这一跑的排名不可当结论**。\n");
   }
 }
-console.log("局".padStart(3), "席位".padEnd(10), "档".padStart(3), "分".padStart(4),
+// 「档」印的是**历史最高档**，分也按它算。只印这一列会骗人：实测
+// 刘备一局冲到甲档后崩回一郡，表上写着「甲 300 分　终郡 1/3」，
+// 看着像计分错了，其实是他真的到过甲档又丢光。docs/EVAL.md 的表一向是
+// 「历史最高/终局档」两列，控制台少印了一列——把终局档补上
+console.log("局".padStart(3), "席位".padEnd(10), "最高".padStart(4), "终档".padStart(4), "分".padStart(4),
   "终郡".padStart(5), "非法率".padStart(7), "观测峰".padStart(7), "令数用率".padStart(9));
 for (const r of results) {
   console.log(
     String(r.game).padStart(3), r.seatName.slice(0, 6).padEnd(10),
-    r.grade.padStart(3), String(r.score).padStart(4),
+    r.grade.padStart(4),
+    (r.finalGrade === r.grade ? "—" : r.finalGrade).padStart(4),
+    String(r.score).padStart(4),
     `${r.commanderies}/${r.start}`.padStart(5),
     `${(r.illegalRate * 100).toFixed(0)}%`.padStart(7),
     String(r.obsPeak).padStart(7),
