@@ -56,6 +56,7 @@ eval-out/
 *.jpeg
 *.png
 !public/**/*.png
+!docs/**/*.webp
 !refs/**
 
 # 地图构建的中间产物。**必须排在 `!public/**/*.png` 之后**——
