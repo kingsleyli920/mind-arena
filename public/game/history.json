@@ -1,6 +1,42 @@
 {
   "eras": [
     {
+      "fingerprint": "mixed@兴平元年·群雄割据",
+      "boards": [
+        {
+          "id": "baseline-frozen",
+          "date": "2026-09-06",
+          "git": "1f0036a",
+          "packVersion": "0.2.0",
+          "scenario": "兴平元年·群雄割据",
+          "mixed": null,
+          "rows": [
+            {
+              "id": "bot:opportunist",
+              "kind": "bot",
+              "games": 48,
+              "board": 195.7,
+              "cont": 113
+            },
+            {
+              "id": "bot:purpose",
+              "kind": "bot",
+              "games": 48,
+              "board": 187.8,
+              "cont": 92
+            },
+            {
+              "id": "bot:balanced",
+              "kind": "bot",
+              "games": 48,
+              "board": 177.2,
+              "cont": 96
+            }
+          ]
+        }
+      ]
+    },
+    {
       "fingerprint": "8f74tlk3e22o",
       "boards": [
         {
@@ -50,5 +86,5 @@
       ]
     }
   ],
-  "current": "8f74tlk3e22o"
+  "current": "mixed@兴平元年·群雄割据"
 }
