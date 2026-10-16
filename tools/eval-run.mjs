@@ -18,6 +18,7 @@ import { execSync } from "node:child_process";
 import { listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, pick as botPick, PROFILES } from "../lib/game/engine/bot.ts";
 import { loadWorld, SEAT_SETS, seatsFor } from "./lib/world.mjs";
+import { emptySeasons } from "./lib/empty-seasons.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
 import { standingOf, gradeOf, zhouEquiv }
@@ -410,6 +411,9 @@ async function playGame(gi) {
       obsPeak: Math.max(...turns.map((t) => t.obsTokens)),
       apUse: turns.reduce((a, t) => a + t.spent, 0)
              / Math.max(1, turns.reduce((a, t) => a + t.ap, 0)),
+      // 空手季：有候选而一条没挑。令数用率会把它和「下得保守」平均成一个数，
+      // 而两者病因完全不同——判据与来由见 tools/lib/empty-seasons.mjs
+      blank: emptySeasons(turns).list.length,
     },
     records: turns.map((t) => ({ game: gi, seed, ...t })),
   };
@@ -473,7 +477,7 @@ console.log(`对局方 ${AGENT}\u3000${GAMES} 局\u3000席位轮换 ${SEATS.leng
 // 看着像计分错了，其实是他真的到过甲档又丢光。docs/EVAL.md 的表一向是
 // 「历史最高/终局档」两列，控制台少印了一列——把终局档补上
 console.log("局".padStart(3), "席位".padEnd(10), "最高".padStart(4), "终档".padStart(4), "分".padStart(4),
-  "终郡".padStart(5), "非法率".padStart(7), "观测峰".padStart(7), "令数用率".padStart(9));
+  "终郡".padStart(5), "非法率".padStart(7), "观测峰".padStart(7), "令数用率".padStart(9), "空手".padStart(6));
 for (const r of results) {
   console.log(
     String(r.game).padStart(3), r.seatName.slice(0, 6).padEnd(10),
@@ -484,6 +488,7 @@ for (const r of results) {
     `${(r.illegalRate * 100).toFixed(0)}%`.padStart(7),
     String(r.obsPeak).padStart(7),
     `${(r.apUse * 100).toFixed(0)}%`.padStart(9),
+    (r.blank ? `${r.blank}/${r.seasons}` : "—").padStart(6),
   );
 }
 const usage = records.filter((r) => r.usage);

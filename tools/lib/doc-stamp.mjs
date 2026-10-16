@@ -16,5 +16,21 @@ export function sourceHash(text) {
   return crypto.createHash("sha256").update(body.join("\n")).digest("hex").slice(0, 12);
 }
 
-export const stampFor = (zhPath) =>
-  `<!-- translated-from: ${zhPath.split("/").pop()}@${sourceHash(fs.readFileSync(zhPath, "utf8"))} -->`;
+/**
+ * 空文件也有哈希，而且长得和正常哈希一模一样（`e3b0c442...`）。
+ *
+ * 这不是假想：今天我用 python 改 README，`open(p,"w")` 在内层读之前就把文件
+ * 截断了，于是 README.md 变成 0 字节，取戳工具照样吐出一个体面的 12 位十六进制，
+ * 闸也照样显示「全部对得上」——**一份被清空的文档被盖上了「已译」的戳**。
+ * 同一个形状的错今天是第二次（上一次把 build-runtime-bundle.mjs 截成 0 字节）。
+ *
+ * 闸只会比对哈希，分不出「改小了」和「没了」。所以在出戳这一步拦。
+ */
+export function stampFor(zhPath) {
+  const text = fs.readFileSync(zhPath, "utf8");
+  if (text.trim().length < 100) {
+    throw new Error(`${zhPath} 只有 ${text.length} 字节——空文件也有哈希，`
+      + "盖上去闸就会说「对得上」。先确认这个文件是不是被截断了");
+  }
+  return `<!-- translated-from: ${zhPath.split("/").pop()}@${sourceHash(text)} -->`;
+}

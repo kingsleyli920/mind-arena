@@ -42,6 +42,18 @@ test("空手季：真·保守不算空手", () => {
   assert.ok(rate < 0.2);
 });
 
+test("空手季：两个调用点的字段形状都要认", () => {
+  // match-log 的逐季记录里 picks 是条数
+  assert.equal(isEmpty({ candidates: 60, picks: 0 }), true);
+  assert.equal(isEmpty({ candidates: 60, picks: 3 }), false);
+  // eval-run 的 picks 是**原文数组**（事后要能复查挑了哪几条），另有 pickCount。
+  // 按 `picks ?? 0` 判的话，空数组不等于 0，整条闸在排行榜那边就是哑的
+  assert.equal(isEmpty({ candidates: 60, picks: [], pickCount: 0 }), true);
+  assert.equal(isEmpty({ candidates: 60, picks: ["a", "b"], pickCount: 2 }), false);
+  // 只有 pickCount 也认
+  assert.equal(isEmpty({ candidates: 60, pickCount: 0 }), true);
+});
+
 test("空手季：候选数未知时不判，宁可漏不可冤", () => {
   // candidates 缺失发生在调用失败的季——那一季已经按失败分类记过账了，
   // 再记一次空手就是同一件事记两遍，会把失败模型的空手率顶到 100%

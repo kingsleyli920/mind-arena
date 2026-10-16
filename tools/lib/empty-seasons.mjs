@@ -8,8 +8,19 @@
 // 账」（credits/auth/infra/budget/harness/model），这边管的是「调用成功了，可是
 // 它什么也没说」。一季可以既不计失败、又是空手季——qwen3.5-9b 第 4 季正是如此。
 
-/** 判一季是不是空手：有候选而 picks 为 0。候选数未知（—）时不判，宁可漏 */
-export const isEmpty = (m) => (m?.candidates ?? 0) > 0 && (m?.picks ?? 0) === 0;
+/**
+ * 挑了几条。两个调用点记的是同一件事而字段名不同：match-log 落 `picks` 为条数，
+ * eval-run 落 `picks` 为**原文数组**（事后要能复查它到底挑了哪几条）外加 `pickCount`。
+ * 在这里收口，省得两边各写一遍判据、再各漂一次
+ */
+const countOf = (m) => {
+  if (Array.isArray(m?.picks)) return m.picks.length;
+  if (typeof m?.picks === "number") return m.picks;
+  return m?.pickCount ?? 0;
+};
+
+/** 判一季是不是空手：有候选而一条没挑。候选数未知（—）时不判，宁可漏 */
+export const isEmpty = (m) => (m?.candidates ?? 0) > 0 && countOf(m) === 0;
 
 /** 超过这个比例就不该再把这一局当「这个模型怎么打」来读 */
 export const EMPTY_WARN = 0.25;

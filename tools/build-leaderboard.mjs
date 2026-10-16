@@ -14,6 +14,7 @@ import path from "node:path";
 import { execSync } from "node:child_process";
 import { GRADE_SCORE, boardScore, contScore } from "../lib/arena/scoring.ts";
 import { ruleFingerprint } from "../lib/game/content/fingerprint.ts";
+import { emptySeasons } from "./lib/empty-seasons.mjs";
 
 /**
  * 一份跑是在哪一代规则下跑的。
@@ -154,6 +155,12 @@ const rows = runs.map((r) => {
     growth: +avg((x) => x.commanderies / Math.max(1, x.start)).toFixed(2),
     elim: R.filter((x) => x.eliminated).length,
     illegal: picks ? +(dropped / picks * 100).toFixed(1) : 0,
+    // 空手席·季：有候选而一条令没挑。**非得单列**，因为它在别的列里全是伪装：
+    // 非法率的分母是「它下的令」，一条不下就是 0%，看着最守规矩；榜分只看
+    // 疆域结果，而一个从不动手的席位多半也不会崩，于是能挂在中间档。
+    // 判据见 tools/lib/empty-seasons.mjs
+    blank: rec.length ? emptySeasons(rec).list.length : 0,
+    turns: rec.length,
     usd: r.spentUsd != null ? +r.spentUsd.toFixed(2) : null,
     grades, bySeat,
     vs: Object.fromEntries(METRICS.map(([k, f]) => [k, vs(r, f)])),

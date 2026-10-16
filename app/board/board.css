@@ -113,3 +113,17 @@ table.rulers-table th.who, table.rulers-table td.who { text-align: left; min-wid
   background: rgba(240, 201, 138, 0.12);
   border-radius: 2px;
 }
+
+/* 空手记号。它要显眼到不会被当成脚注——这正是「保守」与「交白卷」被混为一谈的地方 */
+.board .who .blank {
+  display: inline-block;
+  margin-left: .4em;
+  padding: 0 .35em;
+  border: 1px solid #8a4a2e;
+  border-radius: 2px;
+  color: #d08a5e;
+  font-size: .76em;
+  font-weight: 600;
+  letter-spacing: .02em;
+  vertical-align: 1px;
+}

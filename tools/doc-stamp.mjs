@@ -12,7 +12,9 @@ import { sourceHash, stampFor } from "./lib/doc-stamp.mjs";
 const one = process.argv[2];
 if (one) {
   if (!fs.existsSync(one)) { console.error(`没有这个文件：${one}`); process.exit(2); }
-  console.log(stampFor(one));
+  // 拦得住就别抛栈。这条路径多半是在 shell 里被 `$(...)` 捞走的，
+  // 一屏栈回溯会被原样写进文件
+  try { console.log(stampFor(one)); } catch (e) { console.error(`✗ ${e.message}`); process.exit(2); }
   process.exit(0);
 }
 

@@ -24,6 +24,27 @@ function Delta({ d }: { d: Diff }) {
   );
 }
 
+/**
+ * 空手席·季：引擎摆了候选出来而它一条没挑。
+ *
+ * 单挂一个记号，是因为这件事在表上的**每一列里都是伪装**：非法率的分母是
+ * 「它下的令」，一条不下就是 0%，看着最守规矩；榜分只看疆域结果，而一个从不
+ * 动手的席位多半也不会崩，于是能稳稳挂在中间档。读者看到的是一个「保守但
+ * 规矩」的模型，实际是它把出参预算烧在推理上、什么也没说出来。
+ *
+ * 旧榜没有这一项，照 scenario 的办法显式读、缺了就当没有。
+ */
+function Blank({ r }: { r: object }) {
+  const { blank = 0, turns = 0 } = r as { blank?: number; turns?: number };
+  if (!blank || !turns) return null;
+  const pct = Math.round((blank / turns) * 100);
+  return (
+    <b className="blank" title={`${blank}/${turns} 席·季有候选而一条令未挑——这一列在非法率与榜分里都看不出来`}>
+      空手 {pct}%
+    </b>
+  );
+}
+
 export default function BoardPage() {
   // 旧榜没有 scenario（是加第二个剧本那天才盖进去的），退回原值。
   // 类型从 JSON 推出来，所以这里显式读一次
@@ -86,6 +107,7 @@ export default function BoardPage() {
                 <td className="who">
                   {r.id}
                   {r.kind === "bot" ? <i>机器人</i> : null}
+                  <Blank r={r} />
                 </td>
                 <td className="num strong">{r.board}</td>
                 <td className="num"><Delta d={r.vs.board as Diff} /></td>
