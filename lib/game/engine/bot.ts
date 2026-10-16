@@ -14,6 +14,7 @@ import type { Geography } from "./victory.ts";
 import type { FactionId, GameState, Order } from "./types.ts";
 import { observedGarrison } from "./intel.ts";
 import { cmp } from "./cmp.ts";
+import { V } from "./verdict.ts";
 
 export type Profile = "turtle" | "balanced" | "aggressive" | "opportunist" | "purpose";
 
@@ -157,8 +158,8 @@ function decideInner(
       // 这与征伐早就修过的那个错误是同一个（见 forecast.ts 开头）
       const ff = c.field;
       if (!ff) return { c, score: -1e9 };
-      if (profile === "turtle" && ff.verdict !== "可解围") return { c, score: -1e9 };
-      if (ff.verdict === "解不了") return { c, score: -1e9 };   // 送人头不叫救援
+      if (profile === "turtle" && ff.verdict !== V.canRelieve) return { c, score: -1e9 };
+      if (ff.verdict === V.cannotRelieve) return { c, score: -1e9 };   // 送人头不叫救援
       // 区间下界才是保守估计：上界赢下界输的仗，本质是赌浮动
       return { c, score: 14 + Math.min(8, (ff.ratioLo - 1) * 6) };
     }
@@ -181,7 +182,7 @@ function decideInner(
       // 而不是按攻城的缺口数。此前这里只是「没有 forecast 就弃掉」，
       // 而 forecast 其实还在（且描述的是打不成的那场仗）
       if (c.field) {
-        if (c.field.verdict === "解不了") return { c, score: -1e9 };
+        if (c.field.verdict === V.cannotRelieve) return { c, score: -1e9 };
         if (profile === "turtle") return { c, score: -1e9 };
         return { c, score: score + Math.min(10, (c.field.ratioLo - 1) * 6) };
       }
@@ -197,7 +198,7 @@ function decideInner(
       const canBesiege = campaignPlay && typeof c.project?.seasons === "number";
       if (margin < gate && !canBesiege) return { c, score: -1e9 };
       if (canBesiege && margin < gate) score += 18 - (c.project?.seasons ?? 0) * 2;
-      else score += (margin - minMargin) * 4 + (fc.verdict === "破城" ? 6 : 0);
+      else score += (margin - minMargin) * 4 + (fc.verdict === V.breach ? 6 : 0);
       // 迷雾里的仗要打折：未探时城防与守将不明，区间宽得多
       if (fc.fog === "tier") score -= 3;
       // 投机流额外偏好无主之地：不树敌，扩张最快

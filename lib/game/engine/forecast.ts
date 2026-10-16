@@ -17,6 +17,7 @@ import { attackRetinue, defendRetinue, retinueAt, troopCap, type Roster } from "
 import type { Graph } from "./actions.ts";
 import { provCapOf, siegeEat, type EngineParams } from "./params.ts";
 import type { Action, Army, CommanderyId, FactionId, GameState } from "./types.ts";
+import { V, SIEGE_VERDICT_CN, RELIEF_VERDICT_CN } from "./verdict.ts";
 
 export interface SiegeForecast {
   /** 我方能开的缺口数。取战力浮动的下界，保守报 */
@@ -89,7 +90,7 @@ export function forecastSiege(
   const hi = breachCount(P, army.troops * (1 + P.jitter) * mul, tgt.garrison * guard,
                          tgt.defense, army.gear, terrain, atGate, bonus,
                          (def?.holdBonus ?? 0) + formDefBonus(P, tgt.formation));
-  const verdict = lo.breach > lo.hold ? "破城" : hi.breach > hi.hold ? "未知" : "不破";
+  const verdict = lo.breach > lo.hold ? V.breach : hi.breach > hi.hold ? V.unknown : V.hold;
   return {
     breachLo: lo.breach, breachHi: hi.breach,
     holdLo: lo.hold, holdHi: hi.hold, verdict, fog: "own",
@@ -97,7 +98,7 @@ export function forecastSiege(
     // 逐条重复要在每个席·季上付一次钱。「累加 +N 缺口」同理由「已围 N 季」推得出来。
     // 实测这两句去掉之后刘璋的观测峰值从 10242 压回闸门以内
     text: `续围：缺口 ${lo.breach === hi.breach ? lo.breach : `${lo.breach}–${hi.breach}`}`
-        + ` 对可防守 ${lo.hold}→${verdict}（已围 ${army.siegeSeasons} 季`
+        + ` 对可防守 ${lo.hold}→${SIEGE_VERDICT_CN[verdict]}（已围 ${army.siegeSeasons} 季`
         + `，城中存粮可支 ${tgt.provisions} 季）`,
   };
 }
@@ -290,14 +291,15 @@ export function forecastCampaign(
   const breachLo = Math.min(lo.breach, hi.breach), breachHi = Math.max(lo.breach, hi.breach);
   const holdLo = Math.min(lo.hold, hi.hold), holdHi = Math.max(lo.hold, hi.hold);
   // 破城判据是「缺口 > 可防守」，严格大于
-  const verdict = breachLo > holdHi ? "破城" : breachHi <= holdLo ? "不破" : "未知";
+  const verdict = breachLo > holdHi ? V.breach : breachHi <= holdLo ? V.hold : V.unknown;
 
   const range = (a2: number, b2: number) => (a2 === b2 ? String(a2) : `${a2}–${b2}`);
   return {
     breachLo, breachHi, holdLo, holdHi, verdict, fog,
     // 只写这一条候选特有的数。「未探时区间为何偏宽」是规则，
     // 该在规则摘要里说一次，不该在每条候选上重复一遍
-    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}→${verdict}`
+    text: `缺口 ${range(breachLo, breachHi)} 对可防守 ${range(holdLo, holdHi)}`
+        + `→${SIEGE_VERDICT_CN[verdict]}`
         + (theirForm !== null
             ? (feLo === 0 ? "" : `｜阵${FORMATION_CN[myForm]}对${FORMATION_CN[theirForm]}`
                                  + `（${feLo > 0 ? "克" : "被克"}，${feLo > 0 ? "+" : ""}${feLo} 缺口）`)
@@ -363,13 +365,13 @@ export function forecastField(
   const rHi = A * (1 + P.jitter) / Math.max(1, lo * foeMul * power);
   const rLo = A * (1 - P.jitter) / Math.max(1, hi * foeMul * power);
   const oLo = fieldOutcome(P, rLo), oHi = fieldOutcome(P, rHi);
-  const verdict = oLo.atkWins && oHi.atkWins ? "可解围"
+  const verdict = oLo.atkWins && oHi.atkWins ? V.canRelieve
     : !oLo.atkWins && !oHi.atkWins ? "解不了" : "未知";
   return {
     ratioLo: Number(rLo.toFixed(2)), ratioHi: Number(rHi.toFixed(2)),
     verdictLo: oLo.outcome, verdictHi: oHi.outcome, verdict,
     text: `战力比 ${rLo.toFixed(2)}–${rHi.toFixed(2)}`
         + `（${oLo.outcome === oHi.outcome ? oLo.outcome : `${oLo.outcome}–${oHi.outcome}`}）`
-        + `→${verdict}`,
+        + `→${RELIEF_VERDICT_CN[verdict]}`,
   };
 }

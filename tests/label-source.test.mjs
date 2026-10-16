@@ -127,3 +127,34 @@ test("标签表：物产表覆盖包里用到的每一种物产", () => {
   // 反面：表里不许有包和引擎都不认的物产
   assert.ok(kind, "包里没有 build.kind");
 });
+
+// ── 判词：id 与显示名是两件事 ──────────────────────────────────────
+//
+// 与适性不同，判词**危险的那一半已经有闸了**：它们是 TypeScript 的字面量联合
+// 类型，写错一个字是编译错误。这里钉的是另一半——判词是 id（bot.ts 拿它做决策，
+// 观测里按它写），显示名可以换语言而判等不该跟着动。
+test("判词：显示表覆盖每一个判词，且今天与 id 逐字相同", async () => {
+  const v = await import("../lib/game/engine/verdict.ts");
+  const sets = [
+    [v.SIEGE_VERDICTS, v.SIEGE_VERDICT_CN, "攻城"],
+    [v.RELIEF_VERDICTS, v.RELIEF_VERDICT_CN, "赴援"],
+    [v.FIELD_OUTCOMES, v.FIELD_OUTCOME_CN, "野战"],
+  ];
+  for (const [ids, cn, what] of sets) {
+    assert.deepEqual(Object.keys(cn).sort(), [...ids].sort(), `${what}判词的显示表漏了`);
+    for (const id of ids) assert.equal(cn[id], id, `${what}判词 ${id} 的显示名`);
+  }
+  // V 里的每个名字都要落在某个全集里
+  const all = new Set([...v.SIEGE_VERDICTS, ...v.RELIEF_VERDICTS, ...v.FIELD_OUTCOMES]);
+  for (const [k, val] of Object.entries(v.V)) assert.ok(all.has(val), `V.${k}=${val} 不在任何全集里`);
+});
+
+test("判词：决策不许再拿中文字面量比", () => {
+  // bot.ts 用判词做决策（「解不了」就不去送死）。拿字面量比，日后换个说法
+  // 就会悄悄少一个分支——而机器人是评测的基线，它变了整条基线就变了
+  const src = fs.readFileSync("lib/game/engine/bot.ts", "utf8")
+    .split("\n").map((l) => l.replace(/\/\/.*$/, "")).join("\n");
+  const hit = [...src.matchAll(/verdict\s*[!=]==\s*"([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(hit, [],
+    `bot.ts 里又出现了判词字面量：${hit.join("、")}——用 lib/game/engine/verdict.ts 的 V`);
+});
