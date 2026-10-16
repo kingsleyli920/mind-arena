@@ -12,6 +12,7 @@ import type { TerritoryGrid as Territory } from "@/lib/game/territory.ts";
 import { upkeepFor } from "@/lib/game/engine/economy.ts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fitLabel, textWidth, type Box } from "./label-fit.ts";
+import { idRe } from "./id-regex.ts";
 import { buildGraph, listActions, POLICY_CN, POSTURE_CN, BUILD_CN, RESOURCE_CN, GEAR_CN,
   type Graph } from "@/lib/game/engine/actions.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
@@ -767,8 +768,11 @@ export function PlayClient() {
    * 此前这个函数定义在封令回调**内部**，只有战报用得到——终局年表读的是
    * 同一批日志却没经过它，于是年表上写着「原属 lijue」「原属 shixie」。
    */
-  const cnText = useCallback((text: string) =>
-    text.replace(/[a-z]+/g, (m) => engineRef.current?.nameOf.get(m) ?? m), []);
+  const cnText = useCallback((text: string) => {
+    const names = engineRef.current?.nameOf;
+    if (!names?.size) return text;
+    return text.replace(idRe(names), (m) => names.get(m) ?? m);
+  }, []);
   // 一百零五郡的沙盘不能只有「整幅可见」一档：中原一带郡治密集，
   // 不能放大就等于看不清
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });
