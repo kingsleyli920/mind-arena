@@ -1,21 +1,33 @@
 import { planFeedback, type Plan } from "@/lib/game/strategy-plan.ts";
 import type { GameState } from "@/lib/game/engine/types.ts";
+import { makeT, type Locale } from "@/lib/i18n";
 
-export function StrategyPlanView({ plan, game, faction }: { plan: Plan; game?: GameState; faction: string }) {
-  if (typeof plan === "string") return <p>文字方略（旧格式）：{plan}</p>;
+export function StrategyPlanView({ plan, game, faction, locale = "zh" }: {
+  plan: Plan; game?: GameState; faction: string; locale?: Locale;
+}) {
+  const t = makeT(locale);
+  if (typeof plan === "string") return <p>{t("plan.legacy", { text: plan })}</p>;
   const feedback = game ? planFeedback(game, faction, plan) : null;
-  const status = { continue: "继续", revise: "调整", complete: "完成" }[plan.status];
-  return <div className="strategy-plan" aria-label="跨季计划">
-    <p><b>阶段目标：</b>{plan.objective}</p>
-    <p><b>目标郡：</b>{plan.target ?? "全局"} · { { attack: "进攻", defend: "防守", develop: "发展" }[plan.stance] }</p>
-    <p><b>准备条件：</b>{plan.preparation}</p>
-    <p><b>撤退或调整条件：</b>{plan.abortWhen}</p>
-    <p><b>本季复核：</b>{plan.review}（AI 判断：{status}）</p>
-    {feedback && <p><b>当前事实：</b>{feedback.lands} 郡，国库 {feedback.treasury} 金。
-      {feedback.ownership === "global" ? "全局计划，请结合战报复核"
-      : feedback.ownership === "unknown-target" ? "目标郡无法识别，请在下季纠正"
-      : feedback.ownership === "own" ? `目标属我方，驻军 ${feedback.ownGarrison} 人${feedback.underSiege ? "，正在被围" : ""}`
-      : feedback.ownership === "neutral" ? "目标目前无主" : "目标仍属其他势力"}
-      {feedback.ownArmies?.length ? `；有 ${feedback.ownArmies.length} 支我军正向该目标行动` : ""}</p>}
+  // status 与 stance 是**引擎给的 id**，显示名按语言取；拿 id 直接往页面上印
+  // 就是英文界面上露出 `revise` 的那条老路
+  const status = t(`plan.status.${plan.status}`);
+  const stance = t(`plan.stance.${plan.stance}`);
+  const own = feedback && (
+    feedback.ownership === "global" ? t("plan.own.global")
+    : feedback.ownership === "unknown-target" ? t("plan.own.unknown")
+    : feedback.ownership === "own"
+      ? t("plan.own.mine", { n: feedback.ownGarrison ?? 0 })
+        + (feedback.underSiege ? t("plan.own.besieged") : "")
+    : feedback.ownership === "neutral" ? t("plan.own.neutral") : t("plan.own.other"));
+  return <div className="strategy-plan" aria-label={t("plan.aria")}>
+    <p><b>{t("plan.objective")}</b>{plan.objective}</p>
+    <p><b>{t("plan.target")}</b>{plan.target ?? t("plan.target.global")} · {stance}</p>
+    <p><b>{t("plan.prep")}</b>{plan.preparation}</p>
+    <p><b>{t("plan.abort")}</b>{plan.abortWhen}</p>
+    <p><b>{t("plan.review")}</b>{plan.review}{t("plan.review.judged", { status })}</p>
+    {feedback && <p><b>{t("plan.facts")}</b>
+      {t("plan.facts.v", { lands: feedback.lands, gold: feedback.treasury })}
+      {own}
+      {feedback.ownArmies?.length ? t("plan.own.marching", { n: feedback.ownArmies.length }) : ""}</p>}
   </div>;
 }

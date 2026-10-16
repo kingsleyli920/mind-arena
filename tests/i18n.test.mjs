@@ -161,6 +161,9 @@ const MIGRATED = [
   "app/_shared/Primer.tsx",
   "app/(zh)/play/SessionPanel.tsx",
   "app/(zh)/play/MatchSetup.tsx",
+  "app/(zh)/play/StrategyPlanView.tsx",
+  "app/(zh)/play/DecisionReviewView.tsx",
+  "app/(zh)/play/SeasonReviewView.tsx",
   // panels.ts 迁完之后只剩 PANEL_ORDER（顺序与语言无关），一条文案都没有，
   // 所以它在上面这张「不许有裸中文」的名单里，不在下面那张「必须用到 t」的里
   "app/(zh)/play/panels.ts",
@@ -177,6 +180,9 @@ const USES_CATALOGUE = [
   "app/_shared/Primer.tsx",
   "app/(zh)/play/SessionPanel.tsx",
   "app/(zh)/play/MatchSetup.tsx",
+  "app/(zh)/play/StrategyPlanView.tsx",
+  "app/(zh)/play/DecisionReviewView.tsx",
+  "app/(zh)/play/SeasonReviewView.tsx",
 ];
 
 /** 去掉注释后，还剩的中文字面量与 JSX 文本 */
