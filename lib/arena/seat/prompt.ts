@@ -8,7 +8,7 @@
 import { toRulesDigest } from "../../game/content/schema.ts";
 import type { Observation } from "../../game/engine/observe.ts";
 
-export const PROMPT_VERSION = "1.23.0";
+export const PROMPT_VERSION = "1.24.0";
 
 /** 静态前缀。同一内容包下逐字节相同，不随席位、季数、seed 变化 */
 export function renderSystem(pack: unknown): string {

@@ -353,6 +353,11 @@ export const KIND_CN: Record<string, string> = {
 export const POLICY_CN: Record<string, string> = {
   farm: "劝农", levy: "募兵", wall: "修城", soothe: "安民", forge: "治械", stock: "屯粮",
 };
+/** 兵力档的中文名。此前只有界面有一份（PlayClient 的 STRENGTH_CN），
+    而这三个字也出现在规则摘要里——两处各存一份，改一处另一处不会报错 */
+export const POSTURE_CN: Record<string, string> = {
+  skirmish: "偏师", main: "主力", allout: "倾国",
+};
 const unitName = (P: EngineParams, unit: string) => P.units[unit]?.name ?? unit;
 
 /**

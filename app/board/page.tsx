@@ -3,14 +3,20 @@ import history from "@/public/game/history.json";
 import pack from "@/lib/game/content/pack-194.json";
 import { ruleFingerprint } from "@/lib/game/content/fingerprint";
 import { boardStale, versionsSince } from "@/lib/arena/board-stale";
+import { GRADE_CN } from "@/lib/game/engine/victory";
+import type { Grade } from "@/lib/game/engine/types";
 import "./board.css";
 
 export const metadata = { title: "汉末沙盘 · 排行榜" };
 
-const GRADE_CN: Record<string, string> = {
-  wang: "王", ba: "霸", chao: "超", jia: "甲", yi: "乙", bing: "丙", ding: "丁",
-};
-const ORDER = ["chao", "jia", "yi", "bing", "ding"];
+/*
+ * 档位中文名从 victory.ts 来，这里不再抄一份。
+ *
+ * 原先这一页自己写了一份，和引擎那份逐字相同——而两份表的危险不在于「现在不一样」，
+ * 在于**改一份另一份不会报错**：榜上写「甲」，对局页写别的，两边都跑得好好的。
+ */
+// 标成 Grade[] 而不是 string[]：这样档位名写错了是编译期报错，不是页面上一个空格
+const ORDER: Grade[] = ["chao", "jia", "yi", "bing", "ding"];
 
 type Diff = { mu: number; ci: number; sig: boolean; n: number } | null;
 

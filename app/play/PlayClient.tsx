@@ -12,12 +12,12 @@ import type { TerritoryGrid as Territory } from "@/lib/game/territory.ts";
 import { upkeepFor } from "@/lib/game/engine/economy.ts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fitLabel, textWidth, type Box } from "./label-fit.ts";
-import { buildGraph, listActions, POLICY_CN, type Graph }
-  from "@/lib/game/engine/actions.ts";
+import { buildGraph, listActions, POLICY_CN, POSTURE_CN, BUILD_CN, RESOURCE_CN, GEAR_CN,
+  type Graph } from "@/lib/game/engine/actions.ts";
 import { buildRoster, stationedAt, type Roster } from "@/lib/game/engine/officers.ts";
 import { observedGarrison, observedFormation, visibleLog, PUBLIC_EVENTS }
   from "@/lib/game/engine/intel.ts";
-import { FORMATION_CN } from "@/lib/game/engine/combat.ts";
+import { FORMATION_CN, unitName } from "@/lib/game/engine/combat.ts";
 import { admit } from "@/lib/arena/seat/admit.ts";
 import { type ModelTurnRecord } from "@/lib/arena/seat/model-seat.ts";
 import { ProxyLlmClient } from "@/lib/arena/llm/proxy-client.ts";
@@ -164,8 +164,6 @@ function costOf(r: ModelTurnRecord, price: Map<string, ModelRow>): number {
        + r.usage.completion * Number(m.completionPrice || 0);
 }
 
-/** 兵力档的中文 */
-const STRENGTH_CN: Record<string, string> = { skirmish: "偏师", main: "主力", allout: "倾国" };
 
 /**
  * 终局时说清「差的那一步是什么」。对局中状态栏另有一句 nextStep，
@@ -213,8 +211,6 @@ function endingGap(
   return need.length ? `距丙档：${need.join("，")}。` : "距丙档：条件已足，本局未及结算。";
 }
 
-/** 器械的中文名。与 actions.ts 的 GEAR_CN 同源，只是那边没导出给界面用 */
-const GEAR_LABEL: Record<string, string> = { none: "无械", ram: "冲车", mound: "土山" };
 
 
 /** 剧本目录的一行，来自 public/game/scenarios.json */
@@ -423,11 +419,17 @@ const GLYPH_N: Record<string, number> = {
   "g-ram": 1, "g-mound": 1,
   "f-scale": 1, "f-wings": 1, "f-square": 1,
 };
-/** 兵种与器械的中文。军团上那两个小标全靠它 */
-const UNIT_CN2: Record<string, string> = {
-  infantry: "步卒", cavalry: "骑兵", archer: "弓弩", navy: "水军",
-};
-const GEAR_CN2: Record<string, string> = { ram: "冲车", mound: "土山" };
+/*
+ * 兵种与器械的中文**不在这里**。
+ *
+ * 这里原先有四份副本（UNIT_CN2 / GEAR_CN2 / RESOURCE_CN2 / BUILD_CN2），
+ * 与引擎的同名表逐字相同。BUILD_CN2 和 RESOURCE_CN2 抄的是 actions.ts，
+ * 而 UNIT_CN2 抄的更远——兵种名是**内容包里的数据**（units[].name），
+ * 抄一份到界面上，等于把「规则即数据」在显示这一层破了个口子：
+ * 包里改个名，图上那两个小标会安静地继续用旧的。
+ *
+ * 现在一律从正本来：建筑/物产/器械从 actions.ts，兵种从 unitName(P, …)。
+ */
 /**
  * 阵型。三阵现在各有实属性（鱼鳞攻、鹤翼速、方圆耐围），不画出来就只能翻表格。
  *
@@ -448,9 +450,6 @@ const FORM_TIP: Record<string, string> = {
 const RES_BUILD: Record<string, string> = {
   iron: "ironworks", salt: "saltern", horse: "stud", tuntian: "farmstead",
 };
-const RESOURCE_CN2: Record<string, string> = {
-  iron: "铁", salt: "盐", horse: "牧苑", tuntian: "可垦之地",
-};
 /**
  * 建筑：引擎里每郡至多三座、八种各有实数（官府加令、仓廪加存粮、市产金 1.3 倍、
  * 校场增兵 1.6 倍、铁官治械半价、盐场每季 70 金、马苑统兵 1.25 倍、屯田军费半价），
@@ -459,10 +458,6 @@ const RESOURCE_CN2: Record<string, string> = {
  * 只画自家的：他家城里建了什么，观测里本来就看不到（迷雾），
  * 画出来等于开天眼
  */
-const BUILD_CN2: Record<string, string> = {
-  office: "官府", granary: "仓廪", market: "市", drill: "校场",
-  ironworks: "铁官", saltern: "盐场", stud: "马苑", farmstead: "屯田",
-};
 /** 有可上色面的那几个 */
 const WASHED = ["city-small", "city-large", "city-seat", "tent", "camp"] as const;
 /** 符号画面里的地平线在 0.82 处：图元要**站在**那个点上，不是以它为心 */
@@ -507,14 +502,23 @@ function NodeMark({ x, y, r, kind, id }: {
  * 两者的处境不同：一个是「已经动了、还没到」，一个是「在家闲着」。
  * 帐面与栅面刷势力色，图上一眼看得出这支兵是谁的
  */
-function ArmyMark({ x, y, s, color, marching, at, unit, gear }: {
+function ArmyMark({ x, y, s, color, marching, at, unit, gear, unitLabel, gearLabel }: {
   x: number; y: number; s: number; color: string; marching: boolean;
   /** 军团 id：同一支军团一路上是同一顶帐 */
   at: string;
-  /** 兵种。野战有相克，图上一眼看得出这支打不打得过那支 */
+  /** 兵种 id，决定画哪个图元 */
   unit?: string;
-  /** 攻城器械。它决定攻城那一击，也决定行军慢一季 */
+  /** 攻城器械 id。它决定攻城那一击，也决定行军慢一季 */
   gear?: string;
+  /**
+   * 两个小标的**显示名由调用方给**，这里不查表。
+   *
+   * 兵种名在内容包里（units[].name），而这个叶子组件手上没有 P；
+   * 为了一句 title 把 P 一路传下来不值当，抄一份到模块顶上又会和包漂移——
+   * 那正是这里原先四份 *_CN2 的来路
+   */
+  unitLabel?: string;
+  gearLabel?: string;
 }) {
   const kind = marching ? "tent" : "camp";
   const id = `${kind}-${variantOf(at, kind)}`;
@@ -527,14 +531,14 @@ function ArmyMark({ x, y, s, color, marching, at, unit, gear }: {
         mask={`url(#wash-${id})`} opacity={0.9} />
       <image href={`${GLYPH}/${id}-ink.png`} x={l} y={t} width={w} height={w} />
       {/* 兵种在帐左、器械在帐右。引擎里这两样都有，图上此前一律画同一顶帐 */}
-      {unit && UNIT_CN2[unit] && (
-        <g><title>{UNIT_CN2[unit]}</title>
+      {unit && unitLabel && (
+        <g><title>{unitLabel}</title>
           <image href={`${GLYPH}/u-${unit}-0-ink.png`}
             x={l - badge * 0.72} y={y - badge * 0.92} width={badge} height={badge} />
         </g>
       )}
-      {gear && gear !== "none" && GEAR_CN2[gear] && (
-        <g><title>{GEAR_CN2[gear]}</title>
+      {gear && gear !== "none" && gearLabel && (
+        <g><title>{gearLabel}</title>
           <image href={`${GLYPH}/g-${gear}-0-ink.png`}
             x={l + w - badge * 0.28} y={y - badge * 0.92} width={badge} height={badge} />
         </g>
@@ -2257,7 +2261,7 @@ export function PlayClient() {
       const officers = stationedAt(game, engine.roster, c.id);
       const note = besieger ? `被 ${engine.nameOf.get(besieger.faction) ?? besieger.faction} 围`
         : cut ? "补给断绝"
-        : c.gear !== "none" ? `备${GEAR_LABEL[c.gear] ?? c.gear}`
+        : c.gear !== "none" ? `备${GEAR_CN[c.gear] ?? c.gear}`
         : "";
       return { c, officers, note, warn: !!besieger || cut };
     })
@@ -2697,7 +2701,7 @@ export function PlayClient() {
                     const dy = m.mine && m.st.buildings.length ? m.base * 1.06 : m.base * 0.06;
                     return (
                       <g key={`r-${r}`} className="res-ghost">
-                        <title>{`有${RESOURCE_CN2[r] ?? r}（未建）`}</title>
+                        <title>{`有${RESOURCE_CN[r as keyof typeof RESOURCE_CN] ?? r}（未建）`}</title>
                         <image href={`${GLYPH}/b-${RES_BUILD[r]}-0-ink.png`}
                           x={bx - bs / 2} y={m.y + dy} width={bs} height={bs} />
                       </g>
@@ -2710,7 +2714,7 @@ export function PlayClient() {
                   const bx = m.x + (i - (all.length - 1) / 2) * bs * 0.92;
                   return (
                     <g key={b}>
-                      <title>{BUILD_CN2[b] ?? b}</title>
+                      <title>{BUILD_CN[b as keyof typeof BUILD_CN] ?? b}</title>
                       <image href={`${GLYPH}/b-${b}-0-ink.png`}
                         x={bx - bs / 2} y={m.y + m.base * 0.06} width={bs} height={bs} />
                     </g>
@@ -2886,7 +2890,8 @@ export function PlayClient() {
                   <ArmyMark x={campX} y={campY - s * 0.25} s={s * 0.86}
                     color={engine.colorOf.get(a.faction) ?? "#7a7266"}
                     marching={false} at={a.id}
-                    unit={lod >= 1 ? a.unit : undefined} gear={lod >= 1 ? a.gear : undefined} />
+                    unit={lod >= 1 ? a.unit : undefined} gear={lod >= 1 ? a.gear : undefined}
+                    unitLabel={unitName(engine.P, a.unit)} gearLabel={GEAR_CN[a.gear]} />
                   <text x={campX} y={campY + s * 0.42} textAnchor="middle" fontSize={s * 0.4}>
                     {a.siegeSeasons + 1}季·{(a.troops / 1000).toFixed(1)}千
                     {/* 存粮只在**自己的城**被围时报：他方城的存粮看不见，
@@ -3061,8 +3066,8 @@ export function PlayClient() {
                   : (() => { const o = observedGarrison(game, seat, a.at, engine.P);
                       return o.scouted || o.own ? `约 ${Math.round(o.value)} 人`
                         : `${Math.round(o.lo)}–${Math.round(o.hi)} 人（未探）`; })()}
-                  {"\u3000"}{UNIT_CN2[a.unit] ?? a.unit}
-                  {a.gear && a.gear !== "none" ? `\u3000${GEAR_LABEL[a.gear] ?? a.gear}` : ""}</span>
+                  {"\u3000"}{unitName(engine.P, a.unit)}
+                  {a.gear && a.gear !== "none" ? `\u3000${GEAR_CN[a.gear] ?? a.gear}` : ""}</span>
                 {lead.length > 0 && <span>{lead.join("、")}</span>}
               </div>
             );
@@ -3156,7 +3161,7 @@ export function PlayClient() {
                     onClick={() => { setPinned(L.c.id); setFocus(L.c.id); centerOnId(L.c.id); }}>
                     <td>{L.c.id}</td>
                     <td>{L.c.garrison}</td>
-                    <td>{UNIT_CN2[L.c.unit] ?? L.c.unit}</td>
+                    <td>{unitName(engine.P, L.c.unit)}</td>
                     <td>{L.c.yieldTier}</td>
                     <td>{L.c.moraleTier}</td>
                     <td>{L.c.defense}</td>
@@ -3166,10 +3171,10 @@ export function PlayClient() {
                       {L.c.provisions >= provCapOf(L.c, engine.P) ? "满" : L.c.provisions}
                     </td>
                     <td>{FORMATION_CN[L.c.formation]}</td>
-                    <td>{GEAR_CN2[L.c.gear] ?? "—"}</td>
+                    <td>{L.c.gear && L.c.gear !== "none" ? GEAR_CN[L.c.gear] : "—"}</td>
                     <td>{L.officers.length ? L.officers.map((o) => o.name).join("、") : "—"}</td>
                     <td>{L.c.buildings.length
-                      ? L.c.buildings.map((b) => BUILD_CN2[b] ?? b).join("·") : "—"}</td>
+                      ? L.c.buildings.map((b: string) => BUILD_CN[b as keyof typeof BUILD_CN] ?? b).join("\u00b7") : "—"}</td>
                     <td>{L.note}</td>
                   </tr>
                 ))}
@@ -3394,7 +3399,7 @@ export function PlayClient() {
                               <b>{titleOf(c.action, (id) => engine.nameOf.get(id) ?? id,
                                 (id) => engine.roster.byId.get(id)?.name ?? id)}</b>
                               {c.action.type === "campaign" && "strength" in c.action
-                                && <i className="tier">{STRENGTH_CN[c.action.strength]}</i>}
+                                && <i className="tier">{POSTURE_CN[c.action.strength]}</i>}
                               {c.forecast && (
                                 <em className={`verdict v-${
                                   c.forecast.verdict === "破城" ? "win"
