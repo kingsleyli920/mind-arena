@@ -177,12 +177,29 @@ export async function modelDecide(
       // 实测见过后者：某免费模型 0.6 秒返回空内容、无 usage 无 finish_reason，
       // 而同一份载荷手工重发就正常。把它记成 budget 会让人去调出参预算，
       // 而该做的是重试或换提供方
-      const spent = res.finishReason === "length" || r > 0 || c > 0;
+      // 三种空内容，三个去处。判据是**出参到底有没有顶到上限**：
+      //   顶到了                     → 被推理吃光，harness 的配置问题（budget）
+      //   没顶到却空手而归（finish=stop）→ 模型自己交了白卷（model）
+      //   一个 token 都没花就空        → 提供方回了空壳（infra）
+      //
+      // 原先第二种被并进第一种，判据是「花过出参就算」（`r > 0 || c > 0`）。
+      // 那太松：实测 deepseek-v4-flash-0731 四季全空，finish=stop、
+      // 出参预算 8000 而推理只用了 1169——离上限远得很，却被记成 budget，
+      // 于是一个交白卷的模型被算成我们的预算没调好。这是今天那个
+      // 「模型 id 打错被记成模型答不上来」的镜像：方向相反，同样把账记错了人。
+      const cap = res.maxTokens ?? 0;
+      const hitCap = res.finishReason === "length" || (cap > 0 && r + c >= cap * 0.9);
+      const touched = r > 0 || c > 0;
+      const kind: FailureBucket = hitCap ? "budget" : touched ? "model" : "infra";
       return { orders: [], record: { ...base, ...meta(res),
-        failureKind: spent ? "budget" : "infra",
-        failure: spent
-          ? `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${res.maxTokens}`
-            + `${r ? `，推理占 ${r}` : ""}）`
+        failureKind: kind,
+        failure: hitCap
+          ? `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${cap}`
+            + `${r ? `，推理占 ${r}` : ""}）——出参顶到上限`
+          : touched
+          ? `无内容（finish=${res.finishReason ?? "?"}，出参预算 ${cap}`
+            + `${r ? `，推理 ${r}` : ""}${c ? `，正文 ${c}` : ""}）`
+            + `——**未顶到上限**，是模型空手而归，不是预算不够`
           : `提供方回了空壳（finish=${res.finishReason ?? "无"}，未计出参`
             + `，耗时 ${res.elapsedMs}ms）——多半是限流或路由问题，非模型能力` } };
     }

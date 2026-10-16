@@ -29,3 +29,26 @@ test("失败分级：别的档位没被这次改动带动", () => {
   assert.equal(classify(500, "boom").kind, "retryable");
   assert.equal(classify(418, "teapot").kind, "fatal");
 });
+
+// ── 空内容的三分法 ────────────────────────────────────────────────
+//
+// 模型回了空内容，有三种完全不同的原因，不能都记成「出参预算不够」：
+//   出参顶到上限 → 被推理吃光，harness 的配置问题
+//   没顶到却空手 → 模型自己交了白卷，算它的分
+//   一个 token 没花 → 提供方回了空壳，基础设施
+//
+// 原判据是「花过出参就算被吃光」（r > 0 || c > 0），太松。实测
+// deepseek/deepseek-v4-flash-0731 四季全空，finish=stop、出参预算 8000
+// 而推理只用了 1169——离上限远得很，却被记成 budget，于是一个交白卷的模型
+// 被算成我们的预算没调好。这是「模型 id 打错被记成模型答不上来」的镜像。
+test("空内容：顶到上限算 harness，没顶到算模型，一个 token 没花算基础设施", async () => {
+  const src = await import("node:fs").then((fs) =>
+    fs.readFileSync("lib/arena/seat/model-seat.ts", "utf8"));
+  // 判据写在源码里，这里只钉住它的形状——改松了会让这条闸失效而不报错
+  assert.ok(/const hitCap = res\.finishReason === "length" \|\| \(cap > 0 && r \+ c >= cap \* 0\.9\)/.test(src),
+    "hitCap 的判据变了 —— 它必须同时看 finish=length 与「出参接近上限」");
+  assert.ok(/kind: FailureBucket = hitCap \? "budget" : touched \? "model" : "infra"/.test(src),
+    "三分法变了 —— 顶到上限→budget，没顶到却空手→model，没花 token→infra");
+  assert.ok(!/const spent = res\.finishReason === "length" \|\| r > 0 \|\| c > 0/.test(src),
+    "旧的宽判据回来了：花过出参就算被吃光 —— 交白卷的模型会被记成预算问题");
+});
