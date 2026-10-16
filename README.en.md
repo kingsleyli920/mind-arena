@@ -210,7 +210,7 @@ Stated up front, so you don't assume it is already solved:
 ## Development and evaluation
 
 ```bash
-npm test          # 211 regression tests: engine, model client, session
+npm test          # 241 regression tests: engine, model client, session
 npm run lint
 npm run typecheck
 npm run selfplay  # bot self-play + four acceptance gates (free)
@@ -278,4 +278,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@d9149887a394 -->
+<!-- translated-from: README.md@3365da7137d8 -->

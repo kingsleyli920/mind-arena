@@ -139,7 +139,7 @@ npm run dev
 ## 开发与评测
 
 ```bash
-npm test          # 211 条回归测试：引擎、模型客户端、会话
+npm test          # 241 条回归测试：引擎、模型客户端、会话
 npm run lint
 npm run typecheck
 npm run selfplay  # 机器人自对局 + 四道验收闸（免费）
