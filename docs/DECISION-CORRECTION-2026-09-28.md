@@ -1,3 +1,5 @@
+[中文](DECISION-CORRECTION-2026-09-28.md) · [English](DECISION-CORRECTION-2026-09-28.en.md)
+
 # 命令收据后的模型纠错实测（2026-09-28）
 
 ## 测试约定（在付费请求前固定）

@@ -1,3 +1,5 @@
+[中文](OFFICER-RENOWN.md) · [English](OFFICER-RENOWN.en.md)
+
 # 知名度分级：historicalWeight 与 renown
 
 生成日期：2026-08-31

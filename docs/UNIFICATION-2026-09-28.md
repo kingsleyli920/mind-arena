@@ -1,3 +1,5 @@
+[中文](UNIFICATION-2026-09-28.md) · [English](UNIFICATION-2026-09-28.en.md)
+
 # 统一终局与机器人首轮优化
 
 ## 结论

@@ -1,3 +1,5 @@
+[中文](PLAN-CONSISTENCY-2026-09-29.md) · [English](PLAN-CONSISTENCY-2026-09-29.en.md)
+
 # 跨季计划状态与实际战果（2026-09-29）
 
 ## 问题与修正

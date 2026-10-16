@@ -1,3 +1,5 @@
+[中文](DECISION-COMPARISON-2026-09-28.md) · [English](DECISION-COMPARISON-2026-09-28.en.md)
+
 # 固定局面模型对照 · 2026-09-28
 
 ## 结论

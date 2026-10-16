@@ -1,3 +1,5 @@
+[中文](GAMEPLAY-DESIGN-V2-DELTA.md) · [English](GAMEPLAY-DESIGN-V2-DELTA.en.md)
+
 # 玩法方案 V2 增量修订：第二轮六份扫描 × 首轮结论对接
 
 编写日期：2026-08-31

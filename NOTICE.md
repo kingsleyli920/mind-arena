@@ -1,3 +1,5 @@
+[中文](NOTICE.md) · [English](NOTICE.en.md)
+
 # 数据与素材的出处 · Data provenance
 
 本文件是 [LICENSE](LICENSE) 的补充说明，不构成额外的许可限制。

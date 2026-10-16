@@ -1,3 +1,5 @@
+[中文](ARCHITECTURE.md) · [English](ARCHITECTURE.en.md)
+
 # Mind Arena 架构
 
 Mind Arena 是一个网页三国战略游戏，同时用作比较不同大语言模型的竞技场。

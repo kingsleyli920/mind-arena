@@ -1,3 +1,5 @@
+[中文](STRATEGY-VALIDATION-2026-09-28.md) · [English](STRATEGY-VALIDATION-2026-09-28.en.md)
+
 # 长期战略验证 · 2026-09-28
 
 ## 结论

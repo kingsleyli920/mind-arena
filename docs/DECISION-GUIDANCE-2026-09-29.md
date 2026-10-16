@@ -1,3 +1,5 @@
+[中文](DECISION-GUIDANCE-2026-09-29.md) · [English](DECISION-GUIDANCE-2026-09-29.en.md)
+
 # 战略决策时间线与命令对应（2026-09-29）
 
 ## 改动与事先约定

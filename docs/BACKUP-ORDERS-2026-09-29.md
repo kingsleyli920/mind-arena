@@ -1,3 +1,5 @@
+[中文](BACKUP-ORDERS-2026-09-29.md) · [English](BACKUP-ORDERS-2026-09-29.en.md)
+
 # AI 首选命令与备选补位（2026-09-29）
 
 ## 目的与实现

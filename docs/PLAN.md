@@ -1,3 +1,5 @@
+[中文](PLAN.md) · [English](PLAN.en.md)
+
 # 开发计划
 
 依据 `GAMEPLAY-DESIGN-V2-DELTA.md` 的 MERS v0.1（43 条规则）。

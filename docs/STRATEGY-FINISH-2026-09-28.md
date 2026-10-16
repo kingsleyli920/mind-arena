@@ -1,3 +1,5 @@
+[中文](STRATEGY-FINISH-2026-09-28.md) · [English](STRATEGY-FINISH-2026-09-28.en.md)
+
 # 战略收尾与验收 · 2026-09-28
 
 本轮按三项任务完成：解决后期僵持、低成本真实 AI 跨季验证、清理 TypeScript 错误。
