@@ -187,11 +187,15 @@ Stated up front, so you don't assume it is already solved:
   Yuan Shao's six, neighbourhood pressure 2.73 against 1.24. Historically Cao Cao was
   the side that won by a hair, but "whether a human or a model playing Cao Cao can win"
   has not been tested. Under the sixteen-season evaluation setting the four gates pass
-  4/4 (opening commandery count ↔ score, ρ = 0.38), but **the Liu Biao seat is
-  eliminated in 35 of 60 games** — his three commanderies hold four fronts (Cao Cao to
-  the north, Zhang Xian to the south, Sun Ce to the east, Liu Zhang (刘璋) to the
-  west), neighbourhood pressure 13.96, and his score is close to random, which makes
-  him unsuitable as an evaluation seat.
+  4/4 (opening commandery count ↔ score, ρ = 0.31). **The Liu Biao seat is eliminated
+  in 35 of 60 games and finishes in Grade D (丁) in 45 of them** — his three
+  commanderies hold four fronts (Cao Cao to the north, Zhang Xian to the south, Sun Ce
+  to the east, Liu Zhang (刘璋) to the west), neighbourhood pressure 13.96, and his
+  score is close to random, so he is **not in the evaluation rotation**. His place goes
+  to Zhang Lu (张鲁), who also opens with a single commandery (eliminated 23% of the
+  time, grades spread across four tiers), which gives the "opening with one commandery
+  does not mean certain elimination" criterion something to stand on in this scenario
+  too. Liu Biao is still playable; he is just not used as a yardstick.
 - Desktop only.
 
 ## Development and evaluation
@@ -265,4 +269,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.5.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@09ed08b9f1ca -->
+<!-- translated-from: README.md@8ca0a55ada3d -->

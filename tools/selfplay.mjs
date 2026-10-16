@@ -63,10 +63,19 @@ const GAMES = Number(process.env.GAMES ?? 100);
 const SEAT_SETS = {
   // 最强 / 最难 / 两家据险自守 / 两家中等
   194: ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"],
-  // 官渡两强 + 夹在曹操腹地的刘备（本剧本最难的席位）+ 江东 + 荆益
-  200: ["caocao", "yuanshao", "liubei", "sunce", "liubiao", "liuzhang"],
+  // 官渡两强 + 夹在曹操腹地的刘备 + 江东 + 益州 + 汉中。
+  //
+  // **刘表不在内，是测出来的**：他三郡顶四条战线（北曹操、南张羡、东孙策、
+  // 西刘璋），60 局出局 35 局、45 局落丁档——那个席位的得分接近随机，
+  // 放在轮换里会污染「苟活是否最优」那道闸的对照。换过四个候选各 30 局：
+  //   张羡 出局 2/30 丙8丁8甲14　　张鲁 出局 5/30 丙17丁8乙5
+  //   公孙度 出局 9/30 丙7丁15甲8　士燮 出局 3/30 丙1丁29（与刘表同病）
+  // 取张鲁：档位最居中，上下都有空间；而且他一郡开局，于是「一郡开局不
+  // 必然出局」那道专项判据在本剧本重新有了着落。刘表仍可选来玩，只是不当量尺。
+  200: ["caocao", "yuanshao", "liubei", "sunce", "zhanglu", "liuzhang"],
 };
-const SEATS = SEAT_SETS[SCENARIO];
+// SEATS=a,b,c 可临时换一组来比，用于挑席位时的对照实验；不传则用上表
+const SEATS = process.env.SEATS ? process.env.SEATS.split(",") : SEAT_SETS[SCENARIO];
 if (!SEATS) {
   console.error(`没有 ${SCENARIO} 剧本的席位名单——加剧本时要在 SEAT_SETS 里选六家，`
     + "理由写在注释里。照搬别年的名单会得到空席位和一份虚假的报告。");

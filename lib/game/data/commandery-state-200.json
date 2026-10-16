@@ -180,15 +180,15 @@
     "黄祖为刘表股肱，屯沙羡以扼江路，舟师甚盛——孙氏三世攻之（坚死于此，策、权屡攻）至建安十三年乃下"
    ],
    "长沙郡": [
-    0.8,
-    "张羡举三郡叛刘表，表遣兵攻之连年不下（《桓阶传》），临湘方在围中"
+    0.65,
+    "张羡举三郡叛刘表，「表遣兵攻之，连年不下」（《桓阶传》）——临湘被围已数年，非近乎完好之地。此前给 0.80 是把「连年不下」只当成刘表攻不动，而没算在被围一方身上"
    ],
    "零陵郡": [
-    0.85,
-    "随张羡叛表，为刘表兵锋所及"
+    0.7,
+    "随张羡叛表，为刘表兵锋所及；与长沙同受连年之兵"
    ],
    "桂阳郡": [
-    0.85,
+    0.7,
     "同零陵"
    ],
    "汉中郡": [
@@ -1191,15 +1191,15 @@
    "control": "contested",
    "households140": 212284,
    "population140": 1001578,
-   "warDamage": 0.85,
-   "warBasis": "随张羡叛表，为刘表兵锋所及",
-   "householdsEff": 180441,
-   "populationEff": 851341,
+   "warDamage": 0.7,
+   "warBasis": "随张羡叛表，为刘表兵锋所及；与长沙同受连年之兵",
+   "householdsEff": 148599,
+   "populationEff": 701105,
    "terrainFactor": 0.945,
    "dominantTerrain": "plain",
    "yieldTier": 8,
-   "garrison": 17027,
-   "garrisonTier": 9,
+   "garrison": 14022,
+   "garrisonTier": 8,
    "moraleTier": 3,
    "defense": 70,
    "degree": 4
@@ -1213,15 +1213,15 @@
    "control": "contested",
    "households140": 135029,
    "population140": 501403,
-   "warDamage": 0.85,
+   "warDamage": 0.7,
    "warBasis": "同零陵",
-   "householdsEff": 114775,
-   "populationEff": 426193,
+   "householdsEff": 94520,
+   "populationEff": 350982,
    "terrainFactor": 0.903,
    "dominantTerrain": "plain",
    "yieldTier": 7,
-   "garrison": 8524,
-   "garrisonTier": 7,
+   "garrison": 7020,
+   "garrisonTier": 6,
    "moraleTier": 3,
    "defense": 65,
    "degree": 5
@@ -1257,16 +1257,16 @@
    "control": "firm",
    "households140": 255854,
    "population140": 1059372,
-   "warDamage": 0.8,
-   "warBasis": "张羡举三郡叛刘表，表遣兵攻之连年不下（《桓阶传》），临湘方在围中",
-   "householdsEff": 204683,
-   "populationEff": 847498,
+   "warDamage": 0.65,
+   "warBasis": "张羡举三郡叛刘表，「表遣兵攻之，连年不下」（《桓阶传》）——临湘被围已数年，非近乎完好之地。此前给 0.80 是把「连年不下」只当成刘表攻不动，而没算在被围一方身上",
+   "householdsEff": 166305,
+   "populationEff": 688592,
    "terrainFactor": 1,
    "dominantTerrain": "plain",
    "yieldTier": 8,
-   "garrison": 16950,
-   "garrisonTier": 9,
-   "moraleTier": 4,
+   "garrison": 13772,
+   "garrisonTier": 8,
+   "moraleTier": 3,
    "defense": 70,
    "degree": 5
   },
