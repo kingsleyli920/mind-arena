@@ -1,0 +1,133 @@
+{
+ "_note": "建安五年·曹操席位·64 季的配对对照。同种子，一方由模型执子，其余全是机器人；对照组整局由 bot:purpose 执曹操。match-1792177807 那个种子是先跑模型（时间戳种子）才去找对照的，**不独立**；cc-1..3 才是干净的配对。cc-4..6 只跑了机器人，用来定基线。",
+ "scenario": "200",
+ "seat": "caocao",
+ "seasons": 64,
+ "model": "z-ai/glm-5.3-flash",
+ "provider": "CoreWeave",
+ "reasoning": "low",
+ "pairs": [
+  {
+   "seed": "match-1792177807",
+   "bot_purpose": {
+    "start": 24,
+    "end": 94,
+    "zhouStart": 4,
+    "zhou": 12,
+    "grade": "王",
+    "unified": true,
+    "spentUsd": null
+   },
+   "model": {
+    "start": 24,
+    "end": 92,
+    "zhouStart": 4,
+    "zhou": 11,
+    "grade": "王",
+    "unified": true,
+    "spentUsd": 0.1162
+   }
+  },
+  {
+   "seed": "cc-1",
+   "bot_purpose": {
+    "start": 24,
+    "end": 21,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "乙",
+    "unified": false,
+    "spentUsd": null
+   },
+   "model": {
+    "start": 24,
+    "end": 84,
+    "zhouStart": 4,
+    "zhou": 11,
+    "grade": "王",
+    "unified": true,
+    "spentUsd": 0.1475
+   }
+  },
+  {
+   "seed": "cc-2",
+   "bot_purpose": {
+    "start": 24,
+    "end": 19,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "丙",
+    "unified": false,
+    "spentUsd": null
+   },
+   "model": {
+    "start": 24,
+    "end": 90,
+    "zhouStart": 4,
+    "zhou": 11,
+    "grade": "王",
+    "unified": true,
+    "spentUsd": 0.1107
+   }
+  },
+  {
+   "seed": "cc-3",
+   "bot_purpose": {
+    "start": 24,
+    "end": 23,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "乙",
+    "unified": false,
+    "spentUsd": null
+   },
+   "model": {
+    "start": 24,
+    "end": 94,
+    "zhouStart": 4,
+    "zhou": 11,
+    "grade": "王",
+    "unified": true,
+    "spentUsd": 0.1031
+   }
+  }
+ ],
+ "botOnly": [
+  {
+   "seed": "cc-4",
+   "bot_purpose": {
+    "start": 24,
+    "end": 25,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "乙",
+    "unified": false,
+    "spentUsd": null
+   }
+  },
+  {
+   "seed": "cc-5",
+   "bot_purpose": {
+    "start": 24,
+    "end": 17,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "乙",
+    "unified": false,
+    "spentUsd": null
+   }
+  },
+  {
+   "seed": "cc-6",
+   "bot_purpose": {
+    "start": 24,
+    "end": 24,
+    "zhouStart": 4,
+    "zhou": 3,
+    "grade": "超",
+    "unified": false,
+    "spentUsd": null
+   }
+  }
+ ]
+}

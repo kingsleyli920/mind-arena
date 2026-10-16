@@ -2194,5 +2194,68 @@ uses in recording it: one, so that the next person who sees desertions knows whe
 come from; two, because this is precisely the Guandu situation — short supply was Cao
 Cao's problem in that campaign to begin with, and the engine puts it on the board in
 season one.
+## 39. A model playing Cao Cao unifies the realm and the bot cannot — and I nearly reported a selection effect
 
-<!-- translated-from: EVAL.md@1caca592b7eb -->
+The README's "current limits" carried a line: on Jian'an 5, "whether a human or a model
+playing Cao Cao can win has not been tested". It has now been tested.
+
+### The paired comparison
+
+Cao Cao's seat, 64 seasons, Jian'an 5, one side driven by a model and every other seat
+a bot; the control group has the strongest bot profile, `bot:purpose`, driving Cao Cao
+for the whole game. **Same seeds.**
+
+| Seed | bot:purpose | model `z-ai/glm-5.3-flash` |
+|---|---|---|
+| `match-1792177807` | 94 commanderies / 12 provinces, King ★unified | 92 commanderies / 11 provinces, King ★unified |
+| `cc-1` | 21 commanderies / 3 provinces, Grade B | **84 commanderies / 11 provinces, King ★unified** |
+| `cc-2` | 19 commanderies / 3 provinces, Grade C | **90 commanderies / 11 provinces, King ★unified** |
+| `cc-3` | 23 commanderies / 3 provinces, Grade B | **94 commanderies / 11 provinces, King ★unified** |
+
+The bot baseline was run on three further seeds (bots only, free): `cc-4` 25
+commanderies, `cc-5` 17, `cc-6` 24, provinces controlled constant at 3, and **not one
+unification**.
+
+**The model unified 4/4; the purpose-profile bot went 0/6 on clean seeds.** Cao Cao
+opens with 24 commanderies and 4 provinces; the model reached 84–94 commanderies and 11
+provinces, seventy-odd of them taken from other hands. Model-side spend came to
+**$0.4775 actually charged** (a per-season mean of $0.0023–0.0032).
+
+### I nearly reported a selection effect, and the control group is what stopped me
+
+For the first game I used a timestamp seed (`match-1792177807`), the model unified, and
+I was about to write "the model wins where the bot cannot" — then I ran the bot on that
+same seed, and **it unified too, with 94 commanderies against the model's 92.**
+
+That seed is a one-in-seven outlier. And the reason I was standing on it is precisely
+that **I ran the model first and went looking for a control afterwards** — result
+first, control second. A real experiment has to pair on the same batch of seeds
+**chosen in advance**, which is what cc-1..3 are (along with the free cc-4..6 that set
+the baseline).
+
+The conclusion did not change, but the reason for it changed completely: the old
+evidence was a seed picked out by its own outcome, the new evidence is a paired
+difference on three seeds chosen in advance plus a six-seed bot baseline.
+**Had the first version gone out, it would have been the worst thing written today.**
+
+### Two limits to remember
+
+- **n=4 (only 3 of them clean), one model, one control profile.** This is not a general
+  conclusion that "models are stronger than bots"; it is that on this scenario's this
+  seat, this model did what this baseline could not.
+- There is another set of figures on a different basis of measurement; do not read them
+  together. In **all-bot unification-mode** long games (`tools/playtest-session.mjs`,
+  8 games on Jian'an 5) Cao Cao is **wiped out in six of eight** (0 commanderies at the
+  end), whereas in the fixed-length 64-season games here a bot driving Cao Cao is never
+  wiped out and simply stalls at 17–25 commanderies. The two are not contradictory —
+  **the game mode (unification versus fixed length), who drives which seat, and how many
+  profiles are present all differ.** Cite either set of figures with its setup attached.
+  (I cited this twice as "point 4 of this document", and point 4 is about fallback rungs
+  and the reasoning share — that result was never in this document at all. Section
+  numbers recalled from memory go wrong, so this states the setup instead of a number.)
+
+The raw data is in
+[reports/scenario-200-2026-10-16/caocao-64season-pairs.json](reports/scenario-200-2026-10-16/caocao-64season-pairs.json)
+(Chinese).
+
+<!-- translated-from: EVAL.md@db9de61a8da1 -->

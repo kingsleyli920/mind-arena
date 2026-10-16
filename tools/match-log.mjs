@@ -60,6 +60,7 @@ const cn = (t) => String(t).replace(/[a-z][a-z0-9_]*/g, (m) => NAME[m] ?? m);
 
 const SEED = arg("seed", `match-${Math.floor(Date.now() / 1000)}`);
 const SEASONS = Number(arg("seasons", "32"));
+const MAX_USD = Number(arg("max-usd", "0")) || 0;
 const MODEL = arg("model", "");
 const AGENT = MODEL ? "model" : arg("agent", "bot:balanced");
 const REASONING = arg("reasoning", "low");
@@ -285,6 +286,13 @@ async function main() {
       reason = rec.reason ?? "";
       if (rec.plan) plan = rec.plan;
       if (typeof rec.usage?.cost === "number") spentUsd += rec.usage.cost;
+      // 花费上限，超了就地停（与 eval-run 的 --max-usd 同一个理由：事前估价
+      // 看不见推理用量，实测撞过一次 20 倍的差额）。不传则不设限
+      if (MAX_USD && spentUsd > MAX_USD) {
+        halted = `花费已达 $${spentUsd.toFixed(4)}，超过 --max-usd=${MAX_USD}`;
+        say(`\n> **${halted}**　第 ${s.turn + 1} 季停手。这不是模型的问题，是没跑完。`);
+        break;
+      }
       calls += 1;
       say(`\`${MODEL}\`\u3000用时 ${(rec.elapsedMs / 1000).toFixed(1)}s`
         + `\u3000入 ${fmt(rec.usage?.prompt ?? 0)} tok（缓存 ${fmt(rec.usage?.cached ?? 0)}）`

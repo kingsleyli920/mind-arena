@@ -185,8 +185,13 @@ Stated up front, so you don't assume it is already solved:
   the winner is still Yuan Shao**, while a bot playing Cao Cao is usually eliminated —
   he opens with twenty-four commanderies and 147,000 troops, but with eleven fronts to
   Yuan Shao's six, neighbourhood pressure 2.73 against 1.24. Historically Cao Cao was
-  the side that won by a hair, but "whether a human or a model playing Cao Cao can win"
-  has not been tested. Under the sixteen-season evaluation setting the four gates pass
+  the side that won by a hair — and **a model playing Cao Cao does win**: paired on the
+  same seeds, `glm-5.3-flash` driving Cao Cao over 64-season games **unified the realm
+  4/4** (84–94 commanderies, 11 provinces), while the strongest bot profile went **0/6**
+  across six seeds (17–25 commanderies). Model-side spend was $0.4775 actually charged.
+  n=4, one model, one control profile — see point 39 of
+  [docs/EVAL.en.md](docs/EVAL.en.md).
+  Under the sixteen-season evaluation setting the four gates pass
   4/4 (opening commandery count ↔ score, ρ = 0.31). **The Liu Biao seat is eliminated
   in 35 of 60 games and finishes in Grade D (丁) in 45 of them** — his three
   commanderies hold four fronts (Cao Cao to the north, Zhang Xian to the south, Sun Ce
@@ -269,4 +274,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@298262a4aae5 -->
+<!-- translated-from: README.md@e3dc96b5b66a -->
