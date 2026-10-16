@@ -15,16 +15,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import crypto from "node:crypto";
+import { sourceHash } from "../tools/lib/doc-stamp.mjs";
 
 const ROOTS = [".", "docs"];
 const STAMP = /<!--\s*translated-from:\s*([^@\s]+)@([0-9a-f]{12})\s*-->/;
-
-/** 中文原件的内容哈希。只取内容，不含语言切换行——那一行两边都会改 */
-export function sourceHash(text) {
-  const body = text.split("\n").filter((l) => !/^\[中文\]\(.*\)\s*·\s*\[English\]\(.*\)\s*$/.test(l.trim()));
-  return crypto.createHash("sha256").update(body.join("\n")).digest("hex").slice(0, 12);
-}
 
 const pairs = [];
 for (const dir of ROOTS) {
@@ -53,8 +47,7 @@ test("双语：英文件必须钉住所译中文原件的版本", () => {
   assert.deepEqual(missing, [],
     `这些英文件末尾缺 translated-from 戳：${missing.join("、")}`
     + "\n  格式：<!-- translated-from: <中文件名>@<sha256 前 12 位> -->"
-    + "\n  取哈希：node -e \"import('./tests/bilingual-drift.test.mjs').then(m=>"
-    + "console.log(m.sourceHash(require('fs').readFileSync('docs/EVAL.md','utf8'))))\"");
+    + "\n  取戳：node tools/doc-stamp.mjs docs/EVAL.md");
 });
 
 test("双语：中文改了，英文就得跟上", () => {

@@ -17,7 +17,10 @@ Apart from `I18N-PLAN.md` — written for the maintainer, Chinese only — every
 document on this page and in the three sections below has an English parallel
 version `*.en.md`, with switcher links at the top of each. Chinese is the source;
 when a Chinese file changes, `tests/bilingual-drift.test.mjs` names the English
-twins that have gone stale. `tests/docs-index.test.mjs` pins this page itself:
+twins that have gone stale. `npm run docs:stamp` lists the ones still owed, and
+`node tools/doc-stamp.mjs docs/XX.md` prints the stamp line to paste in once you have
+translated — **it prints, it does not write**: a one-key stamp would reduce this gate to
+an alarm clock you slap off whenever it goes red. `tests/docs-index.test.mjs` pins this page itself:
 every document under `docs/` must appear here.
 
 ## How the officer stats were derived
@@ -85,4 +88,4 @@ new report says so; the old report keeps its original data untouched.
 | `GAMEPLAY-DESIGN-v1-superseded.md` (Chinese) | The first-round design. An adversarial review found 7 fatal problems; V2-DELTA has rewritten it |
 | `GAMEPLAY-REVIEW-v1.md` (Chinese) | The adversarial review of the first-round design. Its conclusions have been folded into V2-DELTA; kept for traceability |
 
-<!-- translated-from: README.md@a3ba694d03dd -->
+<!-- translated-from: README.md@e053ccb5943a -->

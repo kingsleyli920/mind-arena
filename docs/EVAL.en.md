@@ -324,6 +324,13 @@ The consequence of the old value of 2000: all 16 of gpt-5-nano's seasons returne
 empty string, and the report recorded "could not parse a decision / 0 points /
 order-budget utilisation 0%" — which looks like the model being bad.
 
+This rule is **one-directional**, and the implementation once crossed it the other way:
+the test was written as "if it spent any output tokens at all, the budget ate it", so a
+model that burned only 1169 tokens and then came back empty-handed was recorded as *our*
+budget being misconfigured. Empty content is now classified three ways (hit the cap →
+budget, did not hit it → model, spent not a single token → infra); see point 39,
+"Looking for a second model to replicate with".
+
 ### 7. Without pinning the provider, "the same model" is not the same thing
 
 OpenRouter routes by availability. In one 24-season record, the same model id bounced
@@ -2296,4 +2303,92 @@ The raw data is in
 [reports/scenario-200-2026-10-16/caocao-64season-pairs.json](reports/scenario-200-2026-10-16/caocao-64season-pairs.json)
 (Chinese).
 
-<!-- translated-from: EVAL.md@66c387eed2e4 -->
+### Looking for a second model to replicate with, I hit two walls in the cheap tier
+
+The table above is one model and four games. For it to be more than "how
+`glm-5.3-flash` happened to play on this one day", a different model has to run the same
+three seeds. Per this project's spending discipline the second model comes from the cheap
+tier, so four candidates each played four seasons to measure what they are actually
+charged — eight cents in total.
+
+Two of the four were out immediately, and both of them paid for themselves anyway.
+
+`tencent/hy-mt2-7b` failed all four seasons with a 404, "No endpoints found", and was
+correctly classified as **harness** — that is the "pin one provider + require structured
+output" gate firing in the field, because it supports neither. Nothing to fix here; it is
+worth a line because it shows the gate works.
+
+`deepseek/deepseek-v4-flash-0731` came back empty all four seasons, and it looked like the
+**cheapest** of the lot ($0.0025 per season, below glm) — cheap because it produced
+nothing. The log read "no content (finish=stop, output budget 8000, reasoning 1169)",
+classified as **budget**. That was wrong: 1169 is nowhere near 8000, so reasoning did not
+eat the budget. The old test was "if it spent any output tokens, the budget ate it" — too
+loose, and so a model handing in a blank page was recorded as *our* budget being
+misconfigured. This is the mirror image of point 38's "a typo'd model id recorded as the
+model being unable to answer": opposite direction, same error of charging the bill to the
+wrong party. Point 6, "Harness failures must not be charged to the model", is
+one-directional, and this was the reverse overreach — charging the model's failure to the
+harness, which makes a leaderboard lie just as effectively. It is now a three-way split,
+and the test is **whether the output actually hit the cap**:
+
+| Case | Classified as | Whose fault |
+|---|---|---|
+| Hit it (`finish=length`, or r+c ≥ cap × 0.9) | budget | harness misconfiguration |
+| Did not hit it, yet came back empty | model | counts against its score |
+| Did not spend a single token | infra | the provider returned a husk |
+
+The probe summaries for the remaining two:
+
+| | `qwen/qwen3.5-9b` | `deepseek/deepseek-v4-flash` | control `glm-5.3-flash` |
+|---|---|---|---|
+| Mean charged per season | $0.0082 | $0.0089 | $0.0025 |
+| Median time per season | **226.0s** | **137.7s** | **8.9s** |
+| Failures | budget×2 | none | none |
+| Order-budget utilisation | 38% | 90% | 96% |
+
+I picked qwen on "cheap and it runs", and started three 64-season games. Thirty-one
+minutes later it had reached season nine, and only then did I look at the per-season
+table:
+
+| Season | Output | of which reasoning | Picked | Admitted |
+|---|---:|---:|---:|---:|
+| 3 | 32,000 | 31,986 | **0** | **0** |
+| 4 | 32,000 | 828 | **0** | **0** |
+
+Two of the four seasons burned the entire output budget on reasoning and issued no orders
+at all; the other two issued nine and eleven, normally. Replicating with it would
+replicate a game in which the model is silent half the time. Killed it, switched to
+deepseek.
+
+**The first wall: order-budget utilisation averages two different diseases into one
+number.** "Issued orders but did not use the whole allowance" and "issued no orders at
+all" are different things, and 38% is their mean. Worse: a genuinely cautious game — one
+or two orders a season — has a utilisation of 15%, **lower than the one handing in blank
+pages**. That ruler does not even point the right way. There is now a separate row,
+**blank seasons** (seasons with candidates on the table and not one order picked, listed
+by number), plus a warning line above a quarter; the test and the threshold live in
+`tools/lib/empty-seasons.mjs`, pinned by a test that uses qwen's four real seasons. It
+deliberately does not overlap with failure classification: that one answers "who gets
+billed for this call", this one answers "the call succeeded and it still said nothing" —
+qwen's season 4 is both not-a-failure and blank.
+
+**The second wall: the cheap tier is expensive in wall-clock, not in money.** The three
+models' per-season charges span $0.0025–$0.0089, a factor of 3.5; their per-season times
+span a factor of **25**. The cause is the same thing: cheap models buy capability by
+burning reasoning tokens, fourteen to thirty-two thousand a season, where glm burns one
+thousand seven hundred. So for a 64-season game: glm seven minutes, deepseek two and a
+half hours.
+
+This extends a pit recorded earlier in this document. The "cost per 48 games" column in
+`npm run models` estimates from "1500 output tokens per season", which is already known to
+underestimate reasoning models twentyfold — **and the same assumption underestimates
+wall-clock by the same factor, with no warning under that column**. Added, along with a
+note that the table is only for ruling slow models out, never for believing the fast ones:
+once you have picked, run four seasons and measure the real median and blank-season count
+before committing to a board.
+
+An eight-cent probe could have stopped this — the data was all printed in the summary at
+the time (`failures budget×2`, `order-budget utilisation 38%`). It did not stop it because
+I read only the price and whether it ran at all.
+
+<!-- translated-from: EVAL.md@31eb36f2645d -->

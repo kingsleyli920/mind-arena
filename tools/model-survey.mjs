@@ -115,13 +115,27 @@ for (const r of rows.slice(0, 20)) {
     + `${r.lat.toFixed(1).padStart(6)}s` + `${String(Math.round(r.up)).padStart(8)}%`
     + `${String(r.n).padStart(7)} 家`);
 }
-// 一季约 1500 出参 token（含推理）。这一列是「值不值得等」的那一列
-console.log(`\n吞吐折成工期（一季约 1500 出参 tok，一局 16 季，48 局按 4 路并发）：`);
+// 一季约 1500 出参 token（含推理）。这一列是「值不值得等」的那一列。
+//
+// **和上面那一列同一个假设，于是同样会低估，而且是在时间上。** 推理吃得凶的
+// 模型一季烧一万四到三万二出参 token，是这里假设的十到二十倍，工期也就差十到
+// 二十倍。实测（建安五年曹操席，单季中位）：
+//   z-ai/glm-5.3-flash        8.9s　一季约 1,700 出参 tok
+//   deepseek/deepseek-v4-flash  137.7s　一季约 18,000
+//   qwen/qwen3.5-9b           226.0s　一季约 16,500，且半数季节顶满预算后交白卷
+// 下面算出来的「一局几分」对后两个会报成一两分钟，实际是两三个小时。
+//
+// 所以这张表只用来**排除**慢的，不用来相信快的：选中之后先跑四季
+//（`npm run match -- --seasons=4`），看实测的单季中位与空手季，再决定开不开榜。
+const ASSUMED_OUT = 1500;
+console.log(`\n吞吐折成工期（假设一季 ${ASSUMED_OUT} 出参 tok，一局 16 季，48 局按 4 路并发）：`);
 for (const r of rows.slice(0, 5)) {
-  const perSeason = 1500 / Math.max(1, r.tp) + r.lat;
+  const perSeason = ASSUMED_OUT / Math.max(1, r.tp) + r.lat;
   console.log(`  ${pad(r.id, 34)}一季 ${perSeason.toFixed(0)}s　一局 ${(perSeason * 16 / 60).toFixed(0)}分`
     + `　48 局约 ${(perSeason * 16 * 48 / 4 / 3600).toFixed(1)} 小时`);
 }
+console.log(`  ↑ 推理吃得凶的模型一季烧一万以上出参 tok，上面这几个数要乘十到二十。`
+  + `\n    先跑 \`npm run match -- --seasons=4\` 量实测中位，别信这一列的绝对值。`);
 if (noStruct.length) {
   console.log(`\n没有任何提供方支持结构化输出（只能在 text 档评，读分要按另一把尺）：`);
   console.log(`  ${noStruct.slice(0, 12).join("　")}${noStruct.length > 12 ? ` …共 ${noStruct.length} 个` : ""}`);

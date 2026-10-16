@@ -15,7 +15,9 @@
 
 除 `I18N-PLAN.md`（写给维护者，只有中文）之外，本页与下面三节的每一份
 都有英文平行本 `*.en.md`，顶上互挂切换链接。中文是源；中文一改，
-`tests/bilingual-drift.test.mjs` 会点名哪几份英文过期。
+`tests/bilingual-drift.test.mjs` 会点名哪几份英文过期。`npm run docs:stamp`
+列出待补的，`node tools/doc-stamp.mjs docs/XX.md` 打印译完后该贴的那行戳——
+**只打印不代改**：能一键盖戳的话，这道闸就退化成一个红了就按掉的闹钟。
 另有 `tests/docs-index.test.mjs` 钉住本页：docs/ 下每一份都要在这里出现。
 
 ## 武将数据的推导口径
