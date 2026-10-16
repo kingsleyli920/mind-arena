@@ -16,13 +16,12 @@
 //   npm run melee -- --models=A,B,C --seasons=32        ← 随机抽席位派给它们
 import fs from "node:fs";
 import { execSync } from "node:child_process";
-import { buildGraph, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide } from "../lib/game/engine/bot.ts";
-import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { loadWorld, POOLS, seatsFor } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, epochLimitFor, GRADE_CN }
+import { standingOf, epochLimitFor, GRADE_CN }
   from "../lib/game/engine/victory.ts";
 import { modelDecide } from "../lib/arena/seat/model-seat.ts";
 import { OpenRouterClient } from "../lib/arena/llm/client.ts";
@@ -37,17 +36,10 @@ const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
   return hit ? hit.slice(k.length + 3) : d;
 };
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
-const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-const DATA = {
-  commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
-  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
-};
-const G = buildGraph(read("adjacency.json"));
-const P = loadParams(pack);
-const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+// 剧本由 SCENARIO 选（默认 194）。读的是运行时数据包，与浏览器同一份——
+// 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
+const WORLD = loadWorld();
+const { pack, P, G, ROSTER, GEO, DATA } = WORLD;
 const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]));
 const nameOf = (id) => NAME[id] ?? id;
 
@@ -63,10 +55,8 @@ const PROVIDER = arg("provider", "");
  *  混战正是最该被看见的那种局——多个模型同场，而散文记不下同时发生的六件事 */
 const REPLAY = arg("replay", "");
 
-// 抽签池与 match-log 同一份：塞外诸部据的是名存实亡的边郡，抽到等于废签
-const POOL = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu",
-  "liubei", "gongsunzan", "lijue", "gongsundu", "shixie", "zhangyang",
-  "zhanglu", "maten", "hansui", "kongrong", "wanglang", "liuyao"];
+// 抽签池在 tools/lib/world.mjs，三个工具共用一份；拼错 id 会报错退出
+const POOL = seatsFor(WORLD, POOLS, "抽签池");
 
 /** 席位 → 模型。--seats=席位=模型,… 显式指定；--models=… 则随机抽席位 */
 const seatOf = new Map();
@@ -130,7 +120,7 @@ const IDX = REPLAY ? buildIndex(
   DATA.commanderies,
   DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
   ["scale", "crane", "square"],
-  read("adjacency.json").edges,
+  WORLD.B.adjacency.edges,
 ) : null;
 const frames = [];
 let prevStations = {}, prevCaptured = [];

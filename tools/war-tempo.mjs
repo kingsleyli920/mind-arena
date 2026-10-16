@@ -24,29 +24,20 @@
  * 都要先和这个对照差分，否则测出来的差异归不到因上去。
  */
 import fs from "node:fs";
-import { buildGraph, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide } from "../lib/game/engine/bot.ts";
-import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { loadWorld } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography } from "../lib/game/engine/victory.ts";
 
 const arg = (k, d) => {
   const hit = process.argv.find((a) => a.startsWith(`--${k}=`));
   return hit ? hit.slice(k.length + 3) : d;
 };
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
-const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-const DATA = {
-  commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
-  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
-};
-const G = buildGraph(read("adjacency.json"));
-const P = loadParams(pack);
-const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+// 剧本由 SCENARIO 选（默认 194）。读的是运行时数据包，与浏览器同一份——
+// 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
+const WORLD = loadWorld();
+const { P, G, ROSTER, GEO, DATA } = WORLD;
 const BOTS = ["turtle", "balanced", "aggressive", "opportunist"];
 
 const GAMES = Number(arg("games", "6"));
@@ -183,7 +174,7 @@ line(`  从峰值掉到 500 以下的军团：${pct(last.filter((v) => v < 500).
 // 「1 = 100km 平原」，meta.terrainCost 给了各地形系数
 // （plain 1 · hill 1.35 · river 1.8 · mountain 2.1 · gate 2.6）。
 // 别另造一套系数——关隘在已有数据里是 2.6，仅次于山地，凭直觉多半会猜低。
-const adjacency = read("adjacency.json");
+const adjacency = WORLD.B.adjacency;
 const DAY_PER_COST = 100 / 12.5;   // 汉军常态行军日三十里≈12.5km，一个 cost 单位=100km 平原
 const SEASON_DAYS = 90;
 const marched = adjacency.edges.map((e) => ({ ...e, days: e.cost * DAY_PER_COST }));

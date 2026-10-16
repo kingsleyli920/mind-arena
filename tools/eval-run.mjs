@@ -15,13 +15,12 @@
 // 同 seed 同对手，因此可直接比。
 import fs from "node:fs";
 import { execSync } from "node:child_process";
-import { buildGraph, listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, pick as botPick, PROFILES } from "../lib/game/engine/bot.ts";
-import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { loadWorld } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, gradeOf, zhouEquiv }
+import { standingOf, gradeOf, zhouEquiv }
   from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { admit } from "../lib/arena/seat/admit.ts";
@@ -74,19 +73,11 @@ const RULES = { ...DEFAULT_RULES, bareNote: BARE_NOTE };
  */
 const PROVIDER = arg("provider", "");
 
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
-const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-const P = loadParams(pack);
-const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
-const G = buildGraph(read("adjacency.json"));
-const scenario = read("scenario-194.json");
-const nameOf = (id) => scenario.factions.find((f) => f.id === id)?.name ?? id;
-const DATA = {
-  commanderyState: read("commandery-state.json"), scenario,
-  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
-};
+// 剧本由 SCENARIO 选（默认 194）。读的是运行时数据包，与浏览器同一份——
+// 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
+const WORLD = loadWorld();
+const { pack, P, G, ROSTER, GEO, DATA } = WORLD;
+const nameOf = (id) => WORLD.NAME[id] ?? id;
 
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 const [agentKind, agentVariantRaw] = AGENT.split(":");

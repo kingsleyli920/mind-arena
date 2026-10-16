@@ -18,6 +18,7 @@ import { buildGeography } from "../lib/game/engine/victory.ts";
 import { buildRoster } from "../lib/game/engine/officers.ts";
 import { loadParams } from "../lib/game/engine/params.ts";
 import { decide, PROFILES } from "../lib/game/engine/bot.ts";
+import { SEAT_SETS, seatsFor } from "./lib/world.mjs";
 
 /**
  * 读**运行时数据包**，不读 lib/game/data 的散件。
@@ -35,6 +36,7 @@ if (!fs.existsSync(BUNDLE)) {
   process.exit(1);
 }
 const B = JSON.parse(fs.readFileSync(BUNDLE, "utf8"));
+const WORLD = { scenario: SCENARIO, B };
 const DATA = {
   commanderyState: B.commanderyState,
   scenario: B.scenario,
@@ -52,40 +54,11 @@ const GEO = buildGeography(B.commanderies, B.provinceSeats);
 const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]));
 
 const GAMES = Number(process.env.GAMES ?? 100);
-/**
- * 席位轮换：每局给六家换一遍画像，避免「画像与开局绑定」混淆结论。
- *
- * 这是一份**精选**名单，不是「最大的六家」——曹操在 194 年只有一个郡，
- * 之所以在里面正因为那是最难的席位，验收闸 D 的「一郡开局不必然出局」
- * 就钉在他身上。换剧本要另选一份，不能照搬：袁术死于建安四年、吕布灭于
- * 建安三年，拿 194 的名单去跑建安五年会得到两个空席位和一份虚假的报告。
- */
-const SEAT_SETS = {
-  // 最强 / 最难 / 两家据险自守 / 两家中等
-  194: ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"],
-  // 官渡两强 + 夹在曹操腹地的刘备 + 江东 + 益州 + 汉中。
-  //
-  // **刘表不在内，是测出来的**：他三郡顶四条战线（北曹操、南张羡、东孙策、
-  // 西刘璋），60 局出局 35 局、45 局落丁档——那个席位的得分接近随机，
-  // 放在轮换里会污染「苟活是否最优」那道闸的对照。换过四个候选各 30 局：
-  //   张羡 出局 2/30 丙8丁8甲14　　张鲁 出局 5/30 丙17丁8乙5
-  //   公孙度 出局 9/30 丙7丁15甲8　士燮 出局 3/30 丙1丁29（与刘表同病）
-  // 取张鲁：档位最居中，上下都有空间；而且他一郡开局，于是「一郡开局不
-  // 必然出局」那道专项判据在本剧本重新有了着落。刘表仍可选来玩，只是不当量尺。
-  200: ["caocao", "yuanshao", "liubei", "sunce", "zhanglu", "liuzhang"],
-};
-// SEATS=a,b,c 可临时换一组来比，用于挑席位时的对照实验；不传则用上表
-const SEATS = process.env.SEATS ? process.env.SEATS.split(",") : SEAT_SETS[SCENARIO];
-if (!SEATS) {
-  console.error(`没有 ${SCENARIO} 剧本的席位名单——加剧本时要在 SEAT_SETS 里选六家，`
-    + "理由写在注释里。照搬别年的名单会得到空席位和一份虚假的报告。");
-  process.exit(1);
-}
-const missing = SEATS.filter((f) => !DATA.scenario.factions.some((x) => x.id === f));
-if (missing.length) {
-  console.error(`席位名单里有 ${SCENARIO} 剧本没有的势力：${missing.join("、")}`);
-  process.exit(1);
-}
+// 席位名单在 tools/lib/world.mjs，与 obs-budget、melee、match-log 共用一份。
+// SEATS=a,b,c 可临时换一组来比，用于挑席位时的对照实验
+const SEATS = process.env.SEATS
+  ? process.env.SEATS.split(",")
+  : seatsFor(WORLD, SEAT_SETS, "轮换席位名单");
 // 默认四画像，与历次验收同口径。PROFILES=5 时把目的流一并放进轮换，
 // 用来看「看不看目的」这一条本身值多少分——均衡流与目的流权重表同底，
 // 差别只在读不读 gain，所以两者同场的分差可直接归因

@@ -17,13 +17,13 @@ import { formatPlan } from "../lib/game/strategy-plan.ts";
 import fs from "node:fs";
 import readline from "node:readline";
 import { execSync } from "node:child_process";
-import { buildGraph, listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
+import { listActions, DEFAULT_RULES } from "../lib/game/engine/actions.ts";
 import { decide, PROFILES } from "../lib/game/engine/bot.ts";
-import { buildRoster, stationedAt, isFiller } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { stationedAt, isFiller } from "../lib/game/engine/officers.ts";
+import { loadWorld, POOLS, SEAT_SETS, seatsFor } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
-import { buildGeography, standingOf, epochLimitFor, GRADE_CN }
+import { standingOf, epochLimitFor, GRADE_CN }
   from "../lib/game/engine/victory.ts";
 import { visibleLog } from "../lib/game/engine/intel.ts";
 import { buildIndex, captureFrame, attachOutcome, REPLAY_VERSION }
@@ -42,17 +42,10 @@ const arg = (k, d) => {
 };
 const has = (k) => process.argv.includes(`--${k}`);
 
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
-const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-const DATA = {
-  commanderyState: read("commandery-state.json"), scenario: read("scenario-194.json"),
-  commanderies: read("commanderies.json"), troopTypes: read("troop-types.json"), resources: read("resources.json"),
-};
-const G = buildGraph(read("adjacency.json"));
-const P = loadParams(pack);
-const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
+// 剧本由 SCENARIO 选（默认 194）。读的是运行时数据包，与浏览器同一份——
+// 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
+const WORLD = loadWorld();
+const { pack, P, G, ROSTER, GEO, DATA } = WORLD;
 const NAME = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.name]));
 const LORE = Object.fromEntries(DATA.scenario.factions.map((f) => [f.id, f.situation ?? ""]));
 const nameOf = (id) => NAME[id] ?? id;
@@ -82,15 +75,12 @@ const PROVIDER = arg("provider", "");
 const REPLAY = arg("replay", "");
 /** 其余势力的机器人画像。与 eval-run 同一份轮换口径 */
 const BOT_PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
-const SEATS_ROT = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
+const SEATS_ROT = seatsFor(WORLD, SEAT_SETS, "轮换席位名单");
 
 // ── 抽签：席位不手动指定 ────────────────────────────────────────────
 //
-// 可选席位限定在有名有姓的汉末群雄。塞外诸部（鲜卑、乌桓、南匈奴、羌胡）
-// 与南中夷帅据的是名存实亡的边郡，产出极低、无路可扩，抽到等于抽到一张废签
-const POOL = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu",
-  "liubei", "gongsunzan", "lijue", "sunce", "gongsundu", "shixie", "zhangyang",
-  "zhanglu", "maten", "hansui", "kongrong", "wanglang", "liuyao", "luking"];
+// 抽签池在 tools/lib/world.mjs，三个工具共用一份；拼错 id 会报错退出
+const POOL = seatsFor(WORLD, POOLS, "抽签池");
 const probe = createGame(DATA, { seed: SEED, roster: ROSTER, geo: GEO, graph: G, seasons: SEASONS }, P);
 const playable = POOL.filter((id) => probe.factions[id] && !probe.factions[id].eliminated);
 
@@ -203,7 +193,7 @@ async function main() {
     DATA.commanderies,
     DATA.scenario.factions.map((f) => ({ id: f.id, name: f.name, color: f.color })),
     ["scale", "crane", "square"],
-    read("adjacency.json").edges,
+    WORLD.B.adjacency.edges,
   ) : null;
   const frames = [];
   let prevStations = {};

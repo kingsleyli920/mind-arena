@@ -3,37 +3,24 @@
 // 不是估算：真跑一局，逐季逐席位量观测的大小。
 // 预算超了要么砍报告与记忆，**不砍候选**——砍候选等于用观测预算去交换
 // 动作空间，那得是显式决策而不是顺手压缩。
-import fs from "node:fs";
-import { buildGraph } from "../lib/game/engine/actions.ts";
 import { decide } from "../lib/game/engine/bot.ts";
-import { buildRoster } from "../lib/game/engine/officers.ts";
-import { loadParams } from "../lib/game/engine/params.ts";
+import { loadWorld, SEAT_SETS, seatsFor } from "./lib/world.mjs";
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve } from "../lib/game/engine/resolve.ts";
-import { buildGeography } from "../lib/game/engine/victory.ts";
 import { observe, estTokens } from "../lib/game/engine/observe.ts";
 import { toRulesDigest } from "../lib/game/content/schema.ts";
 
-const read = (f) => JSON.parse(fs.readFileSync(`lib/game/data/${f}`, "utf8"));
-const pack = JSON.parse(fs.readFileSync("lib/game/content/pack-194.json", "utf8"));
-const P = loadParams(pack);
-const ROSTER = buildRoster(read("officers.json"), read("officer-availability-194.json"),
-  new Map(read("commanderies.json").map((c) => [c.name, c.id])));
-const GEO = buildGeography(read("commanderies.json"), read("province-seats-194.json"));
-const G = buildGraph(read("adjacency.json"));
-const DATA = {
-  commanderyState: read("commandery-state.json"),
-  scenario: read("scenario-194.json"),
-  commanderies: read("commanderies.json"),
-  troopTypes: read("troop-types.json"), resources: read("resources.json"),
-};
-const nameOf = (id) => read("scenario-194.json").factions.find((f) => f.id === id)?.name ?? id;
+// 剧本由 SCENARIO 选（默认 194）。读的是运行时数据包，与浏览器同一份——
+// 天子所在之郡与武将归属都在打包时按剧本年解析过，见 tools/lib/world.mjs
+const WORLD = loadWorld();
+const { pack, P, G, ROSTER, GEO, DATA } = WORLD;
+const nameOf = (id) => WORLD.NAME[id] ?? id;
 
 // 单位是**真实 token**（estTokens 已按三家 tokenizer 标定，取 Claude 系数）。
 // 此前是 6000「估算单位」，而估算低估 1.59 倍——那道闸门真正卡的是约 9500 真 token。
 // 这里换成同等严格的真实值，闸门的松紧不变，但数字终于表示它字面的意思
 const LIMIT = Number(process.env.LIMIT ?? 10_000);
-const SEATS = ["caocao", "yuanshao", "liubiao", "liuzhang", "yuanshu", "lubu"];
+const SEATS = seatsFor(WORLD, SEAT_SETS, "轮换席位名单");
 const PROFILES = ["turtle", "balanced", "aggressive", "opportunist"];
 
 const digest = toRulesDigest(pack);
