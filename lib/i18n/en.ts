@@ -656,4 +656,10 @@ export const en: Dict = {
     + "ranks by final commandery count, for reference only; it is not part of the score.",
   "legend.marching": "on the march",
   "legend.idle": "idle / besieging",
+  "board.caveat.gate.b": "This board cannot see the snowball.",
+  "board.caveat.gate": "Demanding a faction\u2019s surrender \u2014 which absorbs it whole \u2014 "
+    + "requires 15 cities captured and 6 provinces held, and clearing it turns the game into a "
+    + "landslide. The earliest crossing measured was **season 29**, so within sixteen seasons it "
+    + "never fires: this board measures the stretch before the gate. A 64-season outcome is a "
+    + "different thing and must not be read off this board, or the other way round.",
 };

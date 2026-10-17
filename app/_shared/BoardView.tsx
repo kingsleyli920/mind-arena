@@ -300,6 +300,10 @@ export function BoardView({ locale }: { locale: Locale }) {
             <li className="skew"><b>{t("board.caveat.skew.b")}</b>{board.versionSkewNote}</li>
           ) : null}
           <li><b>{t("board.caveat.usd.b")}</b>{t("board.caveat.usd")}</li>
+          {/* 这一条是 docs/EVAL.md 第 40 条的直接后果：64 季局的胜负大半由一道
+              门槛决定，而十六季里那道门槛从未触发。两种口径量的不是一回事，
+              页面上不说清楚，读者必然把它们并排读 */}
+          <li><b>{t("board.caveat.gate.b")}</b>{rich(t("board.caveat.gate"))}</li>
         </ul>
         <p className="foot">
           <a href="/play">{t("board.foot.play")} →</a>
