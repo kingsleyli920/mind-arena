@@ -2966,52 +2966,45 @@ export function PlayClient() {
                 <em>地色由通行代价场画出：越深越难走。关渡就设在深色的豁口上</em>
               </li>
               <li>
-                <span>{legendGlyph("gate")}关隘</span>
-                <span>{legendGlyph("pass")}谷道</span>
+                <span>{legendGlyph("gate")}{KIND_CN.gate}</span>
+                <span>{legendGlyph("pass")}{KIND_CN.pass}</span>
                 <em>守 +0.55 · 行军 2.6 倍</em>
               </li>
               <li>
-                <span>{legendGlyph("ford")}渡口</span>
-                <span>{legendGlyph("port")}港口</span>
+                <span>{legendGlyph("ford")}{KIND_CN.ford}</span>
+                <span>{legendGlyph("port")}{KIND_CN.port}</span>
                 <em>守 +0.35 · 行军 1.8 倍</em>
               </li>
               <li>
-                <span>{legendGlyph("depot")}粮仓</span>
-                <span>{legendGlyph("battlefield")}古战场</span>
+                <span>{legendGlyph("depot")}{KIND_CN.depot}</span>
+                <span>{legendGlyph("battlefield")}{KIND_CN.battlefield}</span>
               </li>
               <li>
-                <span>{legendArmy(true)}行军中</span>
-                <span>{legendArmy(false)}待命／城下围城</span>
+                <span>{legendArmy(true)}{t("legend.marching")}</span>
+                <span>{legendArmy(false)}{t("legend.idle")}</span>
               </li>
               <li>
                 {/* 兵种贴在帐左、器械贴在帐右。野战有相克，看图就能判胜负 */}
-                <span>{legendPlain("u-infantry")}步卒</span>
-                <span>{legendPlain("u-cavalry")}骑兵</span>
-                <span>{legendPlain("u-archer")}弓弩</span>
-                <span>{legendPlain("u-navy")}水军</span>
+                {["infantry", "cavalry", "archer", "navy"].map((u) => (
+                  <span key={u}>{legendPlain(`u-${u}`)}{unitName(engine.P, u)}</span>))}
               </li>
               <li>
-                <span>{legendPlain("g-ram")}冲车</span>
-                <span>{legendPlain("g-mound")}土山</span>
+                <span>{legendPlain("g-ram")}{GEAR_CN.ram}</span>
+                <span>{legendPlain("g-mound")}{GEAR_CN.mound}</span>
                 <em>攻城更易，但行军慢一季</em>
               </li>
               <li>
-                <span>{legendPlain("b-office")}官府</span>
-                <span>{legendPlain("b-granary")}仓廪</span>
-                <span>{legendPlain("b-market")}市</span>
-                <span>{legendPlain("b-drill")}校场</span>
+                {(["office", "granary", "market", "drill"] as const).map((b) => (
+                  <span key={b}>{legendPlain(`b-${b}`)}{BUILD_CN[b]}</span>))}
               </li>
               <li>
-                <span>{legendPlain("b-ironworks")}铁官</span>
-                <span>{legendPlain("b-saltern")}盐场</span>
-                <span>{legendPlain("b-stud")}马苑</span>
-                <span>{legendPlain("b-farmstead")}屯田</span>
+                {(["ironworks", "saltern", "stud", "farmstead"] as const).map((b) => (
+                  <span key={b}>{legendPlain(`b-${b}`)}{BUILD_CN[b]}</span>))}
               </li>
               {/* JSX 里不吃 markdown：这行原来写成 **淡影**，图例上露出一对星号 */}
               <li>
-                <span>{legendPlain("f-scale")}鱼鳞</span>
-                <span>{legendPlain("f-wings")}鹤翼</span>
-                <span>{legendPlain("f-square")}方圆</span>
+                {(["scale", "wings", "square"] as const).map((f) => (
+                  <span key={f}>{legendPlain(`f-${f}`)}{FORMATION_CN[f]}</span>))}
                 <em>攻／速／耐围，画在城左上</em>
               </li>
               <li><em>阵型受迷雾约束：自家的看得见，他家的要刺探过或结了盟。

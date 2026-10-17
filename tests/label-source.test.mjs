@@ -93,6 +93,32 @@ test("标签表：界面不许自己写一份已有正本的表", () => {
     + "  删掉副本，从正本导入");
 });
 
+test("标签表：JSX 文本里也不许抄", () => {
+  // 前两条只查对象字面量，而**图例是直接写成 JSX 文本的**：
+  //   <span>{legendGlyph("port")}港口</span>
+  // 没有大括号、没有变量名，于是所有查字面量的闸都看不见它。
+  // 实测漏过一整份：清掉 KIND_LABEL 与 NODE_CN 那次，图例里的「港口」「粮仓」
+  // 原样留着，而正本是「港」「仓」——我以为修完了，其实还有第六份。
+  const owned = { BUILD_CN, GEAR_CN, GRADE_CN, FORMATION_CN, KIND_CN, POLICY_CN };
+  const hit = [];
+  for (const { f, src } of UI) {
+    // 文本节点前面可能是 `>`，**也可能是 `}`**——图例正是后者：
+    //   <span>{legendGlyph("port")}港口</span>
+    // 第一版只认 `>`，于是放它过去了，而它恰好就是这条闸要逮的那一份。
+    const texts = [...src.matchAll(/[>}]([^<>{}]+)</g)].map((m) => m[1].trim()).filter(Boolean);
+    for (const [name, table] of Object.entries(owned)) {
+      const vals = new Set(Object.values(table));
+      const shared = texts.filter((x) => vals.has(x));
+      if (shared.length >= 3) {
+        hit.push(`${f} 的 JSX 文本里有 ${name} 的 ${shared.length} 个值：${shared.join("、")}`);
+      }
+    }
+  }
+  assert.deepEqual(hit, [],
+    `标签被直接写成了 JSX 文本：\n  ${hit.join("\n  ")}\n`
+    + "  用 {KIND_CN.port} 这样的表达式，别把字打在标签之间");
+});
+
 test("标签表：界面之间也不许互抄", () => {
   // 上一条只拿**引擎**的表当正本，于是两个界面文件互抄它一句话都不说。
   // 实测漏过：SessionPanel 自己写了一份动作名，与 panels.ts 的 TYPE_CN 三处不一样

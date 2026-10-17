@@ -550,4 +550,6 @@ export const zh: Dict = {
   "play.end.over": "终局",
   "play.end.destroyed": "覆灭",
   "play.grade.note": "档位按本局曾达到过的最高档记，判的是相对开局的增量——守成不得分。天下排名按终局郡数，仅供参照，不进计分。",
+  "legend.marching": "行军中",
+  "legend.idle": "待命／城下围城",
 };

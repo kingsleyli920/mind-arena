@@ -654,4 +654,6 @@ export const en: Dict = {
   "play.grade.note": "The grade records the highest reached during the game and measures the "
     + "gain over the opening \u2014 holding what you had scores nothing. The standing below "
     + "ranks by final commandery count, for reference only; it is not part of the score.",
+  "legend.marching": "on the march",
+  "legend.idle": "idle / besieging",
 };
