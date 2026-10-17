@@ -2538,4 +2538,91 @@ not merely ugly — **`seize 7` is exactly the seven candidates the bot never to
 the report it did not even look like a class of action, so nobody would have counted it.
 It now reads from the text catalogue.
 
-<!-- translated-from: EVAL.md@4863c6536c9e -->
+
+### A different axis: compare states, not actions
+
+Four rounds of measuring the attacking side found nothing. So instead, commanderies over time:
+
+| Seed | | S16 | S24 | S32 | S40 | final |
+|---|---|---|---|---|---|---|
+| cc-1 | `bot:purpose` | 26 | 22 | 21 | 21 | **21** (64 seasons) |
+| | `glm` | 28 | 28 | 27 | 28 | **71** (59) |
+| | `deepseek` | 28 | 30 | 30 | 35 | **84** (49) |
+| cc-3 | `bot:purpose` | 26 | 26 | 25 | 23 | **23** |
+| | `glm` | 28 | 28 | 31 | 41 | **83** (45) |
+| | `deepseek` | 28 | 28 | 28 | 28 | 31 (the game it lost) |
+
+The shape is the same on all three seeds: **the bot peaks at season 16 and shrinks from
+there** (26→21, 24→19, 26→23), while the models lead by only 2–6 commanderies for thirty
+seasons and then multiply by 2.3–2.7× in the following fifteen.
+
+That is not "slightly better every season". It is a change of growth regime at some point.
+
+### That point is the surrender mechanic, and it sits behind a gate
+
+| cc-3 | surrender candidates | surrender orders | taken from others |
+|---|---:|---:|---:|
+| `bot:purpose` | **0** | 0 | 13 |
+| `bot:aggressive` | **0** | 0 | — |
+| `deepseek` (**the game it lost**) | **0** | 0 | 13 |
+| `glm` (won) | 28 | 15 | 84 |
+
+The engine **never once offered the bot a surrender candidate**. And once it is available
+it absorbs a whole faction, so it compounds: capture cities → clear the gate → demand
+surrender → more commanderies → more captures.
+
+State when each first saw a surrender candidate:
+
+| | first offered | state then |
+|---|---|---|
+| `glm` cc-1 / cc-2 / cc-3 | season 46 / 29 / 31 | 31/4, 30/4, 30/5 (commanderies/provinces) |
+| `deepseek` cc-1 / cc-2 | season 39 / 39 | 32/4 both |
+| `deepseek` cc-3 | **never** | stuck at 28 |
+| all five bot profiles | **never** | peak 26, then downhill |
+
+**The crossing point is nearly identical: 30–32 commanderies.** The bot peaks at 26. What
+decides the whole game is whether you hold 26 or 30 by season thirty — a four-commandery
+difference that the rules convert into a landslide.
+
+### Lower the gate and the bot snowballs too
+
+Tested directly: the gate was temporarily moved from "15 cities / 4 provinces" to "8 / 2"
+and the same `bot:purpose` re-ran the three seeds (the pack was restored immediately
+afterwards; fingerprint still 305 / `35t92rq29av0`).
+
+| Seed | original gate | lowered gate |
+|---|---|---|
+| cc-1 | 21 commanderies | 20, still never cleared it |
+| cc-2 | 19 | 18, still never cleared it |
+| cc-3 | 23 | **104 / 13 provinces ★unified** (first candidate at season 21, 23 surrender orders) |
+
+One of three flips. **The bot is not incapable of snowballing; it cannot reach the
+entrance.**
+
+### What this means for point 39
+
+"A model playing Cao Cao wins where the bot cannot" **still holds** — under the real rules
+the models cleared the gate and five profiles across fifteen games never did. But what it
+*means* has to change:
+
+- Not "the model plays better throughout". Through thirty seasons the troop counts are
+  nearly identical (season 32: glm 226k, `bot:purpose` 228k) and the commandery gap is 2–6.
+- It is "the model is four to six commanderies ahead at mid-game, and the rules convert
+  that into a landslide".
+- So what the experiment actually measures is **"can you reach thirty commanderies before
+  season thirty"** — much narrower than "who plays better", and much more honest.
+
+Two notes attached:
+
+1. **The sixteen-season evaluation setting is entirely unaffected.** The gate has never
+   fired within sixteen seasons (the earliest crossing was season 29), so the leaderboard
+   measures the stretch before the gate. That is good news (no snowball contamination) and
+   also a limit (the board cannot see the most dramatic part of this machine).
+2. **That city-count gate is a 2.5.0 addition from this repository**, and the reason is
+   recorded in the pack: with a province-count gate alone, Cao Cao opens Jian'an 5 already
+   holding four provinces and **unifies in six seasons**. Adding the gate was right, but it
+   also created a cliff, and the cliff happens to fall between the bot's peak (26) and the
+   models' plateau (30). That is not a bug, it is a property of this map — recorded here so
+   nobody later reads a 64-season outcome as "strategic ability".
+
+<!-- translated-from: EVAL.md@e166d01e76ef -->
