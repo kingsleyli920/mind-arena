@@ -59,14 +59,32 @@ test("标签表：界面不许自己写一份已有正本的表", () => {
   const owned = { BUILD_CN, RESOURCE_CN, GEAR_CN, GRADE_CN, FORMATION_CN, KIND_CN, POLICY_CN };
   const hit = [];
   for (const { f, src } of UI) {
-    for (const m of src.matchAll(/(?:const|let)\s+([A-Za-z_]+)[^=]*=\s*\{([^}]*)\}/g)) {
+    // **连内联字面量一起查**，不只是 `const X = {...}`。
+    //
+    // 这是补的：对局页里有一处 `{{ none: "无", ram: "冲车", mound: "土山" }[gear]}`
+    // 直接写在 JSX 里，没有名字，于是上一版闸看不见它——而它恰好是今天把包里的
+    // `none` 从「无」统一成「无械」时漏掉的那一份，统一完它仍然写着「无」。
+    // 两边都跑得好好的。
+    for (const m of src.matchAll(/(?:(?:const|let)\s+([A-Za-z_]+)[^=]*=\s*)?\{([^{}]*:[^{}]*)\}/g)) {
       const inside = m[2];
+      // 注意 `\s*` 要在分组**外面**：写成 `(?:^|[,{]\s*)` 的话，
+      // 开头带空格的字面量（` none: …`）第一个键会被漏掉，而那正是这里要数的
+      const keys = [...inside.matchAll(/(?:^|[,{])\s*"?([A-Za-z_][A-Za-z0-9_]*)"?\s*:/g)]
+        .map((x) => x[1]);
       for (const [name, table] of Object.entries(owned)) {
         const vals = Object.values(table);
-        // 三个值撞上就算抄——两个可能是巧合（「港」「仓」这种常用字），
-        // 三个不会是
+        // 三个值撞上就算抄——两个可能是巧合（「港」「仓」这种常用字），三个不会是
         const n = vals.filter((v) => inside.includes(`"${v}"`)).length;
-        if (n >= 3) hit.push(`${f}  ${m[1]} 重复了 ${name} 的 ${n} 个值`);
+        // **但只看值会漏掉已经漂了的副本**：三项的表漂掉一项，共有值就只剩两个，
+        // 永远够不到三。实测漏过——对局页那份内联器械表写着 `none: "无"`，
+        // 而正本早已统一成「无械」，于是它正因为抄错了而躲过了这条闸。
+        // 所以再看一眼**键**：键集完全一样、值还对得上两个以上，就是抄的。
+        const sameKeys = keys.length >= 2 && keys.length === Object.keys(table).length
+          && keys.every((k) => k in table);
+        if (n >= 3 || (sameKeys && n >= 2)) {
+          hit.push(`${f}  ${m[1] ?? "（内联字面量）"} 重复了 ${name}`
+            + `（${n} 个值${sameKeys ? "，且键完全一样" : ""}）`);
+        }
       }
     }
   }

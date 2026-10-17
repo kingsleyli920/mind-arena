@@ -434,11 +434,7 @@ const GLYPH_N: Record<string, number> = {
  * **受迷雾约束**：自家的看真值，他家的要刺探过或结了盟才看得见——
  * 与观测里的 observedFormation 同一条规矩，否则鼠标一悬就等于开天眼
  */
-const FORM_TIP: Record<string, string> = {
-  scale: "鱼鳞：攻城 +1 缺口、守城 −1 可防守",
-  wings: "鹤翼：行军少一季、攻城 −1 缺口",
-  square: "方圆：城中存粮 +1 季",
-};
+/* 阵型提示走文案目录的 `form.<id>`；受迷雾约束那条规矩在用处就近写着 */
 /**
  * 物产 → 它能建的那座建筑。
  *
@@ -578,9 +574,8 @@ const EDGE_STYLE: Record<string, { stroke: string; dash: string; width: number }
   river:    { stroke: "#5b7f93", dash: "", width: 1.9 },
   gate:     { stroke: "#7a3b32", dash: "", width: 2.3 },
 };
-const EDGE_CN: Record<string, string> = {
-  plain: "平道", hill: "丘陵", mountain: "山道", river: "水路", gate: "关道",
-};
+/* 道路类型走文案目录的 `edge.<地形>`。它与内容包的 terrain 标签
+   （平原/山地/水道）是两套词：包说地形，这里说那条路 */
 
 interface Engine {
   P: EngineParams; G: Graph; roster: Roster; geo: Geography;
@@ -1821,7 +1816,7 @@ export function PlayClient() {
                   )}
                 </b>
                 <span>{n} 郡{"\u3000"}{st.controlledZhou} 州{"\u3000"}州治 {st.zhouSeats}
-                  {"\u3000"}治 {f.capital ?? "无"}</span>
+                  {"\u3000"}治 {f.capital ?? t("play.none")}</span>
                 {/* 本年局势取自剧本，逐条有史料出处。开局先让人知道自己接的是什么烂摊子 */}
                 {engine.lore.get(f.id)?.situation && (
                   <em>{engine.lore.get(f.id)!.situation}</em>
@@ -1843,8 +1838,8 @@ export function PlayClient() {
   const nextStep = step.grade
     ? (step.score < GRADE_CUTS.yi
         && !(standing.commanderies > me.startCommanderies && standing.conquests > 0)
-        ? "郡数高于开局且至少一郡夺自他方 → 丙"
-        : `再多控 ${step.needZhou} 州，或多据 ${step.needSeat} 个州治 → ${GRADE_CN[step.grade]}`)
+        ? t("play.hint.bing")
+        : `再多控 ${step.needZhou} 州，或多据 ${step.needSeat} 个州治 → ${t(`grade.${step.grade}`)}`)
     : `已达超档；再往上判绝对疆域（控 ${ABS_CUTS.ba} 州为霸）`;
 
   // 城池与标注。标注在屏幕空间做贪心避让——冀州、兖州一带郡治密集，
@@ -2081,7 +2076,7 @@ export function PlayClient() {
   // 三档都撞就不发这一条——与牌记同一套办法，且它们共用同一张已占位表
   const roadTips = roads.filter((r) => r.hot).map((r) => {
     const size = 19 / view.k ** 0.88;
-    const text = `${EDGE_CN[r.e.terrain] ?? r.e.terrain}`
+    const text = `${t(`edge.${r.e.terrain}`)}`
       + `${r.e.nodes.length ? `·${r.e.nodes[0].name}` : ""} ${r.days} 日`;
     // 宽度按字宽分别估：中日韩字宽约 1em，数字与空格约 0.55em。
     // 一刀切 0.62 会低估中文串的宽度，避让就漏判——实测「关道·潼关 41 日」
@@ -2347,16 +2342,16 @@ export function PlayClient() {
         level: "grave" as const,
         text: `治所${cap ? ` ${cap}` : ""}已失，全境政令不通——本季无产出。`,
         fix: fix ? { key: fix.key, label: `迁治于 ${fix.key.split(":")[1]}` } : null,
-        hint: fix ? "迁治下季生效，选连得回最多郡国的那一处。" : "已无可迁之处。",
+        hint: fix ? t("play.hint.relocate") : t("play.hint.relocate.none"),
       };
     }
     if (besieged.length) {
       return {
         level: "warn" as const,
         text: `${besieged.map((l) => l.c.id).join("、")} 被围——围城之郡无产出，`
-          + "守军逐季折损。",
+          + t("play.hint.garrison"),
         fix: null,
-        hint: "从邻郡发兵解围，或出城迎战；候选在「征伐」一栏。",
+        hint: t("play.hint.relief"),
       };
     }
     if (cut.length) {
@@ -2364,7 +2359,7 @@ export function PlayClient() {
         level: "warn" as const,
         text: `${cut.map((l) => l.c.id).join("、")} 补给断绝——与治所之间的通路被切断。`,
         fix: null,
-        hint: "补给按己方郡国的连通算：夺回中间那一郡即可复通。",
+        hint: t("play.hint.supply"),
       };
     }
     return null;
@@ -2446,7 +2441,7 @@ export function PlayClient() {
           </span>
           {/* 这一句只在第一季说。逐季重复就是回声——治所失守那条战报
               每季重播同一句话，正是我要避开的毛病 */}
-          {game.turn === 0 && <i>开局全境未探，攻城预告只会是「未知」；刺探不要钱。</i>}
+          {game.turn === 0 && <i>{t("play.scout.hint")}</i>}
         </div>
       )}
       {!spectator && crisis && (
@@ -2690,7 +2685,7 @@ export function PlayClient() {
                   const fs2 = m.base * 0.66;
                   return (
                     <g className="form-mark">
-                      <title>{FORM_TIP[f]}</title>
+                      <title>{t(`form.${f}`)}</title>
                       <image href={`${GLYPH}/f-${f}-0-ink.png`}
                         x={m.x - m.base * 1.15 - fs2 / 2} y={m.y - m.base * 1.5}
                         width={fs2} height={fs2} />
@@ -3087,10 +3082,10 @@ export function PlayClient() {
                 {nodeTip.at ? `\u3000近${nodeTip.at}` : ""}</span>
               {/* 数值取自内容包的 terrain 表，别在这里另写一份——两份必然漂移 */}
               <span>{nodeTip.kind === "port" || nodeTip.kind === "ford"
-                ? "水道：守方 +0.35，行军 1.8 倍。无渡口则此路不通。"
+                ? t("terrain.river")
                 : nodeTip.kind === "gate" || nodeTip.kind === "pass"
-                  ? "关隘：守方 +0.55，行军 2.6 倍，以寡当众。"
-                  : nodeTip.kind === "depot" ? "屯粮之所。" : "古战场。"}</span>
+                  ? t("terrain.gate")
+                  : nodeTip.kind === "depot" ? t("terrain.depot") : t("terrain.battlefield")}</span>
             </div>
           )}
           {focus && game.commanderies[focus] && (
@@ -3106,7 +3101,7 @@ export function PlayClient() {
                   <span>城防 {game.commanderies[focus].defense}{"\u3000"}产出 {game.commanderies[focus].yieldTier}
                     {"\u3000"}民心 {game.commanderies[focus].moraleTier}</span>
                   <span>{engine.P.units[game.commanderies[focus].unit]?.name}
-                    {"\u3000"}器械 {{ none: "无", ram: "冲车", mound: "土山" }[game.commanderies[focus].gear]}
+                    {"\u3000"}器械 {GEAR_CN[game.commanderies[focus].gear]}
                     {(() => {
                       // 驻将名单：兵力上限由人数定，所以这是选郡时最该看见的一项
                       const os = stationedAt(game, engine.roster, focus);
@@ -3265,9 +3260,9 @@ export function PlayClient() {
               {/* 统一是这局游戏真正的胜负，档位只是评测用的量尺——两者不能混为一谈。
                   此前这里只认「打满季数」，一个真把天下打下来的玩家看到的
                   也是「终局」两个字，赢了却不知道自己赢了 */}
-              <h2>{game.winner === seat ? "一统天下"
+              <h2>{game.winner === seat ? t("play.end.unified")
                 : game.winner ? `天下归${engine.nameOf.get(game.winner) ?? game.winner}`
-                : me.eliminated ? "覆灭" : me.retired ? "归隐" : "终局"}
+                : me.eliminated ? t("play.end.destroyed") : me.retired ? "归隐" : t("play.end.over")}
                 {"\u3000"}{GRADE_CN[me.bestGrade]} 档{"\u3000"}
                 <b>{GRADE_SCORE[me.bestGrade]} 分</b>
                 {!me.eliminated && <u>天下第 {rank.at}/{rank.of}</u>}</h2>
@@ -3420,7 +3415,7 @@ export function PlayClient() {
                                   开局阶段几乎每次夺郡都升丙，标了等于没标 */}
                               {(c.gain?.upgrade === "jia" || c.gain?.upgrade === "yi") && (
                                 <em className="verdict v-gain">
-                                  升{c.gain.upgrade === "jia" ? "甲" : "乙"}档
+                                  升{t(`grade.${c.gain.upgrade === "jia" ? "jia" : "yi"}`)}档
                                 </em>
                               )}
                               {c.gain?.isSeat && <i className="tier">{t("play.zhou.seat")}</i>}

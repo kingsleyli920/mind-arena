@@ -532,4 +532,22 @@ export const zh: Dict = {
   "play.model.seat": "模型执子",
   "play.legend": "图例",
   "play.fit.all": "全图",
+
+  // ── 对局页：局势提示与地形悬停 ──────────────────────────────────
+  "play.scout.hint": "开局全境未探，攻城预告只会是「未知」；刺探不要钱。",
+  "play.hint.relocate.none": "已无可迁之处。",
+  "play.hint.relocate": "迁治下季生效，选连得回最多郡国的那一处。",
+  "play.hint.garrison": "守军逐季折损。",
+  "play.hint.relief": "从邻郡发兵解围，或出城迎战；候选在「征伐」一栏。",
+  "play.hint.supply": "补给按己方郡国的连通算：夺回中间那一郡即可复通。",
+  "play.hint.bing": "郡数高于开局且至少一郡夺自他方 → 丙",
+  "terrain.river": "水道：守方 +0.35，行军 1.8 倍。无渡口则此路不通。",
+  "terrain.gate": "关隘：守方 +0.55，行军 2.6 倍，以寡当众。",
+  "terrain.battlefield": "古战场。",
+  "terrain.depot": "屯粮之所。",
+  "play.end.unified": "一统天下",
+  "play.end.retired": "归隐",
+  "play.end.over": "终局",
+  "play.end.destroyed": "覆灭",
+  "play.grade.note": "档位按本局曾达到过的最高档记，判的是相对开局的增量——守成不得分。天下排名按终局郡数，仅供参照，不进计分。",
 };

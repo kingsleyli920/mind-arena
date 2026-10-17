@@ -628,4 +628,30 @@ export const en: Dict = {
   "play.model.seat": "model seat",
   "play.legend": "Legend",
   "play.fit.all": "Fit all",
+
+  // ── match page: situation hints and terrain tooltips ────────────
+  "play.scout.hint": "Nothing is scouted at the start, so every siege forecast reads "
+    + "\u201cunknown\u201d. Scouting costs nothing.",
+  "play.hint.relocate.none": "There is nowhere left to move the seat.",
+  "play.hint.relocate": "Moving the seat takes effect next season; pick the one that "
+    + "reconnects the most commanderies.",
+  "play.hint.garrison": "The garrison wastes away each season.",
+  "play.hint.relief": "March from a neighbouring commandery to lift the siege, or sortie "
+    + "from the city \u2014 both are under Campaign.",
+  "play.hint.supply": "Supply follows connectivity among your own commanderies: retake the "
+    + "one in between and it flows again.",
+  "play.hint.bing": "More commanderies than at the start, at least one taken from another "
+    + "faction \u2192 grade C",
+  "terrain.river": "Water: +0.35 to the defender, 1.8× march time. Without a ford there is "
+    + "no way through.",
+  "terrain.gate": "Pass: +0.55 to the defender, 2.6× march time \u2014 few hold off many.",
+  "terrain.battlefield": "An old battlefield.",
+  "terrain.depot": "A grain depot.",
+  "play.end.unified": "The realm united",
+  "play.end.retired": "Retired",
+  "play.end.over": "Game over",
+  "play.end.destroyed": "Destroyed",
+  "play.grade.note": "The grade records the highest reached during the game and measures the "
+    + "gain over the opening \u2014 holding what you had scores nothing. The standing below "
+    + "ranks by final commandery count, for reference only; it is not part of the score.",
 };
