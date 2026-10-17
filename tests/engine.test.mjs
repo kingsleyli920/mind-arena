@@ -1888,15 +1888,25 @@ test("界面的郡国表要与观测的 mine 段对得上 —— 人和模型不
   // 四方对账里最容易漏的一处：模型的观测里有存粮、器械、兵种、建筑，
   // 而界面那张「我的郡国」表只有兵产心防阵将——人少看四样，
   // 其中「粮」还是围城那只钟（被围每季 −1，归零则不战自下）。
+  //
+  // 原先这条闸在源码里搜 `<th>粮</th>`。表头迁进文案目录之后它搜不到了——
+  // **而那不等于列没了**。改成两段：表头引了哪个 key（源码），那个 key 两种语言
+  // 都有文案（目录）。中间那个字不再出现在源码里，正是迁移要的结果。
   const obs = fs.readFileSync("lib/game/engine/observe.ts", "utf8");
   const client = fs.readFileSync("app/(zh)/play/PlayClient.tsx", "utf8");
   const i = client.indexOf('className="lands"');
   const head = client.slice(i, client.indexOf("</thead>", i));
-  for (const [field, col] of [["provisions", "粮"], ["gear", "械"],
-                              ["built", "建"], ["unit", "种"]]) {
+  for (const [field, key, col] of [["provisions", "play.col.provisions", "粮"],
+                                   ["gear", "play.col.gear", "械"],
+                                   ["built", "play.col.buildings", "建"],
+                                   ["unit", "play.col.unit", "种"]]) {
     assert.ok(obs.includes(`${field}`), `观测里没有 ${field}，这条对账的前提变了`);
-    assert.ok(head.includes(`<th>${col}</th>`),
+    assert.ok(head.includes(`t("${key}")`),
       `郡国表缺「${col}」列 —— 模型看得见 ${field}，人看不见`);
+    for (const loc of ["zh", "en"]) {
+      assert.ok(DICTS[loc][key], `${loc} 目录里没有 ${key} —— 那一列会印出 key 本身`);
+    }
+    assert.equal(DICTS.zh[key], col, `${key} 的中文该是「${col}」`);
   }
 });
 

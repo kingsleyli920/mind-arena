@@ -904,7 +904,7 @@ export function PlayClient() {
   useEffect(() => {
     if (!game || !seat) return;
     const timer = window.setTimeout(() => {
-      if (!persist(game)) setTurnError("本地存档写入失败；模型调用已受阻，请检查浏览器存储空间。");
+      if (!persist(game)) setTurnError(t("play.err.save"));
     }, 0);
     return () => window.clearTimeout(timer);
   }, [game, seat, persist]);
@@ -918,7 +918,7 @@ export function PlayClient() {
       .then((d) => {
         setModels(d.data ?? []);
         if (d.error) setModelErr(d.error);
-        else if (!d.data?.length) setModelErr("模型列表为空 —— 多半是没配 OPENROUTER_API_KEY");
+        else if (!d.data?.length) setModelErr(t("play.err.models"));
       })
       .catch((e: Error) => setModelErr(`取模型列表失败：${e.message}`));
   }, [models.length]);
@@ -968,7 +968,7 @@ export function PlayClient() {
     advancing.current = true;
     setBusy(true); setTurnError(null);
     const modeled = modelSeats(game, session);
-    setThinking(Object.fromEntries(modeled.map((f) => [f, "思考中"])));
+    setThinking(Object.fromEntries(modeled.map((f) => [f, t("play.thinking")])));
     try {
       const humanOrders = spectator ? [] : admit(game, seat, picked, candidates,
         engine.G, engine.roster, undefined, engine.P).orders;
@@ -977,7 +977,7 @@ export function PlayClient() {
         roster: engine.roster, geo: engine.geo,
         nameOf: (id) => engine.nameOf.get(id) ?? id,
       }, (reserved) => {
-        if (modeled.length && !persist(game, reserved)) throw new Error("无法保存调用额度，本季未调用模型。");
+        if (modeled.length && !persist(game, reserved)) throw new Error(t("play.err.quota"));
         setSession(reserved);
       }, (f, record) => {
         setThinking((t) => ({ ...t, [f]: record.failure ? `失败：${record.failure}` : `${record.admission.admitted.length} 令` }));
@@ -986,7 +986,7 @@ export function PlayClient() {
       setSession(result.session);
       if (result.session.records.slice(session.records.length).some((record) => record.failure)) {
         setAutoPlay(false);
-        setTurnError("本季有模型未能下令，已暂停自动推进。可查看决策记录后手动继续。");
+        setTurnError(t("play.err.turn"));
       }
       const before = game.log.length;
       // resolve 走的是深拷贝，所以逐郡比对 owner 是有效差分
@@ -2267,7 +2267,7 @@ export function PlayClient() {
       const cut = !supplied.has(c.id);
       const officers = stationedAt(game, engine.roster, c.id);
       const note = besieger ? `被 ${engine.nameOf.get(besieger.faction) ?? besieger.faction} 围`
-        : cut ? "补给断绝"
+        : cut ? t("play.nosupply")
         : c.gear !== "none" ? `备${GEAR_CN[c.gear] ?? c.gear}`
         : "";
       return { c, officers, note, warn: !!besieger || cut };
@@ -2338,8 +2338,8 @@ export function PlayClient() {
   const crisis = (() => {
     const cap = me.capital;
     const capLost = !cap || game.commanderies[cap]?.owner !== seat;
-    const besieged = myLands.filter((l) => l.note.endsWith("围"));
-    const cut = myLands.filter((l) => l.note === "补给断绝");
+    const besieged = myLands.filter((l) => l.note.endsWith(t("play.besieged")));
+    const cut = myLands.filter((l) => l.note === t("play.nosupply"));
     const fix = candidates.find((c) => c.key.startsWith("relocate:"));
     if (!myLands.length) return null;
     if (capLost) {
@@ -2394,8 +2394,8 @@ export function PlayClient() {
   // 丙档不参与排序：开局阶段几乎每次夺郡都升丙，参与了等于没参与
   const UPRANK: Record<string, number> = { jia: 0, yi: 1 };
   for (const list of byType.values()) {
-    list.sort((a, b) => (RANK[a.forecast?.verdict ?? "未知"] ?? 1)
-                      - (RANK[b.forecast?.verdict ?? "未知"] ?? 1)
+    list.sort((a, b) => (RANK[a.forecast?.verdict ?? t("play.unknown")] ?? 1)
+                      - (RANK[b.forecast?.verdict ?? t("play.unknown")] ?? 1)
                       || (UPRANK[a.gain?.upgrade ?? ""] ?? 9)
                        - (UPRANK[b.gain?.upgrade ?? ""] ?? 9)
                       || (b.forecast ? b.forecast.breachLo - b.forecast.holdHi : 0)
@@ -2410,7 +2410,7 @@ export function PlayClient() {
           第 {game.finished ? game.turn : game.turn + 1} 季{"\u3000"}
           纪元 {game.epoch}</span>
         <span className="who" style={{ "--c": engine.colorOf.get(seat) } as React.CSSProperties}>
-          {spectator ? "观战 · " : ""}{engine.nameOf.get(seat)}
+          {spectator ? t("play.watching") : ""}{engine.nameOf.get(seat)}
         </span>
         <span className="ap">令数 {me.ap - spent}/{me.ap}
           {engine.P.goldOn && <>{"\u3000"}国库 {Math.round(me.gold)} 金
@@ -2421,12 +2421,12 @@ export function PlayClient() {
           {me.governorships.length > 0 && <>{"\u3000"}
             <i className="titles">{me.governorships.join("·")}牧</i></>}
           {game.commanderies[engine.P.courtSeat]?.owner === seat
-            ? <>{"\u3000"}<i className="titles">挟天子</i></>
+            ? <>{"\u3000"}<i className="titles">{t("play.emperor")}</i></>
             : <>{"\u3000"}<i className="titles dim">朝廷在 {
                 engine.nameOf.get(game.commanderies[engine.P.courtSeat]?.owner ?? "") ?? UNOWNED_CN
               }</i></>}</span>
         <button className="primer-btn" onClick={() => setShowPrimer((v) => !v)}
-          aria-expanded={showPrimer}>规则</button>
+          aria-expanded={showPrimer}>{t("play.rules.short")}</button>
       </header>
 
       {/* 危局条。治所失守这类势力级的坏状态会持续好几季，而战报每季重复
@@ -2435,9 +2435,9 @@ export function PlayClient() {
           真出了危局，别的都不要紧 */}
       {!spectator && !crisis && freeLeft.length > 0 && (
         <div className="crisis tip" role="status">
-          <b>提示</b>
+          <b>{t("play.tips")}</b>
           <span>
-            还有 {freeLeft.length} 条<b className="inline">不耗令</b>的候选
+            还有 {freeLeft.length} 条<b className="inline">{t("play.free.order")}</b>的候选
             {/* 按**候选 key 的前缀**取中文名，不按动作类型——
                 relief 与 withdraw 不是动作类型，是引擎派生的键（见 panels.ts） */}
             （{[...new Set(freeLeft.map((c) => t(`action.${c.key.split(":")[0]}`)))]
@@ -2451,7 +2451,7 @@ export function PlayClient() {
       )}
       {!spectator && crisis && (
         <div className={`crisis ${crisis.level}`} role="status">
-          <b>{crisis.level === "grave" ? "危局" : "警"}</b>
+          <b>{crisis.level === "grave" ? t("play.crisis") : t("play.warn")}</b>
           <span>{crisis.text}</span>
           {crisis.fix && (
             <button type="button" className="crisis-fix"
@@ -2470,12 +2470,12 @@ export function PlayClient() {
           到现在花了多少。看不到这些，就分不清「对手按兵不动」和「模型没答上来」 */}
       {Object.keys(modelOf).length > 0 && (
         <div className="model-bar">
-          <b>模型执子</b>
+          <b>{t("play.model.seat")}</b>
           {Object.entries(modelOf).map(([f, m]) => {
             const st = thinking[f];
-            const bad = st?.startsWith("失败");
+            const bad = st?.startsWith(t("play.failed"));
             return (
-              <span key={f} className={bad ? "seatbad" : busy && st === "思考中" ? "seatwait" : undefined}
+              <span key={f} className={bad ? "seatbad" : busy && st === t("play.thinking") ? "seatwait" : undefined}
                 style={{ "--c": engine.colorOf.get(f) } as React.CSSProperties}
                 title={`${m}${st ? `｜${st}` : ""}`}>
                 {engine.nameOf.get(f) ?? f}
@@ -2499,9 +2499,9 @@ export function PlayClient() {
       )}
 
       {showPrimer && (
-        <div className="primer-sheet" role="dialog" aria-label="规则速览">
+        <div className="primer-sheet" role="dialog" aria-label={t("play.rules")}>
           <div>
-            <button className="primer-close" onClick={() => setShowPrimer(false)}>关闭</button>
+            <button className="primer-close" onClick={() => setShowPrimer(false)}>{t("play.close")}</button>
             <Primer P={engine.P} />
           </div>
         </div>
@@ -2563,7 +2563,7 @@ export function PlayClient() {
               只需最小的一档——细节由上面的瓦片给，@2x 那张 720KB 现在是白下的。
               套 next/image 只会多一层运行时开销，不换来任何优化 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={BASE} alt="汉末地形" />
+          <img src={BASE} alt={t("play.terrain")} />
           <TileLayer view={view} screenW={stageW} />
           {/* 海波压在瓦片之上、疆域之下：它是底图的一部分，
               但疆域的色域要盖得住它 */}
@@ -2958,7 +2958,7 @@ export function PlayClient() {
           {/* 图例：关津港仓与军团的印记不写出来就是密码。收在一个角标里，
               点开才占地方——常驻会挤掉地图，而它只在头一两局需要看 */}
           <details className="legend">
-            <summary>图例</summary>
+            <summary>{t("play.legend")}</summary>
             <ul>
               {/* 图例里的图元与图上是同一段代码画的：另画一份必然与地图分家。
                   每一对「图 + 名」用 nowrap 裹住，否则名字会被折到图的下一行 */}
@@ -3044,11 +3044,11 @@ export function PlayClient() {
 
           <div className="zoom">
             <button onClick={() => setUnrolled((v) => !v)}
-              title={unrolled ? "收卷：把候选表放回来" : "展卷：画心占满整屏"}>
-              {unrolled ? "收卷" : "展卷"}
+              title={unrolled ? t("play.scroll.close") : t("play.scroll.open")}>
+              {unrolled ? t("play.scroll.close.s") : t("play.scroll.open.s")}
             </button>
             <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1.4, minK)); }}>＋</button>
-            <button onClick={() => { setSmooth(true); setView(fitAll(minK)); }}>全图</button>
+            <button onClick={() => { setSmooth(true); setView(fitAll(minK)); }}>{t("play.fit.all")}</button>
             <button onClick={() => { setSmooth(true); setView((v) => zoomAt(v, 1 / 1.4, minK)); }}>－</button>
           </div>
           {/* 军团的悬停详情。圆点上只留「谁的、在哪」，其余全在这里说——
@@ -3063,7 +3063,7 @@ export function PlayClient() {
             return (
               <div className="tip">
                 <b style={{ "--c": engine.colorOf.get(a.faction) } as React.CSSProperties}
-                  className="army-who">{who}{mine ? "（你）" : ""}</b>
+                  className="army-who">{who}{mine ? t("play.you") : ""}</b>
                 <span>{a.marchLeft > 0 && a.target
                   ? `自 ${a.home} 往 ${a.target}——尚需 ${a.marchLeft} 季`
                   : a.target ? `围 ${a.target}` : `驻 ${a.at}`}</span>
@@ -3144,7 +3144,7 @@ export function PlayClient() {
             <em>{nextStep}</em>
           </div>
           <details className="brief-fold">
-            <summary>逐州进度</summary>
+            <summary>{t("play.zhou.progress")}</summary>
             <pre className="brief">{brief}</pre>
           </details>
 
@@ -3153,14 +3153,14 @@ export function PlayClient() {
               能不能出兵——这几项摊在一张表里，比在地图上找快得多。
               点一行即定位地图并筛出该郡的候选 */}
           <details className="mine-fold">
-            <summary>{spectator ? "所观势力郡国" : "我的郡国"}<i>{myLands.length}</i></summary>
+            <summary>{spectator ? t("play.watched") : t("play.mine")}<i>{myLands.length}</i></summary>
             <table className="lands">
               <thead>
                 {/* 与观测的 mine 段对账加出来的四列：粮、种、械、建。
                     模型这四样都看得见，而人只看得见兵产心防阵将——
                     「人和模型看的不是同一场战争」在这张表上就是四个字段的差 */}
-                <tr><th>郡国</th><th>兵</th><th>种</th><th>产</th><th>心</th><th>防</th>
-                  <th>粮</th><th>阵</th><th>械</th><th>将</th><th>建</th><th>状况</th></tr>
+                <tr><th>{t("play.col.commandery")}</th><th>{t("play.col.troops")}</th><th>{t("play.col.unit")}</th><th>{t("play.col.yield")}</th><th>{t("play.col.morale")}</th><th>{t("play.col.defense")}</th>
+                  <th>{t("play.col.provisions")}</th><th>{t("play.col.formation")}</th><th>{t("play.col.gear")}</th><th>{t("play.col.officers")}</th><th>{t("play.col.buildings")}</th><th>{t("play.col.state")}</th></tr>
               </thead>
               <tbody>
                 {myLands.map((L) => (
@@ -3175,7 +3175,7 @@ export function PlayClient() {
                     {/* 存粮是围城那只钟：被围时每季 −1，归零则不战自下。
                         满仓写「满」，免得一列数字里看不出哪个是危的 */}
                     <td className={L.c.provisions <= 1 ? "warn-cell" : undefined}>
-                      {L.c.provisions >= provCapOf(L.c, engine.P) ? "满" : L.c.provisions}
+                      {L.c.provisions >= provCapOf(L.c, engine.P) ? t("play.full") : L.c.provisions}
                     </td>
                     <td>{FORMATION_CN[L.c.formation]}</td>
                     <td>{L.c.gear && L.c.gear !== "none" ? GEAR_CN[L.c.gear] : "—"}</td>
@@ -3193,13 +3193,13 @@ export function PlayClient() {
             <div className="flash" role="status" aria-live="polite">
               {flash.mine.length > 0 && (
                 <>
-                  <h3>上季战报<i>{spectator ? "上季观察势力" : "我方"}</i></h3>
+                  <h3>{t("play.report")}<i>{spectator ? t("play.last.watched") : t("play.ours")}</i></h3>
                   <ul className="mine">{flash.mine.map((x, i) => <li key={i}>{x}</li>)}</ul>
                 </>
               )}
               {flash.world.length > 0 && (
                 <>
-                  <h3>天下大事</h3>
+                  <h3>{t("play.world")}</h3>
                   <ul>{flash.world.map((x, i) => <li key={i}>{x}</li>)}</ul>
                 </>
               )}
@@ -3208,7 +3208,7 @@ export function PlayClient() {
                   列出来就是给玩家假情报 */}
               {powers.length > 1 && (
                 <>
-                  <h3>天下形势<i>郡数</i></h3>
+                  <h3>{t("play.standing")}<i>{t("play.col.lands")}</i></h3>
                   <ol className="powers">
                     {powers.map((p) => (
                       <li key={p.f} className={p.mine ? "me" : ""}>
@@ -3237,7 +3237,7 @@ export function PlayClient() {
               默认折叠：它是「要查的时候才看」的东西，不该跟本季战报抢地方 */}
           {!over && chronicle.length > 0 && (
             <details className="chron-fold">
-              <summary>本局年表<i>{chronicle.length} 事</i></summary>
+              <summary>{t("play.chronicle")}<i>{chronicle.length} 事</i></summary>
               <ol className="chron">
                 {chronicle.slice().reverse().map((e, i) => (
                   <li key={i}>
@@ -3253,7 +3253,7 @@ export function PlayClient() {
             <div className="pinned-bar">
               <b>{pinned}</b>
               <span>相关候选 {shown.length} 条</span>
-              <button onClick={() => setPinned(null)}>看全部</button>
+              <button onClick={() => setPinned(null)}>{t("play.see.all")}</button>
             </div>
           )}
 
@@ -3289,13 +3289,13 @@ export function PlayClient() {
                   以及「差一步的那一步是什么」——判据是州级的，而对局十六季
                   都在郡这一层做决定，不摊开写没人算得出来 */}
               <dl className="over-stat">
-                <div><dt>郡国</dt><dd>{standing.commanderies}
+                <div><dt>{t("play.col.commandery")}</dt><dd>{standing.commanderies}
                   <i>开局 {me.startCommanderies}</i></dd></div>
-                <div><dt>控制州</dt><dd>{standing.controlledZhou}
+                <div><dt>{t("play.zhou.held")}</dt><dd>{standing.controlledZhou}
                   <i>开局 {me.startZhou}</i></dd></div>
-                <div><dt>州治</dt><dd>{standing.zhouSeats}
+                <div><dt>{t("play.zhou.seat")}</dt><dd>{standing.zhouSeats}
                   <i>开局 {me.startSeats}</i></dd></div>
-                <div><dt>夺自他方</dt><dd>{standing.conquests}<i>郡</i></dd></div>
+                <div><dt>{t("play.taken")}</dt><dd>{standing.conquests}<i>{t("play.unit.commandery")}</i></dd></div>
               </dl>
               <p>{endingGap(me, standing)}</p>
               {/* 年表：十六季不该只剩一个档位。哪一季拿下了什么、哪一季被围、
@@ -3307,19 +3307,19 @@ export function PlayClient() {
                     <li key={i}><b>{e.when}</b>
                       <span>{e.text}{e.n > 1 ? `（连 ${e.n} 季）` : ""}</span></li>
                   ))}
-                  {!chronicle.length && <li><span>尚无大事记。</span></li>}
+                  {!chronicle.length && <li><span>{t("play.no.events")}</span></li>}
                 </ol>
               </details>
 
               {(caught.mine.length > 0 || caught.theirs.length > 0) && (
                 <details className="over-fold">
-                  <summary>名将去向<i>{caught.mine.length + caught.theirs.length} 人</i></summary>
+                  <summary>{t("play.officers.where")}<i>{caught.mine.length + caught.theirs.length} 人</i></summary>
                   <dl className="captives">
                     {caught.theirs.length > 0 && (
-                      <div><dt>我所俘</dt><dd>{caught.theirs.join("、")}</dd></div>
+                      <div><dt>{t("play.captured.by.me")}</dt><dd>{caught.theirs.join("、")}</dd></div>
                     )}
                     {caught.mine.length > 0 && (
-                      <div><dt>我方被俘</dt><dd>{caught.mine.join("、")}</dd></div>
+                      <div><dt>{t("play.captured.mine")}</dt><dd>{caught.mine.join("、")}</dd></div>
                     )}
                   </dl>
                 </details>
@@ -3330,8 +3330,8 @@ export function PlayClient() {
               <div className="over-acts">
                 {!game.finished && !spectator && <button onClick={() => {
                   setSession({ ...session, human: null }); setPicked([]);
-                }}>转为观战</button>}
-                <button onClick={() => { clearSave(); setResume(null); setGame(null); setSeat(null); setAutoPlay(false); setTurnError(null); }}>再来一局</button>
+                }}>{t("play.to.spectate")}</button>}
+                <button onClick={() => { clearSave(); setResume(null); setGame(null); setSeat(null); setAutoPlay(false); setTurnError(null); }}>{t("play.again")}</button>
                 <button className="ghost" onClick={() => {
                   // 把这一局抄成一段纯文本，方便贴出去。replay 尚未做界面，
                   // 但至少让人能把自己那一局带走
@@ -3350,13 +3350,13 @@ export function PlayClient() {
                   navigator.clipboard?.writeText(lines.join("\n"));
                   setCopied(true);
                   window.setTimeout(() => setCopied(false), 2000);
-                }}>{copied ? "已复制" : "抄一份战绩"}</button>
+                }}>{copied ? t("play.copied") : t("play.copy")}</button>
               </div>
             </div>
           ) : spectator ? (
             <div className="observer-note">
               <p>当前观察：{engine.nameOf.get(seat)}。地图与情报按此势力视角显示，所有势力由各自的控制者下令。</p>
-              <p>可在上方逐季推进或自动观战；切换观察势力不改变控制权。</p>
+              <p>{t("play.spectate.note")}</p>
             </div>
           ) : (
             <>
@@ -3372,17 +3372,17 @@ export function PlayClient() {
                     <summary>
                       {t(`action.${cls}`)}
                       <i>{cls === "campaign" && onlyWinnable
-                        ? `${list.filter((c) => c.forecast?.verdict !== "不破").length}/${list.length}`
+                        ? `${list.filter((c) => c.forecast?.verdict !== t("play.unbreakable")).length}/${list.length}`
                         : list.length}</i>
-                      {cls === "campaign" && list.some((c) => c.forecast?.verdict === "不破") && (
+                      {cls === "campaign" && list.some((c) => c.forecast?.verdict === t("play.unbreakable")) && (
                         <button className="only-winnable"
                           onClick={(e) => { e.preventDefault(); setOnlyWinnable((v) => !v); }}>
-                          {onlyWinnable ? "看全部" : "只看打得下的"}
+                          {onlyWinnable ? t("play.see.all") : t("play.winnable.only")}
                         </button>
                       )}
                     </summary>
                     {(cls === "campaign" && onlyWinnable
-                        ? list.filter((c) => c.forecast?.verdict !== "不破")
+                        ? list.filter((c) => c.forecast?.verdict !== t("play.unbreakable"))
                         : list
                       ).map((c) => {
                       const on = picked.includes(c.key);
@@ -3410,7 +3410,7 @@ export function PlayClient() {
                               {c.forecast && (
                                 <em className={`verdict v-${
                                   c.forecast.verdict === "破城" ? "win"
-                                  : c.forecast.verdict === "不破" ? "no" : "maybe"}`}>
+                                  : c.forecast.verdict === t("play.unbreakable") ? "no" : "maybe"}`}>
                                   {c.forecast.verdict}
                                 </em>
                               )}
@@ -3423,8 +3423,8 @@ export function PlayClient() {
                                   升{c.gain.upgrade === "jia" ? "甲" : "乙"}档
                                 </em>
                               )}
-                              {c.gain?.isSeat && <i className="tier">州治</i>}
-                              {c.gain?.isCapital && <i className="tier t-cap">敌治所</i>}
+                              {c.gain?.isSeat && <i className="tier">{t("play.zhou.seat")}</i>}
+                              {c.gain?.isCapital && <i className="tier t-cap">{t("play.seat.enemy")}</i>}
                             </span>
                             {c.forecast && (
                               <span className="act-nums">
@@ -3434,7 +3434,7 @@ export function PlayClient() {
                                 {"\u3000"}可防守 {c.forecast.holdLo === c.forecast.holdHi
                                   ? c.forecast.holdLo
                                   : `${c.forecast.holdLo}–${c.forecast.holdHi}`}
-                                {c.forecast.fog === "tier" && <u>未探</u>}
+                                {c.forecast.fog === "tier" && <u>{t("play.unscouted")}</u>}
                               </span>
                             )}
                             {/* 标签是**给模型的**一整句，界面上原样摊出来就是一堵墙：
@@ -3471,18 +3471,18 @@ export function PlayClient() {
                             })()}
                           </span>
                           <b className="cost">
-                            {why ? why.slice(0, 10) : c.cost === 0 ? "免费" : `${c.cost} 令`}
+                            {why ? why.slice(0, 10) : c.cost === 0 ? t("play.free") : `${c.cost} 令`}
                           </b>
                         </label>
                       );
                     })}
                   </details>
                 ))}
-                {!candidates.length && <p className="play-note">本季无可行之事。</p>}
+                {!candidates.length && <p className="play-note">{t("play.nothing")}</p>}
               </div>
               <button className="go" onClick={submit} disabled={busy || Boolean(budgetMessage(game, session))}>
                 {busy
-                  ? <>模型思考中 · {Object.values(thinking).filter((x) => x === "思考中").length} 席未答</>
+                  ? <>模型思考中 · {Object.values(thinking).filter((x) => x === t("play.thinking")).length} 席未答</>
                   : <>封令结算 · {picked.length} 条 · 耗 {spent}/{me.ap} 令</>}
                 {!busy && picked.length > 0 && spent < me.ap
                   && <i>尚余 {me.ap - spent} 令，只结转 {engine.P.carryCap}</i>}
