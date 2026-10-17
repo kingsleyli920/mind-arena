@@ -107,23 +107,7 @@ const FOREST = "/game/map/forest.webp";
  * 194 是兴平元年；195 兴平二年；196 起改元建安，建安元年至二十五年（220）。
  * 再往后本剧本够不着，兜底写成汉字数字
  */
-const HAN_NUM = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
-function hanNum(n: number): string {
-  if (n <= 10) return n === 10 ? "十" : HAN_NUM[n];
-  if (n < 20) return `十${HAN_NUM[n - 10]}`;
-  const t = Math.floor(n / 10), o = n % 10;
-  return `${HAN_NUM[t]}十${o ? HAN_NUM[o] : ""}`;
-}
-function eraName(year: number): string {
-  if (year <= 193) return "初平四年";
-  if (year <= 195) return year === 194 ? "興平元年" : "興平二年";
-  const n = year - 195;                      // 196 = 建安元年
-  // 建安止于二十五年（220）。再往后本剧本够不着，退回数字——
-  // 竖排里靠 text-combine-upright 把三位数合成一格，不会一位一行地摞下来
-  return n <= 25 ? `建安${n === 1 ? "元" : hanNum(n)}年` : `${year} 年`;
-}
-
-const SEASON_CN = ["", "春", "夏", "秋", "冬"];
+import { eraName, SEASON_CN } from "./era.ts";
 /**
  * 面板顺序按「有多急」写死，不按 key 的字母序。
  * 字母序下实际是 ally → appoint → campaign → …→ relief 第六位：

@@ -419,4 +419,5 @@ export const zh: Dict = {
   "map.hint": "拖动平移 · 滚轮缩放 · 放大显示更多关津",
   "map.cancel": "取消",
   "map.kind.commandery": "郡国",
+  "play.title": "汉末沙盘 · 对局",
 };

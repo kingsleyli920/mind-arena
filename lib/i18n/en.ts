@@ -510,4 +510,5 @@ export const en: Dict = {
   "map.hint": "Drag to pan · scroll to zoom · more passes and fords appear as you zoom in",
   "map.cancel": "Cancel",
   "map.kind.commandery": "Commandery",
+  "play.title": "Han Sandbox · Match",
 };

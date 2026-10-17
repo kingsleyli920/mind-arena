@@ -163,6 +163,7 @@ const MIGRATED = [
   "app/(zh)/play/MatchSetup.tsx",
   "app/(zh)/game/page.tsx",
   "app/(zh)/game/InkMapViewer.tsx",
+  "app/(zh)/play/page.tsx",
   "app/(zh)/play/StrategyPlanView.tsx",
   "app/(zh)/play/DecisionReviewView.tsx",
   "app/(zh)/play/SeasonReviewView.tsx",
@@ -188,6 +189,17 @@ const USES_CATALOGUE = [
   "app/(zh)/play/DecisionReviewView.tsx",
   "app/(zh)/play/SeasonReviewView.tsx",
 ];
+
+/**
+ * **有意不迁**的文件，附理由。不写在这里的话，「app/ 还剩多少没迁」这个数会
+ * 一直带着几条永远不会动的，而谁也说不清它们为什么还在。
+ */
+const WONT_MIGRATE = {
+  "app/api/openrouter/chat/route.ts":
+    "服务端路由，没有 locale 上下文，返回的是 JSON 错误串。要做得对得先改成"
+    + "「返回错误码、由界面翻译」，那是改 API 形状，不是搬文案。而且这几条多半是"
+    + "跑仓库的人看的配置错误（里面带着一行 shell 命令）。",
+};
 
 /** 去掉注释后，还剩的中文字面量与 JSX 文本 */
 function bareChinese(src) {
@@ -217,6 +229,16 @@ test("棘轮：迁完的文件里不许再出现裸中文", () => {
     + "  文案进 lib/i18n/zh.ts 与 en.ts，组件里用 t('key')。\n"
     + "  若那是**数据键**（内容包的键名本来就是中文），别开白名单——"
     + "把它收进懂它的那个 lib 模块里，像 lib/arena/board-stale.ts 的 changeLogOf");
+});
+
+test("棘轮：有意不迁的文件，必须写得出理由", () => {
+  // 清单只增不减地**解释**，不是豁免：理由短于 20 字就说明没想清楚
+  for (const [f, why] of Object.entries(WONT_MIGRATE)) {
+    assert.ok(fs.existsSync(f), `${f} 不存在了——这份清单要跟着改名走`);
+    assert.ok(why.length >= 20, `${f} 的理由太短：${why}`);
+    // 它们也不该偷偷进了迁移名单
+    assert.ok(!MIGRATED.includes(f), `${f} 同时在「迁完」和「不迁」两张名单里`);
+  }
 });
 
 test("棘轮：名单里的文件确实在用目录", () => {
