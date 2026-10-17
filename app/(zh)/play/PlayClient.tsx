@@ -108,6 +108,7 @@ const FOREST = "/game/map/forest.webp";
  * 再往后本剧本够不着，兜底写成汉字数字
  */
 import { eraName, SEASON_CN } from "./era.ts";
+import { rich } from "@/lib/i18n/rich";
 /**
  * 面板顺序按「有多急」写死，不按 key 的字母序。
  * 字母序下实际是 ally → appoint → campaign → …→ relief 第六位：
@@ -2916,7 +2917,14 @@ export function PlayClient() {
           </svg>
           </div>
           {/* 图题：古地图的图题不在固定角落，是写在图面构图里的一个墨线框。
-              挂在屏幕固定层，随平移不动，像图例一样 */}
+              挂在屏幕固定层，随平移不动，像图例一样。
+
+              **这七个字是繁体的，而且有意不进文案目录、有意不翻。** 它是题款，
+              不是界面文案——仿的是传世舆图上那方墨线框里的手书，翻成英文
+              或改成简体，画面上就没有那件东西了。与模块图标（将／塔）同一类：
+              字形，不是说明。
+              （对局页正文里那处「興平元年」是另一回事，那是错字，已改。
+               见 app/(zh)/play/era.ts 开头。） */}
           <div className="cartouche" aria-hidden="true">
             <b>大漢輿地圖</b>
             <span>每方折地百里</span>
@@ -2959,21 +2967,21 @@ export function PlayClient() {
                   每一对「图 + 名」用 nowrap 裹住，否则名字会被折到图的下一行 */}
               {/* 地色那一层要先解释：图上最要紧的一件事就是「哪儿过得去」 */}
               <li className="terrain-key">
-                <span><i style={{ background: "rgba(62,54,45,0)" }} />好走</span>
-                <span><i style={{ background: "rgba(62,54,45,0.34)" }} />难行</span>
-                <span><i style={{ background: "rgba(58,50,42,0.82)" }} />过不去</span>
-                <span><i style={{ background: "rgba(58,92,116,0.66)" }} />大江</span>
-                <em>地色由通行代价场画出：越深越难走。关渡就设在深色的豁口上</em>
+                <span><i style={{ background: "rgba(62,54,45,0)" }} />{t("legend.terrain.easy")}</span>
+                <span><i style={{ background: "rgba(62,54,45,0.34)" }} />{t("legend.terrain.hard")}</span>
+                <span><i style={{ background: "rgba(58,50,42,0.82)" }} />{t("legend.terrain.block")}</span>
+                <span><i style={{ background: "rgba(58,92,116,0.66)" }} />{t("legend.terrain.river")}</span>
+                <em>{t("legend.terrain.note")}</em>
               </li>
               <li>
                 <span>{legendGlyph("gate")}{KIND_CN.gate}</span>
                 <span>{legendGlyph("pass")}{KIND_CN.pass}</span>
-                <em>守 +0.55 · 行军 2.6 倍</em>
+                <em>{t("legend.gate.note")}</em>
               </li>
               <li>
                 <span>{legendGlyph("ford")}{KIND_CN.ford}</span>
                 <span>{legendGlyph("port")}{KIND_CN.port}</span>
-                <em>守 +0.35 · 行军 1.8 倍</em>
+                <em>{t("legend.ford.note")}</em>
               </li>
               <li>
                 <span>{legendGlyph("depot")}{KIND_CN.depot}</span>
@@ -2991,7 +2999,7 @@ export function PlayClient() {
               <li>
                 <span>{legendPlain("g-ram")}{GEAR_CN.ram}</span>
                 <span>{legendPlain("g-mound")}{GEAR_CN.mound}</span>
-                <em>攻城更易，但行军慢一季</em>
+                <em>{t("legend.gear.note")}</em>
               </li>
               <li>
                 {(["office", "granary", "market", "drill"] as const).map((b) => (
@@ -3005,28 +3013,20 @@ export function PlayClient() {
               <li>
                 {(["scale", "wings", "square"] as const).map((f) => (
                   <span key={f}>{legendPlain(`f-${f}`)}{FORMATION_CN[f]}</span>))}
-                <em>攻／速／耐围，画在城左上</em>
+                <em>{t("legend.form.note")}</em>
               </li>
-              <li><em>阵型受迷雾约束：自家的看得见，他家的要刺探过或结了盟。
-                相克成环——鱼鳞克鹤翼、鹤翼克方圆、方圆克鱼鳞，克之 +1 缺口</em></li>
-              <li><em>建筑画在城下（只画自家的）。<b>淡影</b>是「有这个物产、
-                但那座还没修」——铁官须有铁、盐场须有盐、马苑须有牧苑、屯田须可垦</em></li>
+              <li><em>{t("legend.form.fog")}</em></li>
+              <li><em>{rich(t("legend.build.note"))}</em></li>
               <li>
                 <label className="legend-toggle">
                   <input type="checkbox" checked={allRoads}
                     onChange={(e) => setAllRoads(e.target.checked)} />
-                  画出全部 232 条道路
+                  {t("legend.roads.all", { n: 232 })}
                 </label>
-                <em>常驻只画<b>自家郡国接出去的</b>那些——全网铺开时每条路都在跟
-                  别的路抢注意力，谁也读不出来。指到某郡，它那几条照样会提亮</em>
+                <em>{rich(t("legend.roads.note"))}</em>
               </li>
-              <li><em>道路一律实线，按<b>颜色与粗细</b>分：平道最细最淡、丘陵、山道、
-                水路走青、<b>关道最粗最深</b>。路是在高程上算出来的实走路径，
-                会沿河谷绕开山脊，并从挂在它上面的关穿过去。
-                指到某郡，它那几条会提亮并标出行军日数</em></li>
-              <li><em>成片的墨点是<b>林</b>（南方多、北方少），取自公有领域的
-                理想化自然植被——那是「几乎无人类影响」的一版，比现代地表更近汉末。
-                山地高原不叠树点，那里留给皴笔</em></li>
+              <li><em>{rich(t("legend.roads.style"))}</em></li>
+              <li><em>{rich(t("legend.forest"))}</em></li>
             </ul>
           </details>
 
@@ -3313,8 +3313,7 @@ export function PlayClient() {
                 </details>
               )}
 
-              <p className="over-note">档位按本局曾达到过的最高档记，判的是相对开局的增量——
-                守成不得分。天下排名按终局郡数，仅供参照，不进计分。</p>
+              <p className="over-note">{t("play.grade.note")}</p>
               <div className="over-acts">
                 {!game.finished && !spectator && <button onClick={() => {
                   setSession({ ...session, human: null }); setPicked([]);

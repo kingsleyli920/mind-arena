@@ -662,4 +662,35 @@ export const en: Dict = {
     + "landslide. The earliest crossing measured was **season 29**, so within sixteen seasons it "
     + "never fires: this board measures the stretch before the gate. A 64-season outcome is a "
     + "different thing and must not be read off this board, or the other way round.",
+
+  // ── match page: map legend (long-form, stage 2) ─────────────────
+  "legend.terrain.easy": "easy going",
+  "legend.terrain.hard": "hard going",
+  "legend.terrain.block": "impassable",
+  "legend.terrain.river": "great river",
+  "legend.terrain.note": "The ground tone is drawn from the movement-cost field: darker is "
+    + "harder. Passes and fords sit exactly in the gaps in the dark",
+  "legend.gate.note": "+0.55 to the defender · 2.6× march time",
+  "legend.ford.note": "+0.35 to the defender · 1.8× march time",
+  "legend.gear.note": "Easier assaults, but one season slower on the march",
+  "legend.form.note": "attack / speed / siege endurance, drawn at the city\u2019s upper left",
+  "legend.form.fog": "Formation is fog-limited: your own is visible, another faction\u2019s needs "
+    + "scouting or an alliance. The three cycle \u2014 Fish-Scale beats Crane-Wing, Crane-Wing "
+    + "beats Square, Square beats Fish-Scale \u2014 and the favoured side gains +1 breach",
+  "legend.build.note": "Buildings are drawn below the city (yours only). A **faint outline** "
+    + "means \u201cthe resource is here but the building is not\u201d \u2014 ironworks need iron, "
+    + "salterns salt, studs pasture, farmsteads arable land",
+  "legend.roads.all": "Draw all {n} roads",
+  "legend.roads.note": "By default only **the roads out of your own commanderies** are drawn "
+    + "\u2014 with the whole network up, every road competes for attention and none can be read. "
+    + "Point at a commandery and its roads light up anyway",
+  "legend.roads.style": "Roads are always solid lines, told apart by **colour and weight**: "
+    + "flat roads thinnest and palest, then hill, then mountain, water routes in blue-green, "
+    + "and **pass roads thickest and darkest**. They are real walked paths computed over the "
+    + "elevation, following valleys around ridges and passing through whatever gate sits on "
+    + "them. Point at a commandery and its roads light up with the march time",
+  "legend.forest": "Drifts of ink dots are **forest** (more in the south, less in the north), "
+    + "taken from a public-domain potential-natural-vegetation layer \u2014 the \u201calmost no "
+    + "human influence\u201d version, which is closer to the Han than modern land cover. Mountains "
+    + "and plateaus carry no tree dots; that ground is left to the brushwork",
 };
