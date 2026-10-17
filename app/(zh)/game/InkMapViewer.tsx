@@ -12,6 +12,12 @@ import type { TerritoryGrid } from "@/lib/game/territory.ts";
 import { useEffect, useRef, useState } from "react";
 import type { Container, Graphics, Sprite, Text } from "pixi.js";
 import { KIND_CN } from "@/lib/game/engine/actions.ts";
+import { makeT, type Locale, type T } from "@/lib/i18n";
+import scenarios from "@/public/game/scenarios.json";
+
+/** 剧本的年号。目录里没有就退回 id——总比印一个可能为假的年号好 */
+const eraOf = (id: string) =>
+  scenarios.scenarios.find((x) => x.id === id)?.era ?? id;
 
 type Level = { z: number; width: number; height: number; cols: number; rows: number };
 type Manifest = {
@@ -57,7 +63,15 @@ function rankBudget(scale: number, fit: number): number {
  * 仓叫「仓城」，而候选表、战报、以及模型读到的候选标签里是「谷道/港/仓」。
  * 同一个东西，产品里两个名字，两边都跑得好好的——对局页还有第三个（「粮仓」）。
  */
-const KIND_LABEL: Record<string, string> = { commandery: "郡国", ...KIND_CN };
+/*
+ * 据点名从引擎的 KIND_CN 来；只有「郡国」是它没有的（那张表只管据点），
+ * 走文案目录。于是这里同时有两个来源——**这不是偷懒，是两类东西**：
+ * 据点名是引擎与模型共用的词（阶段 3 才动），「郡国」是纯界面文案。
+ */
+// 收 t 而不是自己 makeT("zh")——组件里已经有一个随 locale 走的 t，
+// 在这儿另起一个等于把这一处钉死在中文上，而且看不出来
+const kindLabel = (kind: string, t: T) =>
+  kind === "commandery" ? t("map.kind.commandery") : KIND_CN[kind] ?? kind;
 
 /**
  * 这一页画的是地图，而势力归属那一层是**某个剧本的**。地图两个剧本共用，
@@ -71,15 +85,20 @@ const SCENARIO = (() => {
   return v && /^\d{3,4}$/.test(v) ? v : "194";
 })();
 
-export function InkMapViewer() {
+export function InkMapViewer({ locale = "zh" }: { locale?: Locale }) {
+  const t = makeT(locale);
   const hostRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState("正在载入沙盘…");
+  // 状态存 **key**，不存成句的文字——存句子的话语言一换这一行就停在上一种语言上
+  const [status, setStatus] = useState<{ key: string; params?: Record<string, string> } | null>(
+    { key: "map.loading" });
   const [hover, setHover] = useState<Label | null>(null);
   const [scaleLabel, setScaleLabel] = useState("");
   const [shown, setShown] = useState("");
   const [factions, setFactions] = useState<Array<Faction & { count: number }>>([]);
   // 旧的标注文件没有 era（是加第二个剧本那天才带上的），退回原值
-  const [era, setEra] = useState("兴平元年");
+  // 年号是**数据**不是文案：它随剧本走，不随语言走，所以从剧本目录取而不是写死。
+  // 加第三个剧本时目录会自己多一行，而写死的那个字符串不会
+  const [era, setEra] = useState(eraOf(SCENARIO));
   const [picked, setPicked] = useState<string | null>(null);
   // Pixi 循环里读的是 ref，避免每次选中都重建整个应用
   const pickedRef = useRef<string | null>(null);
@@ -222,7 +241,7 @@ export function InkMapViewer() {
         for (const l of data.labels) {
           if (l.kind === "commandery" && l.factionId) cnt.set(l.factionId, (cnt.get(l.factionId) ?? 0) + 1);
         }
-        setEra(data.era ?? "兴平元年");
+        setEra(data.era ?? eraOf(SCENARIO));
         setFactions(data.factions
           .map((f) => ({ ...f, count: cnt.get(f.id) ?? 0 }))
           .sort((a, b) => b.count - a.count));
@@ -418,7 +437,7 @@ export function InkMapViewer() {
 
       relayoutRef.current = () => { layoutLabels(); };
       apply();
-      setStatus("");
+      setStatus(null);
 
       cleanup = () => {
         ro.disconnect();
@@ -429,7 +448,7 @@ export function InkMapViewer() {
         canvas.removeEventListener("wheel", onWheel);
         app.destroy(true, { children: true });
       };
-    })().catch((err: Error) => setStatus(`载入失败：${err.message}`));
+    })().catch((err: Error) => setStatus({ key: "map.load.fail", params: { err: err.message } }));
 
     return () => { disposed = true; cleanup(); };
   }, []);
@@ -437,36 +456,39 @@ export function InkMapViewer() {
   return (
     <div className="ink-map-shell">
       <div ref={hostRef} className="ink-map-host" />
-      {status ? <div className="ink-map-status">{status}</div> : null}
+      {status ? <div className="ink-map-status">{t(status.key, status.params)}</div> : null}
       <div className="ink-map-scale">{scaleLabel}<span className="shown">{shown}</span></div>
       {hover ? (
         <div className="ink-map-card">
-          <h3>{hover.fullName}<span className="kind">{KIND_LABEL[hover.kind] ?? hover.kind}</span></h3>
+          <h3>{hover.fullName}<span className="kind">{kindLabel(hover.kind, t)}</span></h3>
           <p className="card-sub">
-            {[hover.zhou, hover.seat ? `治${hover.seat}` : null, hover.modernReference ? `今${hover.modernReference}` : null]
+            {[hover.zhou,
+              hover.seat ? t("map.seat", { name: hover.seat }) : null,
+              hover.modernReference ? t("map.modern", { name: hover.modernReference }) : null]
               .filter(Boolean).join(" · ")}
           </p>
           <dl>
             {hover.factionName ? (
               <div><dt>{era}</dt><dd>{hover.factionName}
                 <span className="ctrl">
-                  {hover.control === "firm" ? "实控" : hover.control === "contested" ? "争夺中" : "名义"}
+                  {t(hover.control === "firm" ? "map.control.full"
+                    : hover.control === "contested" ? "map.control.contested" : "map.control.nominal")}
                 </span></dd></div>
             ) : null}
-            {hover.counties != null ? <div><dt>属县</dt><dd>{hover.counties}</dd></div> : null}
+            {hover.counties != null ? <div><dt>{t("map.counties")}</dt><dd>{hover.counties}</dd></div> : null}
             {hover.population != null ? (
-              <div><dt>永和五年口</dt><dd>{hover.population.toLocaleString()}</dd></div>
+              <div><dt>{t("map.households")}</dt><dd>{hover.population.toLocaleString()}</dd></div>
             ) : null}
-            {hover.nearestCommandery ? <div><dt>所属</dt><dd>{hover.nearestCommandery}</dd></div> : null}
+            {hover.nearestCommandery ? <div><dt>{t("map.belongs")}</dt><dd>{hover.nearestCommandery}</dd></div> : null}
           </dl>
           {hover.basis || hover.note ? <p className="card-basis">{hover.basis ?? hover.note}</p> : null}
         </div>
       ) : null}
-      <div className="ink-map-hint">拖动平移 · 滚轮缩放 · 放大显示更多关津</div>
+      <div className="ink-map-hint">{t("map.hint")}</div>
       <aside className="faction-panel">
         <header>
           {era} · {factions.length} 势力
-          {picked ? <button type="button" onClick={() => { setPicked(null); pickedRef.current = null; relayoutRef.current(); }}>取消</button> : null}
+          {picked ? <button type="button" onClick={() => { setPicked(null); pickedRef.current = null; relayoutRef.current(); }}>{t("map.cancel")}</button> : null}
         </header>
         <ul>
           {factions.map((f) => (
