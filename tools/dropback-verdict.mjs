@@ -20,7 +20,7 @@ if (!onPath || !offPath) {
  * 不是总季数——没被丢过令的季本来就没有「重不重犯」可言，算进分母会让
  * 两臂一起被稀释，而稀释的程度取决于各自丢了多少令，于是比较就不干净了。
  */
-function repeatRate(run) {
+function repeatRate(run, only = null) {
   // 按 (局, 席位) 分轨，轨内按季排序。跨局不连
   const tracks = new Map();
   for (const r of run.records ?? []) {
@@ -35,7 +35,10 @@ function repeatRate(run) {
     rs.sort((a, b) => a.turn - b.turn);
     let tr = 0, tc = 0;
     for (let i = 0; i + 1 < rs.length; i += 1) {
-      const a = new Set(rs[i].dropped), b = new Set(rs[i + 1].dropped);
+      // only 给定时只数那一类错误（原因串以它开头）。第二轮要单看 unknown-key——
+      // 第一轮的教训是总重复率被「令数不够」淹掉了，88% 对 3%
+      const keep = (xs) => (only ? xs.filter((x) => String(x).startsWith(only)) : xs);
+      const a = new Set(keep(rs[i].dropped)), b = new Set(keep(rs[i + 1].dropped));
       if (!a.size) continue;
       tc += a.size;
       for (const x of a) if (b.has(x)) tr += 1;
@@ -53,12 +56,28 @@ const t95 = (df) => T95[df] ?? (df <= 0 ? 12.706 : 2.042);
 
 const on = JSON.parse(readFileSync(onPath, "utf8"));
 const off = JSON.parse(readFileSync(offPath, "utf8"));
-const A = repeatRate(on), B = repeatRate(off);
+/** --only=unknown-key：只看这一类错误。不给则算全部 */
+const onlyArg = process.argv.find((a) => a.startsWith("--only="));
+const ONLY = onlyArg ? onlyArg.slice(7) : null;
+const A = repeatRate(on, ONLY), B = repeatRate(off, ONLY);
+if (ONLY) console.log(`（只看「${ONLY}」这一类）`);
 
 console.log(`回执组  dropback=on　重复 ${A.repeats}/${A.chances} = ${(A.rate * 100).toFixed(1)}%`);
 console.log(`对照组  dropback=off 重复 ${B.repeats}/${B.chances} = ${(B.rate * 100).toFixed(1)}%`);
 console.log(`合计实扣 $${((on.spentUsd ?? 0) + (off.spentUsd ?? 0)).toFixed(4)}`
   + `　局数 ${on.played}/${off.played}`);
+
+// 错误构成。第一轮的要紧发现正是从这里看出来的：88% 是「令数不够」，
+// 而真想测的 unknown-key 只有 2 次。不印出来，就会拿一个被稀释的总数下结论
+for (const [name, run] of [["on", on], ["off", off]]) {
+  const kinds = {};
+  for (const r of run.records ?? []) for (const x of (r.dropped ?? [])) {
+    const k = String(x).split(":")[0];
+    kinds[k] = (kinds[k] ?? 0) + 1;
+  }
+  console.log(`  ${name} 被丢的令按原因：`
+    + Object.entries(kinds).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join("　"));
+}
 
 // 配对：同 (局, 席位) 的轨道两边都有才配得上
 const bm = new Map(B.perTrack.map((x) => [x.k, x]));
