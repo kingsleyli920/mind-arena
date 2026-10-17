@@ -241,7 +241,7 @@ Evaluation tooling (these really do call models, and need the key above):
 | `npm run eval:suite` | Runs several agents over the same batch of seeds and produces a leaderboard |
 | `npm run eval:dissect` | Takes one run apart: by seat, by action mix, by dropped orders, by order-budget utilisation |
 | `npm run models` | Provider research before opening a leaderboard: price per 48 games, whether structured output is supported, measured throughput |
-| `npm run build:board` | Compresses results into the leaderboard the `/board` page wants; **refuses to mix agents with different rule fingerprints** |
+| `npm run build:board` | Compresses results into the leaderboard the `/board` page wants; **refuses to mix agents with different rule fingerprints**. One board per scenario; the page switches with `?scenario=` |
 | `npm run verdict` | Checks that the coarse ruler (grades) and the continuous ruler (province progress) agree |
 | `npm run obs:budget` | Per-seat observation token gate (exit code 1 if exceeded) |
 
@@ -294,4 +294,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@0e86b7bc0cfd -->
+<!-- translated-from: README.md@61bf70f936bc -->

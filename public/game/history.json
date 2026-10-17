@@ -120,7 +120,43 @@
           ]
         }
       ]
+    },
+    {
+      "fingerprint": "35t92rq29av0@建安五年·官渡前夕",
+      "boards": [
+        {
+          "id": "board200",
+          "date": "2026-10-17",
+          "git": "0807655",
+          "packVersion": "2.6.0",
+          "scenario": "建安五年·官渡前夕",
+          "mixed": null,
+          "rows": [
+            {
+              "id": "z-ai/glm-5.3-flash",
+              "kind": "model",
+              "games": 48,
+              "board": 288.7,
+              "cont": 124
+            },
+            {
+              "id": "bot:purpose",
+              "kind": "bot",
+              "games": 48,
+              "board": 214.5,
+              "cont": 49
+            },
+            {
+              "id": "bot:balanced",
+              "kind": "bot",
+              "games": 48,
+              "board": 205.8,
+              "cont": 43
+            }
+          ]
+        }
+      ]
     }
   ],
-  "current": "35t92rq29av0@兴平元年·群雄割据"
+  "current": "35t92rq29av0@建安五年·官渡前夕"
 }

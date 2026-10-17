@@ -171,7 +171,7 @@ npm run golden    # 金样回放：模型看到的那一面是否逐字节未变
 | `npm run eval:suite` | 几个对局方跑同一批 seed，出排行榜 |
 | `npm run eval:dissect` | 把一次运行拆开看：按席位、动作构成、被丢的令、令数用率 |
 | `npm run models` | 开榜前的供应方调研：每 48 局的价钱、是否支持结构化输出、实测吞吐 |
-| `npm run build:board` | 压成 `/board` 页要的榜单；**拒绝混合规则指纹不同的对局方** |
+| `npm run build:board` | 压成 `/board` 页要的榜单；**拒绝混合规则指纹不同的对局方**。两个剧本各一份，页面按 `?scenario=` 切换 |
 | `npm run verdict` | 检查粗尺（档位）与连续尺（州进度）是否一致 |
 | `npm run obs:budget` | 逐席位的观测 token 闸（超了退出码 1） |
 

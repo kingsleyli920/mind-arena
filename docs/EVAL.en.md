@@ -2794,4 +2794,42 @@ another design, not another run.
 Raw data: [keyenum-off-on.json](reports/dropback-2026-10-16/keyenum-off-on.json),
 [keyenum-off-off.json](reports/dropback-2026-10-16/keyenum-off-off.json).
 
-<!-- translated-from: EVAL.md@46edc512e730 -->
+
+## 42. Change the map and the gap survives: the first board for Jian'an 5
+
+Points 39–41 all ran on one map. Is the model's advantage a property of **these rules**, or of
+**the fractured map of Xingping 1**? Changing the map answers it.
+
+48 games, 16 seasons, same seeds and seat rotation, content pack 2.6.0, $2.384 charged.
+
+| Contender | Board score | vs baseline ±95% | Territory × | Eliminated | Illegal | Grade spread |
+|---|---|---|---|---|---|---|
+| `z-ai/glm-5.3-flash` | **288.7** | **+74.2 ±33 ✓** | 1.82 | 0/48 | 6.8% | A 21, B 12, Asc 10, C 5 |
+| `bot:purpose` | 214.5 | baseline | 1.20 | 0/48 | 0% | B 15, A 14, D 9, Asc 6, C 4 |
+| `bot:balanced` | 205.8 | −8.7 ±33 · | 1.42 | 0/48 | 0% | B 19, C 13, A 11, Asc 3, D 2 |
+
+**The gap survives**: +74.2 ±33, the same magnitude as Xingping 1's +84.2 ±28.5, with
+overlapping intervals. So it is not a property of one map.
+
+Two differences worth recording:
+
+- **The two bot profiles cannot be told apart on this map** (−8.7 ±33, marked ·), where
+  Xingping 1 gave −27.1 ±25.8 (significant). Jian'an 5 opens already consolidated — twenty
+  factions, Cao Cao holding four provinces from the start — which leaves no room for "pick the
+  commanderies that push a province over the line", and that is exactly where the purpose
+  profile beats the balanced one.
+- **Nobody was eliminated** (0/48 across all three arms), where Xingping 1 had the model at
+  0/48 and each bot at 1/48. Over sixteen seasons Jian'an 5 is far steadier, which does not
+  contradict the long-game result: the cliff in point 40 only starts to bite after season 29.
+
+### The two boards are switched between, not placed side by side
+
+`/board` now takes `?scenario=`, the same convention as `/play` and `/game`. Keeping them apart
+is deliberate: both ran under the same rule generation (fingerprint `35t92rq29av0`) but on
+different scenarios, and build-leaderboard's era key is "fingerprint@scenario" — the tool
+already considers them different generations. Putting them in one table would be asking the
+reader to compare two different opening difficulties.
+
+Raw data in [reports/board200-2026-10-17/](reports/board200-2026-10-17/).
+
+<!-- translated-from: EVAL.md@5c6cd51497c4 -->

@@ -1,4 +1,14 @@
-import board from "@/public/game/leaderboard.json";
+/*
+ * **两份榜，一页。** 剧本不同的两份榜不是同一代（build-leaderboard 的代键是
+ * 「指纹@剧本」），所以不能并排读，也不能混进同一张表——但它们该在同一个
+ * 地址下切换，照 /play 与 /game 的 `?scenario=` 一样。
+ *
+ * 静态 import 两份而不是按需取：这一页是服务端渲染的，两份加起来 27KB，
+ * 而按需取意味着要么加一条 API、要么把页面改成客户端组件——两样都比省下的
+ * 13KB 贵。
+ */
+import board194 from "@/public/game/leaderboard.json";
+import board200 from "@/public/game/leaderboard-200.json";
 import history from "@/public/game/history.json";
 import pack from "@/lib/game/content/pack-194.json";
 import { ruleFingerprint } from "@/lib/game/content/fingerprint";
@@ -57,8 +67,16 @@ function Blank({ r, t }: { r: object; t: T }) {
  * 排行榜。中英共用同一个组件——两份页面会各自演化，而没有任何东西会报错。
  * 中文入口在 (zh)/board/page.tsx，英文在 (en)/en/board/page.tsx。
  */
-export function BoardView({ locale }: { locale: Locale }) {
+/** 可选的榜。顺序即页面上的顺序——按剧本年份排，不按跑出来的先后 */
+const BOARDS = [
+  { id: "194", data: board194 },
+  { id: "200", data: board200 },
+] as const;
+
+export function BoardView({ locale, scenario = "194" }: { locale: Locale; scenario?: string }) {
   const t = makeT(locale);
+  // 认不出的剧本退回 194，而不是白屏——地址栏是人能手改的
+  const board = (BOARDS.find((b) => b.id === scenario) ?? BOARDS[0]).data;
   // 列举的分隔符。中文用顿号，英文用逗号——这不是文案，是标点习惯，
   // 放进目录会变成一条谁都看不懂的 key
   const listSep = locale === "zh" ? "、" : ", ";
@@ -83,10 +101,21 @@ export function BoardView({ locale }: { locale: Locale }) {
         <div className="board-top">
           <span className="era">{scenarioName}</span>
           <span className="board-links">
+            {/* 剧本切换。两份榜跑在同一代规则下（指纹相同）而剧本不同，
+                所以是两张榜不是一张——并排读是错的，切换着读才对 */}
+            {BOARDS.map((b) => (
+              <a key={b.id}
+                className={b.id === scenario ? "on" : undefined}
+                aria-current={b.id === scenario ? "page" : undefined}
+                href={withLocale(locale, b.id === "194" ? "/board" : `/board?scenario=${b.id}`)}>
+                {(b.data as { scenario?: string }).scenario ?? b.id}
+              </a>
+            ))}
             <a href={withLocale(locale, "/")}>{t("board.back")}</a>
             {/* 语言开关指向**同一页**的另一种语言，不是回首页 */}
             <a className="lang-switch"
-              href={withLocale(locale === "zh" ? "en" : "zh", "/board")}>
+              href={withLocale(locale === "zh" ? "en" : "zh",
+                scenario === "194" ? "/board" : `/board?scenario=${scenario}`)}>
               {t("lang.switch")}</a>
           </span>
         </div>

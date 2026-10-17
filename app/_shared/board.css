@@ -141,3 +141,6 @@ table.board td.who .blank {
   margin-top: 10px; max-width: 62em;
   font-size: 12.5px; line-height: 1.85; color: #9c9078;
 }
+
+/* 剧本切换。当前那一个加下划线——两份榜不是同一张榜，读者得一眼看出自己在看哪一张 */
+.board-links a.on { color: #e8dfc7; border-bottom: 1px solid #a08f68; }
