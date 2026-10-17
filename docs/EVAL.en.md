@@ -440,8 +440,20 @@ needs 7, King needs 11), zero unifications. The content pack's notion that "only
 games can reach Ascendant/Hegemon/King" is entirely unrealised at the rule-bot level.
 
 What this experiment can falsify is the bot's half of "it is purely because the game is
-short" — **the rule bot has nothing longer-range to unfold over 64 seasons either**. The
-model's half has not been tested yet.
+short" — **the rule bot has nothing longer-range to unfold over 64 seasons either**.
+
+> **The model's half was measured later (2026-10-16, see points 39 and 40): they do reach it.**
+> Cao Cao's seat in Jian'an 5, 64 seasons, six games: `glm-5.3-flash` took **King, 600** in all
+> three, and `deepseek-v4-flash` took King twice and Ascendant (400) once. Over the same 64
+> seasons, the same seat and the same three seeds, five bot profiles across fifteen games
+> **never reached any of the three** (13–25 commanderies at the end, grade A at best).
+>
+> So "only a long game can reach Ascendant / Hegemon / King" holds **for models, and still not
+> for bots**. Point 40 gives that a narrower reading, though: the road there runs through the
+> surrender gate (15 cities captured, 6 provinces held); the models cross it at 30–32
+> commanderies while the bot peaks at 26 and never comes close. So it is not that the model has
+> longer-range plans — it is that **the model is four to six commanderies ahead at mid-game and
+> the rules convert that into a landslide**.
 
 #### So a "final-standing score" column was added, and it turns the ruler the other way round
 
@@ -2625,4 +2637,4 @@ Two notes attached:
    models' plateau (30). That is not a bug, it is a property of this map — recorded here so
    nobody later reads a 64-season outcome as "strategic ability".
 
-<!-- translated-from: EVAL.md@e166d01e76ef -->
+<!-- translated-from: EVAL.md@d2c5dd535307 -->
