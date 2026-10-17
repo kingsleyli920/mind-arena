@@ -34,6 +34,17 @@ const REASONING = arg("reasoning", "");
 const SEASONS = Number(arg("seasons", "0")) || 0;
 const KEYENUM = arg("keyenum", "");
 const OUT_DIR = arg("out", "");
+/**
+ * **`--jobs` 是「同时跑几个对局方」，不是「同时跑几局」。**
+ *
+ * 局内并发在 eval-run 的 `--gamejobs`（模型默认 4，机器人 1）。两者混淆会把
+ * 工期算错好几倍：我按 `--jobs=3` 当局内并发估过一次「48 局 40 分钟」，
+ * 实测 2.2 小时——机器人那两臂几分钟就跑完了，之后模型那一臂是一个人在跑，
+ * 它自己的 4 路并发才是决定工期的那个数。
+ *
+ * 要缩工期，加的是 `--gamejobs`，而且要留意 429：客户端有退避，但并发越高
+ * 退避越多，收益递减。
+ */
 const CONCURRENCY = Number(arg("jobs", "3"));
 // 基线必须是**指定的**那一个，不能是「碰巧排最高的那个 bot」——
 // 后者会让每个对局方都显示成「不如基线」，而基线本身在换人。
