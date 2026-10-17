@@ -2637,4 +2637,97 @@ Two notes attached:
    models' plateau (30). That is not a bug, it is a property of this map — recorded here so
    nobody later reads a 64-season outcome as "strategic ability".
 
-<!-- translated-from: EVAL.md@d2c5dd535307 -->
+
+## 41. "Can a model be corrected?" — measured, and nothing came out
+
+The first item under "Current limits" in the README has been open for a while: the decision
+review feeds back what orders were given, which were dropped and why, along with what
+actually happened — and the two earlier experiments (points 2 and 3) only showed that the
+feedback **arrives**, not that it produces **reliable correction**.
+
+This round measured it with the ablation switches that already existed. **The criterion was
+written before the runs started**, see
+[reports/dropback-2026-10-16/预登记.md](reports/dropback-2026-10-16/预登记.md) (Chinese) —
+point 39 nearly had me pick a control after seeing a result, so this time the registration
+was committed first.
+
+### Setup
+
+`eval-run` already carries two switches, and the comment says they are deliberately
+separate: `--memory` (the standing plan) and `--dropback` (last season's dropped orders fed
+back). Only the latter moves here; `--memory` stays on in both arms, or the two cannot be
+told apart.
+
+`z-ai/glm-5.3-flash`, reasoning low, scenario 194, 16 seasons, 6 games per arm, **the same
+seeds and the same six-seat rotation**. $0.5083 charged in total.
+
+### What is measured is the repeat rate, not the score
+
+Scores are moved by too many things, and the question is whether it **corrects itself**:
+
+> repeat rate = Σ|D_n ∩ D_{n+1}| ÷ Σ|D_n|
+>
+> where D_n is the set of reason-strings for orders the admission layer dropped in season n.
+> The denominator is **how many chances there were to repeat** — a season with no drops has
+> no repeat to speak of, and counting it would dilute both arms by an amount that depends on
+> how much each dropped, which makes the comparison dirty.
+
+### Result: no benefit, and every point estimate is nominally slightly worse
+
+| | repeat rate | mean score | duplicate | unknown-key |
+|---|---|---|---|---|
+| `--dropback=on` (feedback) | **4/30 = 13.3%** | 183.3 | 5 | 2 |
+| `--dropback=off` (none) | **2/27 = 7.4%** | 250.0 | 1 | 0 |
+
+Paired difference (same seed, same seat, on − off) over 6 tracks: **+1.6pp ±11.4pp**.
+
+Per registration clause 3: **record the negative result**. The README's "still unresolved"
+becomes "measured, and nothing came out".
+
+Two things not to over-read:
+
+- **This is not "feedback hurts".** +1.6 ±11.4 means the true effect lies between −9.8pp and
+  +13.0pp, zero included. The 66.7-point score gap is **not evidence** — point 1 of this
+  document measured that 6 games cannot separate scores at all (paired difference ±0.0) —
+  but it should not be hidden either.
+- **Nor is it "models cannot be corrected".** This run can only see effects above about
+  11pp, and none appeared. A smaller real benefit is invisible at this sample size.
+
+### A sharper limit: 88% of dropped orders are "not enough orders"
+
+Across 89 seat-seasons only 18 dropped anything at all, 59 orders in total:
+
+| Reason | Count |
+|---|---:|
+| `over-budget: 0 left, needs 1/2` | 31 |
+| `rejected: this commandery is already at its order cap`, etc. | 21 |
+| `duplicate` | 5 |
+| **`unknown-key` (inventing a candidate key)** | **2** |
+
+So what this round actually asked was "**tell it that it ran out of orders — does it overrun
+again next season?**" That is **budget discipline**, not factual correction. And the budget
+is already printed plainly in the observation (`budget.ap`), so a priori one should not have
+expected much from saying it a second time.
+
+The correction one actually wants to measure — "it invented a candidate key that does not
+exist; once told, does it keep inventing?" — occurred **twice** in 89 seat-seasons. Measuring
+that needs a model that makes the mistake often (point 27 records qwen3.6-35b-a3b returning
+empty in 25% of seasons and ling-3.0-flash-fin in 84%), or a setting that invites it (such as
+turning off the key enum in the schema rung).
+
+### How much data would it take
+
+The between-track standard deviation is about 10.9pp. Under the t distribution:
+
+| Interval wanted | Games per arm | Cost per arm |
+|---|---:|---:|
+| ±5pp | 19 | $1.6 |
+| ±3pp | 53 | $4.5 |
+
+So **$3.2 would move this from "cannot see 11pp" to "cannot see 5pp"**. It was not done now
+because, given the limit above, the better next step is a contender that errs more often —
+piling sample size onto a model that barely errs still only measures budget discipline.
+
+Raw data in [reports/dropback-2026-10-16/](reports/dropback-2026-10-16/).
+
+<!-- translated-from: EVAL.md@a68719dc4251 -->

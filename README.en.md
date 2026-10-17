@@ -154,14 +154,20 @@ be used to evaluate models at all.
 
 Stated up front, so you don't assume it is already solved:
 
-- **Whether a model can be corrected is still an open question.** The decision review
-  feeds "what you ordered, which order was dropped, and why", along with the actual
-  outcome, back into the next season. One [six-decision receipt
-  trial](docs/DECISION-CORRECTION-2026-09-28.en.md) cost $0.01073: Flash-Lite
-  recognised that the administrative seat had moved, Nano still confused targets with
-  orders, and both sides dropped three orders each. [A follow-up
-  round](docs/DECISION-GUIDANCE-2026-09-29.en.md) stopped Nano from repeating a false
-  target; the other planning and ordering errors were unchanged.
+- **Whether a model can be corrected: measured, and nothing came out.** The decision
+  review feeds "what you ordered, which order was dropped, and why", along with the
+  actual outcome, back into the next season. An ablation was run (same seeds, same
+  seats, 6 games per arm, differing only in whether the feedback is sent, $0.51):
+  **repeat rate 13.3% against 7.4%, paired difference +1.6pp ±11.4pp** — the arm with
+  feedback was nominally *higher*, and the interval covers zero.
+  That is neither "feedback hurts" (the interval includes zero) nor "models cannot be
+  corrected" (this run can only see effects above about 11pp). The sharper limit is
+  that **88% of dropped orders are "not enough orders", while inventing a candidate key
+  happened twice in 89 seat-seasons** — so what this measured is budget discipline, not
+  factual correction. The criterion was written before the runs; see point 41 of
+  [docs/EVAL.en.md](docs/EVAL.en.md). The two earlier qualitative trials still stand:
+  [receipts](docs/DECISION-CORRECTION-2026-09-28.en.md),
+  [follow-up](docs/DECISION-GUIDANCE-2026-09-29.en.md).
 - **The factions are unbalanced, and the cause has been traced.** 24 games in
   unification mode: 20 unified naturally (19–50 seasons, median 30), **all of them Yuan
   Shao (袁绍)**; the remaining 4 ran the full 64 seasons undecided, and 3 of those still
@@ -285,4 +291,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@fb27fe4b9a6f -->
+<!-- translated-from: README.md@195a1ff38b14 -->
