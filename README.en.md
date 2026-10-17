@@ -161,11 +161,14 @@ Stated up front, so you don't assume it is already solved:
   **repeat rate 13.3% against 7.4%, paired difference +1.6pp ±11.4pp** — the arm with
   feedback was nominally *higher*, and the interval covers zero.
   That is neither "feedback hurts" (the interval includes zero) nor "models cannot be
-  corrected" (this run can only see effects above about 11pp). The sharper limit is
-  that **88% of dropped orders are "not enough orders", while inventing a candidate key
-  happened twice in 89 seat-seasons** — so what this measured is budget discipline, not
-  factual correction. The criterion was written before the runs; see point 41 of
-  [docs/EVAL.en.md](docs/EVAL.en.md). The two earlier qualitative trials still stand:
+  corrected" (this run can only see effects above about 11pp). That round also measured
+  the wrong thing: **88% of dropped orders were "not enough orders"** and inventing a
+  candidate key happened only twice. So a second round turned off the schema's key enum,
+  pushing that error from 2 to 37 — and **still nothing measurable** (−0.3pp ±40.4pp).
+  The most informative part is the two rounds together: on the same aggregate metric,
+  round one gave +1.6pp and round two −13.1pp — **opposite signs, both intervals covering
+  zero**, which says the measurement is noise at n=6. Both rounds were pre-registered;
+  see point 41 of [docs/EVAL.en.md](docs/EVAL.en.md). The two earlier qualitative trials still stand:
   [receipts](docs/DECISION-CORRECTION-2026-09-28.en.md),
   [follow-up](docs/DECISION-GUIDANCE-2026-09-29.en.md).
 - **The factions are unbalanced, and the cause has been traced.** 24 games in
@@ -291,4 +294,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@195a1ff38b14 -->
+<!-- translated-from: README.md@0e86b7bc0cfd -->

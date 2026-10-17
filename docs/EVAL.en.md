@@ -2730,4 +2730,68 @@ piling sample size onto a model that barely errs still only measures budget disc
 
 Raw data in [reports/dropback-2026-10-16/](reports/dropback-2026-10-16/).
 
-<!-- translated-from: EVAL.md@a68719dc4251 -->
+
+### Round two: with the aim fixed it still shows nothing — and this time the finding is *why*
+
+Round one measured the wrong thing, so both arms were re-run with `--keyenum=off` (candidate
+keys are not written into the schema's enum, so the model has to produce them itself). The
+[amendment](reports/dropback-2026-10-16/预登记.md) (Chinese) was likewise written before the
+runs, and states that **round one's conclusion is not rewritten by round two** — the two ask
+different questions.
+
+That rung did produce the errors: `unknown-key` went from 2 to 37, illegal rate 3.2% → 14.7%.
+
+**The registered primary criterion (`unknown-key` only):**
+
+| | repeat rate |
+|---|---|
+| with feedback | 4/22 = 18.2% |
+| without | 4/18 = 22.2% |
+| paired difference | **−0.3pp ±40.4pp** (5 tracks) |
+
+Right direction, interval ±40.4pp. Per amendment clause 2: **nothing measurable**.
+
+### A trap worth pointing at myself
+
+The same data over **all error types** (round one's metric):
+
+| | repeat rate |
+|---|---|
+| with feedback | 7/64 = 10.9% |
+| without | 14/62 = 22.6% |
+| paired difference | **−13.1pp ±16.2pp** |
+
+That number is "nearly significant" and points the way one would hope. **But it is not the
+registered primary** — the amendment named `unknown-key` for round two.
+
+Worse: on that same all-errors metric, round one gave **+1.6pp** and round two **−13.1pp** —
+opposite signs, both with intervals covering zero. That is the most informative fact here:
+**at n=6 this measurement is noise.** Had only round two been run and only theaggregate metric
+reported, the write-up would have claimed "feedback halves repeats", and round one's data
+would contradict it.
+
+This is exactly what pre-registration is for. It does not prevent an inconclusive result; it
+prevents **picking the prettier of two metrics**.
+
+### Conclusion and what it would cost
+
+$1.17 across both rounds. The README limit now reads "**measured, and nothing came out**",
+with these notes:
+
+- both rounds are direction-unstable with intervals covering zero;
+- round one measured budget discipline (88% of dropped orders were "not enough orders");
+  round two is the factual-correction question;
+- how much data this measurement needs: the between-track standard deviation on the
+  `unknown-key` metric is about 32.5pp, so **43 games per arm** (about $4.7) would give
+  ±10pp, and ±5pp would need 170.
+
+**No more sample was added**, and the reason is method rather than money: piling games onto a
+quantity whose standard deviation is 32.5pp buys only "no effect larger than 10pp". To make
+the question answerable the **measurement** has to change — for instance, not "does it repeat
+an error of this class" but "does it write that one specific key again next season". That is
+another design, not another run.
+
+Raw data: [keyenum-off-on.json](reports/dropback-2026-10-16/keyenum-off-on.json),
+[keyenum-off-off.json](reports/dropback-2026-10-16/keyenum-off-off.json).
+
+<!-- translated-from: EVAL.md@46edc512e730 -->
