@@ -84,7 +84,43 @@
           ]
         }
       ]
+    },
+    {
+      "fingerprint": "35t92rq29av0@兴平元年·群雄割据",
+      "boards": [
+        {
+          "id": "board5",
+          "date": "2026-10-17",
+          "git": "e549ce2",
+          "packVersion": "2.6.0",
+          "scenario": "兴平元年·群雄割据",
+          "mixed": null,
+          "rows": [
+            {
+              "id": "z-ai/glm-5.3-flash",
+              "kind": "model",
+              "games": 48,
+              "board": 278.6,
+              "cont": 155
+            },
+            {
+              "id": "bot:purpose",
+              "kind": "bot",
+              "games": 48,
+              "board": 194.5,
+              "cont": 94
+            },
+            {
+              "id": "bot:balanced",
+              "kind": "bot",
+              "games": 48,
+              "board": 167.4,
+              "cont": 81
+            }
+          ]
+        }
+      ]
     }
   ],
-  "current": "mixed@兴平元年·群雄割据"
+  "current": "35t92rq29av0@兴平元年·群雄割据"
 }
