@@ -152,6 +152,7 @@ npm run lint
 npm run typecheck
 npm run selfplay  # 机器人自对局 + 四道验收闸（免费）
 npm run playtest  # 三场 64 季长局，走浏览器同一条推进路径（免费）
+npm run golden    # 金样回放：模型看到的那一面是否逐字节未变（免费，2 秒）
 ```
 
 评测工具（会真的调模型，需要上面那个 key）：

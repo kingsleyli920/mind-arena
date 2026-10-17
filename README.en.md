@@ -221,6 +221,7 @@ npm run lint
 npm run typecheck
 npm run selfplay  # bot self-play + four acceptance gates (free)
 npm run playtest  # three 64-season long games, down the same advance path the browser uses (free)
+npm run golden    # golden replay: is what the model sees byte-identical (free, 2s)
 ```
 
 Evaluation tooling (these really do call models, and need the key above):
@@ -284,4 +285,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@debd5331c6e0 -->
+<!-- translated-from: README.md@fb27fe4b9a6f -->
