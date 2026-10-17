@@ -40,6 +40,7 @@
     "map:cost:report": "node --max-old-space-size=8192 tools/costfield-report.mjs",
     "map:wall": "node tools/render-passability.mjs",
     "playtest": "node --experimental-strip-types tools/playtest-session.mjs",
+    "golden": "node --experimental-strip-types tools/golden.mjs",
     "typecheck": "tsc --noEmit",
     "types:worker": "wrangler types worker/runtime.d.ts --config dist/server/wrangler.json --include-env=false"
   },
