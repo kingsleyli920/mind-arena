@@ -511,4 +511,30 @@ export const en: Dict = {
   "map.cancel": "Cancel",
   "map.kind.commandery": "Commandery",
   "play.title": "Han Sandbox · Match",
+
+  // ── match page: seat selection and setup ────────────────────────
+  "play.preparing": "Preparing the sandbox\u2026",
+  "play.h": "Han Sandbox",
+  "play.era.fallback": "Xingping 1 · 194 CE",
+  "play.lede.pick": "Take one of the seats. ",
+  "play.lede.win": "First to unify the realm wins",
+  "play.lede.rule": ". Hold {zhou} provinces, or be the last faction standing. There is no "
+    + "season limit; you can pause, save and come back at any time.",
+  "play.scenario.aria": "Scenario",
+  "play.scenario.meta": "{year} CE　{factions} factions　{blurb}",
+  "play.primer.sum": "How to play",
+  "play.primer.hint": "start here if this is new",
+  "play.length.sum": "How long is a game",
+  "play.length.hint": "until someone unifies",
+  "play.length.1": "The game continues while the realm is divided. You can pause, spectate, "
+    + "save your progress and pick it up later.",
+  "play.length.2": "It pauses when an AI model reaches its call quota; raise the quota or hand "
+    + "the seat to a bot and it continues. Seasons never decide the winner.",
+  "play.resume.done": "See the last result",
+  "play.resume.go": "Resume your game",
+  "play.resume.watch": "spectating · ",
+  "play.resume.state": "　season {turn}　{owned} commanderies (started with {start})　grade {grade}",
+  "play.resume.continue": "Continue",
+  "play.resume.discard": "Discard and restart",
+  "play.seat.heading": "The factions · pick the one you will command",
 };

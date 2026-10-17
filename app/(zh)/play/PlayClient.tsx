@@ -1715,7 +1715,7 @@ export function PlayClient() {
   ), [borders, junBorders, focusArea, lod]);
 
   if (error) return <main className="play"><p className="play-error">载入失败：{error}</p></main>;
-  if (!engine || !terr) return <main className="play"><p className="play-note">正在备沙盘…</p></main>;
+  if (!engine || !terr) return <main className="play"><p className="play-note">{t("play.preparing")}</p></main>;
 
   // ── 选席 ────────────────────────────────────────────────────────
   if (!game || !seat) {
@@ -1729,36 +1729,36 @@ export function PlayClient() {
     return (
       <main className="play">
         <header className="play-head">
-          <h1>汉末沙盘</h1>
-          <p>{here ? `${here.era}·${here.year}` : "兴平元年·一九四"}{"\u3000"}择一席入局。
-            <b>谁先一统天下谁赢</b>。控制 {engine.P.unifyZhou} 州，或成为最后一个有效势力，即可统一。
-            对局没有季数上限，可随时暂停、存档后继续。</p>
+          <h1>{t("play.h")}</h1>
+          <p>{here ? `${here.era}·${here.year}` : t("play.era.fallback")}{"\u3000"}
+            {t("play.lede.pick")}<b>{t("play.lede.win")}</b>
+            {t("play.lede.rule", { zhou: engine.P.unifyZhou })}</p>
         </header>
 
         {/* 剧本切换。换剧本是换一局，所以直接改 URL 重新载入——
             留在页内切换就得把引擎、存档、选席全重建，而那正是出错的地方 */}
         {catalog.length > 1 && (
-          <nav className="scenario-pick" aria-label="剧本">
+          <nav className="scenario-pick" aria-label={t("play.scenario.aria")}>
             {catalog.map((x) => (
               <a key={x.id} href={`?scenario=${x.id}`}
                  className={x.id === SCENARIO ? "on" : undefined}
                  aria-current={x.id === SCENARIO ? "page" : undefined}>
                 <b>{x.label}</b>
-                <i>{x.year} 年{"\u3000"}{x.factions} 家{"\u3000"}{x.blurb}</i>
+                <i>{t("play.scenario.meta", { year: x.year, factions: x.factions, blurb: x.blurb })}</i>
               </a>
             ))}
           </nav>
         )}
         <details className="primer-fold">
-          <summary>怎么玩<i>没玩过先看这个</i></summary>
+          <summary>{t("play.primer.sum")}<i>{t("play.primer.hint")}</i></summary>
           <Primer P={engine.P} />
         </details>
 
         <details className="primer-fold model-fold">
-          <summary>这一局打多久<i>直到统一</i></summary>
+          <summary>{t("play.length.sum")}<i>{t("play.length.hint")}</i></summary>
           <div className="model-setup">
-            <p>天下尚未统一，对局就继续。你可以暂停观战、保存进度，下次接着玩。</p>
-            <p>AI 模型达到调用额度时会暂停；增加额度或切换机器人后可以继续，不会按季数判定胜负。</p>
+            <p>{t("play.length.1")}</p>
+            <p>{t("play.length.2")}</p>
           </div>
         </details>
 
@@ -1771,11 +1771,14 @@ export function PlayClient() {
           return (
             <div className="resume">
               <div>
-                <b>{resume.game.finished ? "查看上局结果" : "继续上次对局"}</b>
-                <span>{resume.session.human === null ? "观战 · " : ""}{engine.nameOf.get(resume.seat) ?? resume.seat}
-                  {"\u3000"}第 {resume.game.finished ? resume.game.turn : resume.game.turn + 1} 季
-                  {"\u3000"}{owned} 郡（开局 {f?.startCommanderies ?? "?"}）
-                  {"\u3000"}{GRADE_CN[f?.bestGrade ?? "ding"]} 档</span>
+                <b>{t(resume.game.finished ? "play.resume.done" : "play.resume.go")}</b>
+                <span>{resume.session.human === null ? t("play.resume.watch") : ""}
+                  {engine.nameOf.get(resume.seat) ?? resume.seat}
+                  {t("play.resume.state", {
+                    turn: resume.game.finished ? resume.game.turn : resume.game.turn + 1,
+                    owned, start: f?.startCommanderies ?? "?",
+                    grade: t(`grade.${f?.bestGrade ?? "ding"}`),
+                  })}</span>
               </div>
               <button onClick={() => {
                 setSeat(resume.seat); setGame(resume.game); setPicked(resume.picked);
@@ -1788,9 +1791,9 @@ export function PlayClient() {
                 setSmooth(true);
                 setView(p ? centerOn(p.longitude, p.latitude, Math.max(4, minK), MAP) : fitAll(minK));
                 setResume(null);
-              }}>继续</button>
+              }}>{t("play.resume.continue")}</button>
               <button className="ghost" onClick={() => { clearSave(); setResume(null); }}>
-                弃掉，重开
+                {t("play.resume.discard")}
               </button>
             </div>
           );
@@ -1800,7 +1803,7 @@ export function PlayClient() {
           models={models} onLoadModels={loadModels} error={modelErr}
           onStart={start} />
         <WashDefs />
-        <h2 className="seat-heading">势力背景 · 点击选择你要执掌的一方</h2>
+        <h2 className="seat-heading">{t("play.seat.heading")}</h2>
         <ul className="seat-grid">
           {seats.map(({ f, n, st }) => (
             <li key={f.id}>
