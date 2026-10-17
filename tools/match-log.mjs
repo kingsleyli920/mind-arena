@@ -22,6 +22,10 @@ import { decide, PROFILES } from "../lib/game/engine/bot.ts";
 import { stationedAt, isFiller } from "../lib/game/engine/officers.ts";
 import { loadWorld, POOLS, SEAT_SETS, seatsFor } from "./lib/world.mjs";
 import { emptySeasons } from "./lib/empty-seasons.mjs";
+// 报告是中文的（实录给人读，不给模型读），所以钉死 zh。
+// 叫 actionCN 而不是 cn——下面已经有一个 cn，它管的是「把势力 id 换成名字」
+import { makeT } from "../lib/i18n/index.ts";
+const actionCN = makeT("zh");
 import { createGame, refreshAp } from "../lib/game/engine/setup.ts";
 import { resolve, supplyReach } from "../lib/game/engine/resolve.ts";
 import { standingOf, epochLimitFor, GRADE_CN }
@@ -258,8 +262,14 @@ async function main() {
     say("");
     say(`### 摆在面前的选择`);
     say("");
+    // 动作名从文案目录取（`action.<key>`），不在这里抄第四份。
+    //
+    // 原先这里有一份内联表，漏了 invest / seize / transfer / relocate / build——
+    // 于是实录里写着「…刺探 6　seize 7　transfer 6」，中文里夹着内部 id。
+    // 这不只是难看：**`seize 7` 正是机器人一条没挑的那七条候选**，
+    // 而它在报告里长得不像一类动作，谁也不会去数它
     say(`候选 ${cands.length} 条：`
-      + [...byType].sort().map(([k, v]) => `${({ campaign: "征伐", relief: "赴援", withdraw: "撤围", muster: "集结", govern: "内政", array: "改阵", submit: "劝降", suade: "招降", appoint: "调任", scout: "刺探", ally: "外交", passage: "借道", retire: "归隐" })[k] ?? k} ${v}`).join("\u3000")
+      + [...byType].sort().map(([k, v]) => `${actionCN(`action.${k}`)} ${v}`).join("\u3000")
       + `\u3000｜其中预告可破城的 **${winnable}** 条`);
     if (FULL) {
       // 候选全文。只报类型计数等于把「它面前摆的是什么」抹掉了——

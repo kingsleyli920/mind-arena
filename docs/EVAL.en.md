@@ -2449,4 +2449,93 @@ points cannot establish a cause, but the direction is consistent.
 Raw data and per-season records are in
 [reports/scenario-200-2026-10-16/](reports/scenario-200-2026-10-16/) (Chinese).
 
-<!-- translated-from: EVAL.md@c136885fd3dd -->
+
+## 40. To overturn the point above I ran fifteen bot games — it held, but the baseline has a hole
+
+Point 39 says "a model playing Cao Cao wins where the bot cannot", and the evidence for it
+was **one bot profile** (`bot:purpose`). `aggressive` and `balanced` had only ever run on
+the discarded timestamp seed, never on `cc-1..3`.
+
+That is a hole that costs nothing to check, and checking it could invalidate a sentence
+already published — so it went first.
+
+### Five profiles × three seeds: 0/15
+
+| Profile | cc-1 | cc-2 | cc-3 |
+|---|---|---|---|
+| `purpose` | 21 commanderies / 3 provinces | 19 / 3 | 23 / 3 |
+| `aggressive` | 18 / 3 | 13 / 1 | 13 / 2 |
+| `balanced` | 19 / 3 | 23 / 4 | 25 / 3 |
+| `opportunist` | 20 / 3 | 19 / 3 | 23 / 3 |
+| `turtle` | 21 / 3 | 21 / 3 | 21 / 3 |
+
+**Not one unification.** Point 39 is not overturned; it goes from "one profile 0/6" to
+"five profiles 0/15".
+
+One counter-intuitive detail: `aggressive` has the highest campaign weight (12 against
+`purpose`'s 7) and ends with the **fewest** commanderies (13–18). Attacking hard is not
+the same as holding ground.
+
+### Once opportunity is controlled for, the models attack *less*
+
+Per-season rates are dragged around by game length and territory — a bot campaigns rarely
+partly **because it is losing** (fewer commanderies, fewer candidates), which is the
+effect, not the cause. The match logs already print the candidate mix each season, so the
+honest measure is **"offered N, took how many"**:
+
+| Contender (cc-3) | campaign taken/offered | seize taken/offered | muster taken/offered |
+|---|---|---|---|
+| `bot:purpose` | 15/484　3.1% | **0/400　0%** | 0/384　0% |
+| `bot:aggressive` | 24/883　2.7% | **0/175　0%** | 39/378　10.3% |
+| `bot:balanced` | 14/502　2.8% | **0/457　0%** | 0/384　0% |
+| `glm-5.3-flash` | 38/422　**9.0%** | 19/121　15.7% | 44/269　16.4% |
+| `deepseek-v4-flash` | 18/720　**2.5%** | 21/77　**27.3%** | 9/384　2.3% |
+
+**deepseek's campaign take-rate is the lowest of anyone here** — below every bot — and it
+won two of the three games. So "the model wins because it is willing to attack" is, once
+opportunity is controlled for, **backwards**.
+
+### The hole in the baseline: no bot ever seizes a site
+
+Every profile above is at zero for seize. Following that down leads somewhere deeper than
+"a weight was set badly":
+
+1. The weight table **has no `seize` entry at all** (nor relief / relocate / transfer).
+   `w[type] ?? 0` does not fail; it just parks that whole class at the bottom forever.
+2. Giving it a 5 (the band of the same-cost govern 6 / build 5) — **still zero**. Other
+   actions pick up large bonuses during scoring (a campaign can reach `GAIN_W`'s +48)
+   while seize has only a bare base score. It takes 999 before it is ever chosen.
+   **It was never wired into the scoring at all; adding a weight only makes the table
+   look complete.**
+3. "No weight" does not mean "never used": `relief` has no weight either and was chosen
+   **136 times** across the fifteen games, carried entirely by bonuses. I had this wrong
+   until the gate said so.
+
+### But seizing is not the answer either
+
+Set seize to 999 so the bot takes **39–48 sites a game** (the models take 19–21), and the
+three seeds still produce **no unification** — 23–24 commanderies, exactly as before.
+
+So this round rules out two convenient explanations:
+
+- not "the model attacks more" — controlled for opportunity it attacks **less**;
+- not "the bot cannot seize" — let it seize more than the models and it still loses.
+
+The gap is somewhere else. These fifteen games cannot say where, but two paths that looked
+like answers are now closed.
+
+The weights were left unchanged (changing them swaps out the evaluation baseline, and the
+measurement says it changes no outcome). The findings are recorded above the weight table
+in `lib/game/engine/bot.ts`, and the two lists are pinned by `tests/bot-unused.test.mjs` —
+"the bot cannot use a whole class of action" is invisible in the code and there is no line
+in any report that would print it.
+
+### Fixed along the way: English ids leaking into the match log
+
+`match-log.mjs` kept a fourth copy of the action-name table, missing invest / seize /
+transfer / relocate / build, so the logs read "…scout 6　seize 7　transfer 6". That is
+not merely ugly — **`seize 7` is exactly the seven candidates the bot never took**, and in
+the report it did not even look like a class of action, so nobody would have counted it.
+It now reads from the text catalogue.
+
+<!-- translated-from: EVAL.md@4863c6536c9e -->

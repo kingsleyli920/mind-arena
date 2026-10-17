@@ -43,6 +43,25 @@ export const PROFILES: Record<Profile, string> = {
 //   权重 9/6/3/5             非苟活极差 28.7  曹操出局 30%  ρ 0.37
 // 给高了各画像都无脑改阵，策略差异被抹平——极差掉三分之一。
 // 「一条几乎总是对的动作」正是评测最不需要的东西
+// **这张表没有覆盖四类动作：赴援、迁治、取据点、调兵。** 而「没权重」与「不会用」
+// 是两件事，2026-10-16 实测（五画像 × 三种子 × 64 季，约 960 席·季）：
+//
+//   赴援 relief     没权重，却被挑了 136 次 —— 它靠打分时的加成，不靠底分
+//   迁治 relocate   没权重，0 次（只有「治所丢了」那一条加成，平时够不着）
+//   取据点 seize    没权重，0 次 —— 而引擎每季摆出 3–7 条
+//   调兵 transfer   没权重，0 次 —— 每季摆出约 6 条
+//
+// 取据点那一条追过：先给它补 5（与同价的 govern 6 / build 5 同档）——**仍然 0**，
+// 因为别的动作在打分时还有一堆加成（征伐够得上 GAIN_W 能加 48），而它只有一个
+// 光秃秃的底分，怎么排都排在最后。调到 999 才挑得动。
+//
+// 那要不要把它接进打分逻辑？实测说**不急**：把 seize 调到 999、让它每局取
+// 39–48 个据点（比模型的 19–21 还多），三个种子仍然一局没一统，终局 23–24 郡，
+// 和不取时一样。取据点不是机器人与模型之间那道差距的原因。
+//
+// 记在这里而不是改掉，是因为「机器人用不了某一类动作」从代码里看不出来——
+// `w[type] ?? 0` 不报错，只让那一类永远排最后。tests/bot-unused.test.mjs 钉着
+// 这两份清单，哪天谁把它接进去了，那条闸会提醒连这段记载一起更新。
 const WEIGHTS: Record<Profile, Record<string, number>> = {
   turtle:      { submit: 9, suade: 6, array: 5, govern: 10, build: 8, scout: 3, ally: 6, muster: 0, campaign: -100, passage: 2, retire: 0, appoint: 5, withdraw: 11, invest: 6 },
   balanced:    { submit: 9, suade: 6, array: 3, govern: 6, build: 5, scout: 4, ally: 4, muster: 5, campaign: 7, passage: 2, retire: 0, appoint: 4, withdraw: 3, invest: 5 },

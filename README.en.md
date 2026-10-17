@@ -188,13 +188,14 @@ Stated up front, so you don't assume it is already solved:
   the side that won by a hair — and **a model playing Cao Cao does win**: on **three
   seeds chosen in advance**, `glm-5.3-flash` **unified the realm 3/3** and
   `deepseek-v4-flash` **2/3** (the third reached Chao, first of the survivors), while
-  the strongest bot profile went **0/6** across six seeds (17–25 commanderies). Two
-  models, different labs and providers, $1.49 charged across those six games.
-  **But the two models win differently**: per season, deepseek campaigns at about half
-  glm's rate and almost never musters, sitting closer to the bot than to glm on both
-  axes — **playing little can still win**, so "the bot barely plays" does not explain
-  why every bot loses. Six games, one seat, one scenario, one control profile — see
-  point 39 of [docs/EVAL.en.md](docs/EVAL.en.md).
+  **five bot profiles went 0/15** across three seeds (13–25 commanderies). Two models,
+  different labs and providers, $1.49 charged across those six games.
+  **But "the model wins because it is willing to attack" is false.** Controlled for
+  opportunity (the engine offers N campaign candidates, how many does it take), deepseek's
+  take-rate of **2.5% is the lowest of anyone**, below every bot — and it won two games.
+  Two other likely-looking answers are closed too: let the bot seize more sites than the
+  models do and it still goes 0/3. The gap is somewhere else, and these eighteen games
+  cannot say where — see points 39 and 40 of [docs/EVAL.en.md](docs/EVAL.en.md).
   Under the sixteen-season evaluation setting the four gates pass
   4/4 (opening commandery count ↔ score, ρ = 0.31). **The Liu Biao seat is eliminated
   in 35 of 60 games and finishes in Grade D (丁) in 45 of them** — his three
@@ -278,4 +279,4 @@ data bundled in. Item-by-item provenance is in [NOTICE.en.md](NOTICE.en.md).
 
 Current rule pack 2.6.0, save format 12; old saves require starting a new game.
 
-<!-- translated-from: README.md@1e3543eadd9d -->
+<!-- translated-from: README.md@93a71b759af5 -->
